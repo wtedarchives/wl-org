@@ -1,0 +1,31 @@
+---
+description: Mobile-first, responsive UI so the app is viewable on phones
+alwaysApply: true
+---
+
+# Mobile-Viewable / Responsive UI
+
+Every UI we build must work on phones. Assume users will open the app on mobile first; desktop is an enhancement.
+
+## Approach
+
+- **Mobile-first:** Design and implement the small-screen layout first, then add `sm:`, `md:`, `lg:` (etc.) for larger viewports.
+- **Touch-friendly:** Use adequate tap targets (min ~44px), spacing between interactive elements, and avoid hover-only interactions for critical actions.
+- **Readable on small screens:** Avoid tiny text; use responsive typography and avoid long fixed-width content.
+
+## Tailwind breakpoints (reference)
+
+- Default: < 640px (mobile)
+- `sm:` 640px+
+- `md:` 768px+
+- `lg:` 1024px+
+- `xl:` 1280px+
+
+## Checklist when adding or changing UI
+
+- [ ] Layout stacks or adapts on narrow viewports (no horizontal scroll unless intentional, e.g. carousel).
+- [ ] Navigation and key actions are usable on a small screen (e.g. hamburger or bottom nav if many items).
+- [ ] Images/media scale or constrain so they don't overflow on mobile.
+- [ ] Forms and buttons are easy to tap and don't rely on hover for essential behavior.
+
+When proposing new pages or components, always describe or implement the mobile layout as well as desktop.

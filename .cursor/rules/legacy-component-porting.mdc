@@ -1,0 +1,54 @@
+---
+description: Preserve behavior and URLs when porting legacy React components into the new Next.js App Router project, with shadcn/Tailwind redesigns.
+alwaysApply: true
+---
+
+# Legacy Component Porting Into New Next.js App
+
+When the user provides a component from another project and asks to implement/port it here:
+
+- **Preserve behavior and data**: Keep all user-visible behavior and data semantics identical unless the user explicitly approves a change.
+- **Preserve URL structure**: Do not change routes or URL shapes without confirming with the user. Ask for any missing routing/reference docs if needed.
+- **Redesign is allowed**: You may change layout and visuals, but favor shadcn UI components and Tailwind, and keep the same information/content.
+- **Improve internals**: Prefer performance optimizations and stronger error handling that do not alter user-visible behavior.
+
+## Required checklist before implementing
+
+Before starting any porting work, walk through this checklist. Ask only about items that are ambiguous or not already answered in the current session.
+
+1. **Confirmation of legacy source**
+   - Confirm that the provided file(s) are from the old project and are intended to be ported into this Next.js App Router project.
+
+2. **Data and behavior**
+   - Clarify what data the component depends on (props, context, APIs, global stores, feature flags).
+   - Ask for any missing types, API contracts, or config needed to faithfully reproduce behavior.
+   - Call out any behavior you cannot infer from the code (edge cases, loading, error states) and ask how it should work.
+
+3. **Routing and URLs**
+   - Identify all routes, links, navigations, or URL params involved.
+   - Confirm the expected URL structure and whether it must exactly match the old app.
+   - If routing in the old app is unclear, ask for additional files or documentation.
+
+4. **External dependencies**
+   - When you see unfamiliar hooks, utilities, or libraries in the legacy code, ask the user whether they exist in this repo and, if not, whether to re-create, replace, or drop them.
+   - Ask for any required credentials, environment variables, or config files instead of creating placeholders.
+
+5. **Design and shadcn usage**
+   - Confirm which shadcn components (if any) the user prefers for key UI pieces.
+   - If not specified, choose reasonable shadcn components and Tailwind classes while keeping information hierarchy and content intact.
+
+6. **Assumptions and ambiguity**
+   - If information is missing or time-critical, you may proceed using reasonable assumptions, but you must:
+     - Explicitly list each assumption before implementing.
+     - Note where the implementation may need revision once the user clarifies.
+
+7. **Testing and verification**
+   - Describe how to manually verify behavior in the browser (e.g. routes to hit, states to check, critical interactions).
+   - When in doubt about expected edge cases, ask the user rather than silently changing behavior.
+
+## Implementation expectations
+
+- Use **Next.js App Router** conventions when placing files (e.g. `app/.../page.tsx`) and organize components/hooks/utilities into sensible locations in this project.
+- Do not introduce breaking changes to public APIs (props, context shape, or route contracts) unless the user approves them.
+- When you optimize performance or improve error handling, briefly explain the change and why behavior is still equivalent from the user’s perspective.
+

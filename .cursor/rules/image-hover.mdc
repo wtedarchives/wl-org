@@ -1,0 +1,27 @@
+---
+description: Images should have hover scale effect for interactivity
+globs: **/*.{tsx,jsx,ts,js}
+alwaysApply: false
+---
+
+# Image Hover Effects
+
+All images should have a subtle hover scale effect to indicate interactivity.
+
+## Implementation
+
+- Add `hover:scale-105` class to all `<img>` elements
+- Include `transition-transform` for smooth animation
+- Use `duration-200` or `duration-300` for the transition timing
+
+## Example
+
+```tsx
+<img
+  src="/example.png"
+  alt="Example"
+  className="hover:scale-105 transition-transform duration-200"
+/>
+```
+
+This applies to both regular `<img>` tags and Next.js `Image` components (add the classes to the `className` prop).

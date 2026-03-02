@@ -1,0 +1,27 @@
+---
+description: Animate forms and expand/collapse sections instead of instant show/hide
+alwaysApply: true
+---
+
+# Animated Forms and Expand/Collapse
+
+Whenever a button opens a form, or expands/collapses a section, the content must **animate** in and out—never appear or disappear statically.
+
+## When this applies
+
+- Buttons that reveal a form (e.g. "Add member", "Edit address", "Create household").
+- Buttons or controls that expand/collapse a section (accordions, "Show more", toggles).
+- Modals or panels that open/close in response to user action.
+
+## Approach
+
+- **In:** Use a short transition for opacity and/or height/transform (e.g. 150–300ms). Content should fade and/or slide in.
+- **Out:** Use the same duration for exit so content fades and/or slides out before unmounting or hiding.
+- **Implementation:** Prefer CSS transitions (`transition`, `transition-all`) with Tailwind (e.g. `transition-all duration-200 ease-out`). For enter/exit that requires unmounting, use a small delay before unmount so the exit animation can run, or use a library like `framer-motion` or React state that toggles a "closing" class.
+- Keep animations subtle and fast enough not to feel sluggish (typically 200–300ms).
+
+## Checklist when adding or changing UI
+
+- [ ] Forms that open on button click animate in (and out when closed).
+- [ ] Expand/collapse sections animate open and closed (height/opacity or similar).
+- [ ] No instant show/hide for user-triggered content; always use a transition.

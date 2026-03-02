@@ -1,0 +1,14 @@
+---
+description: Keep components under 400 lines; split or extract when larger
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Component size limit
+
+- **Maximum 400 lines** per component file (including imports, data, and JSX).
+- If a component grows beyond this, refactor by:
+  - Extracting **subcomponents** (e.g. list items, cards, accordion rows) into their own files.
+  - Moving **static data** (e.g. copy, config, content maps) into separate modules (e.g. `constants/`, `content/`, or a colocated `*.data.ts`).
+  - Extracting **custom hooks** for state and logic.
+- Prefer smaller, focused components over single large files.
