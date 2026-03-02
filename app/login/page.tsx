@@ -16,7 +16,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet"
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { signIn } = useAuth()
@@ -142,6 +142,14 @@ export default function LoginPage() {
         </form>
       </SheetContent>
     </Sheet>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-[50vh]" />}>
+      <LoginForm />
+    </React.Suspense>
   )
 }
 
