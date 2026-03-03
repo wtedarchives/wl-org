@@ -95,7 +95,7 @@ export function WtedInfo() {
                     className="inline-block transition-transform duration-300 hover:scale-105"
                   >
                     <img
-                      src="/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg"
+                      src="/app-store-badge.svg"
                       alt="Download on the App Store"
                       className="h-[66px] w-auto object-contain shadow-xl"
                     />
@@ -107,7 +107,7 @@ export function WtedInfo() {
                     className="inline-block transition-transform duration-300 hover:scale-105"
                   >
                     <img
-                      src="/GetItOnGooglePlay_Badge_Web_color_English.svg"
+                      src="/google-play-badge.svg"
                       alt="Get it on Google Play"
                       className="h-[66px] w-auto object-contain shadow-xl"
                     />
