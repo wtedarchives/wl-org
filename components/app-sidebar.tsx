@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -61,9 +62,23 @@ const navMainItems = [
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [wtedOpen, setWtedOpen] = useState(false)
-  const [setlistOpen, setSetlistOpen] = useState(false)
+  const pathname = usePathname()
+  const isWtedPath = pathname.startsWith("/wted")
+  const isSetlistPath = SETLIST_ARCHIVE_SUB.some(
+    (item) => pathname === item.url || pathname.startsWith(item.url + "/")
+  )
+
+  const [wtedOpen, setWtedOpen] = useState(isWtedPath)
+  const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
+
+  // Keep the group expanded when the user is viewing a page in that group
+  useEffect(() => {
+    if (isWtedPath) setWtedOpen(true)
+  }, [pathname, isWtedPath])
+  useEffect(() => {
+    if (isSetlistPath) setSetlistOpen(true)
+  }, [pathname, isSetlistPath])
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -98,26 +113,45 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <SidebarMenuButton
                   tooltip="WTED Radio"
-                  className="group-data-[state=open]:bg-sidebar-accent"
-                  onClick={() => setWtedOpen((o) => !o)}
+                  isActive={pathname === "/wted/info"}
+                  className="group-data-[state=open]:bg-sidebar-accent data-[slot=sidebar-menu-button]:p-0"
+                  asChild
                 >
-                  <Image
-                    src="/WTED2.png"
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="w-4 h-auto object-contain"
-                  />
-                  <span>WTED Radio</span>
-                  <ChevronDownIcon
-                    className={`ml-auto size-4 transition-transform ${wtedOpen ? "rotate-180" : ""}`}
-                  />
+                  <div className="flex w-full min-w-0 items-center">
+                    <Link
+                      href="/wted/info"
+                      className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5"
+                    >
+                      <Image
+                        src="/WTED2.png"
+                        alt=""
+                        width={24}
+                        height={24}
+                        className="w-4 h-auto object-contain"
+                      />
+                      <span>WTED Radio</span>
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex shrink-0 items-center justify-center p-2"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setWtedOpen((o) => !o)
+                      }}
+                      aria-label="Toggle WTED submenu"
+                    >
+                      <ChevronDownIcon
+                        className={`size-4 transition-transform ${wtedOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                  </div>
                 </SidebarMenuButton>
                 {wtedOpen && (
                   <SidebarMenuSub>
                     {WTED_RADIO_SUB.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
-                        <SidebarMenuSubButton asChild>
+                        <SidebarMenuSubButton asChild isActive={pathname === item.url}>
                           <Link href={item.url}>{item.title}</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
@@ -127,7 +161,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
               {navMainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton tooltip={item.title} asChild>
+                  <SidebarMenuButton tooltip={item.title} asChild isActive={pathname === item.url}>
                     <Link href={item.url}>
                       {item.icon}
                       <span>{item.title}</span>
@@ -187,7 +221,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     {SETLIST_ARCHIVE_SUB.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
-                        <SidebarMenuSubButton asChild>
+                        <SidebarMenuSubButton asChild isActive={pathname === item.url}>
                           <Link href={item.url}>{item.title}</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
