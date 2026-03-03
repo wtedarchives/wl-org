@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation"
 import { FaBluesky } from "react-icons/fa6"
 
 import { NavUser } from "@/components/nav-user"
+import { supabase } from "@/lib/supabase"
 import {
   Sidebar,
   SidebarContent,
@@ -59,7 +60,12 @@ const LINKS = [
 const navMainItems = [
   { title: "Community Forum", url: "/forum", icon: <MessageSquareIcon className="size-4" /> },
   { title: "Goose 101", url: "/goose101", icon: <BookOpenIcon className="size-4" /> },
-]
+] as const
+
+type YearLink = {
+  year: string
+  year_id: string
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
@@ -71,6 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [wtedOpen, setWtedOpen] = useState(isWtedPath)
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
+  const [years, setYears] = useState<YearLink[]>([])
 
   // Keep the group expanded when the user is viewing a page in that group
   useEffect(() => {
@@ -79,6 +86,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     if (isSetlistPath) setSetlistOpen(true)
   }, [pathname, isSetlistPath])
+
+  useEffect(() => {
+    const loadYears = async () => {
+      if (!supabase) return
+      try {
+        const { data, error } = await supabase
+          .from("years")
+          .select("year, year_id")
+          .order("year", { ascending: true })
+
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error("Error loading years for sidebar:", error)
+          return
+        }
+        if (data) {
+          setYears(
+            data.filter(
+              (y): y is { year: string; year_id: string } =>
+                typeof (y as any).year === "string" &&
+                typeof (y as any).year_id === "string"
+            )
+          )
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("Unexpected error loading years for sidebar:", err)
+      }
+    }
+
+    loadYears()
+  }, [])
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -217,6 +256,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     className={`ml-auto size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}
                   />
                 </SidebarMenuButton>
+                {setlistOpen && years.length > 0 && (
+                  <div className="px-2 pt-1 text-[0.625rem] font-medium text-sidebar-foreground">
+                    <div className="flex flex-wrap items-center gap-1 pb-1">
+                      {years.map((year, index) => (
+                        <span key={year.year_id} className="flex items-center gap-1">
+                          <Link
+                            href={`/years/${year.year_id}`}
+                            className="hover:underline"
+                          >
+                            {year.year}
+                          </Link>
+                          {index < years.length - 1 && (
+                            <span className="text-[0.5rem] opacity-70">•</span>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {setlistOpen && (
                   <SidebarMenuSub>
                     {SETLIST_ARCHIVE_SUB.map((item) => (
