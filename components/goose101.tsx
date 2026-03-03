@@ -177,7 +177,7 @@ export function Goose101() {
   return (
     <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl">
       <main className="relative flex-1">
-        <div className="relative flex w-full max-w-7xl flex-col px-4 md:flex-row md:gap-4 lg:px-6">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 md:flex-row md:gap-4 lg:px-6">
           {/* Desktop: sticky vertical nav column (in flow so it works with sidebar layout) */}
           <div
             ref={navContainerRef}

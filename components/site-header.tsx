@@ -46,6 +46,8 @@ const PATH_LABELS: Record<string, string> = {
   "wted/info": "WTED Info",
   "wted/gorps": "GORPs and Contributors",
   "wted/shows": "Shows and More",
+  "wted/about": "About Us and FAQ",
+  "wted/support": "Support WTED",
 }
 
 function pathnameToBreadcrumbs(pathname: string) {
@@ -78,11 +80,11 @@ function pathnameToBreadcrumbs(pathname: string) {
   return items
 }
 
-export function SiteHeader() {
+export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string } = {}) {
   const pathname = usePathname()
   const isMobile = useIsMobile()
   const { toggleSidebar } = useSidebar()
-  const breadcrumbs = pathnameToBreadcrumbs(pathname ?? "")
+  const breadcrumbs = breadcrumbOverride ? [{ label: breadcrumbOverride, href: "" }] : pathnameToBreadcrumbs(pathname ?? "")
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">

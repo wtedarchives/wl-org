@@ -15,7 +15,7 @@ export default function NotFound() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader breadcrumbOverride="Page not found" />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-1 flex-col">

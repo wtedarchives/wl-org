@@ -238,14 +238,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem>
                 <div className="flex gap-1 px-2 py-1">
                   <SidebarMenuButton asChild className="flex-1">
-                    <a
-                      href="https://www.paypal.com/donate/?hosted_button_id=RGT26R3CG44YJ"
-                      target="_blank"
-                      rel="noreferrer"
+                    <Link
+                      href="/wted/support"
                     >
                       <CircleDollarSignIcon className="size-4" />
                       <span>Support</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                   <SidebarMenuButton asChild className="flex-1">
                     <a
