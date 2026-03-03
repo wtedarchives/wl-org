@@ -47,15 +47,23 @@ const SETLIST_ARCHIVE_SUB = [
   { title: "Submit", url: "/submit" },
 ] as const
 
+const LINKS = [
+  { title: "Goose Website", href: "https://www.goosetheband.com/" },
+  { title: "Goose Bandcamp Page", href: "https://goosetheband.bandcamp.com/" },
+  { title: "Western Sun Foundation", href: "https://westernsunfoundation.org/" },
+  { title: "Cash or Trade", href: "https://cashortrade.org/goose-tickets/" },
+  { title: "ElGoose.net", href: "https://elgoose.net/" },
+] as const
+
 const navMainItems = [
   { title: "Community Forum", url: "/forum", icon: <MessageSquareIcon className="size-4" /> },
   { title: "Goose 101", url: "/goose101", icon: <BookOpenIcon className="size-4" /> },
-  { title: "Links", url: "/links", icon: <LinkIcon className="size-4" /> },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [wtedOpen, setWtedOpen] = useState(false)
   const [setlistOpen, setSetlistOpen] = useState(false)
+  const [linksOpen, setLinksOpen] = useState(false)
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -127,6 +135,39 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem
+                className="group/item"
+                data-open={linksOpen || undefined}
+              >
+                <SidebarMenuButton
+                  tooltip="Links"
+                  className="group-data-[state=open]:bg-sidebar-accent"
+                  onClick={() => setLinksOpen((o) => !o)}
+                >
+                  <LinkIcon className="size-4" />
+                  <span>Links</span>
+                  <ChevronDownIcon
+                    className={`ml-auto size-4 transition-transform ${linksOpen ? "rotate-180" : ""}`}
+                  />
+                </SidebarMenuButton>
+                {linksOpen && (
+                  <SidebarMenuSub>
+                    {LINKS.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild>
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {item.title}
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
               <SidebarMenuItem
                 className="group/item"
                 data-open={setlistOpen || undefined}

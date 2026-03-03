@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
@@ -107,6 +108,12 @@ function SidebarProvider({
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
+
+  const pathname = usePathname()
+  // On mobile, close the sidebar when the route changes (e.g. user tapped a nav link).
+  React.useEffect(() => {
+    if (isMobile) setOpenMobile(false)
+  }, [pathname, isMobile, setOpenMobile])
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
