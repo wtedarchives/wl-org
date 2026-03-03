@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { createElement, useEffect } from "react"
 
 import { Separator } from "@/components/ui/separator"
 
@@ -54,16 +54,16 @@ export function WtedSupport() {
           <Separator className="my-6 bg-wl-orange" />
 
           <div className="flex w-full flex-col items-center gap-6">
-            <stripe-pricing-table
-              pricing-table-id="prctbl_1NugUyCzMQF2fsuobAOsUi5S"
-              publishable-key={STRIPE_PUBLISHABLE_KEY}
-              class="w-full"
-            />
-            <stripe-buy-button
-              buy-button-id="buy_btn_1NugdqCzMQF2fsuoRp2sFoxp"
-              publishable-key={STRIPE_PUBLISHABLE_KEY}
-              class="w-full"
-            />
+            {createElement("stripe-pricing-table" as any, {
+              "pricing-table-id": "prctbl_1NugUyCzMQF2fsuobAOsUi5S",
+              "publishable-key": STRIPE_PUBLISHABLE_KEY,
+              class: "w-full",
+            })}
+            {createElement("stripe-buy-button" as any, {
+              "buy-button-id": "buy_btn_1NugdqCzMQF2fsuoRp2sFoxp",
+              "publishable-key": STRIPE_PUBLISHABLE_KEY,
+              class: "w-full",
+            })}
           </div>
         </div>
       </main>
