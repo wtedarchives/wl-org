@@ -47,7 +47,7 @@ const PATH_LABELS: Record<string, string> = {
   "wted/gorps": "GORPs and Contributors",
   "wted/shows": "Shows and More",
   "wted/about": "About Us and FAQ",
-  "wted/support": "Support WTED",
+  support: "Support Wysteria Lane",
 }
 
 function pathnameToBreadcrumbs(pathname: string) {

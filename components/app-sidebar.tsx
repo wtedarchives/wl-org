@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { FaBluesky } from "react-icons/fa6"
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -34,7 +35,6 @@ const WTED_RADIO_SUB = [
   { title: "GORPs and Contributors", url: "/wted/gorps" },
   { title: "Shows and More", url: "/wted/shows" },
   { title: "About Us and FAQ", url: "/wted/about" },
-  { title: "Support WTED", url: "/wted/support" },
 ] as const
 
 const SETLIST_ARCHIVE_SUB = [
@@ -239,7 +239,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex gap-1 px-2 py-1">
                   <SidebarMenuButton asChild className="flex-1">
                     <Link
-                      href="/wted/support"
+                      href="/support"
                     >
                       <CircleDollarSignIcon className="size-4" />
                       <span>Support</span>
@@ -247,14 +247,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuButton>
                   <SidebarMenuButton asChild className="flex-1">
                     <a
-                      href="https://x.com/dripfieldpro"
+                      href="https://bsky.app/profile/wysterialane.org"
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                      </svg>
-                      <span>@dripfieldpro</span>
+                      <FaBluesky className="size-4" />
+                      <span>Follow Us</span>
                     </a>
                   </SidebarMenuButton>
                 </div>

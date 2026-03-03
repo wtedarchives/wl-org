@@ -68,7 +68,7 @@ export function WtedAbout() {
                 the team that produces the station. We&apos;ve launched the
                 ability to{" "}
                 <Link
-                  href="/wted/support"
+                  href="/support"
                   className="font-medium text-wl-orange underline hover:text-wl-light-orange"
                 >
                   support WTED
