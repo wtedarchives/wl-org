@@ -1,4 +1,9 @@
+import type { Metadata } from "next"
 import { Goose101 } from "@/components/goose101"
+
+export const metadata: Metadata = {
+  title: "Goose 101",
+}
 
 export default function Goose101Page() {
   return (
