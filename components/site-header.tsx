@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -19,7 +20,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 
 const SEGMENT_LABELS: Record<string, string> = {
   wted: "WTED Radio",
-  forum: "Forum",
+  forum: "Community Forum",
   goose101: "Goose 101",
   links: "Links",
   tours: "Tours",
@@ -45,7 +46,16 @@ function pathnameToBreadcrumbs(pathname: string) {
     return [{ label: "Home", href: "/" }]
   }
   const segments = pathname.split("/").filter(Boolean)
-  const items: { label: string; href: string }[] = [{ label: "Home", href: "/" }]
+  // Standalone pages: breadcrumb is just the page name (no Home in trail).
+  if (segments.length === 1 && (segments[0] === "forum" || segments[0] === "goose101")) {
+    const label =
+      segments[0] === "forum"
+        ? (SEGMENT_LABELS.forum ?? "Community Forum")
+        : (SEGMENT_LABELS.goose101 ?? "Goose 101")
+    return [{ label, href: `/${segments[0]}` }]
+  }
+
+  const items: { label: string; href: string }[] = []
   let href = ""
   for (const segment of segments) {
     href += `/${segment}`
@@ -86,6 +96,20 @@ export function SiteHeader() {
           />
           <Breadcrumb className="flex-1 overflow-hidden">
             <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/" className="flex items-center">
+                    <Image
+                      src="/WL.png"
+                      alt="Home"
+                      width={20}
+                      height={20}
+                      className="size-5 object-contain transition-transform duration-150 hover:scale-105"
+                    />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
               {breadcrumbs.map((item, i) => (
                 <span key={item.href} className="contents">
                   {i > 0 && <BreadcrumbSeparator />}

@@ -4,7 +4,6 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 
-import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -21,7 +20,6 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import {
-  RadioIcon,
   MessageSquareIcon,
   BookOpenIcon,
   LibraryIcon,
@@ -29,6 +27,14 @@ import {
   CircleDollarSignIcon,
   ChevronDownIcon,
 } from "lucide-react"
+
+const WTED_RADIO_SUB = [
+  { title: "WTED Info", url: "/wted/info" },
+  { title: "GORPs and Contributors", url: "/wted/gorps" },
+  { title: "Shows and More", url: "/wted/shows" },
+  { title: "About Us and FAQ", url: "/wted/about" },
+  { title: "Support WTED", url: "/wted/support" },
+] as const
 
 const SETLIST_ARCHIVE_SUB = [
   { title: "Tours", url: "/tours" },
@@ -42,25 +48,13 @@ const SETLIST_ARCHIVE_SUB = [
 ] as const
 
 const navMainItems = [
-  {
-    title: "WTED Radio",
-    url: "/wted",
-    icon: (
-      <Image
-        src="/WTED2.png"
-        alt="WTED Radio"
-        width={24}
-        height={24}
-        className="w-4 h-auto object-contain"
-      />
-    ),
-  },
-  { title: "Forum", url: "/forum", icon: <MessageSquareIcon className="size-4" /> },
+  { title: "Community Forum", url: "/forum", icon: <MessageSquareIcon className="size-4" /> },
   { title: "Goose 101", url: "/goose101", icon: <BookOpenIcon className="size-4" /> },
   { title: "Links", url: "/links", icon: <LinkIcon className="size-4" /> },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [wtedOpen, setWtedOpen] = useState(false)
   const [setlistOpen, setSetlistOpen] = useState(false)
 
   return (
@@ -87,36 +81,82 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMainItems} />
-        <SidebarMenu>
-          <SidebarMenuItem
-            className="group/item"
-            data-open={setlistOpen || undefined}
-          >
-            <SidebarMenuButton
-              tooltip="Setlist Archive"
-              className="group-data-[state=open]:bg-sidebar-accent"
-              onClick={() => setSetlistOpen((o) => !o)}
-            >
-              <LibraryIcon className="size-4" />
-              <span>Setlist Archive</span>
-              <ChevronDownIcon
-                className={`ml-auto size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}
-              />
-            </SidebarMenuButton>
-            {setlistOpen && (
-            <SidebarMenuSub>
-              {SETLIST_ARCHIVE_SUB.map((item) => (
-                <SidebarMenuSubItem key={item.title}>
-                  <SidebarMenuSubButton asChild>
-                    <Link href={item.url}>{item.title}</Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
+        <SidebarGroup>
+          <SidebarGroupContent className="flex flex-col gap-2">
+            <SidebarMenu>
+              <SidebarMenuItem
+                className="group/item"
+                data-open={wtedOpen || undefined}
+              >
+                <SidebarMenuButton
+                  tooltip="WTED Radio"
+                  className="group-data-[state=open]:bg-sidebar-accent"
+                  onClick={() => setWtedOpen((o) => !o)}
+                >
+                  <Image
+                    src="/WTED2.png"
+                    alt=""
+                    width={24}
+                    height={24}
+                    className="w-4 h-auto object-contain"
+                  />
+                  <span>WTED Radio</span>
+                  <ChevronDownIcon
+                    className={`ml-auto size-4 transition-transform ${wtedOpen ? "rotate-180" : ""}`}
+                  />
+                </SidebarMenuButton>
+                {wtedOpen && (
+                  <SidebarMenuSub>
+                    {WTED_RADIO_SUB.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={item.url}>{item.title}</Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+              {navMainItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton tooltip={item.title} asChild>
+                    <Link href={item.url}>
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               ))}
-            </SidebarMenuSub>
-            )}
-          </SidebarMenuItem>
-        </SidebarMenu>
+              <SidebarMenuItem
+                className="group/item"
+                data-open={setlistOpen || undefined}
+              >
+                <SidebarMenuButton
+                  tooltip="Setlist Archive"
+                  className="group-data-[state=open]:bg-sidebar-accent"
+                  onClick={() => setSetlistOpen((o) => !o)}
+                >
+                  <LibraryIcon className="size-4" />
+                  <span>Setlist Archive</span>
+                  <ChevronDownIcon
+                    className={`ml-auto size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}
+                  />
+                </SidebarMenuButton>
+                {setlistOpen && (
+                  <SidebarMenuSub>
+                    {SETLIST_ARCHIVE_SUB.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={item.url}>{item.title}</Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
@@ -129,7 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       rel="noreferrer"
                     >
                       <CircleDollarSignIcon className="size-4" />
-                      <span>Donate</span>
+                      <span>Support</span>
                     </a>
                   </SidebarMenuButton>
                   <SidebarMenuButton asChild className="flex-1">
@@ -141,7 +181,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
-                      <span>X</span>
+                      <span>@dripfieldpro</span>
                     </a>
                   </SidebarMenuButton>
                 </div>
@@ -149,8 +189,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <div className="w-full border-t border-sidebar-border px-2 py-2">
+          <iframe
+            src="https://www.coreyterrell.com/assets/external/radio.html"
+            title="WTED Radio"
+            className="w-full rounded-md border-0"
+            style={{ height: "66px" }}
+          />
+        </div>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="pt-0 pb-2">
         <NavUser />
       </SidebarFooter>
     </Sidebar>

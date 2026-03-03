@@ -8,6 +8,13 @@
   --color-wl-green: var(--wl-green);
   --color-wl-dark-green: var(--wl-dark-green);
   --color-wl-light-green: var(--wl-light-green);
+  --color-wl-orange: var(--wl-orange);
+  --color-wl-light-orange: var(--wl-light-orange);
+  --color-wl-black: var(--wl-black);
+  --color-wl-white: var(--wl-white);
+  --color-wl-off-white: var(--wl-off-white);
+  --color-wl-grey: var(--wl-grey);
+  --color-wl-dark-grey: var(--wl-dark-grey);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -51,10 +58,17 @@
 }
 
 :root {
-  /* Brand greens (single source of truth) — #58c8ae, #285b4e, #5aaa96 */
-  --wl-green: oklch(0.76 0.06 163);
-  --wl-dark-green: oklch(0.43 0.03 161);
-  --wl-light-green: oklch(0.68 0.04 160);
+  /* Wysteria Lane brand (oklch from hex) */
+  --wl-green: oklch(0.76 0.06 163);        /* #58c8ae */
+  --wl-dark-green: oklch(0.43 0.03 161);  /* #285b4e */
+  --wl-light-green: oklch(0.68 0.04 160); /* #5aaa96 */
+  --wl-orange: oklch(0.72 0.15 25);       /* #ff7a67 */
+  --wl-light-orange: oklch(0.82 0.10 55); /* #ffb999 */
+  --wl-black: oklch(0 0 0);               /* #000000 */
+  --wl-white: oklch(1 0 0);               /* #ffffff */
+  --wl-off-white: oklch(0.98 0.01 192);   /* #effefa */
+  --wl-grey: oklch(0.55 0.02 260);        /* #70798a */
+  --wl-dark-grey: oklch(0.18 0 0);        /* #1f1f1f */
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
