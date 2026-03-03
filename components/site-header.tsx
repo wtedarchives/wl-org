@@ -45,6 +45,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 const PATH_LABELS: Record<string, string> = {
   "wted/info": "WTED Info",
   "wted/gorps": "GORPs and Contributors",
+  "wted/shows": "Shows and More",
 }
 
 function pathnameToBreadcrumbs(pathname: string) {
