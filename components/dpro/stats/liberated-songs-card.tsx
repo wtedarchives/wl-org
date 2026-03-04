@@ -55,53 +55,57 @@ export function LiberatedSongsCard({
             No data to display for this year.
           </div>
         ) : (
-          <Table>
+          <Table className="min-w-max w-max">
             <TableBody>
               {items.map((song, index) => (
                 <TableRow key={`${song.song}-${index}`}>
-                  <TableCell className="py-1.5 pl-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link
-                        href={`/dpro/song/${song.song_id}`}
-                        className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
-                      >
-                        {song.song}
-                      </Link>
-                      <div className="flex items-center gap-2">
-                        {song.last_count &&
-                          song.last_count.toUpperCase().includes("LIB") && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex cursor-default items-center justify-center rounded-full bg-yellow-600 px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm">
+                  <TableCell className="w-min shrink-0 py-1.5 pl-3">
+                    <Link
+                      href={`/dpro/song/${song.song_id}`}
+                      className="text-xs font-medium text-foreground underline-offset-4 hover:underline whitespace-nowrap"
+                    >
+                      {song.song}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="w-min shrink-0 py-1.5 pl-0 pr-2 text-center">
+                    {song.last_count &&
+                    song.last_count.toUpperCase().includes("LIB") ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+<span className="inline-flex shrink-0 cursor-default items-center justify-center rounded-full bg-yellow-600 px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm">
                                     LIB
                                   </span>
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  side="right"
-                                  className="max-w-[180px] text-xs"
-                                >
-                                  {LIB_TOOLTIP}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        {song.category_artwork && (
-                          <Image
-                            src={song.category_artwork}
-                            alt=""
-                            width={16}
-                            height={16}
-                            className="size-4 shrink-0 rounded object-cover border border-border"
-                            unoptimized
-                            onError={(e) => {
-                              const el = e.target as HTMLImageElement
-                              if (el) el.style.display = "none"
-                            }}
-                          />
-                        )}
-                      </div>
-                    </div>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="right"
+                            className="max-w-[180px] text-xs"
+                          >
+                            {LIB_TOOLTIP}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <span className="inline-block size-0" aria-hidden />
+                    )}
+                  </TableCell>
+                  <TableCell className="w-min shrink-0 py-1.5 pl-0 pr-2">
+                    {song.category_artwork ? (
+                      <Image
+                        src={song.category_artwork}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="size-4 min-w-4 min-h-4 shrink-0 rounded object-cover border border-border"
+                        unoptimized
+                        onError={(e) => {
+                          const el = e.target as HTMLImageElement
+                          if (el) el.style.display = "none"
+                        }}
+                      />
+                    ) : (
+                      <span className="inline-block size-4" aria-hidden />
+                    )}
                   </TableCell>
                   <TableCell className="py-1.5 pl-2 text-xs text-muted-foreground">
                     {song.show_date && (
