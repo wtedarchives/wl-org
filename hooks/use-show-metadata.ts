@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { supabase } from "@/lib/supabase"
 
@@ -9,6 +9,9 @@ interface MetaShow {
 }
 
 export function useShowMetadata(shows: MetaShow[], currentYear: string) {
+  const hasFetchedSetlists = useRef(false)
+  const hasFetchedReleases = useRef(false)
+
   const [showsWithSetlists, setShowsWithSetlists] = useState<Set<string>>(
     new Set(),
   )
@@ -17,7 +20,14 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
   )
 
   useEffect(() => {
-    if (!supabase || !currentYear || shows.length === 0) return
+    if (
+      !supabase ||
+      !currentYear ||
+      shows.length === 0 ||
+      hasFetchedSetlists.current
+    ) {
+      return
+    }
     const client = supabase
     async function fetchShowsWithSetlists() {
       try {
@@ -31,16 +41,23 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
         if (error) throw error
         const setlistSet = new Set((data ?? []).map((item) => item.show_id))
         setShowsWithSetlists(setlistSet)
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("Error fetching shows with setlists:", err)
+        hasFetchedSetlists.current = true
+      } catch {
+        // Metadata is optional; ignore transient errors.
       }
     }
     fetchShowsWithSetlists()
   }, [shows, currentYear])
 
   useEffect(() => {
-    if (!supabase || !currentYear || shows.length === 0) return
+    if (
+      !supabase ||
+      !currentYear ||
+      shows.length === 0 ||
+      hasFetchedReleases.current
+    ) {
+      return
+    }
     const client = supabase
     async function fetchShowsWithReleases() {
       try {
@@ -70,9 +87,9 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
         }
         const releaseSet = new Set(allReleaseShows.map((item) => item.show_id))
         setShowsWithReleases(releaseSet)
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("Error fetching shows with releases:", err)
+        hasFetchedReleases.current = true
+      } catch {
+        // Metadata is optional; ignore transient errors.
       }
     }
     fetchShowsWithReleases()
