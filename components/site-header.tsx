@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { useYearBreadcrumb } from "@/components/year-breadcrumb-context"
 import { Button } from "@/components/ui/button"
 import {
   Breadcrumb,
@@ -20,6 +21,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 
 const SEGMENT_LABELS: Record<string, string> = {
   dpro: "Setlist Archive",
+  years: "Years",
   wted: "WTED Radio",
   forum: "Community Forum",
   goose101: "Goose 101",
@@ -51,7 +53,10 @@ const PATH_LABELS: Record<string, string> = {
   support: "Support Wysteria Lane",
 }
 
-function pathnameToBreadcrumbs(pathname: string) {
+function pathnameToBreadcrumbs(
+  pathname: string,
+  lastSegmentLabelOverride?: string | null,
+) {
   if (!pathname || pathname === "/") {
     return [{ label: "Home", href: "/" }]
   }
@@ -68,14 +73,18 @@ function pathnameToBreadcrumbs(pathname: string) {
   const items: { label: string; href: string }[] = []
   let href = ""
   const pathSoFar: string[] = []
-  for (const segment of segments) {
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
     href += `/${segment}`
     pathSoFar.push(segment)
     const pathKey = pathSoFar.join("/")
+    const isLastSegment = i === segments.length - 1
     const label =
-      PATH_LABELS[pathKey] ??
-      SEGMENT_LABELS[segment] ??
-      segment.charAt(0).toUpperCase() + segment.slice(1)
+      isLastSegment && lastSegmentLabelOverride != null
+        ? lastSegmentLabelOverride
+        : PATH_LABELS[pathKey] ??
+          SEGMENT_LABELS[segment] ??
+          segment.charAt(0).toUpperCase() + segment.slice(1)
     items.push({ label, href })
   }
   return items
@@ -85,7 +94,12 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const pathname = usePathname()
   const isMobile = useIsMobile()
   const { toggleSidebar } = useSidebar()
-  const breadcrumbs = breadcrumbOverride ? [{ label: breadcrumbOverride, href: "" }] : pathnameToBreadcrumbs(pathname ?? "")
+  const { yearLabel } = useYearBreadcrumb()
+  const useYearOverride =
+    (pathname ?? "").startsWith("/dpro/years/") && yearLabel != null
+  const breadcrumbs = breadcrumbOverride
+    ? [{ label: breadcrumbOverride, href: "" }]
+    : pathnameToBreadcrumbs(pathname ?? "", useYearOverride ? yearLabel : undefined)
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">

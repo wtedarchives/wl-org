@@ -11,11 +11,15 @@ interface MetaShow {
 export function useShowMetadata(shows: MetaShow[], currentYear: string) {
   const hasFetchedSetlists = useRef(false)
   const hasFetchedReleases = useRef(false)
+  const hasFetchedRadioIds = useRef(false)
 
   const [showsWithSetlists, setShowsWithSetlists] = useState<Set<string>>(
     new Set(),
   )
   const [showsWithReleases, setShowsWithReleases] = useState<Set<string>>(
+    new Set(),
+  )
+  const [showsWithRadioIds, setShowsWithRadioIds] = useState<Set<string>>(
     new Set(),
   )
 
@@ -95,6 +99,43 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
     fetchShowsWithReleases()
   }, [shows, currentYear])
 
-  return { showsWithSetlists, showsWithReleases }
+  useEffect(() => {
+    if (
+      !supabase ||
+      !currentYear ||
+      shows.length === 0 ||
+      hasFetchedRadioIds.current
+    ) {
+      return
+    }
+    const client = supabase
+    async function fetchShowsWithRadioIds() {
+      try {
+        const { data, error } = await client
+          .from("setlist_entries")
+          .select("entry_show, radio_id")
+          .in(
+            "entry_show",
+            shows.map((s) => s.show_id),
+          )
+          .not("radio_id", "is", null)
+
+        if (error) throw error
+
+        const radioSet = new Set(
+          (data ?? [])
+            .map((item) => (item as any).entry_show as string | null)
+            .filter(Boolean) as string[],
+        )
+        setShowsWithRadioIds(radioSet)
+        hasFetchedRadioIds.current = true
+      } catch {
+        // Metadata is optional; ignore transient errors.
+      }
+    }
+    fetchShowsWithRadioIds()
+  }, [shows, currentYear])
+
+  return { showsWithSetlists, showsWithReleases, showsWithRadioIds }
 }
 

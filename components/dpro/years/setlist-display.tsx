@@ -1,0 +1,121 @@
+"use client"
+
+import React from "react"
+import Link from "next/link"
+import { MoveRight } from "lucide-react"
+
+interface SetlistEntry {
+  entry_song: string
+  entry_short: string | null
+  entry_segue: string | null
+  entry_placement: string
+  entry_setorder: number
+  entry_set: string
+  entry_setnum: number
+  averageLength?: string | null
+  songs: {
+    song_id: string
+    category_artwork?: string | null
+  }
+}
+
+interface SetlistDisplayProps {
+  setlist: SetlistEntry[]
+  horizontalMargin?: string
+}
+
+export function SetlistDisplay({
+  setlist,
+  horizontalMargin = "mx-2",
+}: SetlistDisplayProps) {
+  return (
+    <div className={horizontalMargin}>
+      {setlist.map((entry, index) => {
+        const prevEntry = index > 0 ? setlist[index - 1] : null
+        const isNewSet =
+          prevEntry && prevEntry.entry_set !== entry.entry_set
+
+        const placement = entry.entry_placement
+        const isOpener =
+          placement === "Set 1 Opener" ||
+          placement === "Set 2 Opener" ||
+          placement === "Set 3 Opener" ||
+          placement === "Set 4 Opener" ||
+          placement === "Set 5 Opener"
+        const isCloser =
+          placement === "Set 1 Closer" ||
+          placement === "Set 2 Closer" ||
+          placement === "Set 3 Closer" ||
+          placement === "Set 4 Closer" ||
+          placement === "Set 5 Closer"
+        const isEncore =
+          placement === "Encore 1" ||
+          placement === "Encore 2" ||
+          placement === "Encore 3"
+
+        const isSpecial = isOpener || isCloser || isEncore
+        let barColor = "transparent"
+        if (placement === "Set 1 Opener") barColor = "#047857"
+        else if (placement === "Set 1 Closer") barColor = "#1e40af"
+        else if (isOpener) barColor = "#10b981"
+        else if (isCloser) barColor = "#3b82f6"
+        else if (placement === "Encore 1") barColor = "#be123c"
+        else if (placement === "Encore 2" || placement === "Encore 3")
+          barColor = "#f43f5e"
+
+        return (
+          <React.Fragment key={`${entry.entry_song}-${index}`}>
+            {isNewSet && <hr className="my-1 border-border/70" />}
+            <div className="flex items-center px-0 py-0 text-xs text-foreground">
+              <div
+                className={`w-1 rounded-sm shrink-0 ${
+                  isSpecial ? "text-white" : "text-muted-foreground"
+                }`}
+                style={{ backgroundColor: barColor }}
+              >
+                {"\u00A0"}
+              </div>
+              <div className="flex flex-1 items-center justify-between pl-2">
+                <span className="flex items-center gap-1">
+                  <Link
+                    href={`/dpro/songs/${entry.songs.song_id}`}
+                    className="text-[11px] font-medium hover:underline"
+                  >
+                    {entry.entry_song}
+                  </Link>
+                  {entry.entry_short && (
+                    <span className="text-[10px] font-medium text-destructive">
+                      [{entry.entry_short}]
+                    </span>
+                  )}
+                  {entry.entry_segue && (
+                    <MoveRight className="h-3 w-3 text-destructive" />
+                  )}
+                </span>
+                <div className="flex items-center gap-2">
+                  {entry.averageLength && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {entry.averageLength}
+                    </span>
+                  )}
+                  {entry.songs.category_artwork && (
+                    <img
+                      src={entry.songs.category_artwork}
+                      alt={`${entry.entry_song} artwork`}
+                      className="h-4 w-4 rounded border border-border object-cover"
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement
+                        if (el) el.style.display = "none"
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </React.Fragment>
+        )
+      })}
+    </div>
+  )
+}
+

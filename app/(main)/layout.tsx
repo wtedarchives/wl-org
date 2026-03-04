@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
+import { YearBreadcrumbProvider } from "@/components/year-breadcrumb-context"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function MainLayout({
@@ -16,10 +17,12 @@ export default function MainLayout({
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          {children}
-        </div>
+        <YearBreadcrumbProvider>
+          <SiteHeader />
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
+        </YearBreadcrumbProvider>
       </SidebarInset>
     </SidebarProvider>
   )
