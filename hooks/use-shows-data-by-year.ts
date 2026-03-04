@@ -54,12 +54,13 @@ export function useShowsDataByYear(currentYear: string) {
     }
 
     const client = supabase
+    const userId = user.id
     async function fetchAttendedShows() {
       try {
         const { data, error } = await client
           .from("user_attended_shows")
           .select("show_id")
-          .eq("user_id", user.id)
+          .eq("user_id", userId)
 
         if (error) throw error
 
@@ -87,7 +88,7 @@ export function useShowsDataByYear(currentYear: string) {
       try {
         const { data, error } = await client
           .from("shows")
-          .select<ShowResponse, ShowResponse>(
+          .select(
             `
             show_iscanon,
             show_tour,
@@ -106,7 +107,7 @@ export function useShowsDataByYear(currentYear: string) {
                 venue_id
               )
             )
-          `,
+          `
           )
           .eq("show_year", currentYear)
           .order("show_date", { ascending: true })
@@ -115,8 +116,9 @@ export function useShowsDataByYear(currentYear: string) {
 
         if (error) throw error
 
+        const rows = (data ?? []) as ShowResponse[]
         const processed =
-          (data ?? []).map((show) => ({
+          rows.map((show) => ({
             ...show,
             venue_id: show.subvenues?.venues?.venue_id,
             attended: attendedShowIds.includes(show.show_id),
