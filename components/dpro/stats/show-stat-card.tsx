@@ -154,7 +154,7 @@ export function ShowStatCard({
                         : "py-[7.33px]"
                     } text-center text-xs font-medium`}
                   >
-                    <div className="flex items-center justify-center gap-0.5">
+                    <div className="flex items-center justify-center gap-1">
                       {valueFormatter ? (
                         valueFormatter(item.value)
                       ) : (
