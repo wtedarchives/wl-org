@@ -19,6 +19,7 @@ All URL slugs for **Setlist Archive** pages must start with `/dpro`.
 
 - **App Router**: Place Setlist Archive pages under `app/(main)/dpro/...` (e.g. `app/(main)/dpro/years/[year_id]/page.tsx`, `app/(main)/dpro/tours/page.tsx`).
 - **Links**: Use `/dpro/...` for any link that targets a Setlist Archive page (sidebar, breadcrumbs, internal links).
+- **Breadcrumbs**: For any Setlist Archive page, the first breadcrumb segment after Home must show **"Setlist Archive"** (not "Dpro"); link target remains `/dpro`.
 - **Pathname checks**: Treat `pathname.startsWith("/dpro")` as “user is in Setlist Archive” for sidebar expansion and active state.
 
 ## Checklist when adding or changing Setlist Archive routes

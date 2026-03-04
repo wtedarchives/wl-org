@@ -19,6 +19,7 @@ import { MenuIcon, PanelLeftIcon } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const SEGMENT_LABELS: Record<string, string> = {
+  dpro: "Setlist Archive",
   wted: "WTED Radio",
   forum: "Community Forum",
   goose101: "Goose 101",

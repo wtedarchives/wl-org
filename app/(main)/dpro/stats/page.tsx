@@ -24,7 +24,7 @@ import {
 const DEFAULT_YEAR = 2025
 const YEARS = [
   "all-time",
-  ...Array.from({ length: 14 }, (_, i) => 2026 - i),
+  ...Array.from({ length: 13 }, (_, i) => 2026 - i),
 ] as const
 
 function DproStatsContent() {
