@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation"
 import { FaBluesky } from "react-icons/fa6"
 
 import { NavUser } from "@/components/nav-user"
-import { supabase } from "@/lib/supabase"
 import {
   Sidebar,
   SidebarContent,
@@ -39,14 +38,34 @@ const WTED_RADIO_SUB = [
 ] as const
 
 const SETLIST_ARCHIVE_SUB = [
-  { title: "Tours", url: "/tours" },
-  { title: "Songs", url: "/songs" },
-  { title: "Personnel", url: "/personnel" },
-  { title: "Venues", url: "/venues" },
-  { title: "Discography", url: "/discography" },
-  { title: "Lists", url: "/lists" },
-  { title: "Setlist Game", url: "/setlistgame" },
-  { title: "Submit", url: "/submit" },
+  { title: "Tours", url: "/dpro/tours" },
+  { title: "Songs", url: "/dpro/songs" },
+  { title: "Stats", url: "/dpro/stats" },
+  { title: "Personnel", url: "/dpro/personnel" },
+  { title: "Venues", url: "/dpro/venues" },
+  { title: "Discography", url: "/dpro/discography" },
+  { title: "Lists", url: "/dpro/lists" },
+  { title: "Setlist Game", url: "/dpro/setlistgame" },
+  { title: "Submit", url: "/dpro/submit" },
+] as const
+
+/** Hardcoded years for nav; year_id must match Supabase years table (year, year_id). */
+const NAV_YEARS = [
+  { year: "2012", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002012" },
+  { year: "2013", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002013" },
+  { year: "2014", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002014" },
+  { year: "2015", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002015" },
+  { year: "2016", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002016" },
+  { year: "2017", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002017" },
+  { year: "2018", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002018" },
+  { year: "2019", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002019" },
+  { year: "2020", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002020" },
+  { year: "2021", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002021" },
+  { year: "2022", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002022" },
+  { year: "2023", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002023" },
+  { year: "2024", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002024" },
+  { year: "2025", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002025" },
+  { year: "2026", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002026" },
 ] as const
 
 const LINKS = [
@@ -62,22 +81,18 @@ const navMainItems = [
   { title: "Goose 101", url: "/goose101", icon: <BookOpenIcon className="size-4" /> },
 ] as const
 
-type YearLink = {
-  year: string
-  year_id: string
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const isWtedPath = pathname.startsWith("/wted")
-  const isSetlistPath = SETLIST_ARCHIVE_SUB.some(
-    (item) => pathname === item.url || pathname.startsWith(item.url + "/")
-  )
+  const isSetlistPath =
+    pathname.startsWith("/dpro") ||
+    SETLIST_ARCHIVE_SUB.some(
+      (item) => pathname === item.url || pathname.startsWith(item.url + "/")
+    )
 
   const [wtedOpen, setWtedOpen] = useState(isWtedPath)
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
-  const [years, setYears] = useState<YearLink[]>([])
 
   // Keep the group expanded when the user is viewing a page in that group
   useEffect(() => {
@@ -86,38 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     if (isSetlistPath) setSetlistOpen(true)
   }, [pathname, isSetlistPath])
-
-  useEffect(() => {
-    const loadYears = async () => {
-      if (!supabase) return
-      try {
-        const { data, error } = await supabase
-          .from("years")
-          .select("year, year_id")
-          .order("year", { ascending: true })
-
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error("Error loading years for sidebar:", error)
-          return
-        }
-        if (data) {
-          setYears(
-            data.filter(
-              (y): y is { year: string; year_id: string } =>
-                typeof (y as any).year === "string" &&
-                typeof (y as any).year_id === "string"
-            )
-          )
-        }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("Unexpected error loading years for sidebar:", err)
-      }
-    }
-
-    loadYears()
-  }, [])
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -256,18 +239,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     className={`ml-auto size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}
                   />
                 </SidebarMenuButton>
-                {setlistOpen && years.length > 0 && (
+                {setlistOpen && NAV_YEARS.length > 0 && (
                   <div className="px-2 pt-1 text-[0.625rem] font-medium text-sidebar-foreground">
                     <div className="flex flex-wrap items-center gap-1 pb-1">
-                      {years.map((year, index) => (
+                      {NAV_YEARS.map((year, index) => (
                         <span key={year.year_id} className="flex items-center gap-1">
                           <Link
-                            href={`/years/${year.year_id}`}
+                            href={`/dpro/years/${year.year_id}`}
                             className="hover:underline"
                           >
                             {year.year}
                           </Link>
-                          {index < years.length - 1 && (
+                          {index < NAV_YEARS.length - 1 && (
                             <span className="text-[0.5rem] opacity-70">•</span>
                           )}
                         </span>

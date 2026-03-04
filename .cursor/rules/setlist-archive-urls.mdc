@@ -1,0 +1,28 @@
+---
+description: Setlist Archive URL prefix — all setlist archive routes must live under /dpro
+alwaysApply: true
+---
+
+# Setlist Archive URLs (/dpro)
+
+All URL slugs for **Setlist Archive** pages must start with `/dpro`.
+
+## Convention
+
+- **Base path**: `/dpro`
+- **Examples**:
+  - Years: `/dpro/years/{year_id}` (year_id = UUID from Supabase `years` table)
+  - Tours: `/dpro/tours` (and `/dpro/tours/...` for nested routes)
+  - Songs: `/dpro/songs`, Stats: `/dpro/stats`, Personnel: `/dpro/personnel`, Venues: `/dpro/venues`, Discography: `/dpro/discography`, Lists: `/dpro/lists`, Setlist Game: `/dpro/setlistgame`, Submit: `/dpro/submit`
+
+## Implementation
+
+- **App Router**: Place Setlist Archive pages under `app/(main)/dpro/...` (e.g. `app/(main)/dpro/years/[year_id]/page.tsx`, `app/(main)/dpro/tours/page.tsx`).
+- **Links**: Use `/dpro/...` for any link that targets a Setlist Archive page (sidebar, breadcrumbs, internal links).
+- **Pathname checks**: Treat `pathname.startsWith("/dpro")` as “user is in Setlist Archive” for sidebar expansion and active state.
+
+## Checklist when adding or changing Setlist Archive routes
+
+- [ ] Route path starts with `/dpro`
+- [ ] Sidebar nav uses `/dpro/...` for the corresponding item
+- [ ] Any internal links to setlist pages use `/dpro/...`
