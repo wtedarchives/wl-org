@@ -51,21 +51,21 @@ const SETLIST_ARCHIVE_SUB = [
 
 /** Hardcoded years for nav; year_id must match Supabase years table (year, year_id). */
 const NAV_YEARS = [
-  { year: "2012", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002012" },
-  { year: "2013", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002013" },
-  { year: "2014", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002014" },
-  { year: "2015", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002015" },
-  { year: "2016", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002016" },
-  { year: "2017", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002017" },
-  { year: "2018", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002018" },
-  { year: "2019", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002019" },
-  { year: "2020", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002020" },
-  { year: "2021", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002021" },
-  { year: "2022", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002022" },
-  { year: "2023", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002023" },
-  { year: "2024", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002024" },
-  { year: "2025", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002025" },
-  { year: "2026", year_id: "a1b2c3d4-e5f6-4a7b-8c9d-000000002026" },
+  { year: "2012", year_id: "d0a3d0b0-a40f-40f1-9430-712e616ab844" },
+  { year: "2013", year_id: "51dc603b-2b18-4c97-8573-1f0c99eae9f1" },
+  { year: "2014", year_id: "08778200-4ae7-48f9-b6dc-275842f0a56d" },
+  { year: "2015", year_id: "794bb9d6-6483-4cd0-9174-04fa872b4bb0" },
+  { year: "2016", year_id: "96b02a0e-1d4d-4baa-9b2e-a8d445ead63b" },
+  { year: "2017", year_id: "23989762-c3df-4631-821b-0fb01ee44020" },
+  { year: "2018", year_id: "6da8e2f8-14d9-458d-a4ad-7793de2ad94f" },
+  { year: "2019", year_id: "d71b7545-574d-4801-808b-fb704e0e80fa" },
+  { year: "2020", year_id: "6acf970b-97d4-4d19-a90a-28149e37327c" },
+  { year: "2021", year_id: "0e646c0e-3630-413a-b7d5-d52dba1947fe" },
+  { year: "2022", year_id: "9f380c88-e925-47c5-a5b0-ac8c18d2be6b" },
+  { year: "2023", year_id: "ced3076c-8659-42ce-a2cd-6ca3a871ce10" },
+  { year: "2024", year_id: "20765f62-5610-4d2d-b03a-8ddb307577f7" },
+  { year: "2025", year_id: "6b13c0c8-3fdc-41bd-996b-f598bd18696e" },
+  { year: "2026", year_id: "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445" },
 ] as const
 
 const LINKS = [
