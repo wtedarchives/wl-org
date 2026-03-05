@@ -23,7 +23,7 @@ export function ShowsTableCard({
   )
 
   return (
-    <Card className="bg-card/95 text-xs shadow-sm">
+    <Card className="py-0 bg-card/95 text-xs shadow-sm">
       <CardHeader className="border-b border-border/40 py-2">
         <CardTitle className="text-[13px] font-semibold">{title}</CardTitle>
       </CardHeader>

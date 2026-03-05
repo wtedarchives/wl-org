@@ -65,7 +65,7 @@ export function WtedInfo() {
                   Stream WTED Goose Radio right in your browser.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="flex justify-center">
                   <iframe
                     src="https://embed.radio.co/player/55044fc.html"
@@ -86,7 +86,7 @@ export function WtedInfo() {
                   Take WTED Goose Radio with you wherever you go.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="flex flex-wrap items-center justify-center gap-4">
                   <a
                     href="https://apps.apple.com/us/app/wted-goose-radio/id6476207418"
@@ -124,7 +124,7 @@ export function WtedInfo() {
                 See what&apos;s coming up on WTED Goose Radio.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="flex justify-center">
                 <iframe
                   src="https://embed.radio.co/embeds/schedule/es27f0222.html"
@@ -146,7 +146,7 @@ export function WtedInfo() {
                   Request a song to be played on WTED Goose Radio.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <iframe
                   src="https://embed.radio.co/request/w2255950.html"
                   title="WTED Request a Song"
@@ -165,7 +165,7 @@ export function WtedInfo() {
                   See what was recently played on WTED Goose Radio.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div
                   ref={historyContainerRef}
                   id="radio-co-history"

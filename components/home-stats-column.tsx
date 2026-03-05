@@ -19,7 +19,7 @@ export function HomeStatsColumn() {
 
   if (!isSupabaseConfigured()) {
     return (
-      <Card className="bg-card/95 text-xs shadow-sm">
+      <Card className="py-0 bg-card/95 text-xs shadow-sm">
         <CardContent className="px-3 py-4 text-[11px] text-muted-foreground">
           Trouble communicating with the database server. Please reload the
           page.
