@@ -44,6 +44,11 @@ function DproStatsContent() {
   const [connectionError, setConnectionError] = useState(false)
 
   useEffect(() => {
+    document.title = "Stats – Wysteria Lane"
+    return () => { document.title = "" }
+  }, [])
+
+  useEffect(() => {
     if (selectedYear !== null) return
     const params = new URLSearchParams(searchParams.toString())
     params.set("year", String(DEFAULT_YEAR))

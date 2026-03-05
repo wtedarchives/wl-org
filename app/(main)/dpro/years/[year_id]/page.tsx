@@ -109,6 +109,13 @@ function YearPageContent({ yearId }: { yearId?: string }) {
     return () => setYearLabel(null)
   }, [currentYear, setYearLabel])
 
+  useEffect(() => {
+    if (currentYear) {
+      document.title = `${currentYear} Shows – Wysteria Lane`
+    }
+    return () => { document.title = "" }
+  }, [currentYear])
+
   const handleYearClick = (id: string) => {
     router.push(`/dpro/years/${id}`)
   }

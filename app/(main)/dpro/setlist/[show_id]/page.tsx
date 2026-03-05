@@ -148,6 +148,23 @@ export default function SetlistPage({
     return () => setSetlistBreadcrumbs(null)
   }, [show, yearId, setSetlistBreadcrumbs])
 
+  useEffect(() => {
+    if (!show) return
+    const datePart = formatSetlistDate(show.show_date)
+    const group = show.show_group?.trim() || ""
+    const venue = show.show_venue_location?.trim() || ""
+    const middle =
+      group && venue
+        ? ` (${group} - ${venue})`
+        : group
+          ? ` (${group})`
+          : venue
+            ? ` (${venue})`
+            : ""
+    document.title = `${datePart}${middle} – Wysteria Lane`
+    return () => { document.title = "" }
+  }, [show])
+
   if (!showId) notFound()
   if (!loading && !show) notFound()
 
