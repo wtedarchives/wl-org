@@ -270,7 +270,7 @@ export function YearShowRow({
                     className="inline-flex items-center justify-center rounded hover:opacity-90"
                   >
                     <Image
-                      src="/WTED.png"
+                      src="/WTED2.png"
                       alt="WTED Goose Radio"
                       width={14}
                       height={14}

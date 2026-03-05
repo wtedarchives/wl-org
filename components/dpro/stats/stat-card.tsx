@@ -42,7 +42,7 @@ export function StatCard({
   showEmptyState = false,
 }: StatCardProps) {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden py-0">
       <CardHeader
         className={headerClassName ?? "bg-muted/60 py-2"}
         style={headerClassName ? undefined : undefined}

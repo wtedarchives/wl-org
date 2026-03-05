@@ -52,7 +52,7 @@ export function YearShowsTable({
 
   if (loading) {
     return (
-      <Card className="ring-0 border border-border/60 bg-card/80">
+      <Card className="ring-0 border border-border/60 bg-card/80 py-0">
         <CardContent className="flex items-center justify-center px-4 py-8 text-xs text-muted-foreground">
           Loading shows…
         </CardContent>
@@ -62,7 +62,7 @@ export function YearShowsTable({
 
   if (!loading && shows.length === 0) {
     return (
-      <Card className="ring-0 border border-border/60 bg-card/80">
+      <Card className="ring-0 border border-border/60 bg-card/80 py-0">
         <CardContent className="px-4 py-6 text-center text-xs text-muted-foreground">
           {selectedGroups.length === 0 ? (
             <>No shows found for {currentYear || "this year"}.</>
@@ -84,7 +84,7 @@ export function YearShowsTable({
   }
 
   return (
-    <Card className="ring-0 border border-border/60 bg-card/80">
+    <Card className="ring-0 border border-border/60 bg-card/80 py-0">
       <CardContent className="p-0">
         <Table className="min-w-max text-[11px]">
           <TableHeader>
@@ -162,7 +162,7 @@ export function YearShowsTable({
               </TableHead>
               <TableHead className="w-[28px] px-1 py-1 text-center text-[11px] font-medium">
                 <Image
-                  src="/WTED.png"
+                  src="/WTED2.png"
                   alt="WTED Goose Radio"
                   width={12}
                   height={12}

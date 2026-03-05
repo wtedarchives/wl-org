@@ -28,7 +28,7 @@ export function AverageSetlistCard({
   )
 
   const cardClass = cn(
-    "ring-0 border border-border/60 bg-card/80",
+    "ring-0 border border-border/60 bg-card/80 py-0",
     className,
   )
 

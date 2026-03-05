@@ -43,7 +43,7 @@ export function LiberatedSongsCard({
   showEmptyState = false,
 }: LiberatedSongsCardProps) {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden py-0">
       <CardHeader className="bg-yellow-600 py-2">
         <CardTitle className="text-sm font-medium">
           Top Returning Songs

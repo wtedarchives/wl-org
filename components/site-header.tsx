@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useYearBreadcrumb } from "@/components/year-breadcrumb-context"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,10 +15,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
-import { MenuIcon, PanelLeftIcon } from "lucide-react"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { MenuIcon, MoreHorizontalIcon, PanelLeftIcon } from "lucide-react"
+import {
+  useIsDesktopContentLayout,
+  useIsMobile,
+} from "@/hooks/use-mobile"
 
 const SEGMENT_LABELS: Record<string, string> = {
   dpro: "Setlist Archive",
@@ -93,13 +102,21 @@ function pathnameToBreadcrumbs(
 export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string } = {}) {
   const pathname = usePathname()
   const isMobile = useIsMobile()
+  const isDesktopContent = useIsDesktopContentLayout()
   const { toggleSidebar } = useSidebar()
   const { yearLabel } = useYearBreadcrumb()
+  const { setlistBreadcrumbs } = useSetlistBreadcrumb()
   const useYearOverride =
     (pathname ?? "").startsWith("/dpro/years/") && yearLabel != null
+  const useSetlistTrail =
+    (pathname ?? "").startsWith("/dpro/setlist/") &&
+    setlistBreadcrumbs != null &&
+    setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride
     ? [{ label: breadcrumbOverride, href: "" }]
-    : pathnameToBreadcrumbs(pathname ?? "", useYearOverride ? yearLabel : undefined)
+    : useSetlistTrail
+      ? setlistBreadcrumbs
+      : pathnameToBreadcrumbs(pathname ?? "", useYearOverride ? yearLabel : undefined)
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -120,15 +137,11 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
               <PanelLeftIcon className="size-4" />
             )}
           </Button>
-          <Separator
-            orientation="vertical"
-            className="mx-2 data-[orientation=vertical]:h-4"
-          />
-          <Breadcrumb className="flex-1 overflow-hidden">
-            <BreadcrumbList>
-              <BreadcrumbItem>
+          <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
+            <BreadcrumbList className="flex-nowrap gap-1.5 text-muted-foreground">
+              <BreadcrumbItem className="shrink-0">
                 <BreadcrumbLink asChild>
-                  <Link href="/" className="flex items-center">
+                  <Link href="/" className="flex items-center pl-1.5">
                     <Image
                       src="/WL.png"
                       alt="Home"
@@ -140,22 +153,73 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              {breadcrumbs.map((item, i) => (
-                <span key={item.href} className="contents">
-                  {i > 0 && <BreadcrumbSeparator />}
-                  <BreadcrumbItem>
-                    {i === breadcrumbs.length - 1 ? (
-                      <BreadcrumbPage className="text-base font-medium">
-                        {item.label}
-                      </BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink asChild>
-                        <Link href={item.href}>{item.label}</Link>
-                      </BreadcrumbLink>
-                    )}
+              {breadcrumbs.length > 1 && !isDesktopContent ? (
+                <>
+                  <BreadcrumbItem className="shrink-0">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          aria-label="Show breadcrumb trail"
+                        >
+                          <MoreHorizontalIcon className="size-3.5" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" side="bottom">
+                        {breadcrumbs.slice(0, -1).map((item) => (
+                          <DropdownMenuItem key={item.href} asChild>
+                            {item.href ? (
+                              <Link href={item.href}>{item.label}</Link>
+                            ) : (
+                              <span>{item.label}</span>
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </BreadcrumbItem>
-                </span>
-              ))}
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem className="min-w-0 shrink">
+                    <BreadcrumbPage className="block min-w-0 truncate text-base font-medium text-foreground">
+                      {breadcrumbs[breadcrumbs.length - 1].label}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              ) : breadcrumbs.length > 1 && isDesktopContent ? (
+                breadcrumbs.map((item, i) => (
+                  <span key={item.href} className="contents">
+                    {i > 0 && <BreadcrumbSeparator />}
+                    <BreadcrumbItem className="min-w-0 shrink">
+                      {i === breadcrumbs.length - 1 ? (
+                        <BreadcrumbPage className="block min-w-0 truncate text-base font-medium text-foreground">
+                          {item.label}
+                        </BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link href={item.href} className="block min-w-0 truncate">
+                            {item.label}
+                          </Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                  </span>
+                ))
+              ) : breadcrumbs.length === 1 ? (
+                <BreadcrumbItem className="min-w-0 shrink">
+                  {breadcrumbs[0].href ? (
+                    <BreadcrumbLink asChild>
+                      <Link href={breadcrumbs[0].href} className="block min-w-0 truncate">
+                        {breadcrumbs[0].label}
+                      </Link>
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage className="block min-w-0 truncate text-base font-medium text-foreground">
+                      {breadcrumbs[0].label}
+                    </BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+              ) : null}
             </BreadcrumbList>
           </Breadcrumb>
         </div>

@@ -57,7 +57,7 @@ export function ShowStatCard({
   const icon = getTitleIcon(title)
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden py-0">
       <CardHeader
         className={headerClassName ?? "bg-muted/60 py-2"}
       >

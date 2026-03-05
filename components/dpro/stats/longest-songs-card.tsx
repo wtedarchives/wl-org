@@ -27,7 +27,7 @@ export function LongestSongsCard({
   showEmptyState = false,
 }: LongestSongsCardProps) {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden py-0">
       <CardHeader className="bg-gray-500 py-2">
         <CardTitle className="text-sm font-medium">Longest Songs</CardTitle>
       </CardHeader>

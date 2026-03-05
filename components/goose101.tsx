@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -94,15 +94,31 @@ function SectionBlock({
   )
 }
 
+function getScrollParent(el: HTMLElement | null): HTMLElement | null {
+  if (!el) return null
+  let parent = el.parentElement
+  while (parent) {
+    const { overflowY } = getComputedStyle(parent)
+    if (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay")
+      return parent
+    parent = parent.parentElement
+  }
+  return null
+}
+
 export function Goose101() {
   const [activeSection, setActiveSection] = useState<number | null>(null)
+  const [mobileNavAtTop, setMobileNavAtTop] = useState(false)
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([])
   const hrRefs = useRef<(HTMLDivElement | null)[]>([])
   const navContainerRef = useRef<HTMLDivElement>(null)
   const mobileNavRef = useRef<HTMLDivElement>(null)
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const contentWrapperRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  // Observe sections so active circle updates as user scrolls (use scroll container as root when present)
+  useLayoutEffect(() => {
+    const scrollRoot = getScrollParent(contentWrapperRef.current) ?? null
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -112,12 +128,46 @@ export function Goose101() {
           }
         })
       },
-      { root: null, rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+      {
+        root: scrollRoot,
+        rootMargin: scrollRoot ? "-20% 0px -60% 0px" : "-20% 0px -60% 0px",
+        threshold: 0,
+      }
     )
-    sectionRefs.current.forEach((ref) => {
-      if (ref && observerRef.current) observerRef.current.observe(ref)
-    })
-    return () => observerRef.current?.disconnect()
+    const observer = observerRef.current
+    const refs = sectionRefs.current
+    const toObserve = refs.filter((r): r is HTMLDivElement => r != null)
+    toObserve.forEach((ref) => observer.observe(ref))
+    return () => observer.disconnect()
+  }, [])
+
+  // Mobile: when the site header scrolls out of view, move circle nav to top of screen.
+  // Listen to scroll on the scroll container, or window if layout has overflow-hidden.
+  useEffect(() => {
+    const headerEl = document.querySelector("header")
+    const scrollContainer = getScrollParent(contentWrapperRef.current)
+
+    const updateNavPosition = () => {
+      if (!headerEl) return
+      const scrollTop = scrollContainer
+        ? scrollContainer.scrollTop
+        : typeof window !== "undefined"
+          ? window.scrollY
+          : 0
+      const headerHeight = headerEl.getBoundingClientRect().height
+      setMobileNavAtTop(scrollTop > headerHeight)
+    }
+
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", updateNavPosition, { passive: true })
+      updateNavPosition()
+      return () => scrollContainer.removeEventListener("scroll", updateNavPosition)
+    }
+
+    // No overflow-auto ancestor (layout uses overflow-hidden): scroll is on window
+    window.addEventListener("scroll", updateNavPosition, { passive: true })
+    updateNavPosition()
+    return () => window.removeEventListener("scroll", updateNavPosition)
   }, [])
 
   useEffect(() => {
@@ -132,8 +182,13 @@ export function Goose101() {
       const target = container.scrollTop + (b.top - c.top) - c.height / 2 + b.height / 2
       container.scrollTo({ top: target, behavior: "smooth" })
     }
+    // Only scroll the horizontal nav strip; do not use scrollIntoView (it would scroll the page to top)
     if (mobileBtn && mobile) {
-      mobileBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
+      const containerWidth = mobile.clientWidth
+      const btnLeft = mobileBtn.offsetLeft
+      const btnWidth = mobileBtn.offsetWidth
+      const targetScroll = btnLeft - containerWidth / 2 + btnWidth / 2
+      mobile.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" })
     }
   }, [activeSection])
 
@@ -175,24 +230,36 @@ export function Goose101() {
   )
 
   return (
-    <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl">
+    <div
+      ref={contentWrapperRef}
+      className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl"
+    >
       <main className="relative flex-1">
         <div className="relative mx-auto flex w-full max-w-7xl flex-col px-4 md:flex-row md:gap-4 lg:px-6">
-          {/* Desktop: sticky vertical nav column (in flow so it works with sidebar layout) */}
+          {/* Desktop: fixed vertical nav (sticky fails when ancestor has overflow-hidden) */}
+          <div
+            className="hidden w-10 shrink-0 md:block"
+            aria-hidden
+          />
           <div
             ref={navContainerRef}
-            className="sticky top-[var(--header-height,0)] z-20 hidden w-10 shrink-0 overflow-x-hidden overflow-y-auto self-start pt-8 md:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{ height: "calc(100vh - var(--header-height, 0px) - 80px)" }}
+            className="fixed top-[var(--header-height,0)] z-20 hidden h-[calc(100vh-var(--header-height,0px)-80px)] w-10 overflow-x-hidden overflow-y-auto pt-8 md:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{
+              left: "calc(var(--sidebar-width, 0px) + 1rem + (100vw - var(--sidebar-width, 0px) - min(100vw - var(--sidebar-width, 0px), 82rem)) / 2)",
+            }}
           >
             <div className="flex min-h-max flex-col items-center justify-start">
               {navButtons}
             </div>
           </div>
 
-          {/* Mobile: sticky horizontal nav */}
+          {/* Mobile: fixed nav; sits below header until header scrolls away, then moves to top */}
           <div
             ref={mobileNavRef}
-            className="sticky top-0 z-20 flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-b border-wl-white/20 bg-wl-dark-green/95 px-4 py-2 backdrop-blur md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="fixed left-0 right-0 z-20 flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-b border-wl-white/20 bg-wl-dark-green/95 px-4 py-2 backdrop-blur transition-[top] duration-200 ease-out md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{
+              top: mobileNavAtTop ? 0 : "var(--header-height, 0)",
+            }}
           >
             {Array.from({ length: SECTION_COUNT }, (_, i) => i + 1).map((num) => (
               <Button
@@ -219,8 +286,8 @@ export function Goose101() {
             ))}
           </div>
 
-          {/* Content */}
-          <div className="min-w-0 flex-1 px-4 pb-8 pt-6 md:px-8">
+          {/* Content: pt for mobile so content isn't under fixed nav; header sits below nav */}
+          <div className="min-w-0 flex-1 px-4 pb-8 pt-[calc(var(--header-height,0px)+52px)] md:pt-6 md:px-8">
             <h1 className="mb-6 text-center text-xl font-bold text-wl-white">
               Goose 101: An Introduction And Guide
             </h1>
@@ -238,7 +305,7 @@ export function Goose101() {
                   ref={(el) => {
                     hrRefs.current[i] = el
                   }}
-                  className="clear-both scroll-mt-[44px] md:scroll-mt-0"
+                  className="clear-both scroll-mt-[56px] md:scroll-mt-0"
                 >
                   <Separator className="my-6 border-wl-orange" />
                 </div>
