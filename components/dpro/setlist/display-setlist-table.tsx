@@ -202,7 +202,7 @@ export function DisplaySetlistTable({
                   >
                     <TableCell
                       colSpan={fullColSpan}
-                      className="border-y border-border bg-red-800/30 py-1 text-center text-[0.625rem] font-medium text-foreground"
+                      className="border-y border-border bg-gray-700 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
                     >
                       {getEncoreLabel(entry.entry_set)}
                     </TableCell>
@@ -215,7 +215,7 @@ export function DisplaySetlistTable({
                   >
                     <TableCell
                       colSpan={fullColSpan}
-                      className="border-y border-border bg-gray-300 py-1 text-center text-[0.625rem] font-medium text-foreground dark:bg-gray-600"
+                      className="border-y border-border bg-gray-800 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
                     >
                       Set Break
                     </TableCell>

@@ -49,7 +49,7 @@ export function SetlistPageHeader({
   onEditShow,
 }: SetlistPageHeaderProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2 pb-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Setlist
@@ -103,7 +103,7 @@ export function SetlistPageHeader({
           )}
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
         <SetlistTourDropdown
           tours={tours}
           currentTourId={show.tour_id}
@@ -157,7 +157,7 @@ export function SetlistPageHeader({
           </Link>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className="rounded-full border border-border bg-wl-orange/30 px-2.5 py-1 text-xs font-medium tabular-nums text-foreground">
           {formatSetlistDate(show.show_date)}
         </span>
