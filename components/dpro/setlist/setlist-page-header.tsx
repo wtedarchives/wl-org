@@ -10,7 +10,7 @@ import {
   Pencil,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Show } from "@/types/setlist"
+import type { Show, ShowDate } from "@/types/setlist"
 import type { Tour } from "@/hooks/use-setlist-data"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { SetlistTourDropdown } from "@/components/dpro/setlist/setlist-tour-dropdown"
@@ -19,7 +19,7 @@ import { SetlistShowsDropdown } from "@/components/dpro/setlist/setlist-shows-dr
 export interface SetlistPageHeaderProps {
   show: Show
   showId: string
-  showDates: { show_id: string; show_date: string }[]
+  showDates: ShowDate[]
   showPosition: {
     prevShowId: string | null
     nextShowId: string | null
