@@ -43,7 +43,6 @@ export function SetlistSidebar({
     <aside className="flex min-w-0 flex-1 flex-col gap-3">
       <SetlistShowStatsCard
         show={show}
-        setlistLength={setlist.length}
         totalLengthFromSetlist={totalLength}
         showLengthRank={showLengthRank}
       />

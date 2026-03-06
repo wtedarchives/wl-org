@@ -242,7 +242,7 @@ export function SetlistEntryRow({
         )}
         {entry.entry_coachnotes?.trim() && (
           <div
-            className="min-w-[300px] max-w-[470px] break-words whitespace-normal text-[10px] leading-2.5 text-muted-foreground [&_a]:bg-[#844240] [&_a]:font-medium [&_a]:text-white [&_a]:rounded-full [&_a]:px-1 [&_a]:py-[0.5px] [&_a]:hover:underline"
+            className="min-w-[300px] max-w-[470px] break-words whitespace-normal text-[10px] leading-2.5 text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline"
             dangerouslySetInnerHTML={{ __html: entry.entry_coachnotes.trim() }}
           />
         )}

@@ -2,12 +2,11 @@
 
 import { use, useEffect, useRef, useState } from "react"
 import { notFound } from "next/navigation"
-import { Loader2, ListFilter, X } from "lucide-react"
+import { Loader2, ListFilter } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
 import type { Show } from "@/types/setlist"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { useSetlistData, useTours, useShowDates } from "@/hooks/use-setlist-data"
@@ -24,6 +23,7 @@ import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistReleases } from "@/hooks/use-setlist-releases"
 import { SetlistSidebar } from "@/components/dpro/setlist/setlist-sidebar"
+import { SetlistSidebarSheet } from "@/components/dpro/setlist/setlist-sidebar-sheet"
 import { SetlistCallbacks } from "@/components/dpro/setlist/setlist-callbacks"
 import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { SetlistPageHeader } from "@/components/dpro/setlist/setlist-page-header"
@@ -360,59 +360,30 @@ export default function SetlistPage({
         entry={wtedSheetEntry}
       />
 
-      <Sheet
+      <SetlistSidebarSheet
         open={sidebarSheetOpen}
         onOpenChange={setSidebarSheetOpen}
-      >
-        <SheetContent
-          side="bottom"
-          className="max-h-[85vh] flex flex-col rounded-t-none overflow-hidden"
-          showCloseButton={false}
-        >
-          <button
-            type="button"
-            onClick={() => setSidebarSheetOpen(false)}
-            className="flex w-full items-center justify-center gap-2 border-b border-border/50 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-            Close
-          </button>
-          <div className="min-h-0 flex-1 overflow-y-auto p-3">
-            <div className="flex flex-col gap-3 max-w-[280px] mx-auto">
-              <SetlistRatingCard
-                averageRating={averageRating}
-                reviewCount={reviewCount}
-                onClick={() =>
-                  user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
-                }
-              />
-              <SetlistAttendanceCard
-                attendeeCount={attendeeCount}
-                attended={attended}
-                toggling={toggling}
-                onToggle={toggle}
-                showAttendButton={!!user}
-              />
-              <SetlistSidebar
-                show={show}
-                setlist={setlist}
-                showLengthRank={showLengthRank}
-                changes={changes}
-                changesLoading={changesLoading}
-                releases={releases}
-                hasReleases={hasReleases}
-                onOpenChangesModal={() => {
-                  setOpenChangesModal(true)
-                  setSidebarSheetOpen(false)
-                }}
-                hoveredCategory={hoveredCategory}
-                onCategoryHover={setHoveredCategory}
-              />
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+        show={show}
+        setlist={setlist}
+        showLengthRank={showLengthRank}
+        averageRating={averageRating}
+        reviewCount={reviewCount}
+        attendeeCount={attendeeCount}
+        attended={attended}
+        toggling={toggling}
+        onToggle={toggle}
+        user={user}
+        onRatingClick={() =>
+          user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
+        }
+        changes={changes}
+        changesLoading={changesLoading}
+        releases={releases}
+        hasReleases={hasReleases}
+        onOpenChangesModal={() => setOpenChangesModal(true)}
+        hoveredCategory={hoveredCategory}
+        onCategoryHover={setHoveredCategory}
+      />
     </div>
   )
 }

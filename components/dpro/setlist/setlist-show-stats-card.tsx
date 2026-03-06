@@ -2,11 +2,10 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import type { Show } from "@/types/setlist"
-import { formatEntryLength } from "@/lib/setlist-utils"
+import { formatEntryLength, getRarityColor, getGapColor } from "@/lib/setlist-utils"
 
 interface SetlistShowStatsCardProps {
   show: Show
-  setlistLength: number
   totalLengthFromSetlist: string | null
   showLengthRank: number | null
 }
@@ -20,7 +19,6 @@ function formatShowLength(value: string | null | undefined): string {
 
 export function SetlistShowStatsCard({
   show,
-  setlistLength,
   totalLengthFromSetlist,
   showLengthRank,
 }: SetlistShowStatsCardProps) {
@@ -33,14 +31,8 @@ export function SetlistShowStatsCard({
         <p className="text-xs font-medium text-foreground mb-2">Show Stats</p>
         <ul className="space-y-1.5 text-xs text-muted-foreground">
           <li className="flex justify-between gap-2">
-            <span>Songs</span>
-            <span className="tabular-nums font-medium text-foreground">
-              {setlistLength}
-            </span>
-          </li>
-          <li className="flex justify-between gap-2">
             <span>Length</span>
-            <span className="tabular-nums font-medium text-foreground">
+            <span className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white bg-wl-dark-green">
               {displayLength}
             </span>
           </li>
@@ -55,7 +47,14 @@ export function SetlistShowStatsCard({
           {show.show_rarity != null && (
             <li className="flex justify-between gap-2">
               <span>Rarity</span>
-              <span className="tabular-nums font-medium text-foreground">
+              <span
+                className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white"
+                style={{
+                  backgroundColor: getRarityColor(
+                    Number(show.show_rarity).toFixed(2) + "%",
+                  ),
+                }}
+              >
                 {Number(show.show_rarity).toFixed(2)}%
               </span>
             </li>
@@ -63,7 +62,12 @@ export function SetlistShowStatsCard({
           {show.show_gap != null && (
             <li className="flex justify-between gap-2">
               <span>Gap</span>
-              <span className="tabular-nums font-medium text-foreground">
+              <span
+                className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white"
+                style={{
+                  backgroundColor: getGapColor(show.show_gap),
+                }}
+              >
                 {Number(show.show_gap).toFixed(2)}
               </span>
             </li>

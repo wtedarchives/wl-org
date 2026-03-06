@@ -220,3 +220,43 @@ export function getRarityColor(percentage: string | null): string {
   )
   return `rgb(${r}, ${g}, ${b})`
 }
+
+/** Gap color: 0 = blue (best), 100 = red (worst). Same stops as rarity, reversed. */
+export function getGapColor(value: string | number | null): string {
+  if (value == null || value === "" || value === "-") return "transparent"
+  const num = typeof value === "string" ? parseFloat(value) : value
+  if (Number.isNaN(num)) return "transparent"
+  const cappedValue = Math.min(num, 100)
+  const colorStops = [
+    { percent: 0, color: { r: 13, g: 71, b: 161 } },
+    { percent: 12, color: { r: 46, g: 125, b: 50 } },
+    { percent: 24, color: { r: 179, g: 135, b: 0 } },
+    { percent: 50, color: { r: 230, g: 81, b: 0 } },
+    { percent: 100, color: { r: 156, g: 12, b: 12 } },
+  ]
+  let lowerStop = colorStops[0]
+  let upperStop = colorStops[colorStops.length - 1]
+  for (let i = 0; i < colorStops.length - 1; i++) {
+    if (
+      cappedValue >= colorStops[i].percent &&
+      cappedValue <= colorStops[i + 1].percent
+    ) {
+      lowerStop = colorStops[i]
+      upperStop = colorStops[i + 1]
+      break
+    }
+  }
+  const range = upperStop.percent - lowerStop.percent
+  const factor =
+    range !== 0 ? (cappedValue - lowerStop.percent) / range : 0
+  const r = Math.round(
+    lowerStop.color.r + factor * (upperStop.color.r - lowerStop.color.r),
+  )
+  const g = Math.round(
+    lowerStop.color.g + factor * (upperStop.color.g - lowerStop.color.g),
+  )
+  const b = Math.round(
+    lowerStop.color.b + factor * (upperStop.color.b - lowerStop.color.b),
+  )
+  return `rgb(${r}, ${g}, ${b})`
+}
