@@ -21,7 +21,13 @@ export function SetlistAttendButton({
     <Button
       variant={attended ? "default" : "outline"}
       size="sm"
-      className={cn("h-7 gap-1 text-xs", className)}
+      className={cn(
+        "h-7 gap-1 text-xs transition-colors",
+        attended
+          ? "hover:!bg-primary/90"
+          : "hover:!bg-muted",
+        className
+      )}
       onClick={onToggle}
       disabled={toggling}
     >
