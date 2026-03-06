@@ -66,7 +66,7 @@ export function DisplaySetlistTable({
   const uniquePlacements = new Set(setlist.map((e) => e.entry_placement))
   const hasSinglePlacementType = uniquePlacements.size === 1
   const fullColSpan =
-    2 + (showWtedColumn ? 1 : 0) + 1 + (showCanonColumns ? 3 : 0) + 2 // #, Song, WTED?, Time, Last+Tour+Rarity?, Personnel, Coach
+    2 + (showWtedColumn ? 1 : 0) + 1 + (showCanonColumns ? 3 : 0) + 1 // #, Song, WTED?, Time, Last+Tour+Rarity?, Personnel
   const hasLastBadges = showCanonColumns && setlist.some((e) => {
     const c = e.last_count ?? ""
     return c.includes("Debut") || c.includes("TD") || c.includes("LIB")
@@ -118,11 +118,11 @@ export function DisplaySetlistTable({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="w-full overflow-x-auto">
-        <Table className="[&_th]:py-1 [&_th]:px-2 [&_td]:py-1 [&_td]:px-2">
+        <Table className="[&_th]:py-1 [&_th]:px-2 [&_th]:align-middle [&_td]:py-0.5 [&_td]:px-2 [&_td]:align-middle">
         <TableHeader>
           <TableRow className="h-8 border-border/60 hover:bg-transparent">
             <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">#</TableHead>
-            <TableHead className="h-8 text-muted-foreground">
+            <TableHead className="h-8 max-w-[470px] text-muted-foreground">
               {hasSongHeaderTooltipItems ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -171,11 +171,8 @@ export function DisplaySetlistTable({
             {showCanonColumns && (
               <TableHead className="h-8 text-center text-muted-foreground">Rarity</TableHead>
             )}
-            <TableHead className="h-8 min-w-[225px] max-w-[400px] text-muted-foreground">
+            <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
               Personnel
-            </TableHead>
-            <TableHead className="h-8 min-w-[400px] max-w-[400px] text-muted-foreground">
-              Coach&apos;s Notes
             </TableHead>
           </TableRow>
         </TableHeader>

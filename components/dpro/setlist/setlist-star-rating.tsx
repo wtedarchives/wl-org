@@ -5,17 +5,24 @@ import { Button } from "@/components/ui/button"
 
 interface SetlistStarRatingProps {
   averageRating: number
+  reviewCount?: number
   onClick?: () => void
   disabled?: boolean
 }
 
 export function SetlistStarRating({
   averageRating,
+  reviewCount,
   onClick,
   disabled,
 }: SetlistStarRatingProps) {
   const rating = averageRating ?? 0
   const hasRating = rating > 0
+  const ratingNumberText = hasRating ? `(${rating.toFixed(2)})` : null
+  const reviewCountText =
+    reviewCount != null && reviewCount > 0
+      ? `(${reviewCount} ${reviewCount === 1 ? "review" : "reviews"})`
+      : null
 
   const stars = (
     <div className="relative flex items-center gap-0.5">
@@ -47,31 +54,41 @@ export function SetlistStarRating({
     </div>
   )
 
+  const content = (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        {stars}
+        {ratingNumberText != null && (
+          <span className="text-xs tabular-nums">{ratingNumberText}</span>
+        )}
+      </div>
+      {reviewCountText != null && (
+        <div className="flex w-full justify-center">
+          <span className="text-[10px] tabular-nums text-muted-foreground">
+            {reviewCountText}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+
   if (onClick && !disabled) {
     return (
       <Button
         variant="ghost"
         size="sm"
-        className="h-auto gap-1 px-1.5 py-0.5 text-xs text-muted-foreground hover:text-foreground"
+        className="flex h-auto flex-col items-center gap-0 px-1.5 text-xs text-muted-foreground hover:text-foreground"
         onClick={onClick}
         aria-label={hasRating ? `Rating: ${rating} out of 5. Click to rate.` : "Click to rate this show"}
       >
-        {stars}
-        {hasRating && (
-          <span className="tabular-nums">({rating.toFixed(1)})</span>
-        )}
+        {content}
       </Button>
     )
   }
 
   return (
-    <div className="flex items-center gap-1 px-1.5 py-0.5">
-      {stars}
-      {hasRating && (
-        <span className="text-xs tabular-nums text-muted-foreground">
-          ({rating.toFixed(1)})
-        </span>
-      )}
+    <div className="flex flex-col items-center gap-0 px-1.5 py-0.5">
+      {content}
     </div>
   )
 }

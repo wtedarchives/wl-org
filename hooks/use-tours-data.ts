@@ -72,18 +72,21 @@ export function useToursData(currentYear: string) {
         })
 
         const transformedTours: TourCount[] = Object.entries(tourCounts).map(
-          ([tourName, { count, tour_canonid, tour_id, tour }], index) => ({
+          ([tourName, { count, tour_canonid, tour_id, tour }]) => ({
             tour_count: `${tourName} (${count})`,
             tour_canonid: tour_canonid ?? 0,
             tour_id: tour_id ?? "",
             tour: tour ?? tourName,
-            color: TOUR_COLORS[index % TOUR_COLORS.length],
+            color: "", // assigned after sort
           }),
         )
 
-        const sortedTours = transformedTours.sort(
-          (a, b) => a.tour_canonid - b.tour_canonid,
-        )
+        const sortedTours = transformedTours
+          .sort((a, b) => a.tour_canonid - b.tour_canonid)
+          .map((t, index) => ({
+            ...t,
+            color: TOUR_COLORS[index % TOUR_COLORS.length],
+          }))
 
         setTours(sortedTours)
       } catch (err) {

@@ -93,7 +93,7 @@ export function SetlistEntryRow({
           <button
             type="button"
             onClick={() => onNumberClick(entry.entry_id)}
-            className="inline-flex min-w-[1rem] cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-ring"
+            className="inline-flex min-w-[1rem] cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-0"
             title="Copy entry ID"
           >
             {numberCellContent}
@@ -102,7 +102,8 @@ export function SetlistEntryRow({
           numberCellContent
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="max-w-[470px]">
+        <div className="flex flex-col gap-0.5">
         {showSongRowTooltip ? (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -239,6 +240,13 @@ export function SetlistEntryRow({
             })()}
           </div>
         )}
+        {entry.entry_coachnotes?.trim() && (
+          <div
+            className="min-w-[300px] max-w-[470px] break-words whitespace-normal text-[10px] leading-2.5 text-muted-foreground [&_a]:font-medium [&_a]:text-wl-orange [&_a]:underline [&_a]:hover:text-wl-light-orange"
+            dangerouslySetInnerHTML={{ __html: entry.entry_coachnotes.trim() }}
+          />
+        )}
+        </div>
       </TableCell>
       {showWtedColumn && (
         <TableCell className="text-center">
@@ -344,7 +352,7 @@ export function SetlistEntryRow({
           ) : null}
         </TableCell>
       )}
-      <TableCell className="min-w-[225px] max-w-[400px]">
+      <TableCell className="min-w-[400px] max-w-[600px]">
         {entry.guests?.length ? (
           <div className="flex flex-wrap gap-0.5">
             {[...entry.guests]
@@ -363,14 +371,6 @@ export function SetlistEntryRow({
                 </Tooltip>
               ))}
           </div>
-        ) : null}
-      </TableCell>
-      <TableCell className="min-w-[400px] max-w-[400px] whitespace-normal text-muted-foreground">
-        {entry.entry_coachnotes ? (
-          <span
-            className="text-[10px] text-left [&_a]:font-medium [&_a]:text-wl-orange [&_a]:underline [&_a]:hover:text-wl-light-orange"
-            dangerouslySetInnerHTML={{ __html: entry.entry_coachnotes }}
-          />
         ) : null}
       </TableCell>
     </TableRow>

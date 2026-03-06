@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js"
 
 export function useSetlistRating(showId: string | undefined, user: User | null) {
   const [averageRating, setAverageRating] = useState<number>(0)
+  const [reviewCount, setReviewCount] = useState<number>(0)
   const [userRating, setUserRating] = useState<number | null>(null)
   const [userReview, setUserReview] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,8 +30,10 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
         if (rows.length > 0) {
           const sum = rows.reduce((s, r) => s + r.rating, 0)
           setAverageRating(Math.round((sum / rows.length) * 100) / 100)
+          setReviewCount(rows.length)
         } else {
           setAverageRating(0)
+          setReviewCount(0)
         }
         if (user) {
           const mine = rows.find((r) => r.user_id === user.id)
@@ -92,6 +95,9 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
         if (rows.length > 0) {
           const sum = rows.reduce((s, row) => s + row.rating, 0)
           setAverageRating(Math.round((sum / rows.length) * 100) / 100)
+          setReviewCount(rows.length)
+        } else {
+          setReviewCount(0)
         }
       } catch (err) {
         console.error("Error submitting rating:", err)
@@ -104,6 +110,7 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
 
   return {
     averageRating,
+    reviewCount,
     userRating,
     userReview,
     loading,

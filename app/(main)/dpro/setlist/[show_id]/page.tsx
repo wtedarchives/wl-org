@@ -107,6 +107,7 @@ export default function SetlistPage({
 
   const {
     averageRating,
+    reviewCount,
     userRating,
     userReview,
     submitting,
@@ -270,10 +271,24 @@ export default function SetlistPage({
           <div className="flex flex-col gap-3">
             <Card className="min-w-0 border-border/60 bg-card/80">
               <CardContent className="flex min-h-[2.5rem] items-center justify-center px-3 md:px-4 py-0">
-                <SetlistStarRating
-                  averageRating={averageRating}
-                  onClick={user ? () => setRatingSheetOpen(true) : undefined}
-                />
+                {user ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full h-full min-h-0 flex items-center justify-center -m-3 md:-m-4 hover:bg-muted/50 transition-colors"
+                    onClick={() => setRatingSheetOpen(true)}
+                  >
+                    <SetlistStarRating
+                      averageRating={averageRating}
+                      reviewCount={reviewCount}
+                    />
+                  </Button>
+                ) : (
+                  <SetlistStarRating
+                    averageRating={averageRating}
+                    reviewCount={reviewCount}
+                  />
+                )}
               </CardContent>
             </Card>
             <Card className="min-w-0 border-border/60 bg-card/80">
@@ -362,14 +377,30 @@ export default function SetlistPage({
           </button>
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
             <div className="flex flex-col gap-3 max-w-[280px] mx-auto">
-              <Card className="min-w-0 border-border/60 bg-card/80">
-                <CardContent className="flex min-h-[2.5rem] items-center justify-center px-3 py-0">
-                  <SetlistStarRating
-                    averageRating={averageRating}
-                    onClick={user ? () => setRatingSheetOpen(true) : undefined}
-                  />
-                </CardContent>
-              </Card>
+              {user ? (
+                <div className="min-w-0 w-full border border-border/60 bg-card/80 py-3 rounded-lg ring-1 ring-foreground/10 px-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full h-full min-h-0 py-0 flex items-center justify-center hover:bg-muted/50 transition-colors -m-3"
+                    onClick={() => setRatingSheetOpen(true)}
+                  >
+                    <SetlistStarRating
+                      averageRating={averageRating}
+                      reviewCount={reviewCount}
+                    />
+                  </Button>
+                </div>
+              ) : (
+                <Card className="min-w-0 border-border/60 bg-card/80 py-3">
+                  <CardContent className="flex items-center justify-center px-3 py-0">
+                    <SetlistStarRating
+                      averageRating={averageRating}
+                      reviewCount={reviewCount}
+                    />
+                  </CardContent>
+                </Card>
+              )}
               <Card className="min-w-0 border-border/60 bg-card/80">
                 <CardContent className="flex min-h-[2.5rem] items-center justify-center px-3 py-0">
                   <div className="flex flex-wrap items-center gap-2 text-xs">

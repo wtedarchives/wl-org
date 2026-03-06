@@ -5,8 +5,10 @@ import Image from "next/image"
 import {
   ArrowLeft,
   ArrowRight,
+  Building2,
   Info,
   Link as LinkIcon,
+  MapPin,
   Pencil,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -170,28 +172,32 @@ export function SetlistPageHeader({
           show.venue_id ? (
             <Link
               href={`/dpro/venue/${show.venue_id}`}
-              className="rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
+              <Building2 className="size-3 shrink-0" />
               {show.show_subvenue}
             </Link>
           ) : show.show_subvenue_venue ? (
             <Link
               href={`/dpro/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
-              className="rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
+              <Building2 className="size-3 shrink-0" />
               {show.show_subvenue}
             </Link>
           ) : (
             <Link
               href={`/dpro/venue/${encodeURIComponent(show.show_subvenue)}`}
-              className="rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
+              <Building2 className="size-3 shrink-0" />
               {show.show_subvenue}
             </Link>
           )
         )}
         {show.show_venue_location && (
-          <span className="rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground">
+          <span className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground">
+            <MapPin className="size-3 shrink-0" />
             {show.show_venue_location}
           </span>
         )}
