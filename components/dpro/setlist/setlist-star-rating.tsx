@@ -18,7 +18,7 @@ export function SetlistStarRating({
 }: SetlistStarRatingProps) {
   const rating = averageRating ?? 0
   const hasRating = rating > 0
-  const ratingNumberText = hasRating ? `(${rating.toFixed(2)})` : null
+  const ratingNumberText = hasRating ? rating.toFixed(2) : null
   const reviewCountText =
     reviewCount != null && reviewCount > 0
       ? `(${reviewCount} ${reviewCount === 1 ? "review" : "reviews"})`
@@ -56,12 +56,14 @@ export function SetlistStarRating({
 
   const content = (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center">
         {stars}
-        {ratingNumberText != null && (
-          <span className="text-xs tabular-nums">{ratingNumberText}</span>
-        )}
       </div>
+      {ratingNumberText != null && (
+        <div className="flex w-full justify-center">
+          <span className="text-xs tabular-nums">{ratingNumberText}</span>
+        </div>
+      )}
       {reviewCountText != null && (
         <div className="flex w-full justify-center">
           <span className="text-[10px] tabular-nums text-muted-foreground">

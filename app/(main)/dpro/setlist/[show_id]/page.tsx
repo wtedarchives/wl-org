@@ -29,9 +29,10 @@ import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { SetlistPageHeader } from "@/components/dpro/setlist/setlist-page-header"
 import { SetlistTourDropdown } from "@/components/dpro/setlist/setlist-tour-dropdown"
 import { SetlistShowsDropdown } from "@/components/dpro/setlist/setlist-shows-dropdown"
-import { SetlistStarRating } from "@/components/dpro/setlist/setlist-star-rating"
-import { SetlistRatingSheet } from "@/components/dpro/setlist/setlist-rating-sheet"
-import { SetlistAttendButton } from "@/components/dpro/setlist/setlist-attend-button"
+import { SetlistRatingCard } from "@/components/dpro/setlist/setlist-rating-card"
+import { SetlistAttendanceCard } from "@/components/dpro/setlist/setlist-attendance-card"
+import { SetlistRatingDrawer } from "@/components/dpro/setlist/setlist-rating-drawer"
+import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-login-required-dialog"
 import { SetlistShowChangesSheet } from "@/components/dpro/setlist/setlist-show-changes-sheet"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
 import { SetlistJotySheet } from "@/components/dpro/setlist/setlist-joty-sheet"
@@ -80,7 +81,8 @@ export default function SetlistPage({
   const { releases, hasReleases, loading: releasesLoading } = useSetlistReleases(showId)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [sidebarSheetOpen, setSidebarSheetOpen] = useState(false)
-  const [ratingSheetOpen, setRatingSheetOpen] = useState(false)
+  const [ratingDrawerOpen, setRatingDrawerOpen] = useState(false)
+  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
   const [songSheetEntry, setSongSheetEntry] = useState<SetlistEntry | null>(null)
   const [jotySheetOpen, setJotySheetOpen] = useState(false)
@@ -110,8 +112,13 @@ export default function SetlistPage({
     reviewCount,
     userRating,
     userReview,
+    reviews,
+    isLoadingReviews,
+    reviewsError,
     submitting,
     submitRating,
+    fetchReviews,
+    validateReview,
   } = useSetlistRating(showId, user ?? null)
   const { attended, toggling, toggle } = useSetlistAttendance(
     showId,
@@ -268,45 +275,27 @@ export default function SetlistPage({
         </div>
 
         {layoutMode === "desktop" && (
-          <div className="flex flex-col gap-3">
-            <Card className="min-w-0 border-border/60 bg-card/80">
-              <CardContent className="flex min-h-[2.5rem] items-center justify-center px-3 md:px-4 py-0">
-                {user ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full h-full min-h-0 flex items-center justify-center -m-3 md:-m-4 hover:bg-muted/50 transition-colors"
-                    onClick={() => setRatingSheetOpen(true)}
-                  >
-                    <SetlistStarRating
-                      averageRating={averageRating}
-                      reviewCount={reviewCount}
-                    />
-                  </Button>
-                ) : (
-                  <SetlistStarRating
-                    averageRating={averageRating}
-                    reviewCount={reviewCount}
-                  />
-                )}
-              </CardContent>
-            </Card>
-            <Card className="min-w-0 border-border/60 bg-card/80">
-              <CardContent className="flex min-h-[2.5rem] items-center justify-center px-3 md:px-4 py-0">
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  {user && (
-                    <SetlistAttendButton
-                      attended={attended}
-                      toggling={toggling}
-                      onToggle={toggle}
-                    />
-                  )}
-                  <span className="text-muted-foreground">
-                    {attendeeCount} {attendeeCount === 1 ? "attendee" : "attendees"}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex w-[280px] shrink-0 flex-col gap-3">
+            <div className="flex flex-row gap-3">
+              <div className="min-w-0 flex-1">
+                <SetlistRatingCard
+                  averageRating={averageRating}
+                  reviewCount={reviewCount}
+                  onClick={() =>
+                    user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
+                  }
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <SetlistAttendanceCard
+                  attendeeCount={attendeeCount}
+                  attended={attended}
+                  toggling={toggling}
+                  onToggle={toggle}
+                  showAttendButton={!!user}
+                />
+              </div>
+            </div>
             <SetlistSidebar
               show={show}
               setlist={setlist}
@@ -323,13 +312,27 @@ export default function SetlistPage({
         )}
       </div>
 
-      <SetlistRatingSheet
-        open={ratingSheetOpen}
-        onOpenChange={setRatingSheetOpen}
-        initialRating={userRating}
-        initialReview={userReview}
+      <SetlistRatingDrawer
+        open={ratingDrawerOpen}
+        onOpenChange={setRatingDrawerOpen}
+        showDate={show?.show_date ?? ""}
+        showVenueLocation={show?.show_venue_location ?? ""}
+        averageRating={averageRating}
+        reviewCount={reviewCount}
+        userRating={userRating}
+        userReview={userReview}
+        reviews={reviews}
+        isLoadingReviews={isLoadingReviews}
+        reviewsError={reviewsError}
         onSubmit={submitRating}
         submitting={submitting}
+        onFetchReviews={fetchReviews}
+        validateReview={validateReview}
+      />
+
+      <SetlistLoginRequiredDialog
+        open={loginRequiredOpen}
+        onOpenChange={setLoginRequiredOpen}
       />
 
       <SetlistShowChangesSheet
@@ -377,46 +380,20 @@ export default function SetlistPage({
           </button>
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
             <div className="flex flex-col gap-3 max-w-[280px] mx-auto">
-              {user ? (
-                <div className="min-w-0 w-full border border-border/60 bg-card/80 py-3 rounded-lg ring-1 ring-foreground/10 px-3">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full h-full min-h-0 py-0 flex items-center justify-center hover:bg-muted/50 transition-colors -m-3"
-                    onClick={() => setRatingSheetOpen(true)}
-                  >
-                    <SetlistStarRating
-                      averageRating={averageRating}
-                      reviewCount={reviewCount}
-                    />
-                  </Button>
-                </div>
-              ) : (
-                <Card className="min-w-0 border-border/60 bg-card/80 py-3">
-                  <CardContent className="flex items-center justify-center px-3 py-0">
-                    <SetlistStarRating
-                      averageRating={averageRating}
-                      reviewCount={reviewCount}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-              <Card className="min-w-0 border-border/60 bg-card/80">
-                <CardContent className="flex min-h-[2.5rem] items-center justify-center px-3 py-0">
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {user && (
-                      <SetlistAttendButton
-                        attended={attended}
-                        toggling={toggling}
-                        onToggle={toggle}
-                      />
-                    )}
-                    <span className="text-muted-foreground">
-                      {attendeeCount} {attendeeCount === 1 ? "attendee" : "attendees"}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+              <SetlistRatingCard
+                averageRating={averageRating}
+                reviewCount={reviewCount}
+                onClick={() =>
+                  user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
+                }
+              />
+              <SetlistAttendanceCard
+                attendeeCount={attendeeCount}
+                attended={attended}
+                toggling={toggling}
+                onToggle={toggle}
+                showAttendButton={!!user}
+              />
               <SetlistSidebar
                 show={show}
                 setlist={setlist}

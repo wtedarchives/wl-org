@@ -40,7 +40,7 @@ export function SetlistSidebar({
   const totalLength = totalSetlistLength(setlist) || null
 
   return (
-    <aside className="flex w-[280px] shrink-0 flex-col gap-3">
+    <aside className="flex min-w-0 flex-1 flex-col gap-3">
       <SetlistShowStatsCard
         show={show}
         setlistLength={setlist.length}
