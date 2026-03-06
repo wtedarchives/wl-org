@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useShowsData } from "@/hooks/use-shows-data"
 import { useShowMetadata } from "@/hooks/use-show-metadata"
-import { AudioLines, FileMusic, MoveRight } from "lucide-react"
+import { AudioLines, FileMusic } from "lucide-react"
 import { formatShowDate } from "./format-show-date"
 
 function getPlacementColor(placement: string | null): string {
@@ -220,7 +220,7 @@ export function MostRecentShowCard() {
                           </span>
                         )}
                         {entry.entry_segue && (
-                          <MoveRight className="ml-2 inline h-3 w-3 align-middle text-destructive" />
+                          <span className="ml-2 text-destructive">→</span>
                         )}
                       </span>
                     </div>

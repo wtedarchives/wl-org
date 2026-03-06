@@ -2,8 +2,9 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ListChecks } from "lucide-react"
+import { FileMusic } from "lucide-react"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
+import { getChangeTypeIcon } from "./setlist-show-change-icon"
 
 interface SetlistShowChangesCardProps {
   changes: ShowChangeRow[]
@@ -28,14 +29,7 @@ export function SetlistShowChangesCard({
   }
 
   if (changes.length === 0) {
-    return (
-      <Card className="border-border/60 bg-card/80 py-0">
-        <CardContent className="p-3">
-          <p className="text-xs font-medium text-foreground">Show Changes</p>
-          <p className="text-xs text-muted-foreground mt-1">No changes recorded.</p>
-        </CardContent>
-      </Card>
-    )
+    return null
   }
 
   return (
@@ -47,26 +41,31 @@ export function SetlistShowChangesCard({
             <Button
               variant="outline"
               size="sm"
-              className="h-7 gap-1 text-[10px] px-1.5"
+              className="gap-1 text-[10px] px-1.5 hover:!bg-muted"
               onClick={onOpenModal}
             >
-              <ListChecks className="size-3" />
-              View all
+              <FileMusic className="size-3" />
+              Setlist Scan
             </Button>
           )}
         </div>
-        <ul className="space-y-1 text-xs text-muted-foreground">
-          {changes.slice(0, 3).map((c) => (
-            <li key={c.show_change_uuid} className="line-clamp-2">
-              <span className="font-medium text-foreground">{c.change_type}:</span>{" "}
-              {c.change}
-            </li>
-          ))}
-          {changes.length > 3 && (
-            <li className="text-muted-foreground/80">
-              +{changes.length - 3} more
-            </li>
-          )}
+        <ul className="space-y-1 text-xs text-white/80 [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline">
+          {changes.map((c) => {
+            const iconConfig = getChangeTypeIcon(c.change_type)
+            return (
+              <li
+                key={c.show_change_uuid}
+                className="flex items-start gap-1.5 line-clamp-2"
+              >
+                {iconConfig && (
+                  <iconConfig.Icon
+                    className={`size-3.5 shrink-0 mt-[1px] ${iconConfig.colorClass}`}
+                  />
+                )}
+                <span dangerouslySetInnerHTML={{ __html: c.change }} />
+              </li>
+            )
+          })}
         </ul>
       </CardContent>
     </Card>

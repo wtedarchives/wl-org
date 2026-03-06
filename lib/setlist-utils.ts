@@ -37,6 +37,80 @@ export function getGuestColor(
   return group?.color ?? "transparent"
 }
 
+/** Ordinal suffix for rank (1st, 2nd, 3rd, 4th, 11th, 21st, etc.). */
+function getOrdinalSuffix(n: number): string {
+  if (n >= 11 && n <= 13) return "th"
+  const last = n % 10
+  if (last === 1) return "st"
+  if (last === 2) return "nd"
+  if (last === 3) return "rd"
+  return "th"
+}
+
+/** Tooltip text for show length rank (e.g. "Longest Goose show of all-time."). */
+export function getLengthRankTooltipText(rank: number): string {
+  if (rank <= 0 || rank > 25) return ""
+  const ord = getOrdinalSuffix(rank)
+  const ordWord =
+    rank === 1
+      ? "Longest"
+      : rank === 2
+        ? "Second-longest"
+        : rank === 3
+          ? "Third-longest"
+          : rank === 4
+            ? "Fourth-longest"
+            : rank === 5
+              ? "Fifth-longest"
+              : rank === 6
+                ? "Sixth-longest"
+                : rank === 7
+                  ? "Seventh-longest"
+                  : rank === 8
+                    ? "Eighth-longest"
+                    : rank === 9
+                      ? "Ninth-longest"
+                      : `${rank}${ord}-longest`
+  return `${ordWord} Goose show of all-time.`
+}
+
+/** Format date as "MMMM d, yyyy" in UTC (e.g. "March 15, 2024"). */
+export function formatShowDateLong(dateInput: string | null | undefined): string {
+  if (dateInput == null) return ""
+  const date = new Date(dateInput.includes("T") ? dateInput : dateInput + "T00:00:00Z")
+  if (Number.isNaN(date.getTime())) return ""
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  })
+}
+
+/** Placement bar color for setlist entries (home-style). */
+export function getPlacementColor(placement: string | null | undefined): string {
+  if (!placement) return "transparent"
+  if (placement === "Set 1 Opener") return "#047857"
+  if (placement === "Set 1 Closer") return "#1e40af"
+  if (
+    placement === "Set 2 Opener" ||
+    placement === "Set 3 Opener" ||
+    placement === "Set 4 Opener" ||
+    placement === "Set 5 Opener"
+  )
+    return "#10b981"
+  if (
+    placement === "Set 2 Closer" ||
+    placement === "Set 3 Closer" ||
+    placement === "Set 4 Closer" ||
+    placement === "Set 5 Closer"
+  )
+    return "#3b82f6"
+  if (placement === "Encore 1") return "#be123c"
+  if (placement === "Encore 2" || placement === "Encore 3") return "#f43f5e"
+  return "transparent"
+}
+
 /**
  * Formats a date for setlist display (MM.DD.YY).
  * Accepts YYYY-MM-DD, ISO strings, numeric timestamps, or already-formatted MM.DD.YY.

@@ -27,7 +27,8 @@ interface SetlistSidebarSheetProps {
   changesLoading: boolean
   releases: ShowRelease[]
   hasReleases: boolean
-  onOpenChangesModal: () => void
+  hasSetlistScan?: boolean
+  onOpenSetlistScan?: () => void
   hoveredCategory: string | null
   onCategoryHover: (category: string | null) => void
 }
@@ -50,7 +51,8 @@ export function SetlistSidebarSheet({
   changesLoading,
   releases,
   hasReleases,
-  onOpenChangesModal,
+  hasSetlistScan,
+  onOpenSetlistScan,
   hoveredCategory,
   onCategoryHover,
 }: SetlistSidebarSheetProps) {
@@ -92,10 +94,15 @@ export function SetlistSidebarSheet({
               changesLoading={changesLoading}
               releases={releases}
               hasReleases={hasReleases}
-              onOpenChangesModal={() => {
-                onOpenChangesModal()
-                onOpenChange(false)
-              }}
+              hasSetlistScan={hasSetlistScan}
+              onOpenSetlistScan={
+                onOpenSetlistScan
+                  ? () => {
+                      onOpenSetlistScan()
+                      onOpenChange(false)
+                    }
+                  : undefined
+              }
               hoveredCategory={hoveredCategory}
               onCategoryHover={onCategoryHover}
             />

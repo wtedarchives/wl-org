@@ -1,8 +1,21 @@
 "use client"
 
+import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { Show } from "@/types/setlist"
-import { formatEntryLength, getRarityColor, getGapColor } from "@/lib/setlist-utils"
+import {
+  formatEntryLength,
+  getRarityColor,
+  getGapColor,
+  getLengthRankTooltipText,
+} from "@/lib/setlist-utils"
+
+const LENGTH_RANK_LIST_ID = "45a4b90e-adbe-4af5-9051-2f4d212069fc"
 
 interface SetlistShowStatsCardProps {
   show: Show
@@ -30,23 +43,34 @@ export function SetlistShowStatsCard({
       <CardContent className="p-3">
         <p className="text-xs font-medium text-foreground mb-2">Show Stats</p>
         <ul className="space-y-1.5 text-xs text-muted-foreground">
-          <li className="flex justify-between gap-2">
-            <span>Length</span>
-            <span className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white bg-wl-dark-green">
-              {displayLength}
-            </span>
-          </li>
-          {showLengthRank != null && (
-            <li className="flex justify-between gap-2">
-              <span>Length rank</span>
-              <span className="tabular-nums font-medium text-foreground">
-                #{showLengthRank}
+          <li className="flex items-center justify-between gap-2">
+            <span>Show Length</span>
+            <div className="flex items-center gap-1.5">
+              {showLengthRank != null &&
+                showLengthRank >= 1 &&
+                showLengthRank <= 25 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={`/dpro/lists/${LENGTH_RANK_LIST_ID}`}
+                        className="inline-block rounded px-1 py-[1px] text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-600/80 transition-colors"
+                      >
+                        #{showLengthRank}
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                      {getLengthRankTooltipText(showLengthRank)}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              <span className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white bg-wl-dark-green">
+                {displayLength}
               </span>
-            </li>
-          )}
+            </div>
+          </li>
           {show.show_rarity != null && (
             <li className="flex justify-between gap-2">
-              <span>Rarity</span>
+              <span>Show Rarity</span>
               <span
                 className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white"
                 style={{
@@ -61,7 +85,7 @@ export function SetlistShowStatsCard({
           )}
           {show.show_gap != null && (
             <li className="flex justify-between gap-2">
-              <span>Gap</span>
+              <span>Average Show Gap</span>
               <span
                 className="inline-block rounded px-1.5 py-[1px] tabular-nums text-xs font-medium text-white"
                 style={{

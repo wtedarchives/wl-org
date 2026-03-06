@@ -21,6 +21,7 @@ import { useShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useShowChanges } from "@/hooks/use-setlist-show-changes"
+import { useSetlistScan } from "@/hooks/use-setlist-scan"
 import { useSetlistReleases } from "@/hooks/use-setlist-releases"
 import { SetlistSidebar } from "@/components/dpro/setlist/setlist-sidebar"
 import { SetlistSidebarSheet } from "@/components/dpro/setlist/setlist-sidebar-sheet"
@@ -33,7 +34,7 @@ import { SetlistRatingCard } from "@/components/dpro/setlist/setlist-rating-card
 import { SetlistAttendanceCard } from "@/components/dpro/setlist/setlist-attendance-card"
 import { SetlistRatingDrawer } from "@/components/dpro/setlist/setlist-rating-drawer"
 import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-login-required-dialog"
-import { SetlistShowChangesSheet } from "@/components/dpro/setlist/setlist-show-changes-sheet"
+import { SetlistScanDrawer } from "@/components/dpro/setlist/setlist-scan-drawer"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
 import { SetlistJotySheet } from "@/components/dpro/setlist/setlist-joty-sheet"
 import {
@@ -78,6 +79,7 @@ export default function SetlistPage({
   } = useSetlistAdmin(user, showId)
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { changes, loading: changesLoading } = useShowChanges(showId)
+  const { setlistUrl } = useSetlistScan(showId)
   const { releases, hasReleases, loading: releasesLoading } = useSetlistReleases(showId)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [sidebarSheetOpen, setSidebarSheetOpen] = useState(false)
@@ -89,6 +91,7 @@ export default function SetlistPage({
   const [jotySheetEntry, setJotySheetEntry] = useState<SetlistEntry | null>(null)
   const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
   const [wtedSheetEntry, setWtedSheetEntry] = useState<SetlistEntry | null>(null)
+  const [setlistScanDrawerOpen, setSetlistScanDrawerOpen] = useState(false)
   const [copiedEntryIds, setCopiedEntryIds] = useState<Set<string>>(new Set())
 
   const handleNumberClick = async (entryId: string) => {
@@ -155,6 +158,12 @@ export default function SetlistPage({
     ])
     return () => setSetlistBreadcrumbs(null)
   }, [show, yearId, setSetlistBreadcrumbs])
+
+  useEffect(() => {
+    if (openChangesModal && setlistUrl) {
+      setSetlistScanDrawerOpen(true)
+    }
+  }, [openChangesModal, setlistUrl])
 
   useEffect(() => {
     if (!show) return
@@ -304,7 +313,8 @@ export default function SetlistPage({
               changesLoading={changesLoading}
               releases={releases}
               hasReleases={hasReleases}
-              onOpenChangesModal={() => setOpenChangesModal(true)}
+              hasSetlistScan={!!setlistUrl}
+              onOpenSetlistScan={() => setSetlistScanDrawerOpen(true)}
               hoveredCategory={hoveredCategory}
               onCategoryHover={setHoveredCategory}
             />
@@ -335,11 +345,16 @@ export default function SetlistPage({
         onOpenChange={setLoginRequiredOpen}
       />
 
-      <SetlistShowChangesSheet
-        open={openChangesModal}
-        onOpenChange={setOpenChangesModal}
-        changes={changes}
-      />
+      {setlistUrl && (
+        <SetlistScanDrawer
+          open={setlistScanDrawerOpen}
+          onOpenChange={setSetlistScanDrawerOpen}
+          setlistUrl={setlistUrl}
+          show={show}
+          setlist={setlist}
+          changes={changes}
+        />
+      )}
 
       <SetlistSongPerformancesSheet
         open={songSheetOpen}
@@ -380,7 +395,8 @@ export default function SetlistPage({
         changesLoading={changesLoading}
         releases={releases}
         hasReleases={hasReleases}
-        onOpenChangesModal={() => setOpenChangesModal(true)}
+        hasSetlistScan={!!setlistUrl}
+        onOpenSetlistScan={() => setSetlistScanDrawerOpen(true)}
         hoveredCategory={hoveredCategory}
         onCategoryHover={setHoveredCategory}
       />

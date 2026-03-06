@@ -18,7 +18,8 @@ interface SetlistSidebarProps {
   changesLoading: boolean
   releases: ShowRelease[]
   hasReleases: boolean
-  onOpenChangesModal?: () => void
+  hasSetlistScan?: boolean
+  onOpenSetlistScan?: () => void
   hoveredCategory?: string | null
   onCategoryHover?: (category: string | null) => void
   onReleaseHover?: (releaseId: string | null) => void
@@ -32,7 +33,8 @@ export function SetlistSidebar({
   changesLoading,
   releases,
   hasReleases,
-  onOpenChangesModal,
+  hasSetlistScan,
+  onOpenSetlistScan,
   hoveredCategory,
   onCategoryHover,
   onReleaseHover,
@@ -46,11 +48,13 @@ export function SetlistSidebar({
         totalLengthFromSetlist={totalLength}
         showLengthRank={showLengthRank}
       />
-      <SetlistShowChangesCard
-        changes={changes}
-        loading={changesLoading}
-        onOpenModal={onOpenChangesModal}
-      />
+      {hasSetlistScan && (
+        <SetlistShowChangesCard
+          changes={changes}
+          loading={changesLoading}
+          onOpenModal={onOpenSetlistScan}
+        />
+      )}
       <SetlistBadgesCard show={show} />
       <SetlistSongSpreadCard
         setlist={setlist}
