@@ -178,10 +178,14 @@ export function SetlistRatingDrawer({
                     <button
                       key={value}
                       type="button"
-                      className="p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                      onMouseEnter={() => setHoverRating(value)}
+                      disabled={submitting}
+                      className="p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded disabled:opacity-50 disabled:pointer-events-none"
+                      onMouseEnter={() => !submitting && setHoverRating(value)}
                       onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setRating(value)}
+                      onClick={async () => {
+                        setRating(value)
+                        await onSubmit(value, review)
+                      }}
                       aria-label={`${value} star${value === 1 ? "" : "s"}`}
                     >
                       <Star
