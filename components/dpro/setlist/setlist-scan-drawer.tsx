@@ -2,12 +2,15 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { X } from "lucide-react"
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import { Button } from "@/components/ui/button"
 import {
   formatShowDateLong,
   getPlacementColor,
@@ -44,10 +47,22 @@ export function SetlistScanDrawer({
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col md:flex-row md:items-start min-h-[50vh]">
           {/* Left column – Setlist Scan */}
           <div className="flex w-full shrink-0 flex-col md:w-[312px]">
-            <DrawerHeader className="shrink-0 border-b border-border/50 py-2">
+            <DrawerHeader className="shrink-0 border-b border-border/50 py-[2px] flex-row items-center justify-between gap-2">
+              <span className="size-8 shrink-0" aria-hidden />
               <DrawerTitle className="text-sm font-semibold">
                 Setlist Scan
               </DrawerTitle>
+              <span className="size-8 shrink-0 hidden md:block" aria-hidden />
+              <DrawerClose asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 shrink-0 md:hidden"
+                  aria-label="Close"
+                >
+                  <X className="size-4" />
+                </Button>
+              </DrawerClose>
             </DrawerHeader>
             <div className="flex items-center justify-center p-3">
               {!imageError && setlistUrl ? (
