@@ -41,7 +41,7 @@ export function LongestSongsCard({
             <TableBody>
               {items.map((song, index) => (
                 <TableRow key={`${song.song}-${index}`}>
-                  <TableCell className="py-1.5 pl-3">
+                  <TableCell className="py-0.5 pl-3">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={`/dpro/song/${song.song_id}`}
@@ -55,7 +55,7 @@ export function LongestSongsCard({
                           alt=""
                           width={16}
                           height={16}
-                          className="size-4 shrink-0 rounded object-cover border border-border"
+                          className="size-5 shrink-0 rounded object-cover border border-border"
                           unoptimized
                           onError={(e) => {
                             const el = e.target as HTMLImageElement

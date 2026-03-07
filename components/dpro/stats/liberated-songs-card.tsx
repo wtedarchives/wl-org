@@ -67,7 +67,7 @@ export function LiberatedSongsCard({
                       {song.song}
                     </Link>
                   </TableCell>
-                  <TableCell className="w-min shrink-0 py-1.5 pl-0 pr-2 text-center">
+                  <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2 text-center">
                     {song.last_count &&
                     song.last_count.toUpperCase().includes("LIB") ? (
                       <TooltipProvider>
@@ -89,14 +89,14 @@ export function LiberatedSongsCard({
                       <span className="inline-block size-0" aria-hidden />
                     )}
                   </TableCell>
-                  <TableCell className="w-min shrink-0 py-1.5 pl-0 pr-2">
+                  <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2">
                     {song.category_artwork ? (
                       <Image
                         src={song.category_artwork}
                         alt=""
                         width={16}
                         height={16}
-                        className="size-4 min-w-4 min-h-4 shrink-0 rounded object-cover border border-border"
+                        className="size-5 shrink-0 rounded object-cover border border-border"
                         unoptimized
                         onError={(e) => {
                           const el = e.target as HTMLImageElement

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { MoveRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -38,19 +37,28 @@ export function TourSlotsTable({
   const renderSongList = (songs: SongEntryWithId[] | null) => {
     if (!songs || songs.length === 0) return null
     return (
-      <div className="w-full text-left break-words">
+      <div
+        className="w-full min-w-0 text-left leading-3"
+        style={{
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
+        }}
+      >
         {songs.map((song, index) => (
           <span key={`${song.song}-${index}`}>
             {index > 0 && (
-              <MoveRight className="text-red-500 inline size-4 align-middle mr-1" />
+              <span className="text-destructive mr-1">→</span>
             )}
-            <button
-              type="button"
-              onClick={() => onSongClick(song.song)}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                onSongClick(song.song)
+              }}
               className="text-[11px] font-medium hover:underline cursor-pointer"
             >
               {song.song}
-            </button>
+            </a>
             {index < songs.length - 1 && <span className="mr-1" />}
           </span>
         ))}
@@ -65,7 +73,10 @@ export function TourSlotsTable({
       </div>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <Table className="min-w-max text-[11px]">
+          <Table
+            className="min-w-max text-[11px]"
+            style={{ tableLayout: "fixed" }}
+          >
             <TableHeader>
               <TableRow className="bg-muted/60">
                 <TableHead className="w-[65px] min-w-[65px] py-1 text-center text-[11px] font-medium">
@@ -74,8 +85,10 @@ export function TourSlotsTable({
                 {activeColumns.map((column) => (
                   <TableHead
                     key={column}
-                    className="px-2 py-1 text-left text-[11px] font-medium min-w-[120px] max-w-[190px]"
+                    className="px-2 py-1 text-left text-[11px] font-medium"
                     style={{
+                      width: "190px",
+                      minWidth: "190px",
                       backgroundColor: getColumnBackgroundColor(String(column)),
                       color: "white",
                     }}
@@ -102,7 +115,12 @@ export function TourSlotsTable({
                   {activeColumns.map((column) => (
                     <TableCell
                       key={`${slot.show_id}-${column}`}
-                      className="px-2 py-1 text-left align-middle min-w-[120px] max-w-[190px]"
+                      className="px-2 py-1 text-left align-middle whitespace-normal break-words overflow-hidden"
+                      style={{
+                        width: "190px",
+                        minWidth: "190px",
+                        maxWidth: "190px",
+                      }}
                     >
                       {renderSongList(slot[column] as SongEntryWithId[] | null)}
                     </TableCell>

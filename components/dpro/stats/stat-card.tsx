@@ -59,7 +59,7 @@ export function StatCard({
             <TableBody>
               {items.map((item) => (
                 <TableRow key={item.song_id}>
-                  <TableCell className="py-1.5 pl-3">
+                  <TableCell className="py-0.5 pl-3">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={`/dpro/song/${item.song_id}`}
@@ -73,7 +73,7 @@ export function StatCard({
                           alt=""
                           width={16}
                           height={16}
-                          className="size-4 shrink-0 rounded object-cover border border-border"
+                          className="size-5 shrink-0 rounded object-cover border border-border"
                           unoptimized
                           onError={(e) => {
                             const el = e.target as HTMLImageElement

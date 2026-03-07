@@ -1,12 +1,14 @@
 "use client"
 
-import { use, useEffect, useRef, useState } from "react"
+import { Suspense, use, useEffect, useRef, useState } from "react"
 import { notFound } from "next/navigation"
 import { Loader2, MapPin, X } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useTourData } from "@/hooks/use-tour-data"
+import { useYearIdFromYear } from "@/hooks/use-setlist-year-id"
 import { TourShowsTable } from "@/components/dpro/tours/tour-shows-table"
 import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
+import { TourStats } from "@/components/dpro/tours/tour-stats"
 import { ToursSidebarCard } from "@/components/dpro/tours/tours-sidebar-card"
 import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
@@ -29,6 +31,7 @@ export default function TourPage({
   const { id: tourId } = use(params)
   const containerRef = useRef<HTMLDivElement>(null)
   const [layoutMode, setLayoutMode] = useState<"mobile" | "desktop">("desktop")
+  const [windowWidth, setWindowWidth] = useState(1280)
   const [expandedYear, setExpandedYear] = useState<string | null>(null)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
   const [songSheetSongName, setSongSheetSongName] = useState<string | null>(null)
@@ -45,7 +48,12 @@ export default function TourPage({
     activeColumns,
     hasSlotEntries,
     songIdMap,
+    topSlots,
     hasTourSetlistEntries,
+    hasGuestAppearances,
+    setHasGuestAppearances,
+    uniqueSongCount,
+    setUniqueSongCount,
     attendeeCounts,
     showRatings,
     showsWithSetlists,
@@ -55,12 +63,17 @@ export default function TourPage({
   } = useTourData(tourId)
 
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
+  const yearFromTour = currentTour ? extractYear(currentTour.tour) : null
+  const yearId = useYearIdFromYear(yearFromTour)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    const update = () =>
-      setLayoutMode(el.clientWidth >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile")
+    const update = () => {
+      const w = el.clientWidth
+      setWindowWidth(w)
+      setLayoutMode(w >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile")
+    }
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
@@ -72,13 +85,17 @@ export default function TourPage({
       setSetlistBreadcrumbs(null)
       return
     }
-    setSetlistBreadcrumbs([
+    const year = extractYear(currentTour.tour)
+    const items: { label: string; href: string }[] = [
       { label: "Setlist Archive", href: "/dpro" },
-      { label: "Tours", href: "/dpro/tours" },
+      ...(yearId && year !== "Unknown"
+        ? [{ label: year, href: `/dpro/years/${yearId}` }]
+        : []),
       { label: currentTour.tour, href: "" },
-    ])
+    ]
+    setSetlistBreadcrumbs(items)
     return () => setSetlistBreadcrumbs(null)
-  }, [currentTour, tourId, setSetlistBreadcrumbs])
+  }, [currentTour, tourId, yearId, setSetlistBreadcrumbs])
 
   useEffect(() => {
     if (currentTour && tours.length > 0) {
@@ -171,12 +188,30 @@ export default function TourPage({
             />
           )}
 
+          <Suspense fallback={null}>
+            <TourStats
+              shows={shows}
+              topSlots={topSlots}
+              windowWidth={windowWidth}
+              currentTourId={currentTourId ?? ""}
+              currentTour={currentTour?.tour ?? ""}
+              currentTourShowFields={currentTourShowFields}
+              hasGuestAppearances={hasGuestAppearances}
+              setHasGuestAppearances={setHasGuestAppearances}
+              songIdMap={songIdMap}
+              uniqueSongCount={uniqueSongCount}
+              setUniqueSongCount={setUniqueSongCount}
+              hasTourSetlistEntries={hasTourSetlistEntries}
+              onSongClick={handleSongClick}
+            />
+          </Suspense>
+
           {layoutMode === "mobile" &&
             shows.length > 0 &&
             currentTourShowFields && (
               <AverageSetlistCard
                 shows={shows}
-                title={`${currentTour.tour} Average Setlist`}
+                title={`Average Setlist`}
                 type="tour"
               />
             )}
@@ -194,7 +229,7 @@ export default function TourPage({
             {shows.length > 0 && currentTourShowFields && (
               <AverageSetlistCard
                 shows={shows}
-                title={`${currentTour.tour} Average Setlist`}
+                title={`Average Setlist`}
                 type="tour"
               />
             )}

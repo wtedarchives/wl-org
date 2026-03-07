@@ -108,3 +108,25 @@ export function getColumnBackgroundColor(column: string): string {
   }
   return colorMap[column] ?? ""
 }
+
+/** Background color for matrix placement (e.g. "Set 1 Opener"). */
+export function getMatrixPlacementColor(placement: string | null): string {
+  if (!placement) return ""
+  const colorMap: Record<string, string> = {
+    "Set 1 Opener": "#047857",
+    "Set 1 Closer": "#1e40af",
+    "Set 2 Opener": "#10b981",
+    "Set 3 Opener": "#10b981",
+    "Set 4 Opener": "#10b981",
+    "Set 5 Opener": "#10b981",
+    "Set 2 Closer": "#3b82f6",
+    "Set 3 Closer": "#3b82f6",
+    "Set 4 Closer": "#3b82f6",
+    "Set 5 Closer": "#3b82f6",
+    "Encore 1": "#be123c",
+    "Encore 2": "#f43f5e",
+    "Encore 3": "#f43f5e",
+  }
+  if (placement.startsWith("Main Set")) return "#1e293b"
+  return colorMap[placement] ?? "#1e3a5f"
+}
