@@ -253,7 +253,7 @@ export function SetlistSongPerformancesSheet({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="mx-auto w-full max-w-4xl text-xs">
-        <DrawerHeader className="border-b border-border/60 pb-3">
+        <DrawerHeader className="border-b border-border/60 pt-1 pb-3">
           {songName ? (
             <div className="space-y-1 text-[11px]">
               <p className="text-sm font-medium text-foreground">{songName}</p>

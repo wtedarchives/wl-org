@@ -205,6 +205,26 @@ export function formatEntryLength(length: string | null): string {
   return length
 }
 
+/** Format a length string as h:mm:ss (e.g. 0:45:30 for under an hour). Use for show length display. */
+export function formatLengthAsHmmss(length: string | null | undefined): string {
+  if (length == null || length === "") return ""
+  const parts = length.split(":").map((p) => parseInt(p, 10))
+  let totalSeconds = 0
+  if (parts.length === 3) {
+    totalSeconds = (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0)
+  } else if (parts.length === 2) {
+    totalSeconds = (parts[0] || 0) * 60 + (parts[1] || 0)
+  } else if (parts.length === 1 && !Number.isNaN(parts[0])) {
+    totalSeconds = parts[0]
+  } else {
+    return length
+  }
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+}
+
 export function totalSetlistLength(entries: { entry_length: string | null }[]): string {
   let totalSeconds = 0
   for (const e of entries) {

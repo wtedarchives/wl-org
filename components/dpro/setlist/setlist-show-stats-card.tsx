@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { Show } from "@/types/setlist"
 import {
-  formatEntryLength,
+  formatLengthAsHmmss,
   getRarityColor,
   getGapColor,
   getLengthRankTooltipText,
@@ -25,9 +25,9 @@ interface SetlistShowStatsCardProps {
 }
 
 function formatShowLength(value: string | null | undefined): string {
-  if (!value) return "—"
-  if (typeof value !== "string") return "—"
-  if (value.includes(":") || /^\d+$/.test(value)) return formatEntryLength(value)
+  if (!value) return ""
+  if (typeof value !== "string") return ""
+  if (value.includes(":") || /^\d+$/.test(value)) return formatLengthAsHmmss(value)
   return value
 }
 
@@ -38,12 +38,12 @@ export function SetlistShowStatsCard({
 }: SetlistShowStatsCardProps) {
   const isDesktop = useIsDesktopContentLayout()
   const displayLength =
-    formatShowLength(show.show_length) || totalLengthFromSetlist || "—"
+    formatShowLength(show.show_length) || (totalLengthFromSetlist ? formatLengthAsHmmss(totalLengthFromSetlist) : "") || "—"
   const showLengthStat =
     displayLength &&
     displayLength !== "—" &&
     displayLength !== "0" &&
-    displayLength !== "0:00"
+    displayLength !== "0:00:00"
 
   const hasRarity = show.show_rarity != null
   const hasGap = show.show_gap != null

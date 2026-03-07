@@ -40,8 +40,8 @@ export function SetlistScanDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="flex max-h-[90vh] max-w-[800px] mx-auto flex-col overflow-hidden rounded-xl data-[vaul-drawer-direction=bottom]:!h-fit after:!h-0">
-        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col md:flex-row md:items-start">
+      <DrawerContent className="flex max-h-[90vh] max-w-[800px] mx-auto flex-col overflow-hidden rounded-xl data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=bottom]:min-h-[70vh] after:!h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col md:flex-row md:items-start min-h-[50vh]">
           {/* Left column – Setlist Scan */}
           <div className="flex w-full shrink-0 flex-col md:w-[312px]">
             <DrawerHeader className="shrink-0 border-b border-border/50 py-2">

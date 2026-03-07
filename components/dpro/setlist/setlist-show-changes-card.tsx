@@ -28,7 +28,8 @@ export function SetlistShowChangesCard({
     )
   }
 
-  if (changes.length === 0) {
+  const hasScan = !!onOpenModal
+  if (changes.length === 0 && !hasScan) {
     return null
   }
 
@@ -49,24 +50,30 @@ export function SetlistShowChangesCard({
             </Button>
           )}
         </div>
-        <ul className="space-y-1 text-xs text-white/80 [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline">
-          {changes.map((c) => {
-            const iconConfig = getChangeTypeIcon(c.change_type)
-            return (
-              <li
-                key={c.show_change_uuid}
-                className="flex items-start gap-1.5 line-clamp-2"
-              >
-                {iconConfig && (
-                  <iconConfig.Icon
-                    className={`size-3.5 shrink-0 mt-[1px] ${iconConfig.colorClass}`}
-                  />
-                )}
-                <span dangerouslySetInnerHTML={{ __html: c.change }} />
-              </li>
-            )
-          })}
-        </ul>
+        {changes.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            No changes from original setlist.
+          </p>
+        ) : (
+          <ul className="space-y-1 text-xs text-white/80 [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline">
+            {changes.map((c) => {
+              const iconConfig = getChangeTypeIcon(c.change_type)
+              return (
+                <li
+                  key={c.show_change_uuid}
+                  className="flex items-start gap-1.5 line-clamp-2"
+                >
+                  {iconConfig && (
+                    <iconConfig.Icon
+                      className={`size-3.5 shrink-0 mt-[1px] ${iconConfig.colorClass}`}
+                    />
+                  )}
+                  <span dangerouslySetInnerHTML={{ __html: c.change }} />
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </CardContent>
     </Card>
   )

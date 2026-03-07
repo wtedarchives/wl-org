@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { TourShow } from "@/types/tour"
 import { getRarityColor, getGapColor } from "@/lib/stats/tour-utils"
-import { formatEntryLength } from "@/lib/setlist-utils"
+import { formatLengthAsHmmss } from "@/lib/setlist-utils"
 
 export function formatTourShowDate(showDate: string) {
   const [year, month, day] = showDate.split("-")
@@ -118,7 +118,7 @@ export function TourShowRow({
         {show.show_group}
       </TableCell>
       <TableCell className="px-2 py-1 text-center text-[11px] tabular-nums">
-        {formatEntryLength(show.show_length ?? null) ?? ""}
+        {formatLengthAsHmmss(show.show_length ?? null) ?? ""}
       </TableCell>
       <TableCell className="px-2 py-1 text-center">
         {show.show_rarity ? (
