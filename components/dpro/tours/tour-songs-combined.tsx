@@ -116,7 +116,7 @@ export function TourSongsCombined({
   const count = uniqueSongCount || 0
 
   return (
-    <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden">
+    <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
       <div className="border-b border-border/60 bg-muted/60 px-3 py-1.5 flex justify-between items-center">
         <h2 className="text-sm font-semibold">{count} Songs Played</h2>
         <div className="flex items-center gap-3">

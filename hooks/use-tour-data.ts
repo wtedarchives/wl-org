@@ -228,6 +228,7 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
                   entry_placement,
                   entry_setnum,
                   entry_length,
+                  entry_short,
                   entry_show,
                   songs:entry_song(
                     song_id,

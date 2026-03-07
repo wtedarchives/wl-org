@@ -127,6 +127,6 @@ export function getMatrixPlacementColor(placement: string | null): string {
     "Encore 2": "#f43f5e",
     "Encore 3": "#f43f5e",
   }
-  if (placement.startsWith("Main Set")) return "#1e293b"
-  return colorMap[placement] ?? "#1e3a5f"
+  if (placement.startsWith("Main Set")) return "#000000"
+  return colorMap[placement] ?? "#1C4482"
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
+import Image from "next/image"
 import { ArrowUp, ArrowDown } from "lucide-react"
 import {
   Table,
@@ -10,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useCategoryArtwork } from "@/hooks/use-category-artwork"
 
 interface Show {
   show_id: string
@@ -47,6 +49,35 @@ interface TourSongStatsProps {
 
 const SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 const EXCLUDED_DURATION = ["aborted", "fake", "tease", "reprise"]
+
+function CategoryCell({ category }: { category: string }) {
+  const { artwork, loaded } = useCategoryArtwork(category)
+  return (
+    <div className="flex items-center gap-2">
+      <span className="shrink-0 size-5 flex py-0.5 items-center justify-center rounded-sm overflow-hidden bg-muted">
+        {loaded && artwork ? (
+          <Image
+            src={artwork}
+            alt={category}
+            width={20}
+            height={20}
+            className="size-5 object-cover"
+            unoptimized
+            onError={(e) => {
+              const el = e.target as HTMLImageElement
+              if (el) el.style.display = "none"
+            }}
+          />
+        ) : (
+          <span className="text-[10px] text-muted-foreground truncate px-0.5">
+            {category.slice(0, 2)}
+          </span>
+        )}
+      </span>
+      <span className="text-xs text-muted-foreground">{category}</span>
+    </div>
+  )
+}
 
 function parseDuration(interval: string | undefined | null): number | null {
   if (!interval) return null
@@ -230,7 +261,7 @@ export function TourSongStats({
   return (
     <div>
       {!hideTitle && (
-        <div className="border-b border-border/60 bg-muted/60 px-3 py-1.5">
+        <div className="border-b border-border/60 bg-muted/60 px-3 py-0.5">
           <h2 className="text-sm font-semibold">
             {uniqueSongCount ?? sortedStats.length} Songs Played
           </h2>
@@ -241,7 +272,7 @@ export function TourSongStats({
           <TableHeader>
             <TableRow className="bg-muted/50 border-border/60">
               <TableHead
-                className="px-2 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className="px-2 py-0.5 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
                 onClick={() => handleSort("count")}
               >
                 <span className="flex items-center justify-center gap-1">
@@ -249,7 +280,7 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 text-left text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className="pl-3 py-0.5 text-left text-xs font-medium cursor-pointer hover:bg-muted/70"
                 onClick={() => handleSort("song")}
               >
                 <span className="flex items-center gap-1">
@@ -257,7 +288,7 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className="px-2 py-0.5 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
                 onClick={() => handleSort("longest")}
               >
                 <span className="flex items-center justify-center gap-1">
@@ -265,7 +296,7 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className="px-2 py-0.5 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
                 onClick={() => handleSort("shortest")}
               >
                 <span className="flex items-center justify-center gap-1">
@@ -273,7 +304,7 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 text-left text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className="px-2 py-0.5 text-left text-xs font-medium cursor-pointer hover:bg-muted/70"
                 onClick={() => handleSort("category")}
               >
                 <span className="flex items-center gap-1">
@@ -288,25 +319,25 @@ export function TourSongStats({
                 key={stat.song}
                 className="bg-background/70 hover:bg-muted/40"
               >
-                <TableCell className="px-2 py-1 text-center text-[0.625rem]">
+                <TableCell className="py-0.5 text-center text-xs font-medium tabular-nums">
                   {stat.count}
                 </TableCell>
                 <TableCell
-                  className="px-2 py-1 cursor-pointer"
+                  className="pl-3 py-0.5 cursor-pointer"
                   onClick={() => onSongClick?.(stat.song)}
                 >
-                  <span className="font-medium hover:underline text-[0.625rem]">
+                  <span className="font-medium hover:underline text-xs">
                     {stat.song}
                   </span>
                 </TableCell>
-                <TableCell className="px-2 py-1 text-center text-[0.625rem] text-muted-foreground">
+                <TableCell className="py-0.5 pl-2 text-center text-xs text-muted-foreground tabular-nums">
                   {stat.longest ?? ""}
                 </TableCell>
-                <TableCell className="px-2 py-1 text-center text-[0.625rem] text-muted-foreground">
+                <TableCell className="py-0.5 pl-2 text-center text-xs text-muted-foreground tabular-nums">
                   {stat.shortest ?? ""}
                 </TableCell>
-                <TableCell className="px-2 py-1 text-[0.625rem] text-muted-foreground">
-                  {stat.category}
+                <TableCell className="py-0.5 pl-2 text-muted-foreground">
+                  <CategoryCell category={stat.category} />
                 </TableCell>
               </TableRow>
             ))}

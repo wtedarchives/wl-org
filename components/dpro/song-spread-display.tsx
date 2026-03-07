@@ -123,18 +123,7 @@ export function SongSpreadDisplay({
   const isDesktop = useIsDesktopContentLayout()
   const maxCount = spread.length > 0 ? Math.max(...spread.map((s) => s.count)) : 0
 
-  if (spread.length === 0) {
-    return (
-      <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
-        <div className="px-3 py-1.5 bg-muted/60">
-          <h2 className="text-sm font-semibold">Song Spread</h2>
-        </div>
-        <CardContent className="p-3">
-          <p className="text-xs text-muted-foreground">No data</p>
-        </CardContent>
-      </Card>
-    )
-  }
+  if (spread.length === 0) return null
 
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
@@ -143,7 +132,7 @@ export function SongSpreadDisplay({
       </div>
       <CardContent className="p-0">
         <ul
-          className="space-y-1 text-xs max-h-[498px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-3"
+          className="space-y-1 text-xs max-h-[390px] md:max-h-[498px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-3"
         >
           {spread.map(({ category, count, songs }) => {
             const tooltipContent =

@@ -121,17 +121,17 @@ export function TourSongMatrix({
           {songMatrix.songs.length} Songs Played
         </h2>
       )}
-      <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
+      <div className="overflow-x-auto overflow-y-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="px-2 py-1 text-left text-xs font-medium sticky left-0 bg-muted/50 z-10">
+              <TableHead className="pl-3 py-1.5 text-left text-xs font-medium bg-muted/50">
                 Song
               </TableHead>
               {songMatrix.showDates.map((d, i) => (
                 <TableHead
                   key={d.id}
-                  className="px-1 py-1 text-center text-xs font-medium whitespace-nowrap min-w-[3rem]"
+                  className="px-1 py-1.5 text-center text-xs font-medium whitespace-nowrap min-w-[3rem]"
                 >
                   <Link
                     href={`/dpro/setlist/${d.id}`}
@@ -151,7 +151,7 @@ export function TourSongMatrix({
                   key={song}
                   className="bg-background/70 hover:bg-muted/40"
                 >
-                  <TableCell className="font-medium text-[0.625rem] px-2 py-1 whitespace-nowrap sticky left-0 bg-background/70 z-10">
+                  <TableCell className="font-medium text-xs pl-3 py-0.5 whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => onSongClick?.(song)}
@@ -168,14 +168,14 @@ export function TourSongMatrix({
                     return (
                       <TableCell
                         key={`${song}-${show.show_id}`}
-                        className="text-center border border-border/40 p-0"
+                        className="text-center border-x border-border p-0"
                         style={{
                           backgroundColor: bg || undefined,
                           minWidth: "3rem",
                         }}
                       >
                         {perf && (
-                          <span className="text-white text-xs font-medium inline-block py-1">
+                          <span className="text-white text-xs font-medium inline-block py-0.5">
                             {perf.venueAppearanceCount}
                           </span>
                         )}

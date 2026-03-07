@@ -67,15 +67,38 @@ export function useSongMatrix(
           `,
           )
           .in("entry_show", showIds)
-          .order("entry_song", { ascending: true })
 
         if (error) throw error
 
         const skipShorts = ["fake", "tease", "reprise", "aborted"]
-        const validEntries = (entriesData ?? []).filter(
+        const validEntriesRaw = (entriesData ?? []).filter(
           (e: any) =>
             !e.entry_short || !skipShorts.includes(e.entry_short.toLowerCase()),
         )
+
+        /** Set order for chronological sort: 1,2,3,4,5 then E1,E2,E3 */
+        const setOrder = (set: string): number => {
+          const s = String(set ?? "")
+          if (s === "1") return 0
+          if (s === "2") return 1
+          if (s === "3") return 2
+          if (s === "4") return 3
+          if (s === "5") return 4
+          if (s === "E1") return 5
+          if (s === "E2") return 6
+          if (s === "E3") return 7
+          return 8
+        }
+
+        const validEntries = [...validEntriesRaw].sort((a: any, b: any) => {
+          const dateA = new Date(showDateMap.get(a.entry_show) ?? 0).getTime()
+          const dateB = new Date(showDateMap.get(b.entry_show) ?? 0).getTime()
+          if (dateA !== dateB) return dateA - dateB
+          const setA = setOrder(a.entry_set)
+          const setB = setOrder(b.entry_set)
+          if (setA !== setB) return setA - setB
+          return (a.entry_setnum ?? 0) - (b.entry_setnum ?? 0)
+        })
 
         const uniqueSongs = [
           ...new Set(validEntries.map((e: any) => e.entry_song)),
@@ -97,7 +120,6 @@ export function useSongMatrix(
           matrixData[song] = []
         })
 
-        const songShowCountMap = new Map<string, number>()
         const songVenueAppearances = new Map<string, number>()
         uniqueSongs.forEach((s) => songVenueAppearances.set(s, 0))
 
@@ -113,41 +135,37 @@ export function useSongMatrix(
         for (const entry of validEntries as any[]) {
           const song = entry.entry_song
           const showId = entry.entry_show
-          const placement = entry.entry_placement
+          const placement = entry.entry_placement ?? null
           const key = `${song}|${showId}`
-          const currentCount = songShowCountMap.get(key) ?? 0
 
-          let venueCount = songVenueAppearances.get(song) ?? 0
-          if (currentCount === 0) {
-            venueCount += 1
-            songVenueAppearances.set(song, venueCount)
-            if (!songFirstAppearance[song]) {
-              songFirstAppearance[song] = {
-                showDate: showDateMap.get(showId) ?? "",
-                entrySet: entry.entry_set ?? "",
-                entrySetnum: entry.entry_setnum ?? 0,
-              }
-            }
-            songLastAppearance[song] = {
+          const existing = matrixData[song].find((p) => p.showId === showId)
+          if (existing) {
+            /** One cell per show: keep first occurrence's placement; do not overwrite */
+            continue
+          }
+
+          const venueCount = (songVenueAppearances.get(song) ?? 0) + 1
+          songVenueAppearances.set(song, venueCount)
+
+          if (!songFirstAppearance[song]) {
+            songFirstAppearance[song] = {
               showDate: showDateMap.get(showId) ?? "",
               entrySet: entry.entry_set ?? "",
               entrySetnum: entry.entry_setnum ?? 0,
             }
           }
-
-          songShowCountMap.set(key, currentCount + 1)
-
-          const existing = matrixData[song].find((p) => p.showId === showId)
-          if (!existing) {
-            matrixData[song].push({
-              showId,
-              placement,
-              count: currentCount + 1,
-              venueAppearanceCount: venueCount,
-            })
-          } else {
-            existing.count = currentCount + 1
+          songLastAppearance[song] = {
+            showDate: showDateMap.get(showId) ?? "",
+            entrySet: entry.entry_set ?? "",
+            entrySetnum: entry.entry_setnum ?? 0,
           }
+
+          matrixData[song].push({
+            showId,
+            placement,
+            count: 1,
+            venueAppearanceCount: venueCount,
+          })
         }
 
         setSongMatrix({

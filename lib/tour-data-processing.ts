@@ -45,6 +45,7 @@ export interface RawSetlistEntry {
   entry_placement: string
   entry_setnum: number
   entry_length?: string | null
+  entry_short?: string | null
   entry_show?: string
   songs?:
     | {
@@ -128,11 +129,11 @@ export function processShowData(
     const songsRel = e.songs
     const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
     return {
-      entry_length: null,
+      entry_length: e.entry_length ?? null,
       entry_song: e.entry_song,
       entry_placement: e.entry_placement,
       entry_setnum: e.entry_setnum,
-      entry_short: null,
+      entry_short: e.entry_short ?? null,
       songs: songRow
         ? {
             song_category: songRow.song_category ?? undefined,
