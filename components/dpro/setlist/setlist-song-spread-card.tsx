@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useMemo } from "react"
 import { Card, CardContent } from "@/components/ui/card"
+import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import {
   Tooltip,
   TooltipContent,
@@ -35,6 +36,7 @@ function CategorySpreadRow({
   isHovered,
   onCategoryHover,
   tooltipContent,
+  showTooltips,
 }: {
   category: string
   count: number
@@ -43,6 +45,7 @@ function CategorySpreadRow({
   isHovered: boolean
   onCategoryHover?: (category: string | null) => void
   tooltipContent: React.ReactNode
+  showTooltips: boolean
 }) {
   const { artwork, loaded } = useCategoryArtwork(category)
   const barWidth = maxCount > 0 ? Math.max(4, (count / maxCount) * 100) : 0
@@ -70,7 +73,10 @@ function CategorySpreadRow({
             }}
           />
         ) : (
-          <span className="text-[10px] text-muted-foreground truncate px-0.5" title={category}>
+          <span
+            className="text-[10px] text-muted-foreground truncate px-0.5"
+            {...(showTooltips && { title: category })}
+          >
             {category.slice(0, 2)}
           </span>
         )}
@@ -95,7 +101,7 @@ function CategorySpreadRow({
 
   return (
     <li>
-      {tooltipContent ? (
+      {showTooltips && tooltipContent ? (
         <Tooltip>
           <TooltipTrigger asChild>{rowContent}</TooltipTrigger>
           <TooltipContent side="left" className="max-w-xs text-[11px] p-0">
@@ -117,6 +123,7 @@ export function SetlistSongSpreadCard({
   hoveredCategory = null,
   onCategoryHover,
 }: SetlistSongSpreadCardProps) {
+  const isDesktop = useIsDesktopContentLayout()
   const spread = useMemo((): CategorySpread[] => {
     const filteredSetlist = setlist.filter((entry) => {
       const short = (entry.entry_short ?? "").toLowerCase().trim()
@@ -154,7 +161,9 @@ export function SetlistSongSpreadCard({
         category,
         count,
         canonid: canonids[category] ?? 0,
-        songs: songsByCategory[category] ?? [],
+        songs: [...(songsByCategory[category] ?? [])].sort((a, b) =>
+          a.localeCompare(b)
+        ),
       }))
       .sort((a, b) => b.count - a.count || a.canonid - b.canonid)
   }, [setlist])
@@ -206,6 +215,7 @@ export function SetlistSongSpreadCard({
                 isHovered={hoveredCategory === category}
                 onCategoryHover={onCategoryHover}
                 tooltipContent={tooltipContent}
+                showTooltips={isDesktop}
               />
             )
           })}

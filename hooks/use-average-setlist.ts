@@ -4,8 +4,8 @@ import { supabase } from "@/lib/supabase"
 
 interface ShowSlice {
   show_id: string
-  show_iscanon: boolean
-  show_canonid: number | null
+  show_iscanon?: boolean
+  show_canonid?: number | null
 }
 
 interface SetlistEntry {

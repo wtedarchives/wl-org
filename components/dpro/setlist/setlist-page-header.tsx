@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import {
   ArrowLeft,
   ArrowRight,
@@ -50,6 +51,7 @@ export function SetlistPageHeader({
   onCopyLink,
   onEditShow,
 }: SetlistPageHeaderProps) {
+  const isDesktop = useIsDesktopContentLayout()
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2 pb-2">
@@ -64,7 +66,7 @@ export function SetlistPageHeader({
               onClick={() =>
                 show.show_wl_link && window.open(show.show_wl_link, "_blank")
               }
-              title="Chat on WysteriaLane.org!"
+              {...(isDesktop && { title: "Chat on WysteriaLane.org!" })}
               aria-label="Wysteria Lane"
               className="hover:bg-muted/80 hover:border-muted-foreground/30"
             >
@@ -96,7 +98,7 @@ export function SetlistPageHeader({
                 variant="outline"
                 size="icon-sm"
                 onClick={onEditShow}
-                title="Edit Show"
+                {...(isDesktop && { title: "Edit Show" })}
                 className="hover:bg-muted/80 hover:border-muted-foreground/30"
               >
                 <Pencil className="size-3" />

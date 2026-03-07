@@ -7,8 +7,6 @@ import { SetlistAttendanceCard } from "./setlist-attendance-card"
 import { SetlistSidebar } from "./setlist-sidebar"
 import type { Show, SetlistEntry } from "@/types/setlist"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
-import type { ShowRelease } from "@/hooks/use-setlist-releases"
-
 interface SetlistSidebarSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -25,8 +23,6 @@ interface SetlistSidebarSheetProps {
   onRatingClick: () => void
   changes: ShowChangeRow[]
   changesLoading: boolean
-  releases: ShowRelease[]
-  hasReleases: boolean
   hasSetlistScan?: boolean
   onOpenSetlistScan?: () => void
   hoveredCategory: string | null
@@ -49,8 +45,6 @@ export function SetlistSidebarSheet({
   onRatingClick,
   changes,
   changesLoading,
-  releases,
-  hasReleases,
   hasSetlistScan,
   onOpenSetlistScan,
   hoveredCategory,
@@ -92,8 +86,6 @@ export function SetlistSidebarSheet({
               showLengthRank={showLengthRank}
               changes={changes}
               changesLoading={changesLoading}
-              releases={releases}
-              hasReleases={hasReleases}
               hasSetlistScan={hasSetlistScan}
               onOpenSetlistScan={
                 onOpenSetlistScan

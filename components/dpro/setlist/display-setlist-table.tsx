@@ -43,6 +43,8 @@ export interface DisplaySetlistTableProps {
   onNumberClick?: (entryId: string) => void
   /** When true, # cell is clickable to copy entry ID. */
   showAdminUi?: boolean
+  /** When set, rows matching this category are highlighted; others are dimmed. */
+  hoveredCategory?: string | null
 }
 
 export function DisplaySetlistTable({
@@ -56,6 +58,7 @@ export function DisplaySetlistTable({
   copiedEntryIds,
   onNumberClick,
   showAdminUi,
+  hoveredCategory,
 }: DisplaySetlistTableProps) {
   if (setlist.length === 0) {
     return null
@@ -123,7 +126,7 @@ export function DisplaySetlistTable({
           <TableRow className="h-8 border-border/60 hover:bg-transparent">
             <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">#</TableHead>
             <TableHead className="h-8 max-w-[470px] text-muted-foreground">
-              {hasSongHeaderTooltipItems ? (
+              {hasSongHeaderTooltipItems && isDesktop ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="cursor-help">Song</span>
@@ -138,20 +141,24 @@ export function DisplaySetlistTable({
             </TableHead>
             {showWtedColumn && (
               <TableHead className="h-8 text-center text-muted-foreground">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">WTED</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Use the icons below to request songs on WTED Goose Radio.
-                  </TooltipContent>
-                </Tooltip>
+                {isDesktop ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">WTED</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Use the icons below to request songs on WTED Goose Radio.
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  "WTED"
+                )}
               </TableHead>
             )}
             <TableHead className="h-8 text-center text-muted-foreground">Time</TableHead>
             {showCanonColumns && (
               <TableHead className="h-8 text-center text-muted-foreground">
-                {hasLastBadges ? (
+                {hasLastBadges && isDesktop ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help">Last</span>
@@ -230,7 +237,8 @@ export function DisplaySetlistTable({
                   copiedEntryIds={copiedEntryIds}
                   onNumberClick={onNumberClick}
                   showAdminUi={showAdminUi}
-                  showSongRowTooltip={isDesktop}
+                  showTooltips={isDesktop}
+                  hoveredCategory={hoveredCategory}
                 />
               </Fragment>
             )

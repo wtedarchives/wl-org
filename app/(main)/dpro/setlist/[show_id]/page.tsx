@@ -2,13 +2,12 @@
 
 import { use, useEffect, useRef, useState } from "react"
 import { notFound } from "next/navigation"
-import { Loader2, ListFilter } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import type { Show } from "@/types/setlist"
-import { formatSetlistDate } from "@/lib/setlist-utils"
+import { formatSetlistDate, totalSetlistLength } from "@/lib/setlist-utils"
 import { useSetlistData, useTours, useShowDates } from "@/hooks/use-setlist-data"
 import { useSetlistNavigation } from "@/hooks/use-setlist-navigation"
 import {
@@ -24,7 +23,10 @@ import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistScan } from "@/hooks/use-setlist-scan"
 import { useSetlistReleases } from "@/hooks/use-setlist-releases"
 import { SetlistSidebar } from "@/components/dpro/setlist/setlist-sidebar"
-import { SetlistSidebarSheet } from "@/components/dpro/setlist/setlist-sidebar-sheet"
+import { SetlistShowStatsCard } from "@/components/dpro/setlist/setlist-show-stats-card"
+import { SetlistShowChangesCard } from "@/components/dpro/setlist/setlist-show-changes-card"
+import { SetlistBadgesCard } from "@/components/dpro/setlist/setlist-badges-card"
+import { SetlistSongSpreadCard } from "@/components/dpro/setlist/setlist-song-spread-card"
 import { SetlistCallbacks } from "@/components/dpro/setlist/setlist-callbacks"
 import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { SetlistPageHeader } from "@/components/dpro/setlist/setlist-page-header"
@@ -35,6 +37,7 @@ import { SetlistAttendanceCard } from "@/components/dpro/setlist/setlist-attenda
 import { SetlistRatingDrawer } from "@/components/dpro/setlist/setlist-rating-drawer"
 import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-login-required-dialog"
 import { SetlistScanDrawer } from "@/components/dpro/setlist/setlist-scan-drawer"
+import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
 import { SetlistJotySheet } from "@/components/dpro/setlist/setlist-joty-sheet"
 import {
@@ -82,7 +85,6 @@ export default function SetlistPage({
   const { setlistUrl } = useSetlistScan(showId)
   const { releases, hasReleases, loading: releasesLoading } = useSetlistReleases(showId)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
-  const [sidebarSheetOpen, setSidebarSheetOpen] = useState(false)
   const [ratingDrawerOpen, setRatingDrawerOpen] = useState(false)
   const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
@@ -231,17 +233,25 @@ export default function SetlistPage({
       >
         <div className="min-w-0 flex-1 space-y-4">
           {layoutMode === "mobile" && (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => setSidebarSheetOpen(true)}
-              >
-                <ListFilter className="size-3.5" />
-                Stats &amp; more
-              </Button>
+            <div className="flex flex-row flex-wrap gap-3">
+              <div className="min-w-0 flex-1">
+                <SetlistRatingCard
+                  averageRating={averageRating}
+                  reviewCount={reviewCount}
+                  onClick={() =>
+                    user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
+                  }
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <SetlistAttendanceCard
+                  attendeeCount={attendeeCount}
+                  attended={attended}
+                  toggling={toggling}
+                  onToggle={toggle}
+                  showAttendButton={!!user}
+                />
+              </div>
             </div>
           )}
 
@@ -254,6 +264,7 @@ export default function SetlistPage({
                   guestGroups={guestGroups}
                   showCanonColumns={show.show_canonid != null}
                   showWtedColumn={setlist.some((e) => !!e.radio_id)}
+                  hoveredCategory={hoveredCategory}
                   onSongClick={(entry) => {
                     setSongSheetEntry(entry)
                     setSongSheetOpen(true)
@@ -280,7 +291,34 @@ export default function SetlistPage({
               </CardContent>
             </Card>
           )}
+          {layoutMode === "mobile" && (
+            <SetlistShowStatsCard
+              show={show}
+              totalLengthFromSetlist={totalSetlistLength(setlist) || null}
+              showLengthRank={showLengthRank}
+            />
+          )}
           <SetlistCallbacks callbacks={show.show_callbacks} />
+          {layoutMode === "mobile" && (
+            <>
+              {setlistUrl && (
+                <SetlistShowChangesCard
+                  changes={changes}
+                  loading={changesLoading}
+                  onOpenModal={() => setSetlistScanDrawerOpen(true)}
+                />
+              )}
+              <SetlistBadgesCard show={show} />
+              <SetlistSongSpreadCard
+                setlist={setlist}
+                hoveredCategory={hoveredCategory}
+                onCategoryHover={setHoveredCategory}
+              />
+            </>
+          )}
+          {hasReleases && (
+            <SetlistMediaSection releases={releases} />
+          )}
         </div>
 
         {layoutMode === "desktop" && (
@@ -311,8 +349,6 @@ export default function SetlistPage({
               showLengthRank={showLengthRank}
               changes={changes}
               changesLoading={changesLoading}
-              releases={releases}
-              hasReleases={hasReleases}
               hasSetlistScan={!!setlistUrl}
               onOpenSetlistScan={() => setSetlistScanDrawerOpen(true)}
               hoveredCategory={hoveredCategory}
@@ -373,32 +409,6 @@ export default function SetlistPage({
         open={wtedSheetOpen}
         onOpenChange={setWtedSheetOpen}
         entry={wtedSheetEntry}
-      />
-
-      <SetlistSidebarSheet
-        open={sidebarSheetOpen}
-        onOpenChange={setSidebarSheetOpen}
-        show={show}
-        setlist={setlist}
-        showLengthRank={showLengthRank}
-        averageRating={averageRating}
-        reviewCount={reviewCount}
-        attendeeCount={attendeeCount}
-        attended={attended}
-        toggling={toggling}
-        onToggle={toggle}
-        user={user}
-        onRatingClick={() =>
-          user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
-        }
-        changes={changes}
-        changesLoading={changesLoading}
-        releases={releases}
-        hasReleases={hasReleases}
-        hasSetlistScan={!!setlistUrl}
-        onOpenSetlistScan={() => setSetlistScanDrawerOpen(true)}
-        hoveredCategory={hoveredCategory}
-        onCategoryHover={setHoveredCategory}
       />
     </div>
   )

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/tooltip"
 import { Check } from "lucide-react"
 import type { SetlistEntry, GuestGroup } from "@/types/setlist"
+import { cn } from "@/lib/utils"
 import {
   getLastCountBadgeStyle,
   getPlacementIndexCellBg,
@@ -38,8 +39,10 @@ export interface SetlistEntryRowProps {
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
   showAdminUi?: boolean
-  /** When true (desktop), show tooltip on hover over Song cell. */
-  showSongRowTooltip?: boolean
+  /** When true (desktop), show tooltips (Song cell, WTED, Last, guests, etc.). */
+  showTooltips?: boolean
+  /** When set, rows matching this category are highlighted; others are dimmed. */
+  hoveredCategory?: string | null
 }
 
 export function SetlistEntryRow({
@@ -54,7 +57,8 @@ export function SetlistEntryRow({
   copiedEntryIds,
   onNumberClick,
   showAdminUi,
-  showSongRowTooltip,
+  showTooltips = true,
+  hoveredCategory,
 }: SetlistEntryRowProps) {
   const rarity = calculateRarity(
     entry.times_played_num,
@@ -66,23 +70,40 @@ export function SetlistEntryRow({
   const isCopied = copiedEntryIds?.has(entry.entry_id) ?? false
   const canCopyNumber = showAdminUi && !!onNumberClick
 
+  const entryCategory =
+    entry.song_category || entry.songs?.song_category || "undefined"
+  const shouldHighlightRow =
+    !!hoveredCategory && entryCategory === hoveredCategory
+  const shouldDimRow =
+    !!hoveredCategory && entryCategory !== hoveredCategory
+
   const numberCellContent = isCopied ? (
     <span className="inline-flex items-center justify-center text-white" aria-label="Copied">
       <Check className="size-3" />
     </span>
   ) : displayNumber !== null ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-block cursor-default">{displayNumber}</span>
-      </TooltipTrigger>
-      <TooltipContent>
-        {entry.entry_placement || `Song ${displayNumber}`}
-      </TooltipContent>
-    </Tooltip>
+    showTooltips ? (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-block cursor-default">{displayNumber}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {entry.entry_placement || `Song ${displayNumber}`}
+        </TooltipContent>
+      </Tooltip>
+    ) : (
+      <span className="inline-block cursor-default">{displayNumber}</span>
+    )
   ) : null
 
   return (
-    <TableRow className="border-border/60">
+    <TableRow
+      className={cn(
+        "border-border/60 transition-opacity",
+        shouldHighlightRow && "bg-primary/20",
+        shouldDimRow && "opacity-10"
+      )}
+    >
       <TableCell
         className={`text-center tabular-nums ${isCopied ? "bg-green-600 text-white" : indexCellBg !== "transparent" ? "text-white" : "text-muted-foreground"}`}
         style={{
@@ -94,7 +115,7 @@ export function SetlistEntryRow({
             type="button"
             onClick={() => onNumberClick(entry.entry_id)}
             className="inline-flex min-w-[1rem] cursor-pointer items-center justify-center rounded focus:outline-none focus:ring-0"
-            title="Copy entry ID"
+            {...(showTooltips && { title: "Copy entry ID" })}
           >
             {numberCellContent}
           </button>
@@ -104,7 +125,7 @@ export function SetlistEntryRow({
       </TableCell>
       <TableCell className="max-w-[470px]">
         <div className="flex flex-col gap-0.5">
-        {showSongRowTooltip ? (
+        {showTooltips ? (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex flex-nowrap items-center gap-2">
@@ -251,37 +272,64 @@ export function SetlistEntryRow({
       {showWtedColumn && (
         <TableCell className="text-center">
           {entry.radio_id ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {onWtedClick ? (
-                  <button
-                    type="button"
-                    onClick={() => onWtedClick(entry)}
-                    className="rounded p-0.5 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    aria-label="Request this song on WTED Goose Radio"
-                  >
-                    <Image
-                      src="/WTED2.png"
-                      alt="WTED"
-                      width={20}
-                      height={20}
-                      className="size-3"
-                    />
-                  </button>
-                ) : (
-                  <span className="inline-block">
-                    <Image
-                      src="/WTED2.png"
-                      alt="WTED"
-                      width={20}
-                      height={20}
-                      className="size-5"
-                    />
-                  </span>
-                )}
-              </TooltipTrigger>
-              <TooltipContent>Request this song on WTED Goose Radio.</TooltipContent>
-            </Tooltip>
+            showTooltips ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {onWtedClick ? (
+                    <button
+                      type="button"
+                      onClick={() => onWtedClick(entry)}
+                      className="rounded p-0.5 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      aria-label="Request this song on WTED Goose Radio"
+                    >
+                      <Image
+                        src="/WTED2.png"
+                        alt="WTED"
+                        width={20}
+                        height={20}
+                        className="size-3"
+                      />
+                    </button>
+                  ) : (
+                    <span className="inline-block">
+                      <Image
+                        src="/WTED2.png"
+                        alt="WTED"
+                        width={20}
+                        height={20}
+                        className="size-5"
+                      />
+                    </span>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>Request this song on WTED Goose Radio.</TooltipContent>
+              </Tooltip>
+            ) : onWtedClick ? (
+              <button
+                type="button"
+                onClick={() => onWtedClick(entry)}
+                className="rounded p-0.5 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
+                aria-label="Request this song on WTED Goose Radio"
+              >
+                <Image
+                  src="/WTED2.png"
+                  alt="WTED"
+                  width={20}
+                  height={20}
+                  className="size-3"
+                />
+              </button>
+            ) : (
+              <span className="inline-block">
+                <Image
+                  src="/WTED2.png"
+                  alt="WTED"
+                  width={20}
+                  height={20}
+                  className="size-5"
+                />
+              </span>
+            )
           ) : null}
         </TableCell>
       )}
@@ -292,39 +340,54 @@ export function SetlistEntryRow({
         <TableCell className="text-center text-muted-foreground">
           {entry.last_count != null && entry.last_count !== "" ? (
             entry.last_show_id ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={`/dpro/setlist/${entry.last_show_id}`}
-                    className="cursor-pointer hover:underline"
-                  >
-                    {lastBadgeStyle ? (
-                      <span className={lastBadgeStyle.className}>
-                        {entry.last_count}
-                      </span>
-                    ) : (
-                      entry.last_count
-                    )}
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-[200px] text-xs">
-                  <div className="space-y-0.5">
-                    {entry.last_show_date && (
-                      <div>
-                        <span className="font-semibold">
-                          {formatSetlistDate(entry.last_show_date)}
+              showTooltips ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={`/dpro/setlist/${entry.last_show_id}`}
+                      className="cursor-pointer hover:underline"
+                    >
+                      {lastBadgeStyle ? (
+                        <span className={lastBadgeStyle.className}>
+                          {entry.last_count}
                         </span>
-                      </div>
-                    )}
-                    {entry.last_venue_location && (
-                      <div>{entry.last_venue_location}</div>
-                    )}
-                    {entry.last_show_tour && (
-                      <div>{entry.last_show_tour}</div>
-                    )}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+                      ) : (
+                        entry.last_count
+                      )}
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[200px] text-xs">
+                    <div className="space-y-0.5">
+                      {entry.last_show_date && (
+                        <div>
+                          <span className="font-semibold">
+                            {formatSetlistDate(entry.last_show_date)}
+                          </span>
+                        </div>
+                      )}
+                      {entry.last_venue_location && (
+                        <div>{entry.last_venue_location}</div>
+                      )}
+                      {entry.last_show_tour && (
+                        <div>{entry.last_show_tour}</div>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <Link
+                  href={`/dpro/setlist/${entry.last_show_id}`}
+                  className="cursor-pointer hover:underline"
+                >
+                  {lastBadgeStyle ? (
+                    <span className={lastBadgeStyle.className}>
+                      {entry.last_count}
+                    </span>
+                  ) : (
+                    entry.last_count
+                  )}
+                </Link>
+              )
             ) : lastBadgeStyle ? (
               <span className={lastBadgeStyle.className}>
                 {entry.last_count}
@@ -357,19 +420,29 @@ export function SetlistEntryRow({
           <div className="flex flex-wrap gap-0.5">
             {[...entry.guests]
               .sort((a, b) => a.guest_canonid - b.guest_canonid)
-              .map((g) => (
-                <Tooltip key={g.guest_id}>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={`/dpro/personnel/${g.guest_id}`}
-                      className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
-                    >
-                      {g.guest_display_name}
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>{g.guest_instrument || "Personnel"}</TooltipContent>
-                </Tooltip>
-              ))}
+              .map((g) =>
+                showTooltips ? (
+                  <Tooltip key={g.guest_id}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={`/dpro/personnel/${g.guest_id}`}
+                        className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
+                      >
+                        {g.guest_display_name}
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>{g.guest_instrument || "Personnel"}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Link
+                    key={g.guest_id}
+                    href={`/dpro/personnel/${g.guest_id}`}
+                    className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
+                  >
+                    {g.guest_display_name}
+                  </Link>
+                )
+              )}
           </div>
         ) : null}
       </TableCell>

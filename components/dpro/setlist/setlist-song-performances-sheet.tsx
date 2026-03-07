@@ -38,6 +38,10 @@ interface SetlistSongPerformancesSheetProps {
   entry: SetlistEntry | null
   /** Human-readable tour name, e.g. "Fall 2024 Tour". */
   tourName: string | null
+  /** When provided with tourName, used for tour-page song click (no entry needed). */
+  songName?: string | null
+  /** Song ID for "View full song history" link when opened from tour page. */
+  songId?: string | null
 }
 
 interface SongPerformance {
@@ -234,12 +238,15 @@ export function SetlistSongPerformancesSheet({
   onOpenChange,
   entry,
   tourName,
+  songName: songNameProp,
+  songId: songIdProp,
 }: SetlistSongPerformancesSheetProps) {
-  const songName = entry?.entry_song ?? ""
+  const songName = songNameProp ?? entry?.entry_song ?? ""
+  const songId = songIdProp ?? entry?.song_id ?? null
 
   const { performances, loading, error } = useSongTourPerformances(
     open,
-    entry?.entry_song ?? null,
+    songName || null,
     tourName,
   )
 
@@ -247,7 +254,7 @@ export function SetlistSongPerformancesSheet({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="mx-auto w-full max-w-4xl text-xs">
         <DrawerHeader className="border-b border-border/60 pb-3">
-          {entry ? (
+          {songName ? (
             <div className="space-y-1 text-[11px]">
               <p className="text-sm font-medium text-foreground">{songName}</p>
               {tourName && (
@@ -262,7 +269,7 @@ export function SetlistSongPerformancesSheet({
         </DrawerHeader>
 
         <div className="max-h-[52vh] min-h-[140px] overflow-y-auto px-3 pb-3 pt-2">
-          {!entry ? (
+          {!songName ? (
             <p className="text-[11px] text-muted-foreground">
               Select a song in the setlist to view its tour performances.
             </p>
@@ -370,9 +377,9 @@ export function SetlistSongPerformancesSheet({
         <DrawerFooter className="border-t border-border/60 pt-3">
           <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center">
             <div className="flex flex-wrap items-center gap-2">
-              {entry?.song_id && (
+              {songId && (
                 <Button type="button" size="sm" variant="outline" asChild>
-                  <Link href={`/dpro/songs/${entry.song_id}`}>
+                  <Link href={`/dpro/songs/${songId}`}>
                     View full song history
                   </Link>
                 </Button>

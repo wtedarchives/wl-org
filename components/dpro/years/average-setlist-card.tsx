@@ -8,23 +8,30 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { useAverageSetlist } from "@/hooks/use-average-setlist"
-import type { YearShow } from "@/hooks/use-shows-data-by-year"
 import { SetlistDisplay } from "./setlist-display"
 
+interface ShowSlice {
+  show_id: string
+  show_iscanon?: boolean
+  show_canonid?: number | null
+}
+
 interface AverageSetlistCardProps {
-  shows: YearShow[]
+  shows: ShowSlice[]
   title: string
+  type?: "year" | "tour"
   className?: string
 }
 
 export function AverageSetlistCard({
   shows,
   title,
+  type = "year",
   className,
 }: AverageSetlistCardProps) {
   const { averageSetlist, isLoading, error } = useAverageSetlist(
     shows,
-    "year",
+    type,
   )
 
   const cardClass = cn(

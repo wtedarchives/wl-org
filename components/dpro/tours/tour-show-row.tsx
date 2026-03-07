@@ -1,0 +1,298 @@
+"use client"
+
+import Link from "next/link"
+import Image from "next/image"
+import { Check, FileMusic, Star, AudioLines } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import {
+  TableCell,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip"
+import type { TourShow } from "@/types/tour"
+import { getRarityColor, getGapColor } from "@/lib/stats/tour-utils"
+import { formatEntryLength } from "@/lib/setlist-utils"
+
+export function formatTourShowDate(showDate: string) {
+  const [year, month, day] = showDate.split("-")
+  return `${month}.${day}.${year.slice(2)}`
+}
+
+function RatingStars({ rating }: { rating: number }) {
+  if (!rating || rating <= 0) {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className="size-3 text-muted-foreground/30"
+            strokeWidth={1.75}
+          />
+        ))}
+      </div>
+    )
+  }
+  return (
+    <div className="relative flex items-center">
+      <div className="flex items-center gap-0.5 transition-opacity group-hover:opacity-10">
+        {[1, 2, 3, 4, 5].map((starNumber) => {
+          const fillPercentage = Math.min(
+            Math.max(rating - starNumber + 1, 0),
+            1,
+          )
+          return (
+            <div key={starNumber} className="relative size-3">
+              <Star
+                className="size-3 text-yellow-400/40"
+                strokeWidth={1.75}
+              />
+              <div
+                className="absolute inset-0 overflow-hidden"
+                style={{ width: `${fillPercentage * 100}%` }}
+              >
+                <Star className="size-3 text-yellow-400" fill="currentColor" />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-semibold opacity-0 transition-opacity group-hover:opacity-100">
+        {rating.toFixed(2)}
+      </div>
+    </div>
+  )
+}
+
+export interface TourShowRowProps {
+  show: TourShow
+  index: number
+  attendeeCounts: Record<string, number>
+  showRatings: Record<string, number>
+  showsWithSetlists: Set<string>
+  showsWithReleases: Set<string>
+  showsWithRadioIds: Set<string>
+}
+
+export function TourShowRow({
+  show,
+  index,
+  attendeeCounts,
+  showRatings,
+  showsWithSetlists,
+  showsWithReleases,
+  showsWithRadioIds,
+}: TourShowRowProps) {
+  const { user } = useAuth()
+  const rating = showRatings[show.show_id] ?? 0
+  const attendeeCount = attendeeCounts[show.show_id] ?? 0
+
+  return (
+    <TableRow className={index % 2 === 0 ? "bg-background/70" : "bg-background"}>
+      <TableCell className="whitespace-nowrap px-2 py-1 text-center text-[11px] font-medium tabular-nums">
+        <Link
+          href={`/dpro/setlist/${show.show_id}`}
+          className="hover:underline"
+        >
+          {formatTourShowDate(show.show_date)}
+        </Link>
+      </TableCell>
+      {user ? (
+        <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+          <div className="inline-flex items-center justify-center">
+            {show.attended ? (
+              <div className="inline-flex items-center justify-center rounded-full bg-emerald-600 p-0.5">
+                <Check className="size-3 text-white" strokeWidth={3} />
+              </div>
+            ) : (
+              <span className="inline-block size-3" aria-hidden />
+            )}
+          </div>
+        </TableCell>
+      ) : null}
+      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+        {show.show_group}
+      </TableCell>
+      <TableCell className="px-2 py-1 text-center text-[11px] tabular-nums">
+        {formatEntryLength(show.show_length ?? null) ?? ""}
+      </TableCell>
+      <TableCell className="px-2 py-1 text-center">
+        {show.show_rarity ? (
+          <span
+            className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
+            style={{ backgroundColor: getRarityColor(show.show_rarity) }}
+          >
+            {show.show_rarity}
+          </span>
+        ) : null}
+      </TableCell>
+      <TableCell className="px-2 py-1 text-center">
+        {show.show_gap ? (
+          <span
+            className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
+            style={{ backgroundColor: getGapColor(show.show_gap) }}
+          >
+            {show.show_gap}
+          </span>
+        ) : null}
+      </TableCell>
+      <TableCell className="px-2 py-1 text-[11px]">
+        {show.venue_id ? (
+          <Link
+            href={`/dpro/venue/${show.venue_id}`}
+            className="hover:underline"
+          >
+            {show.show_subvenue}
+          </Link>
+        ) : show.show_subvenue_venue ? (
+          <Link
+            href={`/dpro/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
+            className="hover:underline"
+          >
+            {show.show_subvenue}
+          </Link>
+        ) : (
+          <span>{show.show_subvenue}</span>
+        )}
+      </TableCell>
+      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+        {show.show_venue_location}
+      </TableCell>
+      <TableCell className="group px-2 py-1 text-center align-middle leading-none">
+        <div className="inline-flex items-center justify-center">
+          <RatingStars rating={rating} />
+        </div>
+      </TableCell>
+      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+        <div className="inline-flex items-center justify-center">
+          {showsWithSetlists.has(show.show_id) ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`/dpro/setlist/${show.show_id}`}
+                    aria-label="View setlist"
+                    className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
+                  >
+                    <FileMusic className="size-3.5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <span className="text-[11px]">Setlist scan</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="inline-block size-3.5" aria-hidden />
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+        <div className="inline-flex items-center justify-center">
+          {showsWithReleases.has(show.show_id) ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`/dpro/setlist/${show.show_id}`}
+                    aria-label="View releases"
+                    className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
+                  >
+                    <AudioLines className="size-3.5" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <span className="text-[11px]">Media available</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="inline-block size-3.5" aria-hidden />
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="w-[32px] px-1 py-1 text-center align-middle text-[11px] font-medium leading-none">
+        <div className="inline-flex items-center justify-center">
+          {attendeeCount > 0 ? attendeeCount : ""}
+        </div>
+      </TableCell>
+      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+        <div className="inline-flex items-center justify-center">
+          {show.show_wl_link ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={show.show_wl_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Wysteria Lane article"
+                    className="inline-flex items-center justify-center rounded hover:opacity-90"
+                  >
+                    <Image
+                      src="/WL.png"
+                      alt="Wysteria Lane"
+                      width={14}
+                      height={14}
+                      className="h-3.5 w-auto block"
+                    />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <span className="text-[11px]">
+                    Chat in the Community Forum
+                  </span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="inline-block size-3.5" aria-hidden />
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+        <div className="inline-flex items-center justify-center">
+          {showsWithRadioIds.has(show.show_id) ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`/dpro/setlist/${show.show_id}`}
+                    aria-label="WTED Goose Radio"
+                    className="inline-flex items-center justify-center rounded hover:opacity-90"
+                  >
+                    <Image
+                      src="/WTED2.png"
+                      alt="WTED Goose Radio"
+                      width={14}
+                      height={14}
+                      className="h-3.5 w-auto block"
+                    />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <span className="text-[11px]">WTED Goose Radio</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="inline-block size-3.5" aria-hidden />
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+        {show.show_detail}
+        {show.show_detail && show.show_alert ? <>&nbsp;&nbsp;</> : null}
+        {show.show_alert ? (
+          <span className="font-medium text-red-500">
+            [{show.show_alert}]
+          </span>
+        ) : null}
+      </TableCell>
+    </TableRow>
+  )
+}

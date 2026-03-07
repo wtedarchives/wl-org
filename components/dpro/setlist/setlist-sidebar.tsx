@@ -2,12 +2,10 @@
 
 import type { Show, SetlistEntry } from "@/types/setlist"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
-import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import { SetlistShowStatsCard } from "./setlist-show-stats-card"
 import { SetlistShowChangesCard } from "./setlist-show-changes-card"
 import { SetlistBadgesCard } from "./setlist-badges-card"
 import { SetlistSongSpreadCard } from "./setlist-song-spread-card"
-import { SetlistReleaseContainer } from "./setlist-release-container"
 import { totalSetlistLength } from "@/lib/setlist-utils"
 
 interface SetlistSidebarProps {
@@ -16,13 +14,10 @@ interface SetlistSidebarProps {
   showLengthRank: number | null
   changes: ShowChangeRow[]
   changesLoading: boolean
-  releases: ShowRelease[]
-  hasReleases: boolean
   hasSetlistScan?: boolean
   onOpenSetlistScan?: () => void
   hoveredCategory?: string | null
   onCategoryHover?: (category: string | null) => void
-  onReleaseHover?: (releaseId: string | null) => void
 }
 
 export function SetlistSidebar({
@@ -31,13 +26,10 @@ export function SetlistSidebar({
   showLengthRank,
   changes,
   changesLoading,
-  releases,
-  hasReleases,
   hasSetlistScan,
   onOpenSetlistScan,
   hoveredCategory,
   onCategoryHover,
-  onReleaseHover,
 }: SetlistSidebarProps) {
   const totalLength = totalSetlistLength(setlist) || null
 
@@ -61,12 +53,6 @@ export function SetlistSidebar({
         hoveredCategory={hoveredCategory}
         onCategoryHover={onCategoryHover}
       />
-      {hasReleases && (
-        <SetlistReleaseContainer
-          releases={releases}
-          onReleaseHover={onReleaseHover}
-        />
-      )}
     </aside>
   )
 }
