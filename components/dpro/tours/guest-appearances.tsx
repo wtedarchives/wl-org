@@ -2,14 +2,24 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { MoveRight } from "lucide-react"
+import { X } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { formatEntryLength } from "@/lib/setlist-utils"
 
@@ -261,47 +271,69 @@ export function GuestAppearances({
         </CardContent>
       </Card>
 
-      <Sheet
+      <Drawer
         open={modalData.isOpen}
         onOpenChange={(open) =>
           !open && setModalData((p) => ({ ...p, isOpen: false }))
         }
       >
-        <SheetContent
-          side="bottom"
-          className="max-h-[90vh] flex flex-col p-0 rounded-t-xl"
-        >
-          <SheetHeader className="border-b border-border/60 px-4 py-2 bg-muted/50 flex-row items-center justify-between gap-4 shrink-0">
-            <div className="flex flex-1 items-center gap-2 flex-wrap">
-              <SheetTitle className="text-sm font-semibold m-0">
-                {modalData.guestName}
-              </SheetTitle>
-              {modalData.tourName && (
-                <span className="text-xs font-medium bg-background text-foreground px-2 py-0.5 rounded border border-border whitespace-nowrap">
-                  {modalData.tourName}
-                </span>
-              )}
+        <DrawerContent className="mx-auto w-full max-w-4xl text-xs flex flex-col max-h-[90vh] data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=bottom]:min-h-[70vh] after:!h-0">
+          <DrawerHeader className="shrink-0 border-b border-border/60 pt-1 pb-3 px-4 flex flex-row items-center justify-between md:justify-center gap-3">
+            <div className="w-8 shrink-0 md:hidden" aria-hidden />
+            <div className="flex flex-1 min-w-0 justify-center">
+              <div className="space-y-1 text-center">
+                <DrawerTitle className="text-sm font-medium text-foreground m-0">
+                  {modalData.guestName}
+                </DrawerTitle>
+                {modalData.tourName && (
+                  <p className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    {modalData.tourName}
+                  </p>
+                )}
+              </div>
             </div>
-          </SheetHeader>
-          <div className="overflow-x-auto flex-1 min-h-0">
-            <table className="w-full border-collapse min-w-max text-[0.625rem]">
-              <thead>
-                <tr className="bg-muted/50">
-                  <th className="px-2 py-1 text-left font-medium">Song</th>
-                  <th className="px-2 py-1 text-center font-medium">Show</th>
-                  <th className="px-2 py-1 text-left font-medium">Location</th>
-                  <th className="px-2 py-1 text-left font-medium">&nbsp;</th>
-                  <th className="px-2 py-1 text-center font-medium">Length</th>
-                </tr>
-              </thead>
-              <tbody>
+            <DrawerClose asChild>
+              <button
+                type="button"
+                className="w-8 h-8 shrink-0 rounded-sm p-2 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring md:hidden flex items-center justify-center"
+                aria-label="Close"
+              >
+                <X className="size-4" />
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
+
+          <div className="flex-1 min-h-0 overflow-auto px-4 pb-4 pt-2">
+            <Table className="min-w-full border-separate border-spacing-y-0.25 text-[11px]">
+              <TableHeader>
+                <TableRow className="border-b border-border/60 hover:bg-transparent">
+                  <TableHead className="whitespace-nowrap text-left text-[11px] font-medium py-2 pr-4">
+                    Song
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-[11px] font-medium py-2 px-2">
+                    Show
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap text-left text-[11px] font-medium py-2 px-2">
+                    Location
+                  </TableHead>
+                  <TableHead className="w-[4.5rem] shrink-0 text-left text-[11px] font-medium py-2 px-2">
+                    &nbsp;
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap text-center text-[11px] font-medium py-2 pl-2 tabular-nums">
+                    Length
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {modalData.songs.map((song) => (
-                  <tr
+                  <TableRow
                     key={`${song.show_id}-${song.entry_song}`}
-                    className="bg-background/70 hover:bg-muted/40"
+                    className="align-middle"
                   >
-                    <td className="px-2 py-1 font-medium">{song.entry_song}</td>
-                    <td className="px-2 py-1 text-center whitespace-nowrap">
+                    <TableCell className="align-middle py-1.5 pr-4 text-[11px] font-medium">
+                      {song.entry_song}
+                    </TableCell>
+                    <TableCell className="align-middle py-1.5 px-2 text-center text-[11px] whitespace-nowrap">
                       <Link
                         href={`/dpro/setlist/${song.show_id}`}
                         onClick={() =>
@@ -311,42 +343,47 @@ export function GuestAppearances({
                       >
                         {formatTourDate(song.show_date)}
                       </Link>
-                    </td>
-                    <td className="px-2 py-1 whitespace-nowrap text-muted-foreground">
+                    </TableCell>
+                    <TableCell className="align-middle py-1.5 px-2 text-[11px] text-muted-foreground whitespace-nowrap">
                       {song.show_venue_location}
-                    </td>
-                    <td className="px-2 py-1">
-                      {song.entry_short && (
-                        <span className="text-destructive mr-2 font-medium">
-                          [{song.entry_short}]
-                        </span>
-                      )}
-                      {song.entry_segue && (
-                        <MoveRight className="text-destructive inline size-4" />
-                      )}
-                    </td>
-                    <td className="px-2 py-1 whitespace-nowrap text-center text-muted-foreground">
-                      {formatEntryLength(song.entry_length)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="align-middle py-1.5 px-2 text-left text-[11px] w-[4.5rem] shrink-0">
+                      <span className="inline-flex items-center gap-2">
+                        {song.entry_short && (
+                          <span className="text-red-400 font-medium">
+                            [{song.entry_short}]
+                          </span>
+                        )}
+                        {song.entry_segue && (
+                          <span className="text-red-400">→</span>
+                        )}
+                      </span>
+                    </TableCell>
+                    <TableCell className="align-middle py-1.5 pl-2 text-center text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
+                      {formatEntryLength(song.entry_length) || "—"}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-          <div className="border-t border-border/60 px-4 py-2 bg-muted/50 flex justify-center">
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href={`/dpro/personnel/${modalData.guestId}`}
-                onClick={() =>
-                  setModalData((p) => ({ ...p, isOpen: false }))
-                }
-              >
-                Guest Profile
-              </Link>
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+
+          <DrawerFooter className="border-t border-border/60 shrink-0 pt-3 pb-4">
+            <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center sm:justify-center">
+              <Button variant="outline" size="sm" asChild>
+                <Link
+                  href={`/dpro/personnel/${modalData.guestId}`}
+                  onClick={() =>
+                    setModalData((p) => ({ ...p, isOpen: false }))
+                  }
+                >
+                  Guest Profile
+                </Link>
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   )
 }
