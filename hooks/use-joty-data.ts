@@ -62,19 +62,24 @@ export function useJotyData(open: boolean, year: number | null) {
           joty_round: string
           joty_round_priority: number
         }>
-        const resultsData = (resultsRes.data ?? []) as Array<{
+        const resultsData = (resultsRes.data ?? []) as unknown as Array<{
           entry_id: string
           round_achieved: string
           setlist_entries: {
             entry_song: string
             entry_short: string | null
-            songs: { song_id: string } | null
+            songs: { song_id: string } | { song_id: string }[] | null
             shows: {
               show_id: string
               show_date: string
               show_venue_location: string | null
               show_subvenue: string | null
-            } | null
+            } | Array<{
+              show_id: string
+              show_date: string
+              show_venue_location: string | null
+              show_subvenue: string | null
+            }> | null
           } | null
         }>
 
@@ -82,8 +87,11 @@ export function useJotyData(open: boolean, year: number | null) {
         for (const r of resultsData) {
           const se = r.setlist_entries
           if (!se) continue
-          const songId = se.songs?.song_id ?? null
-          const show = se.shows
+          const songsVal = se.songs
+          const songId =
+            Array.isArray(songsVal) ? songsVal[0]?.song_id ?? null : songsVal?.song_id ?? null
+          const showsVal = se.shows
+          const show = Array.isArray(showsVal) ? showsVal[0] ?? null : showsVal
           const row: JotyResultRow = {
             entry_id: r.entry_id,
             entry_song: se.entry_song,
