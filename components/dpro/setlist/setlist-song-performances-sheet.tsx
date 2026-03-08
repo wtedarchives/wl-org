@@ -60,6 +60,7 @@ interface SongPerformance {
   show_subvenue: string
   show_venue_location: string
   show_subvenue_venue: string | null
+  venue_id: string | null
   guests: Guest[]
 }
 
@@ -108,7 +109,12 @@ function useSongTourPerformances(
               show_tour,
               show_subvenue,
               show_venue_location,
-              show_subvenue_venue
+              show_subvenue_venue,
+              subvenues:show_subvenue(
+                venues:subvenue_venue(
+                  venue_id
+                )
+              )
             ),
             setlist_entry_guests(
               guest_id,
@@ -137,6 +143,7 @@ function useSongTourPerformances(
                 show_subvenue: string
                 show_venue_location: string
                 show_subvenue_venue?: string | null
+                subvenues?: { venues?: { venue_id: string } } | null
               }
             | {
                 show_id: string
@@ -145,6 +152,7 @@ function useSongTourPerformances(
                 show_subvenue: string
                 show_venue_location: string
                 show_subvenue_venue?: string | null
+                subvenues?: { venues?: { venue_id: string } } | null
               }[]
             | undefined
 
@@ -159,8 +167,15 @@ function useSongTourPerformances(
                       show_subvenue: string
                       show_venue_location: string
                       show_subvenue_venue?: string | null
+                      subvenues?: { venues?: { venue_id: string } } | null
                     }
                   | undefined)
+          const subvenuesVal = show?.subvenues
+          const venueId =
+            (Array.isArray(subvenuesVal)
+              ? subvenuesVal[0]?.venues?.venue_id
+              : (subvenuesVal as { venues?: { venue_id: string } } | undefined)
+                  ?.venues?.venue_id) ?? null
 
           const guestsRaw = row.setlist_entry_guests as
             | Array<{
@@ -201,6 +216,7 @@ function useSongTourPerformances(
             show_subvenue: show?.show_subvenue ?? "",
             show_venue_location: show?.show_venue_location ?? "",
             show_subvenue_venue: show?.show_subvenue_venue ?? null,
+            venue_id: venueId,
             guests,
           }
         }) as SongPerformance[]
@@ -254,6 +270,9 @@ export function SetlistSongPerformancesSheet({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="mx-auto w-full max-w-4xl text-xs">
         <DrawerHeader className="border-b border-border/60 pt-1 pb-3">
+          <DrawerTitle className="sr-only">
+            {songName ? `${songName} – tour performances` : "Song performances"}
+          </DrawerTitle>
           {songName ? (
             <div className="space-y-1 text-[11px]">
               <p className="text-sm font-medium text-foreground">{songName}</p>
@@ -315,7 +334,12 @@ export function SetlistSongPerformancesSheet({
                         className="align-middle"
                       >
                         <TableCell className="whitespace-nowrap align-middle px-2 py-1 text-center text-[11px]">
-                          {formatSetlistDate(perf.show_date)}
+                          <Link
+                            href={`/dpro/setlist/${perf.show_id}`}
+                            className="hover:underline"
+                          >
+                            {formatSetlistDate(perf.show_date)}
+                          </Link>
                         </TableCell>
                         <TableCell
                           className="relative w-2 shrink-0 p-0 align-middle"
@@ -334,7 +358,16 @@ export function SetlistSongPerformancesSheet({
                           ) : null}
                         </TableCell>
                         <TableCell className="align-middle px-2 py-1 text-[11px]">
-                          {perf.show_venue_location || "—"}
+                          {perf.venue_id ? (
+                            <Link
+                              href={`/dpro/venue/${perf.venue_id}`}
+                              className="hover:underline"
+                            >
+                              {perf.show_venue_location || perf.show_subvenue || "—"}
+                            </Link>
+                          ) : (
+                            <span>{perf.show_venue_location || "—"}</span>
+                          )}
                         </TableCell>
                         <TableCell className="align-middle px-2 py-1 text-left text-[11px]">
                           <div className="inline-flex items-center gap-1">
