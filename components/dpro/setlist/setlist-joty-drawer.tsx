@@ -56,7 +56,7 @@ export function SetlistJotyDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[90vh] max-w-[800px] mx-auto flex flex-col rounded-t-xl w-full">
-        <DrawerHeader className="flex flex-row items-start justify-between gap-4 border-b border-border pb-3 shrink-0 pt-0">
+        <DrawerHeader className="flex flex-row items-center justify-between gap-4 border-b border-border pb-3 shrink-0 pt-0">
           <div className="flex w-16 shrink-0 items-center justify-start gap-1.5">
             <a
               href="https://jotyoftheyear.com"
