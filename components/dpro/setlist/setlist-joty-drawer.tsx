@@ -26,8 +26,11 @@ import { cn } from "@/lib/utils"
 import type { JotyRoundWithResults, JotyResultRow } from "@/hooks/use-joty-data"
 
 function formatShowDate(dateStr: string | null): string {
-  if (!dateStr) return "—"
-  const d = new Date(dateStr + "Z")
+  if (!dateStr || typeof dateStr !== "string") return "—"
+  const dateOnly = dateStr.includes("T") ? dateStr.slice(0, dateStr.indexOf("T")) : dateStr.trim()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return "—"
+  const d = new Date(dateOnly + "T00:00:00.000Z")
+  if (Number.isNaN(d.getTime())) return "—"
   const m = String(d.getUTCMonth() + 1).padStart(2, "0")
   const day = String(d.getUTCDate()).padStart(2, "0")
   const y = String(d.getUTCFullYear()).slice(-2)
@@ -55,7 +58,7 @@ export function SetlistJotyDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh] max-w-[800px] mx-auto flex flex-col rounded-t-xl w-full">
+      <DrawerContent className="max-h-[90vh] max-w-[800px] mx-auto flex flex-col rounded-t-xl w-full outline-none focus:outline-none focus-visible:outline-none [&:focus]:outline-none [&:focus-visible]:outline-none ring-0 focus:ring-0">
         <DrawerHeader className="flex flex-row items-center justify-between gap-4 border-b border-border pb-3 shrink-0 pt-0">
           <div className="flex w-16 shrink-0 items-center justify-start gap-1.5">
             <a
