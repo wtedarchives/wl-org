@@ -8,6 +8,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
@@ -56,7 +57,7 @@ export function SetlistJotyDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[90vh] max-w-[800px] mx-auto flex flex-col rounded-t-xl w-full">
         <DrawerHeader className="flex flex-row items-start justify-between gap-4 border-b border-border pb-3 shrink-0 pt-0">
-          <div className="flex w-24 shrink-0 items-center justify-start gap-1.5">
+          <div className="flex w-16 shrink-0 items-center justify-start gap-1.5">
             <a
               href="https://jotyoftheyear.com"
               target="_blank"
@@ -90,15 +91,12 @@ export function SetlistJotyDrawer({
               />
             </a>
           </div>
-          <div className="min-w-0 flex-1 flex flex-col items-center text-center space-y-1">
+          <div className="min-w-0 flex-1 flex flex-col items-center justify-center text-center">
             <DrawerTitle className="text-base font-semibold">
               Jam of the Year {displayYear}
             </DrawerTitle>
-            <p className="text-xs text-muted-foreground pt-1 max-w-[350px]">
-              {JOTY_DESCRIPTION}
-            </p>
           </div>
-          <div className="flex w-24 shrink-0 items-center justify-end">
+          <div className="flex w-16 shrink-0 items-center justify-end">
             <DrawerClose asChild>
               <Button variant="ghost" size="icon" className="shrink-0 rounded-full size-8">
                 <X className="size-4" />
@@ -134,6 +132,12 @@ export function SetlistJotyDrawer({
             </div>
           )}
         </div>
+
+        <DrawerFooter className="border-t border-border shrink-0 py-2 bg-muted/30">
+          <p className="text-xs text-muted-foreground text-center">
+            {JOTY_DESCRIPTION}
+          </p>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   )
@@ -212,7 +216,7 @@ function ResultRow({
           <span>{songLabel}</span>
         )}
       </TableCell>
-      <TableCell className="text-xs py-0.5 text-muted-foreground w-[90px]">
+      <TableCell className="text-xs py-0.5 text-muted-foreground">
         {row.show_id ? (
           <Link
             href={`/dpro/setlist/${row.show_id}`}
