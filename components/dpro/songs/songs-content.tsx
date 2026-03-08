@@ -120,19 +120,20 @@ export function SongsContent() {
       setError(true)
       return
     }
+    const db = supabase
 
     async function fetchData() {
       setLoading(true)
       setError(false)
       try {
-        const { data: categoriesData, error: catError } = await supabase
+        const { data: categoriesData, error: catError } = await db
           .from("categories")
           .select("*")
           .order("category_canonid", { ascending: true })
 
         if (catError) throw catError
 
-        const { count, error: countError } = await supabase
+        const { count, error: countError } = await db
           .from("songs")
           .select("*", { count: "exact", head: true })
           .eq("song_placeholder", false)
@@ -146,7 +147,7 @@ export function SongsContent() {
           const start = i * BATCH_SIZE
           const end = Math.min(start + BATCH_SIZE - 1, (count ?? 0) - 1)
 
-          const { data, error: batchError } = await supabase
+          const { data, error: batchError } = await db
             .from("songs")
             .select("*")
             .eq("song_placeholder", false)
