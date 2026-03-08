@@ -62,6 +62,13 @@ const PATH_LABELS: Record<string, string> = {
   support: "Support Wysteria Lane",
 }
 
+/** True if segment looks like a UUID (so we show a placeholder instead of raw id in breadcrumbs). */
+function isUuidLikeSegment(segment: string): boolean {
+  if (!segment || segment.length < 32) return false
+  const hexBlock = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return hexBlock.test(segment) || /^[0-9a-f]{32}$/i.test(segment)
+}
+
 function pathnameToBreadcrumbs(
   pathname: string,
   lastSegmentLabelOverride?: string | null,
@@ -88,12 +95,13 @@ function pathnameToBreadcrumbs(
     pathSoFar.push(segment)
     const pathKey = pathSoFar.join("/")
     const isLastSegment = i === segments.length - 1
+    const explicitLabel =
+      PATH_LABELS[pathKey] ?? SEGMENT_LABELS[segment]
     const label =
       isLastSegment && lastSegmentLabelOverride != null
         ? lastSegmentLabelOverride
-        : PATH_LABELS[pathKey] ??
-          SEGMENT_LABELS[segment] ??
-          segment.charAt(0).toUpperCase() + segment.slice(1)
+        : explicitLabel ??
+          (isUuidLikeSegment(segment) ? "…" : segment.charAt(0).toUpperCase() + segment.slice(1))
     items.push({ label, href })
   }
   return items
