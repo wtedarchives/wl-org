@@ -39,7 +39,7 @@ import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-lo
 import { SetlistScanDrawer } from "@/components/dpro/setlist/setlist-scan-drawer"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
-import { SetlistJotySheet } from "@/components/dpro/setlist/setlist-joty-sheet"
+import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
 import {
   SetlistWtedSheet,
   getWtedRateLimited,
@@ -83,14 +83,26 @@ export default function SetlistPage({
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { changes, loading: changesLoading } = useShowChanges(showId)
   const { setlistUrl } = useSetlistScan(showId)
-  const { releases, hasReleases, loading: releasesLoading } = useSetlistReleases(showId)
+  const {
+    releases,
+    releaseToEntriesMap,
+    hasReleases,
+    loading: releasesLoading,
+  } = useSetlistReleases(showId)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+  const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setHoveredReleaseId(null)
+  }, [showId])
   const [ratingDrawerOpen, setRatingDrawerOpen] = useState(false)
   const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
   const [songSheetEntry, setSongSheetEntry] = useState<SetlistEntry | null>(null)
-  const [jotySheetOpen, setJotySheetOpen] = useState(false)
-  const [jotySheetEntry, setJotySheetEntry] = useState<SetlistEntry | null>(null)
+  const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
+  const [jotyDrawerYear, setJotyDrawerYear] = useState<number | null>(null)
+  const [jotyDrawerHighlightedEntryId, setJotyDrawerHighlightedEntryId] =
+    useState<string | null>(null)
   const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
   const [wtedSheetEntry, setWtedSheetEntry] = useState<SetlistEntry | null>(null)
   const [setlistScanDrawerOpen, setSetlistScanDrawerOpen] = useState(false)
@@ -265,13 +277,20 @@ export default function SetlistPage({
                   showCanonColumns={show.show_canonid != null}
                   showWtedColumn={setlist.some((e) => !!e.radio_id)}
                   hoveredCategory={hoveredCategory}
+                  hoveredReleaseId={hoveredReleaseId}
+                  releaseToEntriesMap={releaseToEntriesMap}
                   onSongClick={(entry) => {
                     setSongSheetEntry(entry)
                     setSongSheetOpen(true)
                   }}
                   onJotyClick={(entry) => {
-                    setJotySheetEntry(entry)
-                    setJotySheetOpen(true)
+                    setJotyDrawerYear(
+                      show?.show_date
+                        ? new Date(show.show_date).getFullYear()
+                        : null
+                    )
+                    setJotyDrawerHighlightedEntryId(entry.entry_id)
+                    setJotyDrawerOpen(true)
                   }}
                   onWtedClick={(entry) => {
                     if (getWtedRateLimited()) return
@@ -317,7 +336,10 @@ export default function SetlistPage({
             </>
           )}
           {hasReleases && (
-            <SetlistMediaSection releases={releases} />
+            <SetlistMediaSection
+              releases={releases}
+              onReleaseHover={setHoveredReleaseId}
+            />
           )}
         </div>
 
@@ -399,10 +421,11 @@ export default function SetlistPage({
         tourName={show.show_tour}
       />
 
-      <SetlistJotySheet
-        open={jotySheetOpen}
-        onOpenChange={setJotySheetOpen}
-        entry={jotySheetEntry}
+      <SetlistJotyDrawer
+        open={jotyDrawerOpen}
+        onOpenChange={setJotyDrawerOpen}
+        year={jotyDrawerYear}
+        highlightedEntryId={jotyDrawerHighlightedEntryId}
       />
 
       <SetlistWtedSheet

@@ -50,9 +50,14 @@ function isEmbeddableService(service: string | null): boolean {
 
 interface SetlistMediaSectionProps {
   releases: ShowRelease[]
+  /** When user hovers a release, call with release_id; on leave call with null. */
+  onReleaseHover?: (releaseId: string | null) => void
 }
 
-export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
+export function SetlistMediaSection({
+  releases,
+  onReleaseHover,
+}: SetlistMediaSectionProps) {
   const isMobile = useIsMobile()
   const [activeEmbed, setActiveEmbed] = useState<{
     release: ShowRelease
@@ -183,6 +188,10 @@ export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
         isDimmed ? "opacity-30" : "hover:opacity-80"
       } ${isEmbeddable ? "hover:bg-muted/60" : ""}`
 
+      const releaseHoverProps = {
+        onMouseEnter: () => onReleaseHover?.(r.release_id),
+        onMouseLeave: () => onReleaseHover?.(null),
+      }
       if (isEmbeddable) {
         return (
           <button
@@ -190,6 +199,7 @@ export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
             type="button"
             onClick={(e) => handleStreamingClick(e, r, index)}
             className={`${rowClassName} w-full cursor-pointer text-left`}
+            {...releaseHoverProps}
           >
             {rowContent}
           </button>
@@ -203,13 +213,14 @@ export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
             target="_blank"
             rel="noopener noreferrer"
             className={rowClassName}
+            {...releaseHoverProps}
           >
             {rowContent}
           </Link>
         )
       }
       return (
-        <div key={r.release_id} className={rowClassName}>
+        <div key={r.release_id} className={rowClassName} {...releaseHoverProps}>
           {rowContent}
         </div>
       )
@@ -253,7 +264,10 @@ export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
       `flex flex-col w-[200px] shrink-0 rounded-lg overflow-hidden border border-border/60 bg-muted/30 transition-all duration-200 hover:scale-[1.02] hover:!bg-muted ${
         isDimmed ? "opacity-30 hover:opacity-80" : ""
       }`
-
+    const desktopHoverProps = {
+      onMouseEnter: () => onReleaseHover?.(r.release_id),
+      onMouseLeave: () => onReleaseHover?.(null),
+    }
     if (isEmbeddable) {
       return (
         <button
@@ -261,6 +275,7 @@ export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
           type="button"
           onClick={(e) => handleStreamingClick(e, r, index)}
           className={`${className} cursor-pointer text-left`}
+          {...desktopHoverProps}
         >
           {content}
         </button>
@@ -274,13 +289,14 @@ export function SetlistMediaSection({ releases }: SetlistMediaSectionProps) {
           target="_blank"
           rel="noopener noreferrer"
           className={className}
+          {...desktopHoverProps}
         >
           {content}
         </Link>
       )
     }
     return (
-      <div key={r.release_id} className={className}>
+      <div key={r.release_id} className={className} {...desktopHoverProps}>
         {content}
       </div>
     )

@@ -43,6 +43,10 @@ export interface SetlistEntryRowProps {
   showTooltips?: boolean
   /** When set, rows matching this category are highlighted; others are dimmed. */
   hoveredCategory?: string | null
+  /** When set, rows on this release are highlighted; others dimmed (overrides category). */
+  hoveredReleaseId?: string | null
+  /** release_id -> Set of setlist entry_ids on that release. */
+  releaseToEntriesMap?: Record<string, Set<string>>
 }
 
 export function SetlistEntryRow({
@@ -59,6 +63,8 @@ export function SetlistEntryRow({
   showAdminUi,
   showTooltips = true,
   hoveredCategory,
+  hoveredReleaseId,
+  releaseToEntriesMap,
 }: SetlistEntryRowProps) {
   const rarity = calculateRarity(
     entry.times_played_num,
@@ -72,10 +78,17 @@ export function SetlistEntryRow({
 
   const entryCategory =
     entry.song_category || entry.songs?.song_category || "undefined"
-  const shouldHighlightRow =
-    !!hoveredCategory && entryCategory === hoveredCategory
-  const shouldDimRow =
-    !!hoveredCategory && entryCategory !== hoveredCategory
+  const entryIdsForRelease = hoveredReleaseId
+    ? releaseToEntriesMap?.[hoveredReleaseId]
+    : undefined
+  const isEntryOnHoveredRelease =
+    !!entryIdsForRelease?.has(entry.entry_id)
+  const shouldHighlightRow = hoveredReleaseId
+    ? isEntryOnHoveredRelease
+    : !!hoveredCategory && entryCategory === hoveredCategory
+  const shouldDimRow = hoveredReleaseId
+    ? !isEntryOnHoveredRelease
+    : !!hoveredCategory && entryCategory !== hoveredCategory
 
   const numberCellContent = isCopied ? (
     <span className="inline-flex items-center justify-center text-white" aria-label="Copied">

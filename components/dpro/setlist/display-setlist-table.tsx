@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { SetlistEntry, GuestGroup } from "@/types/setlist"
+import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import { getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
 import {
@@ -45,6 +46,10 @@ export interface DisplaySetlistTableProps {
   showAdminUi?: boolean
   /** When set, rows matching this category are highlighted; others are dimmed. */
   hoveredCategory?: string | null
+  /** When set, rows on this release are highlighted; others dimmed (overrides category). */
+  hoveredReleaseId?: string | null
+  /** release_id -> Set of setlist entry_ids on that release (from setlist_entry_media). */
+  releaseToEntriesMap?: ReleaseToEntriesMap
 }
 
 export function DisplaySetlistTable({
@@ -59,6 +64,8 @@ export function DisplaySetlistTable({
   onNumberClick,
   showAdminUi,
   hoveredCategory,
+  hoveredReleaseId,
+  releaseToEntriesMap,
 }: DisplaySetlistTableProps) {
   if (setlist.length === 0) {
     return null
@@ -239,6 +246,8 @@ export function DisplaySetlistTable({
                   showAdminUi={showAdminUi}
                   showTooltips={isDesktop}
                   hoveredCategory={hoveredCategory}
+                  hoveredReleaseId={hoveredReleaseId}
+                  releaseToEntriesMap={releaseToEntriesMap}
                 />
               </Fragment>
             )

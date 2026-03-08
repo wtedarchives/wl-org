@@ -39,19 +39,29 @@ function CategorySection({
 }) {
   if (sectionCategories.length === 0) return null
 
+  const isCoverSongs = title === "Cover Songs"
+  const containerClass = isCoverSongs
+    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start"
+    : "columns-1 gap-x-4 md:columns-2 lg:columns-3 xl:columns-4 space-y-4"
+
   return (
     <div className="mb-8 space-y-3">
       <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
-      <div className="columns-1 gap-x-4 md:columns-2 lg:columns-3 xl:columns-4 space-y-4">
-        {sectionCategories.map((category) => {
+      <div className={containerClass}>
+        {sectionCategories.map((category, index) => {
           const categorySongs = songsByCategory[category.category] ?? []
+          const isSecondCoverCard =
+            isCoverSongs && sectionCategories.length > 1 && index === 1
+          const cardClass = isSecondCoverCard
+            ? "col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-3 overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0"
+            : "overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0 break-inside-avoid"
 
           return (
             <Card
               key={category.category}
-              className="overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0 break-inside-avoid"
+              className={cardClass}
             >
                   <CardHeader className="bg-muted/60 py-2 flex flex-row items-center justify-between gap-2">
                     <CardTitle className="text-sm font-medium truncate pr-2">
