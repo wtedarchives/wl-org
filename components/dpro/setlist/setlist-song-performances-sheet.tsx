@@ -412,7 +412,7 @@ export function SetlistSongPerformancesSheet({
             <div className="flex flex-wrap items-center gap-2">
               {songId && (
                 <Button type="button" size="sm" variant="outline" asChild>
-                  <Link href={`/dpro/songs/${songId}`}>
+                  <Link href={`/dpro/song/${songId}`}>
                     View full song history
                   </Link>
                 </Button>
