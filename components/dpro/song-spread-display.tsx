@@ -113,32 +113,53 @@ interface SongSpreadDisplayProps {
   spread: CategorySpread[]
   hoveredCategory?: string | null
   onCategoryHover?: (category: string | null) => void
+  /** Max height for the entire card, e.g. "max-h-[400px]" */
+  cardMaxHeight?: string
+}
+
+function getSongNameForSort(s: string): string {
+  const bracketIdx = s.indexOf(" [")
+  return bracketIdx >= 0 ? s.slice(0, bracketIdx) : s
 }
 
 export function SongSpreadDisplay({
   spread,
   hoveredCategory = null,
   onCategoryHover,
+  cardMaxHeight,
 }: SongSpreadDisplayProps) {
   const isDesktop = useIsDesktopContentLayout()
   const maxCount = spread.length > 0 ? Math.max(...spread.map((s) => s.count)) : 0
 
   if (spread.length === 0) return null
 
+  const cardClassName = cardMaxHeight
+    ? `ring-0 border border-border/60 bg-card/80 overflow-hidden py-0 ${cardMaxHeight} flex flex-col`
+    : "ring-0 border border-border/60 bg-card/80 overflow-hidden py-0"
+
+  const contentClassName = cardMaxHeight
+    ? "p-0 flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    : "p-0"
+
+  const ulClassName = cardMaxHeight
+    ? "space-y-1 text-xs p-3"
+    : "space-y-1 text-xs max-h-[390px] md:max-h-[498px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-3"
+
   return (
-    <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
-      <div className="px-3 py-1.5 bg-muted/60">
+    <Card className={cardClassName}>
+      <div className="px-3 py-1.5 bg-muted/60 shrink-0">
         <h2 className="text-sm font-semibold">Song Spread</h2>
       </div>
-      <CardContent className="p-0">
-        <ul
-          className="space-y-1 text-xs max-h-[390px] md:max-h-[498px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-3"
-        >
+      <CardContent className={contentClassName}>
+        <ul className={ulClassName}>
           {spread.map(({ category, count, songs }) => {
+            const songsSortedByName = [...songs].sort((a, b) =>
+              getSongNameForSort(a).localeCompare(getSongNameForSort(b)),
+            )
             const tooltipContent =
-              songs.length > 0 ? (
+              songsSortedByName.length > 0 ? (
                 <ul className="list-none space-y-[1px] overflow-y-auto text-[11px] leading-tight py-1.5">
-                  {songs.map((s) => {
+                  {songsSortedByName.map((s) => {
                     const bracketIdx = s.indexOf(" [")
                     const songName = bracketIdx >= 0 ? s.slice(0, bracketIdx) : s
                     const artistPart =
