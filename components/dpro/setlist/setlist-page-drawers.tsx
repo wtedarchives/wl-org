@@ -86,7 +86,7 @@ export function SetlistPageDrawers({
         onOpenChange={setRatingDrawerOpen}
         showDate={show?.show_date ?? ""}
         showVenueLocation={show?.show_venue_location ?? ""}
-        averageRating={averageRating}
+        averageRating={averageRating ?? 0}
         reviewCount={reviewCount}
         userRating={userRating}
         userReview={userReview}
