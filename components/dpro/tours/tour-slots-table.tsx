@@ -29,11 +29,20 @@ function formatColumnLabel(column: string): string {
     .join(" ")
 }
 
+function hasRowData(slot: SlotShowData, activeColumns: (keyof SlotShowData)[]): boolean {
+  return activeColumns.some((col) => {
+    const val = slot[col] as SongEntryWithId[] | null
+    return val != null && val.length > 0
+  })
+}
+
 export function TourSlotsTable({
   slots,
   activeColumns,
   onSongClick,
 }: TourSlotsTableProps) {
+  const slotsWithData = slots.filter((slot) => hasRowData(slot, activeColumns))
+
   const renderSongList = (songs: SongEntryWithId[] | null) => {
     if (!songs || songs.length === 0) return null
     return (
@@ -99,7 +108,7 @@ export function TourSlotsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {slots.map((slot) => (
+              {slotsWithData.map((slot) => (
                 <TableRow
                   key={slot.show_id}
                   className="bg-background/70 hover:bg-muted/30"

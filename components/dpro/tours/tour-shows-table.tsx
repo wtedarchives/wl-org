@@ -37,6 +37,8 @@ export function TourShowsTable({
   loading,
 }: TourShowsTableProps) {
   const { user } = useAuth()
+  const hasRarity = shows.some((s) => s.show_rarity != null && s.show_rarity !== "")
+  const hasGap = shows.some((s) => s.show_gap != null && s.show_gap !== "")
   const { sortedShows, handleSort, sortIndicator } = useTourShowsSort(
     shows,
     attendeeCounts,
@@ -101,20 +103,24 @@ export function TourShowsTable({
                 <span>Length</span>{" "}
                 <span className="text-[9px]">{sortIndicator("show_length")}</span>
               </TableHead>
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                onClick={() => handleSort("show_rarity")}
-              >
-                <span>Rarity</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_rarity")}</span>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                onClick={() => handleSort("show_gap")}
-              >
-                <span>Gap</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_gap")}</span>
-              </TableHead>
+              {hasRarity ? (
+                <TableHead
+                  className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
+                  onClick={() => handleSort("show_rarity")}
+                >
+                  <span>Rarity</span>{" "}
+                  <span className="text-[9px]">{sortIndicator("show_rarity")}</span>
+                </TableHead>
+              ) : null}
+              {hasGap ? (
+                <TableHead
+                  className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
+                  onClick={() => handleSort("show_gap")}
+                >
+                  <span>Gap</span>{" "}
+                  <span className="text-[9px]">{sortIndicator("show_gap")}</span>
+                </TableHead>
+              ) : null}
               <TableHead
                 className="cursor-pointer px-2 py-1 text-left text-[11px] font-medium"
                 onClick={() => handleSort("show_subvenue")}
@@ -191,6 +197,8 @@ export function TourShowsTable({
                 showsWithSetlists={showsWithSetlists}
                 showsWithReleases={showsWithReleases}
                 showsWithRadioIds={showsWithRadioIds}
+                showRarityColumn={hasRarity}
+                showGapColumn={hasGap}
               />
             ))}
           </TableBody>

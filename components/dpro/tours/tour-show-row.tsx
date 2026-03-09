@@ -76,6 +76,8 @@ export interface TourShowRowProps {
   showsWithSetlists: Set<string>
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
+  showRarityColumn?: boolean
+  showGapColumn?: boolean
 }
 
 export function TourShowRow({
@@ -86,6 +88,8 @@ export function TourShowRow({
   showsWithSetlists,
   showsWithReleases,
   showsWithRadioIds,
+  showRarityColumn = true,
+  showGapColumn = true,
 }: TourShowRowProps) {
   const { user } = useAuth()
   const rating = showRatings[show.show_id] ?? 0
@@ -120,26 +124,30 @@ export function TourShowRow({
       <TableCell className="px-2 py-1 text-center text-[11px] tabular-nums">
         {formatLengthAsHmmss(show.show_length ?? null) ?? ""}
       </TableCell>
-      <TableCell className="px-2 py-1 text-center">
-        {show.show_rarity ? (
-          <span
-            className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
-            style={{ backgroundColor: getRarityColor(show.show_rarity) }}
-          >
-            {show.show_rarity}
-          </span>
-        ) : null}
-      </TableCell>
-      <TableCell className="px-2 py-1 text-center">
-        {show.show_gap ? (
-          <span
-            className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
-            style={{ backgroundColor: getGapColor(show.show_gap) }}
-          >
-            {show.show_gap}
-          </span>
-        ) : null}
-      </TableCell>
+      {showRarityColumn ? (
+        <TableCell className="px-2 py-1 text-center">
+          {show.show_rarity ? (
+            <span
+              className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
+              style={{ backgroundColor: getRarityColor(show.show_rarity) }}
+            >
+              {show.show_rarity}
+            </span>
+          ) : null}
+        </TableCell>
+      ) : null}
+      {showGapColumn ? (
+        <TableCell className="px-2 py-1 text-center">
+          {show.show_gap ? (
+            <span
+              className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
+              style={{ backgroundColor: getGapColor(show.show_gap) }}
+            >
+              {show.show_gap}
+            </span>
+          ) : null}
+        </TableCell>
+      ) : null}
       <TableCell className="px-2 py-1 text-[11px]">
         {show.venue_id ? (
           <Link
