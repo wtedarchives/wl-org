@@ -1,12 +1,11 @@
 "use client"
 
-import { use, useEffect, useRef, useState } from "react"
+import { use, useEffect } from "react"
 import { notFound } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
-import type { Show } from "@/types/setlist"
 import { formatSetlistDate, totalSetlistLength } from "@/lib/setlist-utils"
 import { useSetlistData, useTours, useShowDates } from "@/hooks/use-setlist-data"
 import { useSetlistNavigation } from "@/hooks/use-setlist-navigation"
@@ -22,6 +21,7 @@ import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistScan } from "@/hooks/use-setlist-scan"
 import { useSetlistReleases } from "@/hooks/use-setlist-releases"
+import { useSetlistPageState } from "@/hooks/use-setlist-page-state"
 import { SetlistSidebar } from "@/components/dpro/setlist/setlist-sidebar"
 import { SetlistShowStatsCard } from "@/components/dpro/setlist/setlist-show-stats-card"
 import { SetlistShowChangesCard } from "@/components/dpro/setlist/setlist-show-changes-card"
@@ -30,25 +30,13 @@ import { SetlistSongSpreadCard } from "@/components/dpro/setlist/setlist-song-sp
 import { SetlistCallbacks } from "@/components/dpro/setlist/setlist-callbacks"
 import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { SetlistPageHeader } from "@/components/dpro/setlist/setlist-page-header"
-import { SetlistTourDropdown } from "@/components/dpro/setlist/setlist-tour-dropdown"
-import { SetlistShowsDropdown } from "@/components/dpro/setlist/setlist-shows-dropdown"
 import { SetlistRatingCard } from "@/components/dpro/setlist/setlist-rating-card"
 import { SetlistAttendanceCard } from "@/components/dpro/setlist/setlist-attendance-card"
-import { SetlistRatingDrawer } from "@/components/dpro/setlist/setlist-rating-drawer"
-import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-login-required-dialog"
-import { SetlistScanDrawer } from "@/components/dpro/setlist/setlist-scan-drawer"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
-import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
-import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
-import {
-  SetlistWtedSheet,
-  getWtedRateLimited,
-} from "@/components/dpro/setlist/setlist-wted-sheet"
+import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawers"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
-import type { SetlistEntry } from "@/types/setlist"
-
-const DESKTOP_MIN_WIDTH = 1280
+import { getWtedRateLimited } from "@/components/dpro/setlist/setlist-wted-sheet"
 
 export default function SetlistPage({
   params,
@@ -56,8 +44,37 @@ export default function SetlistPage({
   params: Promise<{ show_id: string }>
 }) {
   const { show_id: showId } = use(params)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [layoutMode, setLayoutMode] = useState<"mobile" | "desktop">("desktop")
+  const pageState = useSetlistPageState(showId)
+  const {
+    containerRef,
+    layoutMode,
+    hoveredCategory,
+    setHoveredCategory,
+    hoveredReleaseId,
+    setHoveredReleaseId,
+    ratingDrawerOpen,
+    setRatingDrawerOpen,
+    loginRequiredOpen,
+    setLoginRequiredOpen,
+    songSheetOpen,
+    setSongSheetOpen,
+    songSheetEntry,
+    setSongSheetEntry,
+    jotyDrawerOpen,
+    setJotyDrawerOpen,
+    jotyDrawerYear,
+    setJotyDrawerYear,
+    jotyDrawerHighlightedEntryId,
+    setJotyDrawerHighlightedEntryId,
+    wtedSheetOpen,
+    setWtedSheetOpen,
+    wtedSheetEntry,
+    setWtedSheetEntry,
+    setlistScanDrawerOpen,
+    setSetlistScanDrawerOpen,
+    copiedEntryIds,
+    handleNumberClick,
+  } = pageState
 
   const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
   const { tours } = useTours()
@@ -70,7 +87,6 @@ export default function SetlistPage({
     handleTourSelect,
     handleShowSelect,
     openChangesModal,
-    setOpenChangesModal,
   } = useSetlistNavigation(show ?? null)
   const guestGroups = useGuestGroups(setlist)
   const { user } = useAuth()
@@ -87,42 +103,7 @@ export default function SetlistPage({
     releases,
     releaseToEntriesMap,
     hasReleases,
-    loading: releasesLoading,
   } = useSetlistReleases(showId)
-  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
-  const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
-
-  useEffect(() => {
-    setHoveredReleaseId(null)
-  }, [showId])
-  const [ratingDrawerOpen, setRatingDrawerOpen] = useState(false)
-  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
-  const [songSheetOpen, setSongSheetOpen] = useState(false)
-  const [songSheetEntry, setSongSheetEntry] = useState<SetlistEntry | null>(null)
-  const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
-  const [jotyDrawerYear, setJotyDrawerYear] = useState<number | null>(null)
-  const [jotyDrawerHighlightedEntryId, setJotyDrawerHighlightedEntryId] =
-    useState<string | null>(null)
-  const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
-  const [wtedSheetEntry, setWtedSheetEntry] = useState<SetlistEntry | null>(null)
-  const [setlistScanDrawerOpen, setSetlistScanDrawerOpen] = useState(false)
-  const [copiedEntryIds, setCopiedEntryIds] = useState<Set<string>>(new Set())
-
-  const handleNumberClick = async (entryId: string) => {
-    try {
-      await navigator.clipboard.writeText(entryId)
-      setCopiedEntryIds((prev) => new Set(prev).add(entryId))
-      setTimeout(() => {
-        setCopiedEntryIds((prev) => {
-          const next = new Set(prev)
-          next.delete(entryId)
-          return next
-        })
-      }, 2000)
-    } catch {
-      // ignore clipboard errors
-    }
-  }
 
   const {
     averageRating,
@@ -142,17 +123,6 @@ export default function SetlistPage({
     user ?? null,
     setAttendeeCount
   )
-
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const update = () =>
-      setLayoutMode(el.clientWidth >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile")
-    update()
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
 
   useEffect(() => {
     if (!show || !yearId) {
@@ -380,11 +350,29 @@ export default function SetlistPage({
         )}
       </div>
 
-      <SetlistRatingDrawer
-        open={ratingDrawerOpen}
-        onOpenChange={setRatingDrawerOpen}
-        showDate={show?.show_date ?? ""}
-        showVenueLocation={show?.show_venue_location ?? ""}
+      <SetlistPageDrawers
+        show={show}
+        setlist={setlist}
+        changes={changes}
+        setlistUrl={setlistUrl}
+        ratingDrawerOpen={ratingDrawerOpen}
+        setRatingDrawerOpen={setRatingDrawerOpen}
+        loginRequiredOpen={loginRequiredOpen}
+        setLoginRequiredOpen={setLoginRequiredOpen}
+        songSheetOpen={songSheetOpen}
+        setSongSheetOpen={setSongSheetOpen}
+        songSheetEntry={songSheetEntry}
+        setSongSheetEntry={setSongSheetEntry}
+        jotyDrawerOpen={jotyDrawerOpen}
+        setJotyDrawerOpen={setJotyDrawerOpen}
+        jotyDrawerYear={jotyDrawerYear}
+        jotyDrawerHighlightedEntryId={jotyDrawerHighlightedEntryId}
+        wtedSheetOpen={wtedSheetOpen}
+        setWtedSheetOpen={setWtedSheetOpen}
+        wtedSheetEntry={wtedSheetEntry}
+        setWtedSheetEntry={setWtedSheetEntry}
+        setlistScanDrawerOpen={setlistScanDrawerOpen}
+        setSetlistScanDrawerOpen={setSetlistScanDrawerOpen}
         averageRating={averageRating}
         reviewCount={reviewCount}
         userRating={userRating}
@@ -392,46 +380,10 @@ export default function SetlistPage({
         reviews={reviews}
         isLoadingReviews={isLoadingReviews}
         reviewsError={reviewsError}
-        onSubmit={submitRating}
+        submitRating={(r: number, rev?: string) => submitRating(r, rev ?? "")}
         submitting={submitting}
-        onFetchReviews={fetchReviews}
+        fetchReviews={fetchReviews}
         validateReview={validateReview}
-      />
-
-      <SetlistLoginRequiredDialog
-        open={loginRequiredOpen}
-        onOpenChange={setLoginRequiredOpen}
-      />
-
-      {setlistUrl && (
-        <SetlistScanDrawer
-          open={setlistScanDrawerOpen}
-          onOpenChange={setSetlistScanDrawerOpen}
-          setlistUrl={setlistUrl}
-          show={show}
-          setlist={setlist}
-          changes={changes}
-        />
-      )}
-
-      <SetlistSongPerformancesSheet
-        open={songSheetOpen}
-        onOpenChange={setSongSheetOpen}
-        entry={songSheetEntry}
-        tourName={show.show_tour}
-      />
-
-      <SetlistJotyDrawer
-        open={jotyDrawerOpen}
-        onOpenChange={setJotyDrawerOpen}
-        year={jotyDrawerYear}
-        highlightedEntryId={jotyDrawerHighlightedEntryId}
-      />
-
-      <SetlistWtedSheet
-        open={wtedSheetOpen}
-        onOpenChange={setWtedSheetOpen}
-        entry={wtedSheetEntry}
       />
     </div>
   )
