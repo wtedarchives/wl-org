@@ -118,7 +118,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     (pathname ?? "").startsWith("/dpro/years/") && yearLabel != null
   const useSetlistTrail =
     ((pathname ?? "").startsWith("/dpro/setlist/") ||
-      (pathname ?? "").startsWith("/dpro/tours/")) &&
+      (pathname ?? "").startsWith("/dpro/tours/") ||
+      (pathname ?? "").startsWith("/dpro/song/")) &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride

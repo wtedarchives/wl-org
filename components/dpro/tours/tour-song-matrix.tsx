@@ -164,7 +164,11 @@ export function TourSongMatrix({
                     const perf = performances.find(
                       (p) => p.showId === show.show_id,
                     )
-                    const bg = getMatrixPlacementColor(perf?.placement ?? null)
+                    const base = getMatrixPlacementColor(perf?.placement ?? null)
+                    const bg =
+                      perf?.placement?.startsWith("Main Set")
+                        ? "#333333"
+                        : base
                     return (
                       <TableCell
                         key={`${song}-${show.show_id}`}
