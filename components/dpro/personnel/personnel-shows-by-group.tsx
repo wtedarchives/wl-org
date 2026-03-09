@@ -36,7 +36,7 @@ export function PersonnelShowsByGroup({
       <CardHeader className="bg-muted/60 py-2 shrink-0">
         <CardTitle className="text-sm font-semibold">Shows by Group</CardTitle>
       </CardHeader>
-      <CardContent className="p-3 flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <CardContent className="p-3 flex-1 min-h-0 overflow-y-auto">
         <div className="space-y-0.5">
           {sortedGroups.map(([group, count]) => (
             <button

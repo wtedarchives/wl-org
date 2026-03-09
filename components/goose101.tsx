@@ -243,7 +243,7 @@ export function Goose101() {
           />
           <div
             ref={navContainerRef}
-            className="fixed top-[var(--header-height,0)] z-20 hidden h-[calc(100vh-var(--header-height,0px)-80px)] w-10 overflow-x-hidden overflow-y-auto pt-8 md:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="fixed top-[var(--header-height,0)] z-20 hidden h-[calc(100vh-var(--header-height,0px)-80px)] w-10 overflow-x-hidden overflow-y-auto pt-8 md:block"
             style={{
               left: "calc(var(--sidebar-width, 0px) + 1rem + (100vw - var(--sidebar-width, 0px) - min(100vw - var(--sidebar-width, 0px), 82rem)) / 2)",
             }}
@@ -256,7 +256,7 @@ export function Goose101() {
           {/* Mobile: fixed nav; sits below header until header scrolls away, then moves to top */}
           <div
             ref={mobileNavRef}
-            className="fixed left-0 right-0 z-20 flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-b border-wl-white/20 bg-wl-dark-green/95 px-4 py-2 backdrop-blur transition-[top] duration-200 ease-out md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="fixed left-0 right-0 z-20 flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-b border-wl-white/20 bg-wl-dark-green/95 px-4 py-2 backdrop-blur transition-[top] duration-200 ease-out md:hidden"
             style={{
               top: mobileNavAtTop ? 0 : "var(--header-height, 0)",
             }}

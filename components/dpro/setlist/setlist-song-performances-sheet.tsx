@@ -174,7 +174,7 @@ export function SetlistSongPerformancesSheet({
                           </div>
                         </TableCell>
                         <TableCell className="whitespace-nowrap align-middle px-2 py-1 text-center text-[11px]">
-                          {formatEntryLength(perf.entry_length) || "—"}
+                          {formatEntryLength(perf.entry_length) || ""}
                         </TableCell>
                         <TableCell className="min-w-[400px] max-w-[400px] align-middle whitespace-normal px-2 py-1 text-[11px]">
                           {perf.entry_coachnotes && (

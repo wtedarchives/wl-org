@@ -138,12 +138,12 @@ export function SongSpreadDisplay({
     : "ring-0 border border-border/60 bg-card/80 overflow-hidden py-0"
 
   const contentClassName = cardMaxHeight
-    ? "p-0 flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    ? "p-0 flex-1 min-h-0 overflow-y-auto"
     : "p-0"
 
   const ulClassName = cardMaxHeight
     ? "space-y-1 text-xs p-3"
-    : "space-y-1 text-xs max-h-[390px] md:max-h-[498px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-3"
+    : "space-y-1 text-xs max-h-[390px] md:max-h-[498px] overflow-y-auto p-3"
 
   return (
     <Card className={cardClassName}>

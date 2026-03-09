@@ -142,7 +142,7 @@ export function GuestAppearancesDrawer({
                     </span>
                   </TableCell>
                   <TableCell className="align-middle py-1.5 pl-2 text-center text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
-                    {formatEntryLength(song.entry_length) || "—"}
+                    {formatEntryLength(song.entry_length) || ""}
                   </TableCell>
                 </TableRow>
               ))}
