@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { SongsContent } from "@/components/dpro/songs/songs-content"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 
 export const metadata = {
   title: "Songs – Wysteria Lane",
@@ -7,13 +8,7 @@ export const metadata = {
 
 export default function DproSongsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-1 items-center justify-center p-6">
-          <p className="text-sm text-muted-foreground">Loading songs…</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingPageCard message="Loading songs data…" />}>
       <SongsContent />
     </Suspense>
   )

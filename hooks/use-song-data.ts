@@ -15,6 +15,8 @@ import type {
   LastPlayed,
 } from "@/types/song"
 
+const SONG_LOAD_STEPS = 5 // song, performances, stats, placement, lastPlayed
+
 export function useSongData(songId: string | undefined) {
   const [song, setSong] = useState<SongData | null>(null)
   const [performances, setPerformances] = useState<SongPerformance[]>([])
@@ -27,6 +29,7 @@ export function useSongData(songId: string | undefined) {
   const [placementStats, setPlacementStats] = useState<PlacementStat[]>([])
   const [lastPlayed, setLastPlayed] = useState<LastPlayed | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadedSteps, setLoadedSteps] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -39,6 +42,7 @@ export function useSongData(songId: string | undefined) {
 
     async function fetchSongData() {
       setLoading(true)
+      setLoadedSteps(0)
       setError(null)
       try {
         const { data: songData, error: songError } = await client
@@ -71,6 +75,7 @@ export function useSongData(songId: string | undefined) {
         }
 
         setSong(songData as unknown as SongData)
+        setLoadedSteps(1)
 
         const { data: performanceData, error: performanceError } = await client
           .from("setlist_entries")
@@ -176,12 +181,16 @@ export function useSongData(songId: string | undefined) {
         ) as SongPerformance[]
 
         setPerformances(processedPerformances)
+        setLoadedSteps(2)
 
         const newStats = await calculateStats(processedPerformances)
         setStats(newStats)
+        setLoadedSteps(3)
 
         await fetchPlacementStats((songData as { song: string }).song)
+        setLoadedSteps(4)
         await fetchLastPlayed((songData as { song: string }).song)
+        setLoadedSteps(SONG_LOAD_STEPS)
       } catch (err) {
         console.error("Error fetching song data:", err)
         setError(err instanceof Error ? err.message : "Failed to load song")
@@ -399,13 +408,20 @@ export function useSongData(songId: string | undefined) {
     fetchSongData()
   }, [songId])
 
+  const progress =
+    loading && SONG_LOAD_STEPS > 0
+      ? (loadedSteps / SONG_LOAD_STEPS) * 100
+      : undefined
+
   return {
     song,
+    songName: song?.song ?? null,
     performances,
     stats,
     placementStats,
     lastPlayed,
     loading,
     error,
+    progress,
   }
 }

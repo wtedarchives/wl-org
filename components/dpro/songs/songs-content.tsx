@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { SongSearch } from "@/components/dpro/songs/song-search"
 import { supabase } from "@/lib/supabase"
 
@@ -226,16 +226,7 @@ export function SongsContent() {
   }, [categories])
 
   if (loading) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
-        <div className="flex flex-1 items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading songs…</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <LoadingPageCard message="Loading songs data…" />
   }
 
   if (error) {

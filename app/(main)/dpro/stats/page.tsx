@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronDownIcon } from "lucide-react"
 import { isSupabaseConfigured, supabase } from "@/lib/supabase"
 import { useStatsData } from "@/hooks/use-stats-data"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { StatCard } from "@/components/dpro/stats/stat-card"
 import { LongestSongsCard } from "@/components/dpro/stats/longest-songs-card"
 import { LiberatedSongsCard } from "@/components/dpro/stats/liberated-songs-card"
@@ -118,6 +119,10 @@ function DproStatsContent() {
     return null
   }
 
+  if (isAnyStatLoading) {
+    return <LoadingPageCard message="Loading stats data…" />
+  }
+
   const yearLabel = selectedYear === "all-time" ? "All-Time" : String(selectedYear)
   const showEmptyState = selectedYear !== "all-time"
 
@@ -147,9 +152,7 @@ function DproStatsContent() {
         </DropdownMenu>
       </div>
 
-      <div
-        className={`flex flex-col gap-6 transition-opacity duration-300 ${isAnyStatLoading ? "opacity-50" : ""}`}
-      >
+      <div className="flex flex-col gap-6">
         <section className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Songs
@@ -269,13 +272,7 @@ function DproStatsContent() {
 
 export default function DproStatsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-1 items-center justify-center p-6">
-          <p className="text-sm text-muted-foreground">Loading stats…</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingPageCard message="Loading stats data…" />}>
       <DproStatsContent />
     </Suspense>
   )

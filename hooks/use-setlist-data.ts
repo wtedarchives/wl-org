@@ -18,10 +18,13 @@ export interface Tour {
   tour_id: string
 }
 
+const SETLIST_LOAD_STEPS = 2 // show, setlist
+
 export function useSetlistData(showId: string | undefined) {
   const [show, setShow] = useState<Show | null>(null)
   const [setlist, setSetlist] = useState<SetlistEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadedSteps, setLoadedSteps] = useState(0)
   const [showLengthRank, setShowLengthRank] = useState<number | null>(null)
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export function useSetlistData(showId: string | undefined) {
     const client = supabase
 
     async function fetchSetlist() {
+      setLoadedSteps(0)
       try {
         const { data: showData, error: showError } = await client
           .from("shows")
@@ -87,6 +91,7 @@ export function useSetlistData(showId: string | undefined) {
           tour_id: tourRow?.tour_id ?? "",
           venue_id: subvenuesRow?.venues?.venue_id ?? undefined,
         } as Show)
+        setLoadedSteps(1)
 
         const { data: setlistData, error: setlistError } = await client
           .from("setlist_entries")
@@ -194,6 +199,7 @@ export function useSetlistData(showId: string | undefined) {
         }) as SetlistEntry[]
 
         setSetlist(processedSetlist)
+        setLoadedSteps(SETLIST_LOAD_STEPS)
       } catch (err) {
         console.error("Error fetching setlist:", err)
         setShow(null)
@@ -255,7 +261,12 @@ export function useSetlistData(showId: string | undefined) {
     fetchShowLengthRank()
   }, [showId, show?.show_canonid])
 
-  return { show, setlist, loading, showLengthRank }
+  const progress =
+    loading && SETLIST_LOAD_STEPS > 0
+      ? (loadedSteps / SETLIST_LOAD_STEPS) * 100
+      : undefined
+
+  return { show, setlist, loading, showLengthRank, progress }
 }
 
 export function useTours() {

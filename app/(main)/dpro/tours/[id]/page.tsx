@@ -2,9 +2,9 @@
 
 import { Suspense, use, useEffect, useRef, useState } from "react"
 import { notFound } from "next/navigation"
-import { Loader2, MapPin, X } from "lucide-react"
+import { MapPin, X } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
-import { useTourData } from "@/hooks/use-tour-data"
+import { useTourPageData } from "@/hooks/use-tour-page-data"
 import { useYearIdFromYear } from "@/hooks/use-setlist-year-id"
 import { TourShowsTable } from "@/components/dpro/tours/tour-shows-table"
 import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
@@ -12,7 +12,7 @@ import { TourStats } from "@/components/dpro/tours/tour-stats"
 import { ToursSidebarCard } from "@/components/dpro/tours/tours-sidebar-card"
 import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
-import { Card, CardContent } from "@/components/ui/card"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 
@@ -60,7 +60,10 @@ export default function TourPage({
     showsWithReleases,
     showsWithRadioIds,
     isLoading,
-  } = useTourData(tourId)
+    notPlayedSongs,
+    averageSetlistResult,
+    progress,
+  } = useTourPageData(tourId)
 
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const yearFromTour = currentTour ? extractYear(currentTour.tour) : null
@@ -123,20 +126,14 @@ export default function TourPage({
 
   if (!tourId) notFound()
 
-  if (isLoading && !currentTour) {
+  if (isLoading) {
     return (
-      <div
-        ref={containerRef}
-        className="flex min-w-0 flex-1 flex-col gap-4 rounded-b-none p-4 md:rounded-b-xl md:p-6"
-      >
-        <Card className="border-border/60 bg-card/80 py-0">
-          <CardContent className="flex items-center justify-center gap-2 py-12">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              Loading tour…
-            </span>
-          </CardContent>
-        </Card>
+      <div ref={containerRef}>
+        <LoadingPageCard
+          message={currentTour ? `Loading ${currentTour.tour} data…` : undefined}
+          page="tour"
+          progress={progress}
+        />
       </div>
     )
   }
@@ -203,6 +200,7 @@ export default function TourPage({
               setUniqueSongCount={setUniqueSongCount}
               hasTourSetlistEntries={hasTourSetlistEntries}
               onSongClick={handleSongClick}
+              notPlayedSongs={notPlayedSongs}
             />
           </Suspense>
 
@@ -211,8 +209,9 @@ export default function TourPage({
             currentTourShowFields && (
               <AverageSetlistCard
                 shows={shows}
-                title={`Average Setlist`}
+                title="Average Setlist"
                 type="tour"
+                averageSetlistResult={averageSetlistResult}
               />
             )}
         </div>
@@ -229,8 +228,9 @@ export default function TourPage({
             {shows.length > 0 && currentTourShowFields && (
               <AverageSetlistCard
                 shows={shows}
-                title={`Average Setlist`}
+                title="Average Setlist"
                 type="tour"
+                averageSetlistResult={averageSetlistResult}
               />
             )}
           </div>

@@ -2,9 +2,8 @@
 
 import { use, useEffect, useState } from "react"
 import { notFound } from "next/navigation"
-import { Loader2 } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
-import { Card, CardContent } from "@/components/ui/card"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSongData } from "@/hooks/use-song-data"
 import { SongHeader } from "@/components/dpro/song/song-header"
 import { SongInfo } from "@/components/dpro/song/song-info"
@@ -28,12 +27,14 @@ export default function SongPage({
 
   const {
     song,
+    songName,
     performances,
     stats,
     placementStats,
     lastPlayed,
     loading,
     error,
+    progress,
   } = useSongData(songId)
 
   useEffect(() => {
@@ -66,16 +67,11 @@ export default function SongPage({
 
   if (loading) {
     return (
-      <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-b-none p-4 md:rounded-b-xl md:p-6">
-        <Card className="border-border/60 bg-card/80 py-0 overflow-hidden">
-          <CardContent className="flex items-center justify-center gap-2 py-12">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              Loading song data…
-            </span>
-          </CardContent>
-        </Card>
-      </div>
+      <LoadingPageCard
+        message={songName ? `Loading ${songName}…` : undefined}
+        page="song"
+        progress={progress}
+      />
     )
   }
 

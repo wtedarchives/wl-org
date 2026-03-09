@@ -15,6 +15,7 @@ import { useGroupsData } from "@/hooks/use-groups-data"
 import { useAttendeeData } from "@/hooks/use-attendee-data"
 import { useShowRatings } from "@/hooks/use-show-ratings"
 import { useShowMetadata } from "@/hooks/use-show-metadata"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { ListFilter, ListMusic, MapPin, X } from "lucide-react"
@@ -47,6 +48,9 @@ function YearPageContent({ yearId }: { yearId?: string }) {
     useShowMetadata(shows, currentYear)
 
   const loading = yearsLoading || showsLoading
+  const yearsProgress = yearsLoading ? 0 : 50
+  const showsProgress = showsLoading ? yearsProgress : 100
+  const progress = loading ? showsProgress : undefined
 
   useEffect(() => {
     const el = containerRef.current
@@ -132,7 +136,21 @@ function YearPageContent({ yearId }: { yearId?: string }) {
     setSelectedGroups([])
   }
 
-  const yearLabel = currentYear || DEFAULT_YEAR
+  const yearLabel =
+    yearId && years.length > 0
+      ? years.find((y) => y.year_id === yearId)?.year ?? DEFAULT_YEAR
+      : currentYear || DEFAULT_YEAR
+
+  if (loading) {
+    return (
+      <div ref={containerRef}>
+        <LoadingPageCard
+          message={`Loading ${yearLabel} data…`}
+          progress={progress}
+        />
+      </div>
+    )
+  }
 
   return (
     <div

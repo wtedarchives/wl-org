@@ -2,8 +2,8 @@
 
 import { use, useEffect } from "react"
 import { notFound } from "next/navigation"
-import { Loader2 } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatSetlistDate, totalSetlistLength } from "@/lib/setlist-utils"
@@ -76,7 +76,8 @@ export default function SetlistPage({
     handleNumberClick,
   } = pageState
 
-  const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
+  const { show, setlist, loading, showLengthRank, progress } =
+    useSetlistData(showId)
   const { tours } = useTours()
   const { showDates } = useShowDates(show ?? null, showId)
   const showPosition = useShowPosition(show ?? null, showDates)
@@ -170,19 +171,16 @@ export default function SetlistPage({
   if (!loading && !show) notFound()
 
   if (loading) {
+    const setlistMessage = show?.show_date
+      ? `Loading ${formatSetlistDate(show.show_date)}…`
+      : undefined
     return (
-      <div
-        ref={containerRef}
-        className="flex min-w-0 flex-1 flex-col gap-4 rounded-b-none p-4 md:rounded-b-xl md:p-6"
-      >
-        <Card className="border-border/60 bg-card/80 py-0">
-          <CardContent className="flex items-center justify-center gap-2 py-12">
-            <Loader2 className="size-5 animate-spin text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              Loading setlist…
-            </span>
-          </CardContent>
-        </Card>
+      <div ref={containerRef}>
+        <LoadingPageCard
+          message={setlistMessage}
+          page="setlist"
+          progress={progress}
+        />
       </div>
     )
   }

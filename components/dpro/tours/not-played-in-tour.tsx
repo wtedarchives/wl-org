@@ -3,33 +3,39 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
-
-interface NotPlayedSong {
-  song: string
-  song_id: string
-  play_count: number
-  category_canonid: number
-  category_artwork?: string
-}
+import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
 
 interface NotPlayedInTourProps {
   tourId: string
   tourName: string
   showIds: string[]
   songIdMap?: Record<string, string>
+  /** When provided, use pre-fetched data instead of fetching */
+  notPlayedSongs?: NotPlayedSong[]
+  /** When notPlayedSongs is provided, whether the parent is still loading */
+  loading?: boolean
 }
 
 export function NotPlayedInTour({
   tourId,
   tourName,
   showIds,
+  notPlayedSongs: notPlayedSongsProp,
+  loading: loadingProp,
 }: NotPlayedInTourProps) {
-  const [notPlayedSongs, setNotPlayedSongs] = useState<NotPlayedSong[]>([])
-  const [loading, setLoading] = useState(true)
+  const [notPlayedSongsLocal, setNotPlayedSongsLocal] = useState<
+    NotPlayedSong[]
+  >([])
+  const [loadingLocal, setLoadingLocal] = useState(true)
+
+  const usePreFetched = notPlayedSongsProp !== undefined
+  const notPlayedSongs = usePreFetched ? notPlayedSongsProp : notPlayedSongsLocal
+  const loading = usePreFetched ? (loadingProp ?? false) : loadingLocal
 
   useEffect(() => {
+    if (usePreFetched) return
     if (!tourId || !showIds.length) {
-      setLoading(false)
+      setLoadingLocal(false)
       return
     }
 
@@ -37,7 +43,7 @@ export function NotPlayedInTour({
       try {
         const { supabase } = await import("@/lib/supabase")
         if (!supabase) {
-          setLoading(false)
+          setLoadingLocal(false)
           return
         }
 
@@ -52,7 +58,7 @@ export function NotPlayedInTour({
           .single()
 
         if (firstShowError || !tourFirstShowData?.show_date) {
-          setLoading(false)
+          setLoadingLocal(false)
           return
         }
 
@@ -147,16 +153,17 @@ export function NotPlayedInTour({
           })
           .slice(0, 8)
 
-        setNotPlayedSongs(processed)
+        setNotPlayedSongsLocal(processed)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error("Error fetching not played songs:", err)
       } finally {
-        setLoading(false)
+        setLoadingLocal(false)
       }
     }
 
     fetchNotPlayedSongs()
-  }, [tourId, tourName, showIds])
+  }, [tourId, tourName, showIds, usePreFetched])
 
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">

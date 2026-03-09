@@ -9,6 +9,7 @@ import { LiberatedSongs } from "./liberated-songs"
 import { GuestAppearances } from "./guest-appearances"
 import type { TourShow } from "@/types/tour"
 import type { SlotData } from "@/types/tour"
+import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
 
 interface TourStatsProps {
   shows: TourShow[]
@@ -24,6 +25,7 @@ interface TourStatsProps {
   setUniqueSongCount: (count: number) => void
   hasTourSetlistEntries: boolean
   onSongClick: (songName: string) => void
+  notPlayedSongs?: NotPlayedSong[]
 }
 
 export function TourStats({
@@ -40,6 +42,7 @@ export function TourStats({
   setUniqueSongCount,
   hasTourSetlistEntries,
   onSongClick,
+  notPlayedSongs,
 }: TourStatsProps) {
   const showIds = shows.map((s) => s.show_id)
   const isMobile = windowWidth < 1280
@@ -90,6 +93,7 @@ export function TourStats({
             tourName={currentTour}
             showIds={showIds}
             songIdMap={songIdMap}
+            notPlayedSongs={notPlayedSongs}
           />
           <GuestAppearances
             showIds={showIds}
