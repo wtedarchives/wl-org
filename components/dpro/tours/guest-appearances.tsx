@@ -26,6 +26,7 @@ import { formatEntryLength } from "@/lib/setlist-utils"
 interface GuestCount {
   guest_id: string
   guest: string
+  guest_instrument: string | null
   count: number
 }
 
@@ -65,12 +66,14 @@ export function GuestAppearances({
     isOpen: boolean
     guestId: string
     guestName: string
+    guestInstrument: string | null
     songs: SongWithGuest[]
     tourName: string
   }>({
     isOpen: false,
     guestId: "",
     guestName: "",
+    guestInstrument: null,
     songs: [],
     tourName: "",
   })
@@ -102,7 +105,8 @@ export function GuestAppearances({
               guests (
                 guest_id,
                 guest,
-                guest_category
+                guest_category,
+                guest_instrument
               )
             )
           `,
@@ -113,7 +117,7 @@ export function GuestAppearances({
 
         const guestCountMap: Record<
           string,
-          { guest: string; count: number }
+          { guest: string; guest_instrument: string | null; count: number }
         > = {}
 
         for (const entry of entriesData ?? []) {
@@ -129,7 +133,11 @@ export function GuestAppearances({
               const g = seg.guests
               if (g) {
                 if (!guestCountMap[g.guest_id]) {
-                  guestCountMap[g.guest_id] = { guest: g.guest, count: 0 }
+                  guestCountMap[g.guest_id] = {
+                    guest: g.guest,
+                    guest_instrument: g.guest_instrument ?? null,
+                    count: 0,
+                  }
                 }
                 guestCountMap[g.guest_id].count++
               }
@@ -138,7 +146,12 @@ export function GuestAppearances({
         }
 
         const sorted = Object.entries(guestCountMap)
-          .map(([guest_id, { guest, count }]) => ({ guest_id, guest, count }))
+          .map(([guest_id, { guest, guest_instrument, count }]) => ({
+            guest_id,
+            guest,
+            guest_instrument,
+            count,
+          }))
           .sort((a, b) => {
             if (b.count !== a.count) return b.count - a.count
             return a.guest.localeCompare(b.guest)
@@ -157,7 +170,11 @@ export function GuestAppearances({
     fetchGuestAppearances()
   }, [showIds, onDataLoaded])
 
-  const handleGuestClick = async (guestId: string, guestName: string) => {
+  const handleGuestClick = async (
+    guestId: string,
+    guestName: string,
+    guestInstrument: string | null,
+  ) => {
     try {
       const { supabase } = await import("@/lib/supabase")
       if (!supabase) return
@@ -218,6 +235,7 @@ export function GuestAppearances({
         isOpen: true,
         guestId,
         guestName,
+        guestInstrument,
         songs,
         tourName,
       })
@@ -252,7 +270,11 @@ export function GuestAppearances({
                         <button
                           type="button"
                           onClick={() =>
-                            handleGuestClick(guest.guest_id, guest.guest)
+                            handleGuestClick(
+                              guest.guest_id,
+                              guest.guest,
+                              guest.guest_instrument,
+                            )
                           }
                           className="font-medium text-foreground hover:underline underline-offset-4 cursor-pointer text-left"
                         >
@@ -281,15 +303,22 @@ export function GuestAppearances({
           <DrawerHeader className="shrink-0 border-b border-border/60 pt-1 pb-3 px-4 flex flex-row items-center justify-between md:justify-center gap-3">
             <div className="w-8 shrink-0 md:hidden" aria-hidden />
             <div className="flex flex-1 min-w-0 justify-center">
-              <div className="space-y-1 text-center">
-                <DrawerTitle className="text-sm font-medium text-foreground m-0">
+              <div className="space-y-1.5 text-center">
+                <DrawerTitle className="text-sm font-medium text-foreground m-0 mb-0.5">
                   {modalData.guestName}
                 </DrawerTitle>
-                {modalData.tourName && (
-                  <p className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                    {modalData.tourName}
-                  </p>
-                )}
+                <div className="flex flex-wrap items-center justify-center gap-1.5">
+                  {modalData.guestInstrument && (
+                    <span className="inline-flex items-center rounded-full bg-wl-orange/20 px-2 py-0.5 text-[10px] font-medium text-wl-orange">
+                      {modalData.guestInstrument}
+                    </span>
+                  )}
+                  {modalData.tourName && (
+                    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      {modalData.tourName}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <DrawerClose asChild>
