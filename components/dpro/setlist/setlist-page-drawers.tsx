@@ -6,6 +6,7 @@ import { SetlistScanDrawer } from "./setlist-scan-drawer"
 import { SetlistSongPerformancesSheet } from "./setlist-song-performances-sheet"
 import { SetlistJotyDrawer } from "./setlist-joty-drawer"
 import { SetlistWtedSheet } from "./setlist-wted-sheet"
+import type { ReviewEntry } from "@/hooks/use-setlist-rating"
 import type { Show, SetlistEntry } from "@/types/setlist"
 
 interface SetlistPageDrawersProps {
@@ -35,7 +36,7 @@ interface SetlistPageDrawersProps {
   reviewCount: number
   userRating: number | null
   userReview: string | null
-  reviews: unknown[]
+  reviews: ReviewEntry[]
   isLoadingReviews: boolean
   reviewsError: string | null
   submitRating: (rating: number, review?: string) => Promise<void>
