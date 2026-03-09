@@ -7,12 +7,13 @@ import { SetlistSongPerformancesSheet } from "./setlist-song-performances-sheet"
 import { SetlistJotyDrawer } from "./setlist-joty-drawer"
 import { SetlistWtedSheet } from "./setlist-wted-sheet"
 import type { ReviewEntry } from "@/hooks/use-setlist-rating"
+import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import type { Show, SetlistEntry } from "@/types/setlist"
 
 interface SetlistPageDrawersProps {
   show: Show
   setlist: SetlistEntry[]
-  changes: unknown[]
+  changes: ShowChangeRow[]
   setlistUrl: string | null
   ratingDrawerOpen: boolean
   setRatingDrawerOpen: (open: boolean) => void
