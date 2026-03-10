@@ -24,7 +24,7 @@ interface TourStatsProps {
   uniqueSongCount: number
   setUniqueSongCount: (count: number) => void
   hasTourSetlistEntries: boolean
-  onSongClick: (songName: string) => void
+  onSongClick: (songName: string, songDisplayName?: string | null) => void
   notPlayedSongs?: NotPlayedSong[]
 }
 

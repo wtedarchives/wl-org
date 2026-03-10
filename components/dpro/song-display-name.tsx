@@ -41,17 +41,14 @@ export function SongDisplayName({
 
   return (
     <Component
-      className={cn(
-        "relative inline-grid grid-cols-1 grid-rows-1 min-w-0 [&>*]:col-start-1 [&>*]:row-start-1",
-        className,
-      )}
+      className={cn("relative inline-block", className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <span
         className={cn(
           "transition-opacity duration-200",
-          isHovered ? "opacity-0" : "opacity-100",
+          isHovered ? "opacity-0 absolute left-0 top-0" : "opacity-100",
         )}
       >
         {children ?? displayName}
@@ -59,7 +56,7 @@ export function SongDisplayName({
       <span
         className={cn(
           "transition-opacity duration-200",
-          isHovered ? "opacity-100" : "opacity-0",
+          isHovered ? "opacity-100" : "opacity-0 absolute left-0 top-0",
         )}
       >
         {song}

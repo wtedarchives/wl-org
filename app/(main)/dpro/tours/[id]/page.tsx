@@ -35,6 +35,9 @@ export default function TourPage({
   const [expandedYear, setExpandedYear] = useState<string | null>(null)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
   const [songSheetSongName, setSongSheetSongName] = useState<string | null>(null)
+  const [songSheetSongDisplayName, setSongSheetSongDisplayName] = useState<
+    string | null
+  >(null)
   const [songSheetSongId, setSongSheetSongId] = useState<string | null>(null)
   const [toursSheetOpen, setToursSheetOpen] = useState(false)
 
@@ -48,6 +51,7 @@ export default function TourPage({
     activeColumns,
     hasSlotEntries,
     songIdMap,
+    songDisplayNameMap,
     topSlots,
     hasTourSetlistEntries,
     hasGuestAppearances,
@@ -114,8 +118,14 @@ export default function TourPage({
     }
   }, [currentTour])
 
-  const handleSongClick = (songName: string) => {
+  const handleSongClick = (
+    songName: string,
+    songDisplayName?: string | null,
+  ) => {
     setSongSheetSongName(songName)
+    setSongSheetSongDisplayName(
+      songDisplayName ?? songDisplayNameMap[songName] ?? null,
+    )
     setSongSheetSongId(songIdMap[songName] ?? null)
     setSongSheetOpen(true)
   }
@@ -243,6 +253,7 @@ export default function TourPage({
         entry={null}
         tourName={currentTour.tour}
         songName={songSheetSongName}
+        songDisplayName={songSheetSongDisplayName}
         songId={songSheetSongId}
       />
 

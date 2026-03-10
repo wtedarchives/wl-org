@@ -18,7 +18,7 @@ import { formatTourShowDate } from "./tour-show-row"
 interface TourSlotsTableProps {
   slots: SlotShowData[]
   activeColumns: (keyof SlotShowData)[]
-  onSongClick: (songName: string) => void
+  onSongClick: (songName: string, songDisplayName?: string | null) => void
 }
 
 function formatColumnLabel(column: string): string {
@@ -63,7 +63,7 @@ export function TourSlotsTable({
               href="#"
               onClick={(e) => {
                 e.preventDefault()
-                onSongClick(song.song)
+                onSongClick(song.song, song.song_displayname)
               }}
               className="text-[11px] font-medium hover:underline cursor-pointer"
             >

@@ -24,7 +24,7 @@ interface TourSongMatrixProps {
   hideTitle?: boolean
   sortMode?: MatrixSortMode
   tourId?: string
-  onSongClick?: (songName: string) => void
+  onSongClick?: (songName: string, songDisplayName?: string | null) => void
 }
 
 export function TourSongMatrix({
@@ -155,7 +155,9 @@ export function TourSongMatrix({
                   <TableCell className="font-medium text-xs pl-3 py-0.5 whitespace-nowrap">
                     <button
                       type="button"
-                      onClick={() => onSongClick?.(song)}
+                      onClick={() =>
+                        onSongClick?.(song, songMatrix.songDisplayNameMap?.[song])
+                      }
                       className="hover:underline cursor-pointer"
                     >
                       <SongDisplayName

@@ -23,7 +23,7 @@ interface LiberatedSongsProps {
   songIdMap?: Record<string, string>
   tourId?: string
   onDataLoaded?: (hasData: boolean) => void
-  onSongClick?: (songName: string) => void
+  onSongClick?: (songName: string, songDisplayName?: string | null) => void
 }
 
 function formatTourDate(dateStr?: string): string {
@@ -185,7 +185,7 @@ export function LiberatedSongs({
                       <div className="flex items-center justify-between gap-2">
                         <button
                           type="button"
-                          onClick={() => onSongClick?.(song.entry_song)}
+                          onClick={() => onSongClick?.(song.entry_song, song.song_displayname)}
                           className="font-medium text-foreground hover:underline cursor-pointer"
                         >
                           {song.entry_song}

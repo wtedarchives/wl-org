@@ -17,7 +17,7 @@ interface TopSlotsCarouselProps {
   slots: SlotData[]
   isMobile?: boolean
   songIdMap?: Record<string, string>
-  onSongClick?: (songName: string) => void
+  onSongClick?: (songName: string, songDisplayName?: string | null) => void
   tourId?: string
 }
 
@@ -77,7 +77,7 @@ export function TopSlotsCarousel({
                       <div className="flex items-center justify-between gap-2">
                         <button
                           type="button"
-                          onClick={() => onSongClick?.(item.left)}
+                          onClick={() => onSongClick?.(item.left, item.displayName)}
                           className="font-medium text-foreground hover:underline cursor-pointer text-left"
                         >
                           <SongDisplayName
@@ -160,7 +160,7 @@ export function TopSlotsCarousel({
                         <div className="flex items-center justify-between gap-2">
                           <button
                             type="button"
-                            onClick={() => onSongClick?.(item.left)}
+                            onClick={() => onSongClick?.(item.left, item.displayName)}
                             className="font-medium text-foreground hover:underline cursor-pointer text-left"
                           >
                             <SongDisplayName

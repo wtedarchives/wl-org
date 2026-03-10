@@ -35,7 +35,7 @@ interface TourSongsCombinedProps {
   uniqueSongCount?: number
   onSongCountChange?: (count: number) => void
   tourId?: string
-  onSongClick?: (songName: string) => void
+  onSongClick?: (songName: string, songDisplayName?: string | null) => void
 }
 
 function getViewFromParams(params: URLSearchParams): "list" | "matrix" {

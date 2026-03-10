@@ -10,7 +10,7 @@ interface LongestSongsProps {
   showIds: string[]
   songIdMap?: Record<string, string>
   tourId?: string
-  onSongClick?: (songName: string) => void
+  onSongClick?: (songName: string, songDisplayName?: string | null) => void
 }
 
 interface LongestSong {
@@ -135,7 +135,7 @@ export function LongestSongs({
                       <div className="flex items-center justify-between gap-2">
                         <button
                           type="button"
-                          onClick={() => onSongClick?.(song.entry_song)}
+                          onClick={() => onSongClick?.(song.entry_song, song.song_displayname)}
                           className="font-medium text-foreground hover:underline cursor-pointer"
                         >
                           <SongDisplayName

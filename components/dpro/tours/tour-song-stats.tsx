@@ -47,7 +47,7 @@ interface TourSongStatsProps {
   uniqueSongCount?: number
   hideTitle?: boolean
   tourId?: string
-  onSongClick?: (songName: string) => void
+  onSongClick?: (songName: string, songDisplayName?: string | null) => void
 }
 
 const SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
@@ -331,7 +331,7 @@ export function TourSongStats({
                 </TableCell>
                 <TableCell
                   className="pl-3 py-0.5 cursor-pointer"
-                  onClick={() => onSongClick?.(stat.song)}
+                  onClick={() => onSongClick?.(stat.song, stat.song_displayname)}
                 >
                   <span className="font-medium hover:underline text-xs">
                     <SongDisplayName

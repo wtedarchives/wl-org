@@ -40,6 +40,7 @@ export interface UseTourDataResult {
   activeColumns: (keyof SlotShowData)[]
   hasSlotEntries: boolean
   songIdMap: Record<string, string>
+  songDisplayNameMap: Record<string, string | null>
   topSlots: SlotData[]
   hasTourSetlistEntries: boolean
   hasGuestAppearances: boolean
@@ -420,6 +421,19 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
     return map
   }, [rawEntries])
 
+  const songDisplayNameMap = useMemo(() => {
+    const map: Record<string, string | null> = {}
+    for (const e of rawEntries) {
+      const songsRel = e.songs
+      const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
+      const displayName = songRow?.song_displayname?.trim() || null
+      if (e.entry_song) {
+        map[e.entry_song] = displayName
+      }
+    }
+    return map
+  }, [rawEntries])
+
   const topSlots = useMemo(
     () => processTourDataWithCategories(rawEntries),
     [rawEntries],
@@ -437,6 +451,7 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
     activeColumns,
     hasSlotEntries,
     songIdMap,
+    songDisplayNameMap,
     topSlots,
     hasTourSetlistEntries,
     hasGuestAppearances,
