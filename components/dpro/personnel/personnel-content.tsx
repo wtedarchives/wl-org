@@ -114,7 +114,7 @@ export function PersonnelContent() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
-      <div className="mb-4 w-full">
+      <div className="mb-1 w-full">
         <Card className="overflow-hidden border border-border/60 bg-card/80 shadow-sm py-0">
           <div className="bg-muted/60 px-3 py-1.5 flex justify-between items-center gap-2">
             <h1 className="text-sm font-semibold">Personnel</h1>

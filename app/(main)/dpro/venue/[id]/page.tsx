@@ -95,7 +95,7 @@ export default function VenueDetailPage({
 
   const pageContent = (
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
-      <div className="mb-4 w-full">
+      <div className="mb-1 w-full">
         <VenueHeader
           venueName={venueName}
           venueLocation={venue.venue_location}
