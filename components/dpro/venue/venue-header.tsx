@@ -1,39 +1,36 @@
 "use client"
 
-import { PersonnelSearch } from "@/components/dpro/personnel/personnel-search"
-import { formatInstrument } from "@/lib/personnel-utils"
+import { VenueSearch } from "@/components/dpro/venues/venue-search"
 import { Card } from "@/components/ui/card"
 
-interface PersonnelHeaderProps {
-  guestName: string
-  guestInstrument: string | null
+interface VenueHeaderProps {
+  venueName: string
+  venueLocation: string | null
+  onSearchOpenChange?: (open: boolean) => void
 }
 
-export function PersonnelHeader({
-  guestName,
-  guestInstrument,
-}: PersonnelHeaderProps) {
-  const formattedInstrument = guestInstrument
-    ? formatInstrument(guestInstrument, { wrapInParens: false })
-    : null
-
+export function VenueHeader({
+  venueName,
+  venueLocation,
+  onSearchOpenChange,
+}: VenueHeaderProps) {
   return (
     <Card className="overflow-hidden border border-border/60 bg-card/80 shadow-sm py-0">
       <div className="bg-muted/60 px-3 py-1.5 flex justify-between items-center gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <h1 className="text-sm font-semibold truncate">{guestName}</h1>
-          {formattedInstrument && (
+          <h1 className="text-sm font-semibold truncate">{venueName}</h1>
+          {venueLocation && (
             <span className="hidden md:inline-flex rounded-md border border-border bg-wl-dark-green px-2 py-0.5 text-[10px] font-medium text-white shrink-0">
-              {formattedInstrument}
+              {venueLocation}
             </span>
           )}
         </div>
-        <PersonnelSearch />
+        <VenueSearch onOpenChange={onSearchOpenChange} />
       </div>
-      {formattedInstrument && (
+      {venueLocation && (
         <div className="md:hidden border-t border-border/60 px-3 py-1.5">
           <span className="text-[10px] text-muted-foreground">
-            {formattedInstrument}
+            {venueLocation}
           </span>
         </div>
       )}

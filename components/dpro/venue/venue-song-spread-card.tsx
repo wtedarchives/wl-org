@@ -1,0 +1,54 @@
+"use client"
+
+import { useState, useMemo } from "react"
+import {
+  SongSpreadDisplay,
+  type CategorySpread,
+} from "@/components/dpro/song-spread-display"
+import type { SongSpreadCategory } from "@/hooks/use-venue-data"
+
+const COVER_CATEGORIES = ["Cover Songs", "Miscellaneous Covers"]
+
+interface VenueSongSpreadCardProps {
+  songSpreadData: SongSpreadCategory[]
+}
+
+export function VenueSongSpreadCard({
+  songSpreadData,
+}: VenueSongSpreadCardProps) {
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+
+  const spread: CategorySpread[] = useMemo(
+    () =>
+      [...songSpreadData]
+        .sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count
+          return a.canonid - b.canonid
+        })
+        .map((cat) => {
+          const showArtist = COVER_CATEGORIES.includes(cat.category)
+          const songsFormatted = cat.songs.map(({ song, artist, playCount }) => {
+            const base = showArtist && artist ? `${song} [${artist}]` : song
+            return `${base} [${playCount}]`
+          })
+          return {
+            category: cat.category,
+            count: cat.count,
+            canonid: cat.canonid,
+            songs: songsFormatted,
+          }
+        }),
+    [songSpreadData],
+  )
+
+  if (spread.length === 0) return null
+
+  return (
+    <SongSpreadDisplay
+      spread={spread}
+      hoveredCategory={hoveredCategory}
+      onCategoryHover={setHoveredCategory}
+      cardMaxHeight="max-h-[400px]"
+    />
+  )
+}

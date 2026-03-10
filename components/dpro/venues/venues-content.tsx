@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronDown, ChevronUp } from "lucide-react"
+import { useSidebar } from "@/components/ui/sidebar"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
@@ -31,6 +32,7 @@ const SORT_FIELDS: { field: VenueSortField; label: string }[] = [
 ]
 
 export function VenuesContent() {
+  const { openMobile } = useSidebar()
   const [sortField, setSortField] = useState<VenueSortField>("subvenue")
   const [sortDirection, setSortDirection] =
     useState<VenueSortDirection>("asc")
@@ -190,7 +192,7 @@ export function VenuesContent() {
         </div>
         <div
           className={`relative lg:w-[50%] xl:w-[45%] shrink-0 order-1 lg:order-2 ${
-            isSearchOpen ? "hidden" : ""
+            isSearchOpen || openMobile ? "hidden" : ""
           }`}
         >
           <VenueMap mapData={mapData} />

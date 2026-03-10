@@ -11,6 +11,8 @@ import {
   CommandList as CommandListPrimitive,
   CommandSeparator as CommandSeparatorPrimitive,
 } from "cmdk"
+import { Dialog as DialogPrimitive } from "radix-ui"
+import * as VisuallyHiddenPrimitive from "@radix-ui/react-visually-hidden"
 import { Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,23 +35,47 @@ function CommandDialog({
   className,
   contentClassName,
   overlayClassName,
-  ...props
+  label = "Command menu",
+  open,
+  onOpenChange,
+  container,
+  children,
+  ...commandProps
 }: React.ComponentProps<typeof CommandDialogPrimitive> & {
   contentClassName?: string
   overlayClassName?: string
 }) {
   return (
-    <CommandDialogPrimitive
-      contentClassName={cn(
-        "fixed left-[50%] top-[50%] z-50 max-h-[85vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg border border-border bg-popover p-0 shadow-lg",
-        contentClassName
-      )}
-      overlayClassName={cn(
-        "fixed inset-0 z-50 bg-black/80 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-        overlayClassName
-      )}
-      {...props}
-    />
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal container={container}>
+        <DialogPrimitive.Overlay
+          className={cn(
+            "fixed inset-0 z-50 bg-black/80 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+            overlayClassName
+          )}
+        />
+        <DialogPrimitive.Content
+          aria-label={label}
+          className={cn(
+            "fixed left-[50%] top-[50%] z-50 max-h-[85vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg border border-border bg-popover p-0 shadow-lg",
+            contentClassName
+          )}
+        >
+          <VisuallyHiddenPrimitive.Root>
+            <DialogPrimitive.Title>{label}</DialogPrimitive.Title>
+          </VisuallyHiddenPrimitive.Root>
+          <CommandRoot
+            className={cn(
+              "flex h-full w-full flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground",
+              className
+            )}
+            {...commandProps}
+          >
+            {children}
+          </CommandRoot>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
 
