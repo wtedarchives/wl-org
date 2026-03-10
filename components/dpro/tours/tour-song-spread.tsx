@@ -17,6 +17,7 @@ interface TourSongSpreadProps {
       entry_short?: string | null
       songs?: {
         song_category?: string
+        song_displayname?: string | null
         song_originalartist?: string | null
         categories?: { category_canonid?: number }
       }
