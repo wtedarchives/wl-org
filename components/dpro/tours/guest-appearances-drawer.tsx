@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { X } from "lucide-react"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Drawer,
   DrawerContent,
@@ -115,7 +116,10 @@ export function GuestAppearancesDrawer({
                   className="align-middle"
                 >
                   <TableCell className="align-middle py-1.5 pr-4 text-[11px] font-medium">
-                    {song.entry_song}
+                    <SongDisplayName
+                      song={song.entry_song}
+                      songDisplayName={song.song_displayname}
+                    />
                   </TableCell>
                   <TableCell className="align-middle py-1.5 px-2 text-center text-[11px] whitespace-nowrap">
                     <Link

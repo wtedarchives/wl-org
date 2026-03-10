@@ -23,6 +23,7 @@ export interface GuestShow {
 
 export interface SongCount {
   song: string
+  song_displayname?: string | null
   play_count: number
   category?: string
   category_canonid?: number
@@ -35,6 +36,7 @@ export interface SongSpreadCategory {
   canonid: number
   songs: {
     song: string
+    song_displayname?: string | null
     playCount: number
     artist?: string
   }[]
@@ -93,6 +95,7 @@ export function useGuestData(guestId: string | undefined) {
             entry_show?: string
             songs?: {
               song?: string
+              song_displayname?: string | null
               song_category?: string
               song_originalartist?: string | null
               categories?: { category_canonid?: number } }
@@ -122,6 +125,7 @@ export function useGuestData(guestId: string | undefined) {
                 entry_show,
                 songs:entry_song(
                   song,
+                  song_displayname,
                   song_category,
                   song_originalartist,
                   categories:song_category(
@@ -249,6 +253,7 @@ async function processSongData(
     setlist_entries?: {
       songs?: {
         song?: string
+        song_displayname?: string | null
         song_category?: string
         song_originalartist?: string | null
         categories?: { category_canonid?: number }
@@ -267,6 +272,7 @@ async function processSongData(
       category: string
       categoryCanonId?: number
       originalArtist?: string | null
+      songDisplayName?: string | null
     }
   > = {}
 
@@ -275,6 +281,7 @@ async function processSongData(
     if (!songsRel?.song) continue
 
     const songName = songsRel.song
+    const songDisplayName = songsRel.song_displayname ?? null
     const category = songsRel.song_category ?? "Uncategorized"
     const categoryCanonId = songsRel.categories?.category_canonid
     const originalArtist = songsRel.song_originalartist ?? null
@@ -285,6 +292,7 @@ async function processSongData(
         category,
         categoryCanonId,
         originalArtist,
+        songDisplayName,
       }
     }
     songData[songName].count += 1
@@ -308,6 +316,7 @@ async function processSongData(
   const songsArray: SongCount[] = Object.entries(songData).map(
     ([song, data]) => ({
       song,
+      song_displayname: data.songDisplayName ?? null,
       play_count: data.count,
       category: data.category,
       category_canonid:
@@ -318,7 +327,7 @@ async function processSongData(
 
   const categorySongs: Record<
     string,
-    Array<{ song: string; playCount: number; artist?: string }>
+    Array<{ song: string; song_displayname?: string | null; playCount: number; artist?: string }>
   > = {}
   const categoryTotalPerformances: Record<string, number> = {}
 
@@ -334,6 +343,7 @@ async function processSongData(
         : songItem.original_artist?.trim()
     categorySongs[category].push({
       song: songItem.song,
+      song_displayname: songItem.song_displayname ?? null,
       playCount: songItem.play_count,
       artist: artist ?? undefined,
     })

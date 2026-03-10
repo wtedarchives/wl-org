@@ -11,6 +11,7 @@ function formatShowDate(dateStr: string): string {
 
 export interface SongMatrixData {
   songs: string[]
+  songDisplayNameMap: Record<string, string | null>
   showDates: Array<{ id: string; date: string; displayDate: string }>
   data: Record<
     string,
@@ -29,6 +30,7 @@ export function useSongMatrix(
 ) {
   const [songMatrix, setSongMatrix] = useState<SongMatrixData>({
     songs: [],
+    songDisplayNameMap: {},
     showDates: [],
     data: {},
   })
@@ -63,7 +65,8 @@ export function useSongMatrix(
             entry_set,
             entry_setnum,
             entry_short,
-            shows(show_date)
+            shows(show_date),
+            songs:entry_song(song_displayname)
           `,
           )
           .in("entry_show", showIds)
@@ -103,6 +106,17 @@ export function useSongMatrix(
         const uniqueSongs = [
           ...new Set(validEntries.map((e: any) => e.entry_song)),
         ].sort()
+
+        const songDisplayNameMap: Record<string, string | null> = {}
+        for (const e of validEntries as any[]) {
+          const song = e.entry_song
+          if (song && !songDisplayNameMap[song]) {
+            const songsRel = e.songs
+            const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
+            songDisplayNameMap[song] =
+              songRow?.song_displayname?.trim() || null
+          }
+        }
 
         const sortedShows = [...shows].sort(
           (a, b) =>
@@ -170,6 +184,7 @@ export function useSongMatrix(
 
         setSongMatrix({
           songs: uniqueSongs,
+          songDisplayNameMap,
           showDates,
           data: matrixData,
         })

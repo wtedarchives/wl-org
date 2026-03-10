@@ -31,7 +31,7 @@ export function TourSongSpread({ shows }: TourSongSpreadProps) {
     const counts: Record<string, number> = {}
     const songsByCategory: Record<
       string,
-      { song: string; artist?: string; playCount: number }[]
+      { song: string; displayName: string; artist?: string; playCount: number }[]
     > = {}
     const canonids: Record<string, number> = {}
 
@@ -64,12 +64,15 @@ export function TourSongSpread({ shows }: TourSongSpreadProps) {
               ? "Traditional"
               : entry.songs?.song_originalartist?.trim()
           const showArtist = COVER_CATEGORIES.includes(category) && artist
+          const displayName =
+            entry.songs?.song_displayname?.trim() || entry.entry_song
           const existing = songsByCategory[category].findIndex(
             (s) => s.song === entry.entry_song,
           )
           if (existing === -1) {
             songsByCategory[category].push({
               song: entry.entry_song,
+              displayName,
               artist: showArtist ? artist : undefined,
               playCount: 1,
             })
@@ -85,8 +88,9 @@ export function TourSongSpread({ shows }: TourSongSpreadProps) {
         const showArtist = COVER_CATEGORIES.includes(category)
         const songs = (songsByCategory[category] ?? [])
           .sort((a, b) => a.song.localeCompare(b.song))
-          .map(({ song, artist, playCount }) => {
-            const base = showArtist && artist ? `${song} [${artist}]` : song
+          .map(({ displayName, artist, playCount }) => {
+            const base =
+              showArtist && artist ? `${displayName} [${artist}]` : displayName
             return `${base} [${playCount}]`
           })
         return {

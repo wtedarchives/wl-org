@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Card,
   CardContent,
@@ -47,7 +48,10 @@ export function LongestSongsCard({
                         href={`/dpro/song/${song.song_id}`}
                         className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                       >
-                        {song.song}
+                        <SongDisplayName
+                          song={song.song}
+                          songDisplayName={song.song_displayname}
+                        />
                       </Link>
                       {song.category_artwork && (
                         <Image

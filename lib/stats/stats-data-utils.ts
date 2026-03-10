@@ -50,6 +50,7 @@ export async function fetchTopSongsData(
         entry_song,
         songs!inner(
           song_id,
+          song_displayname,
           song_category,
           categories!inner(
             category_canonid,
@@ -71,10 +72,10 @@ export async function fetchTopSongsData(
   })
 
   const songShowCounts = allData.reduce(
-    (acc: Record<string, { song: string; song_id: string; shows: Set<string>; category_canonid: number; category_artwork?: string }>,
+    (acc: Record<string, { song: string; song_displayname?: string | null; song_id: string; shows: Set<string>; category_canonid: number; category_artwork?: string }>,
     entry: Record<string, unknown>
   ) => {
-    const songs = entry.songs as { song_id: string; categories: { category_canonid: number; category_artwork?: string } } | { song_id: string; categories: { category_canonid: number; category_artwork?: string } }[]
+    const songs = entry.songs as { song_id: string; song_displayname?: string | null; categories: { category_canonid: number; category_artwork?: string } } | { song_id: string; song_displayname?: string | null; categories: { category_canonid: number; category_artwork?: string } }[]
     const song = Array.isArray(songs) ? songs[0] : songs
     const songId = song?.song_id
     const showId = entry.entry_show as string
@@ -82,22 +83,24 @@ export async function fetchTopSongsData(
     if (!acc[songId]) {
       acc[songId] = {
         song: entry.entry_song as string,
+        song_displayname: song?.song_displayname ?? null,
         song_id: songId,
         shows: new Set([showId]),
-        category_canonid: song.categories?.category_canonid ?? 0,
-        category_artwork: song.categories?.category_artwork,
+        category_canonid: song?.categories?.category_canonid ?? 0,
+        category_artwork: song?.categories?.category_artwork,
       }
     } else {
       acc[songId].shows.add(showId)
     }
     return acc
   },
-  {} as Record<string, { song: string; song_id: string; shows: Set<string>; category_canonid: number; category_artwork?: string }>
+  {} as Record<string, { song: string; song_displayname?: string | null; song_id: string; shows: Set<string>; category_canonid: number; category_artwork?: string }>
   )
 
   return Object.values(songShowCounts)
     .map((item) => ({
       song: item.song,
+      song_displayname: item.song_displayname,
       song_id: item.song_id,
       play_count: item.shows.size,
       category_canonid: item.category_canonid,
@@ -126,6 +129,7 @@ async function fetchPlacementData(
         entry_song,
         songs!inner(
           song_id,
+          song_displayname,
           song_category,
           categories!inner(
             category_canonid,
@@ -151,16 +155,17 @@ async function fetchPlacementData(
   })
 
   const counts = allData.reduce(
-    (acc: Record<string, { song_name: string; song_id: string; times_played: number; category_canonid: number; category_artwork?: string }>,
+    (acc: Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; category_artwork?: string }>,
     entry: Record<string, unknown>
   ) => {
     const songName = entry.entry_song as string
-    const songs = entry.songs as { song_id: string; categories: { category_canonid: number; category_artwork?: string } } | { song_id: string; categories: { category_canonid: number; category_artwork?: string } }[]
+    const songs = entry.songs as { song_id: string; song_displayname?: string | null; categories: { category_canonid: number; category_artwork?: string } } | { song_id: string; song_displayname?: string | null; categories: { category_canonid: number; category_artwork?: string } }[]
     const song = Array.isArray(songs) ? songs[0] : songs
     if (!song) return acc
     if (!acc[songName]) {
       acc[songName] = {
         song_name: songName,
+        song_displayname: song.song_displayname ?? null,
         song_id: song.song_id,
         times_played: 1,
         category_canonid: song.categories?.category_canonid ?? 0,
@@ -171,7 +176,7 @@ async function fetchPlacementData(
     }
     return acc
   },
-  {} as Record<string, { song_name: string; song_id: string; times_played: number; category_canonid: number; category_artwork?: string }>
+  {} as Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; category_artwork?: string }>
   )
 
   return Object.values(counts)
@@ -224,6 +229,7 @@ export async function fetchLongestSongsData(
         entry_show,
         songs!inner(
           song_id,
+          song_displayname,
           song_category,
           categories!inner(
             category_artwork
@@ -252,15 +258,19 @@ export async function fetchLongestSongsData(
     })
     .slice(0, 10)
 
-  return sortedData.map((entry: Record<string, unknown>) => ({
-    song: entry.entry_song as string,
-    song_id: (entry.songs as { song_id: string })?.song_id ?? "",
-    entry_length: entry.entry_length as string,
-    show_date: (entry.shows as { show_date?: string })?.show_date,
-    show_id: entry.entry_show as string,
-    venue_location: (entry.shows as { show_venue_location?: string })?.show_venue_location,
-    category_artwork: (entry.songs as { categories?: { category_artwork?: string } })?.categories?.category_artwork,
-  }))
+  return sortedData.map((entry: Record<string, unknown>) => {
+    const songs = entry.songs as { song_id: string; song_displayname?: string | null; categories?: { category_artwork?: string } }
+    return {
+      song: entry.entry_song as string,
+      song_displayname: songs?.song_displayname ?? null,
+      song_id: songs?.song_id ?? "",
+      entry_length: entry.entry_length as string,
+      show_date: (entry.shows as { show_date?: string })?.show_date,
+      show_id: entry.entry_show as string,
+      venue_location: (entry.shows as { show_venue_location?: string })?.show_venue_location,
+      category_artwork: songs?.categories?.category_artwork,
+    }
+  })
 }
 
 function extractNumberFromLastCount(lastCount: string | null): number {
@@ -288,6 +298,7 @@ export async function fetchLiberatedSongsData(
         entry_length,
         songs!inner(
           song_id,
+          song_displayname,
           song_category,
           categories!inner(
             category_artwork
@@ -311,10 +322,11 @@ export async function fetchLiberatedSongsData(
 
   return allData
     .map((entry: Record<string, unknown>) => {
-      const songs = entry.songs as { song_id?: string; categories?: { category_artwork?: string } }
+      const songs = entry.songs as { song_id?: string; song_displayname?: string | null; categories?: { category_artwork?: string } }
       const shows = entry.shows as { show_date?: string; show_venue_location?: string }
       return {
         song: entry.entry_song as string,
+        song_displayname: songs?.song_displayname ?? null,
         song_id: songs?.song_id ?? "",
         last_count: entry.last_count as string | null,
         last_show_date: entry.last_show_date as string | null,

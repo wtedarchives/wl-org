@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
@@ -79,7 +80,10 @@ export function TopSlotsCarousel({
                           onClick={() => onSongClick?.(item.left)}
                           className="font-medium text-foreground hover:underline cursor-pointer text-left"
                         >
-                          {item.left}
+                          <SongDisplayName
+                            song={item.left}
+                            songDisplayName={item.displayName}
+                          />
                         </button>
                         {item.artwork && (
                           <img
@@ -159,7 +163,10 @@ export function TopSlotsCarousel({
                             onClick={() => onSongClick?.(item.left)}
                             className="font-medium text-foreground hover:underline cursor-pointer text-left"
                           >
-                            {item.left}
+                            <SongDisplayName
+                              song={item.left}
+                              songDisplayName={item.displayName}
+                            />
                           </button>
                           {item.artwork && (
                             <img

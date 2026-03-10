@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ type SongItem = {
   song_id: string
   song?: string
   song_name?: string
+  song_displayname?: string | null
   play_count?: number
   times_played?: number
   category_artwork?: string
@@ -29,6 +31,9 @@ interface StatCardProps {
   headerClassName?: string
   items: SongItem[]
   getDisplayName: (item: SongItem) => string
+  /** When provided with getSongDisplayName, uses SongDisplayName with hover-to-canonical. */
+  getSong?: (item: SongItem) => string
+  getSongDisplayName?: (item: SongItem) => string | null
   getCount: (item: SongItem) => number | string
   showEmptyState?: boolean
 }
@@ -38,6 +43,8 @@ export function StatCard({
   headerClassName,
   items,
   getDisplayName,
+  getSong,
+  getSongDisplayName,
   getCount,
   showEmptyState = false,
 }: StatCardProps) {
@@ -65,7 +72,14 @@ export function StatCard({
                         href={`/dpro/song/${item.song_id}`}
                         className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                       >
-                        {getDisplayName(item)}
+                        {getSong && getSongDisplayName ? (
+                          <SongDisplayName
+                            song={getSong(item)}
+                            songDisplayName={getSongDisplayName(item)}
+                          />
+                        ) : (
+                          getDisplayName(item)
+                        )}
                       </Link>
                       {item.category_artwork && (
                         <Image

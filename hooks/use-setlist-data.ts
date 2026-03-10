@@ -124,6 +124,8 @@ export function useSetlistData(showId: string | undefined) {
             shows_since_debut_num,
             songs (
               song_id,
+              song,
+              song_displayname,
               song_category,
               song_originalartist,
               categories (
@@ -152,7 +154,7 @@ export function useSetlistData(showId: string | undefined) {
 
         const processedSetlist = (setlistData ?? []).map((entry: Record<string, unknown>) => {
           const songs = entry.songs as
-            | { song_id: string; song_category: string; song_originalartist: string | null; categories: { category_canonid: number } }
+            | { song_id: string; song: string; song_displayname: string | null; song_category: string; song_originalartist: string | null; categories: { category_canonid: number } }
             | undefined
           const guestsRaw = entry.setlist_entry_guests as
             | Array<{ guest_id: string; guests: { guest_displayname: string; guest_canonid: number; guest_instrument: string; guest_category?: string | null } }>
@@ -183,6 +185,8 @@ export function useSetlistData(showId: string | undefined) {
             songs: songs
               ? {
                   ...songs,
+                  song: songs.song ?? "",
+                  song_displayname: songs.song_displayname ?? null,
                   song_originalartist: songs.song_originalartist ?? null,
                   categories: {
                     category_canonid: songs.categories?.category_canonid ?? 0,
@@ -191,6 +195,8 @@ export function useSetlistData(showId: string | undefined) {
                 }
               : {
                   song_id: "",
+                  song: "",
+                  song_displayname: null,
                   song_category: "",
                   song_originalartist: null,
                   categories: { category_canonid: 0, category_artwork: null },

@@ -34,6 +34,8 @@ interface SetlistSongPerformancesSheetProps {
   tourName: string | null
   /** When provided with tourName, used for tour-page song click (no entry needed). */
   songName?: string | null
+  /** Display name for header (songs.song_displayname). */
+  songDisplayName?: string | null
   /** Song ID for "View full song history" link when opened from tour page. */
   songId?: string | null
 }
@@ -44,9 +46,12 @@ export function SetlistSongPerformancesSheet({
   entry,
   tourName,
   songName: songNameProp,
+  songDisplayName: songDisplayNameProp,
   songId: songIdProp,
 }: SetlistSongPerformancesSheetProps) {
   const songName = songNameProp ?? entry?.entry_song ?? ""
+  const songDisplayName =
+    songDisplayNameProp ?? entry?.songs?.song_displayname ?? songName
   const songId = songIdProp ?? entry?.song_id ?? null
 
   const { performances, loading, error } = useSongTourPerformances(
@@ -64,7 +69,9 @@ export function SetlistSongPerformancesSheet({
           </DrawerTitle>
           {songName ? (
             <div className="space-y-1 text-[11px]">
-              <p className="text-sm font-medium text-foreground">{songName}</p>
+              <p className="text-sm font-medium text-foreground">
+                {songDisplayName || songName}
+              </p>
               {tourName && (
                 <p className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                   {tourName}

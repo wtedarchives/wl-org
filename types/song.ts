@@ -1,5 +1,6 @@
 export interface SongData {
   song: string
+  song_displayname?: string | null
   song_category: string
   song_originalartist: string | null
   song_coachnotes: string | null

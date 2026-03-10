@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
 
 interface NotPlayedInTourProps {
@@ -195,7 +196,10 @@ export function NotPlayedInTour({
                             href={`/dpro/songs/${song.song_id}`}
                             className="font-medium text-foreground hover:underline underline-offset-4"
                           >
-                            {song.song}
+                            <SongDisplayName
+                              song={song.song}
+                              songDisplayName={song.song_displayname}
+                            />
                           </Link>
                           {song.category_artwork && (
                             <img

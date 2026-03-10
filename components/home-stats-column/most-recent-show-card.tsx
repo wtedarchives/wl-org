@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Tooltip,
@@ -209,10 +210,13 @@ export function MostRecentShowCard() {
                     <div className="flex flex-1 items-center justify-between gap-2 pl-2">
                       <span className="truncate font-medium">
                         <Link
-                          href={`/dpro/songs/${entry.songs.song_id}`}
+                          href={`/dpro/songs/${entry.songs?.song_id}`}
                           className="hover:underline"
                         >
-                          {entry.entry_song}
+                          <SongDisplayName
+                            song={entry.entry_song}
+                            songDisplayName={entry.songs?.song_displayname}
+                          />
                         </Link>
                         {entry.entry_short && (
                           <span className="ml-2 text-[10px] font-medium text-destructive">

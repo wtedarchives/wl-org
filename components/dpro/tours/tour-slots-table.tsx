@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Table,
   TableBody,
@@ -66,7 +67,10 @@ export function TourSlotsTable({
               }}
               className="text-[11px] font-medium hover:underline cursor-pointer"
             >
-              {song.song}
+              <SongDisplayName
+                song={song.song}
+                songDisplayName={song.song_displayname}
+              />
             </a>
             {index < songs.length - 1 && <span className="mr-1" />}
           </span>

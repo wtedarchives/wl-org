@@ -1,0 +1,24 @@
+---
+description: Use song_displayname for display; show songs.song on hover
+alwaysApply: false
+globs: **/*.tsx
+---
+
+# Song Display Behavior
+
+Whenever displaying song names in the application:
+
+1. **Default display**: Use `songs.song_displayname` for the visible text.
+2. **Hover behavior**: When the user hovers over the song/row/element, animate to show `songs.song` (canonical name) instead of the display name.
+3. **Implementation**: Use the `SongDisplayName` component from `@/components/dpro/song-display-name`:
+
+```tsx
+<SongDisplayName
+  song={entry.entry_song}
+  songDisplayName={entry.songs?.song_displayname}
+/>
+```
+
+4. **Tooltips only**: For tooltips (e.g. song spread category tooltips), display `song_displayname` only—no hover switch. Just use the display name in the tooltip content.
+
+5. **Exceptions**: If the user specifies otherwise (e.g. "show canonical name only"), follow their instruction. When unsure, ask for clarification on what to display.

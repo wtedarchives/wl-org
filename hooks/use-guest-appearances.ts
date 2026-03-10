@@ -11,6 +11,7 @@ export interface GuestCount {
 
 export interface SongWithGuest {
   entry_song: string
+  song_displayname?: string | null
   show_date: string
   show_id: string
   show_venue_location: string
@@ -167,6 +168,7 @@ export function useGuestAppearances(
           entry_show,
           entry_set,
           entry_setnum,
+          songs:entry_song(song_displayname),
           setlist_entry_guests!inner (
             guest_id
           ),
@@ -191,11 +193,15 @@ export function useGuestAppearances(
         entry_short: string | null
         entry_segue: string | null
         entry_show: string
+        songs?: { song_displayname?: string | null } | Array<{ song_displayname?: string | null }>
         shows?: { show_date?: string; show_venue_location?: string } | Array<{ show_date?: string; show_venue_location?: string }>
       }>).map((entry) => {
         const show = Array.isArray(entry.shows) ? entry.shows[0] : entry.shows
+        const songsRel = entry.songs
+        const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
         return {
           entry_song: entry.entry_song,
+          song_displayname: songRow?.song_displayname ?? null,
           show_date: show?.show_date ?? "",
           show_id: entry.entry_show,
           show_venue_location: show?.show_venue_location ?? "",

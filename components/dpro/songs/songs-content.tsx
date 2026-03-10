@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { SongSearch } from "@/components/dpro/songs/song-search"
@@ -10,6 +11,7 @@ import { supabase } from "@/lib/supabase"
 
 interface Song {
   song: string
+  song_displayname?: string | null
   song_category: string
   song_originalartist: string
   song_id: string
@@ -97,7 +99,10 @@ function CategorySection({
                             href={`/dpro/song/${song.song_id}`}
                             className="block py-0.5 pl-3 text-xs font-medium text-foreground underline-offset-4 hover:underline"
                           >
-                            {song.song}
+                            <SongDisplayName
+                              song={song.song}
+                              songDisplayName={song.song_displayname}
+                            />
                           </Link>
                         </li>
                       ))}

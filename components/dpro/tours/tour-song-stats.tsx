@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import Image from "next/image"
 import { ArrowUp, ArrowDown } from "lucide-react"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ interface Show {
     entry_short?: string | null
     songs?: {
       song_id?: string
+      song_displayname?: string | null
       song_category?: string
       categories?: { category_canonid?: number }
     }
@@ -29,6 +31,7 @@ interface Show {
 
 interface SongStats {
   song: string
+  song_displayname?: string | null
   song_id: string
   count: number
   category: string
@@ -127,6 +130,7 @@ export function TourSongStats({
       string,
       {
         song_id: string
+        song_displayname?: string | null
         count: number
         category: string
         categoryCanonId: number
@@ -150,6 +154,7 @@ export function TourSongStats({
         if (!validSongs.has(e.entry_song)) return
         const curr = songMap.get(e.entry_song) ?? {
           song_id: songIdMap[e.entry_song] ?? "",
+          song_displayname: null,
           count: 0,
           category: "",
           categoryCanonId: 0,
@@ -173,6 +178,7 @@ export function TourSongStats({
 
         songMap.set(e.entry_song, {
           song_id: songId,
+          song_displayname: e.songs?.song_displayname ?? curr.song_displayname,
           count: inc ? curr.count + 1 : curr.count,
           category: e.songs?.song_category ?? curr.category,
           categoryCanonId: catId,
@@ -190,6 +196,7 @@ export function TourSongStats({
       }
       return {
         song,
+        song_displayname: s.song_displayname,
         song_id: s.song_id,
         count: s.count,
         category: s.category,
@@ -327,7 +334,10 @@ export function TourSongStats({
                   onClick={() => onSongClick?.(stat.song)}
                 >
                   <span className="font-medium hover:underline text-xs">
-                    {stat.song}
+                    <SongDisplayName
+                      song={stat.song}
+                      songDisplayName={stat.song_displayname}
+                    />
                   </span>
                 </TableCell>
                 <TableCell className="py-0.5 pl-2 text-center text-xs text-muted-foreground tabular-nums">

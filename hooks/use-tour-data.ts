@@ -232,6 +232,8 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
                   entry_show,
                   songs:entry_song(
                     song_id,
+                    song,
+                    song_displayname,
                     song_category,
                     song_originalartist,
                     categories(

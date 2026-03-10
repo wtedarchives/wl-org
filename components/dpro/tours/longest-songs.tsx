@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { formatEntryLength } from "@/lib/setlist-utils"
 
 interface LongestSongsProps {
@@ -14,6 +15,7 @@ interface LongestSongsProps {
 
 interface LongestSong {
   entry_song: string
+  song_displayname?: string | null
   entry_length: string
   song_id?: string
   show_date?: string
@@ -59,6 +61,7 @@ export function LongestSongs({
             entry_length,
             entry_show,
             songs!inner(
+              song_displayname,
               song_category,
               categories!inner(
                 category_artwork
@@ -86,6 +89,7 @@ export function LongestSongs({
           const cat = Array.isArray(cats) ? cats[0] : cats
           return {
             entry_song: entry.entry_song,
+            song_displayname: song?.song_displayname ?? null,
             entry_length: entry.entry_length,
             show_date: show?.show_date,
             show_id: entry.entry_show,
@@ -134,7 +138,10 @@ export function LongestSongs({
                           onClick={() => onSongClick?.(song.entry_song)}
                           className="font-medium text-foreground hover:underline cursor-pointer"
                         >
-                          {song.entry_song}
+                          <SongDisplayName
+                            song={song.entry_song}
+                            songDisplayName={song.song_displayname}
+                          />
                         </button>
                         {song.category_artwork && (
                           <img

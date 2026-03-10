@@ -3,6 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import { MoveRight } from "lucide-react"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SetlistEntry {
   entry_song: string
@@ -15,6 +16,7 @@ interface SetlistEntry {
   averageLength?: string | null
   songs: {
     song_id: string
+    song_displayname?: string | null
     category_artwork?: string | null
   }
 }
@@ -81,7 +83,10 @@ export function SetlistDisplay({
                     href={`/dpro/songs/${entry.songs.song_id}`}
                     className="text-[11px] font-medium hover:underline"
                   >
-                    {entry.entry_song}
+                    <SongDisplayName
+                      song={entry.entry_song}
+                      songDisplayName={entry.songs.song_displayname}
+                    />
                   </Link>
                   {entry.entry_short && (
                     <span className="text-[10px] font-medium text-destructive">

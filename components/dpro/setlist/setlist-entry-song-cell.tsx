@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -30,10 +31,16 @@ export function SetlistEntrySongCell({
             onClick={() => onSongClick(entry)}
             className="text-left hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded pr-1"
           >
-            {entry.entry_song}
+            <SongDisplayName
+              song={entry.entry_song}
+              songDisplayName={entry.songs?.song_displayname}
+            />
           </button>
         ) : (
-          entry.entry_song
+          <SongDisplayName
+            song={entry.entry_song}
+            songDisplayName={entry.songs?.song_displayname}
+          />
         )}
         {entry.entry_short && (
           <span className="ml-1 text-red-400 text-[0.625rem] pr-1">
@@ -83,7 +90,7 @@ export function SetlistEntrySongCell({
           <TooltipContent className="max-w-[280px] text-xs text-background">
             <div className="space-y-1.5">
               <div className="font-medium text-background">
-                {entry.entry_song}
+                {entry.songs?.song_displayname || entry.entry_song}
                 {entry.entry_short && (
                   <span className="ml-1 text-[0.625rem] text-red-400 pr-1">
                     [{entry.entry_short}]

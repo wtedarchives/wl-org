@@ -163,6 +163,8 @@ function DproStatsContent() {
               headerClassName="bg-[#3C1E40] text-white py-2"
               items={topSongs}
               getDisplayName={(item) => item.song ?? ""}
+              getSong={(item) => item.song ?? ""}
+              getSongDisplayName={(item) => item.song_displayname ?? null}
               getCount={(item) => item.play_count ?? 0}
               showEmptyState={showEmptyState}
             />
@@ -171,6 +173,8 @@ function DproStatsContent() {
               headerClassName="bg-[#047857] text-white py-2"
               items={showOpeners}
               getDisplayName={(item) => item.song_name ?? ""}
+              getSong={(item) => item.song_name ?? ""}
+              getSongDisplayName={(item) => item.song_displayname ?? null}
               getCount={(item) => item.times_played ?? 0}
               showEmptyState={showEmptyState}
             />
@@ -179,6 +183,8 @@ function DproStatsContent() {
               headerClassName="bg-[#10b981] text-white py-2"
               items={setOpeners}
               getDisplayName={(item) => item.song_name ?? ""}
+              getSong={(item) => item.song_name ?? ""}
+              getSongDisplayName={(item) => item.song_displayname ?? null}
               getCount={(item) => item.times_played ?? 0}
               showEmptyState={showEmptyState}
             />
@@ -187,6 +193,8 @@ function DproStatsContent() {
               headerClassName="bg-[#3b82f6] text-white py-2"
               items={setClosers}
               getDisplayName={(item) => item.song_name ?? ""}
+              getSong={(item) => item.song_name ?? ""}
+              getSongDisplayName={(item) => item.song_displayname ?? null}
               getCount={(item) => item.times_played ?? 0}
               showEmptyState={showEmptyState}
             />
@@ -195,6 +203,8 @@ function DproStatsContent() {
               headerClassName="bg-[#be123c] text-white py-2"
               items={encores}
               getDisplayName={(item) => item.song_name ?? ""}
+              getSong={(item) => item.song_name ?? ""}
+              getSongDisplayName={(item) => item.song_displayname ?? null}
               getCount={(item) => item.times_played ?? 0}
               showEmptyState={showEmptyState}
             />
@@ -206,6 +216,8 @@ function DproStatsContent() {
                 headerClassName="bg-white text-black py-2"
                 items={notPlayedSongs}
                 getDisplayName={(item) => item.song ?? ""}
+                getSong={(item) => item.song ?? ""}
+                getSongDisplayName={(item) => item.song_displayname ?? null}
                 getCount={(item) => item.play_count ?? 0}
                 showEmptyState={showEmptyState}
               />

@@ -25,7 +25,7 @@ export interface TourShow {
   show_length?: string | null
   show_rarity?: string | null
   show_gap?: string | null
-  setlist_entries?: Array<{
+    setlist_entries?: Array<{
     entry_length: string | null
     entry_song: string
     entry_placement?: string
@@ -34,6 +34,7 @@ export interface TourShow {
     songs?: {
       song_category?: string
       song_originalartist?: string
+      song_displayname?: string | null
       categories?: { category_canonid?: number; category_artwork?: string }
     }
   }>
@@ -41,6 +42,7 @@ export interface TourShow {
 
 export interface SongEntryWithId {
   song: string
+  song_displayname?: string | null
   setnum: number
   song_id?: string
 }
@@ -72,5 +74,6 @@ export interface SlotData {
     left: string
     right: string | number
     artwork?: string
+    displayName?: string | null
   }>
 }

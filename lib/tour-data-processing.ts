@@ -50,6 +50,8 @@ export interface RawSetlistEntry {
   songs?:
     | {
         song_id?: string
+        song?: string
+        song_displayname?: string | null
         song_category?: string | null
         song_originalartist?: string | null
         categories?: {
@@ -59,6 +61,8 @@ export interface RawSetlistEntry {
       }
     | {
         song_id?: string
+        song?: string
+        song_displayname?: string | null
         song_category?: string | null
         song_originalartist?: string | null
         categories?: {
@@ -138,6 +142,7 @@ export function processShowData(
         ? {
             song_category: songRow.song_category ?? undefined,
             song_originalartist: songRow.song_originalartist ?? undefined,
+            song_displayname: songRow.song_displayname ?? undefined,
             categories: {
               category_canonid: songRow.categories?.category_canonid ?? undefined,
               category_artwork: songRow.categories?.category_artwork,
@@ -209,6 +214,7 @@ export function processSlotsData(
 
     const songEntry: SongEntryWithId = {
       song: entry.entry_song,
+      song_displayname: songRow?.song_displayname ?? null,
       setnum: entry.entry_setnum,
       song_id: songId,
     }
@@ -240,10 +246,22 @@ export function processSlotsData(
 export function processTourDataWithCategories(
   entries: RawSetlistEntry[],
 ): SlotData[] {
-  const showOpeners = new Map<string, { count: number; artwork?: string }>()
-  const setOpeners = new Map<string, { count: number; artwork?: string }>()
-  const setClosers = new Map<string, { count: number; artwork?: string }>()
-  const encores = new Map<string, { count: number; artwork?: string }>()
+  const showOpeners = new Map<
+    string,
+    { count: number; artwork?: string; displayName?: string | null }
+  >()
+  const setOpeners = new Map<
+    string,
+    { count: number; artwork?: string; displayName?: string | null }
+  >()
+  const setClosers = new Map<
+    string,
+    { count: number; artwork?: string; displayName?: string | null }
+  >()
+  const encores = new Map<
+    string,
+    { count: number; artwork?: string; displayName?: string | null }
+  >()
 
   const seenShowOpener = new Set<string>()
   const seenSetOpener = new Set<string>()
@@ -259,8 +277,12 @@ export function processTourDataWithCategories(
     const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
     const artwork = songRow?.categories?.category_artwork
 
+    const displayName = songRow?.song_displayname ?? null
     const addTo = (
-      map: Map<string, { count: number; artwork?: string }>,
+      map: Map<
+        string,
+        { count: number; artwork?: string; displayName?: string | null }
+      >,
       seen: Set<string>,
     ) => {
       const key = `${show}|${placement}|${songName}`
@@ -270,7 +292,7 @@ export function processTourDataWithCategories(
       if (existing) {
         existing.count += 1
       } else {
-        map.set(songName, { count: 1, artwork })
+        map.set(songName, { count: 1, artwork, displayName })
       }
     }
 
@@ -281,7 +303,10 @@ export function processTourDataWithCategories(
   }
 
   const toSlotData = (
-    map: Map<string, { count: number; artwork?: string }>,
+    map: Map<
+      string,
+      { count: number; artwork?: string; displayName?: string | null }
+    >,
     title: string,
   ): SlotData => {
     const data = Array.from(map.entries())
@@ -290,10 +315,11 @@ export function processTourDataWithCategories(
         return a[0].localeCompare(b[0])
       })
       .slice(0, 8)
-      .map(([song, { count, artwork }]) => ({
+      .map(([song, { count, artwork, displayName }]) => ({
         left: song,
         right: count,
         ...(artwork && { artwork }),
+        ...(displayName && { displayName }),
       }))
     return {
       title,

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase"
 
 export interface NotPlayedSong {
   song: string
+  song_displayname?: string | null
   song_id: string
   play_count: number
   category_canonid: number
@@ -86,6 +87,7 @@ export function useNotPlayedInTour(
               entry_song,
               songs!inner(
                 song_id,
+                song_displayname,
                 song_category,
                 categories!inner(
                   category_canonid,
@@ -115,6 +117,7 @@ export function useNotPlayedInTour(
           string,
           {
             song: string
+            song_displayname?: string | null
             song_id: string
             shows: Set<string>
             category_canonid: number
@@ -135,6 +138,7 @@ export function useNotPlayedInTour(
           if (!songShowCounts[songId]) {
             songShowCounts[songId] = {
               song: entry.entry_song ?? "",
+              song_displayname: (songRow as { song_displayname?: string })?.song_displayname ?? null,
               song_id: songId,
               shows: new Set([showId]),
               category_canonid: categories?.category_canonid ?? 0,
@@ -149,6 +153,7 @@ export function useNotPlayedInTour(
           .filter((item) => !songsPlayedInTour.has(item.song_id))
           .map((item) => ({
             song: item.song,
+            song_displayname: item.song_displayname,
             song_id: item.song_id,
             play_count: item.shows.size,
             category_canonid: item.category_canonid,

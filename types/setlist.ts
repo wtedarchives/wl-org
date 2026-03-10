@@ -72,6 +72,8 @@ export interface SetlistEntry {
   joty_round?: string | null
   songs: {
     song_id: string
+    song: string
+    song_displayname: string | null
     song_category: string
     song_originalartist: string | null
     categories: {

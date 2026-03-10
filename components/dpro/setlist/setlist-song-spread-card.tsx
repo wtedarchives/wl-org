@@ -49,7 +49,9 @@ export function SetlistSongSpreadCard({
       const artist =
         rawArtist === "[Traditional]" ? "Traditional" : rawArtist
       const showArtist = COVER_CATEGORIES.includes(category) && artist
-      const label = showArtist ? `${songKey} [${artist}]` : songKey
+      const displayName =
+        entry.songs?.song_displayname?.trim() || songKey
+      const label = showArtist ? `${displayName} [${artist}]` : displayName
       songsByCategory[category].push(label)
     }
 

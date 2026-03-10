@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Card,
   CardContent,
@@ -64,7 +65,10 @@ export function LiberatedSongsCard({
                       href={`/dpro/song/${song.song_id}`}
                       className="text-xs font-medium text-foreground underline-offset-4 hover:underline whitespace-nowrap"
                     >
-                      {song.song}
+                      <SongDisplayName
+                        song={song.song}
+                        songDisplayName={song.song_displayname}
+                      />
                     </Link>
                   </TableCell>
                   <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2 text-center">

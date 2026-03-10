@@ -28,6 +28,7 @@ export interface SongSpreadCategory {
   canonid: number
   songs: {
     song: string
+    song_displayname?: string | null
     playCount: number
     artist?: string
   }[]
@@ -165,6 +166,7 @@ export function useVenueData(venueId: string | undefined) {
                 entry_show,
                 songs:entry_song(
                   song,
+                  song_displayname,
                   song_category,
                   song_originalartist,
                   categories:song_category(category_canonid)
@@ -191,6 +193,7 @@ export function useVenueData(venueId: string | undefined) {
             category: string
             categoryCanonId?: number
             originalArtist?: string | null
+            songDisplayName?: string | null
           }
         > = {}
 
@@ -202,6 +205,7 @@ export function useVenueData(venueId: string | undefined) {
           const category = songsRel.song_category ?? "Uncategorized"
           const categoryCanonId = songsRel.categories?.category_canonid
           const originalArtist = songsRel.song_originalartist ?? null
+          const songDisplayName = (songsRel as { song_displayname?: string })?.song_displayname ?? null
 
           if (!songData[songName]) {
             songData[songName] = {
@@ -209,6 +213,7 @@ export function useVenueData(venueId: string | undefined) {
               category,
               categoryCanonId,
               originalArtist,
+              songDisplayName,
             }
           }
           songData[songName].count += 1
@@ -233,6 +238,7 @@ export function useVenueData(venueId: string | undefined) {
 
         const songsArray = Object.entries(songData).map(([song, data]) => ({
           song,
+          song_displayname: data.songDisplayName,
           play_count: data.count,
           category: data.category,
           category_canonid:
@@ -242,7 +248,7 @@ export function useVenueData(venueId: string | undefined) {
 
         const categorySongs: Record<
           string,
-          Array<{ song: string; playCount: number; artist?: string }>
+          Array<{ song: string; song_displayname?: string | null; playCount: number; artist?: string }>
         > = {}
         const categoryTotalPerformances: Record<string, number> = {}
 
@@ -258,6 +264,7 @@ export function useVenueData(venueId: string | undefined) {
               : songItem.original_artist?.trim()
           categorySongs[category].push({
             song: songItem.song,
+            song_displayname: songItem.song_displayname,
             playCount: songItem.play_count,
             artist: artist ?? undefined,
           })

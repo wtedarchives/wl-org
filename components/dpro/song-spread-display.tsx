@@ -26,6 +26,7 @@ function CategorySpreadRow({
   onCategoryHover,
   tooltipContent,
   showTooltips,
+  tooltipSide = "left",
 }: {
   category: string
   count: number
@@ -35,6 +36,7 @@ function CategorySpreadRow({
   onCategoryHover?: (category: string | null) => void
   tooltipContent: React.ReactNode
   showTooltips: boolean
+  tooltipSide?: "left" | "right" | "top" | "bottom"
 }) {
   const { artwork, loaded } = useCategoryArtwork(category)
   const barWidth = maxCount > 0 ? Math.max(4, (count / maxCount) * 100) : 0
@@ -93,7 +95,7 @@ function CategorySpreadRow({
       {showTooltips && tooltipContent ? (
         <Tooltip>
           <TooltipTrigger asChild>{rowContent}</TooltipTrigger>
-          <TooltipContent side="left" className="max-w-xs text-[11px] p-0">
+          <TooltipContent side={tooltipSide} className="max-w-xs text-[11px] p-0">
             <div className="w-full border-b border-black">
               <p className="font-bold px-3 py-1 leading-tight text-sm">
                 {category}
@@ -115,6 +117,8 @@ interface SongSpreadDisplayProps {
   onCategoryHover?: (category: string | null) => void
   /** Max height for the entire card, e.g. "max-h-[400px]" */
   cardMaxHeight?: string
+  /** Tooltip position; default "left". Use "top" for venue song spread. */
+  tooltipSide?: "left" | "right" | "top" | "bottom"
 }
 
 function getSongNameForSort(s: string): string {
@@ -127,6 +131,7 @@ export function SongSpreadDisplay({
   hoveredCategory = null,
   onCategoryHover,
   cardMaxHeight,
+  tooltipSide = "left",
 }: SongSpreadDisplayProps) {
   const isDesktop = useIsDesktopContentLayout()
   const maxCount = spread.length > 0 ? Math.max(...spread.map((s) => s.count)) : 0
@@ -186,6 +191,7 @@ export function SongSpreadDisplay({
                 onCategoryHover={onCategoryHover}
                 tooltipContent={tooltipContent}
                 showTooltips={isDesktop}
+                tooltipSide={tooltipSide}
               />
             )
           })}

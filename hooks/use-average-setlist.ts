@@ -19,6 +19,7 @@ interface SetlistEntry {
   averageLength: string | null
   songs: {
     song_id: string
+    song_displayname?: string | null
     category_artwork?: string | null
   }
 }
@@ -153,6 +154,7 @@ export function useAverageSetlist(
                 entry_length,
                 songs (
                   song_id,
+                  song_displayname,
                   categories (
                     category_artwork
                   )
@@ -562,6 +564,8 @@ export function useAverageSetlist(
                 finalPlacement = `${placement} Closer`
             }
 
+            const songsRel = sampleEntry.songs
+            const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
             resultEntries.push({
               entry_song: songData.song,
               entry_short: null,
@@ -572,9 +576,10 @@ export function useAverageSetlist(
               entry_setnum: positionInSet,
               averageLength: songData.averageLength,
               songs: {
-                song_id: sampleEntry.songs?.song_id ?? "",
+                song_id: songRow?.song_id ?? "",
+                song_displayname: songRow?.song_displayname ?? null,
                 category_artwork:
-                  sampleEntry.songs?.categories?.category_artwork ?? null,
+                  songRow?.categories?.category_artwork ?? null,
               },
             })
 

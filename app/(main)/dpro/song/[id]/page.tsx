@@ -83,7 +83,10 @@ export default function SongPage({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
-      <SongHeader songName={song.song} />
+      <SongHeader
+        songName={song.song}
+        songDisplayName={song.song_displayname}
+      />
 
       <div
         className={`grid grid-cols-1 gap-4 ${

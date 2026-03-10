@@ -50,6 +50,7 @@ export function useSongData(songId: string | undefined) {
           .select(
             `
             song,
+            song_displayname,
             song_category,
             song_originalartist,
             song_coachnotes,

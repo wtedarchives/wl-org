@@ -27,10 +27,14 @@ export function PersonnelSongSpreadCard({
         })
         .map((cat) => {
           const showArtist = COVER_CATEGORIES.includes(cat.category)
-          const songsFormatted = cat.songs.map(({ song, artist, playCount }) => {
-            const base = showArtist && artist ? `${song} [${artist}]` : song
-            return `${base} [${playCount}]`
-          })
+          const songsFormatted = cat.songs.map(
+            ({ song, song_displayname, artist, playCount }) => {
+              const displayName = song_displayname?.trim() || song
+              const base =
+                showArtist && artist ? `${displayName} [${artist}]` : displayName
+              return `${base} [${playCount}]`
+            },
+          )
           return {
             category: cat.category,
             count: cat.count,

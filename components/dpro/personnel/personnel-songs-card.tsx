@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import type { SongCount } from "@/hooks/use-guest-data"
 
 interface PersonnelSongsCardProps {
@@ -29,10 +30,12 @@ export function PersonnelSongsCard({
 
   const sortedSongs = useMemo(() => {
     return [...filteredSongs].sort((a, b) => {
+      const aName = a.song_displayname ?? a.song
+      const bName = b.song_displayname ?? b.song
       if (sortBy === "song") {
         return sortDirection === "asc"
-          ? a.song.localeCompare(b.song)
-          : b.song.localeCompare(a.song)
+          ? aName.localeCompare(bName)
+          : bName.localeCompare(aName)
       }
       if (a.play_count !== b.play_count) {
         return sortDirection === "asc"
@@ -42,7 +45,7 @@ export function PersonnelSongsCard({
       if ((a.category_canonid ?? 0) !== (b.category_canonid ?? 0)) {
         return (a.category_canonid ?? 0) - (b.category_canonid ?? 0)
       }
-      return a.song.localeCompare(b.song)
+      return aName.localeCompare(bName)
     })
   }, [filteredSongs, sortBy, sortDirection])
 
@@ -100,7 +103,11 @@ export function PersonnelSongsCard({
                       : "hover:bg-muted/60"
                   }`}
                 >
-                  <span className="truncate font-medium">{song.song}</span>
+                  <SongDisplayName
+                    song={song.song}
+                    songDisplayName={song.song_displayname ?? song.song}
+                    className="truncate font-medium"
+                  />
                   <span className="shrink-0 tabular-nums pl-2">{song.play_count}</span>
                 </button>
               ))}

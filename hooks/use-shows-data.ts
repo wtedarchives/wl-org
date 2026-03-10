@@ -439,7 +439,9 @@ export function useShowsData() {
             entry_set,
             entry_setnum,
             songs:entry_song(
-              song_id
+              song_id,
+              song,
+              song_displayname
             )
           `,
           )

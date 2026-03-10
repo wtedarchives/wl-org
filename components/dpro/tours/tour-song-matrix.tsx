@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Table,
   TableBody,
@@ -157,7 +158,10 @@ export function TourSongMatrix({
                       onClick={() => onSongClick?.(song)}
                       className="hover:underline cursor-pointer"
                     >
-                      {song}
+                      <SongDisplayName
+                        song={song}
+                        songDisplayName={songMatrix.songDisplayNameMap?.[song]}
+                      />
                     </button>
                   </TableCell>
                   {filteredShows.map((show) => {
