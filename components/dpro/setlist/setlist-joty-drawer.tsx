@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { useJotyData } from "@/hooks/use-joty-data"
 import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { cn } from "@/lib/utils"
@@ -189,11 +190,6 @@ function ResultRow({
   row: JotyResultRow
   isHighlighted: boolean
 }) {
-  const songLabel = [
-    row.entry_song
-  ]
-    .filter(Boolean)
-    .join(" ")
   const venueDisplay = row.show_venue_location
     ? row.show_subvenue?.trim()
       ? `${row.show_venue_location}`
@@ -213,10 +209,16 @@ function ResultRow({
             href={`/dpro/song/${row.song_id}`}
             className="text-foreground hover:underline"
           >
-            {songLabel}
+            <SongDisplayName
+              song={row.song}
+              songDisplayName={row.song_displayname}
+            />
           </Link>
         ) : (
-          <span>{songLabel}</span>
+          <SongDisplayName
+            song={row.song}
+            songDisplayName={row.song_displayname}
+          />
         )}
       </TableCell>
       <TableCell className="text-xs py-0.5 text-muted-foreground">

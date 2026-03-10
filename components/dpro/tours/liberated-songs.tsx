@@ -247,7 +247,7 @@ export function LiberatedSongs({
                           {song.venue_location && (
                             <span className="text-muted-foreground/70">
                               {" "}
-                              [{song.venue_location.replace(/[\[\]]/g, "")}]
+                              [{song.venue_location}]
                             </span>
                           )}
                         </>

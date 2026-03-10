@@ -1,74 +1,455 @@
 "use client"
 
+import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
 
-const WTED_RATE_LIMIT_KEY = "setlist-wted-sheet-last-open"
-const WTED_RATE_LIMIT_MS = 60_000 // 1 minute
+import { useAuth } from "@/components/auth-context"
+import { useWtedRequests } from "@/hooks/use-wted-requests"
+import { formatSetlistDate } from "@/lib/setlist-utils"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Check } from "lucide-react"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer"
+import type { SetlistEntry } from "@/types/setlist"
+import type { WtedRequestEnriched } from "@/types/wted"
 
-export function getWtedRateLimited(): boolean {
-  if (typeof window === "undefined") return false
-  const last = sessionStorage.getItem(WTED_RATE_LIMIT_KEY)
-  if (!last) return false
-  return Date.now() - Number(last) < WTED_RATE_LIMIT_MS
+const WTED_REQUEST_RATE_LIMIT_MS = 10_000
+const THIRTY_MINUTES_MS = 30 * 60 * 1000
+
+function formatCountdown(ms: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000))
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${m}:${s.toString().padStart(2, "0")}`
 }
 
-function setWtedRateLimit() {
-  if (typeof window === "undefined") return
-  sessionStorage.setItem(WTED_RATE_LIMIT_KEY, String(Date.now()))
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
 }
 
 interface SetlistWtedSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  entry: { entry_song: string; radio_id?: string | null } | null
+  entry: SetlistEntry | null
+  show: { show_date: string; show_venue_location: string | null; show_group: string | null }
+  releaseArtwork: string | null
 }
 
 export function SetlistWtedSheet({
   open,
   onOpenChange,
   entry,
+  show,
+  releaseArtwork,
 }: SetlistWtedSheetProps) {
-  const handleOpenChange = (next: boolean) => {
-    if (!next) setWtedRateLimit()
-    onOpenChange(next)
+  const { session } = useAuth()
+  const accessToken = session?.access_token ?? null
+  const { requests, loading, error, refetch } = useWtedRequests(accessToken, open)
+
+  const [lastRequestTime, setLastRequestTime] = useState<number>(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [countdownMs, setCountdownMs] = useState<number>(0)
+  const [requestWaitMs, setRequestWaitMs] = useState<number>(0)
+
+  useEffect(() => {
+    if (lastRequestTime === 0) {
+      setRequestWaitMs(0)
+      return
+    }
+    const update = () => {
+      const elapsed = Date.now() - lastRequestTime
+      const remaining = WTED_REQUEST_RATE_LIMIT_MS - elapsed
+      setRequestWaitMs(Math.max(0, remaining))
+    }
+    update()
+    const id = setInterval(update, 1000)
+    return () => clearInterval(id)
+  }, [lastRequestTime])
+
+  const canRequestByTime = requestWaitMs === 0
+  const hasOpenSlot = requests.length < 3
+  const nextAvailableAtTimestamp =
+    requests.length >= 3 && requests[0]
+      ? new Date(requests[0].requested_at).getTime() + THIRTY_MINUTES_MS
+      : null
+  const nextAvailableAt =
+    nextAvailableAtTimestamp != null
+      ? new Date(nextAvailableAtTimestamp)
+      : null
+
+  useEffect(() => {
+    if (nextAvailableAtTimestamp == null) {
+      setCountdownMs(0)
+      return
+    }
+    const update = () => {
+      const remaining = nextAvailableAtTimestamp - Date.now()
+      setCountdownMs(Math.max(0, remaining))
+    }
+    update()
+    const id = setInterval(update, 1000)
+    return () => clearInterval(id)
+  }, [nextAvailableAtTimestamp])
+
+  const alreadyRequestedEntryIds = new Set(requests.map((r) => r.entry_id))
+  const canRequestThisEntry =
+    entry &&
+    entry.radio_id &&
+    hasOpenSlot &&
+    !alreadyRequestedEntryIds.has(entry.entry_id) &&
+    canRequestByTime
+  const requestWaitSeconds = Math.ceil(requestWaitMs / 1000)
+
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      if (!next) setSubmitError(null)
+      onOpenChange(next)
+    },
+    [onOpenChange]
+  )
+
+  const handleRequest = useCallback(async () => {
+    if (!entry || !accessToken || !canRequestThisEntry) return
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      const res = await fetch("/api/wted/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ entry_id: entry.entry_id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data.error ?? "Failed to submit request")
+      }
+      setLastRequestTime(Date.now())
+      await refetch()
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to submit request"
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }, [entry, accessToken, canRequestThisEntry, refetch])
+
+  const buildSlots = (): Array<
+    | { type: "request"; request: WtedRequestEnriched }
+    | { type: "pending"; entry: SetlistEntry }
+    | { type: "waiting"; waitSeconds: number }
+    | { type: "request-another" }
+    | { type: "empty" }
+  > => {
+    const slots: Array<
+      | { type: "request"; request: WtedRequestEnriched }
+      | { type: "pending"; entry: SetlistEntry }
+      | { type: "waiting"; waitSeconds: number }
+      | { type: "request-another" }
+      | { type: "empty" }
+    > = []
+    for (let i = 0; i < 3; i++) {
+      if (requests[i]) {
+        slots.push({ type: "request", request: requests[i] })
+      } else if (
+        i === requests.length &&
+        entry?.radio_id &&
+        hasOpenSlot &&
+        !alreadyRequestedEntryIds.has(entry.entry_id) &&
+        canRequestByTime
+      ) {
+        slots.push({ type: "pending", entry })
+      } else if (
+        i === requests.length &&
+        hasOpenSlot &&
+        requestWaitSeconds > 0
+      ) {
+        slots.push({ type: "waiting", waitSeconds: requestWaitSeconds })
+      } else if (
+        i === requests.length &&
+        hasOpenSlot &&
+        requestWaitSeconds === 0
+      ) {
+        slots.push({ type: "request-another" })
+      } else {
+        slots.push({ type: "empty" })
+      }
+    }
+    return slots
   }
 
+  const slots = buildSlots()
+
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent
-        side="bottom"
-        className="max-h-[85vh] flex flex-col rounded-t-xl"
-        showCloseButton={true}
-      >
-        <div className="space-y-4 pb-6">
-          <div className="flex items-center gap-2">
+    <Drawer open={open} onOpenChange={handleOpenChange}>
+      <DrawerContent className="mx-auto w-full max-w-xl text-xs">
+        <DrawerHeader className="flex flex-col items-center justify-center gap-1 border-b border-border/60 pt-1 pb-3 text-center">
+          <DrawerTitle className="sr-only">WTED Goose Radio</DrawerTitle>
+          <div className="flex items-center justify-center gap-2">
             <Image
-              src="/WTED.png"
+              src="/WTED2.png"
               alt="WTED Goose Radio"
               width={32}
               height={32}
-              className="size-8"
+              className="size-6 object-contain"
             />
-            <h2 className="text-sm font-semibold">WTED Goose Radio</h2>
-          </div>
-          {entry && (
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{entry.entry_song}</span>
-              {" — "}
-              Listen to this performance on WTED.
+            <p className="text-sm font-medium text-foreground">
+              WTED Goose Radio
             </p>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Users can request three songs every 30 minutes.
+          </p>
+        </DrawerHeader>
+
+        <div className="max-h-[52vh] min-h-[140px] overflow-y-auto px-3 pb-3 pt-2">
+          {loading ? (
+            <div className="flex min-h-[140px] items-center justify-center">
+              <p className="text-[11px] text-muted-foreground">
+                Loading requests…
+              </p>
+            </div>
+          ) : error ? (
+            <p className="text-[11px] text-destructive">{error}</p>
+          ) : (
+            <div className="space-y-3">
+              {entry &&
+                alreadyRequestedEntryIds.has(entry.entry_id) && (
+                  <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center">
+                    <p className="text-xs font-normal text-foreground">
+                      <span className="font-semibold">
+                        {entry.entry_song} ({formatSetlistDate(show.show_date)})
+                      </span>{" "}
+                      has already been requested.
+                    </p>
+                  </div>
+                )}
+              {!hasOpenSlot && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center">
+                  <p className="text-xs font-normal text-foreground">
+                    You can request another song in{" "}
+                    <span className="inline-flex items-center rounded-full border border-red-500/40 bg-red-500/20 px-1.5 py-[1px] mx-1 font-semibold tabular-nums">
+                      {formatCountdown(countdownMs)}
+                    </span>{" "}
+                    (at {nextAvailableAt ? formatTime(nextAvailableAt) : "—"}).
+                  </p>
+                </div>
+              )}
+              {slots
+                .filter((slot): slot is Exclude<typeof slot, { type: "empty" }> =>
+                  slot.type !== "empty"
+                )
+                .map((slot, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-lg border p-3",
+                    slot.type === "pending" &&
+                      "border-primary/50 bg-primary/5 ring-2 ring-primary/20 ring-offset-2 ring-offset-background",
+                    (slot.type === "request" ||
+                      slot.type === "waiting" ||
+                      slot.type === "request-another") &&
+                      "border-border/60 bg-muted/30"
+                  )}
+                >
+                  {slot.type === "request" && (
+                    <WtedRequestSlotContent request={slot.request} />
+                  )}
+                  {slot.type === "pending" && (
+                    <WtedPendingSlotContent
+                      entry={slot.entry}
+                      show={show}
+                      releaseArtwork={releaseArtwork}
+                      onRequest={handleRequest}
+                      submitting={submitting}
+                      submitError={submitError}
+                      waitSeconds={requestWaitSeconds}
+                    />
+                  )}
+                  {slot.type === "waiting" && (
+                    <div className="flex min-h-[52px] w-full items-center justify-center text-[11px] font-medium tabular-nums text-muted-foreground">
+                      Wait {slot.waitSeconds}s
+                    </div>
+                  )}
+                  {slot.type === "request-another" && (
+                    <div className="flex min-h-[52px] w-full items-center justify-center">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleOpenChange(false)}
+                      >
+                        Request another song
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
-          <Link
-            href="/wted/info"
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs font-medium text-foreground hover:bg-muted"
-          >
-            <Image src="/WTED.png" alt="" width={20} height={20} className="size-5" />
-            Stream WTED Goose Radio
-          </Link>
         </div>
-      </SheetContent>
-    </Sheet>
+
+        <DrawerFooter className="border-t border-border/60 pt-3">
+          <div className="flex justify-end">
+            <DrawerClose asChild>
+              <Button type="button" size="sm" variant="ghost">
+                Close
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+const PILL_CLASSES = {
+  date: "rounded-full border border-border bg-wl-orange/30 px-2 py-0.5 text-[10px] font-medium tabular-nums text-foreground",
+  group: "rounded-full border border-border bg-wl-orange/50 px-2 py-0.5 text-[10px] font-medium text-foreground",
+  venue: "rounded-full border border-border bg-wl-green/30 px-2 py-0.5 text-[10px] font-medium text-foreground",
+} as const
+
+function WtedRequestSlotContent({
+  request,
+}: {
+  request: WtedRequestEnriched
+}) {
+  const pills: { label: string; type: keyof typeof PILL_CLASSES }[] = [
+    request.show_date && {
+      label: formatSetlistDate(request.show_date),
+      type: "date",
+    },
+    request.show_group && { label: request.show_group, type: "group" },
+    request.show_venue_location && {
+      label: request.show_venue_location,
+      type: "venue",
+    },
+  ].filter(Boolean) as { label: string; type: keyof typeof PILL_CLASSES }[]
+
+  return (
+    <>
+      {request.release_artwork && (
+        <div className="relative size-12 shrink-0 overflow-hidden rounded border border-border">
+          <Image
+            src={request.release_artwork}
+            alt=""
+            width={48}
+            height={48}
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-foreground">
+          {request.entry_song}
+          {request.entry_short && (
+            <span className="ml-1 text-[0.625rem] text-red-400">[{request.entry_short}]</span>
+          )}
+        </p>
+        <div className="mt-1 flex flex-wrap gap-1">
+          {pills.map(({ label, type }) => (
+            <span key={label} className={cn("inline-flex", PILL_CLASSES[type])}>
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center justify-center rounded-full bg-primary/20 p-1.5" aria-label="Requested">
+        <Check className="size-4 text-primary" />
+      </div>
+    </>
+  )
+}
+
+function WtedPendingSlotContent({
+  entry,
+  show,
+  releaseArtwork,
+  onRequest,
+  submitting,
+  submitError,
+  waitSeconds,
+}: {
+  entry: SetlistEntry
+  show: { show_date: string; show_venue_location: string | null; show_group: string | null }
+  releaseArtwork: string | null
+  onRequest: () => void
+  submitting: boolean
+  submitError: string | null
+  waitSeconds: number
+}) {
+  const pills: { label: string; type: keyof typeof PILL_CLASSES }[] = [
+    show.show_date && {
+      label: formatSetlistDate(show.show_date),
+      type: "date",
+    },
+    show.show_group && { label: show.show_group, type: "group" },
+    show.show_venue_location && {
+      label: show.show_venue_location,
+      type: "venue",
+    },
+  ].filter(Boolean) as { label: string; type: keyof typeof PILL_CLASSES }[]
+
+  const mustWait = waitSeconds > 0
+  return (
+    <>
+      {releaseArtwork && (
+        <div className="relative size-12 shrink-0 overflow-hidden rounded border border-border">
+          <Image
+            src={releaseArtwork}
+            alt=""
+            width={48}
+            height={48}
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-foreground">
+          {entry.entry_song}
+          {entry.entry_short && (
+            <span className="ml-1 text-[0.625rem] text-red-400">[{entry.entry_short}]</span>
+          )}
+        </p>
+        <div className="mt-1 flex flex-wrap gap-1">
+          {pills.map(({ label, type }) => (
+            <span key={label} className={cn("inline-flex", PILL_CLASSES[type])}>
+              {label}
+            </span>
+          ))}
+        </div>
+        {submitError && (
+          <p className="mt-1 text-[10px] text-destructive">{submitError}</p>
+        )}
+      </div>
+      <Button
+        size="sm"
+        className={cn(
+          "shrink-0",
+          !submitting && !mustWait && "animate-pulse-ring"
+        )}
+        onClick={onRequest}
+        disabled={submitting || mustWait}
+      >
+        {submitting
+          ? "Requesting…"
+          : mustWait
+            ? `Wait ${waitSeconds}s`
+            : "Request this song"}
+      </Button>
+    </>
   )
 }

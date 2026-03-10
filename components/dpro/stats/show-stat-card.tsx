@@ -121,10 +121,10 @@ export function ShowStatCard({
                           href={`/dpro/venue/${item.venue_id}`}
                           className="text-foreground underline-offset-4 hover:underline"
                         >
-                          {item.show_venue_location.replace(/[\[\]]/g, "")}
+                          {item.show_venue_location}
                         </Link>
                       ) : (
-                        item.show_venue_location.replace(/[\[\]]/g, "")
+                        item.show_venue_location
                       )
                     ) : (
                       ""

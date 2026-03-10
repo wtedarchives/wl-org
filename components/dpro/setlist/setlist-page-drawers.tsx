@@ -2,10 +2,12 @@
 
 import { SetlistRatingDrawer } from "./setlist-rating-drawer"
 import { SetlistLoginRequiredDialog } from "./setlist-login-required-dialog"
+import { SetlistWtedLoginRequiredDialog } from "./setlist-wted-login-required-dialog"
 import { SetlistScanDrawer } from "./setlist-scan-drawer"
 import { SetlistSongPerformancesSheet } from "./setlist-song-performances-sheet"
 import { SetlistJotyDrawer } from "./setlist-joty-drawer"
 import { SetlistWtedSheet } from "./setlist-wted-sheet"
+import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import type { ReviewEntry } from "@/hooks/use-setlist-rating"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import type { Show, SetlistEntry } from "@/types/setlist"
@@ -19,6 +21,8 @@ interface SetlistPageDrawersProps {
   setRatingDrawerOpen: (open: boolean) => void
   loginRequiredOpen: boolean
   setLoginRequiredOpen: (open: boolean) => void
+  wtedLoginRequiredOpen: boolean
+  setWtedLoginRequiredOpen: (open: boolean) => void
   songSheetOpen: boolean
   setSongSheetOpen: (open: boolean) => void
   songSheetEntry: SetlistEntry | null
@@ -44,6 +48,7 @@ interface SetlistPageDrawersProps {
   submitting: boolean
   fetchReviews: () => void
   validateReview: (review: string) => string | null
+  releases: ShowRelease[]
 }
 
 export function SetlistPageDrawers({
@@ -55,6 +60,8 @@ export function SetlistPageDrawers({
   setRatingDrawerOpen,
   loginRequiredOpen,
   setLoginRequiredOpen,
+  wtedLoginRequiredOpen,
+  setWtedLoginRequiredOpen,
   songSheetOpen,
   setSongSheetOpen,
   songSheetEntry,
@@ -80,6 +87,7 @@ export function SetlistPageDrawers({
   submitting,
   fetchReviews,
   validateReview,
+  releases,
 }: SetlistPageDrawersProps) {
   return (
     <>
@@ -104,6 +112,11 @@ export function SetlistPageDrawers({
       <SetlistLoginRequiredDialog
         open={loginRequiredOpen}
         onOpenChange={setLoginRequiredOpen}
+      />
+
+      <SetlistWtedLoginRequiredDialog
+        open={wtedLoginRequiredOpen}
+        onOpenChange={setWtedLoginRequiredOpen}
       />
 
       {setlistUrl && (
@@ -135,6 +148,12 @@ export function SetlistPageDrawers({
         open={wtedSheetOpen}
         onOpenChange={setWtedSheetOpen}
         entry={wtedSheetEntry}
+        show={{
+          show_date: show.show_date,
+          show_venue_location: show.show_venue_location,
+          show_group: show.show_group,
+        }}
+        releaseArtwork={releases[0]?.release_artwork ?? null}
       />
     </>
   )

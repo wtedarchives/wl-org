@@ -36,7 +36,6 @@ import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-sec
 import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawers"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
-import { getWtedRateLimited } from "@/components/dpro/setlist/setlist-wted-sheet"
 
 export default function SetlistPage({
   params,
@@ -56,6 +55,8 @@ export default function SetlistPage({
     setRatingDrawerOpen,
     loginRequiredOpen,
     setLoginRequiredOpen,
+    wtedLoginRequiredOpen,
+    setWtedLoginRequiredOpen,
     songSheetOpen,
     setSongSheetOpen,
     songSheetEntry,
@@ -261,7 +262,10 @@ export default function SetlistPage({
                     setJotyDrawerOpen(true)
                   }}
                   onWtedClick={(entry) => {
-                    if (getWtedRateLimited()) return
+                    if (!user) {
+                      setWtedLoginRequiredOpen(true)
+                      return
+                    }
                     setWtedSheetEntry(entry)
                     setWtedSheetOpen(true)
                   }}
@@ -357,6 +361,8 @@ export default function SetlistPage({
         setRatingDrawerOpen={setRatingDrawerOpen}
         loginRequiredOpen={loginRequiredOpen}
         setLoginRequiredOpen={setLoginRequiredOpen}
+        wtedLoginRequiredOpen={wtedLoginRequiredOpen}
+        setWtedLoginRequiredOpen={setWtedLoginRequiredOpen}
         songSheetOpen={songSheetOpen}
         setSongSheetOpen={setSongSheetOpen}
         songSheetEntry={songSheetEntry}
@@ -382,6 +388,7 @@ export default function SetlistPage({
         submitting={submitting}
         fetchReviews={fetchReviews}
         validateReview={validateReview}
+        releases={releases}
       />
     </div>
   )

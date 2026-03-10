@@ -25,7 +25,7 @@ export function SetlistEntryWtedCell({
     <button
       type="button"
       onClick={() => onWtedClick(entry)}
-      className="rounded p-0.5 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
+      className="rounded hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
       aria-label="Request this song on WTED Goose Radio"
     >
       <Image
@@ -33,7 +33,7 @@ export function SetlistEntryWtedCell({
         alt="WTED"
         width={20}
         height={20}
-        className="size-3"
+        className="size-4"
       />
     </button>
   ) : (

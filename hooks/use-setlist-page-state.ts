@@ -12,6 +12,7 @@ export function useSetlistPageState(showId: string) {
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
   const [ratingDrawerOpen, setRatingDrawerOpen] = useState(false)
   const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
+  const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
   const [songSheetEntry, setSongSheetEntry] = useState<SetlistEntry | null>(null)
   const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
@@ -65,6 +66,8 @@ export function useSetlistPageState(showId: string) {
     setRatingDrawerOpen,
     loginRequiredOpen,
     setLoginRequiredOpen,
+    wtedLoginRequiredOpen,
+    setWtedLoginRequiredOpen,
     songSheetOpen,
     setSongSheetOpen,
     songSheetEntry,

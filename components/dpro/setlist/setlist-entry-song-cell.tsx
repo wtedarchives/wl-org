@@ -23,8 +23,8 @@ export function SetlistEntrySongCell({
   showTooltips = true,
 }: SetlistEntrySongCellProps) {
   const songContent = (
-    <div className="flex flex-nowrap items-center gap-2">
-      <span className="font-medium">
+    <div className="flex w-full flex-nowrap items-center gap-2">
+      <span className="min-w-0 flex-1 font-medium">
         {onSongClick ? (
           <button
             type="button"
@@ -53,30 +53,34 @@ export function SetlistEntrySongCell({
           </span>
         )}
       </span>
-      {entry.joty_round && (() => {
-        const jotyStyle = getJotyBadgeStyle(entry.joty_round!)
-        return onJotyClick ? (
-          <button
-            type="button"
-            onClick={() => onJotyClick(entry)}
-            className="cursor-pointer transition-transform hover:scale-110"
-          >
-            <span
-              style={jotyStyle.style}
-              className={`${jotyStyle.className} cursor-pointer`}
-            >
-              {entry.joty_round}
-            </span>
-          </button>
-        ) : (
-          <span
-            style={jotyStyle.style}
-            className={jotyStyle.className}
-          >
-            {entry.joty_round}
-          </span>
-        )
-      })()}
+      {entry.joty_round && (
+        <span className="ml-auto shrink-0">
+          {(() => {
+            const jotyStyle = getJotyBadgeStyle(entry.joty_round!)
+            return onJotyClick ? (
+              <button
+                type="button"
+                onClick={() => onJotyClick(entry)}
+                className="cursor-pointer transition-transform hover:scale-110"
+              >
+                <span
+                  style={jotyStyle.style}
+                  className={`${jotyStyle.className} cursor-pointer`}
+                >
+                  {entry.joty_round}
+                </span>
+              </button>
+            ) : (
+              <span
+                style={jotyStyle.style}
+                className={jotyStyle.className}
+              >
+                {entry.joty_round}
+              </span>
+            )
+          })()}
+        </span>
+      )}
     </div>
   )
 

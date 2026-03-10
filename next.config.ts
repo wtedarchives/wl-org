@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: "api.livedownloads.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "i.postimg.cc",
+        pathname: "/**",
+      },
     ],
   },
 };

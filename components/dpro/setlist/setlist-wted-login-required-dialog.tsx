@@ -12,15 +12,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface SetlistLoginRequiredDialogProps {
+interface SetlistWtedLoginRequiredDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function SetlistLoginRequiredDialog({
+export function SetlistWtedLoginRequiredDialog({
   open,
   onOpenChange,
-}: SetlistLoginRequiredDialogProps) {
+}: SetlistWtedLoginRequiredDialogProps) {
   const router = useRouter()
   const pathname = usePathname()
 
@@ -35,7 +35,8 @@ export function SetlistLoginRequiredDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Login Required</AlertDialogTitle>
           <AlertDialogDescription>
-            You must be logged in to rate this show.
+            You must be logged in to request songs on WTED Radio via setlist
+            pages.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

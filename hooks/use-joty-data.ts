@@ -8,6 +8,10 @@ export interface JotyResultRow {
   entry_song: string
   entry_short: string | null
   song_id: string | null
+  /** Canonical song name (songs.song) */
+  song: string
+  /** Display name (songs.song_displayname) */
+  song_displayname: string | null
   show_id: string | null
   show_date: string | null
   show_venue_location: string | null
@@ -49,7 +53,7 @@ export function useJotyData(open: boolean, year: number | null) {
               setlist_entries(
                 entry_song,
                 entry_short,
-                songs(song_id),
+                songs(song_id, song, song_displayname),
                 shows(show_id, show_date, show_venue_location, show_subvenue)
               )
             `
@@ -68,7 +72,10 @@ export function useJotyData(open: boolean, year: number | null) {
           setlist_entries: {
             entry_song: string
             entry_short: string | null
-            songs: { song_id: string } | { song_id: string }[] | null
+            songs:
+              | { song_id: string; song: string; song_displayname: string | null }
+              | { song_id: string; song: string; song_displayname: string | null }[]
+              | null
             shows: {
               show_id: string
               show_date: string
@@ -88,8 +95,10 @@ export function useJotyData(open: boolean, year: number | null) {
           const se = r.setlist_entries
           if (!se) continue
           const songsVal = se.songs
-          const songId =
-            Array.isArray(songsVal) ? songsVal[0]?.song_id ?? null : songsVal?.song_id ?? null
+          const songRow = Array.isArray(songsVal) ? songsVal[0] ?? null : songsVal
+          const songId = songRow?.song_id ?? null
+          const song = songRow?.song ?? se.entry_song
+          const songDisplayname = songRow?.song_displayname ?? null
           const showsVal = se.shows
           const show = Array.isArray(showsVal) ? showsVal[0] ?? null : showsVal
           const row: JotyResultRow = {
@@ -97,6 +106,8 @@ export function useJotyData(open: boolean, year: number | null) {
             entry_song: se.entry_song,
             entry_short: se.entry_short ?? null,
             song_id: songId,
+            song,
+            song_displayname: songDisplayname,
             show_id: show?.show_id ?? null,
             show_date: show?.show_date ?? null,
             show_venue_location: show?.show_venue_location ?? null,
