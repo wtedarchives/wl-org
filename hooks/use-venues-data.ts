@@ -37,13 +37,13 @@ export function useVenuesData(
       return
     }
 
-    async function fetchVenues() {
+    async function fetchVenues(sb: NonNullable<typeof supabase>) {
       setLoading(true)
       setProgress(0)
       setError(null)
       try {
         setProgress(20)
-        const { data, error: rpcError } = await client.rpc(
+        const { data, error: rpcError } = await sb.rpc(
           "get_venues_with_show_counts",
           {
             sort_field: sortField,
@@ -62,7 +62,7 @@ export function useVenuesData(
       }
     }
 
-    fetchVenues()
+    fetchVenues(client)
   }, [sortField, sortDirection])
 
   return { venues, loading, progress, error }
