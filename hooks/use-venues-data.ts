@@ -31,7 +31,8 @@ export function useVenuesData(
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!supabase) {
+    const client = supabase
+    if (!client) {
       setLoading(false)
       return
     }
@@ -42,7 +43,7 @@ export function useVenuesData(
       setError(null)
       try {
         setProgress(20)
-        const { data, error: rpcError } = await supabase.rpc(
+        const { data, error: rpcError } = await client.rpc(
           "get_venues_with_show_counts",
           {
             sort_field: sortField,
