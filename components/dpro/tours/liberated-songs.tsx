@@ -185,7 +185,7 @@ export function LiberatedSongs({
                       <div className="flex items-center justify-between gap-2">
                         <button
                           type="button"
-                          onClick={() => onSongClick?.(song.entry_song, song.song_displayname)}
+                          onClick={() => onSongClick?.(song.entry_song)}
                           className="font-medium text-foreground hover:underline cursor-pointer"
                         >
                           {song.entry_song}
