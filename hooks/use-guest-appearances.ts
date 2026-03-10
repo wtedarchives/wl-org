@@ -88,9 +88,9 @@ export function useGuestAppearances(
         > = {}
 
         for (const entry of entriesData ?? []) {
-          const guests = (entry as { setlist_entry_guests?: unknown[] })
+          const guests = (entry as { setlist_entry_guests?: Array<{ guests?: { guest_category?: string } }> })
             .setlist_entry_guests ?? []
-          const nonGoose = guests.filter((seg: { guests?: { guest_category?: string } }) => {
+          const nonGoose = guests.filter((seg) => {
             const cat = seg.guests?.guest_category
             return (
               cat !== "Goose (current)" && cat !== "Goose (former)"
