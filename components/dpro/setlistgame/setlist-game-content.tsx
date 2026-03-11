@@ -53,7 +53,7 @@ export function SetlistGameContent() {
     user ?? null
   )
   const { showStatsLoading, showsWithStats } = useShowStatistics(ACTIVE_LEAGUE)
-  const isAdminUser = useAdminStatus(user ?? null)
+  const { isAdmin: isAdminUser } = useAdminStatus(user ?? null)
   const { userPicks, fetchUserPicks, resetPicks, setUserPicks } = useUserPicks()
   const { loading: pastToursLoading, pastTours } = usePastTours(ACTIVE_LEAGUE)
 

@@ -6,7 +6,11 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function MainLayout({
   children,
-}: { children: React.ReactNode }) {
+  modal,
+}: {
+  children: React.ReactNode
+  modal: React.ReactNode
+}) {
   return (
     <SidebarProvider
       style={
@@ -24,6 +28,7 @@ export default function MainLayout({
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
               {children}
             </div>
+            {modal}
           </SetlistBreadcrumbProvider>
         </YearBreadcrumbProvider>
       </SidebarInset>

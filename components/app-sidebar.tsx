@@ -5,8 +5,13 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { FaBluesky } from "react-icons/fa6"
+import { Settings2Icon, BugIcon, SearchIcon } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
+import { useAuth } from "@/components/auth-context"
+import { useAdminStatus } from "@/hooks/use-admin-status"
+import { useBugCount } from "@/hooks/use-bug-count"
+import { FindDialog } from "@/components/dpro/admin/find-dialog"
 import {
   Sidebar,
   SidebarContent,
@@ -81,18 +86,30 @@ const navMainItems = [
   { title: "Goose 101", url: "/goose101", icon: <BookOpenIcon className="size-4" /> },
 ] as const
 
+const ADMIN_SUB = [
+  { title: "Admin Panel", url: "/dpro/admin" },
+  { title: "Bugs", url: "/dpro/bugs" },
+] as const
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const { user } = useAuth()
+  const { isAdmin } = useAdminStatus(user)
+  const openBugCount = useBugCount()
+  const [findDialogOpen, setFindDialogOpen] = useState(false)
+
   const isWtedPath = pathname.startsWith("/wted")
   const isSetlistPath =
     pathname.startsWith("/dpro") ||
     SETLIST_ARCHIVE_SUB.some(
       (item) => pathname === item.url || pathname.startsWith(item.url + "/")
     )
+  const isAdminPath = pathname.startsWith("/dpro/admin") || pathname.startsWith("/dpro/bugs")
 
   const [wtedOpen, setWtedOpen] = useState(isWtedPath)
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
+  const [adminOpen, setAdminOpen] = useState(isAdminPath)
 
   // Keep the group expanded when the user is viewing a page in that group
   useEffect(() => {
@@ -101,6 +118,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     if (isSetlistPath) setSetlistOpen(true)
   }, [pathname, isSetlistPath])
+  useEffect(() => {
+    if (isAdminPath) setAdminOpen(true)
+  }, [pathname, isAdminPath])
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -270,6 +290,52 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuSub>
                 )}
               </SidebarMenuItem>
+              {isAdmin && (
+                <SidebarMenuItem
+                  className="group/item"
+                  data-open={adminOpen || undefined}
+                >
+                  <SidebarMenuButton
+                    tooltip="Admin"
+                    className="group-data-[state=open]:bg-sidebar-accent"
+                    onClick={() => setAdminOpen((o) => !o)}
+                  >
+                    <Settings2Icon className="size-4" />
+                    <span>Admin</span>
+                    <ChevronDownIcon
+                      className={`ml-auto size-4 transition-transform ${adminOpen ? "rotate-180" : ""}`}
+                    />
+                  </SidebarMenuButton>
+                  {adminOpen && (
+                    <SidebarMenuSub>
+                      {ADMIN_SUB.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={pathname === item.url}>
+                            <Link href={item.url} className="flex items-center gap-2">
+                              {item.title}
+                              {item.title === "Bugs" &&
+                                openBugCount != null &&
+                                openBugCount > 0 && (
+                                  <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+                                    {openBugCount > 99 ? "99+" : openBugCount}
+                                  </span>
+                                )}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => setFindDialogOpen(true)}
+                        >
+                          <SearchIcon className="size-4" />
+                          Find
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -313,6 +379,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="pt-0 pb-2">
         <NavUser />
       </SidebarFooter>
+      {isAdmin && (
+        <FindDialog open={findDialogOpen} onOpenChange={setFindDialogOpen} />
+      )}
     </Sidebar>
   )
 }

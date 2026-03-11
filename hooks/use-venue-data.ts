@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 
-export interface VenueInfo {
+export interface VenueDetail {
   venue: string
-  venue_location: string | null
+  venue_location: string
+  venue_id: string
   venue_address: string | null
   venue_latitude: string | null
   venue_longitude: string | null
@@ -16,8 +17,10 @@ export interface VenueShow {
   show_date: string
   show_group: string
   show_subvenue: string
+  show_venue_location: string
   show_tour: string | null
   tour_id: string | null
+  venue_id: string | null
   show_detail: string | null
   show_alert: string | null
 }
@@ -34,10 +37,17 @@ export interface SongSpreadCategory {
   }[]
 }
 
-const VENUE_LOAD_STEPS = 4
+const PAGE_SIZE = 1000
+const VENUE_LOAD_STEPS = 3
+
+function isUuid(str: string): boolean {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
 
 export function useVenueData(venueId: string | undefined) {
-  const [venue, setVenue] = useState<VenueInfo | null>(null)
+  const [venue, setVenue] = useState<VenueDetail | null>(null)
   const [shows, setShows] = useState<VenueShow[]>([])
   const [songSpreadData, setSongSpreadData] = useState<SongSpreadCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -49,142 +59,195 @@ export function useVenueData(venueId: string | undefined) {
       setLoading(false)
       return
     }
-
     const client = supabase
 
     async function fetchVenueData() {
+      if (!venueId) return
       setLoading(true)
       setProgress(0)
       setError(null)
       try {
-        const { data: venueData, error: venueError } = await client
-          .from("venues")
-          .select("venue, venue_location, venue_address, venue_latitude, venue_longitude")
-          .eq("venue_id", venueId)
-          .single()
+        let venueData: VenueDetail | null = null
 
-        if (venueError || !venueData) {
-          throw new Error("Venue not found")
+        if (isUuid(venueId)) {
+          const { data, error: venueError } = await client
+            .from("venues")
+            .select(
+              "venue, venue_location, venue_id, venue_address, venue_latitude, venue_longitude"
+            )
+            .eq("venue_id", venueId)
+            .single()
+          if (!venueError && data) {
+            venueData = data as VenueDetail
+          }
         }
 
-        setVenue({
-          venue: venueData.venue,
-          venue_location: venueData.venue_location ?? null,
-          venue_address: venueData.venue_address ?? null,
-          venue_latitude: venueData.venue_latitude ?? null,
-          venue_longitude: venueData.venue_longitude ?? null,
-        })
+        if (!venueData) {
+          const decodedName = decodeURIComponent(venueId)
+          const { data, error: venueError } = await client
+            .from("venues")
+            .select(
+              "venue, venue_location, venue_id, venue_address, venue_latitude, venue_longitude"
+            )
+            .eq("venue", decodedName)
+            .maybeSingle()
+          if (!venueError && data) {
+            venueData = data as VenueDetail
+          }
+        }
+
+        if (!venueData) {
+          setVenue(null)
+          setShows([])
+          setSongSpreadData([])
+          setError("Venue not found")
+          setLoading(false)
+          return
+        }
+
+        setVenue(venueData)
         setProgress((1 / VENUE_LOAD_STEPS) * 100)
 
-        const { data: showsData, error: showsError } = await client
-          .from("shows")
-          .select(
-            `
-            show_id,
-            show_date,
-            show_group,
-            show_subvenue,
-            show_tour,
-            show_detail,
-            show_alert,
-            tours!show_tour(tour_id)
-          `,
-          )
-          .eq("show_subvenue_venue", venueData.venue)
-          .order("show_date", { ascending: true })
+        const venueName = venueData.venue
 
-        if (showsError) throw showsError
+        const { data: subvenuesData } = await client
+          .from("subvenues")
+          .select("subvenue")
+          .eq("subvenue_venue", venueName)
 
-        const rawShows = (showsData ?? []) as Array<{
+        const subvenueNames =
+          subvenuesData?.map((s) => s.subvenue) ?? []
+
+        if (subvenueNames.length === 0) {
+          setShows([])
+          setSongSpreadData([])
+          setProgress(100)
+          setLoading(false)
+          return
+        }
+
+        let allShowsData: Array<{
           show_id: string
           show_date: string
           show_group: string
           show_subvenue: string
+          show_venue_location: string
           show_tour: string | null
           show_detail: string | null
           show_alert: string | null
-          tours?: { tour_id: string } | { tour_id: string }[] | null
-        }>
+          subvenues?: { venues?: { venue_id?: string } } | null
+        }> = []
+        let page = 0
+        let hasMore = true
 
-        const processedShows: VenueShow[] = rawShows.map((s) => {
-          const t = s.tours
-          const tourId =
-            t && !Array.isArray(t)
-              ? t.tour_id
-              : Array.isArray(t) && t[0]
-                ? t[0].tour_id
-                : null
+        while (hasMore) {
+          const { data, error: showsError } = await client
+            .from("shows")
+            .select(
+              `
+              show_id,
+              show_date,
+              show_group,
+              show_subvenue,
+              show_venue_location,
+              show_tour,
+              show_detail,
+              show_alert,
+              subvenues:show_subvenue(
+                venues:subvenue_venue(venue_id)
+              )
+            `
+            )
+            .in("show_subvenue", subvenueNames)
+            .order("show_date", { ascending: false })
+            .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+
+          if (showsError) throw showsError
+          if (data && data.length > 0) {
+            allShowsData = [...allShowsData, ...(data as typeof allShowsData)]
+            page++
+            hasMore = data.length === PAGE_SIZE
+          } else {
+            hasMore = false
+          }
+        }
+
+        const processedShows: VenueShow[] = allShowsData.map((s) => {
+          const sub = Array.isArray(s.subvenues) ? s.subvenues[0] : s.subvenues
+          const ven = Array.isArray(sub?.venues) ? sub?.venues?.[0] : sub?.venues
           return {
             show_id: s.show_id,
             show_date: s.show_date,
-            show_group: s.show_group,
-            show_subvenue: s.show_subvenue,
-            show_tour: s.show_tour,
-            tour_id: tourId,
-            show_detail: s.show_detail,
-            show_alert: s.show_alert,
+            show_group: s.show_group ?? "",
+            show_subvenue: s.show_subvenue ?? "",
+            show_venue_location: s.show_venue_location ?? "",
+            show_tour: s.show_tour ?? null,
+            tour_id: null,
+            venue_id: ven?.venue_id ?? venueData.venue_id,
+            show_detail: s.show_detail ?? null,
+            show_alert: s.show_alert ?? null,
           }
         })
 
         setShows(processedShows)
         setProgress((2 / VENUE_LOAD_STEPS) * 100)
 
-        if (processedShows.length === 0) {
+        const showIds = processedShows.map((s) => s.show_id)
+        if (showIds.length === 0) {
           setSongSpreadData([])
           setProgress(100)
+          setLoading(false)
           return
         }
 
-        const showIds = processedShows.map((s) => s.show_id)
-        const chunks: string[][] = []
-        for (let i = 0; i < showIds.length; i += 500) {
-          chunks.push(showIds.slice(i, i + 500))
-        }
-
-        let allEntries: Array<{
+        type EntryRow = {
           entry_song?: string
-          entry_show?: string
           songs?: {
             song?: string
+            song_displayname?: string | null
             song_category?: string
             song_originalartist?: string | null
             categories?: { category_canonid?: number }
-          }
-        }> = []
-
-        for (const chunk of chunks) {
-          let page = 0
-          let hasMore = true
-          while (hasMore) {
-            const from = page * 1000
-            const to = from + 999
-            const { data: entriesData, error: entriesError } = await client
-              .from("setlist_entries")
-              .select(
-                `
-                entry_song,
-                entry_show,
-                songs:entry_song(
-                  song,
-                  song_displayname,
-                  song_category,
-                  song_originalartist,
-                  categories:song_category(category_canonid)
-                )
-              `,
-              )
-              .in("entry_show", chunk)
-              .range(from, to)
-
-            if (entriesError) throw entriesError
-            const batch = (entriesData ?? []) as typeof allEntries
-            allEntries = [...allEntries, ...batch]
-            hasMore = batch.length === 1000
-            page++
-          }
+          } | Array<{
+            song?: string
+            song_displayname?: string | null
+            song_category?: string
+            song_originalartist?: string | null
+            categories?: { category_canonid?: number }
+          }>
         }
 
-        setProgress((3 / VENUE_LOAD_STEPS) * 100)
+        let allEntries: EntryRow[] = []
+        let entryPage = 0
+        let entriesHasMore = true
+
+        while (entriesHasMore) {
+          const { data: entriesData, error: entriesError } = await client
+            .from("setlist_entries")
+            .select(
+              `
+              entry_song,
+              songs:entry_song(
+                song,
+                song_displayname,
+                song_category,
+                song_originalartist,
+                categories:song_category(category_canonid)
+              )
+            `
+            )
+            .in("entry_show", showIds)
+            .range(entryPage * PAGE_SIZE, (entryPage + 1) * PAGE_SIZE - 1)
+
+          if (entriesError) throw entriesError
+          if (entriesData && entriesData.length > 0) {
+            allEntries = [...allEntries, ...(entriesData as EntryRow[])]
+            entryPage++
+            entriesHasMore = entriesData.length === PAGE_SIZE
+          } else {
+            entriesHasMore = false
+          }
+        }
 
         const songData: Record<
           string,
@@ -199,13 +262,14 @@ export function useVenueData(venueId: string | undefined) {
 
         for (const item of allEntries) {
           const songsRel = item.songs
-          if (!songsRel?.song) continue
+          const songsVal = Array.isArray(songsRel) ? songsRel[0] : songsRel
+          if (!songsVal?.song) continue
 
-          const songName = songsRel.song
-          const category = songsRel.song_category ?? "Uncategorized"
-          const categoryCanonId = songsRel.categories?.category_canonid
-          const originalArtist = songsRel.song_originalartist ?? null
-          const songDisplayName = (songsRel as { song_displayname?: string })?.song_displayname ?? null
+          const songName = songsVal.song
+          const songDisplayName = songsVal.song_displayname ?? null
+          const category = songsVal.song_category ?? "Uncategorized"
+          const categoryCanonId = songsVal.categories?.category_canonid
+          const originalArtist = songsVal.song_originalartist ?? null
 
           if (!songData[songName]) {
             songData[songName] = {
@@ -236,57 +300,52 @@ export function useVenueData(venueId: string | undefined) {
           }
         }
 
-        const songsArray = Object.entries(songData).map(([song, data]) => ({
-          song,
-          song_displayname: data.songDisplayName,
-          play_count: data.count,
-          category: data.category,
-          category_canonid:
-            data.categoryCanonId ?? categoryCanonIds[data.category] ?? 9999,
-          original_artist: data.originalArtist,
-        }))
-
         const categorySongs: Record<
           string,
-          Array<{ song: string; song_displayname?: string | null; playCount: number; artist?: string }>
+          Array<{
+            song: string
+            song_displayname?: string | null
+            playCount: number
+            artist?: string
+          }>
         > = {}
         const categoryTotalPerformances: Record<string, number> = {}
 
-        for (const songItem of songsArray) {
-          const category = songItem.category ?? "Uncategorized"
+        for (const [song, data] of Object.entries(songData)) {
+          const category = data.category ?? "Uncategorized"
           if (!categorySongs[category]) {
             categorySongs[category] = []
             categoryTotalPerformances[category] = 0
           }
           const artist =
-            songItem.original_artist?.trim() === "[Traditional]"
+            data.originalArtist?.trim() === "[Traditional]"
               ? "Traditional"
-              : songItem.original_artist?.trim()
+              : data.originalArtist?.trim()
           categorySongs[category].push({
-            song: songItem.song,
-            song_displayname: songItem.song_displayname,
-            playCount: songItem.play_count,
+            song,
+            song_displayname: data.songDisplayName ?? null,
+            playCount: data.count,
             artist: artist ?? undefined,
           })
-          categoryTotalPerformances[category] += songItem.play_count
+          categoryTotalPerformances[category] += data.count
         }
 
-        const spread: SongSpreadCategory[] = Object.keys(
-          categoryTotalPerformances,
+        const spreadData: SongSpreadCategory[] = Object.keys(
+          categoryTotalPerformances
         ).map((category) => ({
           category,
           count: categoryTotalPerformances[category],
           canonid: categoryCanonIds[category] ?? 9999,
           songs: (categorySongs[category] ?? []).sort(
-            (a, b) => b.playCount - a.playCount,
+            (a, b) => b.playCount - a.playCount
           ),
         }))
-        spread.sort((a, b) => a.canonid - b.canonid)
+        spreadData.sort((a, b) => a.canonid - b.canonid)
 
-        setSongSpreadData(spread)
+        setSongSpreadData(spreadData)
         setProgress(100)
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load venue")
+        setError(err instanceof Error ? err.message : "Failed to load venue data")
         setVenue(null)
         setShows([])
         setSongSpreadData([])
