@@ -4,16 +4,17 @@ import { useAuth } from "@/components/auth-context"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useSongSelection, useSetlistOperations } from "./song-selection/hooks"
 import { createSongOperations } from "./song-selection/operations"
 import { createSubmissionHandler } from "./song-selection/submission"
-import { ModalHeader, StatusDisplay } from "./song-selection/header"
-import { SongSelector } from "./song-selection/song-selector"
-import { SetlistDisplay } from "./song-selection/setlist-display"
-import { Footer } from "./song-selection/footer"
+import { ShowInfoCard } from "./song-selection/show-info-card"
+import { SongSearchCard } from "./song-selection/song-search-card"
+import { ActionButtonsCard } from "./song-selection/action-buttons-card"
+import { PicksDisplayCard } from "./song-selection/picks-display-card"
+import { ActualSetlistCard } from "./song-selection/actual-setlist-card"
+import { SubmitCard } from "./song-selection/submit-card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import type { UserPick } from "@/hooks/use-user-picks"
 
@@ -51,6 +52,17 @@ interface SongSelectionDialogProps {
     }>
   }
   onSuccess?: () => void
+}
+
+function getDialogTitle(
+  viewMode: boolean,
+  isEditing: boolean,
+  show_scored?: boolean
+): string {
+  if (viewMode) {
+    return show_scored ? "Setlist Game Results" : "Your Setlist Picks"
+  }
+  return isEditing ? "Edit Setlist Picks" : "Select Setlist"
 }
 
 export function SongSelectionDialog({
@@ -98,8 +110,6 @@ export function SongSelectionDialog({
     setSuccess,
     rawPointsTotal,
     actualSetlist,
-    showActualSetlist,
-    setShowActualSetlist,
     showInfo,
   } = useSongSelection({
     isOpen: open,
@@ -163,94 +173,136 @@ export function SongSelectionDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0 gap-0"
+        className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden"
         showCloseButton={true}
       >
-        <ModalHeader
-          show={showForModal}
-          viewMode={viewMode}
-          isEditing={isEditing}
-          show_scored={show.show_scored}
-          submissionDetails={submissionDetails}
-          isSelectionClosed={showInfo.isSelectionClosed}
-          timeRemaining={showInfo.timeRemaining}
-          onClose={() => onOpenChange(false)}
-        />
+        <div className="shrink-0 flex items-center justify-between border-b px-4 py-3">
+          <DialogTitle className="text-sm font-semibold">
+            {getDialogTitle(viewMode, isEditing, show.show_scored)}
+          </DialogTitle>
+        </div>
 
-        <StatusDisplay
-          show={showForModal}
-          viewMode={viewMode}
-          show_scored={show.show_scored}
-          submissionDetails={submissionDetails}
-          isSelectionClosed={showInfo.isSelectionClosed}
-          timeRemaining={showInfo.timeRemaining}
-        />
-
-        <div className="flex-1 overflow-y-auto px-4 pt-2 min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 p-4">
           {loading ? (
             <LoadingPageCard message="Loading songs…" />
           ) : success ? (
-            <div className="text-center py-8">
-              <div className="bg-green-500/20 text-foreground px-3 py-2 rounded-lg text-xs">
+            <div className="text-center py-12 animate-in fade-in duration-200">
+              <p className="text-sm text-muted-foreground">
                 Your song selections have been{" "}
                 {isEditing ? "updated" : "submitted"} successfully!
-              </div>
+              </p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {!viewMode && (
-                <SongSelector
-                  songs={songs}
-                  selectedSong={selectedSong}
-                  setSelectedSong={setSelectedSong}
-                  onAddSong={() => {
-                    handleAddSong(selectedSong)
-                    setSelectedSong("")
-                  }}
-                  onAddNewOriginalSong={handleAddNewOriginalSong}
-                  onAddNewCoverSong={handleAddNewCoverSong}
-                  onAddSetBreak={handleAddSetBreak}
-                  onAddEncoreBreak={handleAddEncoreBreak}
-                  canAddSetBreak={canAddSetBreak()}
-                  canAddEncoreBreak={canAddEncoreBreak()}
-                  error={error}
-                />
-              )}
-
-              <div>
-                <SetlistDisplay
-                  songPicks={songPicks}
-                  actualSetlist={actualSetlist}
-                  showActualSetlist={showActualSetlist}
-                  setShowActualSetlist={setShowActualSetlist}
+          ) : viewMode ? (
+              /* View mode: show info full width, even columns, selection score full width */
+              <div className="flex flex-col gap-4">
+                <ShowInfoCard
+                  show={showForModal}
                   viewMode={viewMode}
                   show_scored={show.show_scored}
+                  submissionDetails={submissionDetails}
                   isSelectionClosed={showInfo.isSelectionClosed}
-                  onRemoveSong={handleRemoveSong}
-                  onMoveSongUp={moveSongUp}
-                  onMoveSongDown={moveSongDown}
-                  onRemoveSet={handleRemoveSet}
+                  timeRemaining={showInfo.timeRemaining}
+                />
+                <div
+                  className={
+                    show.show_scored
+                      ? "grid grid-cols-1 md:grid-cols-2 gap-4"
+                      : "flex flex-col gap-3"
+                  }
+                >
+                  <PicksDisplayCard
+                    songPicks={songPicks}
+                    actualSetlist={actualSetlist}
+                    viewMode={true}
+                    show_scored={show.show_scored}
+                    isSelectionClosed={showInfo.isSelectionClosed}
+                    onRemoveSong={handleRemoveSong}
+                    onMoveSongUp={moveSongUp}
+                    onMoveSongDown={moveSongDown}
+                    onRemoveSet={handleRemoveSet}
+                  />
+                  {show.show_scored && (
+                    <ActualSetlistCard
+                      actualSetlist={actualSetlist}
+                      songPicks={songPicks}
+                    />
+                  )}
+                </div>
+                <SubmitCard
+                  viewMode={viewMode}
+                  show_scored={show.show_scored}
+                  submissionDetails={submissionDetails}
+                  rawPointsTotal={rawPointsTotal}
+                  totalSongsSelected={totalSongsSelected}
+                  songPicks={songPicks}
+                  submitting={submitting}
+                  success={success}
+                  isEditing={isEditing}
+                  onSubmit={handleSubmit}
+                  onClearSelections={handleClearSelections}
+                  onClose={() => onOpenChange(false)}
                 />
               </div>
-            </div>
+            ) : (
+              /* Edit mode: original 1.25:2 layout */
+              <div className="grid grid-cols-1 md:grid-cols-[1.25fr_2fr] gap-4">
+                <div className="flex flex-col gap-3 order-1">
+                  <ShowInfoCard
+                    show={showForModal}
+                    viewMode={viewMode}
+                    show_scored={show.show_scored}
+                    submissionDetails={submissionDetails}
+                    isSelectionClosed={showInfo.isSelectionClosed}
+                    timeRemaining={showInfo.timeRemaining}
+                  />
+                  <SongSearchCard
+                    songs={songs}
+                    selectedSong={selectedSong}
+                    setSelectedSong={setSelectedSong}
+                    onAddSong={() => {
+                      handleAddSong(selectedSong)
+                      setSelectedSong("")
+                    }}
+                    error={error}
+                  />
+                  <ActionButtonsCard
+                    onAddSetBreak={handleAddSetBreak}
+                    onAddEncoreBreak={handleAddEncoreBreak}
+                    onAddNewOriginalSong={handleAddNewOriginalSong}
+                    onAddNewCoverSong={handleAddNewCoverSong}
+                    canAddSetBreak={canAddSetBreak()}
+                    canAddEncoreBreak={canAddEncoreBreak()}
+                  />
+                </div>
+                <div className="flex flex-col gap-3 order-2">
+                  <PicksDisplayCard
+                    songPicks={songPicks}
+                    actualSetlist={actualSetlist}
+                    viewMode={false}
+                    show_scored={show.show_scored}
+                    isSelectionClosed={showInfo.isSelectionClosed}
+                    onRemoveSong={handleRemoveSong}
+                    onMoveSongUp={moveSongUp}
+                    onMoveSongDown={moveSongDown}
+                    onRemoveSet={handleRemoveSet}
+                  />
+                  <SubmitCard
+                    viewMode={viewMode}
+                    show_scored={show.show_scored}
+                    submissionDetails={submissionDetails}
+                    rawPointsTotal={rawPointsTotal}
+                    totalSongsSelected={totalSongsSelected}
+                    songPicks={songPicks}
+                    submitting={submitting}
+                    success={success}
+                    isEditing={isEditing}
+                    onSubmit={handleSubmit}
+                    onClearSelections={handleClearSelections}
+                    onClose={() => onOpenChange(false)}
+                  />
+                </div>
+              </div>
           )}
-        </div>
-
-        <div className="px-4 py-2 border-t bg-muted/30">
-          <Footer
-            viewMode={viewMode}
-            show_scored={show.show_scored}
-            submissionDetails={submissionDetails}
-            rawPointsTotal={rawPointsTotal}
-            songPicks={songPicks}
-            totalSongsSelected={totalSongsSelected}
-            submitting={submitting}
-            success={success}
-            isEditing={isEditing}
-            onClose={() => onOpenChange(false)}
-            onSubmit={handleSubmit}
-            onClearSelections={handleClearSelections}
-          />
         </div>
       </DialogContent>
     </Dialog>

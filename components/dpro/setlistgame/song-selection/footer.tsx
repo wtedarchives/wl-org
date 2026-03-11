@@ -50,7 +50,7 @@ export function Footer({
             </div>
             {submissionDetails &&
               submissionDetails.songsPicked > submissionDetails.songsPlayed && (
-                <div className="text-[11px] font-semibold mt-1">
+                <div className="text-xs font-semibold mt-1">
                   {submissionDetails.songsPicked -
                     submissionDetails.songsPlayed ===
                   1

@@ -55,7 +55,7 @@ export const getPlacementColor = (placement: string | undefined): string => {
     "Encore 2": "#f43f5e",
     "Encore 3": "#f43f5e",
   }
-  return colorMap[placement] ?? "#000000"
+  return colorMap[placement] ?? "transparent"
 }
 
 export const getPlacement = (

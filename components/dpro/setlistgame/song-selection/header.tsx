@@ -57,13 +57,13 @@ export function StatusDisplay({
   timeRemaining,
 }: StatusDisplayProps) {
   return (
-    <div className="px-4 py-2 border-b bg-muted/30">
+    <div className="rounded-md bg-muted/30 px-3 py-2">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
         <div>
           <h3 className="text-xs font-medium">
             {formatSetlistDate(show.show_date)} — {show.show_subvenue}
           </h3>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {show.show_venue_location}
           </p>
         </div>

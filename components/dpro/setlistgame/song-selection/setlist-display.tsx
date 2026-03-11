@@ -273,7 +273,7 @@ export function SetlistDisplay({
             {getSongsForSet(songPicks, setId).map((pick, index) => (
               <div 
                 key={pick.id} 
-                className="flex justify-between items-center rounded-md text-foreground hover:bg-muted/40 transition-colors">
+                className="flex justify-between items-center rounded-md text-foreground hover:bg-muted/40 transition-all duration-200 ease-out">
                 <div className="flex items-center gap-3">
                   <span 
                     className="text-xs text-white px-1.5 py-0.5 rounded flex items-center font-medium justify-center min-w-[1.5rem]"
@@ -284,14 +284,14 @@ export function SetlistDisplay({
                     {index + 1}
                   </span>
                   <div className="flex items-center gap-1.5 flex-1">
-                    <span className="break-words font-medium text-xs leading-[0.75rem]">
+                    <span className="break-words font-medium text-xs">
                       {pick.song}
                     </span>
                     {/* Only show placement labels if not in view mode or if the show isn't closed */}
                     {pick.placement && (!viewMode || !isSelectionClosed) && 
                      !pick.placement.startsWith('Main Set') && (
                       <span 
-                        className="inline-block text-[0.625rem] leading-[0.625rem] text-white font-medium px-1.5 py-0.5 rounded-full shrink-0"
+                        className="inline-block text-xs leading-tight text-white font-medium px-1.5 py-0.5 rounded-full shrink-0"
                         style={{ backgroundColor: getPlacementColor(pick.placement) }}
                       >
                         {pick.placement}
