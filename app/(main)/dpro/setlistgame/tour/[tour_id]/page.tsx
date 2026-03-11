@@ -27,6 +27,13 @@ export default function SetlistGameTourPage({
   } = useSetlistGameTourDetails(tourId ?? undefined)
 
   useEffect(() => {
+    if (tourInfo) {
+      document.title = `Echo of a Show (${tourInfo.tour}) – Wysteria Lane`
+    }
+    return () => { document.title = "" }
+  }, [tourInfo])
+
+  useEffect(() => {
     if (!tourInfo) {
       setSetlistBreadcrumbs(null)
       return

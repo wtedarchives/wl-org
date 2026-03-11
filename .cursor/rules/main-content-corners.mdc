@@ -7,7 +7,7 @@ alwaysApply: true
 
 When building or updating pages/components that render in the main content area (inside `SidebarInset` in the `(main)` layout), keep the **bottom corners** visually consistent:
 
-- **Desktop (md and up)**: main content containers should have **rounded bottom corners**, matching the homepage/dashboard look.
+- **Desktop (md and up)**: main content containers should have **rounded bottom corners**, matching the homepage look.
 - **Mobile**: bottom corners may be square (no rounding) unless the design explicitly calls for it.
 
 ## Implementation Guidelines
@@ -16,5 +16,5 @@ When building or updating pages/components that render in the main content area 
 - Use responsive Tailwind classes like:
   - `rounded-b-none md:rounded-b-xl` on the outermost content wrapper.
   - Pair with `overflow-hidden` when content (e.g. iframes, full-bleed sections) needs to respect the rounded corners.
-- Align the background color and rounding with existing pages (e.g. home/dashboard) so the shell feels consistent when adding new pages like detail views, long-form content, or embedded experiences.
+- Align the background color and rounding with existing pages (e.g. home) so the shell feels consistent when adding new pages like detail views, long-form content, or embedded experiences.
 

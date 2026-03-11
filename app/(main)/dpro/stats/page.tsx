@@ -45,9 +45,12 @@ function DproStatsContent() {
   const [connectionError, setConnectionError] = useState(false)
 
   useEffect(() => {
-    document.title = "Stats – Wysteria Lane"
+    if (selectedYear !== null) {
+      const yearLabel = selectedYear === "all-time" ? "All-Time" : String(selectedYear)
+      document.title = `${yearLabel} Stats – Wysteria Lane`
+    }
     return () => { document.title = "" }
-  }, [])
+  }, [selectedYear])
 
   useEffect(() => {
     if (selectedYear !== null) return

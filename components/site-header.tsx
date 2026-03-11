@@ -50,7 +50,6 @@ const SEGMENT_LABELS: Record<string, string> = {
   profile: "My Stats",
   settings: "Settings",
   overview: "Overview",
-  dashboard: "Dashboard",
 }
 
 /** Override breadcrumb label for specific full paths (e.g. wted/info, wted/gorps). */
