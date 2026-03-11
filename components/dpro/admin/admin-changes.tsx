@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search, Plus } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { formatDate } from "@/lib/utils/show-utils"
@@ -34,7 +35,36 @@ export function AdminChanges() {
   const [isChangeModalOpen, setIsChangeModalOpen] = useState(false)
   const [isNewChange, setIsNewChange] = useState(false)
   const showDataLoadedRef = useRef(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isDropdownOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [isDropdownOpen])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (
+        isDropdownOpen &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isDropdownOpen])
 
   const fetchShows = async () => {
     if (!supabase) return
@@ -196,8 +226,9 @@ export function AdminChanges() {
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Show Changes Management</h3>
-        <div className="relative" ref={dropdownRef}>
+        <div>
           <Button
+            ref={triggerRef}
             variant="outline"
             size="sm"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -206,34 +237,43 @@ export function AdminChanges() {
             Show
             <ChevronDown className="size-4" />
           </Button>
-          {isDropdownOpen && (
-            <div className="absolute right-0 z-50 mt-2 w-80 max-h-96 overflow-y-auto rounded-md border bg-background shadow-lg">
-              <div className="p-1">
-                <Input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search shows..."
-                  className="h-8 text-xs"
-                />
-              </div>
-              <div className="max-h-64 overflow-y-auto divide-y">
-                {filteredShows.map((show) => (
-                  <button
-                    key={show.show_id}
-                    type="button"
-                    onClick={() => handleShowSelect(show)}
-                    className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
-                      selectedShow?.show_id === show.show_id ? "bg-muted" : ""
-                    }`}
-                  >
-                    {formatDate(show.show_date)} {show.show_canonid ? `[${show.show_canonid}]` : ""} [
-                    {show.show_group} — {show.show_venue_location}]
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {isDropdownOpen &&
+            createPortal(
+              <div
+                ref={dropdownRef}
+                className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+                style={{
+                  top: dropdownPosition.top,
+                  right: dropdownPosition.right,
+                }}
+              >
+                <div className="p-1">
+                  <Input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search shows..."
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div className="max-h-64 overflow-y-auto divide-y">
+                  {filteredShows.map((show) => (
+                    <button
+                      key={show.show_id}
+                      type="button"
+                      onClick={() => handleShowSelect(show)}
+                      className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
+                        selectedShow?.show_id === show.show_id ? "bg-muted" : ""
+                      }`}
+                    >
+                      {formatDate(show.show_date)} {show.show_canonid ? `[${show.show_canonid}]` : ""} [
+                      {show.show_group} — {show.show_venue_location}]
+                    </button>
+                  ))}
+                </div>
+              </div>,
+              document.body
+            )}
         </div>
       </div>
       {selectedShow && (

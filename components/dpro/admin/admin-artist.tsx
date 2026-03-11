@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search, CheckCircle, XCircle } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
@@ -21,8 +22,20 @@ export function AdminArtist() {
   const [buttonState, setButtonState] = useState<
     "default" | "success" | "error"
   >("default")
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const mountedRef = useRef(false)
+
+  useEffect(() => {
+    if (isDropdownOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [isDropdownOpen])
 
   useEffect(() => {
     if (buttonState !== "default") {
@@ -33,16 +46,20 @@ export function AdminArtist() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
       if (
+        isDropdownOpen &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target) &&
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
+        !dropdownRef.current.contains(target)
       ) {
         setIsDropdownOpen(false)
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [isDropdownOpen])
 
   useEffect(() => {
     if (!mountedRef.current && supabase) {
@@ -100,8 +117,9 @@ export function AdminArtist() {
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Artist Management</h3>
-        <div className="relative" ref={dropdownRef}>
+        <div>
           <Button
+            ref={triggerRef}
             variant="outline"
             size="sm"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -110,46 +128,55 @@ export function AdminArtist() {
             Current Artists
             <ChevronDown className="size-4" />
           </Button>
-          {isDropdownOpen && (
-            <div className="absolute right-0 z-50 mt-2 w-64 max-h-96 overflow-y-auto rounded-md border bg-background shadow-lg">
-              <div className="p-1">
-                <div className="relative">
-                  <Input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search artists..."
-                    className="h-8 pr-8 text-xs"
-                  />
-                  <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                </div>
-              </div>
-              <div className="max-h-64 overflow-y-auto divide-y">
-                {filteredArtists.map((artist) => (
-                  <button
-                    key={artist.artist_id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedArtist(artist.artist)
-                      setIsDropdownOpen(false)
-                      setSearchTerm("")
-                    }}
-                    className="w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted"
-                  >
-                    {artist.artist}
-                  </button>
-                ))}
-                {filteredArtists.length === 0 && (
-                  <div className="px-2 py-1 text-center text-xs text-muted-foreground">
-                    No artists found
+          {isDropdownOpen &&
+            createPortal(
+              <div
+                ref={dropdownRef}
+                className="fixed z-[100] w-64 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+                style={{
+                  top: dropdownPosition.top,
+                  right: dropdownPosition.right,
+                }}
+              >
+                <div className="p-1">
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search artists..."
+                      className="h-8 pr-8 text-xs"
+                    />
+                    <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   </div>
-                )}
-              </div>
-            </div>
-          )}
+                </div>
+                <div className="max-h-64 overflow-y-auto divide-y">
+                  {filteredArtists.map((artist) => (
+                    <button
+                      key={artist.artist_id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedArtist(artist.artist)
+                        setIsDropdownOpen(false)
+                        setSearchTerm("")
+                      }}
+                      className="w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted"
+                    >
+                      {artist.artist}
+                    </button>
+                  ))}
+                  {filteredArtists.length === 0 && (
+                    <div className="px-2 py-1 text-center text-xs text-muted-foreground">
+                      No artists found
+                    </div>
+                  )}
+                </div>
+              </div>,
+              document.body
+            )}
         </div>
       </div>
-      <div className="flex flex-col gap-1 px-1 pb-1 md:flex-row">
+      <div className="flex flex-col gap-2 md:flex-row">
         <Input
           type="text"
           value={newArtistName}
@@ -172,7 +199,7 @@ export function AdminArtist() {
                 ? "destructive"
                 : "default"
           }
-          className="min-w-[80px]"
+          className="h-8 min-w-[80px]"
         >
           {isSubmitting
             ? "Adding..."

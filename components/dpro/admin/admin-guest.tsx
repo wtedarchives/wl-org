@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search, Save, Edit, Plus } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
@@ -40,23 +41,39 @@ export function AdminGuest() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false)
   const [isNewGuest, setIsNewGuest] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const selectedGuestRef = useRef<HTMLButtonElement | null>(null)
   const mountedRef = useRef(false)
 
   useEffect(() => {
+    if (isDropdownOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [isDropdownOpen])
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
       if (
+        isDropdownOpen &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target) &&
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
+        !dropdownRef.current.contains(target)
       ) {
         setIsDropdownOpen(false)
       }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [isDropdownOpen])
 
   useEffect(() => {
     if (
@@ -194,8 +211,9 @@ export function AdminGuest() {
           >
             <Plus className="size-4" />
           </Button>
-          <div className="relative" ref={dropdownRef}>
+          <div>
             <Button
+              ref={triggerRef}
               variant="outline"
               size="sm"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -204,8 +222,16 @@ export function AdminGuest() {
               Guest
               <ChevronDown className="size-4" />
             </Button>
-            {isDropdownOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-64 max-h-96 overflow-y-auto rounded-md border bg-background shadow-lg">
+            {isDropdownOpen &&
+              createPortal(
+                <div
+                  ref={dropdownRef}
+                  className="fixed z-[100] w-64 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+                  style={{
+                    top: dropdownPosition.top,
+                    right: dropdownPosition.right,
+                  }}
+                >
                 <div className="p-1">
                   <div className="relative">
                     <Input
@@ -247,8 +273,9 @@ export function AdminGuest() {
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              </div>,
+                document.body
+              )}
           </div>
         </div>
       </div>

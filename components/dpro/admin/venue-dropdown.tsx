@@ -1,6 +1,7 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import type { VenueData } from "@/types/admin"
 import { Button } from "@/components/ui/button"
@@ -31,16 +32,31 @@ export function VenueDropdown({
   loadingProgress,
   selectedVenue,
 }: VenueDropdownProps) {
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const selectedVenueRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [isOpen])
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
       if (
         isOpen &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target) &&
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
+        !dropdownRef.current.contains(target)
       ) {
         onClose()
       }
@@ -66,14 +82,15 @@ export function VenueDropdown({
     }
   }, [isOpen, selectedVenue])
 
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <Button variant="outline" size="sm" onClick={onToggle} className="gap-2">
-        Venue
-        <ChevronDown className="size-4" />
-      </Button>
-      {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-80 max-h-96 overflow-y-auto rounded-md border bg-background shadow-lg">
+  const dropdownContent = isOpen && (
+    <div
+      ref={dropdownRef}
+      className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+      style={{
+        top: dropdownPosition.top,
+        right: dropdownPosition.right,
+      }}
+    >
           <div className="p-1">
             <div className="relative">
               <Input
@@ -131,7 +148,21 @@ export function VenueDropdown({
             )}
           </div>
         </div>
-      )}
-    </div>
+  )
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="outline"
+        size="sm"
+        onClick={onToggle}
+        className="gap-2"
+      >
+        Venue
+        <ChevronDown className="size-4" />
+      </Button>
+      {dropdownContent && createPortal(dropdownContent, document.body)}
+    </>
   )
 }
