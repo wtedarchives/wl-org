@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { CallbacksEditor } from "./callbacks-editor"
 
 interface ShowFormFieldsProps {
   editedShow: AdminShowData | null
@@ -40,6 +41,9 @@ export function ShowFormFields({
   tours,
   subvenues,
   years,
+  selectedShow,
+  allShows,
+  songs,
 }: ShowFormFieldsProps) {
   return (
     <div className="pb-1">
@@ -59,10 +63,13 @@ export function ShowFormFields({
           <label className="mb-0.5 block text-xs font-medium">Group</label>
           {isEditing ? (
             <Select
-              value={editedShow?.show_group ?? ""}
+              value={editedShow?.show_group || "__none__"}
               onValueChange={(v) =>
                 onInputChange({
-                  target: { name: "show_group", value: v },
+                  target: {
+                    name: "show_group",
+                    value: v === "__none__" ? "" : v,
+                  },
                 } as React.ChangeEvent<HTMLSelectElement>)
                 }
             >
@@ -70,7 +77,7 @@ export function ShowFormFields({
                 <SelectValue placeholder="-- Select Group --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Group --</SelectItem>
+                <SelectItem value="__none__">-- Select Group --</SelectItem>
                 {groups.map((g) => (
                   <SelectItem key={g.group} value={g.group}>
                     {g.group}
@@ -90,10 +97,13 @@ export function ShowFormFields({
           <label className="mb-0.5 block text-xs font-medium">Tour</label>
           {isEditing ? (
             <Select
-              value={editedShow?.show_tour ?? ""}
+              value={editedShow?.show_tour || "__none__"}
               onValueChange={(v) =>
                 onInputChange({
-                  target: { name: "show_tour", value: v },
+                  target: {
+                    name: "show_tour",
+                    value: v === "__none__" ? "" : v,
+                  },
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
@@ -101,7 +111,7 @@ export function ShowFormFields({
                 <SelectValue placeholder="-- Select Tour --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Tour --</SelectItem>
+                <SelectItem value="__none__">-- Select Tour --</SelectItem>
                 {tours.map((t) => (
                   <SelectItem key={t.tour} value={t.tour}>
                     {t.tour}
@@ -121,10 +131,13 @@ export function ShowFormFields({
           <label className="mb-0.5 block text-xs font-medium">Subvenue</label>
           {isEditing ? (
             <Select
-              value={editedShow?.show_subvenue ?? ""}
+              value={editedShow?.show_subvenue || "__none__"}
               onValueChange={(v) =>
                 onInputChange({
-                  target: { name: "show_subvenue", value: v },
+                  target: {
+                    name: "show_subvenue",
+                    value: v === "__none__" ? "" : v,
+                  },
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
@@ -132,7 +145,7 @@ export function ShowFormFields({
                 <SelectValue placeholder="-- Select Subvenue --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Subvenue --</SelectItem>
+                <SelectItem value="__none__">-- Select Subvenue --</SelectItem>
                 {subvenues.map((s) => (
                   <SelectItem key={s.subvenue} value={s.subvenue}>
                     {s.subvenue}
@@ -144,6 +157,40 @@ export function ShowFormFields({
           ) : (
             <Input
               value={editedShow?.show_subvenue ?? ""}
+              readOnly
+              className="h-8 text-xs"
+            />
+          )}
+        </div>
+        <div>
+          <label className="mb-0.5 block text-xs font-medium">Year</label>
+          {isEditing ? (
+            <Select
+              value={editedShow?.show_year || "__none__"}
+              onValueChange={(v) =>
+                onInputChange({
+                  target: {
+                    name: "show_year",
+                    value: v === "__none__" ? "" : v,
+                  },
+                } as React.ChangeEvent<HTMLSelectElement>)
+              }
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="-- Select Year --" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">-- Select Year --</SelectItem>
+                {years.map((y) => (
+                  <SelectItem key={y.year} value={y.year}>
+                    {y.year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              value={editedShow?.show_year ?? ""}
               readOnly
               className="h-8 text-xs"
             />
@@ -248,20 +295,14 @@ export function ShowFormFields({
             className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
         </div>
-        <div className="md:col-span-2">
-          <label className="mb-0.5 block text-xs font-medium">
-            Callbacks
-          </label>
-          <textarea
-            name="show_callbacks"
-            value={editedShow?.show_callbacks ?? ""}
-            onChange={onInputChange}
-            readOnly={!isEditing}
-            rows={4}
-            className="w-full rounded-md border border-input bg-background px-2 py-1 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-            placeholder="HTML for callbacks..."
-          />
-        </div>
+        <CallbacksEditor
+          selectedShow={selectedShow}
+          editedShow={editedShow}
+          isEditing={isEditing}
+          onInputChange={onInputChange}
+          allShows={allShows}
+          songs={songs}
+        />
       </div>
     </div>
   )

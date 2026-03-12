@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
-import { createPortal } from "react-dom"
-import { ChevronDown, Search, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { formatDate } from "@/lib/utils/show-utils"
 import type { ShowData, ShowChangeData } from "@/types/admin"
+import { AdminShowDropdown } from "./admin-show-dropdown"
 import { ShowChangeModal } from "./show-change-modal"
+import { getChangeTypeIcon } from "../setlist/setlist-show-change-icon"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -35,36 +35,6 @@ export function AdminChanges() {
   const [isChangeModalOpen, setIsChangeModalOpen] = useState(false)
   const [isNewChange, setIsNewChange] = useState(false)
   const showDataLoadedRef = useRef(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (isDropdownOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 8,
-        right: window.innerWidth - rect.right,
-      })
-    }
-  }, [isDropdownOpen])
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (
-        isDropdownOpen &&
-        triggerRef.current &&
-        !triggerRef.current.contains(target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
-        setIsDropdownOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isDropdownOpen])
 
   const fetchShows = async () => {
     if (!supabase) return
@@ -226,55 +196,18 @@ export function AdminChanges() {
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Show Changes Management</h3>
-        <div>
-          <Button
-            ref={triggerRef}
-            variant="outline"
-            size="sm"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="gap-2"
-          >
-            Show
-            <ChevronDown className="size-4" />
-          </Button>
-          {isDropdownOpen &&
-            createPortal(
-              <div
-                ref={dropdownRef}
-                className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
-                style={{
-                  top: dropdownPosition.top,
-                  right: dropdownPosition.right,
-                }}
-              >
-                <div className="p-1">
-                  <Input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search shows..."
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div className="max-h-64 overflow-y-auto divide-y">
-                  {filteredShows.map((show) => (
-                    <button
-                      key={show.show_id}
-                      type="button"
-                      onClick={() => handleShowSelect(show)}
-                      className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
-                        selectedShow?.show_id === show.show_id ? "bg-muted" : ""
-                      }`}
-                    >
-                      {formatDate(show.show_date)} {show.show_canonid ? `[${show.show_canonid}]` : ""} [
-                      {show.show_group} — {show.show_venue_location}]
-                    </button>
-                  ))}
-                </div>
-              </div>,
-              document.body
-            )}
-        </div>
+        <AdminShowDropdown
+          isOpen={isDropdownOpen}
+          onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          filteredShows={filteredShows}
+          onShowSelect={handleShowSelect}
+          loading={loading}
+          loadingProgress={loadingProgress}
+          selectedShow={selectedShow}
+          triggerLabel="Show"
+        />
       </div>
       {selectedShow && (
         <div>
@@ -296,59 +229,71 @@ export function AdminChanges() {
             </Button>
           </div>
           {changesLoading ? (
-            <div className="flex h-32 items-center justify-center">
+            <div className="flex items-center justify-center gap-2 p-3">
               <div className="flex gap-2">
                 <div className="size-3 animate-pulse rounded-lg bg-muted" />
                 <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:150ms]" />
                 <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:300ms]" />
               </div>
+              <p className="ml-2 text-xs text-muted-foreground">
+                Loading changes...
+              </p>
             </div>
           ) : showChanges.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center text-xs">Order</TableHead>
-                  <TableHead className="text-center text-xs">Type</TableHead>
-                  <TableHead className="text-left text-xs">Change</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {showChanges.map((change) => (
-                  <TableRow
-                    key={change.show_change_uuid}
-                    className="cursor-pointer text-[0.625rem] hover:bg-muted/50"
-                    onClick={() => handleChangeSelect(change)}
-                  >
-                    <TableCell className="text-center">
-                      {change.change_order}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {change.change_type}
-                    </TableCell>
-                    <TableCell>
-                      <div
-                        className="[&_a]:font-medium"
-                        dangerouslySetInnerHTML={{ __html: change.change }}
-                      />
-                    </TableCell>
+            <div className="overflow-hidden rounded-lg border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/60">
+                    <TableHead className="py-1 text-center text-xs">Order</TableHead>
+                    <TableHead className="py-1 text-center text-xs">Type</TableHead>
+                    <TableHead className="py-1 text-center text-xs w-8" />
+                    <TableHead className="py-1 text-left text-xs">Change</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {showChanges.map((change) => (
+                    <TableRow
+                      key={change.show_change_uuid}
+                      className="cursor-pointer text-xs hover:bg-muted/50"
+                      onClick={() => handleChangeSelect(change)}
+                    >
+                      <TableCell className="py-1 text-center">
+                        {change.change_order}
+                      </TableCell>
+                      <TableCell className="py-1 text-center">
+                        {change.change_type}
+                      </TableCell>
+                      <TableCell className="py-1 text-center">
+                        {(() => {
+                          const iconConfig = getChangeTypeIcon(change.change_type)
+                          return iconConfig ? (
+                            <iconConfig.Icon
+                              className={`size-3.5 shrink-0 ${iconConfig.colorClass}`}
+                            />
+                          ) : null
+                        })()}
+                      </TableCell>
+                      <TableCell className="py-1">
+                        <div
+                          className="[&_a]:font-medium"
+                          dangerouslySetInnerHTML={{ __html: change.change }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
-            <div className="rounded border bg-background p-3 text-center">
-              <p className="text-xs text-muted-foreground">
-                No changes found for this show.
-              </p>
+            <div className="rounded-lg border border-border bg-background p-3 text-center text-xs text-muted-foreground">
+              No changes found for this show.
             </div>
           )}
         </div>
       )}
       {!selectedShow && !loading && (
-        <div className="rounded border bg-background p-3 text-center">
-          <p className="text-xs text-muted-foreground">
-            Select a show to view its changes.
-          </p>
+        <div className="rounded-lg border border-border bg-background p-3 text-center text-xs text-muted-foreground">
+          Select a show to view its changes.
         </div>
       )}
       {loading && loadingProgress < 100 && !selectedShow && (

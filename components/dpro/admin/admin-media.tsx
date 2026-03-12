@@ -11,6 +11,7 @@ import type { AdminSetlistEntryData } from "@/types/admin"
 import type { ReleaseShow } from "@/types/admin"
 import { useShowData } from "@/hooks/use-show-data"
 import { useShowReleases } from "@/hooks/use-show-releases"
+import { ReleaseServiceIcon } from "../setlist/setlist-media-section"
 import { AdminShowDropdown } from "./admin-show-dropdown"
 import {
   Table,
@@ -21,36 +22,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-
-const NugsIcon = () => (
-  <img
-    src="/NugsColor.png"
-    alt="nugs"
-    className="inline-block size-3.5 w-auto"
-  />
-)
-
-function getServiceIcon(serviceName: string | null) {
-  if (!serviceName) return null
-  switch (serviceName.toLowerCase()) {
-    case "youtube":
-      return (
-        <span className="inline-block text-[#FF0033] text-sm font-bold">▶</span>
-      )
-    case "bandcamp":
-      return (
-        <span className="inline-block text-[#1b96bb] text-sm font-bold">BC</span>
-      )
-    case "nugs":
-      return <NugsIcon />
-    case "spotify":
-      return (
-        <span className="inline-block text-[#1ed760] text-sm font-bold">♫</span>
-      )
-    default:
-      return null
-  }
-}
 
 export function AdminMedia() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -346,54 +317,62 @@ export function AdminMedia() {
         </div>
       )}
       {selectedShow && (
-        <div className="overflow-x-auto">
+        <div className="overflow-hidden rounded-lg border border-border">
           {loadingSetlist || loadingReleases ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="size-8 animate-spin rounded-lg border-2 border-primary border-t-transparent" />
+            <div className="flex items-center justify-center gap-2 p-3">
+              <div className="flex gap-2">
+                <div className="size-3 animate-pulse rounded-lg bg-muted" />
+                <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:150ms]" />
+                <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:300ms]" />
+              </div>
+              <p className="ml-2 text-xs text-muted-foreground">
+                Loading media...
+              </p>
             </div>
           ) : setlistEntries.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center text-xs border-r">S</TableHead>
-                  <TableHead className="text-center text-xs border-r">#</TableHead>
-                  <TableHead className="text-left text-xs border-r">Song</TableHead>
-                  <TableHead className="text-left text-xs border-r">Short</TableHead>
-                  <TableHead className="text-left text-xs border-r">&gt;</TableHead>
-                  <TableHead className="text-center text-xs border-r">
-                    Placement
-                  </TableHead>
-                  {showReleases.map((rs: ReleaseShow) => {
-                    const allChecked =
-                      setlistEntries.length > 0 &&
-                      setlistEntries.every((e) =>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/60">
+                    <TableHead className="py-1 text-center text-xs border-r">S</TableHead>
+                    <TableHead className="py-1 text-center text-xs border-r">#</TableHead>
+                    <TableHead className="py-1 text-left text-xs border-r">Song</TableHead>
+                    <TableHead className="py-1 text-left text-xs border-r">Short</TableHead>
+                    <TableHead className="py-1 text-left text-xs border-r">→</TableHead>
+                    <TableHead className="py-1 text-center text-xs border-r">
+                      Placement
+                    </TableHead>
+                    {showReleases.map((rs: ReleaseShow) => {
+                      const allChecked =
+                        setlistEntries.length > 0 &&
+                        setlistEntries.every((e) =>
+                          mediaEntries.has(`${e.entry_id}:${rs.release_id}`)
+                        )
+                      const someChecked = setlistEntries.some((e) =>
                         mediaEntries.has(`${e.entry_id}:${rs.release_id}`)
                       )
-                    const someChecked = setlistEntries.some((e) =>
-                      mediaEntries.has(`${e.entry_id}:${rs.release_id}`)
-                    )
-                    return (
-                      <TableHead
-                        key={rs.release_id}
-                        className="text-center text-xs border-r"
-                      >
-                        <div className="flex flex-col items-center gap-1">
-                          <div
-                            ref={(el) => {
-                              headerRefs.current[rs.release_id] = el
-                            }}
-                            className="cursor-pointer"
-                            onMouseEnter={() =>
-                              setHoveredReleaseId(rs.release_id)
-                            }
-                            onMouseLeave={() => setHoveredReleaseId(null)}
-                          >
-                            {getServiceIcon(rs.releases?.release_service ?? null)}
-                          </div>
+                      return (
+                        <TableHead
+                          key={rs.release_id}
+                          className="py-1 text-center text-xs border-r"
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <div
+                              ref={(el) => {
+                                headerRefs.current[rs.release_id] = el
+                              }}
+                              className="cursor-pointer"
+                              onMouseEnter={() =>
+                                setHoveredReleaseId(rs.release_id)
+                              }
+                              onMouseLeave={() => setHoveredReleaseId(null)}
+                            >
+                              <ReleaseServiceIcon service={rs.releases?.release_service ?? null} />
+                            </div>
                           <Button
                             variant={allChecked ? "default" : "outline"}
                             size="sm"
-                            className="size-4 p-0"
+                            className="size-4 p-0 transition-colors hover:bg-muted/80 hover:border-muted-foreground/30"
                             onClick={() =>
                               handleToggleAllForRelease(rs.release_id)
                             }
@@ -414,36 +393,31 @@ export function AdminMedia() {
                 {setlistEntries.map((entry) => (
                   <TableRow
                     key={entry.entry_id}
-                    className="text-[0.625rem] hover:bg-muted/50"
+                    className="text-xs hover:bg-muted/50"
                   >
-                    <TableCell className="text-center border-r">
+                    <TableCell className="py-1 text-center border-r">
                       {entry.entry_set}
                     </TableCell>
-                    <TableCell className="text-center border-r">
+                    <TableCell className="py-1 text-center border-r">
                       {entry.entry_setnum}
                     </TableCell>
-                    <TableCell className="font-medium border-r">
+                    <TableCell className="py-1 border-r">
                       {entry.entry_song}
                     </TableCell>
-                    <TableCell className="border-r">
+                    <TableCell className="py-1 border-r">
                       {entry.entry_short || ""}
                     </TableCell>
-                    <TableCell className="border-r">
-                      {entry.entry_segue || ""}
+                    <TableCell className="py-1 border-r">
+                      {entry.entry_segue === ">" ? "→" : (entry.entry_segue || "")}
                     </TableCell>
-                    <TableCell className="border-r">
+                    <TableCell className="py-1 border-r">
                       <div
                         className="mx-auto w-fit rounded-lg px-2 py-0.5 text-center font-medium"
                         style={{
                           backgroundColor: getPlacementColor(
                             entry.entry_placement ?? undefined
                           ),
-                          color:
-                            getPlacementColor(
-                              entry.entry_placement ?? undefined
-                            ) !== "transparent"
-                              ? "white"
-                              : "black",
+                          color: "white",
                         }}
                       >
                         {entry.entry_placement || ""}
@@ -456,12 +430,12 @@ export function AdminMedia() {
                       return (
                         <TableCell
                           key={rs.release_id}
-                          className="text-center border-r"
+                          className="py-1 text-center border-r"
                         >
                           <Button
                             variant={isChecked ? "default" : "outline"}
                             size="sm"
-                            className="size-4 p-0"
+                            className="size-4 p-0 transition-colors hover:bg-muted hover:border-muted-foreground/40 data-[variant=default]:hover:bg-primary/90 data-[variant=default]:hover:ring-2 data-[variant=default]:hover:ring-primary/40"
                             onClick={() =>
                               handleToggleMedia(entry.entry_id, rs.release_id)
                             }
@@ -476,20 +450,17 @@ export function AdminMedia() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           ) : (
-            <div className="rounded border bg-background p-3 text-center">
-              <p className="text-xs text-muted-foreground">
-                No setlist entries found for this show.
-              </p>
+            <div className="rounded-lg border border-border bg-background p-3 text-center text-xs text-muted-foreground">
+              No setlist entries found for this show.
             </div>
           )}
         </div>
       )}
       {!selectedShow && !loading && (
-        <div className="rounded border bg-background p-3 text-center">
-          <p className="text-xs text-muted-foreground">
-            Select a show to view its media assignments.
-          </p>
+        <div className="rounded-lg border border-border bg-background p-3 text-center text-xs text-muted-foreground">
+          Select a show to view its media assignments.
         </div>
       )}
       {hoveredReleaseId &&

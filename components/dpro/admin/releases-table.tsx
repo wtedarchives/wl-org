@@ -46,39 +46,41 @@ export function ReleasesTable({
           </p>
         </div>
       ) : showReleases.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-left text-xs">Display Name</TableHead>
-              <TableHead className="text-left text-xs">Service</TableHead>
-              <TableHead className="text-center text-xs">Order</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {showReleases.map((releaseShow) => (
-              <TableRow
-                key={releaseShow.release_id}
-                className="cursor-pointer text-[0.625rem] hover:bg-muted/50"
-                onClick={() =>
-                  onEditRelease(
-                    releaseShow.release_id,
-                    releaseShow.release_order
-                  )
-                }
-              >
-                <TableCell>
-                  {releaseShow.releases.release_displayname}
-                </TableCell>
-                <TableCell>
-                  {releaseShow.releases.release_service ?? "-"}
-                </TableCell>
-                <TableCell className="text-center">
-                  {releaseShow.release_order}
-                </TableCell>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/60">
+                <TableHead className="py-1 text-left text-xs">Display Name</TableHead>
+                <TableHead className="py-1 text-left text-xs">Service</TableHead>
+                <TableHead className="py-1 text-center text-xs">Order</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {showReleases.map((releaseShow) => (
+                <TableRow
+                  key={releaseShow.release_id}
+                  className="cursor-pointer text-xs hover:bg-muted/50"
+                  onClick={() =>
+                    onEditRelease(
+                      releaseShow.release_id,
+                      releaseShow.release_order
+                    )
+                  }
+                >
+                  <TableCell className="py-1">
+                    {releaseShow.releases.release_displayname}
+                  </TableCell>
+                  <TableCell className="py-1">
+                    {releaseShow.releases.release_service ?? "-"}
+                  </TableCell>
+                  <TableCell className="py-1 text-center">
+                    {releaseShow.release_order}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       ) : (
         <div className="rounded border border-border bg-background p-3 text-center text-xs text-muted-foreground">
           No releases associated with this show

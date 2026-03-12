@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { X, Save, Trash2 } from "lucide-react"
+import React, { useState, useEffect, useRef } from "react"
+import { X, Save, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import {
   Dialog,
@@ -11,6 +11,14 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 
 interface Release {
   release_id: string
@@ -53,9 +61,13 @@ export function ShowReleaseModal({
   const [error, setError] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const dialogContentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (isOpen && mode === "add") fetchAvailableReleases()
+    if (isOpen && mode === "add") {
+      setSelectedReleaseId("")
+      fetchAvailableReleases()
+    }
     if (mode === "edit" && existingReleaseId && existingOrder !== undefined) {
       setSelectedReleaseId(existingReleaseId)
       setReleaseOrder(existingOrder)
@@ -105,10 +117,14 @@ export function ShowReleaseModal({
       }
       const { data: thisShowReleases } = await supabase
         .from("releases_shows")
-        .select("release_id")
+        .select("release_id, release_order")
         .eq("show_id", showId)
       const allIds = new Set(allShowReleases?.map((r) => r.release_id) ?? [])
       const thisIds = new Set(thisShowReleases?.map((r) => r.release_id) ?? [])
+      const maxOrder =
+        thisShowReleases?.length &&
+        Math.max(...thisShowReleases.map((r) => r.release_order ?? 0))
+      const nextOrder = (maxOrder && maxOrder > 0 ? maxOrder : 0) + 1
       const available = allReleases.filter((r) => !thisIds.has(r.release_id))
       const sorted = available.sort((a, b) => {
         const aA = allIds.has(a.release_id)
@@ -121,6 +137,7 @@ export function ShowReleaseModal({
       })
       setAvailableReleases(sorted)
       setAllAssociatedReleaseIds(allIds)
+      setReleaseOrder(nextOrder)
     } catch (err) {
       console.error("Error fetching releases:", err)
       setError("Failed to load available releases")
@@ -185,28 +202,61 @@ export function ShowReleaseModal({
 
   if (!isOpen) return null
 
+  const releaseDisplayLabels = availableReleases.map((r) => {
+    const baseLabel =
+      r.release_service ? `${r.release_service} - ${r.release}` : r.release
+    const sameLabelCount = availableReleases.filter(
+      (o) =>
+        (o.release_service ? `${o.release_service} - ${o.release}` : o.release) ===
+        baseLabel
+    ).length
+    const label =
+      sameLabelCount > 1
+        ? `${baseLabel} (${r.release_id.slice(0, 8)})`
+        : baseLabel
+    return { id: r.release_id, label }
+  })
+  const releaseItems = releaseDisplayLabels.map((r) => r.label)
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === "add"
-              ? "Add Release to Show"
-              : "Edit Release Order"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={saving || (mode === "add" && !selectedReleaseId)}
-          >
-            <Save className="size-4" />
-            {saving && "..."}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </Button>
+      <DialogContent
+        className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl"
+        showCloseButton={false}
+      >
+        <div ref={dialogContentRef} className="contents">
+        <div className="flex items-center justify-between">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === "add"
+                ? "Add Release to Show"
+                : "Edit Release Order"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={saving || (mode === "add" && !selectedReleaseId)}
+            >
+              <Save className="size-4" />
+              {saving && "..."}
+            </Button>
+            {mode === "edit" && !showDeleteConfirm && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deleting}
+                title="Delete"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="size-4" />
+            </Button>
+          </div>
         </div>
         {error && (
           <div className="rounded border border-destructive/50 bg-destructive/10 px-2 py-1 text-xs text-destructive">
@@ -228,35 +278,45 @@ export function ShowReleaseModal({
                   </div>
                 </div>
               ) : (
-                <select
-                  value={selectedReleaseId}
-                  onChange={(e) => setSelectedReleaseId(e.target.value)}
-                  className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
-                >
-                  <option value="">-- Select a release --</option>
-                  {availableReleases.map((r, i) => {
-                    const isFirst =
-                      i > 0 &&
-                      !allAssociatedReleaseIds.has(
-                        availableReleases[i - 1].release_id
-                      ) &&
-                      allAssociatedReleaseIds.has(r.release_id)
-                    return (
-                      <React.Fragment key={r.release_id}>
-                        {isFirst && (
-                          <option disabled>
-                            ──────── Already in other shows ────────
-                          </option>
-                        )}
-                        <option value={r.release_id}>
-                          {r.release_service
-                            ? `${r.release_service} - ${r.release}`
-                            : r.release}
-                        </option>
-                      </React.Fragment>
+                <Combobox
+                  items={releaseItems}
+                  value={
+                    releaseDisplayLabels.find(
+                      (r) => r.id === selectedReleaseId
+                    )?.label ?? null
+                  }
+                  onValueChange={(label) => {
+                    const found = releaseDisplayLabels.find(
+                      (r) => r.label === label
                     )
-                  })}
-                </select>
+                    if (found) setSelectedReleaseId(found.id)
+                  }}
+                  disabled={loading}
+                >
+                  <ComboboxInput
+                    placeholder="Select a release..."
+                    className="h-8 w-full text-xs"
+                  />
+                  <ComboboxContent container={dialogContentRef}>
+                    <ComboboxEmpty>No releases found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(item) => {
+                        const release = releaseDisplayLabels.find(
+                          (r) => r.label === item
+                        )
+                        return (
+                          <ComboboxItem
+                            key={release?.id ?? item}
+                            value={item}
+                            className="text-xs"
+                          >
+                            {item}
+                          </ComboboxItem>
+                        )
+                      }}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
               )}
             </div>
           ) : (
@@ -275,53 +335,63 @@ export function ShowReleaseModal({
             <label className="mb-0.5 block text-xs font-medium">
               Release Order <span className="text-destructive">*</span>
             </label>
-            <Input
-              type="number"
-              min={1}
-              value={releaseOrder}
-              onChange={(e) =>
-                setReleaseOrder(parseInt(e.target.value) || 1)
-              }
-              className="h-8 text-xs"
-              placeholder="Enter order number"
-            />
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 shrink-0 p-0"
+                onClick={() => setReleaseOrder((n) => Math.max(1, n - 1))}
+                aria-label="Decrease order"
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <Input
+                type="number"
+                min={1}
+                value={releaseOrder}
+                onChange={(e) =>
+                  setReleaseOrder(Math.max(1, parseInt(e.target.value) || 1))
+                }
+                className="h-8 w-20 shrink-0 text-center text-xs [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                placeholder="1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 shrink-0 p-0"
+                onClick={() => setReleaseOrder((n) => n + 1)}
+                aria-label="Increase order"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Lower numbers appear first in the list
             </p>
           </div>
-          {mode === "edit" && (
-            <div className="md:col-span-2">
-              {showDeleteConfirm ? (
-                <div className="flex gap-2">
-                  <span className="text-xs">Are you sure?</span>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                  >
-                    {deleting ? "Deleting..." : "Yes, Delete"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  <Trash2 className="size-4" />
-                  Delete
-                </Button>
-              )}
+          {mode === "edit" && showDeleteConfirm && (
+            <div className="flex items-center gap-2 md:col-span-2">
+              <span className="text-xs">Are you sure?</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Yes, Delete"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
             </div>
           )}
+        </div>
         </div>
       </DialogContent>
     </Dialog>

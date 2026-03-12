@@ -16,7 +16,7 @@ const SERVICE_COLORS: Record<string, string> = {
   bandcamp: "#0fa2d1",
 }
 
-function ReleaseServiceIcon({ service }: { service: string | null }) {
+export function ReleaseServiceIcon({ service }: { service: string | null }) {
   if (!service?.trim()) return null
   const key = service.toLowerCase().trim()
   if (key === "nugs") {

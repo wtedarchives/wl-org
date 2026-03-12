@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase"
 import type { ReleaseData } from "@/types/admin"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -133,11 +134,30 @@ export function ReleaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent
+        className="max-w-md max-h-[90vh] overflow-y-auto"
+        showCloseButton={false}
+      >
+        <DialogHeader className="flex flex-row items-center justify-between gap-4">
           <DialogTitle>
             {isAddMode ? "Add New Release" : "Edit Release"}
           </DialogTitle>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="default"
+              size="icon-sm"
+              onClick={handleSave}
+              disabled={saving}
+              title="Save"
+            >
+              <Save className="size-4" />
+            </Button>
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon-sm" title="Close">
+                <X className="size-4" />
+              </Button>
+            </DialogClose>
+          </div>
         </DialogHeader>
         <div className="space-y-4">
           {error && (
@@ -145,15 +165,6 @@ export function ReleaseModal({
               {error}
             </div>
           )}
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={onClose}>
-              <X className="size-4" />
-            </Button>
-            <Button variant="default" size="sm" onClick={handleSave} disabled={saving}>
-              <Save className="size-4" />
-              {saving && "..."}
-            </Button>
-          </div>
           <div className="space-y-2">
             {!isAddMode && release && (
               <div>
@@ -273,7 +284,7 @@ export function ReleaseModal({
                   <img
                     src={formData.release_artwork}
                     alt="Release artwork preview"
-                    className="h-32 w-full object-cover rounded border"
+                    className="h-32 object-cover rounded border"
                     onError={(e) => {
                       ;(e.target as HTMLImageElement).style.display = "none"
                     }}

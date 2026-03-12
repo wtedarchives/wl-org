@@ -179,9 +179,12 @@ export function ShowModal({
               Group <span className="text-destructive">*</span>
             </label>
             <Select
-              value={formData.show_group ?? ""}
+              value={formData.show_group || "__none__"}
               onValueChange={(v) =>
-                setFormData((prev) => ({ ...prev, show_group: v }))
+                setFormData((prev) => ({
+                  ...prev,
+                  show_group: v === "__none__" ? "" : v,
+                }))
               }
             >
               <SelectTrigger
@@ -190,7 +193,7 @@ export function ShowModal({
                 <SelectValue placeholder="-- Select Group --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Group --</SelectItem>
+                <SelectItem value="__none__">-- Select Group --</SelectItem>
                 {groups.map((g) => (
                   <SelectItem key={g.group} value={g.group}>
                     {g.group}
@@ -209,9 +212,12 @@ export function ShowModal({
               Tour <span className="text-destructive">*</span>
             </label>
             <Select
-              value={formData.show_tour ?? ""}
+              value={formData.show_tour || "__none__"}
               onValueChange={(v) =>
-                setFormData((prev) => ({ ...prev, show_tour: v }))
+                setFormData((prev) => ({
+                  ...prev,
+                  show_tour: v === "__none__" ? "" : v,
+                }))
               }
             >
               <SelectTrigger
@@ -220,7 +226,7 @@ export function ShowModal({
                 <SelectValue placeholder="-- Select Tour --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Tour --</SelectItem>
+                <SelectItem value="__none__">-- Select Tour --</SelectItem>
                 {tours.map((t) => (
                   <SelectItem key={t.tour} value={t.tour}>
                     {t.tour}
@@ -239,9 +245,12 @@ export function ShowModal({
               Subvenue <span className="text-destructive">*</span>
             </label>
             <Select
-              value={formData.show_subvenue ?? ""}
+              value={formData.show_subvenue || "__none__"}
               onValueChange={(v) =>
-                setFormData((prev) => ({ ...prev, show_subvenue: v }))
+                setFormData((prev) => ({
+                  ...prev,
+                  show_subvenue: v === "__none__" ? "" : v,
+                }))
               }
             >
               <SelectTrigger
@@ -250,7 +259,7 @@ export function ShowModal({
                 <SelectValue placeholder="-- Select Subvenue --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Subvenue --</SelectItem>
+                <SelectItem value="__none__">-- Select Subvenue --</SelectItem>
                 {subvenues.map((s) => (
                   <SelectItem key={s.subvenue} value={s.subvenue}>
                     {s.subvenue}
@@ -291,9 +300,12 @@ export function ShowModal({
               Year <span className="text-destructive">*</span>
             </label>
             <Select
-              value={formData.show_year ?? ""}
+              value={formData.show_year || "__none__"}
               onValueChange={(v) =>
-                setFormData((prev) => ({ ...prev, show_year: v }))
+                setFormData((prev) => ({
+                  ...prev,
+                  show_year: v === "__none__" ? "" : v,
+                }))
               }
             >
               <SelectTrigger
@@ -302,7 +314,7 @@ export function ShowModal({
                 <SelectValue placeholder="-- Select Year --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Year --</SelectItem>
+                <SelectItem value="__none__">-- Select Year --</SelectItem>
                 {years.map((y) => (
                   <SelectItem key={y.year} value={y.year}>
                     {y.year}

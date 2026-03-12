@@ -4,20 +4,29 @@ import { useRef, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { getShowDisplayData } from "@/lib/utils/show-utils"
-import type { AdminShowData } from "@/types/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+
+/** Minimal show shape for dropdown display (ShowData or AdminShowData) */
+interface ShowForDropdown {
+  show_id: string
+  show_date: string
+  show_canonid?: number | null
+  show_group?: string
+  show_venue_location?: string | null
+}
 
 interface AdminShowDropdownProps {
   isOpen: boolean
   onToggle: () => void
   searchTerm: string
   onSearchChange: (term: string) => void
-  filteredShows: AdminShowData[]
-  onShowSelect: (show: AdminShowData) => void
+  filteredShows: ShowForDropdown[]
+  onShowSelect: (show: ShowForDropdown) => void
   loading: boolean
   loadingProgress: number
-  selectedShow?: AdminShowData | null
+  selectedShow?: ShowForDropdown | null
+  triggerLabel?: string
 }
 
 export function AdminShowDropdown({
@@ -30,6 +39,7 @@ export function AdminShowDropdown({
   loading,
   loadingProgress,
   selectedShow,
+  triggerLabel = "Show",
 }: AdminShowDropdownProps) {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -84,7 +94,7 @@ export function AdminShowDropdown({
   const dropdownContent = isOpen && (
     <div
       ref={dropdownRef}
-      className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+      className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-muted shadow-lg"
       style={{
         top: dropdownPosition.top,
         right: dropdownPosition.right,
@@ -131,8 +141,8 @@ export function AdminShowDropdown({
                           : null
                       }
                       onClick={() => onShowSelect(show)}
-                      className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
-                        selectedShow?.show_id === show.show_id ? "bg-muted" : ""
+                      className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-background ${
+                        selectedShow?.show_id === show.show_id ? "bg-background" : ""
                       }`}
                     >
                       <span className="font-bold">{dateStr}</span>
@@ -161,7 +171,7 @@ export function AdminShowDropdown({
         onClick={onToggle}
         className="gap-2"
       >
-        Show
+        {triggerLabel}
         <ChevronDown className="size-4" />
       </Button>
       {dropdownContent && createPortal(dropdownContent, document.body)}

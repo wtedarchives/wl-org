@@ -108,7 +108,7 @@ export function AdminReleases() {
               placeholder="Search releases..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 w-full pl-8 pr-8 text-xs lg:w-48"
+              className="h-6 w-full pl-8 pr-8 text-xs lg:w-48"
             />
             <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             {searchQuery && (
@@ -142,13 +142,13 @@ export function AdminReleases() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-hidden rounded-lg border border-border">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs">Display Name</TableHead>
-                <TableHead className="text-xs">Service</TableHead>
-                <TableHead className="text-xs">Release</TableHead>
+              <TableRow className="bg-muted/60">
+                <TableHead className="py-1 text-left text-xs">Display Name</TableHead>
+                <TableHead className="py-1 text-left text-xs">Service</TableHead>
+                <TableHead className="py-1 text-left text-xs">Release</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -167,16 +167,16 @@ export function AdminReleases() {
                 filteredReleases.map((release) => (
                   <TableRow
                     key={release.release_id}
-                    className="cursor-pointer text-[0.625rem] hover:bg-muted/50"
+                    className="cursor-pointer text-xs hover:bg-muted/50"
                     onClick={() => handleReleaseClick(release)}
                   >
-                    <TableCell className="font-medium">
+                    <TableCell className="py-1">
                       {release.release_displayname}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-1">
                       {release.release_service || "—"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="py-1">
                       {release.release}
                     </TableCell>
                   </TableRow>

@@ -1,17 +1,33 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Save, Edit, X, Trash2, Check } from "lucide-react"
+import {
+  Save,
+  Edit,
+  Trash2,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { ShowChangeData } from "@/types/admin"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface ShowChangeModalProps {
   isOpen: boolean
@@ -33,7 +49,6 @@ export function ShowChangeModal({
   const [editedChange, setEditedChange] = useState<ShowChangeData | null>(null)
   const [changeTypes, setChangeTypes] = useState<{ change: string }[]>([])
   const [songs, setSongs] = useState<{ song: string; song_id: string }[]>([])
-  const [selectedSongId, setSelectedSongId] = useState("")
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
 
   useEffect(() => {
@@ -60,13 +75,19 @@ export function ShowChangeModal({
   }, [change, isNewChange])
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     if (!editedChange) return
     const { name, value } = e.target
     const updatedValue =
       name === "change_order" ? (value === "" ? 0 : parseInt(value) || 0) : value
     setEditedChange({ ...editedChange, [name]: updatedValue })
+  }
+
+  const handleOrderStep = (delta: number) => {
+    if (!editedChange) return
+    const next = Math.max(0, (editedChange.change_order ?? 0) + delta)
+    setEditedChange({ ...editedChange, change_order: next })
   }
 
   const handleSongSelect = (songId: string) => {
@@ -78,7 +99,6 @@ export function ShowChangeModal({
       ...editedChange,
       change: editedChange.change + songLink,
     })
-    setSelectedSongId("")
   }
 
   const handleInsertArrow = () => {
@@ -160,69 +180,110 @@ export function ShowChangeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
-        <DialogHeader>
+      <DialogContent
+        className="max-h-[90vh] max-w-md overflow-y-auto"
+        showCloseButton={false}
+      >
+        <DialogHeader className="flex flex-row items-center justify-between gap-4">
           <DialogTitle>
             {isNewChange ? "Add Show Change" : "Edit Show Change"}
           </DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          {!isNewChange && (
-            <>
+          <div className="flex items-center gap-1">
+            {!isNewChange && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={toggleEdit}
+                  disabled={isSubmitting}
+                  title={isEditing ? "Save" : "Edit"}
+                >
+                  {isEditing ? (
+                    <Save className="size-4" />
+                  ) : (
+                    <Edit className="size-4" />
+                  )}
+                </Button>
+                <Button
+                  variant={isDeleteConfirming ? "default" : "destructive"}
+                  size="icon-sm"
+                  onClick={() =>
+                    isDeleteConfirming ? handleDelete() : setIsDeleteConfirming(true)
+                  }
+                  disabled={isSubmitting}
+                  title={isDeleteConfirming ? "Confirm Delete" : "Delete"}
+                >
+                  {isDeleteConfirming ? (
+                    <Check className="size-4" />
+                  ) : (
+                    <Trash2 className="size-4" />
+                  )}
+                </Button>
+              </>
+            )}
+            {isNewChange && (
               <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleEdit}
-                disabled={isSubmitting}
-              >
-                {isEditing ? <Save className="size-4" /> : <Edit className="size-4" />}
-              </Button>
-              <Button
-                variant={isDeleteConfirming ? "default" : "destructive"}
-                size="sm"
-                onClick={() =>
-                  isDeleteConfirming ? handleDelete() : setIsDeleteConfirming(true)
+                size="icon-sm"
+                onClick={handleSaveChanges}
+                disabled={
+                  isSubmitting ||
+                  !editedChange?.change_type ||
+                  !editedChange?.change
                 }
-                disabled={isSubmitting}
-                title={isDeleteConfirming ? "Confirm Delete" : "Delete"}
+                title="Save"
               >
-                {isDeleteConfirming ? (
-                  <Check className="size-4" />
-                ) : (
-                  <Trash2 className="size-4" />
-                )}
+                <Save className="size-4" />
               </Button>
-            </>
-          )}
-          {isNewChange && (
-            <Button
-              size="sm"
-              onClick={handleSaveChanges}
-              disabled={
-                isSubmitting ||
-                !editedChange?.change_type ||
-                !editedChange?.change
-              }
-            >
-              <Save className="size-4" />
-              {isSubmitting && "..."}
-            </Button>
-          )}
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </Button>
-        </div>
+            )}
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon-sm" title="Close">
+                <X className="size-4" />
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogHeader>
         <div className="space-y-2">
           <div>
             <label className="mb-0.5 block text-xs font-medium">Order</label>
-            <Input
-              type="number"
-              name="change_order"
-              value={editedChange?.change_order ?? ""}
-              onChange={handleInputChange}
-              readOnly={isReadOnly}
-              className="h-8 text-xs"
-            />
+            {isReadOnly ? (
+              <Input
+                type="text"
+                value={editedChange?.change_order ?? ""}
+                readOnly
+                className="h-8 w-20 text-center text-xs"
+              />
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => handleOrderStep(-1)}
+                  disabled={isSubmitting}
+                  title="Decrease order"
+                >
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  name="change_order"
+                  value={editedChange?.change_order ?? ""}
+                  onChange={handleInputChange}
+                  className="h-8 w-16 text-center text-xs"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => handleOrderStep(1)}
+                  disabled={isSubmitting}
+                  title="Increase order"
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            )}
           </div>
           <div>
             <label className="mb-0.5 block text-xs font-medium">Type</label>
@@ -233,20 +294,24 @@ export function ShowChangeModal({
                 className="h-8 text-xs"
               />
             ) : (
-              <select
-                name="change_type"
+              <Select
                 value={editedChange?.change_type ?? ""}
-                onChange={handleInputChange}
-                className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
-                required
+                onValueChange={(value) =>
+                  editedChange &&
+                  setEditedChange({ ...editedChange, change_type: value })
+                }
               >
-                <option value="">Select a type...</option>
-                {changeTypes.map((t) => (
-                  <option key={t.change} value={t.change}>
-                    {t.change}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="h-8 w-full text-xs">
+                  <SelectValue placeholder="Select a type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {changeTypes.map((t) => (
+                    <SelectItem key={t.change} value={t.change}>
+                      {t.change}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
           <div>
@@ -254,18 +319,28 @@ export function ShowChangeModal({
               <label className="block text-xs font-medium">Change</label>
               {!isReadOnly && (
                 <div className="flex gap-2">
-                  <select
-                    value={selectedSongId}
-                    onChange={(e) => handleSongSelect(e.target.value)}
-                    className="h-8 w-48 rounded-md border border-input bg-background px-2 text-xs"
+                  <Select
+                    value="__placeholder__"
+                    onValueChange={(value) => {
+                      if (value && value !== "__placeholder__") {
+                        handleSongSelect(value)
+                      }
+                    }}
                   >
-                    <option value="">Add song link...</option>
-                    {songs.map((s) => (
-                      <option key={s.song_id} value={s.song_id}>
-                        {s.song}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="h-8 w-48 text-xs">
+                      <SelectValue placeholder="Add song link..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__placeholder__">
+                        Add song link...
+                      </SelectItem>
+                      {songs.map((s) => (
+                        <SelectItem key={s.song_id} value={s.song_id}>
+                          {s.song}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     type="button"
                     variant="outline"
