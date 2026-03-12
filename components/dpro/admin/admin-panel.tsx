@@ -28,7 +28,7 @@ const TABS = [
   "Setlist",
   "Artist",
   "Song",
-  "Guest",
+  "Personnel",
   "Show",
   "Changes",
   "Releases",
@@ -47,7 +47,9 @@ export function AdminPanel() {
   }>({ type: null, message: null })
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window === "undefined") return "Setlist"
-    return (localStorage.getItem("adminActiveTab") || "Setlist") as (typeof TABS)[number]
+    const stored = localStorage.getItem("adminActiveTab") || "Setlist"
+    const migrated = stored === "Guest" ? "Personnel" : stored
+    return migrated as (typeof TABS)[number]
   })
 
   useEffect(() => {
@@ -167,7 +169,7 @@ export function AdminPanel() {
           <TabsContent value="Song" className="mt-0 w-full p-3 sm:p-4">
             <AdminSong />
           </TabsContent>
-          <TabsContent value="Guest" className="mt-0 w-full p-3 sm:p-4">
+          <TabsContent value="Personnel" className="mt-0 w-full p-3 sm:p-4">
             <AdminGuest />
           </TabsContent>
           <TabsContent value="Show" className="mt-0 w-full p-3 sm:p-4">

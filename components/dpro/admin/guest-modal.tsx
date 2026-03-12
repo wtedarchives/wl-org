@@ -140,20 +140,25 @@ export function GuestModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isNewGuest ? "Add New Guest" : "Edit Guest"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <Button size="sm" onClick={handleSubmit} disabled={isSubmitting}>
-            <Save className="size-4" />
-            {isSubmitting && "..."}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </Button>
+      <DialogContent
+        className="max-h-[90vh] max-w-md overflow-y-auto"
+        showCloseButton={false}
+      >
+        <div className="flex items-center justify-between">
+          <DialogHeader>
+            <DialogTitle>
+              {isNewGuest ? "Add New Guest" : "Edit Guest"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSubmit} disabled={isSubmitting}>
+              <Save className="size-4" />
+              {isSubmitting && "..."}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="size-4" />
+            </Button>
+          </div>
         </div>
         {error && (
           <div className="rounded border border-destructive/50 bg-destructive/10 px-2 py-1 text-xs text-destructive">
@@ -200,16 +205,19 @@ export function GuestModal({
               Category <span className="text-destructive">*</span>
             </label>
             <Select
-              value={formData.guest_category ?? ""}
+              value={formData.guest_category || "__none__"}
               onValueChange={(v) =>
-                setFormData((prev) => ({ ...prev, guest_category: v }))
+                setFormData((prev) => ({
+                  ...prev,
+                  guest_category: v === "__none__" ? "" : v,
+                }))
               }
             >
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue placeholder="-- Select Category --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Category --</SelectItem>
+                <SelectItem value="__none__">-- Select Category --</SelectItem>
                 {GUEST_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}

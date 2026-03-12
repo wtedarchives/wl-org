@@ -30,12 +30,20 @@ export function useSongsData() {
         const { data, error } = await supabase
           .from("songs")
           .select(
-            "song, song_id, song_category, song_originalartist, song_categoryorder, song_coachnotes"
+            "song, song_id, song_displayname, song_category, song_originalartist, song_categoryorder, song_coachnotes"
           )
           .order("song", { ascending: true })
           .range(start, end)
         if (error) throw error
-        if (data) allData = [...allData, ...data]
+        if (data) {
+          const normalized = data.map((row) => ({
+            ...row,
+            song_displayname:
+              (row as { song_displayname?: string | null }).song_displayname ??
+              null,
+          }))
+          allData = [...allData, ...normalized]
+        }
       }
       setAllSongs(allData.length > 0 ? allData : [])
     } catch (error) {

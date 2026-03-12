@@ -110,7 +110,7 @@ export function LongestSongs({
 
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
-      <div className="px-3 py-1.5 bg-muted/60">
+      <div className="px-3 py-1.5 flex justify-between items-center bg-muted/60">
         <h2 className="text-sm font-semibold">Longest Songs</h2>
       </div>
       <CardContent className="p-0">
@@ -123,7 +123,7 @@ export function LongestSongs({
             Song times for this tour are unknown.
           </div>
         ) : (
-          <div className="overflow-y-auto max-h-64">
+          <div className="overflow-hidden">
             <table className="w-full border-collapse min-w-max text-xs">
               <tbody>
                 {longestSongs.map((song, i) => (

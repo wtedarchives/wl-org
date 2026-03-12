@@ -202,7 +202,7 @@ export function AdminGuest() {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Guest Management</h3>
+        <h3 className="text-sm font-semibold">Personnel Management</h3>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -219,7 +219,7 @@ export function AdminGuest() {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="gap-2"
             >
-              Guest
+              Personnel
               <ChevronDown className="size-4" />
             </Button>
             {isDropdownOpen &&
@@ -349,10 +349,12 @@ export function AdminGuest() {
               </label>
               {isEditing ? (
                 <Select
-                  value={editedGuest?.guest_category ?? ""}
+                  value={editedGuest?.guest_category || "__none__"}
                   onValueChange={(v) =>
                     setEditedGuest((prev) =>
-                      prev ? { ...prev, guest_category: v } : null
+                      prev
+                        ? { ...prev, guest_category: v === "__none__" ? "" : v }
+                        : null
                     )
                   }
                 >
@@ -360,7 +362,7 @@ export function AdminGuest() {
                     <SelectValue placeholder="-- Select Category --" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">-- Select Category --</SelectItem>
+                    <SelectItem value="__none__">-- Select Category --</SelectItem>
                     {GUEST_CATEGORIES.map((c) => (
                       <SelectItem key={c} value={c}>
                         {c}

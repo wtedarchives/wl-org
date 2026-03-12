@@ -91,6 +91,7 @@ export interface SongData {
 export interface SongDataFull {
   song: string
   song_id: string
+  song_displayname: string | null
   song_category: string | null
   song_originalartist: string | null
   song_categoryorder: number | null

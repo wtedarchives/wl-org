@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
+import { toast } from "sonner"
 import { useSongsData } from "@/hooks/use-songs-data"
 import {
   transformSongForUpdate,
@@ -64,6 +65,9 @@ export function AdminSong() {
       refetchSongs()
     } catch (error) {
       console.error("Error updating song:", error)
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update song"
+      )
     } finally {
       setIsSubmitting(false)
     }

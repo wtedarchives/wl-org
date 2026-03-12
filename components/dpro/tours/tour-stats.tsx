@@ -55,12 +55,14 @@ export function TourStats({
       <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
         <TourSongSpread shows={shows} />
         <div className="flex flex-col gap-4">
-          <LongestSongs
+          <div className="self-start w-full">
+            <LongestSongs
             showIds={showIds}
             songIdMap={songIdMap}
             tourId={currentTourId}
             onSongClick={onSongClick}
           />
+          </div>
           {currentTourShowFields && (
             <LiberatedSongs
               showIds={showIds}

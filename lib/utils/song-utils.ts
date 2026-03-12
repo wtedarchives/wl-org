@@ -6,8 +6,14 @@ import { supabase } from "@/lib/supabase"
 import type { SongDataFull } from "@/types/admin"
 
 export function transformSongForUpdate(song: SongDataFull) {
+  const displayName =
+    (song.song_displayname ?? "").trim() || null
+  if (!displayName) {
+    throw new Error("Display Name is required")
+  }
   return {
     ...song,
+    song_displayname: displayName,
     song_category: song.song_category === "" ? null : song.song_category,
     song_originalartist: song.song_originalartist === "" ? null : song.song_originalartist,
     song_coachnotes: song.song_coachnotes === "" ? null : song.song_coachnotes,
@@ -19,6 +25,7 @@ export async function updateSong(songData: SongDataFull) {
   const { error } = await supabase.rpc("update_song", {
     song_id_param: songData.song_id,
     song_param: songData.song,
+    song_displayname_param: songData.song_displayname,
     song_category_param: songData.song_category,
     song_originalartist_param: songData.song_originalartist,
     song_categoryorder_param: songData.song_categoryorder,

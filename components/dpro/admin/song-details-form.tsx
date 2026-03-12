@@ -59,13 +59,26 @@ export function SongDetailsForm({
           )}
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-4">
         <div className="min-w-0">
           <label className="mb-0.5 block text-xs font-medium">Song Title</label>
           <Input
             type="text"
             name="song"
             value={editedSong?.song ?? ""}
+            onChange={onInputChange}
+            readOnly={!isEditing}
+            className="h-6 w-full text-xs"
+          />
+        </div>
+        <div className="min-w-0">
+          <label className="mb-0.5 block text-xs font-medium">
+            Display Name
+          </label>
+          <Input
+            type="text"
+            name="song_displayname"
+            value={editedSong?.song_displayname ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
             className="h-6 w-full text-xs"
