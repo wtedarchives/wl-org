@@ -64,7 +64,7 @@ export function AdminShowHeader({
         </div>
       </div>
       {selectedShow && (
-        <div className="px-2 pb-1">
+        <div className="pb-1">
           <div className="mb-2 flex items-center justify-between">
             <h4 className="text-sm font-medium">
               {formatDate(selectedShow.show_date)} - {selectedShow.show_subvenue}

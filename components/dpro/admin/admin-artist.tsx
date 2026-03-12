@@ -176,13 +176,13 @@ export function AdminArtist() {
             )}
         </div>
       </div>
-      <div className="flex flex-col gap-2 md:flex-row">
+      <div className="flex flex-row items-center gap-2">
         <Input
           type="text"
           value={newArtistName}
           onChange={(e) => setNewArtistName(e.target.value)}
           placeholder="Enter artist name"
-          className="h-8 flex-grow text-xs"
+          className="h-8 min-w-0 flex-1 text-xs"
         />
         <Button
           size="sm"
@@ -199,7 +199,7 @@ export function AdminArtist() {
                 ? "destructive"
                 : "default"
           }
-          className="h-8 min-w-[80px]"
+          className="h-8 shrink-0"
         >
           {isSubmitting
             ? "Adding..."

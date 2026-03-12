@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Save, Edit, X, Trash2, Check } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
+import { Save, Edit, X, Trash2, Check, Loader2 } from "lucide-react"
 import type { AdminSetlistEntryData } from "@/types/admin"
 import { useSetlistOptions } from "@/hooks/use-setlist-options"
 import { useSetlistEntryForm } from "@/hooks/use-setlist-entry-form"
@@ -17,6 +17,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Input } from "@/components/ui/input"
 
 interface SetlistEntryModalProps {
   isOpen: boolean
@@ -37,21 +39,18 @@ export function SetlistEntryModal({
   onSaveStatusUpdate,
   isNewEntry = false,
 }: SetlistEntryModalProps) {
+  const dialogContentRef = useRef<HTMLDivElement>(null)
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
   const [isGuestSectionExpanded, setIsGuestSectionExpanded] = useState(false)
   const [guestSearchTerm, setGuestSearchTerm] = useState("")
 
-  const { sets, setnums, segues, placements, songs, shorts, allGuests } =
+  const { sets, setnums, placements, songs, shorts, allGuests } =
     useSetlistOptions()
   const {
     isEditing,
     setIsEditing,
     editedEntry,
     selectedGuestIds,
-    songSearchTerm,
-    setSongSearchTerm,
-    isSongDropdownOpen,
-    setIsSongDropdownOpen,
     selectedSongName,
     selectedNewSongOption,
     setSelectedNewSongOption,
@@ -62,6 +61,19 @@ export function SetlistEntryModal({
   } = useSetlistEntryForm(entry, isNewEntry)
   const { isSubmitting, saveStatus, saveEntry, deleteEntry } =
     useSetlistEntryActions()
+
+  useEffect(() => {
+    if (
+      isNewEntry &&
+      editedEntry &&
+      (!editedEntry.entry_set || editedEntry.entry_set === "--") &&
+      sets[0]
+    ) {
+      handleInputChange({
+        target: { name: "entry_set", value: sets[0].set },
+      } as React.ChangeEvent<HTMLSelectElement>)
+    }
+  }, [isNewEntry, editedEntry?.entry_set, sets, handleInputChange])
 
   const toggleEdit = () => {
     if (isEditing && !isNewEntry) handleSaveChanges()
@@ -101,10 +113,11 @@ export function SetlistEntryModal({
         className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl"
         showCloseButton={false}
       >
+        <div ref={dialogContentRef} className="contents">
         {isSubmitting && (
           <div className="absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-black/60">
             <div
-              className={`rounded border px-2 py-0.5 text-xs font-medium ${
+              className={`flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-medium ${
                 saveStatus === "processing"
                   ? "bg-muted-foreground text-muted"
                   : saveStatus === "done"
@@ -114,13 +127,19 @@ export function SetlistEntryModal({
                       : "bg-primary text-primary-foreground"
               }`}
             >
-              {saveStatus === "processing"
-                ? "Processing..."
-                : saveStatus === "done"
-                  ? "Done!"
-                  : saveStatus === "error"
-                    ? "Error."
-                    : "Saving..."}
+              {saveStatus === "processing" || saveStatus === "idle" ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin shrink-0" />
+                  {saveStatus === "processing" ? "Processing..." : "Saving..."}
+                </>
+              ) : saveStatus === "done" ? (
+                <>
+                  <Check className="size-3.5 shrink-0" />
+                  Done!
+                </>
+              ) : (
+                "Error."
+              )}
             </div>
           </div>
         )}
@@ -189,18 +208,14 @@ export function SetlistEntryModal({
           />
           <SongSection
             songs={songs}
-            songSearchTerm={songSearchTerm}
-            setSongSearchTerm={setSongSearchTerm}
-            isSongDropdownOpen={isSongDropdownOpen}
-            setIsSongDropdownOpen={setIsSongDropdownOpen}
             selectedSongName={selectedSongName}
             editedEntry={editedEntry}
             isEditing={isEditing}
             isNewEntry={isNewEntry}
             handleSongSelection={handleSongSelection}
+            comboboxContainer={dialogContentRef}
           />
           <SongDetailsSection
-            segues={segues}
             shorts={shorts}
             editedEntry={editedEntry}
             isEditing={isEditing}
@@ -238,18 +253,67 @@ export function SetlistEntryModal({
             <label className="mb-0.5 block text-xs font-medium">
               New Song?
             </label>
-            <select
-              name="new_song_option"
-              value={selectedNewSongOption}
-              onChange={(e) => setSelectedNewSongOption(e.target.value)}
-              disabled={!isEditing && !isNewEntry}
-              className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-            >
-              <option value="N/A">N/A</option>
-              <option value="New Original Song">New Original Song</option>
-              <option value="New Cover Song">New Cover Song</option>
-            </select>
+            {(isEditing || isNewEntry) ? (
+              <>
+                <div className="flex flex-wrap gap-0.5 md:hidden">
+                  {(["N/A", "New Original Song", "New Cover Song"] as const).map(
+                    (opt) => (
+                      <Button
+                        key={opt}
+                        type="button"
+                        variant={
+                          selectedNewSongOption === opt ? "default" : "outline"
+                        }
+                        size="sm"
+                        className="h-6 text-xs transition-colors hover:!bg-muted hover:!text-foreground"
+                        onClick={() => setSelectedNewSongOption(opt)}
+                      >
+                        {opt}
+                      </Button>
+                    )
+                  )}
+                </div>
+                <div className="hidden md:block">
+                  <ToggleGroup
+                    type="single"
+                    value={selectedNewSongOption}
+                    onValueChange={(v) =>
+                      setSelectedNewSongOption(v ?? "N/A")
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="w-auto flex-wrap justify-start"
+                  >
+                    <ToggleGroupItem
+                      value="N/A"
+                      className="shrink-0 text-xs"
+                    >
+                      N/A
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="New Original Song"
+                      className="shrink-0 text-xs"
+                    >
+                      New Original Song
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                      value="New Cover Song"
+                      className="shrink-0 text-xs"
+                    >
+                      New Cover Song
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+              </>
+            ) : (
+              <Input
+                value={selectedNewSongOption}
+                readOnly
+                className="h-6 w-full text-xs md:w-auto"
+              />
+            )}
           </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>

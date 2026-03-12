@@ -36,7 +36,7 @@ export function SongDetailsForm({
   onInputChange,
 }: SongDetailsFormProps) {
   return (
-    <div className="px-2">
+    <div>
       <div className="mb-2 flex items-center justify-between">
         <h4 className="text-sm font-medium">{selectedSong.song}</h4>
         <Button
@@ -59,8 +59,8 @@ export function SongDetailsForm({
           )}
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        <div>
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4">
+        <div className="min-w-0">
           <label className="mb-0.5 block text-xs font-medium">Song Title</label>
           <Input
             type="text"
@@ -68,58 +68,30 @@ export function SongDetailsForm({
             value={editedSong?.song ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
+            className="h-6 w-full text-xs"
           />
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Category</label>
-          {isEditing ? (
-            <Select
-              value={editedSong?.song_category ?? ""}
-              onValueChange={(v) =>
-                onInputChange({
-                  target: { name: "song_category", value: v },
-                } as React.ChangeEvent<HTMLSelectElement>)
-              }
-            >
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="-- Select Category --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">-- Select Category --</SelectItem>
-                {categories.map((c) => (
-                  <SelectItem key={c.category} value={c.category}>
-                    {c.category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <Input
-              value={editedSong?.song_category ?? ""}
-              readOnly
-              className="h-8 text-xs"
-            />
-          )}
-        </div>
-        <div>
+        <div className="min-w-0">
           <label className="mb-0.5 block text-xs font-medium">
             Original Artist
           </label>
           {isEditing ? (
             <Select
-              value={editedSong?.song_originalartist ?? ""}
+              value={editedSong?.song_originalartist || "__none__"}
               onValueChange={(v) =>
                 onInputChange({
-                  target: { name: "song_originalartist", value: v },
+                  target: {
+                    name: "song_originalartist",
+                    value: v === "__none__" ? "" : v,
+                  },
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-6 w-full text-xs">
                 <SelectValue placeholder="-- Select Artist --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Artist --</SelectItem>
+                <SelectItem value="__none__">-- Select Artist --</SelectItem>
                 {artists.map((a) => (
                   <SelectItem key={a.artist} value={a.artist}>
                     {a.artist}
@@ -131,16 +103,50 @@ export function SongDetailsForm({
             <Input
               value={editedSong?.song_originalartist ?? ""}
               readOnly
-              className="h-8 text-xs"
+              className="h-6 w-full text-xs"
             />
           )}
         </div>
-        <div>
+        <div className="min-w-0">
+          <label className="mb-0.5 block text-xs font-medium">Category</label>
+          {isEditing ? (
+            <Select
+              value={editedSong?.song_category || "__none__"}
+              onValueChange={(v) =>
+                onInputChange({
+                  target: {
+                    name: "song_category",
+                    value: v === "__none__" ? "" : v,
+                  },
+                } as React.ChangeEvent<HTMLSelectElement>)
+              }
+            >
+              <SelectTrigger className="h-6 w-full text-xs">
+                <SelectValue placeholder="-- Select Category --" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">-- Select Category --</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.category} value={c.category}>
+                    {c.category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              value={editedSong?.song_category ?? ""}
+              readOnly
+              className="h-6 w-full text-xs"
+            />
+          )}
+        </div>
+        <div className="min-w-0">
           <label className="mb-0.5 block text-xs font-medium">
             Category Order
           </label>
           <Input
-            type="number"
+            type="text"
             name="song_categoryorder"
             value={
               editedSong?.song_categoryorder === null
@@ -149,22 +155,22 @@ export function SongDetailsForm({
             }
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
+            className="h-6 w-full text-xs"
           />
         </div>
-        <div className="md:col-span-2">
-          <label className="mb-0.5 block text-xs font-medium">
-            Coach&apos;s Notes
-          </label>
-          <textarea
-            name="song_coachnotes"
-            value={editedSong?.song_coachnotes ?? ""}
-            onChange={onInputChange}
-            readOnly={!isEditing}
-            rows={4}
-            className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-          />
-        </div>
+      </div>
+      <div className="mt-2">
+        <label className="mb-0.5 block text-xs font-medium">
+          Coach&apos;s Notes
+        </label>
+        <textarea
+          name="song_coachnotes"
+          value={editedSong?.song_coachnotes ?? ""}
+          onChange={onInputChange}
+          readOnly={!isEditing}
+          rows={4}
+          className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+        />
       </div>
     </div>
   )

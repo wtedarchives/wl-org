@@ -280,7 +280,7 @@ export function AdminGuest() {
         </div>
       </div>
       {selectedGuest && (
-        <div className="px-2 pb-1">
+        <div className="pb-1">
           <div className="mb-2 flex items-center justify-between">
             <h4 className="text-sm font-medium">{selectedGuest.guest}</h4>
             <Button

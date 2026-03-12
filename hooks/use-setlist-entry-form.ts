@@ -16,8 +16,6 @@ export function useSetlistEntryForm(
     null
   )
   const [selectedGuestIds, setSelectedGuestIds] = useState<string[]>([])
-  const [songSearchTerm, setSongSearchTerm] = useState("")
-  const [isSongDropdownOpen, setIsSongDropdownOpen] = useState(false)
   const [selectedSongName, setSelectedSongName] = useState("")
   const [selectedNewSongOption, setSelectedNewSongOption] = useState("N/A")
 
@@ -49,12 +47,10 @@ export function useSetlistEntryForm(
         }
         setEditedEntry(entryWithDefaults)
         setSelectedSongName("")
-        setSongSearchTerm("")
         setSelectedNewSongOption("N/A")
       } else {
         setEditedEntry(entry)
         setSelectedSongName(entry.entry_song || "")
-        setSongSearchTerm("")
         if (entry.entry_new === "New Original Song")
           setSelectedNewSongOption("New Original Song")
         else if (entry.entry_new === "New Cover Song")
@@ -111,8 +107,6 @@ export function useSetlistEntryForm(
     if (!editedEntry) return
     setSelectedSongName(songName)
     setEditedEntry({ ...editedEntry, entry_song: songName })
-    setIsSongDropdownOpen(false)
-    setSongSearchTerm("")
   }
 
   const handleGuestSelection = (guestId: string) => {
@@ -144,10 +138,6 @@ export function useSetlistEntryForm(
     setEditedEntry,
     selectedGuestIds,
     setSelectedGuestIds,
-    songSearchTerm,
-    setSongSearchTerm,
-    isSongDropdownOpen,
-    setIsSongDropdownOpen,
     selectedSongName,
     setSelectedSongName,
     selectedNewSongOption,

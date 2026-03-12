@@ -41,6 +41,50 @@ export function convertToEasternDisplay(utcDatetime: string | null): string {
   return easternDateString.replace(", ", "T")
 }
 
+/**
+ * Parse length input (m:ss, mm:ss, or h:mm:ss) and return h:mm:ss for database storage.
+ * - "3:41" -> "0:03:41"
+ * - "12:30" -> "0:12:30"
+ * - "1:03:41" -> "1:03:41"
+ * Returns null for empty or invalid input.
+ */
+export function parseLengthToHhMmSs(input: string | null | undefined): string | null {
+  if (!input || typeof input !== "string") return null
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  const parts = trimmed.split(":").map((p) => parseInt(p, 10))
+  if (parts.some((n) => Number.isNaN(n) || n < 0)) return null
+
+  if (parts.length === 1) {
+    const [s] = parts
+    return `0:00:${String(s).padStart(2, "0")}`
+  }
+  if (parts.length === 2) {
+    const [m, s] = parts
+    return `0:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+  }
+  if (parts.length === 3) {
+    const [h, m, s] = parts
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+  }
+  return null
+}
+
+/**
+ * Format stored h:mm:ss for display - abbreviate when hours is 0.
+ * - "0:03:41" -> "3:41"
+ * - "1:03:41" -> "1:03:41"
+ */
+export function formatLengthForInput(stored: string | null | undefined): string {
+  if (!stored || typeof stored !== "string") return ""
+  const parts = stored.split(":")
+  if (parts.length !== 3) return stored
+  const [h, m, s] = parts.map((p) => parseInt(p, 10) || 0)
+  if (h === 0) return `${m}:${String(s).padStart(2, "0")}`
+  return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+}
+
 /** Format time/interval for display (e.g. "5:23" or "1:5:30"). Removes leading zeroes except for seconds. */
 export function formatTimeDisplay(interval: string | null): string {
   if (!interval) return ""

@@ -15,8 +15,6 @@ import { SongModal } from "./song-modal"
 
 export function AdminSong() {
   const { allSongs, categories, artists, refetchSongs } = useSongsData()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedSong, setSelectedSong] = useState<SongDataFull | null>(null)
   const [editedSong, setEditedSong] = useState<SongDataFull | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -27,8 +25,6 @@ export function AdminSong() {
   const handleSongSelect = (song: SongDataFull) => {
     setSelectedSong(song)
     setEditedSong(song)
-    setIsDropdownOpen(false)
-    setSearchTerm("")
     setIsEditing(false)
   }
 
@@ -43,7 +39,10 @@ export function AdminSong() {
         name === "song_categoryorder"
           ? value === ""
             ? null
-            : parseInt(value) || 0
+            : (() => {
+                const n = parseInt(value, 10)
+                return Number.isNaN(n) ? null : n
+              })()
           : value,
     })
   }
@@ -94,10 +93,6 @@ export function AdminSong() {
           </Button>
           <SongDropdown
             songs={allSongs}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            isOpen={isDropdownOpen}
-            setIsOpen={setIsDropdownOpen}
             onSongSelect={handleSongSelect}
             selectedSong={selectedSong}
           />

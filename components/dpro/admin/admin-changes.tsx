@@ -278,7 +278,7 @@ export function AdminChanges() {
       </div>
       {selectedShow && (
         <div>
-          <div className="mb-2 flex items-center justify-between px-2">
+          <div className="mb-2 flex items-center justify-between">
             <div>
               <h4 className="text-sm font-medium">
                 {formatDate(selectedShow.show_date)} [{selectedShow.show_group}]

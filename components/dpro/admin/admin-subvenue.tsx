@@ -114,7 +114,7 @@ export function AdminSubvenue() {
         </div>
       </div>
       {selectedSubvenue && (
-        <div className="px-2">
+        <div>
           <div className="mb-2 flex items-center justify-between">
             <h4 className="text-sm font-medium">
               {isCreatingNew ? "New Subvenue" : selectedSubvenue.subvenue}

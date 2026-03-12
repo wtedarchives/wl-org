@@ -81,7 +81,10 @@ export function SongModal({
         name === "song_categoryorder"
           ? value === ""
             ? null
-            : parseInt(value) || 0
+            : (() => {
+                const n = parseInt(value, 10)
+                return Number.isNaN(n) ? null : n
+              })()
           : value,
     })
   }
@@ -133,24 +136,29 @@ export function SongModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>
-            {isNewSong ? "Add New Song" : "Edit Song"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <Button
-            size="sm"
-            onClick={handleSaveChanges}
-            disabled={isSubmitting}
-          >
-            <Save className="size-4" />
-            {isSubmitting && "..."}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </Button>
+      <DialogContent
+        className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl"
+        showCloseButton={false}
+      >
+        <div className="flex items-center justify-between">
+          <DialogHeader>
+            <DialogTitle>
+              {isNewSong ? "Add New Song" : "Edit Song"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={handleSaveChanges}
+              disabled={isSubmitting}
+            >
+              <Save className="size-4" />
+              {isSubmitting && "..."}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="size-4" />
+            </Button>
+          </div>
         </div>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           <div>
@@ -170,10 +178,13 @@ export function SongModal({
           <div>
             <label className="mb-0.5 block text-xs font-medium">Category</label>
             <Select
-              value={editedSong?.song_category ?? ""}
+              value={editedSong?.song_category || "__none__"}
               onValueChange={(v) =>
                 handleInputChange({
-                  target: { name: "song_category", value: v },
+                  target: {
+                    name: "song_category",
+                    value: v === "__none__" ? "" : v,
+                  },
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
@@ -181,7 +192,7 @@ export function SongModal({
                 <SelectValue placeholder="-- Select Category --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Category --</SelectItem>
+                <SelectItem value="__none__">-- Select Category --</SelectItem>
                 {categories.map((c) => (
                   <SelectItem key={c.category} value={c.category}>
                     {c.category}
@@ -195,10 +206,13 @@ export function SongModal({
               Original Artist
             </label>
             <Select
-              value={editedSong?.song_originalartist ?? ""}
+              value={editedSong?.song_originalartist || "__none__"}
               onValueChange={(v) =>
                 handleInputChange({
-                  target: { name: "song_originalartist", value: v },
+                  target: {
+                    name: "song_originalartist",
+                    value: v === "__none__" ? "" : v,
+                  },
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
@@ -206,7 +220,7 @@ export function SongModal({
                 <SelectValue placeholder="-- Select Artist --" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Select Artist --</SelectItem>
+                <SelectItem value="__none__">-- Select Artist --</SelectItem>
                 {artists.map((a) => (
                   <SelectItem key={a.artist} value={a.artist}>
                     {a.artist}
@@ -220,7 +234,7 @@ export function SongModal({
               Category Order
             </label>
             <Input
-              type="number"
+              type="text"
               name="song_categoryorder"
               value={
                 editedSong?.song_categoryorder === null

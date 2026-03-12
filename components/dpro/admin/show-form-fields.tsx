@@ -42,7 +42,7 @@ export function ShowFormFields({
   years,
 }: ShowFormFieldsProps) {
   return (
-    <div className="px-2 pb-1">
+    <div className="pb-1">
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         <div>
           <label className="mb-0.5 block text-xs font-medium">Date</label>

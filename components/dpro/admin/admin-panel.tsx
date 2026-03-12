@@ -88,7 +88,7 @@ export function AdminPanel() {
     <div className="w-full space-y-4 xl:mx-auto xl:max-w-[1024px]">
       <div className="flex flex-row items-center justify-between gap-4">
         <div className="flex shrink-0 items-center gap-2">
-          <h2 className="text-sm font-semibold">Admin Panel</h2>
+          <h2 className="text-md font-semibold">Admin Panel</h2>
           {userCount != null && (
             <Badge variant="secondary">
               {userCount.toLocaleString()} {userCount === 1 ? "user" : "users"}

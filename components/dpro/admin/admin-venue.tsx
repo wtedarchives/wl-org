@@ -91,7 +91,7 @@ export function AdminVenue() {
         </div>
       </div>
       {selectedVenue && (
-        <div className="px-2">
+        <div>
           <div className="mb-2 flex items-center justify-between">
             <h4 className="text-sm font-medium">
               {isCreatingNew

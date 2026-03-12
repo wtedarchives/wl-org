@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { FaBluesky } from "react-icons/fa6"
-import { Settings2Icon, BugIcon, SearchIcon } from "lucide-react"
+import { Settings2Icon, BugIcon } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
 import { useAuth } from "@/components/auth-context"
@@ -328,7 +328,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuSubButton
                           onClick={() => setFindDialogOpen(true)}
                         >
-                          <SearchIcon className="size-4" />
                           Find
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

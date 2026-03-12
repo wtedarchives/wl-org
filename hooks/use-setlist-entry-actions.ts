@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { parseLengthToHhMmSs } from "@/lib/utils/show-utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
 
 export function useSetlistEntryActions() {
@@ -94,7 +95,12 @@ export function useSetlistEntryActions() {
           editedEntry.entry_segue === "" || editedEntry.entry_segue === "--"
             ? null
             : editedEntry.entry_segue,
-        entry_length: editedEntry.entry_length === "" ? null : editedEntry.entry_length,
+        entry_length: (() => {
+          const raw = editedEntry.entry_length
+          if (!raw || raw === "") return null
+          const normalized = parseLengthToHhMmSs(raw)
+          return normalized ?? raw
+        })(),
         entry_placement:
           editedEntry.entry_placement === "" ||
           editedEntry.entry_placement === "--"
