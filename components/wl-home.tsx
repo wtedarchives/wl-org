@@ -11,12 +11,14 @@ function ColumnBanner({
   label,
   href,
   dim = false,
+  logoSrc,
 }: {
   src: string
   alt: string
   label: string
   href?: string
   dim?: boolean
+  logoSrc?: string
 }) {
   const brightnessClasses = dim
     ? "brightness-[0.55] group-hover:brightness-[0.75]"
@@ -32,7 +34,16 @@ function ColumnBanner({
         className={`object-cover grayscale transition-all duration-300 ease-out group-hover:scale-105 group-hover:blur-[1px] group-hover:grayscale-0 ${brightnessClasses}`}
         unoptimized
       />
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+        {logoSrc ? (
+          <Image
+            src={logoSrc}
+            alt=""
+            width={80}
+            height={80}
+            className="h-16 w-auto object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:h-20"
+          />
+        ) : null}
         <span className="text-2xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {label}
         </span>
@@ -41,7 +52,7 @@ function ColumnBanner({
   )
 
   const wrapperClassName =
-    "group relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40"
+    "group relative aspect-[3/1] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 lg:aspect-[16/9]"
 
   if (href) {
     const isExternal = href.startsWith("http")
@@ -99,6 +110,7 @@ export function WlHome() {
                 alt="WTED Radio"
                 label="WTED Radio"
                 href="/wted"
+                logoSrc="/WTED3.png"
               />
               <div className="min-h-[120px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4 text-center text-sm text-wl-white/70">
                 Placeholder for WTED Radio
@@ -113,6 +125,7 @@ export function WlHome() {
                 label="Community Forum"
                 href="https://community.wysterialane.org"
                 dim
+                logoSrc="/WL.png"
               />
               <div className="min-h-[100px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4">
                 <p className="text-center text-sm text-wl-white/70">
@@ -128,6 +141,7 @@ export function WlHome() {
                 alt="Setlist Archive"
                 label="Setlist Archive"
                 href="/archive/tours"
+                logoSrc="/wted-sa-cropped.png"
               />
               <HomeStatsColumn />
             </aside>

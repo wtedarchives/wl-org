@@ -190,7 +190,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5"
                     >
                       <Image
-                        src="/WTED2.png"
+                        src="/WTED3.png"
                         alt=""
                         width={24}
                         height={24}
