@@ -51,11 +51,11 @@ export function GuestPerformanceTableView({
   }
 
   const getVenueHref = (perf: GuestShow) => {
-    if (perf.venue_id) return `/dpro/venue/${perf.venue_id}`
+    if (perf.venue_id) return `/archive/venue/${perf.venue_id}`
     if (perf.show_subvenue)
-      return `/dpro/venue/${encodeURIComponent(perf.show_subvenue)}`
+      return `/archive/venue/${encodeURIComponent(perf.show_subvenue)}`
     if (perf.show_venue_location)
-      return `/dpro/venue/${encodeURIComponent(perf.show_venue_location)}`
+      return `/archive/venue/${encodeURIComponent(perf.show_venue_location)}`
     return null
   }
 
@@ -117,7 +117,7 @@ export function GuestPerformanceTableView({
                   className={`text-xs whitespace-nowrap text-center ${cellPadding}`}
                 >
                   <Link
-                    href={`/dpro/setlist/${perf.show_id}`}
+                    href={`/archive/setlist/${perf.show_id}`}
                     className="font-medium underline-offset-4 hover:underline"
                   >
                     {formatSetlistDate(perf.show_date)}

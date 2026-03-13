@@ -62,7 +62,7 @@ export function LiberatedSongsCard({
                 <TableRow key={`${song.song}-${index}`}>
                   <TableCell className="w-min shrink-0 py-1.5 pl-3">
                     <Link
-                      href={`/dpro/song/${song.song_id}`}
+                      href={`/archive/song/${song.song_id}`}
                       className="text-xs font-medium text-foreground underline-offset-4 hover:underline whitespace-nowrap"
                     >
                       <SongDisplayName
@@ -117,7 +117,7 @@ export function LiberatedSongsCard({
                         <span className="font-normal">Returned </span>
                         {song.show_id ? (
                           <Link
-                            href={`/dpro/setlist/${song.show_id}`}
+                            href={`/archive/setlist/${song.show_id}`}
                             className="font-medium text-foreground underline-offset-4 hover:underline"
                           >
                             {formatDate(song.show_date)}
@@ -142,7 +142,7 @@ export function LiberatedSongsCard({
                         <span className="font-normal">LTP </span>
                         {song.last_show_id ? (
                           <Link
-                            href={`/dpro/setlist/${song.last_show_id}`}
+                            href={`/archive/setlist/${song.last_show_id}`}
                             className="font-medium text-foreground underline-offset-4 hover:underline"
                           >
                             {song.last_show_date}

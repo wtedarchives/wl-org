@@ -153,7 +153,7 @@ export function SetlistPageHeader({
         )}
         {show.tour_id && (
           <Link
-            href={`/dpro/tours/${show.tour_id}`}
+            href={`/archive/tours/${show.tour_id}`}
             className="inline-flex items-center gap-1 rounded border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-foreground hover:bg-muted"
           >
             <Info className="size-3" />
@@ -173,7 +173,7 @@ export function SetlistPageHeader({
         {show.show_subvenue && (
           show.venue_id ? (
             <Link
-              href={`/dpro/venue/${show.venue_id}`}
+              href={`/archive/venue/${show.venue_id}`}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
               <Building2 className="size-3 shrink-0" />
@@ -181,7 +181,7 @@ export function SetlistPageHeader({
             </Link>
           ) : show.show_subvenue_venue ? (
             <Link
-              href={`/dpro/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
+              href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
               <Building2 className="size-3 shrink-0" />
@@ -189,7 +189,7 @@ export function SetlistPageHeader({
             </Link>
           ) : (
             <Link
-              href={`/dpro/venue/${encodeURIComponent(show.show_subvenue)}`}
+              href={`/archive/venue/${encodeURIComponent(show.show_subvenue)}`}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
               <Building2 className="size-3 shrink-0" />

@@ -120,7 +120,7 @@ export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxPr
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <Link
-                            href={`/dpro/song/${songId}`}
+                            href={`/archive/song/${songId}`}
                             className="text-xs font-medium text-foreground underline-offset-4 hover:underline mr-2"
                           >
                             {songName}
@@ -129,7 +129,7 @@ export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxPr
                             <>
                               {" "}
                               <Link
-                                href={`/dpro/setlist/${showId}`}
+                                href={`/archive/setlist/${showId}`}
                                 className="text-[10px] text-muted-foreground underline-offset-4 hover:underline"
                               >
                                 [{showDateVal}]

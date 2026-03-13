@@ -38,7 +38,7 @@ export function SetlistEntryLastCell({
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
-            href={`/dpro/setlist/${entry.last_show_id}`}
+            href={`/archive/setlist/${entry.last_show_id}`}
             className="cursor-pointer hover:underline"
           >
             {content}
@@ -68,7 +68,7 @@ export function SetlistEntryLastCell({
   if (entry.last_show_id) {
     return (
       <Link
-        href={`/dpro/setlist/${entry.last_show_id}`}
+        href={`/archive/setlist/${entry.last_show_id}`}
         className="cursor-pointer hover:underline"
       >
         {content}

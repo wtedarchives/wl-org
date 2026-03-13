@@ -105,7 +105,7 @@ export function RepriseSandwichPerformancesDrawer({
                     <TableRow key={p.show_id} className="border-border/60">
                       <TableCell className="text-center tabular-nums">
                         <Link
-                          href={`/dpro/setlist/${p.show_id}`}
+                          href={`/archive/setlist/${p.show_id}`}
                           className="hover:underline"
                         >
                           {formatShowDate(p.show_date)}
@@ -114,14 +114,14 @@ export function RepriseSandwichPerformancesDrawer({
                       <TableCell>
                         {p.venue_id ? (
                           <Link
-                            href={`/dpro/venue/${p.venue_id}`}
+                            href={`/archive/venue/${p.venue_id}`}
                             className="hover:underline"
                           >
                             {p.show_venue_location ?? p.show_subvenue}
                           </Link>
                         ) : p.show_subvenue_venue ? (
                           <Link
-                            href={`/dpro/venue/${encodeURIComponent(p.show_subvenue_venue)}`}
+                            href={`/archive/venue/${encodeURIComponent(p.show_subvenue_venue)}`}
                             className="hover:underline"
                           >
                             {p.show_venue_location ?? p.show_subvenue}

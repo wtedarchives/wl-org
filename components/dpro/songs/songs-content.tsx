@@ -96,7 +96,7 @@ function CategorySection({
                           className="border-t border-border/40 bg-background/70 hover:bg-muted/40 transition-colors"
                         >
                           <Link
-                            href={`/dpro/song/${song.song_id}`}
+                            href={`/archive/song/${song.song_id}`}
                             className="block py-0.5 pl-3 text-xs font-medium text-foreground underline-offset-4 hover:underline"
                           >
                             <SongDisplayName

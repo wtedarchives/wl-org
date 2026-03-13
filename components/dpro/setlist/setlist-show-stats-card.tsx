@@ -67,7 +67,7 @@ export function SetlistShowStatsCard({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
-                          href={`/dpro/lists/${LENGTH_RANK_LIST_ID}`}
+                          href={`/archive/lists/${LENGTH_RANK_LIST_ID}`}
                           className="inline-block rounded px-1 py-[1px] text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-600/80 transition-colors"
                         >
                           #{showLengthRank}
@@ -79,7 +79,7 @@ export function SetlistShowStatsCard({
                     </Tooltip>
                   ) : (
                     <Link
-                      href={`/dpro/lists/${LENGTH_RANK_LIST_ID}`}
+                      href={`/archive/lists/${LENGTH_RANK_LIST_ID}`}
                       className="inline-block rounded px-1 py-[1px] text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-600/80 transition-colors"
                     >
                       #{showLengthRank}

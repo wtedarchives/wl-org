@@ -54,7 +54,7 @@ export function SetlistGameShowTable({
             <TableRow key={show.show_id} className="text-[11px]">
               <TableCell className="px-2 py-0.5 text-center font-medium">
                 <Link
-                  href={`/dpro/setlistgame/${show.show_id}`}
+                  href={`/archive/setlistgame/${show.show_id}`}
                   className="no-underline hover:underline underline-offset-2 hover:text-foreground"
                 >
                   {formatSetlistDate(show.show_date)}

@@ -155,47 +155,6 @@
   animation: pulse-ring 2s ease-in-out infinite;
 }
 
-/* One-shot pulse for WTED embed highlight - wl-orange, large ring */
-@keyframes wted-pulse-ring {
-  0% {
-    box-shadow: 0 0 0 2px color-mix(in oklch, var(--wl-orange) 80%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 4px color-mix(in oklch, var(--wl-orange) 40%, transparent),
-      0 0 24px 8px color-mix(in oklch, var(--wl-orange) 25%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 2px color-mix(in oklch, var(--wl-orange) 0%, transparent),
-      0 0 40px 16px color-mix(in oklch, var(--wl-orange) 0%, transparent);
-  }
-}
-
-@keyframes wted-overlay {
-  0% {
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.35;
-  }
-  50% {
-    opacity: 0.2;
-  }
-  85% {
-    opacity: 0.1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-.animate-pulse-ring-once {
-  animation: wted-pulse-ring 2.5s ease-out 1 forwards;
-}
-
-.animate-wted-overlay-once {
-  animation: wted-overlay 2.5s ease-out 1 forwards;
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;

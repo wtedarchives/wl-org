@@ -206,7 +206,7 @@ function ResultRow({
       <TableCell className="text-xs font-medium py-0.5">
         {row.song_id ? (
           <Link
-            href={`/dpro/song/${row.song_id}`}
+            href={`/archive/song/${row.song_id}`}
             className="text-foreground hover:underline"
           >
             <SongDisplayName
@@ -224,7 +224,7 @@ function ResultRow({
       <TableCell className="text-xs py-0.5 text-muted-foreground">
         {row.show_id ? (
           <Link
-            href={`/dpro/setlist/${row.show_id}`}
+            href={`/archive/setlist/${row.show_id}`}
             className="hover:underline text-foreground"
           >
             {formatShowDate(row.show_date)}

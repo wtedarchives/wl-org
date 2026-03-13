@@ -80,7 +80,7 @@ export function SongInfo({
                 </div>
                 <div className="text-foreground text-sm">
                   <Link
-                    href={`/dpro/setlist/${lastPlayed.show_id}`}
+                    href={`/archive/setlist/${lastPlayed.show_id}`}
                     className="font-medium underline-offset-4 hover:underline pr-4"
                   >
                     {formatSetlistDate(lastPlayed.show_date)}

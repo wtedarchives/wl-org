@@ -123,7 +123,7 @@ export function GuestAppearancesDrawer({
                   </TableCell>
                   <TableCell className="align-middle py-1.5 px-2 text-center text-[11px] whitespace-nowrap">
                     <Link
-                      href={`/dpro/setlist/${song.show_id}`}
+                      href={`/archive/setlist/${song.show_id}`}
                       onClick={onClose}
                       className="font-medium hover:underline"
                     >
@@ -157,7 +157,7 @@ export function GuestAppearancesDrawer({
         <DrawerFooter className="border-t border-border/60 shrink-0 pt-3 pb-4">
           <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center sm:justify-center">
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/dpro/personnel/${modalData.guestId}`} onClick={onClose}>
+              <Link href={`/archive/personnel/${modalData.guestId}`} onClick={onClose}>
                 Guest Profile
               </Link>
             </Button>

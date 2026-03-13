@@ -119,7 +119,7 @@ export function TourSlotsTable({
                 >
                   <TableCell className="w-[65px] min-w-[65px] py-1 text-center whitespace-nowrap">
                     <Link
-                      href={`/dpro/setlist/${slot.show_id}`}
+                      href={`/archive/setlist/${slot.show_id}`}
                       className="text-[11px] font-medium hover:underline"
                     >
                       {formatTourShowDate(slot.Show_Date)}

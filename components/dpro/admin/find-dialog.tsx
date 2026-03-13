@@ -27,7 +27,7 @@ export function FindDialog({ open, onOpenChange }: FindDialogProps) {
     const trimmed = showId.trim()
     if (!trimmed) return
     onOpenChange(false)
-    router.push(`/dpro/setlist/${trimmed}`)
+    router.push(`/archive/setlist/${trimmed}`)
     setShowId("")
   }
 

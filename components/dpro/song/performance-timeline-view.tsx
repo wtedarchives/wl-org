@@ -70,7 +70,7 @@ export function PerformanceTimelineView({
                       <Tooltip key={`${year}-${perf.formattedDate}-${idx}`}>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/dpro/setlist/${perf.show_id}`}
+                            href={`/archive/setlist/${perf.show_id}`}
                             style={{
                               backgroundColor: bgColor,
                             }}

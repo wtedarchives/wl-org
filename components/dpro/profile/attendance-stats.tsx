@@ -108,7 +108,7 @@ export function AttendanceStats({
               {data.tourCounts.map((tour) => (
                 <li key={tour.tour}>
                   <Link
-                    href={`/dpro/tours/${tour.tour_id}`}
+                    href={`/archive/tours/${tour.tour_id}`}
                     className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                   >
                     {tour.tour}

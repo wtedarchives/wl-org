@@ -103,7 +103,7 @@ export function ToursSidebarCard({
                           return (
                             <div key={tour.tour_id} className="pl-4">
                               <Link
-                                href={`/dpro/tours/${tour.tour_id}`}
+                                href={`/archive/tours/${tour.tour_id}`}
                                 onClick={() => onTourSelect?.(tour.tour_id)}
                                 className={cn(
                                   "text-[11px] font-medium hover:underline block py-1 leading-tight",

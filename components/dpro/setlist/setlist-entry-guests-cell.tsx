@@ -31,7 +31,7 @@ export function SetlistEntryGuestsCell({
           <Tooltip key={g.guest_id}>
             <TooltipTrigger asChild>
               <Link
-                href={`/dpro/personnel/${g.guest_id}`}
+                href={`/archive/personnel/${g.guest_id}`}
                 className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
               >
                 {g.guest_display_name}
@@ -42,7 +42,7 @@ export function SetlistEntryGuestsCell({
         ) : (
           <Link
             key={g.guest_id}
-            href={`/dpro/personnel/${g.guest_id}`}
+            href={`/archive/personnel/${g.guest_id}`}
             className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
           >
             {g.guest_display_name}

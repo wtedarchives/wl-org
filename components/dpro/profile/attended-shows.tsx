@@ -183,7 +183,7 @@ function AttendedShowRow({
       </TableCell>
       <TableCell className="text-center whitespace-nowrap">
         <Link
-          href={`/dpro/setlist/${attendedShow.show_id}`}
+          href={`/archive/setlist/${attendedShow.show_id}`}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           {show?.show_date ? formatShowDate(show.show_date) : ""}
@@ -196,7 +196,7 @@ function AttendedShowRow({
         {show?.show_tour ? (
           tourId ? (
             <Link
-              href={`/dpro/tours/${tourId}`}
+              href={`/archive/tours/${tourId}`}
               className="text-foreground underline-offset-4 hover:underline"
             >
               {show.show_tour}
@@ -232,7 +232,7 @@ function AttendedShowRow({
       <TableCell className="whitespace-nowrap text-muted-foreground">
         {show?.show_subvenue_venue ? (
           <Link
-            href={`/dpro/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
+            href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
             className="text-foreground underline-offset-4 hover:underline"
           >
             {show.show_subvenue}

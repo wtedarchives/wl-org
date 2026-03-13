@@ -30,7 +30,7 @@ export function ShowRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href={`/dpro/setlist/${show.show_id}`}
+              href={`/archive/setlist/${show.show_id}`}
               className="hover:underline"
             >
               {formatShowDate(show.show_date)}
@@ -58,7 +58,7 @@ export function ShowRow({
           <TooltipTrigger asChild>
             {show.venue_id ? (
               <Link
-                href={`/dpro/venue/${show.venue_id}`}
+                href={`/archive/venue/${show.venue_id}`}
                 className="hover:underline"
               >
                 {show.show_venue_location}
@@ -78,7 +78,7 @@ export function ShowRow({
         {showsWithSetlists.has(show.show_id) ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href={`/dpro/setlist/${show.show_id}`} aria-label="View setlist">
+              <Link href={`/archive/setlist/${show.show_id}`} aria-label="View setlist">
                 <FileMusic className="mx-auto size-3.5 text-emerald-500" />
               </Link>
             </TooltipTrigger>
@@ -95,7 +95,7 @@ export function ShowRow({
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                href={`/dpro/setlist/${show.show_id}`}
+                href={`/archive/setlist/${show.show_id}`}
                 aria-label="View releases"
               >
                 <AudioLines className="mx-auto size-3.5 text-rose-500" />

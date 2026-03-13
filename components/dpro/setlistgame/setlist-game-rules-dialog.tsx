@@ -146,7 +146,7 @@ export function SetlistGameRulesDialog({
             <p className="text-xs text-muted-foreground">
               If you experience unforeseen errors,{" "}
               <Link
-                href="/dpro/submit"
+                href="/archive/submit"
                 className="font-bold no-underline hover:underline underline-offset-2"
               >
                 submit a bug report here

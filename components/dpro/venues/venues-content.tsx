@@ -167,7 +167,7 @@ export function VenuesContent() {
                       >
                         <TableCell className="px-2 py-0.5 font-medium">
                           <Link
-                            href={`/dpro/venue/${venue.venue_id}`}
+                            href={`/archive/venue/${venue.venue_id}`}
                             className="underline-offset-4 hover:underline"
                           >
                             {venue.subvenue}

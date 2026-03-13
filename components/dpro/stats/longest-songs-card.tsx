@@ -45,7 +45,7 @@ export function LongestSongsCard({
                   <TableCell className="py-0.5 pl-3">
                     <div className="flex items-center justify-between gap-2">
                       <Link
-                        href={`/dpro/song/${song.song_id}`}
+                        href={`/archive/song/${song.song_id}`}
                         className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                       >
                         <SongDisplayName
@@ -77,7 +77,7 @@ export function LongestSongsCard({
                       <>
                         {song.show_id ? (
                           <Link
-                            href={`/dpro/setlist/${song.show_id}`}
+                            href={`/archive/setlist/${song.show_id}`}
                             className="font-medium text-foreground underline-offset-4 hover:underline"
                           >
                             {formatDate(song.show_date)}

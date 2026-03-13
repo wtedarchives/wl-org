@@ -98,7 +98,7 @@ export function CallbacksEditor({
   }
 
   const insertSongLink = (song: SongData) => {
-    const linkText = `<a href="/dpro/song/${song.song_id}">${song.song}</a>`
+    const linkText = `<a href="/archive/song/${song.song_id}">${song.song}</a>`
     insertAtCursor(linkText)
     setSongPopoverOpen(false)
     setSongSearchTerm("")
@@ -106,7 +106,7 @@ export function CallbacksEditor({
 
   const insertShowLink = (show: AdminShowData) => {
     const dateStr = formatDate(show.show_date)
-    const linkText = `<a href="/dpro/setlist/${show.show_id}">${dateStr}</a>`
+    const linkText = `<a href="/archive/setlist/${show.show_id}">${dateStr}</a>`
     insertAtCursor(linkText)
     setShowPopoverOpen(false)
     setShowSearchTerm("")

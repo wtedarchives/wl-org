@@ -120,7 +120,7 @@ export function YearShowRow({
       </TableCell>
       <TableCell className="whitespace-nowrap px-2 py-1 text-center text-[11px] font-medium tabular-nums">
         <Link
-          href={`/dpro/setlist/${show.show_id}`}
+          href={`/archive/setlist/${show.show_id}`}
           className="hover:underline"
         >
           {formatShowDate(show.show_date)}
@@ -145,14 +145,14 @@ export function YearShowRow({
       <TableCell className="px-2 py-1 text-[11px]">
         {show.venue_id ? (
           <Link
-            href={`/dpro/venue/${show.venue_id}`}
+            href={`/archive/venue/${show.venue_id}`}
             className="hover:underline"
           >
             {show.show_subvenue}
           </Link>
         ) : show.show_subvenue_venue ? (
           <Link
-            href={`/dpro/venue/${encodeURIComponent(
+            href={`/archive/venue/${encodeURIComponent(
               show.show_subvenue_venue,
             )}`}
             className="hover:underline"
@@ -178,7 +178,7 @@ export function YearShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/dpro/setlist/${show.show_id}`}
+                    href={`/archive/setlist/${show.show_id}`}
                     aria-label="View setlist"
                     className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                   >
@@ -202,7 +202,7 @@ export function YearShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/dpro/setlist/${show.show_id}`}
+                    href={`/archive/setlist/${show.show_id}`}
                     aria-label="View releases"
                     className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
                   >
@@ -265,7 +265,7 @@ export function YearShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/dpro/setlist/${show.show_id}`}
+                    href={`/archive/setlist/${show.show_id}`}
                     aria-label="WTED Goose Radio"
                     className="inline-flex items-center justify-center rounded hover:opacity-90"
                   >

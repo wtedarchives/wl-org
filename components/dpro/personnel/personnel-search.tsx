@@ -54,7 +54,7 @@ export function PersonnelSearch({ className = "" }: { className?: string }) {
   const handleSelect = (guestId: string, guestName: string) => {
     setSelectedGuest(guestName)
     setOpen(false)
-    router.push(`/dpro/personnel/${guestId}`)
+    router.push(`/archive/personnel/${guestId}`)
   }
 
   return (

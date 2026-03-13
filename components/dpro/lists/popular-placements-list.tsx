@@ -134,7 +134,7 @@ export function PopularPlacementsList({ listId }: PopularPlacementsListProps) {
                           </TableCell>
                         <TableCell className="px-2 py-0.5">
                           <Link
-                            href={`/dpro/song/${row.song_id}`}
+                            href={`/archive/song/${row.song_id}`}
                             className="font-medium hover:underline"
                           >
                             <SongDisplayName

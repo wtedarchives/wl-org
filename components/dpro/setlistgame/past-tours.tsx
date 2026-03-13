@@ -61,7 +61,7 @@ export function PastTours({
               <TableRow key={tour.tour} className="text-[11px]">
                 <TableCell className="px-2 py-0.5 font-medium">
                   <Link
-                    href={`/dpro/setlistgame/tour/${tour.tour_id}`}
+                    href={`/archive/setlistgame/tour/${tour.tour_id}`}
                     className="no-underline hover:underline underline-offset-2 hover:text-foreground"
                   >
                     {tour.tour}

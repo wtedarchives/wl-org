@@ -149,7 +149,7 @@ export function PersonnelContent() {
                         className="border-t border-border/40 bg-background/70 hover:bg-muted/40 transition-colors"
                       >
                         <Link
-                          href={`/dpro/personnel/${item.guest_id}`}
+                          href={`/archive/personnel/${item.guest_id}`}
                           className="group block py-0.5 pl-3 pr-3 text-xs font-medium text-foreground"
                         >
                           <span className="underline-offset-4 group-hover:underline">

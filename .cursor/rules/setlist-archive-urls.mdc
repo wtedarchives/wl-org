@@ -1,29 +1,29 @@
 ---
-description: Setlist Archive URL prefix — all setlist archive routes must live under /dpro
+description: Setlist Archive URL prefix — all setlist archive routes must live under /archive
 alwaysApply: true
 ---
 
-# Setlist Archive URLs (/dpro)
+# Setlist Archive URLs (/archive)
 
-All URL slugs for **Setlist Archive** pages must start with `/dpro`.
+All URL slugs for **Setlist Archive** pages must start with `/archive`.
 
 ## Convention
 
-- **Base path**: `/dpro`
+- **Base path**: `/archive`
 - **Examples**:
-  - Years: `/dpro/years/{year_id}` (year_id = UUID from Supabase `years` table)
-  - Tours: `/dpro/tours` (and `/dpro/tours/...` for nested routes)
-  - Songs: `/dpro/songs`, Stats: `/dpro/stats`, Personnel: `/dpro/personnel`, Venues: `/dpro/venues`, Discography: `/dpro/discography`, Lists: `/dpro/lists`, Setlist Game: `/dpro/setlistgame`, Submit: `/dpro/submit`
+  - Years: `/archive/years/{year_id}` (year_id = UUID from Supabase `years` table)
+  - Tours: `/archive/tours` (and `/archive/tours/...` for nested routes)
+  - Songs: `/archive/songs`, Stats: `/archive/stats`, Personnel: `/archive/personnel`, Venues: `/archive/venues`, Discography: `/archive/discography`, Lists: `/archive/lists`, Setlist Game: `/archive/setlistgame`, Submit: `/archive/submit`
 
 ## Implementation
 
-- **App Router**: Place Setlist Archive pages under `app/(main)/dpro/...` (e.g. `app/(main)/dpro/years/[year_id]/page.tsx`, `app/(main)/dpro/tours/page.tsx`).
-- **Links**: Use `/dpro/...` for any link that targets a Setlist Archive page (sidebar, breadcrumbs, internal links).
-- **Breadcrumbs**: For any Setlist Archive page, the first breadcrumb segment after Home must show **"Setlist Archive"** (not "Dpro"); link target remains `/dpro`.
-- **Pathname checks**: Treat `pathname.startsWith("/dpro")` as “user is in Setlist Archive” for sidebar expansion and active state.
+- **App Router**: Place Setlist Archive pages under `app/(main)/archive/...` (e.g. `app/(main)/archive/years/[year_id]/page.tsx`, `app/(main)/archive/tours/page.tsx`).
+- **Links**: Use `/archive/...` for any link that targets a Setlist Archive page (sidebar, breadcrumbs, internal links).
+- **Breadcrumbs**: For any Setlist Archive page, the first breadcrumb segment after Home must show **"Setlist Archive"** (not "Dpro"); link target remains `/archive`.
+- **Pathname checks**: Treat `pathname.startsWith("/archive")` as “user is in Setlist Archive” for sidebar expansion and active state.
 
 ## Checklist when adding or changing Setlist Archive routes
 
-- [ ] Route path starts with `/dpro`
-- [ ] Sidebar nav uses `/dpro/...` for the corresponding item
-- [ ] Any internal links to setlist pages use `/dpro/...`
+- [ ] Route path starts with `/archive`
+- [ ] Sidebar nav uses `/archive/...` for the corresponding item
+- [ ] Any internal links to setlist pages use `/archive/...`

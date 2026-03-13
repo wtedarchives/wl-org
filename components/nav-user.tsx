@@ -124,7 +124,7 @@ export function NavUser() {
               <>
                 <DropdownMenuItem asChild>
                   <Link
-                    href="/dpro/profile/overview"
+                    href="/archive/profile/overview"
                     className="flex items-center gap-2"
                   >
                     <BarChart3Icon className="size-4" />

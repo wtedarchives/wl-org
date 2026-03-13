@@ -192,7 +192,7 @@ export function ListShowTable({
                 )}
                 <TableCell className="whitespace-nowrap px-2 py-1 text-center text-xs font-medium tabular-nums">
                   <Link
-                    href={`/dpro/setlist/${show.show_id}`}
+                    href={`/archive/setlist/${show.show_id}`}
                     className="hover:underline"
                   >
                     {formatShowDate(show.show_date)}
@@ -244,7 +244,7 @@ export function ListShowTable({
                 <TableCell className="px-2 py-1 text-xs">
                   {show.tour_id ? (
                     <Link
-                      href={`/dpro/tours/${show.tour_id}`}
+                      href={`/archive/tours/${show.tour_id}`}
                       className="hover:underline"
                     >
                       {show.show_tour}
@@ -285,14 +285,14 @@ export function ListShowTable({
                 <TableCell className="px-2 py-1 text-xs">
                   {show.venue_id ? (
                     <Link
-                      href={`/dpro/venue/${show.venue_id}`}
+                      href={`/archive/venue/${show.venue_id}`}
                       className="hover:underline"
                     >
                       {show.show_subvenue}
                     </Link>
                   ) : (show as { show_subvenue_venue?: string }).show_subvenue_venue ? (
                     <Link
-                      href={`/dpro/venue/${encodeURIComponent((show as { show_subvenue_venue: string }).show_subvenue_venue)}`}
+                      href={`/archive/venue/${encodeURIComponent((show as { show_subvenue_venue: string }).show_subvenue_venue)}`}
                       className="hover:underline"
                     >
                       {show.show_subvenue}
@@ -315,7 +315,7 @@ export function ListShowTable({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/dpro/setlist/${show.show_id}`}
+                            href={`/archive/setlist/${show.show_id}`}
                             className="inline-flex rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                           >
                             <FileMusic className="size-3.5" />
@@ -332,7 +332,7 @@ export function ListShowTable({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/dpro/setlist/${show.show_id}`}
+                            href={`/archive/setlist/${show.show_id}`}
                             className="inline-flex rounded p-0.5 text-rose-600 hover:text-rose-500"
                           >
                             <AudioLines className="size-3.5" />

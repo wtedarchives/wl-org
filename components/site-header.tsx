@@ -114,16 +114,16 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const { yearLabel } = useYearBreadcrumb()
   const { setlistBreadcrumbs } = useSetlistBreadcrumb()
   const useYearOverride =
-    (pathname ?? "").startsWith("/dpro/years/") && yearLabel != null
-  const useProfileTrail = (pathname ?? "").startsWith("/dpro/profile")
+    (pathname ?? "").startsWith("/archive/years/") && yearLabel != null
+  const useProfileTrail = (pathname ?? "").startsWith("/archive/profile")
   const useSetlistTrail =
-    ((pathname ?? "").startsWith("/dpro/setlist/") ||
-      (pathname ?? "").startsWith("/dpro/setlistgame/") ||
-      (pathname ?? "").startsWith("/dpro/tours/") ||
-      (pathname ?? "").startsWith("/dpro/song/") ||
-      (pathname ?? "").startsWith("/dpro/personnel/") ||
-      (pathname ?? "").startsWith("/dpro/venue/") ||
-      (pathname ?? "").startsWith("/dpro/lists/")) &&
+    ((pathname ?? "").startsWith("/archive/setlist/") ||
+      (pathname ?? "").startsWith("/archive/setlistgame/") ||
+      (pathname ?? "").startsWith("/archive/tours/") ||
+      (pathname ?? "").startsWith("/archive/song/") ||
+      (pathname ?? "").startsWith("/archive/personnel/") ||
+      (pathname ?? "").startsWith("/archive/venue/") ||
+      (pathname ?? "").startsWith("/archive/lists/")) &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride
@@ -131,7 +131,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     : useProfileTrail
       ? [
           { label: "Home", href: "/" },
-          { label: "Profile", href: "/dpro/profile/overview" },
+          { label: "Profile", href: "/archive/profile/overview" },
         ]
       : useSetlistTrail
       ? setlistBreadcrumbs
@@ -226,17 +226,9 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
                 ))
               ) : breadcrumbs.length === 1 ? (
                 <BreadcrumbItem className="min-w-0 shrink">
-                  {breadcrumbs[0].href ? (
-                    <BreadcrumbLink asChild>
-                      <Link href={breadcrumbs[0].href} className="block min-w-0 truncate">
-                        {breadcrumbs[0].label}
-                      </Link>
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage className="block min-w-0 truncate text-base font-medium text-foreground">
-                      {breadcrumbs[0].label}
-                    </BreadcrumbPage>
-                  )}
+                  <BreadcrumbPage className="block min-w-0 truncate text-base font-medium text-foreground">
+                    {breadcrumbs[0].label}
+                  </BreadcrumbPage>
                 </BreadcrumbItem>
               ) : null}
             </BreadcrumbList>

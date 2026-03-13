@@ -135,7 +135,7 @@ export function TourSongMatrix({
                   className="px-1 py-1.5 text-center text-xs font-medium whitespace-nowrap min-w-[3rem]"
                 >
                   <Link
-                    href={`/dpro/setlist/${d.id}`}
+                    href={`/archive/setlist/${d.id}`}
                     className="hover:underline"
                   >
                     {d.displayDate}

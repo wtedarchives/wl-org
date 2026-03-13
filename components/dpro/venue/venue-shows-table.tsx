@@ -110,7 +110,7 @@ export function VenueShowsTable({
                 >
                   <TableCell className="px-2 py-0.5 text-center whitespace-nowrap font-medium">
                     <Link
-                      href={`/dpro/setlist/${show.show_id}`}
+                      href={`/archive/setlist/${show.show_id}`}
                       className="underline-offset-4 hover:underline"
                     >
                       {formatVenueShowDate(show.show_date)}
@@ -126,7 +126,7 @@ export function VenueShowsTable({
                     {show.show_tour ? (
                       show.tour_id ? (
                         <Link
-                          href={`/dpro/tours/${show.tour_id}`}
+                          href={`/archive/tours/${show.tour_id}`}
                           className="text-muted-foreground hover:underline"
                         >
                           {show.show_tour}

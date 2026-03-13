@@ -134,7 +134,7 @@ export function SetlistScanDrawer({
                           <div className="flex flex-1 items-center gap-2 pl-2">
                             <span className="truncate font-medium">
                               <Link
-                                href={`/dpro/songs/${entry.songs.song_id}`}
+                                href={`/archive/songs/${entry.songs.song_id}`}
                                 className="hover:underline"
                               >
                                 {entry.entry_song}

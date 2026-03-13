@@ -1,12 +1,12 @@
 ---
-description: Loading card standard for Setlist Archive (/dpro) pages — message, progress bar, percentage
-globs: app/(main)/dpro/**/*.tsx, components/dpro/**/*.tsx
+description: Loading card standard for Setlist Archive (/archive) pages — message, progress bar, percentage
+globs: app/(main)/archive/**/*.tsx, components/dpro/**/*.tsx
 alwaysApply: false
 ---
 
-# Setlist Archive Loading Cards (/dpro)
+# Setlist Archive Loading Cards (/archive)
 
-All `/dpro` pages that show a loading state must use `LoadingPageCard` with:
+All `/archive` pages that show a loading state must use `LoadingPageCard` with:
 
 1. **Descriptive message**: `"Loading <context> data…"` or context-specific text
 2. **Progress bar**: shadcn `Progress` component showing completion
@@ -50,7 +50,7 @@ The loading card uses `Field`, `FieldLabel`, and `Progress` per [shadcn Progress
 - Progress bar below
 - `progress` prop drives both bar and percentage
 
-## Checklist when adding /dpro pages
+## Checklist when adding /archive pages
 
 - [ ] Use `LoadingPageCard` for loading state
 - [ ] Pass context-specific `message` when available

@@ -9,7 +9,7 @@ import { useListsData, type List } from "@/hooks/use-lists-data"
 function ListCard({ list }: { list: List }) {
   return (
     <Link
-      href={`/dpro/lists/${list.list_id}`}
+      href={`/archive/lists/${list.list_id}`}
       className="block h-full min-h-0"
     >
       <Card className="h-full flex flex-col border-border/60 bg-card/80 overflow-hidden transition-colors hover:bg-muted/40 py-2">

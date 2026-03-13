@@ -86,7 +86,7 @@ export function TourShowsTable({ gameShows }: TourShowsTableProps) {
               >
                 <TableCell className="text-center font-medium px-2 py-0.5">
                   <Link
-                    href={`/dpro/setlistgame/${show.show_id}`}
+                    href={`/archive/setlistgame/${show.show_id}`}
                     className="no-underline hover:underline"
                   >
                     {formatSetlistGameDate(show.show_date)}

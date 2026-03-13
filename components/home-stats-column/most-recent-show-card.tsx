@@ -91,7 +91,7 @@ export function MostRecentShowCard() {
           <div className="flex items-center justify-between gap-2">
             <div>
               <Link
-                href={`/dpro/setlist/${mostRecentShow.show_id}`}
+                href={`/archive/setlist/${mostRecentShow.show_id}`}
                 className="font-medium hover:underline"
               >
                 {formatShowDate(mostRecentShow.show_date)}
@@ -99,7 +99,7 @@ export function MostRecentShowCard() {
               {" — "}
               {mostRecentShow.venue_id ? (
                 <Link
-                  href={`/dpro/venue/${mostRecentShow.venue_id}`}
+                  href={`/archive/venue/${mostRecentShow.venue_id}`}
                   className="hover:underline"
                 >
                   {mostRecentShow.venue_location}
@@ -113,7 +113,7 @@ export function MostRecentShowCard() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      href={`/dpro/setlist/${mostRecentShow.show_id}`}
+                      href={`/archive/setlist/${mostRecentShow.show_id}`}
                       aria-label="View setlist"
                     >
                       <FileMusic className="size-3.5 text-emerald-500" />
@@ -128,7 +128,7 @@ export function MostRecentShowCard() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      href={`/dpro/setlist/${mostRecentShow.show_id}`}
+                      href={`/archive/setlist/${mostRecentShow.show_id}`}
                       aria-label="View releases"
                     >
                       <AudioLines className="size-3.5 text-rose-500" />
@@ -210,7 +210,7 @@ export function MostRecentShowCard() {
                     <div className="flex flex-1 items-center justify-between gap-2 pl-2">
                       <span className="truncate font-medium">
                         <Link
-                          href={`/dpro/songs/${entry.songs?.song_id}`}
+                          href={`/archive/songs/${entry.songs?.song_id}`}
                           className="hover:underline"
                         >
                           <SongDisplayName

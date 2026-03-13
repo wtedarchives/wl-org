@@ -44,15 +44,15 @@ const WTED_RADIO_SUB = [
 ] as const
 
 const SETLIST_ARCHIVE_SUB = [
-  { title: "Tours", url: "/dpro/tours" },
-  { title: "Songs", url: "/dpro/songs" },
-  { title: "Stats", url: "/dpro/stats" },
-  { title: "Personnel", url: "/dpro/personnel" },
-  { title: "Venues", url: "/dpro/venues" },
-  { title: "Discography", url: "/dpro/discography" },
-  { title: "Lists", url: "/dpro/lists" },
-  { title: "Setlist Game", url: "/dpro/setlistgame" },
-  { title: "Submit", url: "/dpro/submit" },
+  { title: "Tours", url: "/archive/tours" },
+  { title: "Songs", url: "/archive/songs" },
+  { title: "Stats", url: "/archive/stats" },
+  { title: "Personnel", url: "/archive/personnel" },
+  { title: "Venues", url: "/archive/venues" },
+  { title: "Discography", url: "/archive/discography" },
+  { title: "Lists", url: "/archive/lists" },
+  { title: "Setlist Game", url: "/archive/setlistgame" },
+  { title: "Submit", url: "/archive/submit" },
 ] as const
 
 /** Hardcoded years for nav; year_id must match Supabase years table (year, year_id). */
@@ -105,8 +105,8 @@ const navMainItems = [
 ] as const
 
 const ADMIN_SUB = [
-  { title: "Admin Panel", url: "/dpro/admin" },
-  { title: "Bugs", url: "/dpro/bugs" },
+  { title: "Admin Panel", url: "/archive/admin" },
+  { title: "Bugs", url: "/archive/bugs" },
 ] as const
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -118,34 +118,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isWtedPath = pathname.startsWith("/wted")
   const isSetlistPath =
-    pathname.startsWith("/dpro") ||
+    pathname.startsWith("/archive") ||
     SETLIST_ARCHIVE_SUB.some(
       (item) => pathname === item.url || pathname.startsWith(item.url + "/")
     )
-  const isAdminPath = pathname.startsWith("/dpro/admin") || pathname.startsWith("/dpro/bugs")
+  const isAdminPath = pathname.startsWith("/archive/admin") || pathname.startsWith("/archive/bugs")
 
   const [wtedOpen, setWtedOpen] = useState(isWtedPath)
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(isAdminPath)
-  const [wtedEmbedPulse, setWtedEmbedPulse] = useState(false)
-
-  useEffect(() => {
-    let pulseTimeout: ReturnType<typeof setTimeout> | null = null
-    const handleWtedPulse = () => {
-      setWtedEmbedPulse(true)
-      if (pulseTimeout) clearTimeout(pulseTimeout)
-      pulseTimeout = setTimeout(() => {
-        setWtedEmbedPulse(false)
-        pulseTimeout = null
-      }, 2500)
-    }
-    window.addEventListener("wted-pulse", handleWtedPulse)
-    return () => {
-      window.removeEventListener("wted-pulse", handleWtedPulse)
-      if (pulseTimeout) clearTimeout(pulseTimeout)
-    }
-  }, [])
 
   // Keep the group expanded when the user is viewing a page in that group
   useEffect(() => {
@@ -342,7 +324,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       {NAV_YEARS.map((year, index) => (
                         <span key={year.year_id} className="flex items-center gap-1">
                           <Link
-                            href={`/dpro/years/${year.year_id}`}
+                            href={`/archive/years/${year.year_id}`}
                             className="hover:underline"
                           >
                             {year.year}
@@ -444,22 +426,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
         <div className="w-full border-t border-sidebar-border px-2 py-2">
-          <div
-            className={`relative w-full rounded-md ${wtedEmbedPulse ? "animate-pulse-ring-once" : ""}`}
-          >
-            <iframe
-              src="https://www.coreyterrell.com/assets/external/radio.html"
-              title="WTED Radio"
-              className="w-full rounded-md border-0"
-              style={{ height: "66px" }}
-            />
-            <div
-              className={`pointer-events-none absolute inset-0 rounded-md bg-wl-orange/40 transition-none ${
-                wtedEmbedPulse ? "animate-wted-overlay-once" : "opacity-0"
-              }`}
-              aria-hidden
-            />
-          </div>
+          <iframe
+            src="https://www.coreyterrell.com/assets/external/radio.html"
+            title="WTED Radio"
+            className="w-full rounded-md border-0"
+            style={{ height: "66px" }}
+          />
         </div>
       </SidebarContent>
       <SidebarFooter className="pt-0 pb-2">

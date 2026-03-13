@@ -108,7 +108,7 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
             .single()
 
           if (defaultTour) {
-            router.replace(`/dpro/tours/${defaultTour.tour_id}`, {
+            router.replace(`/archive/tours/${defaultTour.tour_id}`, {
               scroll: false,
             })
           }

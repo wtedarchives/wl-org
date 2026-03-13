@@ -131,7 +131,7 @@ export function SetlistSongPerformancesSheet({
                       >
                         <TableCell className="whitespace-nowrap align-middle px-2 py-1 text-center text-[11px]">
                           <Link
-                            href={`/dpro/setlist/${perf.show_id}`}
+                            href={`/archive/setlist/${perf.show_id}`}
                             className="hover:underline"
                           >
                             {formatSetlistDate(perf.show_date)}
@@ -156,7 +156,7 @@ export function SetlistSongPerformancesSheet({
                         <TableCell className="align-middle px-2 py-1 text-[11px]">
                           {perf.venue_id ? (
                             <Link
-                              href={`/dpro/venue/${perf.venue_id}`}
+                              href={`/archive/venue/${perf.venue_id}`}
                               className="hover:underline"
                             >
                               {perf.show_venue_location || perf.show_subvenue || "—"}
@@ -208,7 +208,7 @@ export function SetlistSongPerformancesSheet({
             <div className="flex flex-wrap items-center gap-2">
               {songId && (
                 <Button type="button" size="sm" variant="outline" asChild>
-                  <Link href={`/dpro/song/${songId}`}>
+                  <Link href={`/archive/song/${songId}`}>
                     View full song history
                   </Link>
                 </Button>

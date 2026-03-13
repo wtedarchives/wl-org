@@ -92,7 +92,7 @@ export function VenueMarker({
               </button>
             ) : (
               <Link
-                href={`/dpro/venue/${venue.venue_id}`}
+                href={`/archive/venue/${venue.venue_id}`}
                 className="text-muted-foreground text-sm font-medium hover:underline"
               >
                 {venue.venue}
@@ -122,7 +122,7 @@ export function VenueMarker({
                   .map((show) => (
                     <Link
                       key={show.show_id}
-                      href={`/dpro/setlist/${show.show_id}`}
+                      href={`/archive/setlist/${show.show_id}`}
                       className="text-muted-foreground text-xs block cursor-pointer hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >

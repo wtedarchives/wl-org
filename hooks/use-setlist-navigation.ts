@@ -23,11 +23,11 @@ export function useSetlistNavigation(show: Show | null) {
   }, [pathname])
 
   const handleTourSelect = (tourId: string) => {
-    router.push(`/dpro/tours/${tourId}`)
+    router.push(`/archive/tours/${tourId}`)
   }
 
   const handleShowSelect = (showId: string) => {
-    router.push(`/dpro/setlist/${showId}`)
+    router.push(`/archive/setlist/${showId}`)
   }
 
   return {

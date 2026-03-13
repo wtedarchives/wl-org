@@ -91,7 +91,7 @@ export function VenueSearch({
   const handleSelect = (venueId: string, subvenue: string) => {
     setSelectedVenue(subvenue)
     setOpen(false)
-    router.push(`/dpro/venue/${venueId}`)
+    router.push(`/archive/venue/${venueId}`)
   }
 
   return (

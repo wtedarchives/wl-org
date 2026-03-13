@@ -104,7 +104,7 @@ export function UnfinishedReprisedList({ listId }: UnfinishedReprisedListProps) 
                       </TableCell>
                       <TableCell className="px-2 py-0.5 align-middle">
                         <Link
-                          href={`/dpro/song/${row.song_id}`}
+                          href={`/archive/song/${row.song_id}`}
                           className="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded"
                         >
                           <SongDisplayName

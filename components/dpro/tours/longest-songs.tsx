@@ -164,7 +164,7 @@ export function LongestSongs({
                         <>
                           {song.show_id ? (
                             <Link
-                              href={`/dpro/setlist/${song.show_id}`}
+                              href={`/archive/setlist/${song.show_id}`}
                               className="font-medium hover:underline text-white/80"
                             >
                               {formatTourDate(song.show_date)}

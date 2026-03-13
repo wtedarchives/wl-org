@@ -60,12 +60,12 @@ export function PerformanceTableView({
   }
 
   const getVenueHref = (perf: SongPerformance) => {
-    if (perf.venue_id) return `/dpro/venue/${perf.venue_id}`
+    if (perf.venue_id) return `/archive/venue/${perf.venue_id}`
     if (perf.show_subvenue_venue)
-      return `/dpro/venue/${encodeURIComponent(perf.show_subvenue_venue)}`
+      return `/archive/venue/${encodeURIComponent(perf.show_subvenue_venue)}`
     const venueSearchTerm = perf.show_subvenue || perf.show_venue_location
     if (venueSearchTerm)
-      return `/dpro/venue/${encodeURIComponent(venueSearchTerm)}`
+      return `/archive/venue/${encodeURIComponent(venueSearchTerm)}`
     return null
   }
 
@@ -153,7 +153,7 @@ export function PerformanceTableView({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link
-                        href={`/dpro/setlist/${perf.show_id}`}
+                        href={`/archive/setlist/${perf.show_id}`}
                         className="font-medium underline-offset-4 hover:underline"
                       >
                         {formatSetlistDate(perf.show_date)}
@@ -215,7 +215,7 @@ export function PerformanceTableView({
                     </span>
                   ) : (
                     <Link
-                      href={`/dpro/setlist/${perf.show_id}`}
+                      href={`/archive/setlist/${perf.show_id}`}
                       className="text-destructive hover:underline"
                     >
                       &gt;

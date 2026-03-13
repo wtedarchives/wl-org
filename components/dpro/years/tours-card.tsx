@@ -60,7 +60,7 @@ export function ToursCard({
                   />
                   <div className="flex-1 px-2 py-1.5 leading-tight">
                     <Link
-                      href={`/dpro/tours/${tour.tour_id}`}
+                      href={`/archive/tours/${tour.tour_id}`}
                       className="text-[11px] font-medium hover:underline"
                     >
                       {label}

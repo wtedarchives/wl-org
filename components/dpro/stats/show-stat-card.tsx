@@ -88,7 +88,7 @@ export function ShowStatCard({
                   <TableCell className="py-[6.665px] pl-3">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/dpro/setlist/${item.show_id}`}
+                        href={`/archive/setlist/${item.show_id}`}
                         className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                       >
                         {item.show_date}
@@ -98,7 +98,7 @@ export function ShowStatCard({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Link
-                                href={`/dpro/lists/${LONGEST_SHOWS_LIST_ID}`}
+                                href={`/archive/lists/${LONGEST_SHOWS_LIST_ID}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-block rounded bg-yellow-500 px-1 py-0.5 text-[10px] font-medium text-black"
@@ -118,7 +118,7 @@ export function ShowStatCard({
                     {item.show_venue_location ? (
                       item.venue_id ? (
                         <Link
-                          href={`/dpro/venue/${item.venue_id}`}
+                          href={`/archive/venue/${item.venue_id}`}
                           className="text-foreground underline-offset-4 hover:underline"
                         >
                           {item.show_venue_location}
@@ -134,7 +134,7 @@ export function ShowStatCard({
                     {item.show_tour ? (
                       item.tour_id ? (
                         <Link
-                          href={`/dpro/tours/${item.tour_id}`}
+                          href={`/archive/tours/${item.tour_id}`}
                           className="text-foreground underline-offset-4 hover:underline"
                         >
                           {item.show_tour}

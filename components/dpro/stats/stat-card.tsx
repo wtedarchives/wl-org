@@ -69,7 +69,7 @@ export function StatCard({
                   <TableCell className="py-0.5 pl-3">
                     <div className="flex items-center justify-between gap-2">
                       <Link
-                        href={`/dpro/song/${item.song_id}`}
+                        href={`/archive/song/${item.song_id}`}
                         className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                       >
                         {getSong && getSongDisplayName ? (

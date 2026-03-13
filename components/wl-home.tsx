@@ -5,21 +5,17 @@ import Link from "next/link"
 
 import { HomeStatsColumn } from "@/components/home-stats-column"
 
-const WTED_PULSE_EVENT = "wted-pulse"
-
 function ColumnBanner({
   src,
   alt,
   label,
   href,
-  onClick,
   dim = false,
 }: {
   src: string
   alt: string
   label: string
   href?: string
-  onClick?: () => void
   dim?: boolean
 }) {
   const brightnessClasses = dim
@@ -46,18 +42,6 @@ function ColumnBanner({
 
   const wrapperClassName =
     "group relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40"
-
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className={`cursor-pointer ${wrapperClassName}`}
-      >
-        {inner}
-      </button>
-    )
-  }
 
   if (href) {
     const isExternal = href.startsWith("http")
@@ -114,10 +98,7 @@ export function WlHome() {
                 src="/wted-radio-banner.jpg"
                 alt="WTED Radio"
                 label="WTED Radio"
-                onClick={() =>
-                  typeof window !== "undefined" &&
-                  window.dispatchEvent(new CustomEvent(WTED_PULSE_EVENT))
-                }
+                href="/wted"
               />
               <div className="min-h-[120px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4 text-center text-sm text-wl-white/70">
                 Placeholder for WTED Radio
@@ -143,10 +124,10 @@ export function WlHome() {
             {/* Right: Setlist Archive */}
             <aside className="flex flex-col gap-3 lg:order-3">
               <ColumnBanner
-                src="/dpro-banner.jpg"
+                src="/archive-banner.jpg"
                 alt="Setlist Archive"
                 label="Setlist Archive"
-                href="/dpro/tours"
+                href="/archive/tours"
               />
               <HomeStatsColumn />
             </aside>

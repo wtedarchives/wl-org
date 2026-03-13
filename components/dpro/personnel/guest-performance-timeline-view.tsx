@@ -52,7 +52,7 @@ export function GuestPerformanceTimelineView({
                       <Tooltip key={`${year}-${perf.show_id}-${idx}`}>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/dpro/setlist/${perf.show_id}`}
+                            href={`/archive/setlist/${perf.show_id}`}
                             className={`block w-full text-[0.625rem] text-center px-0.5 font-medium rounded transition-colors hover:underline text-foreground ${
                               selectedGroup && !isHighlighted
                                 ? "opacity-30"

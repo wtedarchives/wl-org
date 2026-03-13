@@ -27,8 +27,8 @@ export function DefaultListItems({
           key={item.list_item_id}
           href={
             listCategory === "songs"
-              ? `/dpro/song/${item.list_item_id}`
-              : `/dpro/setlist/${item.list_item_id}`
+              ? `/archive/song/${item.list_item_id}`
+              : `/archive/setlist/${item.list_item_id}`
           }
           className="block px-3 py-2 text-xs font-medium hover:bg-muted/40 transition-colors"
         >

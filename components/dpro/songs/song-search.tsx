@@ -73,7 +73,7 @@ export function SongSearch({ className = "" }: { className?: string }) {
   const handleSelect = (songId: string, songName: string) => {
     setSelectedSong(songName)
     setOpen(false)
-    router.push(`/dpro/song/${songId}`)
+    router.push(`/archive/song/${songId}`)
   }
 
   return (

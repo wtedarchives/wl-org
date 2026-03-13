@@ -115,8 +115,8 @@ export function ListIndContent({ listId }: ListIndContentProps) {
   useEffect(() => {
     if (!list) return
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/dpro" },
-      { label: "Lists", href: "/dpro/lists" },
+      { label: "Setlist Archive", href: "/archive" },
+      { label: "Lists", href: "/archive/lists" },
       { label: list.list_name, href: "" },
     ])
     return () => setSetlistBreadcrumbs(null)

@@ -103,7 +103,7 @@ export function LongestPerformancesList({
             >
               <TableCell className="px-2 py-0.5">
                 <Link
-                  href={`/dpro/song/${row.song_id}`}
+                  href={`/archive/song/${row.song_id}`}
                   className="font-medium hover:underline"
                 >
                   <SongDisplayName
@@ -129,7 +129,7 @@ export function LongestPerformancesList({
               </TableCell>
               <TableCell className="px-2 py-0.5">
                 <Link
-                  href={`/dpro/setlist/${row.show_id}`}
+                  href={`/archive/setlist/${row.show_id}`}
                   className="hover:underline"
                 >
                   {formatShowDate(row.show_date)}
@@ -139,14 +139,14 @@ export function LongestPerformancesList({
                 {row.show_venue_location ? (
                   row.venue_id ? (
                     <Link
-                      href={`/dpro/venue/${row.venue_id}`}
+                      href={`/archive/venue/${row.venue_id}`}
                       className="hover:underline"
                     >
                       {row.show_venue_location}
                     </Link>
                   ) : row.show_subvenue_venue ? (
                     <Link
-                      href={`/dpro/venue/${encodeURIComponent(row.show_subvenue_venue)}`}
+                      href={`/archive/venue/${encodeURIComponent(row.show_subvenue_venue)}`}
                       className="hover:underline"
                     >
                       {row.show_venue_location}

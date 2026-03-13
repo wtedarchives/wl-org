@@ -50,7 +50,7 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
   )
 
   const handleVenueClick = onVenueClick ?? ((venueId: string) => {
-    router.push(`/dpro/venue/${venueId}`)
+    router.push(`/archive/venue/${venueId}`)
   })
 
   if (allVenues.length === 0) {

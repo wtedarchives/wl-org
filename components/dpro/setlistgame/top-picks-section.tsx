@@ -29,7 +29,7 @@ function SongRow({ song, index }: { song: SongStat; index: number }) {
           />
         )}
         <Link
-          href={song.song_id ? `/dpro/song/${song.song_id}` : "#"}
+          href={song.song_id ? `/archive/song/${song.song_id}` : "#"}
           className={cn(
             "text-xs font-medium truncate",
             song.song_id
