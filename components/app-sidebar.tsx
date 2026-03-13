@@ -124,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="group/header">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -139,7 +139,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   height={20}
                   className="size-5 object-contain transition-transform duration-150 hover:scale-105"
                 />
-                <span className="text-base font-semibold">Wysteria Lane</span>
+                <span className="relative inline-block min-w-[7rem] text-base font-semibold">
+                  <span className="block transition-opacity duration-150 group-hover/header:opacity-0">
+                    WTED.org
+                  </span>
+                  <span className="absolute left-0 top-0 whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/header:opacity-100">
+                    World of TED
+                  </span>
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

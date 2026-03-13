@@ -9,6 +9,8 @@ type AuthContextType = {
   user: User | null
   session: Session | null
   loading: boolean
+  addAttendedShow: (showId: string) => Promise<void>
+  removeAttendedShow: (showId: string) => Promise<void>
   signIn: (
     email: string,
     password: string,
@@ -140,10 +142,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return { error }
   }
 
+  const addAttendedShow = async (showId: string) => {
+    if (!supabase || !user) throw new Error("User must be logged in")
+    const { error } = await supabase
+      .from("user_attended_shows")
+      .insert({ user_id: user.id, show_id: showId })
+    if (error) throw error
+  }
+
+  const removeAttendedShow = async (showId: string) => {
+    if (!supabase || !user) throw new Error("User must be logged in")
+    const { error } = await supabase
+      .from("user_attended_shows")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("show_id", showId)
+    if (error) throw error
+  }
+
   const value: AuthContextType = {
     user,
     session,
     loading,
+    addAttendedShow,
+    removeAttendedShow,
     signIn,
     signUp,
     signOut,

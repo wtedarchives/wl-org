@@ -94,7 +94,7 @@ export default function SignupPage() {
       if (data?.user && !data.session) {
         setMessage("Check your email for a confirmation link")
       } else if (data?.user && data.session) {
-        router.replace("/profile/overview")
+        router.replace("/dpro/profile/overview")
       }
     } catch (err: unknown) {
       const message =

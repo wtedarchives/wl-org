@@ -115,6 +115,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const { setlistBreadcrumbs } = useSetlistBreadcrumb()
   const useYearOverride =
     (pathname ?? "").startsWith("/dpro/years/") && yearLabel != null
+  const useProfileTrail = (pathname ?? "").startsWith("/dpro/profile")
   const useSetlistTrail =
     ((pathname ?? "").startsWith("/dpro/setlist/") ||
       (pathname ?? "").startsWith("/dpro/setlistgame/") ||
@@ -127,7 +128,12 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride
     ? [{ label: breadcrumbOverride, href: "" }]
-    : useSetlistTrail
+    : useProfileTrail
+      ? [
+          { label: "Home", href: "/" },
+          { label: "Profile", href: "/dpro/profile/overview" },
+        ]
+      : useSetlistTrail
       ? setlistBreadcrumbs
       : pathnameToBreadcrumbs(pathname ?? "", useYearOverride ? yearLabel : undefined)
 
