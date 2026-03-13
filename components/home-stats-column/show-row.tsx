@@ -25,7 +25,7 @@ export function ShowRow({
   showsWithReleases: Set<string>
 }) {
   return (
-    <TableRow>
+    <TableRow className="border-border">
       <TableCell className="w-[68px] px-2 py-1 align-middle text-[11px] font-medium tabular-nums text-muted-foreground">
         <Tooltip>
           <TooltipTrigger asChild>

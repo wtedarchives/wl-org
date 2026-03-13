@@ -1,215 +1,136 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 
-import { Button } from "@/components/ui/button"
-import {
-  Field,
-  FieldContent,
-  FieldLabel,
-  FieldSet,
-  FieldTitle,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
 import { HomeStatsColumn } from "@/components/home-stats-column"
 
-export function WlHome() {
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const [layoutMode, setLayoutMode] = useState<"mobile" | "desktop">("mobile")
+function ColumnBanner({
+  src,
+  alt,
+  label,
+  href,
+  dim = false,
+}: {
+  src: string
+  alt: string
+  label: string
+  href?: string
+  dim?: boolean
+}) {
+  const brightnessClasses = dim
+    ? "brightness-[0.55] group-hover:brightness-[0.75]"
+    : "brightness-90 group-hover:brightness-95"
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setFirstName("")
-    setLastName("")
-    setEmail("")
-    setMessage("")
+  const inner = (
+    <>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, 33vw"
+        className={`object-cover grayscale transition-all duration-300 ease-out group-hover:scale-105 group-hover:blur-[1px] group-hover:grayscale-0 ${brightnessClasses}`}
+        unoptimized
+      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-2xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          {label}
+        </span>
+      </div>
+    </>
+  )
+
+  const wrapperClassName =
+    "group relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40"
+
+  if (href) {
+    const isExternal = href.startsWith("http")
+    return (
+      <Link
+        href={href}
+        className={wrapperClassName}
+        {...(isExternal && { target: "_blank", rel: "noopener noreferrer" })}
+      >
+        {inner}
+      </Link>
+    )
   }
 
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
+  return <div className={wrapperClassName}>{inner}</div>
+}
 
-    const threshold = 840 // Tailwind lg breakpoint in px, for container
-
-    const updateLayout = () => {
-      const width = el.clientWidth
-      const nextMode: "mobile" | "desktop" =
-        width >= threshold ? "desktop" : "mobile"
-
-      setLayoutMode((prev) => {
-        return nextMode
-      })
-    }
-
-    updateLayout()
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateLayout()
-    })
-    resizeObserver.observe(el)
-
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [])
-
+export function WlHome() {
   return (
     <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl">
       <main className="flex-1">
-        <div
-          ref={containerRef}
-          className="mx-auto max-w-7xl px-4 py-6 lg:px-6 lg:py-8"
-        >
-          <div className="mb-4 text-center text-wl-white">
-            <h1 className="text-xl font-bold sm:text-2xl">
-              Welcome to Wysteria Lane
-            </h1>
-          </div>
-          <div
-            className={`flex flex-col gap-6 ${
-              layoutMode === "desktop" ? "flex-row items-start" : ""
-            }`}
-          >
-            <div className="flex flex-1 flex-col gap-4">
-              {layoutMode === "desktop" ? (
-                <div className="mx-auto inline-block overflow-hidden rounded-3xl shadow-xl">
-                  <Image
-                    src="/goose-press-2025.jpg"
-                    alt="Goose press photo with confetti"
-                    width={1600}
-                    height={900}
-                    className="mx-auto h-auto max-h-[500px] w-auto max-w-full object-cover"
-                    priority
-                  />
-                </div>
-              ) : null}
-
-              <p className="mx-auto max-w-3xl text-center text-sm font-normal leading-[1.125rem] text-wl-white">
-                Wysteria Lane is the online home for the charitable arm of a fan
-                site and streaming radio station for the band Goose. Currently
-                organized as an LLC with a goal of achieving 501(c)3 non-profit
-                certification from the IRS, Wysteria Lane manages and operates{" "}
-                <a
-                  href="https://www.wtedradio.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-wl-orange underline hover:text-wl-light-orange"
-                >
-                  WTED Goose Radio
-                </a>{" "}
-                and the{" "}
-                <a
-                  href="https://community.wysterialane.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-wl-orange underline hover:text-wl-light-orange"
-                >
-                  Wysteria Lane Community
-                </a>
-                , both of which are available free of charge. Please explore, and
-                reach out if you have questions or want to know more.
+        <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6 lg:py-8">
+          {/* Hero: image + text blurb above columns */}
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-6">
+            <div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 shadow-lg lg:aspect-auto lg:h-full lg:min-h-[140px] lg:w-48 xl:w-56">
+              <Image
+                src="/goose-press-2025.jpg"
+                alt="Goose press photo with confetti"
+                fill
+                sizes="(max-width: 640px) 100vw, 224px"
+                className="object-cover object-center"
+                priority
+              />
+            </div>
+            <div className="flex flex-1 flex-col justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4">
+              <h1 className="mb-2 text-center text-xl font-bold text-wl-white lg:text-left lg:text-2xl">
+                Welcome to The World of TED
+              </h1>
+              <p className="text-sm leading-5 text-wl-white lg:text-left">
+                <span className="font-bold">WTED.org – the World of TED</span>
+                , is the online home for a fan site
+                and streaming radio station for the band Goose. WTED.org manages
+                and operates WTED Goose Radio, the WTED.org Community, and a
+                comprehensive setlist archive, all available free of charge.
               </p>
+            </div>
+          </div>
 
-              <Separator className="my-2 bg-wl-orange" />
+          {/* Three columns */}
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6">
+            {/* Left: WTED Radio */}
+            <aside className="flex flex-col gap-3 lg:order-1">
+              <ColumnBanner
+                src="/wted-radio-banner.jpg"
+                alt="WTED Radio"
+                label="WTED Radio"
+                href="/wted"
+              />
+              <div className="min-h-[120px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4 text-center text-sm text-wl-white/70">
+                Placeholder for WTED Radio
+              </div>
+            </aside>
 
-              {layoutMode === "mobile" ? <HomeStatsColumn /> : null}
-
-              {layoutMode === "mobile" ? (
-                <Separator className="my-2 bg-wl-orange" />
-              ) : null}
-
-              <form
-                onSubmit={handleSubmit}
-                className="mx-auto flex w-full max-w-2xl flex-col gap-6 rounded-xl bg-wl-dark-grey/90 px-4 py-6 text-wl-white shadow-xl @lg/main:px-6"
-              >
-                <h2 className="text-center text-xl font-bold">Contact Us</h2>
-
-                <FieldSet>
-                  <Field>
-                    <FieldLabel>
-                      <FieldTitle>
-                        Name <span className="text-red-500">*</span>
-                      </FieldTitle>
-                    </FieldLabel>
-                    <FieldContent>
-                      <div className="flex flex-col gap-3 sm:flex-row">
-                        <Input
-                          type="text"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                          placeholder="First"
-                          required
-                          className="h-9 bg-white text-sm text-black shadow-md placeholder:text-gray-500"
-                        />
-                        <Input
-                          type="text"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                          placeholder="Last"
-                          required
-                          className="h-9 bg-white text-sm text-black shadow-md placeholder:text-gray-500"
-                        />
-                      </div>
-                    </FieldContent>
-                  </Field>
-
-                  <Field>
-                    <FieldLabel>
-                      <FieldTitle>
-                        Email <span className="text-red-500">*</span>
-                      </FieldTitle>
-                    </FieldLabel>
-                    <FieldContent>
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                        required
-                        className="h-9 bg-white text-sm text-black shadow-md placeholder:text-gray-500"
-                      />
-                    </FieldContent>
-                  </Field>
-
-                  <Field>
-                    <FieldLabel>
-                      <FieldTitle>Comment or Message</FieldTitle>
-                    </FieldLabel>
-                    <FieldContent>
-                      <Textarea
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Comment or Message"
-                        rows={6}
-                        className="bg-white text-sm text-black shadow-md placeholder:text-gray-500"
-                      />
-                    </FieldContent>
-                  </Field>
-                </FieldSet>
-
-                <div className="flex justify-center">
-                  <Button
-                    type="submit"
-                    className="bg-wl-orange px-6 py-2 text-wl-black hover:bg-wl-light-orange"
-                  >
-                    Submit
-                  </Button>
-                </div>
-              </form>
+            {/* Center: Community Forum */}
+            <div className="flex flex-1 flex-col gap-3 lg:order-2">
+              <ColumnBanner
+                src="/community-banner.jpg"
+                alt="Community Forum"
+                label="Community Forum"
+                href="https://community.wysterialane.org"
+                dim
+              />
+              <div className="min-h-[100px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4">
+                <p className="text-center text-sm text-wl-white/70">
+                  Placeholder for Community Forum
+                </p>
+              </div>
             </div>
 
-            {layoutMode === "desktop" ? (
-              <div className="w-full max-w-sm flex-none">
-                <HomeStatsColumn />
-              </div>
-            ) : null}
+            {/* Right: Setlist Archive */}
+            <aside className="flex flex-col gap-3 lg:order-3">
+              <ColumnBanner
+                src="/dpro-banner.jpg"
+                alt="Setlist Archive"
+                label="Setlist Archive"
+                href="/dpro/tours"
+              />
+              <HomeStatsColumn />
+            </aside>
           </div>
         </div>
       </main>
