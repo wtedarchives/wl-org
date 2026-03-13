@@ -128,6 +128,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(isAdminPath)
+  const [wtedEmbedPulse, setWtedEmbedPulse] = useState(false)
+
+  useEffect(() => {
+    let pulseTimeout: ReturnType<typeof setTimeout> | null = null
+    const handleWtedPulse = () => {
+      setWtedEmbedPulse(true)
+      if (pulseTimeout) clearTimeout(pulseTimeout)
+      pulseTimeout = setTimeout(() => {
+        setWtedEmbedPulse(false)
+        pulseTimeout = null
+      }, 2500)
+    }
+    window.addEventListener("wted-pulse", handleWtedPulse)
+    return () => {
+      window.removeEventListener("wted-pulse", handleWtedPulse)
+      if (pulseTimeout) clearTimeout(pulseTimeout)
+    }
+  }, [])
 
   // Keep the group expanded when the user is viewing a page in that group
   useEffect(() => {
@@ -426,12 +444,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
         <div className="w-full border-t border-sidebar-border px-2 py-2">
-          <iframe
-            src="https://www.coreyterrell.com/assets/external/radio.html"
-            title="WTED Radio"
-            className="w-full rounded-md border-0"
-            style={{ height: "66px" }}
-          />
+          <div
+            className={`relative w-full rounded-md ${wtedEmbedPulse ? "animate-pulse-ring-once" : ""}`}
+          >
+            <iframe
+              src="https://www.coreyterrell.com/assets/external/radio.html"
+              title="WTED Radio"
+              className="w-full rounded-md border-0"
+              style={{ height: "66px" }}
+            />
+            <div
+              className={`pointer-events-none absolute inset-0 rounded-md bg-wl-orange/40 transition-none ${
+                wtedEmbedPulse ? "animate-wted-overlay-once" : "opacity-0"
+              }`}
+              aria-hidden
+            />
+          </div>
         </div>
       </SidebarContent>
       <SidebarFooter className="pt-0 pb-2">
