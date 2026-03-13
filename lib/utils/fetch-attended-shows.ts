@@ -35,7 +35,12 @@ export async function fetchAttendedShows(
 
   onProgress?.(5)
 
-  let allAttendanceData: { id: string; user_id: string; show_id: string }[] = []
+  let allAttendanceData: {
+    id: string
+    user_id: string
+    show_id: string
+    created_at: string
+  }[] = []
   let page = 0
   let hasMore = true
 
@@ -132,8 +137,16 @@ export async function fetchAttendedShows(
             show.show_gap != null
               ? Number(show.show_gap).toFixed(2)
               : null
+          const toursRaw = show.tours
+          const tours =
+            Array.isArray(toursRaw) && toursRaw.length > 0
+              ? { tour_id: toursRaw[0].tour_id }
+              : Array.isArray(toursRaw)
+                ? null
+                : toursRaw
           allShowData[show.show_id] = {
             ...show,
+            tours,
             show_rarity,
             show_gap,
           }

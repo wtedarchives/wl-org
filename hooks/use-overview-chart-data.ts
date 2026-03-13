@@ -29,6 +29,8 @@ export function useOverviewChartData(userId: string | null) {
     }
 
     async function fetchData() {
+      const sb = supabase
+      if (!sb) return
       try {
         setLoading(true)
 
@@ -37,7 +39,7 @@ export function useOverviewChartData(userId: string | null) {
         let hasMore = true
 
         while (hasMore) {
-          const { data: attendedData, error } = await client
+          const { data: attendedData, error } = await sb
             .from("user_attended_shows")
             .select("show_id")
             .eq("user_id", userId)
@@ -71,7 +73,7 @@ export function useOverviewChartData(userId: string | null) {
           let chunkPage = 0
           let chunkHasMore = true
           while (chunkHasMore) {
-            const { data: showData, error } = await client
+            const { data: showData, error } = await sb
               .from("shows")
               .select("show_date, show_group")
               .in("show_id", chunk)

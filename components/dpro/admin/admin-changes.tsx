@@ -152,8 +152,10 @@ export function AdminChanges() {
     })
   }, [shows, searchTerm])
 
-  const handleShowSelect = (show: ShowData) => {
-    setSelectedShow(show)
+  const handleShowSelect = (show: { show_id: string }) => {
+    const fullShow = shows.find((s) => s.show_id === show.show_id)
+    if (!fullShow) return
+    setSelectedShow(fullShow)
     fetchShowChanges(show.show_id)
     setIsDropdownOpen(false)
     setSearchTerm("")

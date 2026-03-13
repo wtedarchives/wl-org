@@ -67,8 +67,10 @@ export function AdminShow() {
     })
   }, [allShows, searchTerm])
 
-  const handleShowSelectWithReleases = (show: AdminShowData) => {
-    handleShowSelect(show, fetchShowReleases)
+  const handleShowSelectWithReleases = (show: { show_id: string }) => {
+    const fullShow = allShows.find((s) => s.show_id === show.show_id)
+    if (!fullShow) return
+    handleShowSelect(fullShow, fetchShowReleases)
     setIsDropdownOpen(false)
     setSearchTerm("")
   }

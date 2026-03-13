@@ -13,6 +13,7 @@ interface ShowForDropdown {
   show_date: string
   show_canonid?: number | null
   show_group?: string
+  show_subvenue?: string
   show_venue_location?: string | null
 }
 

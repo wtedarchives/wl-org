@@ -67,11 +67,13 @@ export function AttendedByGroupChart({
     const pageSize = 1000
 
     async function fetchData() {
+      const sb = supabase
+      if (!sb) return
       try {
         setLoading(true)
 
         while (true) {
-          const { data, error } = await client
+          const { data, error } = await sb
             .from("user_attended_shows")
             .select(
               `
@@ -86,7 +88,9 @@ export function AttendedByGroupChart({
           if (error) throw error
           if (!data?.length) break
 
-          allAttended.push(...(data as { shows: { show_group: string } }[]))
+          allAttended.push(
+            ...(data as unknown as { shows: { show_group: string } }[])
+          )
           page++
           if (data.length < pageSize) break
         }

@@ -10,7 +10,7 @@ interface AdminShowHeaderProps {
   searchTerm: string
   setSearchTerm: (term: string) => void
   filteredShows: AdminShowData[]
-  onShowSelect: (show: AdminShowData) => void
+  onShowSelect: (show: { show_id: string }) => void
   loading: boolean
   loadingProgress: number
   isDropdownOpen: boolean

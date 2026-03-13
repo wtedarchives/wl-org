@@ -89,7 +89,8 @@ export function useAttendanceStats(userId: string | null) {
   const [loadingProgress, setLoadingProgress] = useState(0)
 
   useEffect(() => {
-    if (!userId) {
+    const uid = userId
+    if (!uid) {
       setLoadingProgress(100)
       setLoading(false)
       return
@@ -105,7 +106,7 @@ export function useAttendanceStats(userId: string | null) {
         const allAttended = await fetchAll<{ show_id: string }>(
           "user_attended_shows",
           "show_id",
-          { column: "user_id", value: userId }
+          { column: "user_id", value: uid as string }
         )
 
         setLoadingProgress(22)

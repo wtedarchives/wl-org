@@ -181,8 +181,10 @@ export function AdminMedia() {
     })
   }, [allShows, searchTerm])
 
-  const handleShowSelect = async (show: AdminShowData) => {
-    setSelectedShow(show)
+  const handleShowSelect = async (show: { show_id: string }) => {
+    const fullShow = allShows.find((s) => s.show_id === show.show_id)
+    if (!fullShow) return
+    setSelectedShow(fullShow)
     setIsDropdownOpen(false)
     setSearchTerm("")
     try {

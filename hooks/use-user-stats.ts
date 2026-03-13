@@ -38,7 +38,9 @@ export function useUserStats(effectiveUserId: string | null) {
 
   const skipShort = (entryShort: string | null | undefined): boolean => {
     if (!entryShort) return true
-    return !SKIP_SHORTS.includes(entryShort.toLowerCase().trim())
+    return !(SKIP_SHORTS as readonly string[]).includes(
+      entryShort.toLowerCase().trim()
+    )
   }
 
   const formatShowDate = (showDate: string): string => {
