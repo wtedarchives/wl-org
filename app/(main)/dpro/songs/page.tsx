@@ -3,7 +3,7 @@ import { SongsContent } from "@/components/dpro/songs/songs-content"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 
 export const metadata = {
-  title: "Songs – Wysteria Lane",
+  title: "Songs – WTED.org",
 }
 
 export default function DproSongsPage() {

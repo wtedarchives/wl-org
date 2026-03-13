@@ -153,7 +153,7 @@ export default function SetlistGameShowPage({
       const dateLabel = formatSetlistGameDate(show.show_date)
       const venuePart = show.show_venue_location ?? ""
       const titlePart = venuePart ? `${dateLabel} - ${venuePart}` : dateLabel
-      document.title = `Echo of a Show (${titlePart}) – Wysteria Lane`
+      document.title = `Echo of a Show (${titlePart}) – WTED.org`
     }
     return () => { document.title = "" }
   }, [show])

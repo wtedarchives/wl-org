@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Wysteria Lane",
-    template: "%s – Wysteria Lane",
+    default: "WTED.org",
+    template: "%s – WTED.org",
   },
-  description: "Wysteria Lane",
+  description: "WTED.org",
   icons: {
     icon: "/WL.ico",
   },

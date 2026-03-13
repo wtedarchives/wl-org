@@ -3,7 +3,7 @@ import { ListsContent } from "@/components/dpro/lists/lists-content"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 
 export const metadata = {
-  title: "Lists – Wysteria Lane",
+  title: "Lists – WTED.org",
 }
 
 export default function DproListsPage() {

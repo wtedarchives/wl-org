@@ -115,7 +115,7 @@ function YearPageContent({ yearId }: { yearId?: string }) {
 
   useEffect(() => {
     if (currentYear) {
-      document.title = `${currentYear} Shows – Wysteria Lane`
+      document.title = `${currentYear} Shows – WTED.org`
     }
     return () => { document.title = "" }
   }, [currentYear])
