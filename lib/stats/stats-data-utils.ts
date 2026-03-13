@@ -131,6 +131,7 @@ async function fetchPlacementData(
           song_id,
           song_displayname,
           song_category,
+          song_categoryorder,
           categories!inner(
             category_canonid,
             category_artwork
@@ -155,11 +156,11 @@ async function fetchPlacementData(
   })
 
   const counts = allData.reduce(
-    (acc: Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; category_artwork?: string }>,
+    (acc: Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; song_categoryorder?: number | null; category_artwork?: string }>,
     entry: Record<string, unknown>
   ) => {
     const songName = entry.entry_song as string
-    const songs = entry.songs as { song_id: string; song_displayname?: string | null; categories: { category_canonid: number; category_artwork?: string } } | { song_id: string; song_displayname?: string | null; categories: { category_canonid: number; category_artwork?: string } }[]
+    const songs = entry.songs as { song_id: string; song_displayname?: string | null; song_categoryorder?: number | null; categories: { category_canonid: number; category_artwork?: string } } | { song_id: string; song_displayname?: string | null; song_categoryorder?: number | null; categories: { category_canonid: number; category_artwork?: string } }[]
     const song = Array.isArray(songs) ? songs[0] : songs
     if (!song) return acc
     if (!acc[songName]) {
@@ -169,6 +170,7 @@ async function fetchPlacementData(
         song_id: song.song_id,
         times_played: 1,
         category_canonid: song.categories?.category_canonid ?? 0,
+        song_categoryorder: song.song_categoryorder ?? null,
         category_artwork: song.categories?.category_artwork,
       }
     } else {
@@ -176,7 +178,7 @@ async function fetchPlacementData(
     }
     return acc
   },
-  {} as Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; category_artwork?: string }>
+  {} as Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; song_categoryorder?: number | null; category_artwork?: string }>
   )
 
   return Object.values(counts)
@@ -185,6 +187,9 @@ async function fetchPlacementData(
         return b.times_played - a.times_played
       if (a.category_canonid !== b.category_canonid)
         return a.category_canonid - b.category_canonid
+      const orderA = a.song_categoryorder ?? 9999
+      const orderB = b.song_categoryorder ?? 9999
+      if (orderA !== orderB) return orderA - orderB
       return a.song_name.localeCompare(b.song_name)
     })
     .slice(0, 10)

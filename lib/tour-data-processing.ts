@@ -54,6 +54,7 @@ export interface RawSetlistEntry {
         song_displayname?: string | null
         song_category?: string | null
         song_originalartist?: string | null
+        song_categoryorder?: number | null
         categories?: {
           category_artwork?: string
           category_canonid?: number
@@ -65,6 +66,7 @@ export interface RawSetlistEntry {
         song_displayname?: string | null
         song_category?: string | null
         song_originalartist?: string | null
+        song_categoryorder?: number | null
         categories?: {
           category_artwork?: string
           category_canonid?: number
@@ -248,19 +250,19 @@ export function processTourDataWithCategories(
 ): SlotData[] {
   const showOpeners = new Map<
     string,
-    { count: number; artwork?: string; displayName?: string | null }
+    { count: number; artwork?: string; displayName?: string | null; category_canonid?: number; song_categoryorder?: number | null }
   >()
   const setOpeners = new Map<
     string,
-    { count: number; artwork?: string; displayName?: string | null }
+    { count: number; artwork?: string; displayName?: string | null; category_canonid?: number; song_categoryorder?: number | null }
   >()
   const setClosers = new Map<
     string,
-    { count: number; artwork?: string; displayName?: string | null }
+    { count: number; artwork?: string; displayName?: string | null; category_canonid?: number; song_categoryorder?: number | null }
   >()
   const encores = new Map<
     string,
-    { count: number; artwork?: string; displayName?: string | null }
+    { count: number; artwork?: string; displayName?: string | null; category_canonid?: number; song_categoryorder?: number | null }
   >()
 
   const seenShowOpener = new Set<string>()
@@ -275,13 +277,17 @@ export function processTourDataWithCategories(
 
     const songsRel = entry.songs
     const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
-    const artwork = songRow?.categories?.category_artwork
+    const cat = songRow?.categories
+    const catObj = Array.isArray(cat) ? cat[0] : cat
+    const artwork = catObj?.category_artwork
+    const category_canonid = catObj?.category_canonid ?? 0
+    const song_categoryorder = songRow?.song_categoryorder ?? null
 
     const displayName = songRow?.song_displayname ?? null
     const addTo = (
       map: Map<
         string,
-        { count: number; artwork?: string; displayName?: string | null }
+        { count: number; artwork?: string; displayName?: string | null; category_canonid?: number; song_categoryorder?: number | null }
       >,
       seen: Set<string>,
     ) => {
@@ -292,7 +298,7 @@ export function processTourDataWithCategories(
       if (existing) {
         existing.count += 1
       } else {
-        map.set(songName, { count: 1, artwork, displayName })
+        map.set(songName, { count: 1, artwork, displayName, category_canonid, song_categoryorder })
       }
     }
 
@@ -305,15 +311,23 @@ export function processTourDataWithCategories(
   const toSlotData = (
     map: Map<
       string,
-      { count: number; artwork?: string; displayName?: string | null }
+      { count: number; artwork?: string; displayName?: string | null; category_canonid?: number; song_categoryorder?: number | null }
     >,
     title: string,
   ): SlotData => {
-    const data = Array.from(map.entries())
-      .sort((a, b) => {
-        if (b[1].count !== a[1].count) return b[1].count - a[1].count
-        return a[0].localeCompare(b[0])
-      })
+    const entries = Array.from(map.entries())
+    const sorted = [...entries].sort((a, b) => {
+      if (b[1].count !== a[1].count) return b[1].count - a[1].count
+      const catA = a[1].category_canonid ?? 0
+      const catB = b[1].category_canonid ?? 0
+      if (catA !== catB) return catA - catB
+      const orderA = a[1].song_categoryorder ?? 9999
+      const orderB = b[1].song_categoryorder ?? 9999
+      if (orderA !== orderB) return orderA - orderB
+      return a[0].localeCompare(b[0])
+    })
+
+    const data = sorted
       .slice(0, 8)
       .map(([song, { count, artwork, displayName }]) => ({
         left: song,

@@ -9,6 +9,7 @@ export interface PlacementRow {
   song_id: string
   times_played: number
   category_canonid: number
+  song_categoryorder: number | null
   category_artwork?: string
 }
 
@@ -48,6 +49,7 @@ async function fetchPlacement(
           song_id,
           song_displayname,
           song_category,
+          song_categoryorder,
           categories!inner(
             category_canonid,
             category_artwork
@@ -86,13 +88,16 @@ async function fetchPlacement(
       const songsRel = Array.isArray(entry.songs) ? entry.songs[0] : entry.songs
       if (!songsRel) return acc
       if (!acc[songName]) {
+        const cat = songsRel.categories
+        const catObj = Array.isArray(cat) ? cat[0] : cat
         acc[songName] = {
           song_name: songName,
           song_displayname: songsRel.song_displayname ?? null,
           song_id: songsRel.song_id,
           times_played: 1,
-          category_canonid: songsRel.categories?.category_canonid ?? 0,
-          category_artwork: songsRel.categories?.category_artwork,
+          category_canonid: catObj?.category_canonid ?? 0,
+          song_categoryorder: songsRel.song_categoryorder ?? null,
+          category_artwork: catObj?.category_artwork,
         }
       } else {
         acc[songName].times_played++
@@ -108,6 +113,9 @@ async function fetchPlacement(
         return b.times_played - a.times_played
       if (a.category_canonid !== b.category_canonid)
         return a.category_canonid - b.category_canonid
+      const orderA = a.song_categoryorder ?? 9999
+      const orderB = b.song_categoryorder ?? 9999
+      if (orderA !== orderB) return orderA - orderB
       return a.song_name.localeCompare(b.song_name)
     })
     .slice(0, 25)
