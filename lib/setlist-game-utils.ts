@@ -1,5 +1,5 @@
 /**
- * Utilities for the Setlist Game (Echo of a Show).
+ * Utilities for the Setlist Game (Setlist Game).
  */
 
 /** Format date for display (MM.DD.YY). Re-export for convenience. */

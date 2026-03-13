@@ -3,7 +3,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { SetlistGameContent } from "@/components/dpro/setlistgame/setlist-game-content"
 
 export const metadata = {
-  title: "Echo of a Show – WTED.org",
+  title: "Setlist Game – WTED.org",
 }
 
 export default function SetlistGamePage() {

@@ -28,7 +28,7 @@ export default function SetlistGameTourPage({
 
   useEffect(() => {
     if (tourInfo) {
-      document.title = `Echo of a Show (${tourInfo.tour}) – WTED.org`
+      document.title = `Setlist Game (${tourInfo.tour}) – WTED.org`
     }
     return () => { document.title = "" }
   }, [tourInfo])

@@ -11,7 +11,7 @@ export function LoginPrompt() {
       </CardHeader>
       <CardContent className="py-0 pb-2">
         <p className="text-xs text-muted-foreground">
-          You need to be logged in to participate in Echo of a Show.{" "}
+          You need to be logged in to participate in Setlist Game.{" "}
           <Link href="/login" className="font-medium no-underline hover:underline underline-offset-2">
             Log in
           </Link>{" "}

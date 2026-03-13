@@ -69,7 +69,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
       "Curated song and show lists. Jive Suite, Dripfield, category lists, and community-created collections.",
   },
   {
-    title: "Echo of a Show",
+    title: "Setlist Game",
     href: "/archive/setlistgame",
     icon: "Trophy",
     description:
