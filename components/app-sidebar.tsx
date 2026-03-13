@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/sidebar"
 import {
   MessageSquareIcon,
+  MessageCircle,
   BookOpenIcon,
   LibraryIcon,
   LinkIcon,
@@ -81,8 +82,25 @@ const LINKS = [
   { title: "ElGoose.net", href: "https://elgoose.net/" },
 ] as const
 
+const COMMUNITY_FORUM_SUB = [
+  {
+    title: "GOOSE(c)",
+    url: "https://community.wysterialane.org/chat/c/goosec/14",
+    color: "#e04d2f",
+  },
+  {
+    title: "Non-Goose",
+    url: "https://community.wysterialane.org/chat/c/ngoosec/56",
+    color: "#246151",
+  },
+  {
+    title: "The Couch",
+    url: "https://community.wysterialane.org/chat/c/the-couch/3",
+    color: "#863523",
+  },
+] as const
+
 const navMainItems = [
-  { title: "Community Forum", url: "/forum", icon: <MessageSquareIcon className="size-4" /> },
   { title: "Goose 101", url: "/goose101", icon: <BookOpenIcon className="size-4" /> },
 ] as const
 
@@ -207,6 +225,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     ))}
                   </SidebarMenuSub>
                 )}
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Community Forum" asChild>
+                  <a
+                    href="https://community.wysterialane.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    <MessageSquareIcon className="size-4" />
+                    <span>Community Forum</span>
+                  </a>
+                </SidebarMenuButton>
+                <SidebarMenuSub>
+                  {COMMUNITY_FORUM_SUB.map((item) => (
+                    <SidebarMenuSubItem key={item.title}>
+                      <SidebarMenuSubButton asChild>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          <MessageCircle
+                            className="size-4 shrink-0"
+                            fill={item.color}
+                            strokeWidth={0}
+                          />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
               </SidebarMenuItem>
               {navMainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
