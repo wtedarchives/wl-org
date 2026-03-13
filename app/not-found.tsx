@@ -1,18 +1,5 @@
-import dynamic from "next/dynamic"
+import { AppSidebarClient } from "@/components/app-sidebar-client"
 import { NotFoundContent } from "@/components/not-found-content"
-
-const AppSidebar = dynamic(
-  () => import("@/components/app-sidebar").then((mod) => mod.AppSidebar),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="hidden shrink-0 md:block"
-        style={{ width: "var(--sidebar-width)" }}
-      />
-    ),
-  }
-)
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
@@ -26,7 +13,7 @@ export default function NotFound() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebarClient variant="inset" />
       <SidebarInset>
         <SiteHeader breadcrumbOverride="Page not found" />
         <div className="flex flex-1 flex-col">

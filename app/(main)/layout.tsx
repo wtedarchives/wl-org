@@ -1,21 +1,8 @@
-import dynamic from "next/dynamic"
+import { AppSidebarClient } from "@/components/app-sidebar-client"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 import { SiteHeader } from "@/components/site-header"
 import { YearBreadcrumbProvider } from "@/components/year-breadcrumb-context"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-
-const AppSidebar = dynamic(
-  () => import("@/components/app-sidebar").then((mod) => mod.AppSidebar),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="hidden shrink-0 md:block"
-        style={{ width: "var(--sidebar-width)" }}
-      />
-    ),
-  }
-)
 
 export default function MainLayout({
   children,
@@ -33,7 +20,7 @@ export default function MainLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebarClient variant="inset" />
       <SidebarInset>
         <YearBreadcrumbProvider>
           <SetlistBreadcrumbProvider>
