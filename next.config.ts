@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         hostname: "i.postimg.cc",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.radio.co",
+        pathname: "/**",
+      },
     ],
   },
 };

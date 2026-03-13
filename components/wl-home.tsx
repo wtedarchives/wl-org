@@ -2,8 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { ExternalLink } from "lucide-react"
 
 import { HomeStatsColumn } from "@/components/home-stats-column"
+import { WtedRadioScheduleCard } from "@/components/wted-radio-schedule-card"
 
 function ColumnBanner({
   src,
@@ -30,7 +32,7 @@ function ColumnBanner({
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 100vw, 33vw"
+        sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 33vw"
         className={`object-cover grayscale transition-all duration-300 ease-out group-hover:scale-105 group-hover:blur-[1px] group-hover:grayscale-0 ${brightnessClasses}`}
         unoptimized
       />
@@ -101,10 +103,10 @@ export function WlHome() {
             </div>
           </div>
 
-          {/* Three columns */}
-          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6">
+          {/* Columns: stacked < lg, 2 cols (WTED+Community) + Setlist below at lg–xl, 3 cols at xl+ */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start xl:grid-cols-3 xl:gap-6">
             {/* Left: WTED Radio */}
-            <aside className="flex flex-col gap-3 lg:order-1">
+            <aside className="flex flex-col gap-3 xl:order-1">
               <ColumnBanner
                 src="/wted-radio-banner.jpg"
                 alt="WTED Radio"
@@ -112,13 +114,21 @@ export function WlHome() {
                 href="/wted"
                 logoSrc="/WTED3.png"
               />
-              <div className="min-h-[120px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4 text-center text-sm text-wl-white/70">
-                Placeholder for WTED Radio
-              </div>
+              <Link
+                href="/wted"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-colors hover:bg-wl-dark-grey/50"
+              >
+                <span className="text-center">Listen to Goose on-demand, 24/7.</span>
+                <ExternalLink
+                  className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
+                  aria-hidden
+                />
+              </Link>
+              <WtedRadioScheduleCard />
             </aside>
 
             {/* Center: Community Forum */}
-            <div className="flex flex-1 flex-col gap-3 lg:order-2">
+            <div className="flex flex-1 flex-col gap-3 xl:order-2">
               <ColumnBanner
                 src="/community-banner.jpg"
                 alt="Community Forum"
@@ -127,15 +137,15 @@ export function WlHome() {
                 dim
                 logoSrc="/WL.png"
               />
-              <div className="min-h-[100px] rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4">
-                <p className="text-center text-sm text-wl-white/70">
-                  Placeholder for Community Forum
+              <div className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2">
+                <p className="text-center text-sm text-wl-white">
+                  A community made for Goose fans, by Goose fans.
                 </p>
               </div>
             </div>
 
-            {/* Right: Setlist Archive */}
-            <aside className="flex flex-col gap-3 lg:order-3">
+            {/* Right: Setlist Archive - full width below WTED+Community when viewport < xl */}
+            <aside className="col-span-1 flex flex-col gap-3 lg:col-span-2 xl:col-span-1 xl:order-3">
               <ColumnBanner
                 src="/archive-banner.jpg"
                 alt="Setlist Archive"
@@ -143,6 +153,11 @@ export function WlHome() {
                 href="/archive/tours"
                 logoSrc="/wted-sa-cropped.png"
               />
+              <div className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2">
+                <p className="text-center text-sm text-wl-white">
+                  The ultimate show history archive for Goose.
+                </p>
+              </div>
               <HomeStatsColumn />
             </aside>
           </div>
