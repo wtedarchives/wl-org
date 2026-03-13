@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ExternalLink } from "lucide-react"
 
+import { FeaturedTopicsCard } from "@/components/featured-topics-card"
 import { HomeStatsColumn } from "@/components/home-stats-column"
 import { WtedRadioScheduleCard } from "@/components/wted-radio-schedule-card"
 
@@ -150,6 +151,7 @@ export function WlHome() {
                   aria-hidden
                 />
               </Link>
+              <FeaturedTopicsCard />
             </div>
 
             {/* Right: Setlist Archive - full width below WTED+Community when viewport < xl */}

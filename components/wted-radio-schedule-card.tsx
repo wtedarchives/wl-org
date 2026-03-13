@@ -24,39 +24,39 @@ function ScheduleRow({ slot }: { slot: RadioScheduleSlot }) {
 
   return (
     <TableRow className="border-wl-dark-grey/50 hover:bg-wl-dark-grey/30">
-      <TableCell className="w-[40px] pl-2 pr-1 py-1 align-middle">
-        <div className="relative size-8 overflow-hidden rounded">
+      <TableCell className="w-[66px] pl-2 !pr-1 py-1 align-middle">
+        <div className="relative h-14 w-14 overflow-hidden rounded">
           <Image
             src={artwork}
             alt=""
-            width={32}
-            height={32}
-            className="object-cover"
+            fill
+            sizes="56px"
+            className="object-cover object-center"
             unoptimized
           />
         </div>
       </TableCell>
-      <TableCell className="min-w-0 pl-1 pr-2 py-1 align-middle">
-        <div className="flex flex-col">
-          <span
-            className="truncate text-[11px] font-semibold text-wl-white"
-            title={title}
-          >
-            {title}
-          </span>
-          <span className="text-[10px] text-wl-white/80">{timeRange}</span>
-        </div>
-      </TableCell>
-      <TableCell className="w-[60px] px-2 py-1 text-right align-middle">
-        {isNowPlaying ? (
-          <span className="inline-flex shrink-0 items-center justify-end gap-1.5 rounded-full bg-wl-dark-grey/80 px-2 py-0.5 text-[10px] font-medium text-wl-white">
-            <span className="relative flex size-3">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-wl-orange opacity-75" />
-              <span className="relative inline-flex size-3 shrink-0 rounded-full bg-wl-orange" />
+      <TableCell className="min-w-0 pl-2 pr-2 py-1 align-middle whitespace-normal">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 flex-1 flex flex-col">
+            <span
+              className="break-words text-[12px] font-semibold text-wl-white leading-3.5"
+              title={title}
+            >
+              {title}
             </span>
-            Live
-          </span>
-        ) : null}
+            <span className="text-[11px] text-wl-white/80">{timeRange}</span>
+          </div>
+          {isNowPlaying ? (
+            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-wl-dark-grey/80 px-2 py-0.5 text-[10px] font-medium text-wl-white">
+              <span className="relative flex size-3">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-wl-orange opacity-75" />
+                <span className="relative inline-flex size-3 shrink-0 rounded-full bg-wl-orange" />
+              </span>
+              Live
+            </span>
+          ) : null}
+        </div>
       </TableCell>
     </TableRow>
   )
@@ -126,8 +126,8 @@ export function WtedRadioScheduleCard() {
           Upcoming Schedule
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <Table className="text-[11px] [&_tr:last-child_td]:pb-2">
+      <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
+        <Table className="w-full min-w-0 table-fixed text-[11px] [&_tr:last-child_td]:pb-2">
           <TableBody>
             {slots.map((slot) => (
               <ScheduleRow key={slot.event.event_id} slot={slot} />
