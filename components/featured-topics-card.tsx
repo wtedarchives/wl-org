@@ -30,7 +30,7 @@ const FEATURED_TOPICS = [
 ] as const
 
 const cardClassName =
-  "rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0"
+  "rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
 
 export function FeaturedTopicsCard() {
   return (
@@ -46,7 +46,7 @@ export function FeaturedTopicsCard() {
             {FEATURED_TOPICS.map((item, index) => (
               <TableRow
                 key={index}
-                className="border-wl-dark-grey/50 hover:bg-wl-dark-grey/30"
+                className="border-wl-dark-grey/50 hover:bg-[#3d4842]"
               >
                 <TableCell className="w-[66px] pl-2 pr-2 py-1 align-middle">
                   <div className="relative h-14 w-14 overflow-hidden rounded">

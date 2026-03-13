@@ -54,7 +54,7 @@ function ColumnBanner({
   )
 
   const wrapperClassName =
-    "group relative aspect-[3/1] min-h-[150px] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 lg:aspect-[16/9]"
+    "group relative aspect-[3/1] min-h-[150px] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] lg:aspect-[16/9]"
 
   if (href) {
     const isExternal = href.startsWith("http")
@@ -74,12 +74,12 @@ function ColumnBanner({
 
 export function WlHome() {
   return (
-    <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl">
+    <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green bg-[url('/bg.jpg')] bg-cover bg-center bg-fixed md:rounded-b-xl">
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6 lg:py-8">
           {/* Hero: image + text blurb above columns */}
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-6">
-            <div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 shadow-lg lg:aspect-auto lg:h-full lg:min-h-[140px] lg:w-48 xl:w-56">
+            <div className="relative aspect-[16/9] shrink-0 overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] shadow-lg lg:aspect-auto lg:h-full lg:min-h-[140px] lg:w-48 xl:w-56">
               <Image
                 src="/goose-press-2025.jpg"
                 alt="Goose press photo with confetti"
@@ -89,7 +89,7 @@ export function WlHome() {
                 priority
               />
             </div>
-            <div className="flex flex-1 flex-col justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-4">
+            <div className="flex flex-1 flex-col justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-4">
               <h1 className="mb-2 text-center text-xl font-bold text-wl-white lg:text-left lg:text-2xl">
                 Welcome to The World of TED
               </h1>
@@ -116,7 +116,7 @@ export function WlHome() {
               />
               <Link
                 href="/wted"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-wl-dark-grey/50"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
                 <span className="text-center leading-5 px-6">Listen to Goose on-demand, 24/7.</span>
                 <ExternalLink
@@ -141,7 +141,7 @@ export function WlHome() {
                 href="https://community.wysterialane.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-wl-dark-grey/50"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
                 <p className="text-center leading-5 text-wl-white px-6">
                   A community made for Goose fans, by Goose fans.
@@ -165,7 +165,7 @@ export function WlHome() {
               />
               <Link
                 href="/archive/tours"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-wl-dark-grey/50"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
                 <p className="text-center leading-5 text-wl-white">
                   The ultimate show history archive for Goose.

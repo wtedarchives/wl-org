@@ -25,7 +25,7 @@ export function ShowRow({
   showsWithReleases: Set<string>
 }) {
   return (
-    <TableRow className="border-b-0 hover:bg-wl-dark-grey/30">
+    <TableRow className="border-b-0 hover:bg-[#3d4842]">
       <TableCell className="w-[68px] px-2 py-[1px] align-middle text-[11px] font-medium tabular-nums text-wl-white/80">
         <Tooltip>
           <TooltipTrigger asChild>

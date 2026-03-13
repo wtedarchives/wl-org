@@ -23,7 +23,7 @@ function ScheduleRow({ slot }: { slot: RadioScheduleSlot }) {
   const timeRange = formatTimeRange(event.start, event.end)
 
   return (
-    <TableRow className="border-wl-dark-grey/50 hover:bg-wl-dark-grey/30">
+    <TableRow className="border-wl-dark-grey/50 hover:bg-[#3d4842]">
       <TableCell className="w-[66px] pl-2 !pr-1 py-1 align-middle">
         <div className="relative h-14 w-14 overflow-hidden rounded">
           <Image
@@ -48,7 +48,7 @@ function ScheduleRow({ slot }: { slot: RadioScheduleSlot }) {
             <span className="text-[11px] text-wl-white/80">{timeRange}</span>
           </div>
           {isNowPlaying ? (
-            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-wl-dark-grey/80 px-2 py-0.5 text-[10px] font-medium text-wl-white">
+            <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-[#2a332f] px-2 py-0.5 text-[10px] font-medium text-wl-white">
               <span className="relative flex size-3">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-wl-orange opacity-75" />
                 <span className="relative inline-flex size-3 shrink-0 rounded-full bg-wl-orange" />
@@ -63,7 +63,7 @@ function ScheduleRow({ slot }: { slot: RadioScheduleSlot }) {
 }
 
 const cardClassName =
-  "rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0"
+  "rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
 
 export function WtedRadioScheduleCard() {
   const { slots, loading, error } = useRadioSchedule()

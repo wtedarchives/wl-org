@@ -19,7 +19,7 @@ export function HomeStatsColumn() {
 
   if (!isSupabaseConfigured()) {
     return (
-      <Card className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0">
+      <Card className="rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0">
         <CardContent className="px-3 py-4 text-[11px] text-wl-white/70">
           Trouble communicating with the database server. Please reload the
           page.
