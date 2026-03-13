@@ -309,14 +309,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <SidebarMenuButton
                   tooltip="Setlist Archive"
-                  className="group-data-[state=open]:bg-sidebar-accent"
-                  onClick={() => setSetlistOpen((o) => !o)}
+                  isActive={pathname === "/archive"}
+                  className="group-data-[state=open]:bg-sidebar-accent data-[slot=sidebar-menu-button]:p-0"
+                  asChild
                 >
-                  <LibraryIcon className="size-4" />
-                  <span>Setlist Archive</span>
-                  <ChevronDownIcon
-                    className={`ml-auto size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}
-                  />
+                  <div className="flex w-full min-w-0 items-center">
+                    <Link
+                      href="/archive"
+                      className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5"
+                    >
+                      <LibraryIcon className="size-4 shrink-0" />
+                      <span>Setlist Archive</span>
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex shrink-0 items-center justify-center p-2"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setSetlistOpen((o) => !o)
+                      }}
+                      aria-label="Toggle Setlist Archive submenu"
+                    >
+                      <ChevronDownIcon
+                        className={`size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                  </div>
                 </SidebarMenuButton>
                 {setlistOpen && NAV_YEARS.length > 0 && (
                   <div className="px-2 pt-1 text-[0.625rem] font-medium text-sidebar-foreground">

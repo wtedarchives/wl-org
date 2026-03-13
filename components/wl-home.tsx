@@ -91,7 +91,7 @@ export function WlHome() {
             </div>
             <div className="flex flex-1 flex-col justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-4">
               <h1 className="mb-2 text-center text-xl font-bold text-wl-white lg:text-left lg:text-2xl">
-                Welcome to The World of TED
+                Welcome to WTED.org
               </h1>
               <p className="text-sm leading-5 text-wl-white lg:text-left">
                 <span className="font-bold">WTED.org – the World of TED</span>
@@ -116,9 +116,9 @@ export function WlHome() {
               />
               <Link
                 href="/wted"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
-                <span className="text-center leading-5 px-6">Listen to Goose on-demand, 24/7.</span>
+                <span className="text-center leading-4 px-6 -tracking-[0.02rem]">Listen to Goose on-demand, 24/7.</span>
                 <ExternalLink
                   className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
                   aria-hidden
@@ -141,9 +141,9 @@ export function WlHome() {
                 href="https://community.wysterialane.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
-                <p className="text-center leading-5 text-wl-white px-6">
+                <p className="text-center leading-4 px-6 text-wl-white -tracking-[0.02rem]">
                   A community made for Goose fans, by Goose fans.
                 </p>
                 <ExternalLink
@@ -165,9 +165,9 @@ export function WlHome() {
               />
               <Link
                 href="/archive/tours"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
-                <p className="text-center leading-5 text-wl-white">
+                <p className="text-center leading-4 px-6 text-wl-white -tracking-[0.02rem]">
                   The ultimate show history archive for Goose.
                 </p>
                 <ExternalLink

@@ -59,6 +59,7 @@ const PATH_LABELS: Record<string, string> = {
   "wted/shows": "Shows and More",
   "wted/about": "About Us and FAQ",
   support: "Support Wysteria Lane",
+  archive: "Setlist Archive",
 }
 
 /** True if segment looks like a UUID (so we show a placeholder instead of raw id in breadcrumbs). */

@@ -26,7 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { BarChart3Icon, CircleUserRoundIcon, LogOutIcon, SettingsIcon } from "lucide-react"
+import { BarChart3Icon, LogIn, LogOutIcon, SettingsIcon, User } from "lucide-react"
 
 export function NavUser() {
   const { user, signOut } = useAuth()
@@ -152,13 +152,13 @@ export function NavUser() {
               <>
                 <DropdownMenuItem asChild>
                   <Link href={loginHref} className="flex items-center gap-2">
-                    <CircleUserRoundIcon className="size-4" />
+                    <LogIn className="size-4" />
                     Sign In
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/signup" className="flex items-center gap-2">
-                    <CircleUserRoundIcon className="size-4" />
+                    <User className="size-4" />
                     Create account
                   </Link>
                 </DropdownMenuItem>
