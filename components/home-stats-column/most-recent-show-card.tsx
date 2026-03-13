@@ -51,13 +51,13 @@ export function MostRecentShowCard() {
 
   if (loadingMostRecent) {
     return (
-      <Card className="rounded-xl border border-wl-dark-grey/50 bg-card/95 py-0 text-xs shadow-sm ring-0">
-        <CardHeader className="border-b border-border py-2">
-          <CardTitle className="text-[13px] font-semibold">
+      <Card className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0">
+        <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+          <CardTitle className="text-[13px] font-semibold text-wl-white">
             Most Recent Show
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-3 py-6 text-center text-[11px] text-muted-foreground">
+        <CardContent className="px-3 py-6 text-center text-[11px] text-wl-white/70">
           Loading show…
         </CardContent>
       </Card>
@@ -66,13 +66,13 @@ export function MostRecentShowCard() {
 
   if (!mostRecentShow) {
     return (
-      <Card className="rounded-xl border border-wl-dark-grey/50 bg-card/95 py-0 text-xs shadow-sm ring-0">
-        <CardHeader className="border-b border-border py-2">
-          <CardTitle className="text-[13px] font-semibold">
+      <Card className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0">
+        <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+          <CardTitle className="text-[13px] font-semibold text-wl-white">
             Most Recent Show
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-3 py-4 text-center text-[11px] text-muted-foreground">
+        <CardContent className="px-3 py-4 text-center text-[11px] text-wl-white/70">
           No recent shows found.
         </CardContent>
       </Card>
@@ -80,14 +80,14 @@ export function MostRecentShowCard() {
   }
 
   return (
-    <Card className="rounded-xl border border-wl-dark-grey/50 bg-card/95 py-0 text-xs shadow-sm ring-0">
-      <CardHeader className="border-b border-border py-2">
-        <CardTitle className="text-[13px] font-semibold">
+    <Card className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0">
+      <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+        <CardTitle className="text-[13px] font-semibold text-wl-white">
           Most Recent Show
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2 px-3 py-2">
-        <div className="text-[11px] leading-tight text-foreground">
+        <div className="text-[11px] leading-tight text-wl-white">
           <div className="flex items-center justify-between gap-2">
             <div>
               <Link
@@ -180,17 +180,17 @@ export function MostRecentShowCard() {
               ) : null}
             </div>
           </div>
-          <div className="mt-0.5 text-[11px] text-muted-foreground">
+          <div className="mt-0.5 text-[11px] text-wl-white/80">
             {mostRecentShow.show_group}
           </div>
         </div>
 
         {loadingSetlist ? (
-          <div className="py-3 text-center text-[11px] text-muted-foreground">
+          <div className="py-3 text-center text-[11px] text-wl-white/70">
             Loading setlist…
           </div>
         ) : setlist.length > 0 ? (
-          <div className="space-y-1 rounded-md border border-wl-dark-grey/50 bg-wl-dark-grey/30 px-2 py-2 mb-1">
+          <div className="space-y-[1px] rounded-md border border-wl-dark-grey/50 bg-wl-dark-grey/30 px-2 py-2 mb-1">
             {setlist.map((entry, index) => {
               const prev = index > 0 ? setlist[index - 1] : null
               const isNewSet = prev && prev.entry_set !== entry.entry_set
@@ -200,7 +200,7 @@ export function MostRecentShowCard() {
               return (
                 <div key={`${entry.entry_song}-${index}`}>
                   {isNewSet && <hr className="my-1 border-wl-dark-grey/50" />}
-                  <div className="flex items-center text-[11px] text-foreground">
+                  <div className="flex items-center text-[11px] text-wl-white">
                     <div
                       className="w-1 rounded-sm text-center"
                       style={{ backgroundColor: placementColor }}
@@ -234,7 +234,7 @@ export function MostRecentShowCard() {
             })}
           </div>
         ) : (
-          <div className="py-2 text-center text-[11px] text-muted-foreground">
+          <div className="py-2 text-center text-[11px] text-wl-white/70">
             Setlist not available.
           </div>
         )}

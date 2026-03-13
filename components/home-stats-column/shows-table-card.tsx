@@ -23,17 +23,17 @@ export function ShowsTableCard({
   )
 
   return (
-    <Card className="rounded-xl border border-wl-dark-grey/50 bg-card/95 py-0 text-xs shadow-sm ring-0">
-      <CardHeader className="border-b border-border py-2">
-        <CardTitle className="text-[13px] font-semibold">{title}</CardTitle>
+    <Card className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 py-0 text-xs shadow-sm ring-0">
+      <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+        <CardTitle className="text-[13px] font-semibold text-wl-white">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
-          <div className="flex items-center justify-center px-3 py-6 text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-center px-3 py-6 text-[11px] text-wl-white/70">
             Loading shows…
           </div>
         ) : shows.length === 0 ? (
-          <div className="px-3 py-3 text-center text-[11px] text-muted-foreground">
+          <div className="px-3 py-3 text-center text-[11px] text-wl-white/70">
             {emptyMessage ?? "No shows found."}
           </div>
         ) : (

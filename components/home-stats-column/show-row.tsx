@@ -25,8 +25,8 @@ export function ShowRow({
   showsWithReleases: Set<string>
 }) {
   return (
-    <TableRow className="border-border">
-      <TableCell className="w-[68px] px-2 py-1 align-middle text-[11px] font-medium tabular-nums text-muted-foreground">
+    <TableRow className="border-b-0 hover:bg-wl-dark-grey/30">
+      <TableCell className="w-[68px] px-2 py-[1px] align-middle text-[11px] font-medium tabular-nums text-wl-white/80">
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
@@ -53,7 +53,7 @@ export function ShowRow({
           </TooltipContent>
         </Tooltip>
       </TableCell>
-      <TableCell className="px-2 py-1 align-middle text-[11px] leading-tight text-foreground">
+      <TableCell className="px-2 py-[1px] align-middle text-[11px] leading-tight text-wl-white">
         <Tooltip>
           <TooltipTrigger asChild>
             {show.venue_id ? (
@@ -74,7 +74,7 @@ export function ShowRow({
           )}
         </Tooltip>
       </TableCell>
-      <TableCell className="w-[18px] px-0 py-1 text-center align-middle">
+      <TableCell className="w-[18px] px-0 py-[1px] text-center align-middle">
         {showsWithSetlists.has(show.show_id) ? (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -90,7 +90,7 @@ export function ShowRow({
           <span className="inline-block size-3.5" aria-hidden />
         )}
       </TableCell>
-      <TableCell className="w-[18px] px-0 py-1 text-center align-middle">
+      <TableCell className="w-[18px] px-0 py-[1px] text-center align-middle">
         {showsWithReleases.has(show.show_id) ? (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -109,7 +109,7 @@ export function ShowRow({
           <span className="inline-block size-3.5" aria-hidden />
         )}
       </TableCell>
-      <TableCell className="w-[18px] px-0 py-1 text-center align-middle">
+      <TableCell className="w-[18px] px-0 py-[1px] text-center align-middle">
         {show.show_wl_link ? (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -136,7 +136,7 @@ export function ShowRow({
           <span className="inline-block size-3.5" aria-hidden />
         )}
       </TableCell>
-      <TableCell className="w-[32px] px-0 py-1 text-center align-middle">
+      <TableCell className="w-[32px] px-0 py-[1px] text-center align-middle">
         {show.show_group === "Goose" ? (
           <Tooltip>
             <TooltipTrigger asChild>

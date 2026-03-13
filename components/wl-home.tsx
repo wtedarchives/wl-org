@@ -46,15 +46,14 @@ function ColumnBanner({
             className="h-16 w-auto object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:h-20"
           />
         ) : null}
-        <span className="text-2xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-          {label}
+        <span className="text-center text-2xl font-semibold leading-6 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">          {label}
         </span>
       </div>
     </>
   )
 
   const wrapperClassName =
-    "group relative aspect-[3/1] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 lg:aspect-[16/9]"
+    "group relative aspect-[3/1] min-h-[150px] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 lg:aspect-[16/9]"
 
   if (href) {
     const isExternal = href.startsWith("http")
@@ -116,9 +115,9 @@ export function WlHome() {
               />
               <Link
                 href="/wted"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-colors hover:bg-wl-dark-grey/50"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-wl-dark-grey/50"
               >
-                <span className="text-center">Listen to Goose on-demand, 24/7.</span>
+                <span className="text-center leading-5 px-6">Listen to Goose on-demand, 24/7.</span>
                 <ExternalLink
                   className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
                   aria-hidden
@@ -137,11 +136,20 @@ export function WlHome() {
                 dim
                 logoSrc="/WL.png"
               />
-              <div className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2">
-                <p className="text-center text-sm text-wl-white">
+              <Link
+                href="https://community.wysterialane.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-wl-dark-grey/50"
+              >
+                <p className="text-center leading-5 text-wl-white px-6">
                   A community made for Goose fans, by Goose fans.
                 </p>
-              </div>
+                <ExternalLink
+                  className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
+                  aria-hidden
+                />
+              </Link>
             </div>
 
             {/* Right: Setlist Archive - full width below WTED+Community when viewport < xl */}
@@ -153,11 +161,18 @@ export function WlHome() {
                 href="/archive/tours"
                 logoSrc="/wted-sa-cropped.png"
               />
-              <div className="rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2">
-                <p className="text-center text-sm text-wl-white">
+              <Link
+                href="/archive/tours"
+                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-wl-dark-grey/40 p-2 text-sm text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-wl-dark-grey/50"
+              >
+                <p className="text-center leading-5 text-wl-white">
                   The ultimate show history archive for Goose.
                 </p>
-              </div>
+                <ExternalLink
+                  className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
+                  aria-hidden
+                />
+              </Link>
               <HomeStatsColumn />
             </aside>
           </div>
