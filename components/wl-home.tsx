@@ -160,11 +160,11 @@ export function WlHome() {
                 src="/archive-banner.jpg"
                 alt="Setlist Archive"
                 label="Setlist Archive"
-                href="/archive/tours"
+                href="/archive"
                 logoSrc="/wted-sa-cropped.png"
               />
               <Link
-                href="/archive/tours"
+                href="/archive"
                 className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
               >
                 <p className="text-center leading-4 px-6 text-wl-white -tracking-[0.02rem]">
