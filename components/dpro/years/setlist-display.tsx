@@ -80,7 +80,7 @@ export function SetlistDisplay({
               <div className="flex flex-1 items-center justify-between pl-2">
                 <span className="flex items-center gap-1">
                   <Link
-                    href={`/archive/songs/${entry.songs.song_id}`}
+                    href={`/archive/song/${entry.songs.song_id}`}
                     className="text-[11px] font-medium hover:underline"
                   >
                     <SongDisplayName

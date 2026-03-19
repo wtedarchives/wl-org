@@ -136,20 +136,25 @@ export function ShowModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>
-            {isNewShow ? "Add New Show" : "Edit Show"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <Button size="sm" onClick={handleSubmit} disabled={isSubmitting}>
-            <Save className="size-4" />
-            {isSubmitting && "..."}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </Button>
+      <DialogContent
+        className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl"
+        showCloseButton={false}
+      >
+        <div className="flex items-center justify-between">
+          <DialogHeader>
+            <DialogTitle>
+              {isNewShow ? "Add New Show" : "Edit Show"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSubmit} disabled={isSubmitting}>
+              <Save className="size-4" />
+              {isSubmitting && "..."}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="size-4" />
+            </Button>
+          </div>
         </div>
         {errors.submit && (
           <div className="rounded border border-destructive/50 bg-destructive/10 px-2 py-1 text-xs text-destructive">

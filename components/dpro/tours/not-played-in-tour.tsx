@@ -193,7 +193,7 @@ export function NotPlayedInTour({
                       <td className="pl-3 py-0.5">
                         <div className="flex items-center justify-between gap-2">
                           <Link
-                            href={`/archive/songs/${song.song_id}`}
+                            href={`/archive/song/${song.song_id}`}
                             className="font-medium text-foreground hover:underline underline-offset-4"
                           >
                             <SongDisplayName

@@ -210,7 +210,7 @@ export function MostRecentShowCard() {
                     <div className="flex flex-1 items-center justify-between gap-2 pl-2">
                       <span className="truncate font-medium">
                         <Link
-                          href={`/archive/songs/${entry.songs?.song_id}`}
+                          href={`/archive/song/${entry.songs?.song_id}`}
                           className="hover:underline"
                         >
                           <SongDisplayName
