@@ -99,6 +99,7 @@ export default function VenueDetailPage({
         <VenueHeader
           venueName={venueName}
           venueLocation={venue.venue_location}
+          onSearchOpenChange={setIsSearchOpen}
         />
       </div>
       {hasMap ? (

@@ -182,7 +182,7 @@ export function NotPlayedInTour({
               No historical songs to display.
             </div>
           ) : (
-            <div className="overflow-y-auto max-h-64">
+            <div>
               <table className="w-full border-collapse text-xs">
                 <tbody>
                   {notPlayedSongs.map((song) => (

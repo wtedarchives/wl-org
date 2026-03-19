@@ -123,7 +123,7 @@ export function LongestSongs({
             Song times for this tour are unknown.
           </div>
         ) : (
-          <div className="overflow-hidden">
+          <div className="min-w-0 overflow-x-auto">
             <table className="w-full border-collapse min-w-max text-xs">
               <tbody>
                 {longestSongs.map((song, i) => (

@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import type { Tour } from "@/hooks/use-setlist-data"
 
 interface SetlistTourDropdownProps {
@@ -14,6 +15,8 @@ interface SetlistTourDropdownProps {
   currentTourId: string
   currentTourName: string | null
   onTourSelect: (tourId: string) => void
+  /** Optional className for the SelectTrigger (e.g. for truncation in mobile) */
+  triggerClassName?: string
 }
 
 export function SetlistTourDropdown({
@@ -21,6 +24,7 @@ export function SetlistTourDropdown({
   currentTourId,
   currentTourName,
   onTourSelect,
+  triggerClassName,
 }: SetlistTourDropdownProps) {
   if (tours.length === 0) {
     return (
@@ -35,7 +39,10 @@ export function SetlistTourDropdown({
       value={currentTourId || undefined}
       onValueChange={(value) => value && onTourSelect(value)}
     >
-      <SelectTrigger size="sm" className="h-7 w-auto min-w-[120px] text-xs">
+      <SelectTrigger
+        size="sm"
+        className={cn("h-7 w-auto min-w-[120px] text-xs", triggerClassName)}
+      >
         <SelectValue placeholder="Tour" />
       </SelectTrigger>
       <SelectContent>

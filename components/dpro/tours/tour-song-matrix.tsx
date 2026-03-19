@@ -89,7 +89,7 @@ export function TourSongMatrix({
 
   if (isFiltering || isLoading) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/80 p-4">
+      <div className="rounded-lg border border-[#232325] bg-card/80 p-4">
         <div className="flex justify-center items-center h-40 text-muted-foreground text-sm">
           Loading song matrix…
         </div>
@@ -99,7 +99,7 @@ export function TourSongMatrix({
 
   if (errorMessage) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/80 p-4">
+      <div className="rounded-lg border border-[#232325] bg-card/80 p-4">
         <div className="text-center py-6 text-destructive">{errorMessage}</div>
       </div>
     )
@@ -107,7 +107,7 @@ export function TourSongMatrix({
 
   if (songMatrix.songs.length === 0) {
     return (
-      <div className="rounded-lg border border-border/60 bg-card/80 p-4">
+      <div className="rounded-lg border border-[#232325] bg-card/80 p-4">
         <div className="text-center py-6 text-muted-foreground">
           No song data available for this tour
         </div>
@@ -116,7 +116,7 @@ export function TourSongMatrix({
   }
 
   return (
-    <div className={!hideTitle ? "rounded-lg border border-border/60 bg-card/80 p-3" : ""}>
+    <div className={!hideTitle ? "rounded-lg border border-[#232325] bg-card/80 p-3" : ""}>
       {!hideTitle && (
         <h2 className="text-lg font-semibold mb-4">
           {songMatrix.songs.length} Songs Played
@@ -125,7 +125,7 @@ export function TourSongMatrix({
       <div className="overflow-x-auto overflow-y-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/50">
+            <TableRow className="border-[#232325] bg-muted/50">
               <TableHead className="pl-3 py-1.5 text-left text-xs font-medium bg-muted/50">
                 Song
               </TableHead>
@@ -150,7 +150,7 @@ export function TourSongMatrix({
               return (
                 <TableRow
                   key={song}
-                  className="bg-background/70 hover:bg-muted/40"
+                  className="border-[#232325] bg-background/70 hover:bg-muted/40"
                 >
                   <TableCell className="font-medium text-xs pl-3 py-0.5 whitespace-nowrap">
                     <button
@@ -178,7 +178,7 @@ export function TourSongMatrix({
                     return (
                       <TableCell
                         key={`${song}-${show.show_id}`}
-                        className="text-center border-x border-border p-0"
+                        className="text-center border-x border-[#232325] p-0"
                         style={{
                           backgroundColor: bg || undefined,
                           minWidth: "3rem",

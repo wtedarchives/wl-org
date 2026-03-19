@@ -159,7 +159,7 @@ export function useVenueData(venueId: string | undefined) {
             `
             )
             .in("show_subvenue", subvenueNames)
-            .order("show_date", { ascending: false })
+            .order("show_date", { ascending: true })
             .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
           if (showsError) throw showsError

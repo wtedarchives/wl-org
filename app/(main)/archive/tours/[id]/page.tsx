@@ -14,7 +14,7 @@ import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 
 const DESKTOP_MIN_WIDTH = 1280
 
@@ -266,6 +266,7 @@ export default function TourPage({
           className="max-h-[85vh] flex flex-col rounded-t-none overflow-hidden"
           showCloseButton={false}
         >
+          <SheetTitle className="sr-only">Tours</SheetTitle>
           <button
             type="button"
             onClick={() => setToursSheetOpen(false)}
