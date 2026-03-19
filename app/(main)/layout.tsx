@@ -1,4 +1,5 @@
 import { AppSidebarClient } from "@/components/app-sidebar-client"
+import { MobileRadioBar } from "@/components/mobile-radio-bar"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 import { SiteHeader } from "@/components/site-header"
 import { YearBreadcrumbProvider } from "@/components/year-breadcrumb-context"
@@ -24,6 +25,7 @@ export default function MainLayout({
       <SidebarInset>
         <YearBreadcrumbProvider>
           <SetlistBreadcrumbProvider>
+            <MobileRadioBar />
             <SiteHeader />
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
               {children}

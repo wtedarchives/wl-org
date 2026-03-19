@@ -35,6 +35,8 @@ import {
   CircleDollarSignIcon,
   ChevronDownIcon,
 } from "lucide-react"
+import { RadioEmbed } from "@/components/radio-embed"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const WTED_RADIO_SUB = [
   { title: "WTED Info", url: "/wted/info" },
@@ -128,6 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(isAdminPath)
+  const isMobile = useIsMobile()
 
   // Keep the group expanded when the user is viewing a page in that group
   useEffect(() => {
@@ -444,14 +447,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <div className="w-full border-t border-sidebar-border px-2 py-2">
-          <iframe
-            src="https://www.coreyterrell.com/assets/external/radio.html"
-            title="WTED Radio"
-            className="w-full rounded-md border-0"
-            style={{ height: "66px" }}
-          />
-        </div>
+        {!isMobile && (
+          <div className="w-full border-t border-sidebar-border px-2 py-2">
+            <RadioEmbed />
+          </div>
+        )}
       </SidebarContent>
       <SidebarFooter className="pt-0 pb-2">
         <NavUser />
