@@ -9,7 +9,7 @@ import { FlodownEventsCard } from "@/components/flodown-events-card"
 import { MostRecentShowCard } from "@/components/home-stats-column/most-recent-show-card"
 import { ShowsTableCard } from "@/components/home-stats-column/shows-table-card"
 
-function SetlistStackedContent() {
+function SetlistSectionContent() {
   const {
     recentShows,
     upcomingShows,
@@ -27,25 +27,49 @@ function SetlistStackedContent() {
     )
   }
 
+  const last5 = (
+    <ShowsTableCard
+      title="Last 5 Shows"
+      shows={recentShows}
+      loading={loading}
+    />
+  )
+  const mostRecent = <MostRecentShowCard />
+  const next5 = (
+    <ShowsTableCard
+      title="Next 5 Shows"
+      shows={upcomingShows}
+      loading={loadingUpcoming}
+    />
+  )
+  const thisDay = (
+    <ShowsTableCard
+      title="This Day in Goose History"
+      shows={historicalShows}
+      loading={loadingHistorical}
+      emptyMessage="No shows occurred on this date in Goose history."
+    />
+  )
+
   return (
-    <div className="flex min-h-0 flex-col gap-4">
-      <ShowsTableCard
-        title="Last 5 Shows"
-        shows={recentShows}
-        loading={loading}
-      />
-      <ShowsTableCard
-        title="Next 5 Shows"
-        shows={upcomingShows}
-        loading={loadingUpcoming}
-      />
-      <ShowsTableCard
-        title="This Day in Goose History"
-        shows={historicalShows}
-        loading={loadingHistorical}
-        emptyMessage="No shows occurred on this date in Goose history."
-      />
-    </div>
+    <>
+      {/* Mobile: order 1 */}
+      <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-start-1">
+        {last5}
+      </div>
+      {/* Mobile: order 2 */}
+      <div className="flex min-h-0 flex-col lg:col-start-3 lg:row-start-1">
+        {mostRecent}
+      </div>
+      {/* Mobile: order 3 */}
+      <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-start-2">
+        {next5}
+      </div>
+      {/* Mobile: order 4 */}
+      <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-start-3">
+        {thisDay}
+      </div>
+    </>
   )
 }
 
@@ -72,24 +96,21 @@ export function CommunityArchiveSection() {
         </div>
       </div>
 
-      {/* Setlist: 3 columns – header, stacked shows, Most Recent Show */}
+      {/* Setlist: mobile order Last 5 → Most Recent → Next 5 → This Day; desktop 3-col grid */}
       <TooltipProvider>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <ColumnBanner
-            src="/archive-banner.jpg"
-            alt="Setlist Archive"
-            label="Setlist Archive"
-            description="The ultimate show history archive for Goose."
-            href="/archive"
-            mutedBg
-            logoSrc="/wted-sa-cropped-2.png"
-          />
-          <div className="flex min-h-0 flex-col">
-            <SetlistStackedContent />
+        <div className="grid grid-cols-1 grid-rows-[auto_auto_auto_auto_auto] gap-6 lg:grid-cols-3 lg:grid-rows-[auto_auto_auto]">
+          <div className="lg:row-span-3">
+            <ColumnBanner
+              src="/archive-banner.jpg"
+              alt="Setlist Archive"
+              label="Setlist Archive"
+              description="The ultimate show history archive for Goose."
+              href="/archive"
+              mutedBg
+              logoSrc="/wted-sa-cropped-2.png"
+            />
           </div>
-          <div className="flex min-h-0 flex-col">
-            <MostRecentShowCard />
-          </div>
+          <SetlistSectionContent />
         </div>
       </TooltipProvider>
     </div>

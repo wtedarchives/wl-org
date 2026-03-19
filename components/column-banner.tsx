@@ -127,7 +127,7 @@ export function ColumnBanner({
     return (
       <Link
         href={href}
-        className={`${wrapperClassName} h-full min-h-0 flex-col`}
+        className={`${wrapperClassName} flex min-h-[140px] flex-col lg:min-h-0 lg:h-full`}
         {...(isExternal && { target: "_blank", rel: "noopener noreferrer" })}
       >
         {content}
@@ -136,7 +136,7 @@ export function ColumnBanner({
   }
 
   return (
-    <div className={`${wrapperClassName} h-full min-h-0 flex-col`}>
+    <div className={`${wrapperClassName} flex min-h-[140px] flex-col lg:min-h-0 lg:h-full`}>
       {content}
     </div>
   )
