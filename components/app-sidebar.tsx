@@ -27,10 +27,8 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import {
-  MessageSquareIcon,
   MessageCircle,
   BookOpenIcon,
-  LibraryIcon,
   LinkIcon,
   CircleDollarSignIcon,
   ChevronDownIcon,
@@ -237,7 +235,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-2"
                   >
-                    <MessageSquareIcon className="size-4" />
+                    <Image
+                      src="/WL.png"
+                      alt=""
+                      width={16}
+                      height={16}
+                      className="size-4 shrink-0 object-contain"
+                    />
                     <span>Community Forum</span>
                   </a>
                 </SidebarMenuButton>
@@ -321,7 +325,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       href="/archive"
                       className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5"
                     >
-                      <LibraryIcon className="size-4 shrink-0" />
+                      <Image
+                        src="/wted-sa-cropped-2.png"
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="size-4 shrink-0 object-contain"
+                      />
                       <span>Setlist Archive</span>
                     </Link>
                     <button
