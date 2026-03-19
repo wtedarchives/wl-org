@@ -8,11 +8,13 @@ import {
   ArrowRight,
   Building2,
   Calendar,
+  CircleEllipsis,
   Guitar,
   Info,
   Link as LinkIcon,
   MapPin,
   Pencil,
+  TriangleAlert,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Show, ShowDate } from "@/types/setlist"
@@ -219,13 +221,15 @@ export function SetlistPageHeader({
           )}
           {show.show_detail && (
             <span
-              className={`${pillBaseMobile} bg-wl-orange/80 text-foreground`}
+              className={`inline-flex items-center gap-1 ${pillBaseMobile} bg-wl-orange/80 text-foreground`}
             >
+              <CircleEllipsis className="size-3 shrink-0" />
               {show.show_detail}
             </span>
           )}
           {show.show_alert && (
-            <span className="rounded-full border border-red-500/60 bg-red-500/15 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-red-500/60 bg-red-500/15 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-400">
+              <TriangleAlert className="size-3 shrink-0" />
               {show.show_alert}
             </span>
           )}
@@ -388,12 +392,14 @@ export function SetlistPageHeader({
           </span>
         )}
         {show.show_detail && (
-          <span className="rounded-full border border-border bg-wl-orange/80 px-2.5 py-1 text-xs font-medium text-foreground">
+          <span className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-orange/80 px-2.5 py-1 text-xs font-medium text-foreground">
+            <CircleEllipsis className="size-3 shrink-0" />
             {show.show_detail}
           </span>
         )}
         {show.show_alert && (
-          <span className="rounded-full border border-red-500/60 bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+          <span className="inline-flex items-center gap-1 rounded-full border border-red-500/60 bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-700 dark:text-red-400">
+            <TriangleAlert className="size-3 shrink-0" />
             {show.show_alert}
           </span>
         )}
