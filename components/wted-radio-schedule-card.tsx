@@ -72,7 +72,7 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
   if (loading) {
     return (
       <Card className={mergedClassName}>
-        <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+        <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
           <CardTitle className="text-[13px] font-semibold text-wl-white">
             Upcoming Schedule
           </CardTitle>
@@ -89,7 +89,7 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
   if (error) {
     return (
       <Card className={mergedClassName}>
-        <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+        <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
           <CardTitle className="text-[13px] font-semibold text-wl-white">
             Upcoming Schedule
           </CardTitle>
@@ -106,7 +106,7 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
   if (slots.length === 0) {
     return (
       <Card className={mergedClassName}>
-        <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+        <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
           <CardTitle className="text-[13px] font-semibold text-wl-white">
             Upcoming Schedule
           </CardTitle>
@@ -122,7 +122,7 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
 
   return (
     <Card className={mergedClassName}>
-      <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+      <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
         <CardTitle className="text-[13px] font-semibold text-wl-white">
           Upcoming Schedule
         </CardTitle>

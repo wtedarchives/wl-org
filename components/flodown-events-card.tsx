@@ -24,12 +24,12 @@ function CalendarIcon({ month, date }: { month: string; date: string }) {
 }
 
 const cardClassName =
-  "rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
+  "rounded-xl border border-wl-dark-grey/50 bg-[#844b45] py-0 text-xs shadow-sm ring-0"
 
 export function FlodownEventsCard() {
   return (
     <Card className={cardClassName}>
-      <CardHeader className="border-b border-wl-dark-grey/50 py-2">
+      <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-[#b2655e]">
         <CardTitle className="text-[13px] font-semibold text-wl-white">
           Upcoming Community Events
         </CardTitle>
@@ -40,7 +40,7 @@ export function FlodownEventsCard() {
             {FLODOWN_EVENTS.map((item, index) => (
               <TableRow
                 key={index}
-                className="border-wl-dark-grey/50 hover:bg-[#3d4842]"
+                className="border-wl-dark-grey/40 hover:bg-[#b2655e]"
               >
                 <TableCell className="w-[66px] pl-2 pr-2 py-1 align-middle">
                   <CalendarIcon month={item.month} date={item.date} />

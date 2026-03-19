@@ -10,7 +10,7 @@ const cardClassName =
 export function WtedRequestSongCard() {
   return (
     <Card className={cardClassName}>
-      <CardHeader className="shrink-0 border-b border-wl-dark-grey/50 py-2">
+      <CardHeader className="shrink-0 border-b border-wl-dark-grey/50 py-2 bg-black/30">
         <CardTitle className="text-[13px] font-semibold text-wl-white">
           Request a Song
         </CardTitle>

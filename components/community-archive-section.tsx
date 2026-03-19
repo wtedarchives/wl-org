@@ -58,7 +58,7 @@ function SetlistSectionContent() {
         {last5}
       </div>
       {/* Mobile: order 2 */}
-      <div className="flex min-h-0 flex-col lg:col-start-3 lg:row-start-1">
+      <div className="flex min-h-0 flex-col lg:col-start-3 lg:row-span-3 lg:row-start-1">
         {mostRecent}
       </div>
       {/* Mobile: order 3 */}
@@ -98,7 +98,7 @@ export function CommunityArchiveSection() {
 
       {/* Setlist: mobile order Last 5 → Most Recent → Next 5 → This Day; desktop 3-col grid */}
       <TooltipProvider>
-        <div className="grid grid-cols-1 grid-rows-[auto_auto_auto_auto_auto] gap-6 lg:grid-cols-3 lg:grid-rows-[auto_auto_auto]">
+        <div className="grid grid-cols-1 grid-rows-[auto_auto_auto_auto_auto] gap-6 lg:grid-cols-3 lg:grid-rows-[auto_auto_auto] lg:gap-x-6 lg:gap-y-3">
           <div className="lg:row-span-3">
             <ColumnBanner
               src="/archive-banner.jpg"
