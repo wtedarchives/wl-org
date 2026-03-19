@@ -2,75 +2,11 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ExternalLink } from "lucide-react"
 
-import { FeaturedTopicsCard } from "@/components/featured-topics-card"
-import { HomeStatsColumn } from "@/components/home-stats-column"
+import { ColumnBanner } from "@/components/column-banner"
+import { CommunityArchiveSection } from "@/components/community-archive-section"
 import { WtedRadioScheduleCard } from "@/components/wted-radio-schedule-card"
-
-function ColumnBanner({
-  src,
-  alt,
-  label,
-  href,
-  dim = false,
-  logoSrc,
-}: {
-  src: string
-  alt: string
-  label: string
-  href?: string
-  dim?: boolean
-  logoSrc?: string
-}) {
-  const brightnessClasses = dim
-    ? "brightness-[0.55] group-hover:brightness-[0.75]"
-    : "brightness-90 group-hover:brightness-95"
-
-  const inner = (
-    <>
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 50vw, 33vw"
-        className={`object-cover grayscale transition-all duration-300 ease-out group-hover:scale-105 group-hover:blur-[1px] group-hover:grayscale-0 ${brightnessClasses}`}
-        unoptimized
-      />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-        {logoSrc ? (
-          <Image
-            src={logoSrc}
-            alt=""
-            width={80}
-            height={80}
-            className="h-16 w-auto object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:h-20"
-          />
-        ) : null}
-        <span className="text-center text-2xl font-semibold leading-6 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">          {label}
-        </span>
-      </div>
-    </>
-  )
-
-  const wrapperClassName =
-    "group relative aspect-[3/1] min-h-[150px] w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] lg:aspect-[16/9]"
-
-  if (href) {
-    const isExternal = href.startsWith("http")
-    return (
-      <Link
-        href={href}
-        className={wrapperClassName}
-        {...(isExternal && { target: "_blank", rel: "noopener noreferrer" })}
-      >
-        {inner}
-      </Link>
-    )
-  }
-
-  return <div className={wrapperClassName}>{inner}</div>
-}
+import { WtedRequestSongCard } from "@/components/wted-request-song-card"
 
 export function WlHome() {
   return (
@@ -95,89 +31,97 @@ export function WlHome() {
               </h1>
               <p className="text-sm leading-5 text-wl-white lg:text-left">
                 <span className="font-bold">WTED.org – the World of TED</span>
-                , is the online home for a fan site
-                and streaming radio station for the band Goose. WTED.org manages
-                and operates WTED Goose Radio, the WTED.org Community, and a
-                comprehensive setlist archive, all available free of charge.
+                , is the home for WTED Goose Radio, a 24/7 radio station dedicated to Goose music. 
+                Join us in the WTED.org Community Forum, and explore our
+                comprehensive Setlist Archive, all available free of charge.
               </p>
             </div>
           </div>
 
-          {/* Columns: stacked < lg, 2 cols (WTED+Community) + Setlist below at lg–xl, 3 cols at xl+ */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start xl:grid-cols-3 xl:gap-6">
-            {/* Left: WTED Radio */}
-            <aside className="flex flex-col gap-3 xl:order-1">
-              <ColumnBanner
-                src="/wted-radio-banner.jpg"
-                alt="WTED Radio"
-                label="WTED Radio"
-                href="/wted"
-                logoSrc="/WTED3.png"
-              />
+          {/* Radio section: full-width hero, then Schedule | Request, then Explore links */}
+          <section className="mb-6 flex flex-col gap-3">
+            <ColumnBanner
+              src="/wted-radio-banner.jpg"
+              alt="WTED Radio"
+              label="WTED Goose Radio"
+              description="Listen to Goose on-demand, 24/7."
+              href="/wted"
+              mutedBg
+              logoSrc="/WTED3.png"
+              rightContent={
+                <>
+                  <a
+                    href="https://apps.apple.com/us/app/wted-goose-radio/id6476207418"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-[50px] w-full max-w-[140px] shrink-0 items-center justify-center transition-transform duration-300 hover:scale-105 sm:h-[66px] xl:max-w-[180px]"
+                  >
+                    <Image
+                      src="/app-store-badge.svg"
+                      alt="Download on the App Store"
+                      width={120}
+                      height={40}
+                      className="h-full w-full object-contain object-center shadow-xl"
+                    />
+                  </a>
+                  <a
+                    href="https://play.google.com/store/apps/details?id=com.m92a0e1796e8f.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-[50px] w-full max-w-[140px] shrink-0 items-center justify-center transition-transform duration-300 hover:scale-105 sm:h-[66px] xl:max-w-[180px]"
+                  >
+                    <Image
+                      src="/google-play-badge.svg"
+                      alt="Get it on Google Play"
+                      width={135}
+                      height={40}
+                      className="h-full w-full object-contain object-center shadow-xl"
+                    />
+                  </a>
+                </>
+              }
+            />
+            <div className="flex flex-col divide-y divide-wl-dark-grey/50 overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] sm:flex-row sm:divide-x sm:divide-y-0">
+              <span className="flex flex-1 items-center justify-center bg-wl-orange/80 px-4 py-2 text-center text-[13px] font-semibold text-wl-white">
+                Explore WTED Radio
+              </span>
               <Link
-                href="/wted"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
+                href="/wted/info"
+                className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
               >
-                <span className="text-center leading-4 px-6 -tracking-[0.02rem]">Listen to Goose on-demand, 24/7.</span>
-                <ExternalLink
-                  className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
-                  aria-hidden
-                />
+                WTED Info
               </Link>
-              <WtedRadioScheduleCard />
-            </aside>
-
-            {/* Center: Community Forum */}
-            <div className="flex flex-1 flex-col gap-3 xl:order-2">
-              <ColumnBanner
-                src="/community-banner.jpg"
-                alt="Community Forum"
-                label="Community Forum"
-                href="https://community.wysterialane.org"
-                dim
-                logoSrc="/WL.png"
-              />
               <Link
-                href="https://community.wysterialane.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
+                href="/wted/gorps"
+                className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
               >
-                <p className="text-center leading-4 px-6 text-wl-white -tracking-[0.02rem]">
-                  A community made for Goose fans, by Goose fans.
-                </p>
-                <ExternalLink
-                  className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
-                  aria-hidden
-                />
+                GORPs and Contributors
               </Link>
-              <FeaturedTopicsCard />
+              <Link
+                href="/wted/shows"
+                className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
+              >
+                Shows and More
+              </Link>
+              <Link
+                href="/wted/about"
+                className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
+              >
+                About Us and FAQ
+              </Link>
             </div>
+            <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-2">
+              <div className="flex min-h-0 flex-col">
+                <WtedRadioScheduleCard className="h-full flex flex-col min-h-0" />
+              </div>
+              <div className="flex min-h-0 flex-col">
+                <WtedRequestSongCard />
+              </div>
+            </div>
+          </section>
 
-            {/* Right: Setlist Archive - full width below WTED+Community when viewport < xl */}
-            <aside className="col-span-1 flex flex-col gap-3 lg:col-span-2 xl:col-span-1 xl:order-3">
-              <ColumnBanner
-                src="/archive-banner.jpg"
-                alt="Setlist Archive"
-                label="Setlist Archive"
-                href="/archive"
-                logoSrc="/wted-sa-cropped.png"
-              />
-              <Link
-                href="/archive"
-                className="group relative flex items-center justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-2 text-sm font-semibold text-wl-white transition-all duration-200 hover:scale-[1.02] hover:bg-[#3d4842]"
-              >
-                <p className="text-center leading-4 px-6 text-wl-white -tracking-[0.02rem]">
-                  The ultimate show history archive for Goose.
-                </p>
-                <ExternalLink
-                  className="absolute right-2 top-1/2 size-4 -translate-y-1/2"
-                  aria-hidden
-                />
-              </Link>
-              <HomeStatsColumn />
-            </aside>
-          </div>
+          {/* Community and Archive: left headers, right carousels */}
+          <CommunityArchiveSection />
         </div>
       </main>
     </div>

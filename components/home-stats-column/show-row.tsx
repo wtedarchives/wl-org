@@ -146,7 +146,7 @@ export function ShowRow({
                   alt="Goose"
                   width={28}
                   height={14}
-                  className="mx-auto h-3.5"
+                  className="mx-auto h-3.5 w-auto object-contain"
                 />
               </span>
             </TooltipTrigger>

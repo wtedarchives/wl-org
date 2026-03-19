@@ -171,7 +171,7 @@ export function MostRecentShowCard() {
                         alt="Goose"
                         width={28}
                         height={14}
-                        className="h-3.5"
+                        className="h-3.5 w-auto object-contain"
                       />
                     </span>
                   </TooltipTrigger>

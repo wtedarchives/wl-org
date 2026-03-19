@@ -65,12 +65,13 @@ function ScheduleRow({ slot }: { slot: RadioScheduleSlot }) {
 const cardClassName =
   "rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
 
-export function WtedRadioScheduleCard() {
+export function WtedRadioScheduleCard({ className }: { className?: string }) {
+  const mergedClassName = [cardClassName, className].filter(Boolean).join(" ")
   const { slots, loading, error } = useRadioSchedule()
 
   if (loading) {
     return (
-      <Card className={cardClassName}>
+      <Card className={mergedClassName}>
         <CardHeader className="border-b border-wl-dark-grey/50 py-2">
           <CardTitle className="text-[13px] font-semibold text-wl-white">
             Upcoming Schedule
@@ -87,7 +88,7 @@ export function WtedRadioScheduleCard() {
 
   if (error) {
     return (
-      <Card className={cardClassName}>
+      <Card className={mergedClassName}>
         <CardHeader className="border-b border-wl-dark-grey/50 py-2">
           <CardTitle className="text-[13px] font-semibold text-wl-white">
             Upcoming Schedule
@@ -104,7 +105,7 @@ export function WtedRadioScheduleCard() {
 
   if (slots.length === 0) {
     return (
-      <Card className={cardClassName}>
+      <Card className={mergedClassName}>
         <CardHeader className="border-b border-wl-dark-grey/50 py-2">
           <CardTitle className="text-[13px] font-semibold text-wl-white">
             Upcoming Schedule
@@ -120,7 +121,7 @@ export function WtedRadioScheduleCard() {
   }
 
   return (
-    <Card className={cardClassName}>
+    <Card className={mergedClassName}>
       <CardHeader className="border-b border-wl-dark-grey/50 py-2">
         <CardTitle className="text-[13px] font-semibold text-wl-white">
           Upcoming Schedule
