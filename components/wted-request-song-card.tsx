@@ -1,5 +1,6 @@
 "use client"
 
+import { Pencil } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const REQUEST_IFRAME_SRC = "https://embed.radio.co/request/w2255950.html"
@@ -11,9 +12,12 @@ export function WtedRequestSongCard() {
   return (
     <Card className={cardClassName}>
       <CardHeader className="shrink-0 border-b border-wl-dark-grey/50 py-2 bg-black/30">
-        <CardTitle className="text-[13px] font-semibold text-wl-white">
-          Request a Song
-        </CardTitle>
+        <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+          <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+            Request a Song
+          </CardTitle>
+          <Pencil className="size-4 shrink-0 text-wl-white/80" />
+        </div>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 p-0">
         <iframe

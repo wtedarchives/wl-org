@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { MessageCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 
@@ -36,9 +37,12 @@ export function FeaturedTopicsCard() {
   return (
     <Card className={cardClassName}>
       <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-[#b2655e]">
-        <CardTitle className="text-[13px] font-semibold text-wl-white">
-          Featured Topics
-        </CardTitle>
+        <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+          <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+            Featured Topics
+          </CardTitle>
+          <MessageCircle className="size-4 shrink-0 text-wl-white/80" />
+        </div>
       </CardHeader>
       <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
         <Table className="w-full min-w-0 table-fixed text-[11px] [&_tr:last-child_td]:pb-2">

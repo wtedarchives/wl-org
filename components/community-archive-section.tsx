@@ -1,5 +1,6 @@
 "use client"
 
+import { ArrowLeft, ArrowRight, History } from "lucide-react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { useShowsData } from "@/hooks/use-shows-data"
@@ -32,6 +33,7 @@ function SetlistSectionContent() {
       title="Last 5 Shows"
       shows={recentShows}
       loading={loading}
+      icon={<ArrowLeft className="size-4" />}
     />
   )
   const mostRecent = <MostRecentShowCard />
@@ -40,6 +42,7 @@ function SetlistSectionContent() {
       title="Next 5 Shows"
       shows={upcomingShows}
       loading={loadingUpcoming}
+      icon={<ArrowRight className="size-4" />}
     />
   )
   const thisDay = (
@@ -48,6 +51,7 @@ function SetlistSectionContent() {
       shows={historicalShows}
       loading={loadingHistorical}
       emptyMessage="No shows occurred on this date in Goose history."
+      icon={<History className="size-4" />}
     />
   )
 

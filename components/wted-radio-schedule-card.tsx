@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 
+import { Radio } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { useRadioSchedule, type RadioScheduleSlot } from "@/hooks/use-radio-schedule"
@@ -73,9 +74,12 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
     return (
       <Card className={mergedClassName}>
         <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
-          <CardTitle className="text-[13px] font-semibold text-wl-white">
-            Upcoming Schedule
-          </CardTitle>
+          <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+            <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+              Upcoming Schedule
+            </CardTitle>
+            <Radio className="size-4 shrink-0 text-wl-white/80" />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="flex items-center justify-center px-3 py-6 text-[11px] text-wl-white/70">
@@ -90,9 +94,12 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
     return (
       <Card className={mergedClassName}>
         <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
-          <CardTitle className="text-[13px] font-semibold text-wl-white">
-            Upcoming Schedule
-          </CardTitle>
+          <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+            <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+              Upcoming Schedule
+            </CardTitle>
+            <Radio className="size-4 shrink-0 text-wl-white/80" />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="px-3 py-3 text-center text-[11px] text-wl-white/70">
@@ -107,9 +114,12 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
     return (
       <Card className={mergedClassName}>
         <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
-          <CardTitle className="text-[13px] font-semibold text-wl-white">
-            Upcoming Schedule
-          </CardTitle>
+          <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+            <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+              Upcoming Schedule
+            </CardTitle>
+            <Radio className="size-4 shrink-0 text-wl-white/80" />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="px-3 py-3 text-center text-[11px] text-wl-white/70">
@@ -123,9 +133,12 @@ export function WtedRadioScheduleCard({ className }: { className?: string }) {
   return (
     <Card className={mergedClassName}>
       <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-black/30">
-        <CardTitle className="text-[13px] font-semibold text-wl-white">
-          Upcoming Schedule
-        </CardTitle>
+        <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+          <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+            Upcoming Schedule
+          </CardTitle>
+          <Radio className="size-4 shrink-0 text-wl-white/80" />
+        </div>
       </CardHeader>
       <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
         <Table className="w-full min-w-0 table-fixed text-[11px] [&_tr:last-child_td]:pb-2">
