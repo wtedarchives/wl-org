@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --breakpoint-4col: 107.25rem; /* 1716px */
   --color-wl-green: var(--wl-green);
   --color-wl-dark-green: var(--wl-dark-green);
   --color-wl-light-green: var(--wl-light-green);

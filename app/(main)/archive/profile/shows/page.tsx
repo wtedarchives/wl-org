@@ -20,7 +20,7 @@ export default function ProfileShowsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:items-start">
         <div className="xl:col-span-3">
           <AttendedShows
             userId={userId}
