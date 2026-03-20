@@ -43,7 +43,7 @@ function CategorySection({
 
   const isCoverSongs = title === "Cover Songs"
   const containerClass = isCoverSongs
-    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start"
+    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start"
     : "columns-1 gap-x-4 md:columns-2 lg:columns-3 xl:columns-4 space-y-4"
 
   return (
@@ -54,11 +54,15 @@ function CategorySection({
       <div className={containerClass}>
         {sectionCategories.map((category, index) => {
           const categorySongs = songsByCategory[category.category] ?? []
+          const isFirstCoverCard =
+            isCoverSongs && sectionCategories.length > 1 && index === 0
           const isSecondCoverCard =
             isCoverSongs && sectionCategories.length > 1 && index === 1
-          const cardClass = isSecondCoverCard
-            ? "col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-3 overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0"
-            : "overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0 break-inside-avoid"
+          const cardClass = isFirstCoverCard
+            ? "col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0"
+            : isSecondCoverCard
+              ? "col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0"
+              : "overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0 break-inside-avoid"
 
           return (
             <Card
