@@ -175,16 +175,16 @@ export function Bugs() {
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Bug Tracker</h2>
 
-      <div className="rounded-lg border overflow-hidden">
-        <Table>
+      <div className="rounded-lg border overflow-x-auto">
+        <Table className="table-fixed min-w-[1080px]">
           <TableHeader className="bg-muted text-sm">
             <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead>Contact Email</TableHead>
-              <TableHead>Details</TableHead>
-              <TableHead>File</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="min-w-[120px] w-[120px]">Type</TableHead>
+              <TableHead className="min-w-[100px] w-[100px]">Submitted</TableHead>
+              <TableHead className="min-w-[160px] w-[160px]">Contact Email</TableHead>
+              <TableHead className="min-w-[500px] w-[500px]">Details</TableHead>
+              <TableHead className="min-w-[80px] w-[80px]">File</TableHead>
+              <TableHead className="min-w-[80px] w-[80px]">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -198,21 +198,21 @@ export function Bugs() {
                 }
                 onClick={() => handleRowClick(bug)}
               >
-                <TableCell className="font-medium">{bug.bug_type ?? "N/A"}</TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="min-w-[120px] w-[120px] font-medium">{bug.bug_type ?? "N/A"}</TableCell>
+                <TableCell className="min-w-[100px] w-[100px] text-muted-foreground">
                   {formatDate(bug.bug_submissiondate)}
                 </TableCell>
-                <TableCell>
+                <TableCell className="min-w-[160px] w-[160px] break-all">
                   {bug.bug_contactemail ? (
                     <CopyToClipboard text={bug.bug_contactemail} />
                   ) : (
                     "N/A"
                   )}
                 </TableCell>
-                <TableCell className="max-w-[350px] break-words">
+                <TableCell className="min-w-[500px] w-[500px] max-w-[500px] whitespace-normal break-words">
                   {bug.bug_detail ?? "No details provided"}
                 </TableCell>
-                <TableCell>
+                <TableCell className="min-w-[80px] w-[80px]">
                   {bug.bug_file_url ? (
                     <a
                       href={bug.bug_file_url}
@@ -228,7 +228,7 @@ export function Bugs() {
                     "—"
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="min-w-[80px] w-[80px]">
                   <Badge
                     variant={bug.bug_completion ? "secondary" : "outline"}
                     className={
@@ -258,13 +258,13 @@ export function Bugs() {
             <DialogTitle>Resolve Bug</DialogTitle>
           </DialogHeader>
           {selectedBug && (
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
               <p className="text-sm text-muted-foreground">
                 Has this bug been resolved?
               </p>
-              <div className="rounded-md border bg-muted/50 p-3 space-y-1">
+              <div className="min-w-0 overflow-hidden rounded-md border bg-muted/50 p-3 space-y-1">
                 <p className="font-medium">{selectedBug.bug_type}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="break-words text-sm text-muted-foreground">
                   {selectedBug.bug_detail}
                 </p>
               </div>
