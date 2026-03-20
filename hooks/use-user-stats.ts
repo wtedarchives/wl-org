@@ -75,6 +75,7 @@ export function useUserStats(effectiveUserId: string | null) {
               entry_short,
               songs!inner(
                 song_id,
+                song_displayname,
                 song_category,
                 categories!inner(
                   category_canonid,
@@ -117,6 +118,7 @@ export function useUserStats(effectiveUserId: string | null) {
         {
           song: string
           song_id: string
+          song_displayname?: string | null
           shows: Set<string>
           category_canonid?: number
           category_artwork?: string
@@ -138,6 +140,7 @@ export function useUserStats(effectiveUserId: string | null) {
             countedSongsInShow.add(entry.entry_song as string)
             const songs = entry.songs as {
               song_id: string
+              song_displayname?: string | null
               categories?: { category_canonid?: number; category_artwork?: string }
             }
             const songId = songs?.song_id
@@ -146,6 +149,7 @@ export function useUserStats(effectiveUserId: string | null) {
               songShowCounts.set(songId, {
                 song: entry.entry_song as string,
                 song_id: songId,
+                song_displayname: songs?.song_displayname,
                 shows: new Set([showId]),
                 category_canonid: songs?.categories?.category_canonid,
                 category_artwork: songs?.categories?.category_artwork,
@@ -161,6 +165,7 @@ export function useUserStats(effectiveUserId: string | null) {
         .map((item) => ({
           song: item.song,
           song_id: item.song_id,
+          song_displayname: item.song_displayname,
           play_count: item.shows.size,
           category_canonid: item.category_canonid,
           category_artwork: item.category_artwork,
@@ -206,6 +211,7 @@ export function useUserStats(effectiveUserId: string | null) {
               entry_short,
               songs!inner(
                 song_id,
+                song_displayname,
                 song_category,
                 categories!inner(
                   category_canonid,
@@ -257,11 +263,13 @@ export function useUserStats(effectiveUserId: string | null) {
           const shows = entry.shows as { show_date?: string; show_venue_location?: string }
           const songs = entry.songs as {
             song_id: string
+            song_displayname?: string | null
             categories?: { category_artwork?: string }
           }
           return {
             song: entry.entry_song as string,
             song_id: songs?.song_id ?? "",
+            song_displayname: songs?.song_displayname,
             show_date: formatShowDate(shows?.show_date ?? ""),
             show_id: entry.entry_show as string,
             venue_location: shows?.show_venue_location,
@@ -308,6 +316,7 @@ export function useUserStats(effectiveUserId: string | null) {
               entry_song,
               songs!inner(
                 song_id,
+                song_displayname,
                 song_category,
                 categories!inner(
                   category_canonid,
@@ -348,6 +357,7 @@ export function useUserStats(effectiveUserId: string | null) {
         (acc: Record<string, SlotSong>, entry) => {
           const songs = entry.songs as {
             song_id: string
+            song_displayname?: string | null
             categories?: { category_canonid?: number; category_artwork?: string }
           }
           const songName = entry.entry_song as string
@@ -355,6 +365,7 @@ export function useUserStats(effectiveUserId: string | null) {
             acc[songName] = {
               song_name: songName,
               song_id: songs?.song_id ?? "",
+              song_displayname: songs?.song_displayname,
               times_played: 1,
               category_canonid: songs?.categories?.category_canonid,
               category_artwork: songs?.categories?.category_artwork,
@@ -473,24 +484,25 @@ export function useUserStats(effectiveUserId: string | null) {
       while (hasMore) {
         const { data, error } = await client
           .from("setlist_entries")
-          .select(
-            `
-            entry_song,
-            entry_short,
-            songs!inner(
-              song_id,
-              song_category,
-              categories!inner(
-                category_canonid,
-                category_artwork
+            .select(
+              `
+              entry_song,
+              entry_short,
+              songs!inner(
+                song_id,
+                song_displayname,
+                song_category,
+                categories!inner(
+                  category_canonid,
+                  category_artwork
+                )
+              ),
+              entry_show,
+              shows!inner(
+                show_canonid
               )
-            ),
-            entry_show,
-            shows!inner(
-              show_canonid
+            `
             )
-          `
-          )
           .not("shows.show_canonid", "is", null)
           .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
@@ -523,6 +535,7 @@ export function useUserStats(effectiveUserId: string | null) {
         {
           song: string
           song_id: string
+          song_displayname?: string | null
           shows: Set<string>
           category_canonid?: number
           category_artwork?: string
@@ -539,6 +552,7 @@ export function useUserStats(effectiveUserId: string | null) {
         showEntries.forEach((entry) => {
           const songs = entry.songs as {
             song_id: string
+            song_displayname?: string | null
             categories?: { category_canonid?: number; category_artwork?: string }
           }
           const songId = songs?.song_id
@@ -553,6 +567,7 @@ export function useUserStats(effectiveUserId: string | null) {
               allSongCounts[songId] = {
                 song: songName,
                 song_id: songId,
+                song_displayname: songs?.song_displayname,
                 shows: new Set([entry.entry_show as string]),
                 category_canonid: songs?.categories?.category_canonid,
                 category_artwork: songs?.categories?.category_artwork,
@@ -569,6 +584,7 @@ export function useUserStats(effectiveUserId: string | null) {
         .map((item) => ({
           song: item.song,
           song_id: item.song_id,
+          song_displayname: item.song_displayname,
           play_count: item.shows.size,
           category_canonid: item.category_canonid,
           category_artwork: item.category_artwork,

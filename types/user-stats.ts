@@ -1,6 +1,7 @@
 export interface TopSong {
   song: string
   song_id: string
+  song_displayname?: string | null
   play_count: number
   category_canonid?: number
   category_artwork?: string
@@ -9,6 +10,7 @@ export interface TopSong {
 export interface LongestPerformance {
   song: string
   song_id: string
+  song_displayname?: string | null
   show_date: string
   show_id: string
   length: string
@@ -20,6 +22,7 @@ export interface LongestPerformance {
 export interface SlotSong {
   song_name: string
   song_id: string
+  song_displayname?: string | null
   times_played: number
   category_canonid?: number
   category_artwork?: string
@@ -28,6 +31,7 @@ export interface SlotSong {
 export interface NotSeenSong {
   song: string
   song_id: string
+  song_displayname?: string | null
   play_count: number
   category_canonid?: number
   category_artwork?: string
@@ -50,6 +54,7 @@ export interface StatData {
   showLength?: boolean
   songNameKey?: string
   songIdKey?: string
+  songDisplayNameKey?: string
 }
 
 export interface UserStatsProps {

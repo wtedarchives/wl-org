@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, Copy } from "lucide-react"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -44,6 +45,7 @@ export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxPr
     showLength = false,
     songNameKey = "song",
     songIdKey = "song_id",
+    songDisplayNameKey = "song_displayname",
   } = stat
 
   const handleCopy = () => {
@@ -106,6 +108,10 @@ export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxPr
                 const rec = item as unknown as Record<string, unknown>
                 const songName = rec[songNameKey] as string
                 const songId = rec[songIdKey] as string
+                const songDisplayName = rec[songDisplayNameKey] as
+                  | string
+                  | null
+                  | undefined
                 const countVal = rec[countKey]
                 const displayValue = showLength
                   ? formatTimeInterval((rec.length as string) ?? "")
@@ -121,36 +127,38 @@ export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxPr
                         <div className="min-w-0 flex-1">
                           <Link
                             href={`/archive/song/${songId}`}
-                            className="text-xs font-medium text-foreground underline-offset-4 hover:underline mr-2"
+                            className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
                           >
-                            {songName}
+                            <SongDisplayName
+                              song={songName}
+                              songDisplayName={songDisplayName}
+                            />
                           </Link>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-4">
                           {showDate && showDateVal && showId && (
-                            <>
-                              {" "}
-                              <Link
-                                href={`/archive/setlist/${showId}`}
-                                className="text-[10px] text-muted-foreground underline-offset-4 hover:underline"
-                              >
-                                [{showDateVal}]
-                              </Link>
-                            </>
+                            <Link
+                              href={`/archive/setlist/${showId}`}
+                              className="text-[10px] text-muted-foreground underline-offset-4 hover:underline"
+                            >
+                              [{showDateVal}]
+                            </Link>
+                          )}
+                          {categoryArtwork && (
+                            <Image
+                              src={categoryArtwork}
+                              alt=""
+                              width={16}
+                              height={16}
+                              className="size-5 shrink-0 rounded object-cover border border-border"
+                              unoptimized
+                              onError={(e) => {
+                                const el = e.target as HTMLImageElement
+                                if (el) el.style.display = "none"
+                              }}
+                            />
                           )}
                         </div>
-                        {categoryArtwork && (
-                          <Image
-                            src={categoryArtwork}
-                            alt=""
-                            width={16}
-                            height={16}
-                            className="size-5 shrink-0 rounded object-cover border border-border"
-                            unoptimized
-                            onError={(e) => {
-                              const el = e.target as HTMLImageElement
-                              if (el) el.style.display = "none"
-                            }}
-                          />
-                        )}
                       </div>
                     </TableCell>
                     <TableCell

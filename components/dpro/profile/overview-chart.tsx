@@ -131,19 +131,19 @@ export function OverviewChart({
             />
             <ChartLegend content={<ChartLegendContent />} />
             <Area
-              dataKey="otherCount"
-              name="Other"
-              type="linear"
-              fill="url(#fillOther)"
-              stroke="var(--color-otherCount)"
-              strokeWidth={2}
-            />
-            <Area
               dataKey="gooseCount"
               name="Goose"
               type="linear"
               fill="url(#fillGoose)"
               stroke="var(--color-gooseCount)"
+              strokeWidth={2}
+            />
+            <Area
+              dataKey="otherCount"
+              name="Other"
+              type="linear"
+              fill="url(#fillOther)"
+              stroke="var(--color-otherCount)"
               strokeWidth={2}
             />
           </AreaChart>
