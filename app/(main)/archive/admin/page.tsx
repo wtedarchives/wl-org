@@ -6,9 +6,9 @@ import { AdminPanel } from "@/components/dpro/admin/admin-panel"
 
 export default function AdminPage() {
   useEffect(() => {
-    document.title = "Admin — WTED.org"
+    document.title = "Admin — Wysteria Lane"
     return () => {
-      document.title = "WTED.org"
+      document.title = "Wysteria Lane"
     }
   }, [])
 

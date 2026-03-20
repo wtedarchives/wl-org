@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { WtedSupport } from "@/components/wted-support"
 
 export const metadata: Metadata = {
-  title: "Support WTED.org",
+  title: "Support Wysteria Lane",
 }
 
 export default function SupportPage() {

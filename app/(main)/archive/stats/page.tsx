@@ -47,7 +47,7 @@ function DproStatsContent() {
   useEffect(() => {
     if (selectedYear !== null) {
       const yearLabel = selectedYear === "all-time" ? "All-Time" : String(selectedYear)
-      document.title = `${yearLabel} Stats – WTED.org`
+      document.title = `${yearLabel} Stats – Wysteria Lane`
     }
     return () => { document.title = "" }
   }, [selectedYear])

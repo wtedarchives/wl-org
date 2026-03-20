@@ -3,7 +3,7 @@ import { PersonnelContent } from "@/components/dpro/personnel/personnel-content"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 
 export const metadata = {
-  title: "Personnel – WTED.org",
+  title: "Personnel – Wysteria Lane",
 }
 
 export default function DproPersonnelPage() {

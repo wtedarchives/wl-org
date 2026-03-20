@@ -59,7 +59,7 @@ export function ListsContent() {
   const { songLists, showLists, loading, error } = useListsData()
 
   useEffect(() => {
-    document.title = "Lists – WTED.org"
+    document.title = "Lists – Wysteria Lane"
     return () => {
       document.title = ""
     }

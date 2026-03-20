@@ -50,7 +50,7 @@ export default function VenueDetailPage({
 
   useEffect(() => {
     if (venue) {
-      document.title = `${venueName} – WTED.org`
+      document.title = `${venueName} – Wysteria Lane`
       return () => {
         document.title = ""
       }

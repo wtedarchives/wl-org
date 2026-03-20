@@ -52,7 +52,7 @@ export default function SongPage({
 
   useEffect(() => {
     if (song) {
-      document.title = `${song.song} – WTED.org`
+      document.title = `${song.song} – Wysteria Lane`
       return () => {
         document.title = ""
       }

@@ -8,7 +8,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }) {
   return {
-    title: "List – WTED.org",
+    title: "List – Wysteria Lane",
   }
 }
 

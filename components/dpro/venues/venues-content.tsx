@@ -52,7 +52,7 @@ export function VenuesContent() {
   const loading = venuesLoading || mapLoading || !mapChunkReady
 
   useEffect(() => {
-    document.title = "Venues – WTED.org"
+    document.title = "Venues – Wysteria Lane"
     return () => {
       document.title = ""
     }

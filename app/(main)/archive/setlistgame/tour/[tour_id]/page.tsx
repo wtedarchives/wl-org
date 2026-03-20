@@ -28,7 +28,7 @@ export default function SetlistGameTourPage({
 
   useEffect(() => {
     if (tourInfo) {
-      document.title = `Setlist Game (${tourInfo.tour}) – WTED.org`
+      document.title = `Setlist Game (${tourInfo.tour}) – Wysteria Lane`
     }
     return () => { document.title = "" }
   }, [tourInfo])

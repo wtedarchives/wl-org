@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, History } from "lucide-react"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { useShowsData } from "@/hooks/use-shows-data"
-import { ColumnBanner } from "./column-banner"
+import { ColumnBanner } from "@/components/column-banner"
 import { FeaturedTopicsCard } from "@/components/featured-topics-card"
 import { FlodownEventsCard } from "@/components/flodown-events-card"
 import { MostRecentShowCard } from "@/components/home-stats-column/most-recent-show-card"
@@ -57,21 +57,27 @@ function SetlistSectionContent() {
 
   return (
     <>
-      {/* Mobile: order 1 */}
-      <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-start-1">
+      {/* Left column: Setlist Archive banner — stretches to match tallest of middle/right */}
+      <div className="flex min-h-[140px] flex-col lg:min-h-0 lg:flex-1 lg:min-w-0">
+        <ColumnBanner
+          src="/archive-banner.jpg"
+          alt="Setlist Archive"
+          label="Setlist Archive"
+          description="The ultimate show history archive for Goose."
+          href="/archive"
+          mutedBg
+          logoSrc="/wted-sa-cropped-2.png"
+        />
+      </div>
+      {/* Middle column: three cards stacked with natural height */}
+      <div className="flex flex-col gap-3 lg:flex-1 lg:min-w-0">
         {last5}
-      </div>
-      {/* Mobile: order 2 */}
-      <div className="flex min-h-0 flex-col lg:col-start-3 lg:row-span-3 lg:row-start-1">
-        {mostRecent}
-      </div>
-      {/* Mobile: order 3 */}
-      <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-start-2">
         {next5}
-      </div>
-      {/* Mobile: order 4 */}
-      <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-start-3">
         {thisDay}
+      </div>
+      {/* Right column: Most Recent Show */}
+      <div className="flex flex-col lg:flex-1 lg:min-w-0">
+        {mostRecent}
       </div>
     </>
   )
@@ -81,7 +87,7 @@ export function CommunityArchiveSection() {
   return (
     <div className="flex flex-col gap-6">
       {/* Community: 3 columns – header, Featured Topics, Flodown Events */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-6">
         <ColumnBanner
           src="/community-banner.jpg"
           alt="Community Forum"
@@ -100,20 +106,9 @@ export function CommunityArchiveSection() {
         </div>
       </div>
 
-      {/* Setlist: mobile order Last 5 → Most Recent → Next 5 → This Day; desktop 3-col grid */}
+      {/* Setlist: mobile stacked; desktop 3 columns — left stretches to match tallest of middle/right */}
       <TooltipProvider>
-        <div className="grid grid-cols-1 grid-rows-[auto_auto_auto_auto_auto] gap-6 lg:grid-cols-3 lg:grid-rows-[auto_auto_auto] lg:gap-x-6 lg:gap-y-3">
-          <div className="lg:row-span-3">
-            <ColumnBanner
-              src="/archive-banner.jpg"
-              alt="Setlist Archive"
-              label="Setlist Archive"
-              description="The ultimate show history archive for Goose."
-              href="/archive"
-              mutedBg
-              logoSrc="/wted-sa-cropped-2.png"
-            />
-          </div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-x-6">
           <SetlistSectionContent />
         </div>
       </TooltipProvider>

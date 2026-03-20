@@ -74,7 +74,7 @@ function pathnameToBreadcrumbs(
   lastSegmentLabelOverride?: string | null,
 ) {
   if (!pathname || pathname === "/") {
-    return [{ label: "Home", href: "/" }]
+    return [{ label: "Welcome to Wysteria Lane", href: "/" }]
   }
   const segments = pathname.split("/").filter(Boolean)
   // Standalone pages: breadcrumb is just the page name (no Home in trail).

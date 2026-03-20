@@ -113,7 +113,7 @@ export default function TourPage({
 
   useEffect(() => {
     if (currentTour) {
-      document.title = `${currentTour.tour} – WTED.org`
+      document.title = `${currentTour.tour} – Wysteria Lane`
       return () => { document.title = "" }
     }
   }, [currentTour])

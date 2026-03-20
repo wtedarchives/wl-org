@@ -6,9 +6,9 @@ import { Bugs } from "@/components/dpro/admin/bugs"
 
 export default function BugsPage() {
   useEffect(() => {
-    document.title = "Bugs — WTED.org"
+    document.title = "Bugs — Wysteria Lane"
     return () => {
-      document.title = "WTED.org"
+      document.title = "Wysteria Lane"
     }
   }, [])
 

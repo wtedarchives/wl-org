@@ -34,7 +34,7 @@ export function PersonnelContent() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    document.title = "Personnel – WTED.org"
+    document.title = "Personnel – Wysteria Lane"
     return () => {
       document.title = ""
     }

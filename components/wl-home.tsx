@@ -27,12 +27,12 @@ export function WlHome() {
             </div>
             <div className="flex flex-1 flex-col justify-center rounded-xl border border-wl-dark-grey/50 bg-[#313a34] p-4">
               <h1 className="mb-2 text-center text-xl font-bold text-wl-white lg:text-left lg:text-2xl">
-                Welcome to WTED.org
+                Welcome to Wysteria Lane
               </h1>
               <p className="text-sm leading-5 text-wl-white lg:text-left">
-                <span className="font-bold">WTED.org – the World of TED</span>
-                , is the home for WTED Goose Radio, a 24/7 radio station dedicated to Goose music. 
-                Join us in the WTED.org Community Forum, and explore our
+                <span className="font-bold">Wysteria Lane </span>
+                is the home for WTED Goose Radio, a 24/7 radio station dedicated to Goose music. 
+                Join us in the Community Forum, and explore our
                 comprehensive Setlist Archive, all available free of charge.
               </p>
             </div>
@@ -110,7 +110,7 @@ export function WlHome() {
                 About Us and FAQ
               </Link>
             </div>
-            <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-2">
+            <div className="grid grid-cols-1 items-stretch gap-3 xl:grid-cols-2 xl:gap-6">
               <div className="flex min-h-0 flex-col">
                 <WtedRadioScheduleCard className="h-full flex flex-col min-h-0" />
               </div>
