@@ -1,35 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { createPortal } from "react-dom"
-import { ChevronDown, Search, Save, Edit, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { GuestModal } from "./guest-modal"
-
-interface GuestData {
-  guest: string
-  guest_id: string
-  guest_displayname: string | null
-  guest_instrument: string | null
-  guest_category: string | null
-  guest_canonid: number | null
-}
-
-const GUEST_CATEGORIES = [
-  "Goose (current)",
-  "Goose (former)",
-  "Group",
-  "Guest",
-]
+import { AdminGuestDropdown } from "./admin-guest-dropdown"
+import { AdminGuestForm } from "./admin-guest-form"
+import type { GuestData } from "./admin-guest-dropdown"
 
 export function AdminGuest() {
   const [allGuests, setAllGuests] = useState<GuestData[]>([])
@@ -120,7 +98,9 @@ export function AdminGuest() {
   }
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     if (!editedGuest) return
     const { name, value } = e.target
@@ -199,6 +179,11 @@ export function AdminGuest() {
     setIsGuestModalOpen(false)
   }
 
+  const handleCategoryChange = (v: string) =>
+    setEditedGuest((prev) =>
+      prev ? { ...prev, guest_category: v === "__none__" ? "" : v } : null
+    )
+
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
@@ -211,188 +196,32 @@ export function AdminGuest() {
           >
             <Plus className="size-4" />
           </Button>
-          <div>
-            <Button
-              ref={triggerRef}
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="gap-2"
-            >
-              Personnel
-              <ChevronDown className="size-4" />
-            </Button>
-            {isDropdownOpen &&
-              createPortal(
-                <div
-                  ref={dropdownRef}
-                  className="fixed z-[100] w-64 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
-                  style={{
-                    top: dropdownPosition.top,
-                    right: dropdownPosition.right,
-                  }}
-                >
-                <div className="p-1">
-                  <div className="relative">
-                    <Input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search guests..."
-                      className="h-8 pr-8 text-xs"
-                    />
-                    <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  </div>
-                </div>
-                <div
-                  ref={scrollContainerRef}
-                  className="max-h-64 overflow-y-auto divide-y"
-                >
-                  {filteredGuests.map((guest) => (
-                    <button
-                      key={guest.guest_id}
-                      ref={
-                        selectedGuest?.guest_id === guest.guest_id
-                          ? selectedGuestRef
-                          : null
-                      }
-                      type="button"
-                      onClick={() => handleGuestSelect(guest)}
-                      className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
-                        selectedGuest?.guest_id === guest.guest_id
-                          ? "bg-muted"
-                          : ""
-                      }`}
-                    >
-                      {guest.guest}
-                    </button>
-                  ))}
-                  {filteredGuests.length === 0 && (
-                    <div className="px-2 py-1 text-center text-xs text-muted-foreground">
-                      No guests found
-                    </div>
-                  )}
-                </div>
-              </div>,
-                document.body
-              )}
-          </div>
+          <AdminGuestDropdown
+            isOpen={isDropdownOpen}
+            onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filteredGuests={filteredGuests}
+            selectedGuest={selectedGuest}
+            onGuestSelect={handleGuestSelect}
+            triggerRef={triggerRef}
+            dropdownRef={dropdownRef}
+            scrollContainerRef={scrollContainerRef}
+            selectedGuestRef={selectedGuestRef}
+            dropdownPosition={dropdownPosition}
+          />
         </div>
       </div>
       {selectedGuest && (
-        <div className="pb-1">
-          <div className="mb-2 flex items-center justify-between">
-            <h4 className="text-sm font-medium">{selectedGuest.guest}</h4>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleEdit}
-              disabled={isSubmitting}
-              className="gap-1"
-            >
-              {isEditing ? (
-                <>
-                  <Save className="size-4" />
-                  Save
-                </>
-              ) : (
-                <>
-                  <Edit className="size-4" />
-                  Edit
-                </>
-              )}
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-            <div>
-              <label className="mb-0.5 block text-xs font-medium">
-                Guest Name
-              </label>
-              <Input
-                type="text"
-                name="guest"
-                value={editedGuest?.guest ?? ""}
-                onChange={handleInputChange}
-                readOnly={!isEditing}
-                className="h-8 text-xs"
-              />
-            </div>
-            <div>
-              <label className="mb-0.5 block text-xs font-medium">
-                Display Name
-              </label>
-              <Input
-                type="text"
-                name="guest_displayname"
-                value={editedGuest?.guest_displayname ?? ""}
-                onChange={handleInputChange}
-                readOnly={!isEditing}
-                className="h-8 text-xs"
-              />
-            </div>
-            <div>
-              <label className="mb-0.5 block text-xs font-medium">
-                Instrument
-              </label>
-              <Input
-                type="text"
-                name="guest_instrument"
-                value={editedGuest?.guest_instrument ?? ""}
-                onChange={handleInputChange}
-                readOnly={!isEditing}
-                className="h-8 text-xs"
-              />
-            </div>
-            <div>
-              <label className="mb-0.5 block text-xs font-medium">
-                Category
-              </label>
-              {isEditing ? (
-                <Select
-                  value={editedGuest?.guest_category || "__none__"}
-                  onValueChange={(v) =>
-                    setEditedGuest((prev) =>
-                      prev
-                        ? { ...prev, guest_category: v === "__none__" ? "" : v }
-                        : null
-                    )
-                  }
-                >
-                  <SelectTrigger className="h-8 text-xs">
-                    <SelectValue placeholder="-- Select Category --" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">-- Select Category --</SelectItem>
-                    {GUEST_CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input
-                  value={editedGuest?.guest_category ?? ""}
-                  readOnly
-                  className="h-8 text-xs"
-                />
-              )}
-            </div>
-            <div>
-              <label className="mb-0.5 block text-xs font-medium">
-                Canon ID
-              </label>
-              <Input
-                value={editedGuest?.guest_canonid ?? ""}
-                readOnly
-                className="h-8 text-xs"
-              />
-              <p className="mt-0.5 text-xs italic text-muted-foreground">
-                Auto-generated value
-              </p>
-            </div>
-          </div>
-        </div>
+        <AdminGuestForm
+          guest={selectedGuest}
+          editedGuest={editedGuest}
+          isEditing={isEditing}
+          isSubmitting={isSubmitting}
+          onInputChange={handleInputChange}
+          onCategoryChange={handleCategoryChange}
+          onToggleEdit={toggleEdit}
+        />
       )}
       <GuestModal
         isOpen={isGuestModalOpen}
