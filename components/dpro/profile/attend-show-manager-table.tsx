@@ -101,12 +101,12 @@ export function AttendShowManagerTable({
             </TableRow>
           ) : (
             shows.map((show) => (
-              <TableRow key={show.show_id} className="text-xs">
+              <TableRow key={show.show_id} className="text-xs [&>td]:py-0.5">
                 <TableCell className="text-center">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`h-7 w-7 shrink-0 rounded-md ${
+                    className={`h-5 w-5 shrink-0 rounded-sm ${
                       show.attended
                         ? "bg-green-600 text-white hover:bg-red-600 hover:text-white"
                         : "border border-muted-foreground/50 hover:bg-green-600 hover:text-white"
@@ -135,7 +135,14 @@ export function AttendShowManagerTable({
                   {show.show_group}
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {show.show_subvenue_venue ? (
+                  {show.venue_id ? (
+                    <Link
+                      href={`/archive/venue/${show.venue_id}`}
+                      className="text-foreground underline-offset-4 hover:underline"
+                    >
+                      {show.show_subvenue}
+                    </Link>
+                  ) : show.show_subvenue_venue ? (
                     <Link
                       href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
                       className="text-foreground underline-offset-4 hover:underline"

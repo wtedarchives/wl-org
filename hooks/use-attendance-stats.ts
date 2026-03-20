@@ -78,7 +78,10 @@ async function fetchInChunks<T>(
   return all
 }
 
-export function useAttendanceStats(userId: string | null) {
+export function useAttendanceStats(
+  userId: string | null,
+  refetchKey = 0
+) {
   const [data, setData] = useState<AttendanceStatsData>({
     showsCount: 0,
     venuesCount: 0,
@@ -237,7 +240,7 @@ export function useAttendanceStats(userId: string | null) {
     return () => {
       cancelled = true
     }
-  }, [userId])
+  }, [userId, refetchKey])
 
   return { data, loading, loadingProgress }
 }

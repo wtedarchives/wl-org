@@ -12,6 +12,7 @@ export interface AttendedShow {
     show_subvenue: string
     show_venue_location: string
     show_subvenue_venue: string
+    venue_id?: string
     show_tour: string | null
     show_canonid: string | null
     tours?: { tour_id: string } | null
@@ -85,6 +86,7 @@ export async function fetchAttendedShows(
       show_subvenue: string
       show_venue_location: string
       show_subvenue_venue: string
+      venue_id?: string
       show_tour: string | null
       show_canonid: string | null
       tours?: { tour_id: string } | null
@@ -119,7 +121,12 @@ export async function fetchAttendedShows(
           show_gap,
           tours!show_tour(tour_id),
           show_detail,
-          show_alert
+          show_alert,
+          subvenues:show_subvenue(
+            venues:subvenue_venue(
+              venue_id
+            )
+          )
         `
         )
         .in("show_id", chunk)
@@ -144,11 +151,25 @@ export async function fetchAttendedShows(
               : Array.isArray(toursRaw)
                 ? null
                 : toursRaw
+          const subvenues = (show as { subvenues?: { venues?: { venue_id: string } } })
+            .subvenues
+          const venue_id = subvenues?.venues?.venue_id
           allShowData[show.show_id] = {
-            ...show,
-            tours,
+            show_id: show.show_id,
+            show_date: show.show_date,
+            show_group: show.show_group,
+            show_subvenue: show.show_subvenue,
+            show_venue_location: show.show_venue_location,
+            show_subvenue_venue: show.show_subvenue_venue,
+            show_tour: show.show_tour,
+            show_canonid: show.show_canonid,
+            show_detail: show.show_detail,
+            show_alert: show.show_alert,
+            show_length: show.show_length,
             show_rarity,
             show_gap,
+            tours,
+            venue_id,
           }
         })
         page++

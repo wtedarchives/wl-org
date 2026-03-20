@@ -91,14 +91,14 @@ export function AttendedShows({
       : "This user hasn't marked any shows as attended yet."
 
   return (
-    <Card>
+    <Card className="py-0">
       <CardHeader className="flex flex-row items-center justify-between gap-2 py-3">
         <h3 className="text-sm font-semibold">Shows Attended</h3>
         {isOwnProfile && !readOnly && (
           <Button
             variant="secondary"
             size="sm"
-            className="h-7 gap-1.5 text-xs"
+            className="h-7 gap-1.5 text-xs bg-wl-orange/80 text-wl-white hover:bg-wl-orange/50"
             onClick={handleOpenManage}
           >
             <span className="hidden sm:inline">Manage Shows</span>
@@ -172,7 +172,7 @@ function AttendedShowRow({
       : null
 
   return (
-    <TableRow className="text-xs">
+    <TableRow className="text-xs [&>td]:py-1">
       <TableCell
         className="text-center font-medium tabular-nums"
         style={{
@@ -230,7 +230,14 @@ function AttendedShowRow({
         ) : null}
       </TableCell>
       <TableCell className="whitespace-nowrap text-muted-foreground">
-        {show?.show_subvenue_venue ? (
+        {show?.venue_id ? (
+          <Link
+            href={`/archive/venue/${show.venue_id}`}
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            {show.show_subvenue}
+          </Link>
+        ) : show?.show_subvenue_venue ? (
           <Link
             href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
             className="text-foreground underline-offset-4 hover:underline"

@@ -11,6 +11,7 @@ export interface AttendShow {
   show_subvenue: string
   show_venue_location: string
   show_subvenue_venue: string
+  venue_id?: string
   show_alert: string | null
   show_detail: string | null
   show_year: string
@@ -51,7 +52,12 @@ export function useAttendShowData(yearFilter: string) {
           show_subvenue_venue,
           show_alert,
           show_detail,
-          show_year
+          show_year,
+          subvenues:show_subvenue(
+            venues:subvenue_venue(
+              venue_id
+            )
+          )
         `
         )
         .eq("show_year", yearFilter)
@@ -61,10 +67,24 @@ export function useAttendShowData(yearFilter: string) {
 
       if (data) {
         setShows(
-          data.map((s) => ({
-            ...s,
-            attended: attendedIds.includes(s.show_id),
-          }))
+          data.map((s) => {
+            const subvenues = (s as { subvenues?: { venues?: { venue_id: string } } })
+              .subvenues
+            const venue_id = subvenues?.venues?.venue_id
+            return {
+              show_id: s.show_id,
+              show_date: s.show_date,
+              show_group: s.show_group,
+              show_subvenue: s.show_subvenue,
+              show_venue_location: s.show_venue_location,
+              show_subvenue_venue: s.show_subvenue_venue,
+              show_alert: s.show_alert,
+              show_detail: s.show_detail,
+              show_year: s.show_year,
+              venue_id,
+              attended: attendedIds.includes(s.show_id),
+            }
+          })
         )
       }
     } catch (err) {

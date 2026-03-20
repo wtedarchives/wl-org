@@ -41,17 +41,18 @@ export function AttendShowManager({ onClose }: AttendShowManagerProps) {
   )
 
   return (
-    <Card className="max-w-6xl">
+    <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0"
+            size="sm"
+            className="py-3 shrink-0 gap-1.5 bg-wl-orange/80 text-xs hover:!bg-wl-orange/50"
             onClick={onClose}
             aria-label="Back to attended shows"
           >
-            <ChevronLeft className="size-5" />
+            <ChevronLeft className="size-4" />
+            <span>Back to Shows</span>
           </Button>
           <h2 className="text-sm font-semibold">Manage Attended Shows</h2>
         </div>
@@ -95,7 +96,7 @@ export function AttendShowManager({ onClose }: AttendShowManagerProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground pt-1">
           Check the boxes next to shows you&apos;ve attended to add them to
           your list. Uncheck to remove them.
         </p>

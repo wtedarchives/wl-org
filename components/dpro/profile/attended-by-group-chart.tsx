@@ -33,6 +33,7 @@ interface AttendedByGroupChartProps {
   userId: string | null
   isOwnProfile: boolean
   username?: string | null
+  refetchKey?: number
 }
 
 interface ChartDataItem {
@@ -45,6 +46,7 @@ export function AttendedByGroupChart({
   userId,
   isOwnProfile,
   username,
+  refetchKey = 0,
 }: AttendedByGroupChartProps) {
   const [chartData, setChartData] = useState<ChartDataItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -126,7 +128,7 @@ export function AttendedByGroupChart({
     return () => {
       cancelled = true
     }
-  }, [userId])
+  }, [userId, refetchKey])
 
   const chartConfig: ChartConfig = chartData.reduce(
     (acc, item) => ({
@@ -176,10 +178,19 @@ export function AttendedByGroupChart({
               cursor={false}
               content={
                 <ChartTooltipContent
-                  formatter={(value) => {
-                    const label =
+                  hideLabel
+                  hideIndicator
+                  formatter={(value, name) => {
+                    const countLabel =
                       value === 1 ? "1 show" : `${value} shows`
-                    return [label, ""]
+                    return (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold">{name}</span>
+                        <span className="text-muted-foreground">
+                          {countLabel}
+                        </span>
+                      </div>
+                    )
                   }}
                 />
               }
@@ -201,6 +212,20 @@ export function AttendedByGroupChart({
             </Pie>
           </PieChart>
         </ChartContainer>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5">
+          {chartData.map((entry) => (
+            <div
+              key={entry.name}
+              className="flex items-center gap-1.5 text-xs"
+            >
+              <div
+                className="size-2 shrink-0 rounded-[2px]"
+                style={{ backgroundColor: entry.fill }}
+              />
+              <span style={{ color: entry.fill }}>{entry.name}</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   )
