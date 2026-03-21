@@ -31,9 +31,18 @@ import type { StatData } from "@/types/user-stats"
 interface ProfileStatBoxProps {
   stat: StatData
   showCopyButton?: boolean
+  onSongClick?: (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => void
 }
 
-export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxProps) {
+export function ProfileStatBox({
+  stat,
+  showCopyButton = true,
+  onSongClick,
+}: ProfileStatBoxProps) {
   const [isCopied, setIsCopied] = useState(false)
   const {
     type,
@@ -125,15 +134,30 @@ export function ProfileStatBox({ stat, showCopyButton = true }: ProfileStatBoxPr
                     <TableCell className="align-middle py-0.5 pl-3">
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <Link
-                            href={`/archive/song/${songId}`}
-                            className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
-                          >
-                            <SongDisplayName
-                              song={songName}
-                              songDisplayName={songDisplayName}
-                            />
-                          </Link>
+                          {onSongClick ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                onSongClick(songName, songDisplayName, songId)
+                              }
+                              className="text-xs font-medium text-foreground underline-offset-4 hover:underline text-left focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
+                            >
+                              <SongDisplayName
+                                song={songName}
+                                songDisplayName={songDisplayName}
+                              />
+                            </button>
+                          ) : (
+                            <Link
+                              href={`/archive/song/${songId}`}
+                              className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                            >
+                              <SongDisplayName
+                                song={songName}
+                                songDisplayName={songDisplayName}
+                              />
+                            </Link>
+                          )}
                         </div>
                         <div className="flex shrink-0 items-center gap-4">
                           {showDate && showDateVal && showId && (

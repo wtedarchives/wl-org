@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { ProfileStatBox } from "@/components/dpro/profile/profile-stat-box"
+import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
+import { useUserShows } from "@/hooks/use-user-shows"
 import { useUserStats } from "@/hooks/use-user-stats"
 import { getLoadingMessage } from "@/lib/utils/user-stats-utils"
 import type { StatData } from "@/types/user-stats"
@@ -33,6 +35,29 @@ export function UserStats({
   showCopyButton = true,
 }: UserStatsProps) {
   const [username, setUsername] = useState<string | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetSongName, setSheetSongName] = useState<string | null>(null)
+  const [sheetSongDisplayName, setSheetSongDisplayName] = useState<
+    string | null
+  >(null)
+  const [sheetSongId, setSheetSongId] = useState<string | null>(null)
+
+  const { shows } = useUserShows(effectiveUserId)
+  const attendedShowIds = useMemo(
+    () => shows.map((s) => s.show_id),
+    [shows]
+  )
+
+  const handleSongClick = (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => {
+    setSheetSongName(songName)
+    setSheetSongDisplayName(songDisplayName ?? null)
+    setSheetSongId(songId ?? null)
+    setSheetOpen(true)
+  }
 
   const {
     loading,
@@ -161,18 +186,35 @@ export function UserStats({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {statData.map((stat, index) => (
-        <div
-          key={stat.type}
-          className="min-h-[200px]"
-          style={{
-            order: MOBILE_ORDER[stat.type] ?? index + 1,
-          }}
-        >
-          <ProfileStatBox stat={stat} showCopyButton={showCopyButton} />
-        </div>
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {statData.map((stat, index) => (
+          <div
+            key={stat.type}
+            className="min-h-[200px]"
+            style={{
+              order: MOBILE_ORDER[stat.type] ?? index + 1,
+            }}
+          >
+            <ProfileStatBox
+              stat={stat}
+              showCopyButton={showCopyButton}
+              onSongClick={handleSongClick}
+            />
+          </div>
+        ))}
+      </div>
+
+      <UserSongPerformancesSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        songName={sheetSongName}
+        songDisplayName={sheetSongDisplayName}
+        songId={sheetSongId}
+        userId={effectiveUserId}
+        attendedShowIds={attendedShowIds}
+        isOwnProfile={isOwnProfile}
+      />
+    </>
   )
 }

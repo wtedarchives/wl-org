@@ -27,6 +27,11 @@ export interface UserSongMatrixProps {
   yearIdMap: Record<string, string>
   songIdMap: Record<string, string>
   shows: Array<{ show_id: string; show_date: string }>
+  onSongClick?: (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => void
 }
 
 export function UserSongMatrix({
@@ -36,6 +41,7 @@ export function UserSongMatrix({
   yearIdMap,
   songIdMap,
   shows,
+  onSongClick,
 }: UserSongMatrixProps) {
   return (
     <div className="overflow-x-auto overflow-y-auto">
@@ -92,7 +98,24 @@ export function UserSongMatrix({
                 className="border-border bg-background/70 hover:bg-muted/40"
               >
                 <TableCell className="font-medium text-xs pl-3 py-0.5 whitespace-nowrap border-r border-border">
-                  {songIdMap[song] ? (
+                  {onSongClick ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onSongClick(
+                          song,
+                          songMatrix.songDisplayNameMap?.[song],
+                          songIdMap[song]
+                        )
+                      }
+                      className="text-left hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
+                    >
+                      <SongDisplayName
+                        song={song}
+                        songDisplayName={songMatrix.songDisplayNameMap?.[song]}
+                      />
+                    </button>
+                  ) : songIdMap[song] ? (
                     <Link
                       href={`/archive/song/${songIdMap[song]}`}
                       className="hover:underline"

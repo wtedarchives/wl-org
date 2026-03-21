@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { UserSongsCombined } from "@/components/dpro/profile/user-songs-combined"
+import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
 import { UserSongSpread } from "@/components/dpro/profile/user-song-spread"
 import { useUserShows } from "@/hooks/use-user-shows"
 import { useUserSongsData } from "@/hooks/use-user-songs-data"
@@ -33,6 +34,13 @@ export default function ProfileSongsPage() {
   const userId = user?.id ?? null
   const isOwnProfile = true
   const searchParams = useSearchParams()
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetSongName, setSheetSongName] = useState<string | null>(null)
+  const [sheetSongDisplayName, setSheetSongDisplayName] = useState<
+    string | null
+  >(null)
+  const [sheetSongId, setSheetSongId] = useState<string | null>(null)
 
   const [viewMode, setViewMode] = useState<"list" | "matrix">(() =>
     getViewFromParams(searchParams)
@@ -66,6 +74,38 @@ export default function ProfileSongsPage() {
     isLoading: matrixLoading,
     errorMessage: matrixError,
   } = useUserSongMatrix(shows, matrixSortMode)
+
+  const attendedShowIds = useMemo(
+    () => shows.map((s) => s.show_id),
+    [shows]
+  )
+  const songIdMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    songs.forEach((s) => {
+      map[s.song] = s.song_id
+    })
+    return map
+  }, [songs])
+  const songDisplayNameMap = useMemo(() => {
+    const map: Record<string, string | null> = {}
+    songs.forEach((s) => {
+      map[s.song] = s.song_displayname ?? null
+    })
+    return map
+  }, [songs])
+
+  const handleSongClick = (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => {
+    setSheetSongName(songName)
+    setSheetSongDisplayName(
+      songDisplayName ?? songDisplayNameMap[songName] ?? null
+    )
+    setSheetSongId(songId ?? songIdMap[songName] ?? null)
+    setSheetOpen(true)
+  }
 
   if (!userId) {
     return (
@@ -152,30 +192,44 @@ export default function ProfileSongsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:items-start">
-        <div className="xl:col-span-3">
-          <UserSongsCombined
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            matrixSortMode={matrixSortMode}
-            setMatrixSortMode={setMatrixSortMode}
-            categories={categories}
-            songs={songs}
-            userSongStats={userSongStats}
-            songMatrix={songMatrix}
-            sortedSongs={sortedSongs}
-            yearGroups={yearGroups}
-            yearIdMap={yearIdMap}
-            shows={shows}
-          />
-        </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-1">
-          {songSpreadData.length > 0 && (
-            <UserSongSpread songSpreadData={songSpreadData} />
-          )}
+    <>
+      <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:items-start">
+          <div className="xl:col-span-3">
+            <UserSongsCombined
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              matrixSortMode={matrixSortMode}
+              setMatrixSortMode={setMatrixSortMode}
+              categories={categories}
+              songs={songs}
+              userSongStats={userSongStats}
+              songMatrix={songMatrix}
+              sortedSongs={sortedSongs}
+              yearGroups={yearGroups}
+              yearIdMap={yearIdMap}
+              shows={shows}
+              onSongClick={handleSongClick}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-1">
+            {songSpreadData.length > 0 && (
+              <UserSongSpread songSpreadData={songSpreadData} />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      <UserSongPerformancesSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        songName={sheetSongName}
+        songDisplayName={sheetSongDisplayName}
+        songId={sheetSongId}
+        userId={userId}
+        attendedShowIds={attendedShowIds}
+        isOwnProfile={isOwnProfile}
+      />
+    </>
   )
 }

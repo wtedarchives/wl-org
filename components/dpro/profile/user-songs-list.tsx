@@ -21,11 +21,13 @@ function CategorySection({
   title,
   songsByCategory,
   userSongStats,
+  onSongClick,
 }: {
   sectionCategories: UserSongCategory[]
   title: string
   songsByCategory: Record<string, UserSong[]>
   userSongStats: UserSongStat[]
+  onSongClick?: (songName: string, songDisplayName?: string | null, songId?: string) => void
 }) {
   if (sectionCategories.length === 0) return null
 
@@ -87,6 +89,12 @@ function CategorySection({
                   {categorySongs.map((song) => {
                     const count = getSongStats(song.song_id)
                     const seen = count > 0
+                    const songNameEl = (
+                      <SongDisplayName
+                        song={song.song}
+                        songDisplayName={song.song_displayname}
+                      />
+                    )
                     return (
                       <li
                         key={song.song_id}
@@ -94,15 +102,30 @@ function CategorySection({
                       >
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Link
-                              href={`/archive/song/${song.song_id}`}
-                              className="flex items-center justify-between gap-2 py-0.5 pl-3 pr-3 text-xs font-medium text-foreground underline-offset-4 hover:underline"
-                            >
+                            <div className="flex items-center justify-between gap-2 py-0.5 pl-3 pr-3 text-xs font-medium text-foreground">
                               <span className="min-w-0 flex-1">
-                                <SongDisplayName
-                                  song={song.song}
-                                  songDisplayName={song.song_displayname}
-                                />
+                                {onSongClick ? (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      onSongClick(
+                                        song.song,
+                                        song.song_displayname,
+                                        song.song_id
+                                      )
+                                    }
+                                    className="text-left underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
+                                  >
+                                    {songNameEl}
+                                  </button>
+                                ) : (
+                                  <Link
+                                    href={`/archive/song/${song.song_id}`}
+                                    className="underline-offset-4 hover:underline"
+                                  >
+                                    {songNameEl}
+                                  </Link>
+                                )}
                                 {seen && (
                                   <span className="ml-2 font-normal text-wl-orange">
                                     ({count})
@@ -112,7 +135,7 @@ function CategorySection({
                               {seen && (
                                 <Check className="size-3.5 shrink-0 text-wl-green" />
                               )}
-                            </Link>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent side="top">
                             <span className="text-xs">{song.song}</span>
@@ -135,12 +158,18 @@ export interface UserSongsListProps {
   categories: UserSongCategory[]
   songs: UserSong[]
   userSongStats: UserSongStat[]
+  onSongClick?: (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => void
 }
 
 export function UserSongsList({
   categories,
   songs,
   userSongStats,
+  onSongClick,
 }: UserSongsListProps) {
   const songsByCategory: Record<string, UserSong[]> = {}
   categories.forEach((category) => {
@@ -180,30 +209,35 @@ export function UserSongsList({
         title="Studio Releases"
         songsByCategory={songsByCategory}
         userSongStats={userSongStats}
+        onSongClick={onSongClick}
       />
       <CategorySection
         sectionCategories={liveOnlySongs}
         title="Live-Only Songs"
         songsByCategory={songsByCategory}
         userSongStats={userSongStats}
+        onSongClick={onSongClick}
       />
       <CategorySection
         sectionCategories={tedTapesSongs}
         title="Ted Tapes Songs/Jams"
         songsByCategory={songsByCategory}
         userSongStats={userSongStats}
+        onSongClick={onSongClick}
       />
       <CategorySection
         sectionCategories={coverSongs}
         title="Cover Songs"
         songsByCategory={songsByCategory}
         userSongStats={userSongStats}
+        onSongClick={onSongClick}
       />
       <CategorySection
         sectionCategories={sideProjects}
         title="Side Projects"
         songsByCategory={songsByCategory}
         userSongStats={userSongStats}
+        onSongClick={onSongClick}
       />
     </div>
   )

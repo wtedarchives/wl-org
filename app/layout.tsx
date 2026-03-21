@@ -19,9 +19,6 @@ export const metadata: Metadata = {
     template: "%s – Wysteria Lane",
   },
   description: "Wysteria Lane",
-  icons: {
-    icon: "/WL.ico",
-  },
 };
 
 export default function RootLayout({

@@ -50,6 +50,11 @@ export interface UserSongsCombinedProps {
   yearGroups: YearGroup[]
   yearIdMap: Record<string, string>
   shows: Array<{ show_id: string; show_date: string }>
+  onSongClick?: (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => void
 }
 
 export function UserSongsCombined({
@@ -65,6 +70,7 @@ export function UserSongsCombined({
   yearGroups,
   yearIdMap,
   shows,
+  onSongClick,
 }: UserSongsCombinedProps) {
   const searchParams = useSearchParams()
 
@@ -212,6 +218,7 @@ export function UserSongsCombined({
               categories={categories}
               songs={songs}
               userSongStats={userSongStats}
+              onSongClick={onSongClick}
             />
           </div>
         ) : (
@@ -222,6 +229,7 @@ export function UserSongsCombined({
             yearIdMap={yearIdMap}
             songIdMap={songIdMap}
             shows={shows}
+            onSongClick={onSongClick}
           />
         )}
       </CardContent>
