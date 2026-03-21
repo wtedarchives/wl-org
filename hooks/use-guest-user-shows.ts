@@ -38,6 +38,9 @@ export function useGuestUserShows(
     }
 
     async function fetchShows() {
+      const client = supabase
+      if (!client) return
+
       try {
         setLoading(true)
         setError(null)
@@ -50,7 +53,7 @@ export function useGuestUserShows(
 
         const results = await Promise.all(
           attendedChunks.map((chunk) =>
-            supabase
+            client
               .from("setlist_entries")
               .select(
                 `
