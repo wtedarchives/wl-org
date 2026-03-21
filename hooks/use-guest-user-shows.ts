@@ -109,10 +109,23 @@ export function useGuestUserShows(
                     | null
                 }[]
 
-            const show =
-              Array.isArray(showsRel) && showsRel.length > 0
-                ? showsRel[0]
-                : showsRel
+            const showRaw = Array.isArray(showsRel) && showsRel.length > 0
+              ? showsRel[0]
+              : showsRel
+            const show = Array.isArray(showRaw)
+              ? null
+              : (showRaw as {
+                  show_id: string
+                  show_date: string
+                  show_tour: string | null
+                  show_venue_location: string
+                  show_group: string
+                  tours?: { tour_id: string } | { tour_id: string }[] | null
+                  subvenues?:
+                    | { venues?: { venue_id: string } }
+                    | { venues?: { venue_id: string } }[]
+                    | null
+                })
 
             if (!show) continue
             if (showsMap.has(show.show_id)) continue
