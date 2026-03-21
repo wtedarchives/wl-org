@@ -59,8 +59,8 @@ export function UserPersonnel({
         .select("username")
         .eq("id", userId)
         .single()
-        .then(({ data, err }) => {
-          if (!err && data?.username) {
+        .then(({ data, error: fetchError }) => {
+          if (!fetchError && data?.username) {
             setUsername(data.username)
           }
         })
