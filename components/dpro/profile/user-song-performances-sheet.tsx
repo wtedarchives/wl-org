@@ -91,9 +91,11 @@ export function UserSongPerformancesSheet({
           ) : error ? (
             <p className="text-[11px] text-destructive">{error}</p>
           ) : performances.length === 0 ? (
-            <p className="py-2 text-[11px] text-muted-foreground">
-              No performances of this song were found at your attended shows.
-            </p>
+            <div className="flex flex-1 min-h-[140px] items-center justify-center">
+              <p className="text-center text-[11px] text-muted-foreground">
+                No performances of this song were found at your attended shows.
+              </p>
+            </div>
           ) : (
             <div className="w-full overflow-x-auto">
               <Table className="min-w-full border-separate border-spacing-y-0.25 text-[11px]">
