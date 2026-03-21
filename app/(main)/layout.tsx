@@ -1,7 +1,9 @@
+import { Suspense } from "react"
 import { AppSidebarClient } from "@/components/app-sidebar-client"
 import { MobileRadioBar } from "@/components/mobile-radio-bar"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 import { SiteHeader } from "@/components/site-header"
+import { SubmitModalHandler } from "@/components/submit-modal-handler"
 import { YearBreadcrumbProvider } from "@/components/year-breadcrumb-context"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
@@ -31,6 +33,9 @@ export default function MainLayout({
               {children}
             </div>
             {modal}
+            <Suspense fallback={null}>
+              <SubmitModalHandler />
+            </Suspense>
           </SetlistBreadcrumbProvider>
         </YearBreadcrumbProvider>
       </SidebarInset>

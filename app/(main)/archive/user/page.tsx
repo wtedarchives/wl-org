@@ -1,24 +1,21 @@
 "use client"
 
-import { use } from "react"
+import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { AttendedShows } from "@/components/dpro/profile/attended-shows"
 import { AttendedByGroupChart } from "@/components/dpro/profile/attended-by-group-chart"
 import { AttendanceStats } from "@/components/dpro/profile/attendance-stats"
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { supabase } from "@/lib/supabase"
 
-export default function UserProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = use(params)
+function UserProfileContent() {
+  const searchParams = useSearchParams()
+  const id = searchParams.get("id")
   const { user } = useAuth()
   const [username, setUsername] = useState<string | null>(null)
 
   const isOwnProfile = user?.id === id
-  const userId = id
+  const userId = id ?? null
 
   useEffect(() => {
     if (id) {
@@ -32,6 +29,18 @@ export default function UserProfilePage({
         })
     }
   }, [id])
+
+  if (!userId) {
+    return (
+      <div className="flex flex-col gap-6 rounded-b-none p-4 md:rounded-b-xl md:p-6">
+        <div className="rounded-lg border border-border bg-card p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            No user ID provided. Use a share link to view a user&apos;s profile.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 rounded-b-none p-4 md:rounded-b-xl md:p-6">
@@ -49,7 +58,7 @@ export default function UserProfilePage({
         <div className="lg:col-span-2">
           <AttendedShows
             userId={userId}
-            isOwnProfile={isOwnProfile}
+            isOwnProfile={!!isOwnProfile}
             username={username}
             readOnly={!isOwnProfile}
           />
@@ -57,16 +66,30 @@ export default function UserProfilePage({
         <div className="flex flex-col gap-6">
           <AttendedByGroupChart
             userId={userId}
-            isOwnProfile={isOwnProfile}
+            isOwnProfile={!!isOwnProfile}
             username={username}
           />
           <AttendanceStats
             userId={userId}
-            isOwnProfile={isOwnProfile}
+            isOwnProfile={!!isOwnProfile}
             username={username}
           />
         </div>
       </div>
     </div>
+  )
+}
+
+export default function UserProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center p-6">
+          <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+        </div>
+      }
+    >
+      <UserProfileContent />
+    </Suspense>
   )
 }

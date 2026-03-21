@@ -240,13 +240,19 @@ export function AppSidebarNavItems({
         )}
         {setlistOpen && (
           <SidebarMenuSub>
-            {SETLIST_ARCHIVE_SUB.map((item) => (
-              <SidebarMenuSubItem key={item.title}>
-                <SidebarMenuSubButton asChild isActive={pathname === item.url}>
-                  <Link href={item.url}>{item.title}</Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
+            {SETLIST_ARCHIVE_SUB.map((item) => {
+              const isSubmit = item.title === "Submit"
+              const href = isSubmit
+                ? `${pathname || "/"}${(pathname || "/").includes("?") ? "&" : "?"}submit=1`
+                : item.url
+              return (
+                <SidebarMenuSubItem key={item.title}>
+                  <SidebarMenuSubButton asChild isActive={pathname === item.url}>
+                    <Link href={href}>{item.title}</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              )
+            })}
           </SidebarMenuSub>
         )}
       </SidebarMenuItem>

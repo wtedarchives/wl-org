@@ -60,6 +60,7 @@ export function FeaturedTopicsCard() {
                       fill
                       sizes="56px"
                       className="object-cover object-center"
+                      unoptimized
                     />
                   </div>
                 </TableCell>

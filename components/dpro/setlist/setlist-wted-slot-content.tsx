@@ -41,6 +41,7 @@ export function WtedRequestSlotContent({
             width={48}
             height={48}
             className="object-cover"
+            unoptimized
           />
         </div>
       )}
@@ -116,6 +117,7 @@ export function WtedPendingSlotContent({
             width={48}
             height={48}
             className="object-cover"
+            unoptimized
           />
         </div>
       )}

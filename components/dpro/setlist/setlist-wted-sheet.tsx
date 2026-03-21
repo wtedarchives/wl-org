@@ -128,7 +128,10 @@ export function SetlistWtedSheet({
     setSubmitting(true)
     setSubmitError(null)
     try {
-      const res = await fetch("/api/wted/request", {
+      const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
+        : ""
+      const res = await fetch(`${base}/wted-request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

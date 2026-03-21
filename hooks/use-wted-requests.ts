@@ -14,7 +14,10 @@ export function useWtedRequests(accessToken: string | null, open: boolean) {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch("/api/wted/requests", {
+      const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
+        : ""
+      const res = await fetch(`${base}/wted-requests`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       if (!res.ok) {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { getUserProfileUrl } from "@/lib/user-profile-url"
 import Link from "next/link"
 import { Check, ChevronDownIcon, Share2 } from "lucide-react"
 import { toast } from "sonner"
@@ -56,8 +57,8 @@ export default function ProfileLayout({
     if (!user) return
     const url =
       typeof window !== "undefined"
-        ? `${window.location.origin}/archive/user/${user.id}`
-        : `/archive/user/${user.id}`
+        ? getUserProfileUrl(user.id, window.location.origin)
+        : getUserProfileUrl(user.id)
     try {
       await navigator.clipboard.writeText(url)
       setShareCopied(true)

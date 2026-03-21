@@ -1,0 +1,104 @@
+---
+description: Core architecture and conventions for wted-org (static export, Supabase Edge Functions, routing, images)
+alwaysApply: true
+---
+
+# wted-org Project Rules
+
+## Project Overview
+wted-org is a Next.js static export project serving as the unified platform for WTED Goose Radio,
+the WTED community (Discourse forum integration), and the Dripfield.pro setlist archive.
+It is deployed on Netlify as a fully static site with zero serverless function invocations at runtime.
+All server-side logic lives in Supabase Edge Functions.
+
+---
+
+## Architecture Rules
+
+### Static Export — Non-Negotiable
+- This project uses `output: "export"` in next.config.ts. Never remove or disable this.
+- Never suggest or introduce server-side Next.js features including:
+  - API routes (`app/api/` or `pages/api/`)
+  - Server components using `getServerSideProps` or `getInitialProps`
+  - The `"use server"` directive
+  - Next.js middleware (`middleware.ts` or `middleware.js`)
+  - Intercepting routes (e.g. `@modal/(.)route/page.tsx`)
+- If a problem seems to require one of the above, the correct solution is a Supabase Edge Function,
+  not a Next.js server feature.
+
+### Supabase Edge Functions — Server-Side Home
+- All server-side logic (API proxying, auth token validation, rate limiting, external HTTP calls,
+  service role key usage) must live in Supabase Edge Functions under `/supabase/functions/`.
+- Follow the existing Edge Function patterns in this project:
+  - Include proper CORS headers (use `_shared/cors.ts`)
+  - Use the Supabase client initialized with the service role key from environment variables
+  - Include proper error handling and status codes
+- Client-side code calls Edge Functions via the Supabase Edge Function URL pattern:
+  `${SUPABASE_URL}/functions/v1/function-name`
+- Never add a new API route to solve a problem that an Edge Function can handle.
+
+### Client-Side Data Fetching
+- All Supabase database queries are made client-side using the Supabase JS client
+  with the anon key (`NEXT_PUBLIC_SUPABASE_ANON_KEY`).
+- Never move client-side Supabase queries to a server component or API route.
+- Follow existing pagination patterns using `.range()` in 1000-record batches
+  to avoid Supabase's default row limit.
+
+---
+
+## Routing Rules
+
+### Dynamic Routes — Always Need generateStaticParams
+- Every dynamic route segment (`[id]`, `[show_id]`, etc.) must have a `generateStaticParams`
+  function that fetches all valid IDs from Supabase at build time.
+- `generateStaticParams` uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  which are available at build time.
+- Never create a new dynamic route without also implementing `generateStaticParams`.
+
+### User-Specific Pages — Query Params Only
+- Pages that depend on a user ID that is not known at build time must use query params,
+  not dynamic route segments.
+- Pattern: `/archive/user?id=xxx` (not `/archive/user/[id]`)
+- Use `lib/user-profile-url.ts` (`getUserProfileUrl`) for generating user profile URLs consistently.
+- Never create a dynamic route segment for user IDs or any other runtime-only identifier.
+
+### Modals
+- Modals must be implemented as client-side components triggered by query params
+  (e.g. `?submit=1`), not as intercepting routes.
+- See `components/submit-modal-handler.tsx` and `app/(main)/layout.tsx` as the reference pattern.
+
+---
+
+## Image Rules
+
+### Remote Images Always Need unoptimized
+- Every `next/image` (`<Image>`) component that uses a remote `src` must include the
+  `unoptimized` prop.
+- The Next.js Image Optimization API is not available in static export mode.
+- When adding a new `<Image>` with a remote src, always include `unoptimized`.
+
+---
+
+## Environment Variables
+
+### Build-Time Variables
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` must be set in the
+  Netlify build environment. These are used by `generateStaticParams` functions and
+  redirect pages at build time.
+- Never use server-only (non-`NEXT_PUBLIC_`) environment variables in page components
+  or layouts. They will not be available at runtime in a static export.
+- Secrets (service role keys, Radio.co API keys, Discourse API keys) belong exclusively
+  in Supabase Edge Function environment variables, never in the Next.js app.
+
+---
+
+## General Development Rules
+
+- Always run `next build` to verify the static export succeeds before considering any
+  feature complete.
+- Do not modify existing Supabase Edge Functions, RLS policies, or database schema
+  unless explicitly asked.
+- Do not modify `lib/supabase.ts` (the Supabase client config) unless explicitly asked.
+- When in doubt about where logic belongs — client component vs Edge Function — default
+  to client component with a direct Supabase query. Only use an Edge Function when
+  server-side execution is genuinely required (secrets, external API proxying, rate limiting).

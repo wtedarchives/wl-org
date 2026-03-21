@@ -1,0 +1,217 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { corsHeaders } from "../_shared/cors.ts"
+
+const RADIO_CO_REQUEST_URL =
+  "https://public.radio.co/stations/s3c11c85d6/requests"
+const THIRTY_MINUTES_MS = 30 * 60 * 1000
+const MAX_REQUESTS = 3
+
+const WTED_ERROR_MESSAGES: Record<number, string> = {
+  403: "Requests for WTED Goose Radio have been disabled.",
+  404: "Requested track not found. Submit a bug report for us to investigate.",
+  409:
+    "You have already requested this track. Stay tuned to WTED Goose Radio to hear it!",
+  429:
+    "WTED Radio has reached its request limit for this period. Please try again later.",
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders })
+  }
+
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const authHeader = req.headers.get("authorization")
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  if (!token) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+  if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+    return new Response(
+      JSON.stringify({ error: "Server configuration error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  })
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  const {
+    data: { user },
+    error: userError,
+  } = await client.auth.getUser(token)
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  let body: { entry_id?: string }
+  try {
+    body = await req.json()
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Invalid request body" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const entryId = body?.entry_id
+  if (!entryId || typeof entryId !== "string") {
+    return new Response(
+      JSON.stringify({ error: "Missing or invalid entry_id" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const { data: entry, error: entryError } = await supabase
+    .from("setlist_entries")
+    .select("entry_id, radio_id, entry_show")
+    .eq("entry_id", entryId)
+    .single()
+
+  if (entryError || !entry) {
+    return new Response(
+      JSON.stringify({ error: "Entry not found" }),
+      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const trackId = entry.radio_id
+  if (!trackId) {
+    return new Response(
+      JSON.stringify({ error: "This track is not available for request" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const trackIdNum = parseInt(String(trackId), 10)
+  if (Number.isNaN(trackIdNum)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid track ID" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const since = new Date(Date.now() - THIRTY_MINUTES_MS).toISOString()
+
+  const { data: recentRequests, error: reqError } = await client
+    .from("wted_requests")
+    .select("entry_id, requested_at")
+    .eq("user_id", user.id)
+    .gte("requested_at", since)
+    .order("requested_at", { ascending: true })
+
+  if (reqError) {
+    return new Response(
+      JSON.stringify({ error: "Failed to check request limit" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const requests = recentRequests ?? []
+
+  if (requests.length >= MAX_REQUESTS) {
+    const oldest = requests[0]
+    const oldestTime = new Date(oldest.requested_at).getTime()
+    const nextAvailable = new Date(oldestTime + THIRTY_MINUTES_MS)
+    return new Response(
+      JSON.stringify({
+        error:
+          "You have reached the limit for requesting songs at this time, please check back later!",
+        nextAvailableAt: nextAvailable.toISOString(),
+      }),
+      { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const entryIds = requests.map((r) => r.entry_id)
+  const { data: existingEntries } = await supabase
+    .from("setlist_entries")
+    .select("entry_id, radio_id")
+    .in("entry_id", [...entryIds, entryId])
+
+  const requestedRadioIds = new Set(
+    (existingEntries ?? [])
+      .filter((e) => entryIds.includes(e.entry_id))
+      .map((e) => String(e.radio_id ?? ""))
+      .filter(Boolean)
+  )
+
+  if (requestedRadioIds.has(String(trackId))) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "You have already requested this track. Stay tuned to WTED Goose Radio to hear it!",
+      }),
+      { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const radioResponse = await fetch(RADIO_CO_REQUEST_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ track_id: trackIdNum }),
+  })
+
+  if (!radioResponse.ok) {
+    const status = radioResponse.status
+    let message = WTED_ERROR_MESSAGES[status]
+
+    if (!message) {
+      try {
+        const data = await radioResponse.json()
+        const apiMessage = data?.errors?.[0]?.message
+        if (apiMessage) message = apiMessage
+      } catch {
+        // ignore
+      }
+    }
+    if (!message) {
+      message = "Unable to submit request. Please try again later."
+    }
+
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const { error: insertError } = await client.from("wted_requests").insert({
+    user_id: user.id,
+    entry_id: entryId,
+    requested_at: new Date().toISOString(),
+  })
+
+  if (insertError) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "Request submitted but failed to save. Please try again later.",
+      }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  return new Response(
+    JSON.stringify({ success: true }),
+    { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  )
+})
