@@ -149,16 +149,16 @@ export function SetlistPageHeaderDesktop({
           </Button>
         </div>
         {showPositionInTour && (
-          <span className="rounded border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium">
+          <span className="inline-flex h-6 items-center rounded-md border border-border bg-muted/50 px-2 text-xs font-medium tabular-nums">
             Show {showPositionInTour.position} of {showPositionInTour.total}
           </span>
         )}
         {show.tour_id && (
           <Link
             href={`/archive/tours/${show.tour_id}`}
-            className="inline-flex items-center gap-1 rounded border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-foreground hover:bg-muted"
+            className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-muted/50 px-2 text-xs font-medium text-foreground hover:bg-muted"
           >
-            <Info className="size-3" />
+            <Info className="size-3.5 shrink-0" />
             Tour Info
           </Link>
         )}

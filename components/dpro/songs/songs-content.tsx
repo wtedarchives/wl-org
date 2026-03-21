@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { SongSearch } from "@/components/dpro/songs/song-search"
 import { supabase } from "@/lib/supabase"
@@ -69,7 +69,7 @@ function CategorySection({
               key={category.category}
               className={cardClass}
             >
-                  <CardHeader className="bg-muted/60 py-2 flex flex-row items-center justify-between gap-2">
+                  <div className="bg-muted/60 px-4 py-2 flex flex-row items-center justify-between gap-2">
                     <CardTitle className="text-sm font-medium truncate pr-2">
                       {category.category}
                     </CardTitle>
@@ -85,7 +85,7 @@ function CategorySection({
                         />
                       </span>
                     )}
-                  </CardHeader>
+                  </div>
                   <CardContent className="p-0">
                     <ul
                       className={

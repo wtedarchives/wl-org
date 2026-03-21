@@ -2,13 +2,7 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
   ChartContainer,
   ChartLegend,
@@ -67,9 +61,9 @@ export function OverviewChart({
 
   return (
     <Card className="overflow-visible space-y-4">
-      <CardHeader>
+      <div className="px-6 pt-6">
         <CardTitle>Shows Per Year</CardTitle>
-      </CardHeader>
+      </div>
       <CardContent className="overflow-visible px-6">
         <ChartContainer config={chartConfig} className="h-[280px] w-full overflow-visible">
           <AreaChart

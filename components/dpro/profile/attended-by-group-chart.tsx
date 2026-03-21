@@ -4,12 +4,7 @@ import { useState, useEffect } from "react"
 import { Pie, PieChart, Cell } from "recharts"
 import { supabase } from "@/lib/supabase"
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
   ChartContainer,
   ChartTooltip,
@@ -164,10 +159,10 @@ export function AttendedByGroupChart({
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="py-0">
+      <div className="px-4 pt-4">
         <CardTitle className="text-sm font-semibold">Shows by Group</CardTitle>
-      </CardHeader>
+      </div>
       <CardContent>
         <ChartContainer
           config={chartConfig}
@@ -212,7 +207,7 @@ export function AttendedByGroupChart({
             </Pie>
           </PieChart>
         </ChartContainer>
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5">
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-0.5 pb-4">
           {chartData.map((entry) => (
             <div
               key={entry.name}

@@ -8,12 +8,7 @@ import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -76,8 +71,8 @@ export function ProfileStatBox({
 
   return (
     <Card className="overflow-hidden py-0">
-      <CardHeader
-        className={`flex flex-row items-center justify-between gap-2 ${headerClassName}`}
+      <div
+        className={`flex flex-row items-center justify-between gap-2 px-4 py-3 ${headerClassName}`}
       >
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {!loading && data.length > 0 && showCopyButton && (
@@ -100,7 +95,7 @@ export function ProfileStatBox({
             )}
           </Button>
         )}
-      </CardHeader>
+      </div>
       <CardContent className="p-0">
         {loading ? (
           <div className="flex items-center justify-center py-12">

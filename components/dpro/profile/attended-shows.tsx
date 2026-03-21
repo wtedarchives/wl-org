@@ -5,11 +5,7 @@ import Link from "next/link"
 import { TicketPlus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -91,8 +87,8 @@ export function AttendedShows({
       : "This user hasn't marked any shows as attended yet."
 
   return (
-    <Card className="py-0">
-      <CardHeader className="flex flex-row items-center justify-between gap-2 py-3">
+    <Card className="overflow-hidden py-0">
+      <div className="flex flex-row items-center justify-between gap-2 px-4 py-3">
         <h3 className="text-sm font-semibold">Shows Attended</h3>
         {isOwnProfile && !readOnly && (
           <Button
@@ -105,7 +101,7 @@ export function AttendedShows({
             <TicketPlus className="size-3.5" />
           </Button>
         )}
-      </CardHeader>
+      </div>
       <CardContent className="p-0">
         {attendedShows.length === 0 ? (
           <p className="px-4 pb-4 text-sm text-muted-foreground">{emptyMsg}</p>

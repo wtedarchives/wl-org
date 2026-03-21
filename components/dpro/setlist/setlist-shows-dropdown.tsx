@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 import type { ShowDate } from "@/types/setlist"
 
 interface SetlistShowsDropdownProps {
@@ -14,6 +15,8 @@ interface SetlistShowsDropdownProps {
   currentShowId: string
   currentLabel: string
   onShowSelect: (showId: string) => void
+  /** Merged onto SelectTrigger (e.g. mobile height) */
+  triggerClassName?: string
 }
 
 export function SetlistShowsDropdown({
@@ -21,6 +24,7 @@ export function SetlistShowsDropdown({
   currentShowId,
   currentLabel,
   onShowSelect,
+  triggerClassName,
 }: SetlistShowsDropdownProps) {
   if (showDates.length === 0) {
     return (
@@ -35,7 +39,13 @@ export function SetlistShowsDropdown({
       value={currentShowId}
       onValueChange={(value) => value && onShowSelect(value)}
     >
-      <SelectTrigger size="sm" className="h-8 w-auto min-w-[90px] text-xs tabular-nums">
+      <SelectTrigger
+        size="sm"
+        className={cn(
+          "h-6 w-auto min-w-[90px] text-xs tabular-nums",
+          triggerClassName
+        )}
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

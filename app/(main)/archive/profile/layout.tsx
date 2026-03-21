@@ -84,7 +84,7 @@ export default function ProfileLayout({
   const activeLabel = TABS.find((t) => t.slug === activeTab)?.label ?? "Overview"
 
   return (
-    <div className="flex flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
       <div className="flex flex-row flex-wrap items-center justify-between gap-2">
         <div className="flex shrink-0 items-center gap-2">
           <h1 className="text-lg font-semibold">My Stats</h1>
@@ -144,7 +144,7 @@ export default function ProfileLayout({
           </DropdownMenu>
         </Tabs>
       </div>
-      <div className="min-w-0 flex-1 overflow-auto">{children}</div>
+      <div className="min-w-0 w-full pb-8">{children}</div>
     </div>
   )
 }

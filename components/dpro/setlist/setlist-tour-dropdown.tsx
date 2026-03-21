@@ -41,7 +41,7 @@ export function SetlistTourDropdown({
     >
       <SelectTrigger
         size="sm"
-        className={cn("h-7 w-auto min-w-[120px] text-xs", triggerClassName)}
+        className={cn("h-6 w-auto min-w-[120px] text-xs", triggerClassName)}
       >
         <SelectValue placeholder="Tour" />
       </SelectTrigger>

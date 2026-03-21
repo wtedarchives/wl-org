@@ -5,12 +5,7 @@ import Link from "next/link"
 import { Calendar, Building2, Music } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAttendanceStats } from "@/hooks/use-attendance-stats"
 
@@ -62,9 +57,11 @@ export function AttendanceStats({
 
   return (
     <Card className="overflow-hidden py-0">
-      <CardHeader className="bg-muted/60 py-2">
-        <CardTitle className="text-sm font-medium">Canonical Attendance Stats</CardTitle>
-      </CardHeader>
+      <div className="bg-muted/60 px-4 py-2">
+        <CardTitle className="text-sm font-medium">
+          Canonical Attendance Stats
+        </CardTitle>
+      </div>
       <CardContent className="space-y-4 p-3">
         <ul className="space-y-1.5 text-xs text-muted-foreground">
           <li className="flex items-center justify-between gap-2">
