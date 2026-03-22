@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
 import { formatEntryLength } from "@/lib/setlist-utils"
 
 interface LongestSongsProps {
@@ -175,7 +176,7 @@ export function LongestSongs({
                           {song.venue_location && (
                             <span className="text-muted-foreground/70">
                               {" "}
-                              [{song.venue_location}]
+                              {formatVenueLocationWithBrackets(song.venue_location)}
                             </span>
                           )}
                         </>

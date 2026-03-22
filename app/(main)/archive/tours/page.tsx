@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
-const DEFAULT_TOUR_NAME = "2025 Holiday Run"
+const DEFAULT_TOUR_NAME = "2026 Misc"
 
 export default async function DproToursPage() {
   if (!supabase) {
