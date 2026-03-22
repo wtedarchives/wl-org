@@ -28,7 +28,7 @@ export default function SetlistGameTourPage({
 
   useEffect(() => {
     if (tourInfo) {
-      document.title = `Setlist Game (${tourInfo.tour}) – Wysteria Lane`
+      document.title = `Setlist Game (${tourInfo.tour}) – WysteriaLane.org`
     }
     return () => { document.title = "" }
   }, [tourInfo])

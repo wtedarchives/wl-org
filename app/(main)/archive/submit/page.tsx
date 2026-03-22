@@ -9,9 +9,9 @@ export default function SubmitPage() {
   const router = useRouter()
 
   useEffect(() => {
-    document.title = "Submit — Wysteria Lane"
+    document.title = "Submit — WysteriaLane.org"
     return () => {
-      document.title = "Wysteria Lane"
+      document.title = "WysteriaLane.org"
     }
   }, [])
 

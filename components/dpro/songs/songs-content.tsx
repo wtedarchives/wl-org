@@ -127,7 +127,7 @@ export function SongsContent() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    document.title = "Songs – Wysteria Lane"
+    document.title = "Songs – WysteriaLane.org"
     return () => {
       document.title = ""
     }

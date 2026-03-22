@@ -124,7 +124,7 @@ export function ListIndContent({ listId }: ListIndContentProps) {
 
   useEffect(() => {
     if (list) {
-      document.title = `${list.list_name} – Wysteria Lane`
+      document.title = `${list.list_name} – WysteriaLane.org`
       return () => {
         document.title = ""
       }

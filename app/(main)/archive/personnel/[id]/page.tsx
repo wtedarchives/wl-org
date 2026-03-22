@@ -50,7 +50,7 @@ export default function PersonnelDetailPage({
 
   useEffect(() => {
     if (guest) {
-      document.title = `${guestName} – Wysteria Lane`
+      document.title = `${guestName} – WysteriaLane.org`
       return () => {
         document.title = ""
       }

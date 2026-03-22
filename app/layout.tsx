@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Wysteria Lane",
-    template: "%s – Wysteria Lane",
+    default: "WysteriaLane.org",
+    template: "%s – WysteriaLane.org",
   },
-  description: "Wysteria Lane",
+  description: "WysteriaLane.org",
 };
 
 export default function RootLayout({

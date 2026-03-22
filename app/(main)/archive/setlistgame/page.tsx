@@ -3,7 +3,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { SetlistGameContent } from "@/components/dpro/setlistgame/setlist-game-content"
 
 export const metadata = {
-  title: "Setlist Game – Wysteria Lane",
+  title: "Setlist Game – WysteriaLane.org",
 }
 
 export default function SetlistGamePage() {

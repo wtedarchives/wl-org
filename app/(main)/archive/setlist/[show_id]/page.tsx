@@ -164,7 +164,7 @@ export default function SetlistPage({
           : venue
             ? ` (${venue})`
             : ""
-    document.title = `${datePart}${middle} – Wysteria Lane`
+    document.title = `${datePart}${middle} – WysteriaLane.org`
     return () => { document.title = "" }
   }, [show])
 
