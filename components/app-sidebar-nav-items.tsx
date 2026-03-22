@@ -12,6 +12,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { sidebarMenuButtonVariants } from "@/components/ui/sidebar-menu"
+import { cn } from "@/lib/utils"
 import {
   WTED_RADIO_SUB,
   SETLIST_ARCHIVE_SUB,
@@ -29,8 +31,6 @@ interface AppSidebarNavItemsProps {
   setLinksOpen: (fn: (o: boolean) => boolean) => void
   setlistOpen: boolean
   setSetlistOpen: (fn: (o: boolean) => boolean) => void
-  adminOpen: boolean
-  setAdminOpen: (fn: (o: boolean) => boolean) => void
   isAdmin: boolean
   openBugCount: number | null
   onFindClick: () => void
@@ -43,8 +43,6 @@ export function AppSidebarNavItems({
   setLinksOpen,
   setlistOpen,
   setSetlistOpen,
-  adminOpen,
-  setAdminOpen,
   isAdmin,
   openBugCount,
   onFindClick,
@@ -257,43 +255,42 @@ export function AppSidebarNavItems({
         )}
       </SidebarMenuItem>
       {isAdmin && (
-        <SidebarMenuItem className="group/item" data-open={adminOpen || undefined}>
-          <SidebarMenuButton
-            tooltip="Admin"
-            className="group-data-[state=open]:bg-sidebar-accent"
-            onClick={() => setAdminOpen((o) => !o)}
+        <SidebarMenuItem className="group/item" data-open>
+          <div
+            data-slot="sidebar-menu-button"
+            data-sidebar="menu-button"
+            title="Admin"
+            className={cn(
+              sidebarMenuButtonVariants(),
+              "group-data-[state=open]:bg-sidebar-accent cursor-default hover:bg-transparent active:bg-transparent",
+            )}
           >
             <Settings2Icon className="size-4" />
             <span>Admin</span>
-            <ChevronDownIcon
-              className={`ml-auto size-4 transition-transform ${adminOpen ? "rotate-180" : ""}`}
-            />
-          </SidebarMenuButton>
-          {adminOpen && (
-            <SidebarMenuSub>
-              {ADMIN_SUB.map((item) => (
-                <SidebarMenuSubItem key={item.title}>
-                  <SidebarMenuSubButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url} className="flex items-center gap-2">
-                      {item.title}
-                      {item.title === "Bugs" &&
-                        openBugCount != null &&
-                        openBugCount > 0 && (
-                          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
-                            {openBugCount > 99 ? "99+" : openBugCount}
-                          </span>
-                        )}
-                    </Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              ))}
-              <SidebarMenuSubItem>
-                <SidebarMenuSubButton onClick={onFindClick}>
-                  Find
+          </div>
+          <SidebarMenuSub>
+            {ADMIN_SUB.map((item) => (
+              <SidebarMenuSubItem key={item.title}>
+                <SidebarMenuSubButton asChild isActive={pathname === item.url}>
+                  <Link href={item.url} className="flex items-center gap-2">
+                    {item.title}
+                    {item.title === "Bugs" &&
+                      openBugCount != null &&
+                      openBugCount > 0 && (
+                        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+                          {openBugCount > 99 ? "99+" : openBugCount}
+                        </span>
+                      )}
+                  </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
-            </SidebarMenuSub>
-          )}
+            ))}
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton onClick={onFindClick}>
+                Find
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+          </SidebarMenuSub>
         </SidebarMenuItem>
       )}
     </SidebarMenu>

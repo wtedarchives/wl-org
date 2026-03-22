@@ -8,6 +8,7 @@ import { FaYoutube, FaSpotify } from "react-icons/fa"
 import { SiBandcamp } from "react-icons/si"
 import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { normalizeBandcampUrl } from "@/lib/normalize-bandcamp-url"
 import { SetlistReleaseEmbedCard } from "./setlist-release-embed-card"
 
 const SERVICE_COLORS: Record<string, string> = {
@@ -108,15 +109,32 @@ export function SetlistMediaSection({
         setBandcampAlbumId(null)
         setLoadingReleaseId(release.release_id)
 
+        const bandcampUrl = normalizeBandcampUrl(release.release_link)
+        const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
+          : ""
+        const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
         try {
-          const base = process.env.NEXT_PUBLIC_SUPABASE_URL
-            ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
-            : ""
+          if (!base || !bandcampUrl) {
+            setActiveEmbed(null)
+            return
+          }
           const res = await fetch(
-            `${base}/bandcamp-album-id?url=${encodeURIComponent(release.release_link)}`
+            `${base}/bandcamp-album-id?url=${encodeURIComponent(bandcampUrl)}`,
+            {
+              headers: {
+                ...(anon
+                  ? {
+                      apikey: anon,
+                      Authorization: `Bearer ${anon}`,
+                    }
+                  : {}),
+              },
+            },
           )
-          const data = await res.json()
-          if (data.albumId) {
+          const data = (await res.json()) as { albumId?: string; error?: string }
+          if (res.ok && data.albumId) {
             setBandcampAlbumId(data.albumId)
           } else {
             setActiveEmbed(null)
@@ -212,7 +230,7 @@ export function SetlistMediaSection({
         return (
           <Link
             key={r.release_id}
-            href={r.release_link}
+            href={normalizeBandcampUrl(r.release_link) ?? r.release_link}
             target="_blank"
             rel="noopener noreferrer"
             className={rowClassName}
@@ -288,7 +306,7 @@ export function SetlistMediaSection({
       return (
         <Link
           key={r.release_id}
-          href={r.release_link}
+          href={normalizeBandcampUrl(r.release_link) ?? r.release_link}
           target="_blank"
           rel="noopener noreferrer"
           className={className}

@@ -13,6 +13,11 @@ import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getMatrixPlacementColor } from "@/lib/stats/tour-utils"
 import type { UserSongMatrixData, YearGroup } from "@/hooks/use-user-song-matrix"
 
+/** Match tour song matrix borders (`components/dpro/tours/tour-song-matrix.tsx`). */
+const MATRIX_BORDER = "border-[#232325]"
+/** Softer rules for matrix header: toolbar→grid, between years, between dates. */
+const HEADER_RULE = "border-border/60"
+
 function formatShowDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z")
   const m = String(d.getUTCMonth() + 1).padStart(2, "0")
@@ -47,10 +52,10 @@ export function UserSongMatrix({
     <div className="overflow-x-auto overflow-y-auto">
       <Table>
         <TableHeader>
-          <TableRow className="border-border bg-muted/50">
+          <TableRow className={`border-b ${HEADER_RULE} bg-muted/50`}>
             <TableHead
               rowSpan={2}
-              className="pl-3 py-1.5 text-left text-xs font-medium bg-muted/50 border-b border-r border-border align-bottom"
+              className={`pl-3 py-1.5 text-left text-xs font-medium bg-muted/50 border-b border-r ${HEADER_RULE} align-bottom`}
             >
               Song
             </TableHead>
@@ -58,7 +63,7 @@ export function UserSongMatrix({
               <TableHead
                 key={group.year}
                 colSpan={group.shows.length}
-                className="h-auto px-1 py-1 text-center text-xs font-semibold bg-muted/50 border-b border-r border-border last:border-r-0"
+                className={`h-auto px-1 py-1 text-center text-xs font-semibold bg-muted/50 border-b border-r ${HEADER_RULE} last:border-r-0`}
               >
                 {yearIdMap[group.year] ? (
                   <Link
@@ -73,11 +78,11 @@ export function UserSongMatrix({
               </TableHead>
             ))}
           </TableRow>
-          <TableRow className="border-border bg-muted/50">
+          <TableRow className={`border-b ${HEADER_RULE} bg-muted/50`}>
             {shows.map((show) => (
               <TableHead
                 key={show.show_id}
-                className="h-auto px-1 py-1 text-center text-xs font-medium whitespace-nowrap min-w-[3rem] border-r border-border last:border-r-0"
+                className={`h-auto px-1 py-1 text-center text-xs font-medium whitespace-nowrap min-w-[3rem] border-r ${HEADER_RULE} last:border-r-0`}
               >
                 <Link
                   href={`/archive/setlist/${show.show_id}`}
@@ -95,9 +100,11 @@ export function UserSongMatrix({
             return (
               <TableRow
                 key={song}
-                className="border-border bg-background/70 hover:bg-muted/40"
+                className={`${MATRIX_BORDER} bg-background/70 hover:bg-muted/40`}
               >
-                <TableCell className="font-medium text-xs pl-3 py-0.5 whitespace-nowrap border-r border-border">
+                <TableCell
+                  className={`font-medium text-xs pl-3 py-0.5 whitespace-nowrap border-r ${MATRIX_BORDER}`}
+                >
                   {onSongClick ? (
                     <button
                       type="button"
@@ -142,7 +149,7 @@ export function UserSongMatrix({
                   return (
                     <TableCell
                       key={`${song}-${show.show_id}`}
-                      className="text-center border-r border-border p-0 last:border-r-0"
+                      className={`text-center border-x ${MATRIX_BORDER} p-0`}
                       style={{
                         backgroundColor: bg || undefined,
                         minWidth: "3rem",

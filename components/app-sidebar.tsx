@@ -41,14 +41,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     SETLIST_ARCHIVE_SUB.some(
       (item) => pathname === item.url || pathname.startsWith(item.url + "/")
     )
-  const isAdminPath =
-    pathname.startsWith("/archive/admin") ||
-    pathname.startsWith("/archive/bugs")
-
   const [wtedOpen, setWtedOpen] = useState(isWtedPath)
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
-  const [adminOpen, setAdminOpen] = useState(isAdminPath)
   const isMobile = useIsMobile()
 
   useEffect(() => {
@@ -57,9 +52,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     if (isSetlistPath) setSetlistOpen(true)
   }, [pathname, isSetlistPath])
-  useEffect(() => {
-    if (isAdminPath) setAdminOpen(true)
-  }, [pathname, isAdminPath])
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -96,8 +88,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               setLinksOpen={setLinksOpen}
               setlistOpen={setlistOpen}
               setSetlistOpen={setSetlistOpen}
-              adminOpen={adminOpen}
-              setAdminOpen={setAdminOpen}
               isAdmin={isAdmin}
               openBugCount={openBugCount}
               onFindClick={() => setFindDialogOpen(true)}

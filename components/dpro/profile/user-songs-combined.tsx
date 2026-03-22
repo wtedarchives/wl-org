@@ -127,7 +127,13 @@ export function UserSongsCombined({
   const uniqueSongCount = songMatrix.songs.length
 
   return (
-    <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
+    <Card
+      className={`ring-0 bg-card/80 overflow-hidden py-0 ${
+        viewMode === "matrix"
+          ? "border border-[#232325]"
+          : "border border-border/60"
+      }`}
+    >
       <div className="border-b border-border/60 bg-muted/60 px-3 py-1.5 flex justify-between items-center">
         <h2 className="text-sm font-semibold">{uniqueSongCount} Songs Played</h2>
         <div className="flex items-center gap-3">

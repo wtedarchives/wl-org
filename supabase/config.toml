@@ -1,0 +1,5 @@
+# Function settings for deploy (supabase functions deploy).
+# https://supabase.com/docs/guides/functions/function-configuration
+
+[functions.bandcamp-album-id]
+verify_jwt = false
