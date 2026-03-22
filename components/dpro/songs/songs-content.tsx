@@ -1,43 +1,32 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Rows3, Ungroup } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { SongsListTable } from "@/components/dpro/songs/songs-list-table"
+import { SongSearch } from "@/components/dpro/songs/song-search"
+import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
-import { SongSearch } from "@/components/dpro/songs/song-search"
-import { supabase } from "@/lib/supabase"
-
-interface Song {
-  song: string
-  song_displayname?: string | null
-  song_category: string
-  song_originalartist: string
-  song_id: string
-  song_categoryorder: number
-}
-
-interface Category {
-  category: string
-  category_canonid: number
-  category_display_name: string
-  category_color1: string
-  category_color2: string
-  category_artwork: string
-  category_type: string
-}
-
-const BATCH_SIZE = 1000
+import {
+  type SongsArchiveCategory,
+  type SongsArchiveSong,
+  useSongsArchiveData,
+} from "@/hooks/use-songs-archive-data"
+import { cn } from "@/lib/utils"
 
 function CategorySection({
   sectionCategories,
   title,
   songsByCategory,
 }: {
-  sectionCategories: Category[]
+  sectionCategories: SongsArchiveCategory[]
   title: string
-  songsByCategory: Record<string, Song[]>
+  songsByCategory: Record<string, SongsArchiveSong[]>
 }) {
   if (sectionCategories.length === 0) return null
 
@@ -121,10 +110,29 @@ function CategorySection({
 }
 
 export function SongsContent() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [songs, setSongs] = useState<Song[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [songSearchOpen, setSongSearchOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const view =
+    searchParams.get("view") === "list" ? "list" : "categories"
+
+  const setView = useCallback(
+    (next: "categories" | "list") => {
+      const p = new URLSearchParams(searchParams.toString())
+      if (next === "categories") {
+        p.delete("view")
+      } else {
+        p.set("view", "list")
+      }
+      const q = p.toString()
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
+
+  const { categories, songs, performerBySong, loading, error } =
+    useSongsArchiveData()
 
   useEffect(() => {
     document.title = "Songs – WysteriaLane.org"
@@ -133,66 +141,8 @@ export function SongsContent() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!supabase) {
-      setLoading(false)
-      setError(true)
-      return
-    }
-    const db = supabase
-
-    async function fetchData() {
-      setLoading(true)
-      setError(false)
-      try {
-        const { data: categoriesData, error: catError } = await db
-          .from("categories")
-          .select("*")
-          .order("category_canonid", { ascending: true })
-
-        if (catError) throw catError
-
-        const { count, error: countError } = await db
-          .from("songs")
-          .select("*", { count: "exact", head: true })
-          .eq("song_placeholder", false)
-
-        if (countError) throw countError
-
-        const totalBatches = Math.ceil((count ?? 0) / BATCH_SIZE)
-        let allSongsData: Song[] = []
-
-        for (let i = 0; i < totalBatches; i++) {
-          const start = i * BATCH_SIZE
-          const end = Math.min(start + BATCH_SIZE - 1, (count ?? 0) - 1)
-
-          const { data, error: batchError } = await db
-            .from("songs")
-            .select("*")
-            .eq("song_placeholder", false)
-            .order("song_categoryorder", { ascending: true })
-            .range(start, end)
-
-          if (batchError) throw batchError
-          if (data) allSongsData = [...allSongsData, ...data]
-        }
-
-        setSongs(allSongsData)
-        setCategories((categoriesData as Category[]) ?? [])
-      } catch {
-        setError(true)
-        setSongs([])
-        setCategories([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])
-
   const songsByCategory = useMemo(() => {
-    const grouped: Record<string, Song[]> = {}
+    const grouped: Record<string, SongsArchiveSong[]> = {}
     categories.forEach((category) => {
       const categorySongs = songs.filter(
         (song) => song.song_category === category.category,
@@ -207,6 +157,15 @@ export function SongsContent() {
     })
     return grouped
   }, [songs, categories])
+
+  const listSongsSorted = useMemo(() => {
+    return [...songs].sort((a, b) => a.song.localeCompare(b.song))
+  }, [songs])
+
+  const categoryFilterOptions = useMemo(
+    () => categories.map((c) => c.category),
+    [categories]
+  )
 
   const sectionedCategories = useMemo(() => {
     const sorted = [...categories].sort(
@@ -254,38 +213,89 @@ export function SongsContent() {
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
       <div className="mb-1 w-full">
         <Card className="overflow-hidden border border-border/60 bg-card/80 shadow-sm py-0">
-          <div className="bg-muted/60 px-3 py-1.5 flex justify-between items-center gap-2">
-            <h1 className="text-sm font-semibold">Songs</h1>
-            <SongSearch />
+          <div className="bg-muted/60 flex min-w-0 flex-nowrap items-center gap-2 px-2 py-1.5 sm:px-3">
+            <h1 className="shrink-0 text-sm font-semibold">Songs</h1>
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+              <ButtonGroup className="shrink-0">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  title="Categories"
+                  aria-label="Categories"
+                  className={cn(
+                    "border-border px-2 text-xs text-foreground transition-colors hover:!bg-card/50 sm:px-3",
+                    view === "categories"
+                      ? "bg-muted/50"
+                      : "bg-transparent"
+                  )}
+                  onClick={() => setView("categories")}
+                >
+                  <Ungroup className="size-4 shrink-0 md:hidden" aria-hidden />
+                  <span className="hidden md:inline">Categories</span>
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  title="List"
+                  aria-label="List"
+                  className={cn(
+                    "border-border px-2 text-xs text-foreground transition-colors hover:!bg-card/50 sm:px-3",
+                    view === "list" ? "bg-muted/50" : "bg-transparent"
+                  )}
+                  onClick={() => setView("list")}
+                >
+                  <Rows3 className="size-4 shrink-0 md:hidden" aria-hidden />
+                  <span className="hidden md:inline">List</span>
+                </Button>
+              </ButtonGroup>
+              <SongSearch
+                className="shrink-0"
+                open={songSearchOpen}
+                onOpenChange={setSongSearchOpen}
+              />
+            </div>
           </div>
         </Card>
       </div>
-      <div className="pb-8 w-full">
-        <CategorySection
-          sectionCategories={sectionedCategories.studioReleases}
-          title="Studio Releases"
-          songsByCategory={songsByCategory}
-        />
-        <CategorySection
-          sectionCategories={sectionedCategories.liveOnlySongs}
-          title="Live-Only Songs"
-          songsByCategory={songsByCategory}
-        />
-        <CategorySection
-          sectionCategories={sectionedCategories.tedTapesSongs}
-          title="Ted Tapes Songs/Jams"
-          songsByCategory={songsByCategory}
-        />
-        <CategorySection
-          sectionCategories={sectionedCategories.coverSongs}
-          title="Cover Songs"
-          songsByCategory={songsByCategory}
-        />
-        <CategorySection
-          sectionCategories={sectionedCategories.sideProjects}
-          title="Side Projects"
-          songsByCategory={songsByCategory}
-        />
+      <div className="pb-8 w-full min-w-0">
+        {view === "list" ? (
+          <SongsListTable
+            songs={listSongsSorted}
+            performerBySong={performerBySong}
+            categoryOptions={categoryFilterOptions}
+            onOpenSongSearch={() => setSongSearchOpen(true)}
+          />
+        ) : (
+          <>
+            <CategorySection
+              sectionCategories={sectionedCategories.studioReleases}
+              title="Studio Releases"
+              songsByCategory={songsByCategory}
+            />
+            <CategorySection
+              sectionCategories={sectionedCategories.liveOnlySongs}
+              title="Live-Only Songs"
+              songsByCategory={songsByCategory}
+            />
+            <CategorySection
+              sectionCategories={sectionedCategories.tedTapesSongs}
+              title="Ted Tapes Songs/Jams"
+              songsByCategory={songsByCategory}
+            />
+            <CategorySection
+              sectionCategories={sectionedCategories.coverSongs}
+              title="Cover Songs"
+              songsByCategory={songsByCategory}
+            />
+            <CategorySection
+              sectionCategories={sectionedCategories.sideProjects}
+              title="Side Projects"
+              songsByCategory={songsByCategory}
+            />
+          </>
+        )}
       </div>
     </div>
   )

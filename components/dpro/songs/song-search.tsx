@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
 import {
@@ -21,13 +21,34 @@ interface SongBasic {
 
 const BATCH_SIZE = 1000
 
-export function SongSearch({ className = "" }: { className?: string }) {
+export function SongSearch({
+  className = "",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: {
+  className?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}) {
   const router = useRouter()
   const listRef = useRef<HTMLDivElement>(null)
   const [songs, setSongs] = useState<SongBasic[]>([])
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [selectedSong, setSelectedSong] = useState("")
+
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = useCallback(
+    (next: boolean) => {
+      if (isControlled) {
+        controlledOnOpenChange?.(next)
+      } else {
+        setInternalOpen(next)
+      }
+    },
+    [controlledOnOpenChange, isControlled]
+  )
 
   useEffect(() => {
     if (open) setSearchValue("")
@@ -82,7 +103,7 @@ export function SongSearch({ className = "" }: { className?: string }) {
         type="button"
         variant="outline"
         size="sm"
-        className="w-full justify-between gap-2 pr-2 font-semibold text-xs md:w-auto"
+        className="w-auto justify-between gap-2 pr-2 font-semibold text-xs transition-colors hover:!bg-card/50"
         onClick={() => setOpen(true)}
       >
         <span className="truncate">{selectedSong || "Search"}</span>
