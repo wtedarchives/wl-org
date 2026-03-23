@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { usePublicProfileBreadcrumb } from "@/components/public-profile-breadcrumb-context"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useYearBreadcrumb } from "@/components/year-breadcrumb-context"
 import { Button } from "@/components/ui/button"
@@ -114,6 +115,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const { toggleSidebar } = useSidebar()
   const { yearLabel } = useYearBreadcrumb()
   const { setlistBreadcrumbs } = useSetlistBreadcrumb()
+  const { publicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
+  const isPublicUserProfilePath = (pathname ?? "").startsWith("/archive/user")
   const useYearOverride =
     (pathname ?? "").startsWith("/archive/years/") && yearLabel != null
   const useProfileTrail = (pathname ?? "").startsWith("/archive/profile")
@@ -129,6 +132,13 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride
     ? [{ label: breadcrumbOverride, href: "" }]
+    : isPublicUserProfilePath
+      ? [
+          {
+            label: publicProfileBreadcrumbLabel ?? "Profile",
+            href: "",
+          },
+        ]
     : useProfileTrail
       ? [
           { label: "Home", href: "/" },

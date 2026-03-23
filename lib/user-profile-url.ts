@@ -3,7 +3,7 @@
  * Used for share links and navigation.
  */
 export function getUserProfileUrl(userId: string, base?: string): string {
-  const path = `/archive/user?id=${encodeURIComponent(userId)}`
+  const path = `/archive/user/overview?id=${encodeURIComponent(userId)}`
   if (base) {
     return `${base.replace(/\/$/, "")}${path}`
   }

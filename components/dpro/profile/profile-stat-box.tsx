@@ -72,7 +72,7 @@ export function ProfileStatBox({
   return (
     <Card className="overflow-hidden py-0">
       <div
-        className={`flex flex-row items-center justify-between gap-2 px-4 py-3 ${headerClassName}`}
+        className={`flex flex-row items-center justify-between gap-2 px-4 !py-2 ${headerClassName}`}
       >
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         {!loading && data.length > 0 && showCopyButton && (

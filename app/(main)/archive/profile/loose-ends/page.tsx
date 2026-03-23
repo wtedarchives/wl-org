@@ -1,12 +1,16 @@
 "use client"
 
 import { useAuth } from "@/components/auth-context"
-import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
+import { ProfileStatsTabPanel } from "@/components/dpro/profile/profile-stats-tab-panel"
 
 export default function ProfileLooseEndsPage() {
   const { user } = useAuth()
 
   return (
-    <LooseEndsContent userId={user?.id ?? null} isOwnProfile />
+    <ProfileStatsTabPanel
+      tab="loose-ends"
+      userId={user?.id ?? null}
+      isOwnProfile
+    />
   )
 }

@@ -61,7 +61,7 @@ export function OverviewChart({
 
   return (
     <Card className="overflow-visible space-y-4">
-      <div className="px-6 pt-6">
+      <div className="px-6 pb-2">
         <CardTitle>Shows Per Year</CardTitle>
       </div>
       <CardContent className="overflow-visible px-6">
