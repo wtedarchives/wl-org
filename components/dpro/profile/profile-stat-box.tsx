@@ -7,6 +7,7 @@ import { Check, Copy } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { toast } from "sonner"
 
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
@@ -98,9 +99,7 @@ export function ProfileStatBox({
       </div>
       <CardContent className="p-0">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-          </div>
+          <LoadingPageCard embedded page="stats" />
         ) : data.length === 0 ? (
           <div className="px-3 py-4 text-center text-xs text-muted-foreground">
             No data available

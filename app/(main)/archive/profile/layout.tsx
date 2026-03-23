@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { useAuth } from "@/components/auth-context"
 import { getProfileStatsActiveTab } from "@/components/dpro/profile/profile-stats-tab-config"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { ProfileStatsTabsShell } from "@/components/dpro/profile/profile-stats-tabs-shell"
 
 export default function ProfileLayout({
@@ -45,11 +46,7 @@ export default function ProfileLayout({
   }
 
   if (authLoading) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-      </div>
-    )
+    return <LoadingPageCard message="Loading profile…" />
   }
 
   if (!user) {

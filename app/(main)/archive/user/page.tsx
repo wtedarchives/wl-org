@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { usePublicProfileBreadcrumb } from "@/components/public-profile-breadcrumb-context"
 
 function UserProfileRootContent() {
@@ -29,11 +30,7 @@ function UserProfileRootContent() {
   }, [id, router])
 
   if (id) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-      </div>
-    )
+    return <LoadingPageCard message="Loading profile…" />
   }
 
   return (
@@ -49,13 +46,7 @@ function UserProfileRootContent() {
 
 export default function UserProfilePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex flex-1 items-center justify-center p-6">
-          <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingPageCard message="Loading profile…" />}>
       <UserProfileRootContent />
     </Suspense>
   )

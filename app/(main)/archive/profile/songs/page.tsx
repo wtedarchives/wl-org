@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAuth } from "@/components/auth-context"
 import { ProfileStatsTabPanel } from "@/components/dpro/profile/profile-stats-tab-panel"
 
@@ -16,11 +17,7 @@ function ProfileSongsPageInner() {
 export default function ProfileSongsPage() {
   return (
     <Suspense
-      fallback={
-        <div className="flex flex-1 items-center justify-center py-12">
-          <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-        </div>
-      }
+      fallback={<LoadingPageCard message="Loading songs data…" />}
     >
       <ProfileSongsPageInner />
     </Suspense>
