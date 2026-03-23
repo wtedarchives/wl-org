@@ -1,11 +1,12 @@
 "use client"
 
+import { useAuth } from "@/components/auth-context"
+import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
+
 export default function ProfileLooseEndsPage() {
+  const { user } = useAuth()
+
   return (
-    <div className="rounded-lg border bg-card p-6">
-      <p className="text-sm text-muted-foreground">
-        Loose Ends tab — coming soon. Unfinished/reprised songs will appear here.
-      </p>
-    </div>
+    <LooseEndsContent userId={user?.id ?? null} isOwnProfile />
   )
 }

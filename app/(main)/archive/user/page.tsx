@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth-context"
 import { AttendedShows } from "@/components/dpro/profile/attended-shows"
 import { AttendedByGroupChart } from "@/components/dpro/profile/attended-by-group-chart"
 import { AttendanceStats } from "@/components/dpro/profile/attendance-stats"
+import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
 import { useEffect, useState, Suspense } from "react"
 import { supabase } from "@/lib/supabase"
 
@@ -76,6 +77,13 @@ function UserProfileContent() {
           />
         </div>
       </div>
+
+      <section className="flex flex-col gap-3" aria-labelledby="loose-ends-heading">
+        <h2 id="loose-ends-heading" className="text-base font-semibold">
+          Loose Ends
+        </h2>
+        <LooseEndsContent userId={userId} isOwnProfile={!!isOwnProfile} />
+      </section>
     </div>
   )
 }
