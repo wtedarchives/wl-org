@@ -46,7 +46,7 @@ export function LongestSongsCard({
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={`/archive/song/${song.song_id}`}
-                        className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                        className="text-xs font-medium text-foreground hover:underline"
                       >
                         <SongDisplayName
                           song={song.song}
@@ -78,7 +78,7 @@ export function LongestSongsCard({
                         {song.show_id ? (
                           <Link
                             href={`/archive/setlist/${song.show_id}`}
-                            className="font-medium text-foreground underline-offset-4 hover:underline"
+                            className="font-medium text-foreground hover:underline"
                           >
                             {formatDate(song.show_date)}
                           </Link>

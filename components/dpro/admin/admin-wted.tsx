@@ -237,9 +237,9 @@ export function AdminWted() {
         </div>
       )}
       {selectedShow && (
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border">
           {loadingSetlist ? (
-            <div className="flex items-center justify-center gap-2 p-3">
+            <div className="flex items-center justify-center gap-2 bg-muted/50 p-3">
               <div className="flex gap-2">
                 <div className="size-3 animate-pulse rounded-lg bg-muted" />
                 <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:150ms]" />
@@ -250,59 +250,54 @@ export function AdminWted() {
               </p>
             </div>
           ) : setlistEntries.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/60">
-                    <TableHead className="py-1 text-center text-xs border-r">S</TableHead>
-                    <TableHead className="py-1 text-center text-xs border-r">#</TableHead>
-                    <TableHead className="py-1 text-left text-xs border-r">Song</TableHead>
-                    <TableHead className="py-1 text-left text-xs border-r">Short</TableHead>
-                    <TableHead className="py-1 text-left text-xs border-r">→</TableHead>
-                    <TableHead className="py-1 text-center text-xs border-r">
-                      Placement
-                    </TableHead>
-                    <TableHead className="py-1 text-center text-xs border-r">
-                      Radio ID
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {setlistEntries.map((entry) => (
-                    <TableRow
-                      key={entry.entry_id}
-                      className="text-xs hover:bg-muted/50"
-                    >
-                      <TableCell className="py-1 text-center border-r">
-                        {entry.entry_set}
-                      </TableCell>
-                      <TableCell className="py-1 text-center border-r">
-                        {entry.entry_setnum}
-                      </TableCell>
-                      <TableCell className="py-1 border-r">
-                        {entry.entry_song}
-                      </TableCell>
-                      <TableCell className="py-1 border-r">
-                        {entry.entry_short || ""}
-                      </TableCell>
-                      <TableCell className="py-1 border-r">
-                        {entry.entry_segue === ">" ? "→" : (entry.entry_segue || "")}
-                      </TableCell>
-                      <TableCell className="py-1 border-r">
-                        <div
-                          className="mx-auto w-fit rounded-lg px-2 py-0.5 text-center font-medium"
-                          style={{
-                            backgroundColor: getPlacementColor(
-                              entry.entry_placement ?? undefined
-                            ),
-                            color: "white",
-                          }}
-                        >
-                          {entry.entry_placement || ""}
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-1 border-r">
-                        {editingEntryId === entry.entry_id ? (
+            <Table className="bg-muted/50">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8 py-1 text-center text-sm">S</TableHead>
+                  <TableHead className="w-8 py-1 text-center text-sm">#</TableHead>
+                  <TableHead className="py-1 text-left text-sm">Song</TableHead>
+                  <TableHead className="py-1 text-left text-sm">Short</TableHead>
+                  <TableHead className="py-1 text-left text-sm">→</TableHead>
+                  <TableHead className="py-1 text-center text-sm">Placement</TableHead>
+                  <TableHead className="py-1 text-center text-sm">Radio ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {setlistEntries.map((entry) => (
+                  <TableRow
+                    key={entry.entry_id}
+                    className="bg-muted/50 text-[0.625rem] hover:bg-muted/80"
+                  >
+                    <TableCell className="py-1 text-center text-xs">
+                      {entry.entry_set}
+                    </TableCell>
+                    <TableCell className="py-1 text-center text-xs">
+                      {entry.entry_setnum}
+                    </TableCell>
+                    <TableCell className="py-1 text-xs font-medium">
+                      {entry.entry_song}
+                    </TableCell>
+                    <TableCell className="py-1 text-xs">
+                      {entry.entry_short || ""}
+                    </TableCell>
+                    <TableCell className="py-1 text-xs">
+                      {(entry.entry_segue ?? "").replace(/>/g, "→")}
+                    </TableCell>
+                    <TableCell className="py-1">
+                      <div
+                        className="mx-auto w-fit rounded-lg px-2 py-0.5 text-center font-medium text-xs"
+                        style={{
+                          backgroundColor: getPlacementColor(
+                            entry.entry_placement ?? undefined
+                          ),
+                          color: "white",
+                        }}
+                      >
+                        {entry.entry_placement || ""}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-1 text-xs">
+                      {editingEntryId === entry.entry_id ? (
                         <Input
                           ref={inputRef}
                           type="text"
@@ -310,26 +305,25 @@ export function AdminWted() {
                           onChange={(e) => setEditingValue(e.target.value)}
                           onBlur={() => handleBlur(entry.entry_id)}
                           onKeyDown={(e) => handleKeyDown(e, entry.entry_id)}
-                          className="h-7 min-w-16 px-1.5 py-0.5 text-xs"
+                          className="h-7 min-w-16 bg-background px-1.5 py-0.5 text-xs"
                           placeholder="Track ID"
                         />
                       ) : (
                         <button
                           type="button"
                           onClick={() => handleStartEdit(entry)}
-                          className="w-full px-2 py-0.5 text-left text-xs hover:bg-muted/50 rounded"
+                          className="w-full rounded px-2 py-0.5 text-left text-xs transition-colors hover:bg-muted/80"
                         >
                           {entry.radio_id || "—"}
                         </button>
                       )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
-            <div className="rounded-lg border border-border bg-background p-3 text-center text-xs text-muted-foreground">
+            <div className="bg-muted/50 p-3 text-center text-xs text-muted-foreground">
               No setlist entries found for this show.
             </div>
           )}

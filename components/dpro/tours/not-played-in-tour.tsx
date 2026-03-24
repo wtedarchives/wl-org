@@ -194,7 +194,7 @@ export function NotPlayedInTour({
                         <div className="flex items-center justify-between gap-2">
                           <Link
                             href={`/archive/song/${song.song_id}`}
-                            className="font-medium text-foreground hover:underline underline-offset-4"
+                            className="font-medium text-foreground hover:underline"
                           >
                             <SongDisplayName
                               song={song.song}

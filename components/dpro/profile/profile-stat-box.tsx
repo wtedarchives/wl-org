@@ -134,7 +134,7 @@ export function ProfileStatBox({
                               onClick={() =>
                                 onSongClick(songName, songDisplayName, songId)
                               }
-                              className="text-xs font-medium text-foreground underline-offset-4 hover:underline text-left focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
+                              className="text-xs font-medium text-foreground hover:underline text-left focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
                             >
                               <SongDisplayName
                                 song={songName}
@@ -144,7 +144,7 @@ export function ProfileStatBox({
                           ) : (
                             <Link
                               href={`/archive/song/${songId}`}
-                              className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                              className="text-xs font-medium text-foreground hover:underline"
                             >
                               <SongDisplayName
                                 song={songName}
@@ -157,7 +157,7 @@ export function ProfileStatBox({
                           {showDate && showDateVal && showId && (
                             <Link
                               href={`/archive/setlist/${showId}`}
-                              className="text-[10px] text-muted-foreground underline-offset-4 hover:underline"
+                              className="text-[10px] text-muted-foreground hover:underline"
                             >
                               [{showDateVal}]
                             </Link>

@@ -114,14 +114,14 @@ function CategorySection({
                                         song.song_id
                                       )
                                     }
-                                    className="text-left underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
+                                    className="text-left hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
                                   >
                                     {songNameEl}
                                   </button>
                                 ) : (
                                   <Link
                                     href={`/archive/song/${song.song_id}`}
-                                    className="underline-offset-4 hover:underline"
+                                    className="hover:underline"
                                   >
                                     {songNameEl}
                                   </Link>

@@ -55,7 +55,7 @@ export function GuestAppearances({
                               guest.guest_instrument,
                             )
                           }
-                          className="font-medium text-foreground hover:underline underline-offset-4 cursor-pointer text-left"
+                          className="font-medium text-foreground hover:underline cursor-pointer text-left"
                         >
                           {guest.guest}
                         </button>

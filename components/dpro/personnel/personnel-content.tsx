@@ -152,7 +152,7 @@ export function PersonnelContent() {
                           href={`/archive/personnel/${item.guest_id}`}
                           className="group block py-0.5 pl-3 pr-3 text-xs font-medium text-foreground"
                         >
-                          <span className="underline-offset-4 group-hover:underline">
+                          <span className="group-hover:underline">
                             {item.guest}
                           </span>
                           {showInstrument && item.guest_instrument && (

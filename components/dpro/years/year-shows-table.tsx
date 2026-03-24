@@ -72,7 +72,7 @@ export function YearShowsTable({
               <button
                 type="button"
                 onClick={onClearFilters}
-                className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                className="text-xs font-medium text-foreground hover:underline"
               >
                 Clear filters
               </button>

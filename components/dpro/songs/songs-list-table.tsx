@@ -356,7 +356,7 @@ export function SongsListTable({
                 <TableCell className="px-2 py-0.5 align-middle font-medium whitespace-nowrap">
                   <Link
                     href={`/archive/song/${row.song_id}`}
-                    className="inline-block whitespace-nowrap text-foreground underline-offset-4 hover:underline"
+                    className="inline-block whitespace-nowrap text-foreground hover:underline"
                   >
                     <SongDisplayName
                       song={row.song}

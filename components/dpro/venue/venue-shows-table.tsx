@@ -111,7 +111,7 @@ export function VenueShowsTable({
                   <TableCell className="px-2 py-0.5 text-center whitespace-nowrap font-medium">
                     <Link
                       href={`/archive/setlist/${show.show_id}`}
-                      className="underline-offset-4 hover:underline"
+                      className="hover:underline"
                     >
                       {formatVenueShowDate(show.show_date)}
                     </Link>

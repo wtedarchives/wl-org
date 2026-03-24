@@ -127,7 +127,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
       (pathname ?? "").startsWith("/archive/song/") ||
       (pathname ?? "").startsWith("/archive/personnel/") ||
       (pathname ?? "").startsWith("/archive/venue/") ||
-      (pathname ?? "").startsWith("/archive/lists/")) &&
+      (pathname ?? "").startsWith("/archive/lists/") ||
+      (pathname ?? "").startsWith("/archive/discography/")) &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride

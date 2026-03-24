@@ -89,7 +89,7 @@ export function ShowStatCard({
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/archive/setlist/${item.show_id}`}
-                        className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                        className="text-xs font-medium text-foreground hover:underline"
                       >
                         {item.show_date}
                       </Link>
@@ -119,7 +119,7 @@ export function ShowStatCard({
                       item.venue_id ? (
                         <Link
                           href={`/archive/venue/${item.venue_id}`}
-                          className="text-foreground underline-offset-4 hover:underline"
+                          className="text-foreground hover:underline"
                         >
                           {item.show_venue_location}
                         </Link>
@@ -135,7 +135,7 @@ export function ShowStatCard({
                       item.tour_id ? (
                         <Link
                           href={`/archive/tours/${item.tour_id}`}
-                          className="text-foreground underline-offset-4 hover:underline"
+                          className="text-foreground hover:underline"
                         >
                           {item.show_tour}
                         </Link>

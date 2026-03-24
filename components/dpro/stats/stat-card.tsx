@@ -70,7 +70,7 @@ export function StatCard({
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={`/archive/song/${item.song_id}`}
-                        className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                        className="text-xs font-medium text-foreground hover:underline"
                       >
                         {getSong && getSongDisplayName ? (
                           <SongDisplayName

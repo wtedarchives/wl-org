@@ -118,7 +118,7 @@ export function GuestPerformanceTableView({
                 >
                   <Link
                     href={`/archive/setlist/${perf.show_id}`}
-                    className="font-medium underline-offset-4 hover:underline"
+                    className="font-medium hover:underline"
                   >
                     {formatSetlistDate(perf.show_date)}
                   </Link>
@@ -130,7 +130,7 @@ export function GuestPerformanceTableView({
                   {venueHref ? (
                     <Link
                       href={venueHref}
-                      className="underline-offset-4 hover:underline"
+                      className="hover:underline"
                     >
                       {perf.show_venue_location}
                     </Link>

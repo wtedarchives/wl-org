@@ -105,7 +105,7 @@ export function AttendanceStats({
                 <li key={tour.tour}>
                   <Link
                     href={`/archive/tours/${tour.tour_id}`}
-                    className="text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                    className="text-xs font-medium text-foreground hover:underline"
                   >
                     {tour.tour}
                   </Link>

@@ -90,7 +90,7 @@ function CategorySection({
                         >
                           <Link
                             href={`/archive/song/${song.song_id}`}
-                            className="block py-0.5 pl-3 text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                            className="block py-0.5 pl-3 text-xs font-medium text-foreground hover:underline"
                           >
                             <SongDisplayName
                               song={song.song}

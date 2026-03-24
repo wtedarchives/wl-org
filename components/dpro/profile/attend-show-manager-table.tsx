@@ -126,7 +126,7 @@ export function AttendShowManagerTable({
                 <TableCell className="text-center whitespace-nowrap">
                   <Link
                     href={`/archive/setlist/${show.show_id}`}
-                    className="font-medium underline-offset-4 hover:underline"
+                    className="font-medium hover:underline"
                   >
                     {formatShowDate(show.show_date)}
                   </Link>
@@ -138,14 +138,14 @@ export function AttendShowManagerTable({
                   {show.venue_id ? (
                     <Link
                       href={`/archive/venue/${show.venue_id}`}
-                      className="text-foreground underline-offset-4 hover:underline"
+                      className="text-foreground hover:underline"
                     >
                       {show.show_subvenue}
                     </Link>
                   ) : show.show_subvenue_venue ? (
                     <Link
                       href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
-                      className="text-foreground underline-offset-4 hover:underline"
+                      className="text-foreground hover:underline"
                     >
                       {show.show_subvenue}
                     </Link>
