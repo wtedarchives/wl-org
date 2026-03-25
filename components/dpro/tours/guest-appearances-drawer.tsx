@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { X } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -42,13 +44,11 @@ interface GuestAppearancesDrawerProps {
     tourName: string
   }
   onOpenChange: (open: boolean) => void
-  onClose: () => void
 }
 
 export function GuestAppearancesDrawer({
   modalData,
   onOpenChange,
-  onClose,
 }: GuestAppearancesDrawerProps) {
   return (
     <Drawer
@@ -123,8 +123,8 @@ export function GuestAppearancesDrawer({
                   </TableCell>
                   <TableCell className="align-middle py-1.5 px-2 text-center text-[11px] whitespace-nowrap">
                     <Link
-                      href={`/archive/setlist/${song.show_id}`}
-                      onClick={onClose}
+                      href={getSetlistArchiveUrl(song.show_id)}
+                      onClick={() => onOpenChange(false)}
                       className="font-medium hover:underline"
                     >
                       {formatTourDate(song.show_date)}
@@ -157,7 +157,10 @@ export function GuestAppearancesDrawer({
         <DrawerFooter className="border-t border-border/60 shrink-0 pt-3 pb-4">
           <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center sm:justify-center">
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/archive/personnel/${modalData.guestId}`} onClick={onClose}>
+              <Link
+                href={`/archive/personnel/${modalData.guestId}`}
+                onClick={() => onOpenChange(false)}
+              >
                 Guest Profile
               </Link>
             </Button>

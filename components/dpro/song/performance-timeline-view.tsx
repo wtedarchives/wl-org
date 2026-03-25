@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { PERFORMANCE_YEARS, PLACEMENT_COLORS } from "@/lib/song-performance-utils"
@@ -70,7 +72,7 @@ export function PerformanceTimelineView({
                       <Tooltip key={`${year}-${perf.formattedDate}-${idx}`}>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/archive/setlist/${perf.show_id}`}
+                            href={getSetlistArchiveUrl(perf.show_id)}
                             style={{
                               backgroundColor: bgColor,
                             }}

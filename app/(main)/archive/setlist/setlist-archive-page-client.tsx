@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useEffect } from "react"
-import { notFound } from "next/navigation"
+import { useEffect } from "react"
+import { notFound, useSearchParams } from "next/navigation"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAuth } from "@/components/auth-context"
@@ -37,12 +37,9 @@ import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawe
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
 
-export default function SetlistPage({
-  params,
-}: {
-  params: Promise<{ show_id: string }>
-}) {
-  const { show_id: showId } = use(params)
+export default function SetlistArchivePageClient() {
+  const searchParams = useSearchParams()
+  const showId = searchParams.get("show_id")?.trim() ?? ""
   const pageState = useSetlistPageState(showId)
   const {
     containerRef,
@@ -82,8 +79,14 @@ export default function SetlistPage({
   const { tours } = useTours()
   const { showDates } = useShowDates(show ?? null, showId)
   const showPosition = useShowPosition(show ?? null, showDates)
-  const { attendeeCount, setAttendeeCount } = useAttendeeCount(showId, show ?? null)
-  const showPositionInTour = useShowPositionInTour(showId, show?.show_tour ?? undefined)
+  const { attendeeCount, setAttendeeCount } = useAttendeeCount(
+    showId,
+    show ?? null,
+  )
+  const showPositionInTour = useShowPositionInTour(
+    showId,
+    show?.show_tour ?? undefined,
+  )
   const yearId = useSetlistYearId(show?.show_date)
   const {
     handleTourSelect,
@@ -123,7 +126,7 @@ export default function SetlistPage({
   const { attended, toggling, toggle } = useSetlistAttendance(
     showId,
     user ?? null,
-    setAttendeeCount
+    setAttendeeCount,
   )
 
   useEffect(() => {
@@ -165,7 +168,9 @@ export default function SetlistPage({
             ? ` (${venue})`
             : ""
     document.title = `${datePart}${middle} – WysteriaLane.org`
-    return () => { document.title = "" }
+    return () => {
+      document.title = ""
+    }
   }, [show])
 
   if (!showId) notFound()
@@ -208,7 +213,6 @@ export default function SetlistPage({
         onEditShow={handleEditShow}
       />
 
-      {/* Main + Sidebar */}
       <div
         className={`flex min-w-0 gap-4 ${layoutMode === "desktop" ? "flex-row" : "flex-col"}`}
       >
@@ -256,7 +260,7 @@ export default function SetlistPage({
                     setJotyDrawerYear(
                       show?.show_date
                         ? new Date(show.show_date).getFullYear()
-                        : null
+                        : null,
                     )
                     setJotyDrawerHighlightedEntryId(entry.entry_id)
                     setJotyDrawerOpen(true)

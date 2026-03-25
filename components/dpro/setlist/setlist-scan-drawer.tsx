@@ -136,6 +136,7 @@ export function SetlistScanDrawer({
                               <Link
                                 href={`/archive/song/${entry.songs.song_id}`}
                                 className="hover:underline"
+                                onClick={() => onOpenChange(false)}
                               >
                                 {entry.entry_song}
                               </Link>

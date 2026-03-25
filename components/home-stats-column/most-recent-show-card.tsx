@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -94,7 +96,7 @@ export function MostRecentShowCard() {
           <div className="flex items-center justify-between gap-2">
             <div>
               <Link
-                href={`/archive/setlist/${mostRecentShow.show_id}`}
+                href={getSetlistArchiveUrl(mostRecentShow.show_id)}
                 className="font-medium hover:underline"
               >
                 {formatShowDate(mostRecentShow.show_date)}
@@ -116,7 +118,7 @@ export function MostRecentShowCard() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      href={`/archive/setlist/${mostRecentShow.show_id}`}
+                      href={getSetlistArchiveUrl(mostRecentShow.show_id)}
                       aria-label="View setlist"
                     >
                       <FileMusic className="size-3.5 text-emerald-500" />
@@ -131,7 +133,7 @@ export function MostRecentShowCard() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      href={`/archive/setlist/${mostRecentShow.show_id}`}
+                      href={getSetlistArchiveUrl(mostRecentShow.show_id)}
                       aria-label="View releases"
                     >
                       <AudioLines className="size-3.5 text-rose-500" />

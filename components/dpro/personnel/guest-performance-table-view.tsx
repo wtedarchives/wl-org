@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { ArrowUp, ArrowDown } from "lucide-react"
 import {
@@ -117,7 +119,7 @@ export function GuestPerformanceTableView({
                   className={`text-xs whitespace-nowrap text-center ${cellPadding}`}
                 >
                   <Link
-                    href={`/archive/setlist/${perf.show_id}`}
+                    href={getSetlistArchiveUrl(perf.show_id)}
                     className="font-medium hover:underline"
                   >
                     {formatSetlistDate(perf.show_date)}

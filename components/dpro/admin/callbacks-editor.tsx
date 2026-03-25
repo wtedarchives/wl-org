@@ -4,6 +4,7 @@ import { useRef, useState, useMemo } from "react"
 import { ChevronDown, Search } from "lucide-react"
 import type { AdminShowData } from "@/types/admin"
 import { formatDate, getShowDisplayData } from "@/lib/utils/show-utils"
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -106,7 +107,7 @@ export function CallbacksEditor({
 
   const insertShowLink = (show: AdminShowData) => {
     const dateStr = formatDate(show.show_date)
-    const linkText = `<a href="/archive/setlist/${show.show_id}">${dateStr}</a>`
+    const linkText = `<a href="${getSetlistArchiveUrl(show.show_id)}">${dateStr}</a>`
     insertAtCursor(linkText)
     setShowPopoverOpen(false)
     setShowSearchTerm("")

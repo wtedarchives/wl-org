@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Loader2, X } from "lucide-react"
@@ -131,6 +133,7 @@ export function SetlistJotyDrawer({
                   key={round.round_abbr}
                   round={round}
                   highlightedEntryId={highlightedEntryId}
+                  onNavigate={() => onOpenChange(false)}
                 />
               ))}
             </div>
@@ -150,9 +153,11 @@ export function SetlistJotyDrawer({
 function RoundBlock({
   round,
   highlightedEntryId,
+  onNavigate,
 }: {
   round: JotyRoundWithResults
   highlightedEntryId: string | null
+  onNavigate: () => void
 }) {
   const badgeStyle = getJotyBadgeStyle(round.round_abbr)
   return (
@@ -175,6 +180,7 @@ function RoundBlock({
               key={row.entry_id}
               row={row}
               isHighlighted={row.entry_id === highlightedEntryId}
+              onNavigate={onNavigate}
             />
           ))}
         </TableBody>
@@ -186,9 +192,11 @@ function RoundBlock({
 function ResultRow({
   row,
   isHighlighted,
+  onNavigate,
 }: {
   row: JotyResultRow
   isHighlighted: boolean
+  onNavigate: () => void
 }) {
   const venueDisplay = row.show_venue_location
     ? row.show_subvenue?.trim()
@@ -208,6 +216,7 @@ function ResultRow({
           <Link
             href={`/archive/song/${row.song_id}`}
             className="text-foreground hover:underline"
+            onClick={onNavigate}
           >
             <SongDisplayName
               song={row.song}
@@ -224,8 +233,9 @@ function ResultRow({
       <TableCell className="text-xs py-0.5 text-muted-foreground">
         {row.show_id ? (
           <Link
-            href={`/archive/setlist/${row.show_id}`}
+            href={getSetlistArchiveUrl(row.show_id)}
             className="hover:underline text-foreground"
+            onClick={onNavigate}
           >
             {formatShowDate(row.show_date)}
           </Link>

@@ -77,7 +77,6 @@ export function GuestAppearances({
         onOpenChange={(open) =>
           !open && setModalData((p) => ({ ...p, isOpen: false }))
         }
-        onClose={() => setModalData((p) => ({ ...p, isOpen: false }))}
       />
     </>
   )

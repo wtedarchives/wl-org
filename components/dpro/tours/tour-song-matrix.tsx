@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -135,7 +137,7 @@ export function TourSongMatrix({
                   className="px-1 py-1.5 text-center text-xs font-medium whitespace-nowrap min-w-[3rem]"
                 >
                   <Link
-                    href={`/archive/setlist/${d.id}`}
+                    href={getSetlistArchiveUrl(d.id)}
                     className="hover:underline"
                   >
                     {d.displayDate}

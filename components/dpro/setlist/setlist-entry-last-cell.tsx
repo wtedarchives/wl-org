@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import {
   Tooltip,
@@ -38,7 +40,7 @@ export function SetlistEntryLastCell({
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
-            href={`/archive/setlist/${entry.last_show_id}`}
+            href={getSetlistArchiveUrl(entry.last_show_id)}
             className="cursor-pointer hover:underline"
           >
             {content}
@@ -68,7 +70,7 @@ export function SetlistEntryLastCell({
   if (entry.last_show_id) {
     return (
       <Link
-        href={`/archive/setlist/${entry.last_show_id}`}
+        href={getSetlistArchiveUrl(entry.last_show_id)}
         className="cursor-pointer hover:underline"
       >
         {content}

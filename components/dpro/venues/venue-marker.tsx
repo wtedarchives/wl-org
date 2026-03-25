@@ -1,7 +1,9 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
-import { Marker, Popup } from "react-leaflet"
+import { Marker, Popup, useMap } from "react-leaflet"
 import { createNumberedIcon } from "@/lib/map-icons"
 import type { MapVenue, MapShow } from "@/hooks/use-venue-map-data"
 
@@ -20,6 +22,25 @@ function formatDate(dateString: string): string {
     .slice(1)
     .concat(dateString.substring(2, 4))
     .join(".")
+}
+
+function PopupShowLink({ show }: { show: MapShow }) {
+  const map = useMap()
+  return (
+    <Link
+      href={getSetlistArchiveUrl(show.show_id)}
+      className="text-muted-foreground text-xs block cursor-pointer hover:underline"
+      onClick={(e) => {
+        e.stopPropagation()
+        map.closePopup()
+      }}
+    >
+      <span className="font-medium">
+        {formatDate(show.show_date)}
+      </span>{" "}
+      ({show.show_group})
+    </Link>
+  )
 }
 
 export function VenueMarker({
@@ -120,17 +141,7 @@ export function VenueMarker({
                       new Date(b.show_date).getTime(),
                   )
                   .map((show) => (
-                    <Link
-                      key={show.show_id}
-                      href={`/archive/setlist/${show.show_id}`}
-                      className="text-muted-foreground text-xs block cursor-pointer hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span className="font-medium">
-                        {formatDate(show.show_date)}
-                      </span>{" "}
-                      ({show.show_group})
-                    </Link>
+                    <PopupShowLink key={show.show_id} show={show} />
                   ))}
               </div>
             </div>

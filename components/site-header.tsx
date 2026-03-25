@@ -121,7 +121,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     (pathname ?? "").startsWith("/archive/years/") && yearLabel != null
   const useProfileTrail = (pathname ?? "").startsWith("/archive/profile")
   const useSetlistTrail =
-    ((pathname ?? "").startsWith("/archive/setlist/") ||
+    ((pathname ?? "") === "/archive/setlist" ||
+      (pathname ?? "").startsWith("/archive/setlist/") ||
       (pathname ?? "").startsWith("/archive/setlistgame/") ||
       (pathname ?? "").startsWith("/archive/tours/") ||
       (pathname ?? "").startsWith("/archive/song/") ||

@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { ArrowUp, ArrowDown } from "lucide-react"
@@ -153,7 +155,7 @@ export function PerformanceTableView({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link
-                        href={`/archive/setlist/${perf.show_id}`}
+                        href={getSetlistArchiveUrl(perf.show_id)}
                         className="font-medium hover:underline"
                       >
                         {formatSetlistDate(perf.show_date)}
@@ -215,7 +217,7 @@ export function PerformanceTableView({
                     </span>
                   ) : (
                     <Link
-                      href={`/archive/setlist/${perf.show_id}`}
+                      href={getSetlistArchiveUrl(perf.show_id)}
                       className="text-destructive hover:underline"
                     >
                       &gt;

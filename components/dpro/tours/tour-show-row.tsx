@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, FileMusic, Star, AudioLines } from "lucide-react"
@@ -99,7 +101,7 @@ export function TourShowRow({
     <TableRow className={index % 2 === 0 ? "bg-background/70" : "bg-background"}>
       <TableCell className="whitespace-nowrap px-2 py-1 text-center text-[11px] font-medium tabular-nums">
         <Link
-          href={`/archive/setlist/${show.show_id}`}
+          href={getSetlistArchiveUrl(show.show_id)}
           className="hover:underline"
         >
           {formatTourShowDate(show.show_date)}
@@ -182,7 +184,7 @@ export function TourShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/archive/setlist/${show.show_id}`}
+                    href={getSetlistArchiveUrl(show.show_id)}
                     aria-label="View setlist"
                     className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                   >
@@ -206,7 +208,7 @@ export function TourShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/archive/setlist/${show.show_id}`}
+                    href={getSetlistArchiveUrl(show.show_id)}
                     aria-label="View releases"
                     className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
                   >
@@ -269,7 +271,7 @@ export function TourShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`/archive/setlist/${show.show_id}`}
+                    href={getSetlistArchiveUrl(show.show_id)}
                     aria-label="WTED Goose Radio"
                     className="inline-flex items-center justify-center rounded hover:opacity-90"
                   >

@@ -1,0 +1,2 @@
+# Legacy path-based setlist URLs → query model (static export builds one HTML file)
+/archive/setlist/*  /archive/setlist?show_id=:splat  301

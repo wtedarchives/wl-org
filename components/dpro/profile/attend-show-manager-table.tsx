@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Check } from "lucide-react"
 
@@ -125,7 +127,7 @@ export function AttendShowManagerTable({
                 </TableCell>
                 <TableCell className="text-center whitespace-nowrap">
                   <Link
-                    href={`/archive/setlist/${show.show_id}`}
+                    href={getSetlistArchiveUrl(show.show_id)}
                     className="font-medium hover:underline"
                   >
                     {formatShowDate(show.show_date)}

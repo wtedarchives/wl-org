@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -127,7 +129,7 @@ export function UserSlotsTable({
                 >
                   <TableCell className="w-[65px] min-w-[65px] py-1 text-center whitespace-nowrap">
                     <Link
-                      href={`/archive/setlist/${slot.show_id}`}
+                      href={getSetlistArchiveUrl(slot.show_id)}
                       className="text-[11px] font-medium hover:underline"
                     >
                       {formatShowDate(slot.Show_Date)}

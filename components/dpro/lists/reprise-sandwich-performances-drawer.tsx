@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import {
@@ -105,8 +107,9 @@ export function RepriseSandwichPerformancesDrawer({
                     <TableRow key={p.show_id} className="border-border/60">
                       <TableCell className="text-center tabular-nums">
                         <Link
-                          href={`/archive/setlist/${p.show_id}`}
+                          href={getSetlistArchiveUrl(p.show_id)}
                           className="hover:underline"
+                          onClick={() => onOpenChange(false)}
                         >
                           {formatShowDate(p.show_date)}
                         </Link>
@@ -116,6 +119,7 @@ export function RepriseSandwichPerformancesDrawer({
                           <Link
                             href={`/archive/venue/${p.venue_id}`}
                             className="hover:underline"
+                            onClick={() => onOpenChange(false)}
                           >
                             {p.show_venue_location ?? p.show_subvenue}
                           </Link>
@@ -123,6 +127,7 @@ export function RepriseSandwichPerformancesDrawer({
                           <Link
                             href={`/archive/venue/${encodeURIComponent(p.show_subvenue_venue)}`}
                             className="hover:underline"
+                            onClick={() => onOpenChange(false)}
                           >
                             {p.show_venue_location ?? p.show_subvenue}
                           </Link>

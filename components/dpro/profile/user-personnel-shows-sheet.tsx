@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -110,8 +112,9 @@ export function UserPersonnelShowsSheet({
                     <TableRow key={show.show_id} className="align-middle">
                       <TableCell className="whitespace-nowrap px-2 py-1 text-center align-middle text-[11px]">
                         <Link
-                          href={`/archive/setlist/${show.show_id}`}
+                          href={getSetlistArchiveUrl(show.show_id)}
                           className="hover:underline"
+                          onClick={() => onOpenChange(false)}
                         >
                           {formatSetlistDate(show.show_date)}
                         </Link>
@@ -122,6 +125,7 @@ export function UserPersonnelShowsSheet({
                             <Link
                               href={`/archive/tours/${show.tour_id}`}
                               className="hover:underline"
+                              onClick={() => onOpenChange(false)}
                             >
                               {show.show_tour}
                             </Link>
@@ -137,6 +141,7 @@ export function UserPersonnelShowsSheet({
                           <Link
                             href={`/archive/venue/${show.venue_id}`}
                             className="hover:underline"
+                            onClick={() => onOpenChange(false)}
                           >
                             {show.show_venue_location || "—"}
                           </Link>
@@ -160,7 +165,10 @@ export function UserPersonnelShowsSheet({
             <div className="flex flex-wrap items-center gap-2">
               {guestId && (
                 <Button type="button" size="sm" variant="outline" asChild>
-                  <Link href={`/archive/personnel/${guestId}`}>
+                  <Link
+                    href={`/archive/personnel/${guestId}`}
+                    onClick={() => onOpenChange(false)}
+                  >
                     View full personnel page
                   </Link>
                 </Button>

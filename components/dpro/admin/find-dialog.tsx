@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -27,7 +29,7 @@ export function FindDialog({ open, onOpenChange }: FindDialogProps) {
     const trimmed = showId.trim()
     if (!trimmed) return
     onOpenChange(false)
-    router.push(`/archive/setlist/${trimmed}`)
+    router.push(getSetlistArchiveUrl(trimmed))
     setShowId("")
   }
 

@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
@@ -165,7 +167,7 @@ export function LongestSongs({
                         <>
                           {song.show_id ? (
                             <Link
-                              href={`/archive/setlist/${song.show_id}`}
+                              href={getSetlistArchiveUrl(song.show_id)}
                               className="font-medium hover:underline text-white/80"
                             >
                               {formatTourDate(song.show_date)}

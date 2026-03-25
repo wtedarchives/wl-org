@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Star } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -110,7 +112,7 @@ export function VenueShowsTable({
                 >
                   <TableCell className="px-2 py-0.5 text-center whitespace-nowrap font-medium">
                     <Link
-                      href={`/archive/setlist/${show.show_id}`}
+                      href={getSetlistArchiveUrl(show.show_id)}
                       className="hover:underline"
                     >
                       {formatVenueShowDate(show.show_date)}

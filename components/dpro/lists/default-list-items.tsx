@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import type { ListItem } from "@/hooks/use-list-ind-data"
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 
 interface DefaultListItemsProps {
   items: ListItem[]
@@ -28,7 +29,7 @@ export function DefaultListItems({
           href={
             listCategory === "songs"
               ? `/archive/song/${item.list_item_id}`
-              : `/archive/setlist/${item.list_item_id}`
+              : getSetlistArchiveUrl(item.list_item_id)
           }
           className="block px-3 py-2 text-xs font-medium hover:bg-muted/40 transition-colors"
         >

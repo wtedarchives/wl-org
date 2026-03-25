@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, FileMusic, Star, AudioLines, Users } from "lucide-react"
@@ -192,7 +194,7 @@ export function ListShowTable({
                 )}
                 <TableCell className="whitespace-nowrap px-2 py-1 text-center text-xs font-medium tabular-nums">
                   <Link
-                    href={`/archive/setlist/${show.show_id}`}
+                    href={getSetlistArchiveUrl(show.show_id)}
                     className="hover:underline"
                   >
                     {formatShowDate(show.show_date)}
@@ -315,7 +317,7 @@ export function ListShowTable({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/archive/setlist/${show.show_id}`}
+                            href={getSetlistArchiveUrl(show.show_id)}
                             className="inline-flex rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                           >
                             <FileMusic className="size-3.5" />
@@ -332,7 +334,7 @@ export function ListShowTable({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/archive/setlist/${show.show_id}`}
+                            href={getSetlistArchiveUrl(show.show_id)}
                             className="inline-flex rounded p-0.5 text-rose-600 hover:text-rose-500"
                           >
                             <AudioLines className="size-3.5" />

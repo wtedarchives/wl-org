@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -30,7 +32,7 @@ export function ShowRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href={`/archive/setlist/${show.show_id}`}
+              href={getSetlistArchiveUrl(show.show_id)}
               className="hover:underline"
             >
               {formatShowDate(show.show_date)}
@@ -78,7 +80,7 @@ export function ShowRow({
         {showsWithSetlists.has(show.show_id) ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href={`/archive/setlist/${show.show_id}`} aria-label="View setlist">
+              <Link href={getSetlistArchiveUrl(show.show_id)} aria-label="View setlist">
                 <FileMusic className="mx-auto size-3.5 text-emerald-500" />
               </Link>
             </TooltipTrigger>
@@ -95,7 +97,7 @@ export function ShowRow({
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                href={`/archive/setlist/${show.show_id}`}
+                href={getSetlistArchiveUrl(show.show_id)}
                 aria-label="View releases"
               >
                 <AudioLines className="mx-auto size-3.5 text-rose-500" />

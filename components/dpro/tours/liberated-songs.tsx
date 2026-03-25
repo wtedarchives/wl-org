@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { useEffect, useState, useRef } from "react"
 import { createPortal } from "react-dom"
 import Link from "next/link"
@@ -237,7 +239,7 @@ export function LiberatedSongs({
                           <span className="text-muted-foreground">Returned </span>
                           {song.show_id ? (
                             <Link
-                              href={`/archive/setlist/${song.show_id}`}
+                              href={getSetlistArchiveUrl(song.show_id)}
                               className="font-medium hover:underline text-white/80"
                             >
                               {formatTourDate(song.show_date)}
@@ -260,7 +262,7 @@ export function LiberatedSongs({
                           <span className="text-muted-foreground">LTP </span>
                           {song.last_show_id ? (
                             <Link
-                              href={`/archive/setlist/${song.last_show_id}`}
+                              href={getSetlistArchiveUrl(song.last_show_id)}
                               className="font-medium hover:underline text-white/80"
                             >
                               {formatTourDate(song.last_show_date)}

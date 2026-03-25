@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import {
   Table,
@@ -85,7 +87,7 @@ export function UserSongMatrix({
                 className={`h-auto px-1 py-1 text-center text-xs font-medium whitespace-nowrap min-w-[3rem] border-r ${HEADER_RULE} last:border-r-0`}
               >
                 <Link
-                  href={`/archive/setlist/${show.show_id}`}
+                  href={getSetlistArchiveUrl(show.show_id)}
                   className="hover:underline"
                 >
                   {formatShowDate(show.show_date)}

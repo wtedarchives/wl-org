@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -77,7 +79,7 @@ export function LongestSongsCard({
                       <>
                         {song.show_id ? (
                           <Link
-                            href={`/archive/setlist/${song.show_id}`}
+                            href={getSetlistArchiveUrl(song.show_id)}
                             className="font-medium text-foreground hover:underline"
                           >
                             {formatDate(song.show_date)}

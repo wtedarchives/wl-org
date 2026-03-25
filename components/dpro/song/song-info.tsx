@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Image from "next/image"
 import Link from "next/link"
 import { formatSetlistDate } from "@/lib/setlist-utils"
@@ -80,7 +82,7 @@ export function SongInfo({
                 </div>
                 <div className="text-foreground text-sm">
                   <Link
-                    href={`/archive/setlist/${lastPlayed.show_id}`}
+                    href={getSetlistArchiveUrl(lastPlayed.show_id)}
                     className="font-medium hover:underline pr-4"
                   >
                     {formatSetlistDate(lastPlayed.show_date)}

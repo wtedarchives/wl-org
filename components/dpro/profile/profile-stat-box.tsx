@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -156,7 +158,7 @@ export function ProfileStatBox({
                         <div className="flex shrink-0 items-center gap-4">
                           {showDate && showDateVal && showId && (
                             <Link
-                              href={`/archive/setlist/${showId}`}
+                              href={getSetlistArchiveUrl(showId)}
                               className="text-[10px] text-muted-foreground hover:underline"
                             >
                               [{showDateVal}]

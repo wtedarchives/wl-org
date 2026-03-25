@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -117,7 +119,7 @@ export function LiberatedSongsCard({
                         <span className="font-normal">Returned </span>
                         {song.show_id ? (
                           <Link
-                            href={`/archive/setlist/${song.show_id}`}
+                            href={getSetlistArchiveUrl(song.show_id)}
                             className="font-medium text-foreground hover:underline"
                           >
                             {formatDate(song.show_date)}
@@ -142,7 +144,7 @@ export function LiberatedSongsCard({
                         <span className="font-normal">LTP </span>
                         {song.last_show_id ? (
                           <Link
-                            href={`/archive/setlist/${song.last_show_id}`}
+                            href={getSetlistArchiveUrl(song.last_show_id)}
                             className="font-medium text-foreground hover:underline"
                           >
                             {song.last_show_date}

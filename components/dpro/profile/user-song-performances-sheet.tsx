@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -127,8 +129,9 @@ export function UserSongPerformancesSheet({
                     >
                       <TableCell className="whitespace-nowrap align-middle px-2 py-1 text-center text-[11px]">
                         <Link
-                          href={`/archive/setlist/${perf.show_id}`}
+                          href={getSetlistArchiveUrl(perf.show_id)}
                           className="hover:underline"
+                          onClick={() => onOpenChange(false)}
                         >
                           {formatSetlistDate(perf.show_date)}
                         </Link>
@@ -154,6 +157,7 @@ export function UserSongPerformancesSheet({
                           <Link
                             href={`/archive/venue/${perf.venue_id}`}
                             className="hover:underline"
+                            onClick={() => onOpenChange(false)}
                           >
                             {perf.show_venue_location ||
                               perf.show_subvenue ||
@@ -207,7 +211,10 @@ export function UserSongPerformancesSheet({
             <div className="flex flex-wrap items-center gap-2">
               {songId && (
                 <Button type="button" size="sm" variant="outline" asChild>
-                  <Link href={`/archive/song/${songId}`}>
+                  <Link
+                    href={`/archive/song/${songId}`}
+                    onClick={() => onOpenChange(false)}
+                  >
                     View full song history
                   </Link>
                 </Button>

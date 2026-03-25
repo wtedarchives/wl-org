@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Clock, Space, Flame, Users, Star } from "lucide-react"
 import {
@@ -88,7 +90,7 @@ export function ShowStatCard({
                   <TableCell className="py-[6.665px] pl-3">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/archive/setlist/${item.show_id}`}
+                        href={getSetlistArchiveUrl(item.show_id)}
                         className="text-xs font-medium text-foreground hover:underline"
                       >
                         {item.show_date}

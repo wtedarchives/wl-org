@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { PERFORMANCE_YEARS } from "@/lib/song-performance-utils"
@@ -52,7 +54,7 @@ export function GuestPerformanceTimelineView({
                       <Tooltip key={`${year}-${perf.show_id}-${idx}`}>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/archive/setlist/${perf.show_id}`}
+                            href={getSetlistArchiveUrl(perf.show_id)}
                             className={`block w-full text-[0.625rem] text-center px-0.5 font-medium rounded transition-colors hover:underline text-foreground ${
                               selectedGroup && !isHighlighted
                                 ? "opacity-30"

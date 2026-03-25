@@ -1,5 +1,7 @@
 "use client"
 
+
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -129,7 +131,7 @@ export function LongestPerformancesList({
               </TableCell>
               <TableCell className="px-2 py-0.5">
                 <Link
-                  href={`/archive/setlist/${row.show_id}`}
+                  href={getSetlistArchiveUrl(row.show_id)}
                   className="hover:underline"
                 >
                   {formatShowDate(row.show_date)}
