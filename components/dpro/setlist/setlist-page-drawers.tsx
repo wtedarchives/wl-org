@@ -153,7 +153,7 @@ export function SetlistPageDrawers({
           show_venue_location: show.show_venue_location,
           show_group: show.show_group,
         }}
-        releaseArtwork={releases[0]?.release_artwork ?? null}
+        fallbackReleaseArtwork={releases[0]?.release_artwork ?? null}
       />
     </>
   )

@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Check } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -76,6 +76,7 @@ export function WtedPendingSlotContent({
   entry,
   show,
   releaseArtwork,
+  releaseArtworkLoading = false,
   onRequest,
   submitting,
   submitError,
@@ -88,6 +89,7 @@ export function WtedPendingSlotContent({
     show_group: string | null
   }
   releaseArtwork: string | null
+  releaseArtworkLoading?: boolean
   onRequest: () => void
   submitting: boolean
   submitError: string | null
@@ -109,7 +111,11 @@ export function WtedPendingSlotContent({
 
   return (
     <>
-      {releaseArtwork && (
+      {releaseArtworkLoading ? (
+        <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded border border-border bg-muted/60">
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : releaseArtwork ? (
         <div className="relative size-12 shrink-0 overflow-hidden rounded border border-border">
           <Image
             src={releaseArtwork}
@@ -120,7 +126,7 @@ export function WtedPendingSlotContent({
             unoptimized
           />
         </div>
-      )}
+      ) : null}
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-foreground">
           {entry.entry_song}

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import {
@@ -140,7 +139,7 @@ export function DiscographyContent() {
                       {categoryItems.map((item) => (
                         <TableRow key={item.uuid}>
                           <TableCell className="max-w-0 py-1 pl-3 pr-2 align-middle whitespace-normal">
-                            <div className="flex min-h-10 items-center justify-between gap-2 sm:min-h-0">
+                            <div className="flex items-center justify-between gap-2">
                               <Link
                                 href={`/archive/discography/${item.uuid}`}
                                 className="min-w-0 flex-1 text-xs font-medium text-foreground hover:underline break-words [overflow-wrap:anywhere]"
@@ -148,18 +147,17 @@ export function DiscographyContent() {
                                 {item.displayname}
                               </Link>
                               {item.artwork ? (
-                                <Image
-                                  src={item.artwork}
-                                  alt=""
-                                  width={16}
-                                  height={16}
-                                  className="size-5 shrink-0 rounded object-cover border border-border"
-                                  unoptimized
-                                  onError={(e) => {
-                                    const el = e.target as HTMLImageElement
-                                    if (el) el.style.display = "none"
-                                  }}
-                                />
+                                <span className="inline-block w-max max-w-5 shrink-0">
+                                  <img
+                                    src={item.artwork}
+                                    alt=""
+                                    className="block h-auto max-h-5 w-auto max-w-5 rounded border border-border object-contain"
+                                    onError={(e) => {
+                                      const el = e.target as HTMLImageElement
+                                      if (el) el.style.display = "none"
+                                    }}
+                                  />
+                                </span>
                               ) : null}
                             </div>
                           </TableCell>

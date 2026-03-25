@@ -50,6 +50,18 @@ export interface DisplaySetlistTableProps {
   hoveredReleaseId?: string | null
   /** release_id -> Set of setlist entry_ids on that release (from setlist_entry_media). */
   releaseToEntriesMap?: ReleaseToEntriesMap
+  /** When length matches `setlist`, used as row keys (e.g. discography link UUIDs when the same entry appears twice). */
+  rowKeys?: string[]
+  /** When length matches `setlist`, # column shows these values (e.g. `discography_entries.order`). */
+  numberColumnValues?: number[]
+  /** # column is 1… every row (no blanks or skips). Ignored when `numberColumnValues` is provided. */
+  plainAscendingNumbers?: boolean
+  /** Hide Set Break / Encore divider rows (e.g. when rows come from multiple shows). */
+  suppressPlacementBars?: boolean
+  /** Request extra column after Personnel (hidden automatically if every label is blank). */
+  showDiscographySourceColumn?: boolean
+  /** Parallel to `setlist`; cell shows `mm.dd.yy [venue]` when the show has `discography_display`. */
+  discographySourceLabels?: string[]
 }
 
 export function DisplaySetlistTable({
@@ -66,21 +78,50 @@ export function DisplaySetlistTable({
   hoveredCategory,
   hoveredReleaseId,
   releaseToEntriesMap,
+  rowKeys,
+  numberColumnValues,
+  plainAscendingNumbers = false,
+  suppressPlacementBars = false,
+  showDiscographySourceColumn = false,
+  discographySourceLabels = [],
 }: DisplaySetlistTableProps) {
   if (setlist.length === 0) {
     return null
   }
 
+  const discographySourceLabelsAligned =
+    discographySourceLabels.length === setlist.length
+  const showDiscographySourceCol =
+    showDiscographySourceColumn &&
+    discographySourceLabelsAligned &&
+    discographySourceLabels.some((s) => s.trim().length > 0)
+
+  const useRowKeys = rowKeys?.length === setlist.length
+  const rowKeyAt = (index: number, entry: SetlistEntry) =>
+    useRowKeys ? rowKeys![index]! : entry.entry_id
+
   const isDesktop = useIsDesktopContentLayout()
-  const displayNumbers = computeDisplayNumbers(setlist)
+  const displayNumbers: (number | null)[] =
+    numberColumnValues?.length === setlist.length
+      ? numberColumnValues
+      : plainAscendingNumbers
+        ? setlist.map((_, i) => i + 1)
+        : computeDisplayNumbers(setlist)
   const uniquePlacements = new Set(setlist.map((e) => e.entry_placement))
   const hasSinglePlacementType = uniquePlacements.size === 1
   const fullColSpan =
-    2 + (showWtedColumn ? 1 : 0) + 1 + (showCanonColumns ? 3 : 0) + 1 // #, Song, WTED?, Time, Last+Tour+Rarity?, Personnel
-  const hasLastBadges = showCanonColumns && setlist.some((e) => {
-    const c = e.last_count ?? ""
-    return c.includes("Debut") || c.includes("TD") || c.includes("LIB")
-  })
+    2 +
+    (showWtedColumn ? 1 : 0) +
+    1 +
+    (showCanonColumns ? 3 : 0) +
+    1 +
+    (showDiscographySourceCol ? 1 : 0) // #, Song, WTED?, Time, Last+Tour+Rarity?, Personnel, Source?
+  const hasLastBadges =
+    showCanonColumns &&
+    setlist.some((e) => {
+      const c = e.last_count ?? ""
+      return c.includes("Debut") || c.includes("TD") || c.includes("LIB")
+    })
 
   const hasSegue = setlist.some((e) => !!e.entry_segue)
   const shorts = new Set(
@@ -112,10 +153,7 @@ export function DisplaySetlistTable({
         const jotyStyle = getJotyBadgeStyle(round)
         return (
           <div key={round} className="flex items-center gap-2">
-            <span
-              style={jotyStyle.style}
-              className={jotyStyle.className}
-            >
+            <span style={jotyStyle.style} className={jotyStyle.className}>
               {round}
             </span>
             <span>{JOTY_EXPLANATIONS[round] ?? round}</span>
@@ -129,131 +167,152 @@ export function DisplaySetlistTable({
     <TooltipProvider delayDuration={0}>
       <div className="w-full overflow-x-auto">
         <Table className="[&_th]:py-1 [&_th]:px-2 [&_th]:align-middle [&_td]:py-0.5 [&_td]:px-2 [&_td]:align-middle">
-        <TableHeader>
-          <TableRow className="h-8 border-border/60 hover:bg-transparent">
-            <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">#</TableHead>
-            <TableHead className="h-8 max-w-[470px] text-muted-foreground">
-              {hasSongHeaderTooltipItems && isDesktop ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="cursor-help">Song</span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[280px]">
-                    {songHeaderTooltipContent}
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                "Song"
+          <TableHeader>
+            <TableRow className="h-8 border-border/60 hover:bg-transparent">
+              <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">
+                #
+              </TableHead>
+              <TableHead className="h-8 max-w-[470px] text-muted-foreground">
+                {hasSongHeaderTooltipItems && isDesktop ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">Song</span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[280px]">
+                      {songHeaderTooltipContent}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  "Song"
+                )}
+              </TableHead>
+              {showWtedColumn && (
+                <TableHead className="h-8 text-center text-muted-foreground">
+                  {isDesktop ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">WTED</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Use the icons below to request songs on WTED Goose Radio.
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    "WTED"
+                  )}
+                </TableHead>
               )}
-            </TableHead>
-            {showWtedColumn && (
               <TableHead className="h-8 text-center text-muted-foreground">
-                {isDesktop ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="cursor-help">WTED</span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Use the icons below to request songs on WTED Goose Radio.
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  "WTED"
-                )}
+                Time
               </TableHead>
-            )}
-            <TableHead className="h-8 text-center text-muted-foreground">Time</TableHead>
-            {showCanonColumns && (
-              <TableHead className="h-8 text-center text-muted-foreground">
-                {hasLastBadges && isDesktop ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="cursor-help">Last</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[240px] whitespace-pre-wrap text-xs">
-                      {LAST_HEADER_TOOLTIP}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  "Last"
-                )}
+              {showCanonColumns && (
+                <TableHead className="h-8 text-center text-muted-foreground">
+                  {hasLastBadges && isDesktop ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">Last</span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-[240px] whitespace-pre-wrap text-xs">
+                        {LAST_HEADER_TOOLTIP}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    "Last"
+                  )}
+                </TableHead>
+              )}
+              {showCanonColumns && (
+                <TableHead className="h-8 text-center text-muted-foreground">
+                  Tour
+                </TableHead>
+              )}
+              {showCanonColumns && (
+                <TableHead className="h-8 text-center text-muted-foreground">
+                  Rarity
+                </TableHead>
+              )}
+              <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
+                Personnel
               </TableHead>
-            )}
-            {showCanonColumns && (
-              <TableHead className="h-8 text-center text-muted-foreground">Tour</TableHead>
-            )}
-            {showCanonColumns && (
-              <TableHead className="h-8 text-center text-muted-foreground">Rarity</TableHead>
-            )}
-            <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
-              Personnel
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {setlist.map((entry, index) => {
-            const prevEntry = index > 0 ? setlist[index - 1] : null
-            const showEncoreBar =
-              !hasSinglePlacementType &&
-              prevEntry &&
-              entry.entry_set?.startsWith("E") &&
-              (!prevEntry.entry_set?.startsWith("E") ||
-                prevEntry.entry_set !== entry.entry_set) &&
-              !!getEncoreLabel(entry.entry_set)
-            const showSetBreakBar =
-              !hasSinglePlacementType &&
-              prevEntry &&
-              shouldShowSetBreak(prevEntry.entry_set, entry.entry_set)
-            return (
-              <Fragment key={entry.entry_id}>
-                {showEncoreBar && (
-                  <TableRow
-                    key={`encore-${entry.entry_id}`}
-                    className="hover:bg-transparent border-border/60"
-                  >
-                    <TableCell
-                      colSpan={fullColSpan}
-                      className="border-y border-border bg-gray-700 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+              {showDiscographySourceCol ? (
+                <TableHead className="h-8 min-w-[9rem] max-w-[14rem] text-left text-muted-foreground">
+                  Show
+                </TableHead>
+              ) : null}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {setlist.map((entry, index) => {
+              const prevEntry = index > 0 ? setlist[index - 1] : null
+              const showEncoreBar =
+                !suppressPlacementBars &&
+                !hasSinglePlacementType &&
+                prevEntry &&
+                entry.entry_set?.startsWith("E") &&
+                (!prevEntry.entry_set?.startsWith("E") ||
+                  prevEntry.entry_set !== entry.entry_set) &&
+                !!getEncoreLabel(entry.entry_set)
+              const showSetBreakBar =
+                !suppressPlacementBars &&
+                !hasSinglePlacementType &&
+                prevEntry &&
+                shouldShowSetBreak(prevEntry.entry_set, entry.entry_set)
+              const rowKey = rowKeyAt(index, entry)
+              return (
+                <Fragment key={rowKey}>
+                  {showEncoreBar && (
+                    <TableRow
+                      key={`encore-${rowKey}`}
+                      className="border-border/60 hover:bg-transparent"
                     >
-                      {getEncoreLabel(entry.entry_set)}
-                    </TableCell>
-                  </TableRow>
-                )}
-                {showSetBreakBar && (
-                  <TableRow
-                    key={`setbreak-${entry.entry_id}`}
-                    className="hover:bg-transparent border-border/60"
-                  >
-                    <TableCell
-                      colSpan={fullColSpan}
-                      className="border-y border-border bg-gray-800 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+                      <TableCell
+                        colSpan={fullColSpan}
+                        className="border-y border-border bg-gray-700 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+                      >
+                        {getEncoreLabel(entry.entry_set)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {showSetBreakBar && (
+                    <TableRow
+                      key={`setbreak-${rowKey}`}
+                      className="border-border/60 hover:bg-transparent"
                     >
-                      Set Break
-                    </TableCell>
-                  </TableRow>
-                )}
-                <SetlistEntryRow
-                  entry={entry}
-                  displayNumber={displayNumbers[index]}
-                  guestGroups={guestGroups}
-                  showCanonColumns={showCanonColumns}
-                  showWtedColumn={showWtedColumn}
-                  onWtedClick={onWtedClick}
-                  onSongClick={onSongClick}
-                  onJotyClick={onJotyClick}
-                  copiedEntryIds={copiedEntryIds}
-                  onNumberClick={onNumberClick}
-                  showAdminUi={showAdminUi}
-                  showTooltips={isDesktop}
-                  hoveredCategory={hoveredCategory}
-                  hoveredReleaseId={hoveredReleaseId}
-                  releaseToEntriesMap={releaseToEntriesMap}
-                />
-              </Fragment>
-            )
-          })}
-        </TableBody>
-      </Table>
+                      <TableCell
+                        colSpan={fullColSpan}
+                        className="border-y border-border bg-gray-800 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+                      >
+                        Set Break
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  <SetlistEntryRow
+                    entry={entry}
+                    displayNumber={displayNumbers[index]}
+                    guestGroups={guestGroups}
+                    showCanonColumns={showCanonColumns}
+                    showWtedColumn={showWtedColumn}
+                    onWtedClick={onWtedClick}
+                    onSongClick={onSongClick}
+                    onJotyClick={onJotyClick}
+                    copiedEntryIds={copiedEntryIds}
+                    onNumberClick={onNumberClick}
+                    showAdminUi={showAdminUi}
+                    showTooltips={isDesktop}
+                    hoveredCategory={hoveredCategory}
+                    hoveredReleaseId={hoveredReleaseId}
+                    releaseToEntriesMap={releaseToEntriesMap}
+                    discographySourceLabel={
+                      showDiscographySourceCol
+                        ? (discographySourceLabels[index] ?? "")
+                        : undefined
+                    }
+                  />
+                </Fragment>
+              )
+            })}
+          </TableBody>
+        </Table>
       </div>
     </TooltipProvider>
   )

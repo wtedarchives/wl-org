@@ -17,8 +17,12 @@ export function useWtedRequests(accessToken: string | null, open: boolean) {
       const base = process.env.NEXT_PUBLIC_SUPABASE_URL
         ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
         : ""
+      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       const res = await fetch(`${base}/wted-requests`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          ...(anon ? { apikey: anon } : {}),
+        },
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))

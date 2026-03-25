@@ -23,6 +23,7 @@ import { AdminMedia } from "./admin-media"
 import { AdminVenue } from "./admin-venue"
 import { AdminSubvenue } from "./admin-subvenue"
 import { AdminWted } from "./admin-wted"
+import { AdminDiscography } from "./admin-discography"
 
 const TABS = [
   "Setlist",
@@ -32,6 +33,7 @@ const TABS = [
   "Show",
   "Changes",
   "Releases",
+  "Discography",
   "Media",
   "Venue",
   "Subvenue",
@@ -180,6 +182,9 @@ export function AdminPanel() {
           </TabsContent>
           <TabsContent value="Releases" className="mt-0 w-full p-3 sm:p-4">
             <AdminReleases />
+          </TabsContent>
+          <TabsContent value="Discography" className="mt-0 w-full p-3 sm:p-4">
+            <AdminDiscography />
           </TabsContent>
           <TabsContent value="Media" className="mt-0 w-full p-3 sm:p-4">
             <AdminMedia />

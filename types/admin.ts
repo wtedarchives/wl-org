@@ -177,4 +177,25 @@ export interface ReleaseData {
   release_artwork: string | null
 }
 
+/** Discography row for AdminDiscography */
+export interface DiscographyAdminRecord {
+  uuid: string
+  name: string
+  displayname: string
+  artist: string
+  category: string
+  artwork: string
+  canon_id: number
+  release_date: string | null
+  coach_notes: string | null
+}
+
+/** Join table: setlist lines linked to a discography release */
+export interface DiscographyEntryLink {
+  uuid: string
+  setlist_entry: string
+  discography_entry: string
+  order: number
+}
+
 export type AdminShowDataBasic = ShowData

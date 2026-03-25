@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import {
   TableCell,
   TableRow,
@@ -38,6 +37,8 @@ export interface SetlistEntryRowProps {
   hoveredCategory?: string | null
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: Record<string, Set<string>>
+  /** When set (including `""`), extra column after Personnel for discography source line. */
+  discographySourceLabel?: string
 }
 
 export function SetlistEntryRow({
@@ -56,6 +57,7 @@ export function SetlistEntryRow({
   hoveredCategory,
   hoveredReleaseId,
   releaseToEntriesMap,
+  discographySourceLabel,
 }: SetlistEntryRowProps) {
   const rarity = calculateRarity(
     entry.times_played_num,
@@ -99,7 +101,6 @@ export function SetlistEntryRow({
           displayNumber={displayNumber}
           isCopied={isCopied}
           canCopyNumber={canCopyNumber}
-          showTooltips={showTooltips}
           onNumberClick={onNumberClick}
         />
       </TableCell>
@@ -108,7 +109,6 @@ export function SetlistEntryRow({
           entry={entry}
           onSongClick={onSongClick}
           onJotyClick={onJotyClick}
-          showTooltips={showTooltips}
         />
       </TableCell>
       {showWtedColumn && (
@@ -152,6 +152,11 @@ export function SetlistEntryRow({
       <TableCell className="min-w-[400px] max-w-[600px]">
         <SetlistEntryGuestsCell entry={entry} showTooltips={showTooltips} />
       </TableCell>
+      {discographySourceLabel !== undefined ? (
+        <TableCell className="max-w-[14rem] min-w-[9rem] whitespace-normal text-left text-[11px] text-muted-foreground">
+          {discographySourceLabel}
+        </TableCell>
+      ) : null}
     </TableRow>
   )
 }

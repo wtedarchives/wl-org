@@ -5,6 +5,7 @@ import Image from "next/image"
 
 import { useAuth } from "@/components/auth-context"
 import { useWtedRequests } from "@/hooks/use-wted-requests"
+import { useWtedEntryReleaseArtwork } from "@/hooks/use-wted-entry-release-artwork"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -46,7 +47,8 @@ interface SetlistWtedSheetProps {
   onOpenChange: (open: boolean) => void
   entry: SetlistEntry | null
   show: { show_date: string; show_venue_location: string | null; show_group: string | null }
-  releaseArtwork: string | null
+  /** When entry-based artwork cannot be resolved (no SEM, etc.). */
+  fallbackReleaseArtwork: string | null
 }
 
 export function SetlistWtedSheet({
@@ -54,8 +56,13 @@ export function SetlistWtedSheet({
   onOpenChange,
   entry,
   show,
-  releaseArtwork,
+  fallbackReleaseArtwork,
 }: SetlistWtedSheetProps) {
+  const { releaseArtwork, artworkLoading } = useWtedEntryReleaseArtwork(
+    entry,
+    open,
+    fallbackReleaseArtwork,
+  )
   const { session } = useAuth()
   const accessToken = session?.access_token ?? null
   const { requests, loading, error, refetch } = useWtedRequests(accessToken, open)
@@ -131,11 +138,13 @@ export function SetlistWtedSheet({
       const base = process.env.NEXT_PUBLIC_SUPABASE_URL
         ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
         : ""
+      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       const res = await fetch(`${base}/wted-request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
+          ...(anon ? { apikey: anon } : {}),
         },
         body: JSON.stringify({ entry_id: entry.entry_id }),
       })
@@ -280,6 +289,7 @@ export function SetlistWtedSheet({
                       entry={slot.entry}
                       show={show}
                       releaseArtwork={releaseArtwork}
+                      releaseArtworkLoading={artworkLoading}
                       onRequest={handleRequest}
                       submitting={submitting}
                       submitError={submitError}

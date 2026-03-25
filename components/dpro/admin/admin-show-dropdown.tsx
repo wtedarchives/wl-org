@@ -28,6 +28,12 @@ interface AdminShowDropdownProps {
   loadingProgress: number
   selectedShow?: ShowForDropdown | null
   triggerLabel?: string
+  /**
+   * When false, the menu is positioned under the trigger inside the parent
+   * stacking context (required inside modal dialogs — portaling to body is
+   * blocked by Radix inert/pointer behavior).
+   */
+  portalToBody?: boolean
 }
 
 export function AdminShowDropdown({
@@ -41,6 +47,7 @@ export function AdminShowDropdown({
   loadingProgress,
   selectedShow,
   triggerLabel = "Show",
+  portalToBody = true,
 }: AdminShowDropdownProps) {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -49,14 +56,13 @@ export function AdminShowDropdown({
   const selectedShowRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
-    if (isOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 8,
-        right: window.innerWidth - rect.right,
-      })
-    }
-  }, [isOpen])
+    if (!portalToBody || !isOpen || !triggerRef.current) return
+    const rect = triggerRef.current.getBoundingClientRect()
+    setDropdownPosition({
+      top: rect.bottom + 8,
+      right: window.innerWidth - rect.right,
+    })
+  }, [isOpen, portalToBody])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -92,15 +98,8 @@ export function AdminShowDropdown({
     }
   }, [isOpen, selectedShow])
 
-  const dropdownContent = isOpen && (
-    <div
-      ref={dropdownRef}
-      className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-muted shadow-lg"
-      style={{
-        top: dropdownPosition.top,
-        right: dropdownPosition.right,
-      }}
-    >
+  const dropdownInner = (
+    <>
           <div className="p-1">
             <div className="relative">
               <Input
@@ -160,22 +159,56 @@ export function AdminShowDropdown({
               </>
             )}
           </div>
-        </div>
+    </>
   )
 
+  const dropdownPanel = (
+    <div
+      ref={dropdownRef}
+      className={
+        portalToBody
+          ? "fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+          : "absolute right-0 top-[calc(100%+0.5rem)] z-[200] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+      }
+      style={
+        portalToBody
+          ? {
+              top: dropdownPosition.top,
+              right: dropdownPosition.right,
+            }
+          : undefined
+      }
+    >
+      {dropdownInner}
+    </div>
+  )
+
+  const trigger = (
+    <Button
+      ref={triggerRef}
+      variant="outline"
+      size="sm"
+      onClick={onToggle}
+      className="gap-2"
+    >
+      {triggerLabel}
+      <ChevronDown className="size-4" />
+    </Button>
+  )
+
+  if (portalToBody) {
+    return (
+      <>
+        {trigger}
+        {isOpen ? createPortal(dropdownPanel, document.body) : null}
+      </>
+    )
+  }
+
   return (
-    <>
-      <Button
-        ref={triggerRef}
-        variant="outline"
-        size="sm"
-        onClick={onToggle}
-        className="gap-2"
-      >
-        {triggerLabel}
-        <ChevronDown className="size-4" />
-      </Button>
-      {dropdownContent && createPortal(dropdownContent, document.body)}
-    </>
+    <div className="relative inline-block">
+      {trigger}
+      {isOpen ? dropdownPanel : null}
+    </div>
   )
 }
