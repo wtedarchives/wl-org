@@ -20,6 +20,7 @@ import { SetlistTourDropdown } from "./setlist-tour-dropdown"
 import { SetlistShowsDropdown } from "./setlist-shows-dropdown"
 import type { Show, ShowDate } from "@/types/setlist"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import type { Tour } from "@/hooks/use-setlist-data"
 
 const pillBaseMobile =
@@ -183,7 +184,7 @@ export function SetlistPageHeaderMobile({
             {show.show_subvenue &&
               (show.venue_id ? (
                 <Link
-                  href={`/archive/venue/${show.venue_id}`}
+                  href={getVenueArchiveUrl(show.venue_id)}
                   className={`inline-flex min-w-0 shrink items-center gap-1 truncate ${pillBaseMobile} bg-wl-green/30 text-foreground hover:bg-wl-green/40`}
                 >
                   <Building2 className="size-3 shrink-0" />
@@ -191,7 +192,7 @@ export function SetlistPageHeaderMobile({
                 </Link>
               ) : show.show_subvenue_venue ? (
                 <Link
-                  href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
+                  href={getVenueArchiveUrl(show.show_subvenue_venue)}
                   className={`inline-flex min-w-0 shrink items-center gap-1 truncate ${pillBaseMobile} bg-wl-green/30 text-foreground hover:bg-wl-green/40`}
                 >
                   <Building2 className="size-3 shrink-0" />
@@ -199,7 +200,7 @@ export function SetlistPageHeaderMobile({
                 </Link>
               ) : (
                 <Link
-                  href={`/archive/venue/${encodeURIComponent(show.show_subvenue)}`}
+                  href={getVenueArchiveUrl(show.show_subvenue)}
                   className={`inline-flex min-w-0 shrink items-center gap-1 truncate ${pillBaseMobile} bg-wl-green/30 text-foreground hover:bg-wl-green/40`}
                 >
                   <Building2 className="size-3 shrink-0" />

@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import { ArrowUp, ArrowDown } from "lucide-react"
 import {
@@ -53,11 +54,10 @@ export function GuestPerformanceTableView({
   }
 
   const getVenueHref = (perf: GuestShow) => {
-    if (perf.venue_id) return `/archive/venue/${perf.venue_id}`
-    if (perf.show_subvenue)
-      return `/archive/venue/${encodeURIComponent(perf.show_subvenue)}`
+    if (perf.venue_id) return getVenueArchiveUrl(perf.venue_id)
+    if (perf.show_subvenue) return getVenueArchiveUrl(perf.show_subvenue)
     if (perf.show_venue_location)
-      return `/archive/venue/${encodeURIComponent(perf.show_venue_location)}`
+      return getVenueArchiveUrl(perf.show_venue_location)
     return null
   }
 

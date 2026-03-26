@@ -6,6 +6,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import {
   getLastCountBadgeStyle,
   getPlacementIndexCellBg,
@@ -37,7 +38,7 @@ function DiscographyShowVenueInner({
   if (cell.venueId) {
     return (
       <Link
-        href={`/archive/venue/${cell.venueId}`}
+        href={getVenueArchiveUrl(cell.venueId)}
         className="font-normal text-foreground hover:underline"
       >
         {label}
@@ -47,7 +48,7 @@ function DiscographyShowVenueInner({
   if (cell.venueSlug) {
     return (
       <Link
-        href={`/archive/venue/${encodeURIComponent(cell.venueSlug)}`}
+        href={getVenueArchiveUrl(cell.venueSlug)}
         className="font-normal text-foreground hover:underline"
       >
         {label}

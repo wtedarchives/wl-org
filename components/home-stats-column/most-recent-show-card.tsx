@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -105,7 +106,7 @@ export function MostRecentShowCard() {
               {" — "}
               {mostRecentShow.venue_id ? (
                 <Link
-                  href={`/archive/venue/${mostRecentShow.venue_id}`}
+                  href={getVenueArchiveUrl(mostRecentShow.venue_id)}
                   className="hover:underline"
                 >
                   {mostRecentShow.venue_location}

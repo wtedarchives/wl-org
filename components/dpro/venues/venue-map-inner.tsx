@@ -10,6 +10,7 @@ import { VenueMapMobileHeader } from "./venue-map-mobile-header"
 import { VenueMapDesktopHeader } from "./venue-map-desktop-header"
 import { VenueMapFilterModal } from "./venue-map-filter-modal"
 import type { UseVenueMapDataReturn } from "@/hooks/use-venue-map-data"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import "leaflet/dist/leaflet.css"
 
 interface VenueMapInnerProps {
@@ -50,7 +51,7 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
   )
 
   const handleVenueClick = onVenueClick ?? ((venueId: string) => {
-    router.push(`/archive/venue/${venueId}`)
+    router.push(getVenueArchiveUrl(venueId))
   })
 
   if (allVenues.length === 0) {

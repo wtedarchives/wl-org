@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { useState } from "react"
 import Link from "next/link"
 import { TicketPlus } from "lucide-react"
@@ -231,14 +232,14 @@ function AttendedShowRow({
       <TableCell className="whitespace-nowrap text-muted-foreground">
         {show?.venue_id ? (
           <Link
-            href={`/archive/venue/${show.venue_id}`}
+            href={getVenueArchiveUrl(show.venue_id)}
             className="text-foreground hover:underline"
           >
             {show.show_subvenue}
           </Link>
         ) : show?.show_subvenue_venue ? (
           <Link
-            href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
+            href={getVenueArchiveUrl(show.show_subvenue_venue)}
             className="text-foreground hover:underline"
           >
             {show.show_subvenue}

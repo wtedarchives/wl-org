@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -162,7 +163,7 @@ export function SetlistSongPerformancesSheet({
                         <TableCell className="align-middle px-2 py-1 text-[11px]">
                           {perf.venue_id ? (
                             <Link
-                              href={`/archive/venue/${perf.venue_id}`}
+                              href={getVenueArchiveUrl(perf.venue_id)}
                               className="hover:underline"
                               onClick={() => onOpenChange(false)}
                             >

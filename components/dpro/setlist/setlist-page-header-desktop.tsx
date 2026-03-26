@@ -21,6 +21,7 @@ import { SetlistTourDropdown } from "./setlist-tour-dropdown"
 import { SetlistShowsDropdown } from "./setlist-shows-dropdown"
 import type { Show, ShowDate } from "@/types/setlist"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import type { Tour } from "@/hooks/use-setlist-data"
 
 interface SetlistPageHeaderDesktopProps {
@@ -178,7 +179,7 @@ export function SetlistPageHeaderDesktop({
         {show.show_subvenue &&
           (show.venue_id ? (
             <Link
-              href={`/archive/venue/${show.venue_id}`}
+              href={getVenueArchiveUrl(show.venue_id)}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
               <Building2 className="size-3 shrink-0" />
@@ -186,7 +187,7 @@ export function SetlistPageHeaderDesktop({
             </Link>
           ) : show.show_subvenue_venue ? (
             <Link
-              href={`/archive/venue/${encodeURIComponent(show.show_subvenue_venue)}`}
+              href={getVenueArchiveUrl(show.show_subvenue_venue)}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
               <Building2 className="size-3 shrink-0" />
@@ -194,7 +195,7 @@ export function SetlistPageHeaderDesktop({
             </Link>
           ) : (
             <Link
-              href={`/archive/venue/${encodeURIComponent(show.show_subvenue)}`}
+              href={getVenueArchiveUrl(show.show_subvenue)}
               className="inline-flex items-center gap-1 rounded-full border border-border bg-wl-green/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-wl-green/40"
             >
               <Building2 className="size-3 shrink-0" />

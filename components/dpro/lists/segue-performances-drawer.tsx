@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import {
@@ -115,7 +116,7 @@ export function SeguePerformancesDrawer({
                       <TableCell>
                         {p.venue_id ? (
                           <Link
-                            href={`/archive/venue/${p.venue_id}`}
+                            href={getVenueArchiveUrl(p.venue_id)}
                             className="hover:underline"
                             onClick={() => onOpenChange(false)}
                           >
@@ -123,7 +124,7 @@ export function SeguePerformancesDrawer({
                           </Link>
                         ) : p.show_subvenue_venue ? (
                           <Link
-                            href={`/archive/venue/${encodeURIComponent(p.show_subvenue_venue)}`}
+                            href={getVenueArchiveUrl(p.show_subvenue_venue)}
                             className="hover:underline"
                             onClick={() => onOpenChange(false)}
                           >

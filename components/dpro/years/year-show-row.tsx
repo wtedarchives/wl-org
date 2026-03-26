@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, FileMusic, Star, AudioLines } from "lucide-react"
@@ -147,16 +148,14 @@ export function YearShowRow({
       <TableCell className="px-2 py-1 text-[11px]">
         {show.venue_id ? (
           <Link
-            href={`/archive/venue/${show.venue_id}`}
+            href={getVenueArchiveUrl(show.venue_id)}
             className="hover:underline"
           >
             {show.show_subvenue}
           </Link>
         ) : show.show_subvenue_venue ? (
           <Link
-            href={`/archive/venue/${encodeURIComponent(
-              show.show_subvenue_venue,
-            )}`}
+            href={getVenueArchiveUrl(show.show_subvenue_venue)}
             className="hover:underline"
           >
             {show.show_subvenue}

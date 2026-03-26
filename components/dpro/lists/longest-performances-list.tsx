@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -142,14 +143,14 @@ export function LongestPerformancesList({
                 {row.show_venue_location ? (
                   row.venue_id ? (
                     <Link
-                      href={`/archive/venue/${row.venue_id}`}
+                      href={getVenueArchiveUrl(row.venue_id)}
                       className="hover:underline"
                     >
                       {row.show_venue_location}
                     </Link>
                   ) : row.show_subvenue_venue ? (
                     <Link
-                      href={`/archive/venue/${encodeURIComponent(row.show_subvenue_venue)}`}
+                      href={getVenueArchiveUrl(row.show_subvenue_venue)}
                       className="hover:underline"
                     >
                       {row.show_venue_location}

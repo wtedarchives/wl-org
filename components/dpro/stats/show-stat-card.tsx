@@ -27,6 +27,7 @@ import type { ShowStat } from "@/lib/types/stats"
 import { getRankingText } from "@/lib/stats/stats-formatting"
 import { getRarityColor, getGapColor } from "@/lib/stats/tour-utils"
 import { getListArchiveUrl } from "@/lib/list-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 
 const LONGEST_SHOWS_LIST_ID = "45a4b90e-adbe-4af5-9051-2f4d212069fc"
 
@@ -122,7 +123,7 @@ export function ShowStatCard({
                     {item.show_venue_location ? (
                       item.venue_id ? (
                         <Link
-                          href={`/archive/venue/${item.venue_id}`}
+                          href={getVenueArchiveUrl(item.venue_id)}
                           className="text-foreground hover:underline"
                         >
                           {item.show_venue_location}

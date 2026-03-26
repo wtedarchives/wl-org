@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { ArrowUp, ArrowDown } from "lucide-react"
@@ -68,12 +69,11 @@ export function PerformanceTableView({
   }
 
   const getVenueHref = (perf: SongPerformance) => {
-    if (perf.venue_id) return `/archive/venue/${perf.venue_id}`
+    if (perf.venue_id) return getVenueArchiveUrl(perf.venue_id)
     if (perf.show_subvenue_venue)
-      return `/archive/venue/${encodeURIComponent(perf.show_subvenue_venue)}`
+      return getVenueArchiveUrl(perf.show_subvenue_venue)
     const venueSearchTerm = perf.show_subvenue || perf.show_venue_location
-    if (venueSearchTerm)
-      return `/archive/venue/${encodeURIComponent(venueSearchTerm)}`
+    if (venueSearchTerm) return getVenueArchiveUrl(venueSearchTerm)
     return null
   }
 

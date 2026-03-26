@@ -4,6 +4,7 @@
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -141,7 +142,7 @@ export function UserPersonnelShowsSheet({
                       <TableCell className="whitespace-nowrap px-2 py-1 align-middle text-[11px]">
                         {show.venue_id ? (
                           <Link
-                            href={`/archive/venue/${show.venue_id}`}
+                            href={getVenueArchiveUrl(show.venue_id)}
                             className="hover:underline"
                             onClick={() => onOpenChange(false)}
                           >

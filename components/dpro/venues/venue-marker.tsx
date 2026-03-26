@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import { Marker, Popup, useMap } from "react-leaflet"
 import { createNumberedIcon } from "@/lib/map-icons"
@@ -113,7 +114,7 @@ export function VenueMarker({
               </button>
             ) : (
               <Link
-                href={`/archive/venue/${venue.venue_id}`}
+                href={getVenueArchiveUrl(venue.venue_id)}
                 className="text-muted-foreground text-sm font-medium hover:underline"
               >
                 {venue.venue}

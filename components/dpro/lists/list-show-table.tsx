@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, FileMusic, Star, AudioLines, Users } from "lucide-react"
@@ -288,14 +289,17 @@ export function ListShowTable({
                 <TableCell className="px-2 py-1 text-xs">
                   {show.venue_id ? (
                     <Link
-                      href={`/archive/venue/${show.venue_id}`}
+                      href={getVenueArchiveUrl(show.venue_id)}
                       className="hover:underline"
                     >
                       {show.show_subvenue}
                     </Link>
                   ) : (show as { show_subvenue_venue?: string }).show_subvenue_venue ? (
                     <Link
-                      href={`/archive/venue/${encodeURIComponent((show as { show_subvenue_venue: string }).show_subvenue_venue)}`}
+                      href={getVenueArchiveUrl(
+                        (show as { show_subvenue_venue: string })
+                          .show_subvenue_venue,
+                      )}
                       className="hover:underline"
                     >
                       {show.show_subvenue}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Card, CardContent } from "@/components/ui/card"
@@ -167,7 +168,7 @@ export function VenuesContent() {
                       >
                         <TableCell className="px-2 py-0.5 font-medium">
                           <Link
-                            href={`/archive/venue/${venue.venue_id}`}
+                            href={getVenueArchiveUrl(venue.venue_id)}
                             className="hover:underline"
                           >
                             {venue.subvenue}

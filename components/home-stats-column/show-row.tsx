@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -60,7 +61,7 @@ export function ShowRow({
           <TooltipTrigger asChild>
             {show.venue_id ? (
               <Link
-                href={`/archive/venue/${show.venue_id}`}
+                href={getVenueArchiveUrl(show.venue_id)}
                 className="hover:underline"
               >
                 {show.show_venue_location}

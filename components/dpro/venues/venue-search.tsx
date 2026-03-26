@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/command"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 
 interface VenueBasic {
   subvenue: string
@@ -90,8 +91,8 @@ export function VenueSearch({
 
   const handleSelect = (venueId: string, subvenue: string) => {
     setSelectedVenue(subvenue)
-    setOpen(false)
-    router.push(`/archive/venue/${venueId}`)
+    handleOpenChange(false)
+    router.push(getVenueArchiveUrl(venueId))
   }
 
   return (

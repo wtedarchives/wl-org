@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
-import { notFound } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useSidebar } from "@/components/ui/sidebar"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
@@ -11,13 +11,32 @@ import { VenueHeader } from "@/components/dpro/venue/venue-header"
 import { VenueShowsTable } from "@/components/dpro/venue/venue-shows-table"
 import { VenueSongSpreadCard } from "@/components/dpro/venue/venue-song-spread-card"
 import { VenueSingleMarkerMapWrapper } from "@/components/dpro/venue/venue-single-marker-map-wrapper"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 
-export default function VenueDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id: venueId } = use(params)
+function resolveVenueKeyFromSearchParams(
+  searchParams: ReturnType<typeof useSearchParams>,
+): { venueKey: string; invalidParams: boolean } {
+  const raw = searchParams
+    .getAll("id")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (new Set(raw).size > 1) {
+    return { venueKey: "", invalidParams: true }
+  }
+  return { venueKey: raw[0] ?? "", invalidParams: false }
+}
+
+function VenueIndexRedirect() {
+  const router = useRouter()
+  useEffect(() => {
+    router.replace("/archive/venues")
+  }, [router])
+  return (
+    <LoadingPageCard message="Redirecting…" page="venue" />
+  )
+}
+
+function VenueDetailContent({ venueKey }: { venueKey: string }) {
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { openMobile } = useSidebar()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -29,7 +48,7 @@ export default function VenueDetailPage({
     loading,
     progress,
     error,
-  } = useVenueData(venueId)
+  } = useVenueData(venueKey)
 
   const { showRatings } = useShowRatings(shows)
 
@@ -43,7 +62,7 @@ export default function VenueDetailPage({
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: "Venues", href: "/archive/venues" },
-      { label: venueName, href: "" },
+      { label: venueName, href: getVenueArchiveUrl(venue.venue_id) },
     ])
     return () => setSetlistBreadcrumbs(null)
   }, [venue, venueName, setSetlistBreadcrumbs])
@@ -56,8 +75,6 @@ export default function VenueDetailPage({
       }
     }
   }, [venue, venueName])
-
-  if (!venueId) notFound()
 
   if (loading) {
     return (
@@ -93,7 +110,7 @@ export default function VenueDetailPage({
       </>
     )
 
-  const pageContent = (
+  return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
       <div className="mb-1 w-full">
         <VenueHeader
@@ -128,6 +145,20 @@ export default function VenueDetailPage({
       )}
     </div>
   )
+}
 
-  return pageContent
+export default function VenueArchivePageClient() {
+  const searchParams = useSearchParams()
+  const { venueKey, invalidParams } = useMemo(
+    () => resolveVenueKeyFromSearchParams(searchParams),
+    [searchParams],
+  )
+
+  if (invalidParams) notFound()
+
+  if (!venueKey) {
+    return <VenueIndexRedirect />
+  }
+
+  return <VenueDetailContent venueKey={venueKey} />
 }
