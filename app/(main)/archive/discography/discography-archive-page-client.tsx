@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useEffect, useMemo, useState } from "react"
-import { notFound, useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
@@ -19,12 +19,17 @@ import { Separator } from "@/components/ui/separator"
 import type { SetlistEntry } from "@/types/setlist"
 import { formatLengthAsHmmss, totalSetlistLength } from "@/lib/setlist-utils"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { getDiscographyArchiveUrl } from "@/lib/discography-archive-url"
+import { DiscographyContent } from "@/components/dpro/discography/discography-content"
 
 const EMPTY_WTED_SHOW = {
   show_date: "",
   show_venue_location: null as string | null,
   show_group: null as string | null,
 }
+
+const RELEASE_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function formatReleaseDate(iso: string | null): string | null {
   if (!iso) return null
@@ -39,12 +44,20 @@ function formatReleaseDate(iso: string | null): string | null {
   })
 }
 
-export default function DiscographyReleasePage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = use(params)
+function resolveDiscographyIdFromSearchParams(
+  searchParams: ReturnType<typeof useSearchParams>,
+): { releaseId: string; invalidParams: boolean } {
+  const idList = searchParams
+    .getAll("id")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (new Set(idList).size > 1) {
+    return { releaseId: "", invalidParams: true }
+  }
+  return { releaseId: idList[0] ?? "", invalidParams: false }
+}
+
+function DiscographyReleasePageContent({ id }: { id: string }) {
   const router = useRouter()
   const { user } = useAuth()
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
@@ -94,10 +107,10 @@ export default function DiscographyReleasePage({
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: "Discography", href: "/archive/discography" },
-      { label: release.displayname, href: "" },
+      { label: release.displayname, href: getDiscographyArchiveUrl(id) },
     ])
     return () => setSetlistBreadcrumbs(null)
-  }, [release, setSetlistBreadcrumbs])
+  }, [release, id, setSetlistBreadcrumbs])
 
   useEffect(() => {
     if (!release) return
@@ -116,8 +129,6 @@ export default function DiscographyReleasePage({
     if (!formatted || formatted === "0:00:00") return null
     return formatted
   }, [linkedSetlist, linkedSetlistLoading])
-
-  if (!id) notFound()
 
   if (loading) {
     return (
@@ -284,4 +295,21 @@ export default function DiscographyReleasePage({
       />
     </div>
   )
+}
+
+export default function DiscographyArchivePageClient() {
+  const searchParams = useSearchParams()
+  const { releaseId, invalidParams } = useMemo(
+    () => resolveDiscographyIdFromSearchParams(searchParams),
+    [searchParams],
+  )
+
+  if (invalidParams) notFound()
+
+  if (releaseId) {
+    if (!RELEASE_ID_RE.test(releaseId)) notFound()
+    return <DiscographyReleasePageContent id={releaseId} />
+  }
+
+  return <DiscographyContent />
 }

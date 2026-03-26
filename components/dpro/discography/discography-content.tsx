@@ -8,6 +8,7 @@ import {
 } from "@/lib/discography-public"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
+import { getDiscographyArchiveUrl } from "@/lib/discography-archive-url"
 import {
   Card,
   CardContent,
@@ -147,7 +148,7 @@ export function DiscographyContent() {
                           <TableCell className="max-w-0 py-1 pl-3 pr-2 align-middle whitespace-normal">
                             <div className="flex items-center justify-between gap-2">
                               <Link
-                                href={`/archive/discography/${item.uuid}`}
+                                href={getDiscographyArchiveUrl(item.uuid)}
                                 className="min-w-0 flex-1 text-xs font-medium leading-3.5 text-foreground hover:underline break-words [overflow-wrap:anywhere]"
                               >
                                 {item.displayname}

@@ -15,12 +15,13 @@ All URL slugs for **Setlist Archive** pages must start with `/archive`.
   - Tours: `/archive/tours?id={uuid}` — use `getTourArchiveUrl(tourId)` from `lib/tour-archive-url.ts`. **Legacy** `/archive/tours/{uuid}` **301** to the query form via `public/_redirects`.
   - Songs index: `/archive/songs`. **Song detail**: `/archive/song?id={uuid}` — use `getSongArchiveUrl(songId)` from `lib/song-archive-url.ts`. **Legacy** `/archive/song/{uuid}` **301** to the query form via `public/_redirects`.
   - Stats: `/archive/stats`, **Personnel index**: `/archive/personnel`. **Personnel detail**: `/archive/personnel?id={uuid}` — use `getPersonnelArchiveUrl(guestId)` from `lib/personnel-archive-url.ts`. **Legacy** `/archive/personnel/{uuid}` **301** via `public/_redirects`.
-  - Venues: `/archive/venues`, Discography: `/archive/discography`, Lists: `/archive/lists`, Setlist Game: `/archive/setlistgame`, Submit: `/archive/submit`
+  - Venues: `/archive/venues`, **Discography index**: `/archive/discography`. **Discography release**: `/archive/discography?id={uuid}` — use `getDiscographyArchiveUrl(releaseUuid)` from `lib/discography-archive-url.ts`. **Legacy** `/archive/discography/{uuid}` **301** via `public/_redirects`.
+  - Lists: `/archive/lists`, Setlist Game: `/archive/setlistgame`, Submit: `/archive/submit`
   - **Show setlist (per-show)**: `/archive/setlist?id={uuid}` — use `getSetlistArchiveUrl(showId)` from `lib/setlist-archive-url.ts` for every internal link. Static export cannot add new `generateStaticParams` entries after deploy; query-based URLs avoid that. **Legacy** `/archive/setlist/{uuid}` URLs **301** to `/archive/setlist?id=…` via `public/_redirects` on Netlify. **Legacy** `?show_id=` is still accepted on the client and replaced with `?id=` for the same value.
 
 ## Implementation
 
-- **App Router**: Place Setlist Archive pages under `app/(main)/archive/...` (e.g. `app/(main)/archive/years/page.tsx`, `app/(main)/archive/tours/page.tsx`, `app/(main)/archive/song/page.tsx`, `app/(main)/archive/personnel/page.tsx`).
+- **App Router**: Place Setlist Archive pages under `app/(main)/archive/...` (e.g. `app/(main)/archive/years/page.tsx`, `app/(main)/archive/tours/page.tsx`, `app/(main)/archive/song/page.tsx`, `app/(main)/archive/personnel/page.tsx`, `app/(main)/archive/discography/page.tsx`).
 - **Links**: Use `/archive/...` for any link that targets a Setlist Archive page (sidebar, breadcrumbs, internal links). For a show link, use `getSetlistArchiveUrl`. For a year, `getYearArchiveUrl`. For a tour, `getTourArchiveUrl`. For a song, `getSongArchiveUrl`. For personnel (guest), `getPersonnelArchiveUrl`.
 - **Breadcrumbs**: For any Setlist Archive page, the first breadcrumb segment after Home must show **"Setlist Archive"** (not "Dpro"); link target remains `/archive`.
 - **Pathname checks**: Treat `pathname.startsWith("/archive")` as “user is in Setlist Archive” for sidebar expansion and active state.

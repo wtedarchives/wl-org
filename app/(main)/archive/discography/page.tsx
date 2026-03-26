@@ -1,6 +1,8 @@
 import { Suspense } from "react"
-import { DiscographyContent } from "@/components/dpro/discography/discography-content"
+
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+
+import DiscographyArchivePageClient from "./discography-archive-page-client"
 
 export const metadata = {
   title: "Discography – WysteriaLane.org",
@@ -10,10 +12,10 @@ export default function DiscographyPage() {
   return (
     <Suspense
       fallback={
-        <LoadingPageCard message="Loading discography data…" />
+        <LoadingPageCard message="Loading discography…" page="discography" />
       }
     >
-      <DiscographyContent />
+      <DiscographyArchivePageClient />
     </Suspense>
   )
 }

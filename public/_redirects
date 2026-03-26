@@ -12,3 +12,6 @@
 
 # Legacy path-based personnel URLs → query model
 /archive/personnel/*  /archive/personnel?id=:splat  301
+
+# Legacy path-based discography URLs → query model
+/archive/discography/*  /archive/discography?id=:splat  301
