@@ -40,8 +40,8 @@ function minSortKey(a: SortKey, b: SortKey): SortKey {
 
 /**
  * Releases tied to discography tracks via `setlist_entry_media`, unique by
- * `release_id`, ordered by earliest contributing show_date then that show's
- * `release_order`.
+ * `release_id`, ordered by `releases.release_service` (asc), then earliest
+ * contributing show_date, then that show's `release_order`.
  */
 export function useDiscographyLinkedReleases(
   linkedSetlist: SetlistEntry[],
@@ -216,6 +216,13 @@ export function useDiscographyLinkedReleases(
         if (cancelled) return
 
         const sortedReleaseIds = [...sortKeyByRelease.keys()].sort((a, b) => {
+          const sa = detailById.get(a)?.release_service ?? ""
+          const sb = detailById.get(b)?.release_service ?? ""
+          const byService = sa.localeCompare(sb, undefined, {
+            sensitivity: "base",
+            numeric: true,
+          })
+          if (byService !== 0) return byService
           const ka = sortKeyByRelease.get(a)!
           const kb = sortKeyByRelease.get(b)!
           return compareSortKeys(ka, kb)

@@ -125,11 +125,11 @@ export default function DiscographyReleasePage({
     <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
         {release.artwork ? (
-          <div className="mx-auto w-max max-w-full shrink-0 sm:mx-0">
+          <div className="mx-auto w-full max-w-full shrink-0 sm:mx-0 sm:w-max">
             <img
               src={release.artwork}
               alt={release.displayname}
-              className="block h-auto max-h-[min(70vh,520px)] w-auto max-w-[min(100vw-2rem,280px)] rounded-lg border border-border bg-muted/30 shadow-sm transition-all duration-200 ease-out"
+              className="block h-auto w-full max-h-none max-w-none rounded-lg border border-border bg-muted/30 shadow-sm transition-all duration-200 ease-out sm:h-auto sm:w-auto sm:max-h-[min(70vh,520px)] sm:max-w-[min(100vw-2rem,280px)]"
               onError={(e) => {
                 ;(e.target as HTMLImageElement).style.display = "none"
               }}
