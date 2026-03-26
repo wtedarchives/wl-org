@@ -7,6 +7,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { PersonnelSearch } from "@/components/dpro/personnel/personnel-search"
 import { supabase } from "@/lib/supabase"
 import { formatInstrument } from "@/lib/personnel-utils"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 
 interface GuestRow {
   guest_id: string
@@ -149,7 +150,7 @@ export function PersonnelContent() {
                         className="border-t border-border/40 bg-background/70 hover:bg-muted/40 transition-colors"
                       >
                         <Link
-                          href={`/archive/personnel/${item.guest_id}`}
+                          href={getPersonnelArchiveUrl(item.guest_id)}
                           className="group block py-0.5 pl-3 pr-3 text-xs font-medium text-foreground"
                         >
                           <span className="group-hover:underline">

@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -167,7 +168,7 @@ export function UserPersonnelShowsSheet({
               {guestId && (
                 <Button type="button" size="sm" variant="outline" asChild>
                   <Link
-                    href={`/archive/personnel/${guestId}`}
+                    href={getPersonnelArchiveUrl(guestId)}
                     onClick={() => onOpenChange(false)}
                   >
                     View full personnel page

@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { formatInstrument } from "@/lib/personnel-utils"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 
 interface GuestBasic {
   guest: string
@@ -54,7 +55,7 @@ export function PersonnelSearch({ className = "" }: { className?: string }) {
   const handleSelect = (guestId: string, guestName: string) => {
     setSelectedGuest(guestName)
     setOpen(false)
-    router.push(`/archive/personnel/${guestId}`)
+    router.push(getPersonnelArchiveUrl(guestId))
   }
 
   return (

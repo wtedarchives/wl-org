@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import Link from "next/link"
 import { X } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -158,7 +159,7 @@ export function GuestAppearancesDrawer({
           <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center sm:justify-center">
             <Button variant="outline" size="sm" asChild>
               <Link
-                href={`/archive/personnel/${modalData.guestId}`}
+                href={getPersonnelArchiveUrl(modalData.guestId)}
                 onClick={() => onOpenChange(false)}
               >
                 Guest Profile

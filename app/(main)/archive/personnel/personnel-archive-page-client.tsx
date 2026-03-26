@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useEffect, useMemo, useState } from "react"
-import { notFound } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { notFound, useSearchParams } from "next/navigation"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useGuestData } from "@/hooks/use-guest-data"
@@ -11,13 +11,26 @@ import { PersonnelSongsCard } from "@/components/dpro/personnel/personnel-songs-
 import { PersonnelSongSpreadCard } from "@/components/dpro/personnel/personnel-song-spread-card"
 import { PersonnelShowsByGroup } from "@/components/dpro/personnel/personnel-shows-by-group"
 import { GuestPerformanceChart } from "@/components/dpro/personnel/guest-performance-chart"
+import { PersonnelContent } from "@/components/dpro/personnel/personnel-content"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 
-export default function PersonnelDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id: guestId } = use(params)
+const GUEST_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function resolvePersonnelGuestIdFromSearchParams(
+  searchParams: ReturnType<typeof useSearchParams>,
+): { guestId: string; invalidParams: boolean } {
+  const idList = searchParams
+    .getAll("id")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (new Set(idList).size > 1) {
+    return { guestId: "", invalidParams: true }
+  }
+  return { guestId: idList[0] ?? "", invalidParams: false }
+}
+
+function PersonnelDetailPageContent({ guestId }: { guestId: string }) {
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [selectedSong, setSelectedSong] = useState<string | null>(null)
@@ -43,10 +56,10 @@ export default function PersonnelDetailPage({
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: "Personnel", href: "/archive/personnel" },
-      { label: guestName, href: "" },
+      { label: guestName, href: getPersonnelArchiveUrl(guestId) },
     ])
     return () => setSetlistBreadcrumbs(null)
-  }, [guest, guestName, setSetlistBreadcrumbs])
+  }, [guest, guestName, guestId, setSetlistBreadcrumbs])
 
   useEffect(() => {
     if (guest) {
@@ -124,8 +137,6 @@ export default function PersonnelDetailPage({
     return { displaySongs: filteredSongs, displaySongSpreadData: filteredSpread }
   }, [selectedGroup, songs, songSpreadData, songShowMap, performances])
 
-  if (!guestId) notFound()
-
   if (loading) {
     return (
       <LoadingPageCard
@@ -189,4 +200,21 @@ export default function PersonnelDetailPage({
       />
     </div>
   )
+}
+
+export default function PersonnelArchivePageClient() {
+  const searchParams = useSearchParams()
+  const { guestId, invalidParams } = useMemo(
+    () => resolvePersonnelGuestIdFromSearchParams(searchParams),
+    [searchParams],
+  )
+
+  if (invalidParams) notFound()
+
+  if (guestId) {
+    if (!GUEST_ID_RE.test(guestId)) notFound()
+    return <PersonnelDetailPageContent guestId={guestId} />
+  }
+
+  return <PersonnelContent />
 }

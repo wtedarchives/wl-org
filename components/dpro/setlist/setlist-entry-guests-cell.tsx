@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { getPersonnelPillClassName } from "@/lib/setlist-utils"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistEntryGuestsCellProps {
@@ -31,7 +32,7 @@ export function SetlistEntryGuestsCell({
           <Tooltip key={g.guest_id}>
             <TooltipTrigger asChild>
               <Link
-                href={`/archive/personnel/${g.guest_id}`}
+                href={getPersonnelArchiveUrl(g.guest_id)}
                 className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
               >
                 {g.guest_display_name}
@@ -42,7 +43,7 @@ export function SetlistEntryGuestsCell({
         ) : (
           <Link
             key={g.guest_id}
-            href={`/archive/personnel/${g.guest_id}`}
+            href={getPersonnelArchiveUrl(g.guest_id)}
             className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
           >
             {g.guest_display_name}

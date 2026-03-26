@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { UserGuest } from "@/types/user-guests"
+import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 
 const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   "Goose (current)": "Current Goose Members",
@@ -73,7 +74,7 @@ export function UserPersonnelTable({
                       </button>
                     ) : (
                       <Link
-                        href={`/archive/personnel/${guest.guest_id}`}
+                        href={getPersonnelArchiveUrl(guest.guest_id)}
                         className="font-medium text-foreground hover:underline"
                       >
                         {guest.guest}
