@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -215,7 +216,7 @@ export function SetlistSongPerformancesSheet({
               {songId && (
                 <Button type="button" size="sm" variant="outline" asChild>
                   <Link
-                    href={`/archive/song/${songId}`}
+                    href={getSongArchiveUrl(songId)}
                     onClick={() => onOpenChange(false)}
                   >
                     View full song history

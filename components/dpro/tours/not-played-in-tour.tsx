@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 interface NotPlayedInTourProps {
   tourId: string
@@ -193,7 +194,7 @@ export function NotPlayedInTour({
                       <td className="pl-3 py-0.5">
                         <div className="flex items-center justify-between gap-2">
                           <Link
-                            href={`/archive/song/${song.song_id}`}
+                            href={getSongArchiveUrl(song.song_id)}
                             className="font-medium text-foreground hover:underline"
                           >
                             <SongDisplayName

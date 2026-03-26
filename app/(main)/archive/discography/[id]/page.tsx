@@ -18,6 +18,7 @@ import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { Separator } from "@/components/ui/separator"
 import type { SetlistEntry } from "@/types/setlist"
 import { formatLengthAsHmmss, totalSetlistLength } from "@/lib/setlist-utils"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 const EMPTY_WTED_SHOW = {
   show_date: "",
@@ -236,7 +237,7 @@ export default function DiscographyReleasePage({
                     hoveredReleaseId={hoveredReleaseId}
                     releaseToEntriesMap={discographyReleaseToEntriesMap}
                     onSongClick={(entry) =>
-                      router.push(`/archive/song/${entry.song_id}`)
+                      router.push(getSongArchiveUrl(entry.song_id))
                     }
                     onWtedClick={(entry) => {
                       if (!user) {

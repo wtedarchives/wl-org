@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -105,7 +106,7 @@ export function LongestPerformancesList({
             >
               <TableCell className="px-2 py-0.5">
                 <Link
-                  href={`/archive/song/${row.song_id}`}
+                  href={getSongArchiveUrl(row.song_id)}
                   className="font-medium hover:underline"
                 >
                   <SongDisplayName

@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -64,7 +65,7 @@ export function LiberatedSongsCard({
                 <TableRow key={`${song.song}-${index}`}>
                   <TableCell className="w-min shrink-0 py-1.5 pl-3">
                     <Link
-                      href={`/archive/song/${song.song_id}`}
+                      href={getSongArchiveUrl(song.song_id)}
                       className="text-xs font-medium text-foreground hover:underline whitespace-nowrap"
                     >
                       <SongDisplayName

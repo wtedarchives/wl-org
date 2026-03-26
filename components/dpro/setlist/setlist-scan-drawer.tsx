@@ -19,6 +19,7 @@ import { getChangeTypeIcon } from "./setlist-show-change-icon"
 import type { Show, SetlistEntry } from "@/types/setlist"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import { cn } from "@/lib/utils"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SetlistScanDrawerProps {
@@ -135,7 +136,7 @@ export function SetlistScanDrawer({
                           <div className="flex flex-1 items-center gap-2 pl-2">
                             <span className="truncate font-medium">
                               <Link
-                                href={`/archive/song/${entry.songs.song_id}`}
+                                href={getSongArchiveUrl(entry.songs.song_id)}
                                 className="hover:underline min-w-0"
                                 onClick={() => onOpenChange(false)}
                               >

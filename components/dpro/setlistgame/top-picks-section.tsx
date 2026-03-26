@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import type { SongStat } from "@/hooks/use-setlist-game-show-data"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 
@@ -30,7 +31,7 @@ function SongRow({ song, index }: { song: SongStat; index: number }) {
           />
         )}
         <Link
-          href={song.song_id ? `/archive/song/${song.song_id}` : "#"}
+          href={song.song_id ? getSongArchiveUrl(song.song_id) : "#"}
           className={cn(
             "text-xs font-medium truncate min-w-0",
             song.song_id

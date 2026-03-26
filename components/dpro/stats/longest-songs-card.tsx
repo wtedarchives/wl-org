@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -47,7 +48,7 @@ export function LongestSongsCard({
                   <TableCell className="py-0.5 pl-3">
                     <div className="flex items-center justify-between gap-2">
                       <Link
-                        href={`/archive/song/${song.song_id}`}
+                        href={getSongArchiveUrl(song.song_id)}
                         className="text-xs font-medium text-foreground hover:underline"
                       >
                         <SongDisplayName

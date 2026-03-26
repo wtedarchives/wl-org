@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -215,7 +216,11 @@ export function MostRecentShowCard() {
                     <div className="flex flex-1 items-center justify-between gap-2 pl-2">
                       <span className="truncate font-medium">
                         <Link
-                          href={`/archive/song/${entry.songs?.song_id}`}
+                          href={
+                            entry.songs?.song_id
+                              ? getSongArchiveUrl(entry.songs.song_id)
+                              : "#"
+                          }
                           className="hover:underline"
                         >
                           <SongDisplayName

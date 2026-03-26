@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { useUnfinishedReprisedData } from "@/hooks/use-unfinished-reprised-data"
 import { RepriseSandwichPerformancesDrawer } from "./reprise-sandwich-performances-drawer"
 import { useListContentLoading } from "./list-content-loading-context"
@@ -104,7 +105,7 @@ export function UnfinishedReprisedList({ listId }: UnfinishedReprisedListProps) 
                       </TableCell>
                       <TableCell className="px-2 py-0.5 align-middle">
                         <Link
-                          href={`/archive/song/${row.song_id}`}
+                          href={getSongArchiveUrl(row.song_id)}
                           className="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded"
                         >
                           <SongDisplayName

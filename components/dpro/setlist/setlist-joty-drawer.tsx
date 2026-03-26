@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Loader2, X } from "lucide-react"
@@ -214,7 +215,7 @@ function ResultRow({
       <TableCell className="text-xs font-medium py-0.5">
         {row.song_id ? (
           <Link
-            href={`/archive/song/${row.song_id}`}
+            href={getSongArchiveUrl(row.song_id)}
             className="text-foreground hover:underline"
             onClick={onNavigate}
           >

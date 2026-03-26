@@ -3,6 +3,7 @@
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import {
   Table,
@@ -127,7 +128,7 @@ export function UserSongMatrix({
                     </button>
                   ) : songIdMap[song] ? (
                     <Link
-                      href={`/archive/song/${songIdMap[song]}`}
+                      href={getSongArchiveUrl(songIdMap[song])}
                       className="hover:underline"
                     >
                       <SongDisplayName

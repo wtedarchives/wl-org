@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table"
 import { SONGS_LIST_PERFORMER_GROUPS } from "@/lib/songs-performer-groups"
 import { cn } from "@/lib/utils"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 type SongRow = {
   song: string
@@ -355,7 +356,7 @@ export function SongsListTable({
               <TableRow key={row.song_id}>
                 <TableCell className="px-2 py-0.5 align-middle font-medium whitespace-nowrap">
                   <Link
-                    href={`/archive/song/${row.song_id}`}
+                    href={getSongArchiveUrl(row.song_id)}
                     className="inline-block whitespace-nowrap text-foreground hover:underline"
                   >
                     <SongDisplayName

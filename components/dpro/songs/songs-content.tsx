@@ -18,6 +18,7 @@ import {
   useSongsArchiveData,
 } from "@/hooks/use-songs-archive-data"
 import { cn } from "@/lib/utils"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 function CategorySection({
   sectionCategories,
@@ -89,7 +90,7 @@ function CategorySection({
                           className="border-t border-border/40 bg-background/70 hover:bg-muted/40 transition-colors"
                         >
                           <Link
-                            href={`/archive/song/${song.song_id}`}
+                            href={getSongArchiveUrl(song.song_id)}
                             className="block py-0.5 pl-3 text-xs font-medium text-foreground hover:underline"
                           >
                             <SongDisplayName

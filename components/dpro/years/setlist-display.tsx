@@ -4,6 +4,7 @@ import React from "react"
 import Link from "next/link"
 import { MoveRight } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 interface SetlistEntry {
   entry_song: string
@@ -80,7 +81,7 @@ export function SetlistDisplay({
               <div className="flex flex-1 items-center justify-between pl-2">
                 <span className="flex items-center gap-1">
                   <Link
-                    href={`/archive/song/${entry.songs.song_id}`}
+                    href={getSongArchiveUrl(entry.songs.song_id)}
                     className="text-[11px] font-medium hover:underline"
                   >
                     <SongDisplayName

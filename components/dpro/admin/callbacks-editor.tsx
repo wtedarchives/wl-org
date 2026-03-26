@@ -5,6 +5,7 @@ import { ChevronDown, Search } from "lucide-react"
 import type { AdminShowData } from "@/types/admin"
 import { formatDate, getShowDisplayData } from "@/lib/utils/show-utils"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -99,7 +100,7 @@ export function CallbacksEditor({
   }
 
   const insertSongLink = (song: SongData) => {
-    const linkText = `<a href="/archive/song/${song.song_id}">${song.song}</a>`
+    const linkText = `<a href="${getSongArchiveUrl(song.song_id)}">${song.song}</a>`
     insertAtCursor(linkText)
     setSongPopoverOpen(false)
     setSongSearchTerm("")

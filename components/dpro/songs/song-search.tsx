@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/command"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SongBasic {
@@ -104,7 +105,7 @@ export function SongSearch({
     setSelectedSong(songName)
     setSelectedSongDisplayName(songDisplayName ?? null)
     setOpen(false)
-    router.push(`/archive/song/${songId}`)
+    router.push(getSongArchiveUrl(songId))
   }
 
   return (

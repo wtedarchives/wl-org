@@ -15,6 +15,7 @@ import {
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { usePopularPlacementsData } from "@/hooks/use-popular-placements-data"
 import { useListContentLoading } from "./list-content-loading-context"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 const COVER_SONGS_HEADER_IMAGE =
   "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
@@ -134,7 +135,7 @@ export function PopularPlacementsList({ listId }: PopularPlacementsListProps) {
                           </TableCell>
                         <TableCell className="px-2 py-0.5">
                           <Link
-                            href={`/archive/song/${row.song_id}`}
+                            href={getSongArchiveUrl(row.song_id)}
                             className="font-medium hover:underline"
                           >
                             <SongDisplayName

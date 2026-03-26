@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Check } from "lucide-react"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
@@ -120,7 +121,7 @@ function CategorySection({
                                   </button>
                                 ) : (
                                   <Link
-                                    href={`/archive/song/${song.song_id}`}
+                                    href={getSongArchiveUrl(song.song_id)}
                                     className="hover:underline"
                                   >
                                     {songNameEl}

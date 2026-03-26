@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Image from "next/image"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
@@ -69,7 +70,7 @@ export function StatCard({
                   <TableCell className="py-0.5 pl-3">
                     <div className="flex items-center justify-between gap-2">
                       <Link
-                        href={`/archive/song/${item.song_id}`}
+                        href={getSongArchiveUrl(item.song_id)}
                         className="text-xs font-medium text-foreground hover:underline"
                       >
                         {getSong && getSongDisplayName ? (

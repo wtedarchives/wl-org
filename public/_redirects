@@ -6,3 +6,6 @@
 
 # Legacy path-based tour URLs → query model
 /archive/tours/*  /archive/tours?id=:splat  301
+
+# Legacy path-based song URLs → query model
+/archive/song/*  /archive/song?id=:splat  301

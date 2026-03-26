@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -145,7 +146,7 @@ export function ProfileStatBox({
                             </button>
                           ) : (
                             <Link
-                              href={`/archive/song/${songId}`}
+                              href={getSongArchiveUrl(songId)}
                               className="text-xs font-medium text-foreground hover:underline"
                             >
                               <SongDisplayName

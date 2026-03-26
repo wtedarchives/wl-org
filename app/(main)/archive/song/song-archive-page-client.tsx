@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
-import { notFound } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSongData } from "@/hooks/use-song-data"
@@ -10,13 +10,12 @@ import { SongInfo } from "@/components/dpro/song/song-info"
 import { SongPerformanceChart } from "@/components/dpro/song/song-performance-chart"
 import { SongLyrics } from "@/components/dpro/song/song-lyrics"
 import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
-export default function SongPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id: songId } = use(params)
+const SONG_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+function SongPageContent({ songId }: { songId: string }) {
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
@@ -45,10 +44,10 @@ export default function SongPage({
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: "Songs", href: "/archive/songs" },
-      { label: song.song, href: "" },
+      { label: song.song, href: getSongArchiveUrl(songId) },
     ])
     return () => setSetlistBreadcrumbs(null)
-  }, [song, setSetlistBreadcrumbs])
+  }, [song, songId, setSetlistBreadcrumbs])
 
   useEffect(() => {
     if (song) {
@@ -62,8 +61,6 @@ export default function SongPage({
   const handleGroupClick = (group: string) => {
     setSelectedGroup((current) => (current === group ? null : group))
   }
-
-  if (!songId) notFound()
 
   if (loading) {
     return (
@@ -131,4 +128,36 @@ export default function SongPage({
       />
     </div>
   )
+}
+
+export default function SongArchivePageClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const rawList = useMemo(
+    () =>
+      searchParams
+        .getAll("id")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    [searchParams],
+  )
+  const idSet = new Set(rawList)
+  const songIdParam = rawList[0] ?? ""
+
+  useEffect(() => {
+    if (songIdParam) return
+    router.replace("/archive/songs")
+  }, [songIdParam, router])
+
+  if (idSet.size > 1) notFound()
+
+  if (!songIdParam) {
+    return (
+      <LoadingPageCard message="Opening songs…" page="song" />
+    )
+  }
+
+  if (!SONG_ID_RE.test(songIdParam)) notFound()
+
+  return <SongPageContent songId={songIdParam} />
 }
