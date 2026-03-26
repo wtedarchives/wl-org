@@ -13,6 +13,7 @@ export type DiscographyReleaseRow = {
   artwork: string
   canon_id: number
   release_date: string | null
+  coach_notes: string | null
 }
 
 export function useDiscographyReleaseData(uuid: string) {
@@ -36,7 +37,7 @@ export function useDiscographyReleaseData(uuid: string) {
       const { data, error: qError } = await sb
         .from("discography")
         .select(
-          "uuid, displayname, name, artist, category, artwork, canon_id, release_date",
+          "uuid, displayname, name, artist, category, artwork, canon_id, release_date, coach_notes",
         )
         .eq("uuid", uuid)
         .single()

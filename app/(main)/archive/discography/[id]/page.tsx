@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useEffect, useMemo, useState } from "react"
 import { notFound, useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
@@ -14,8 +14,10 @@ import { useDiscographyLinkedSetlist } from "@/hooks/use-discography-linked-setl
 import { useDiscographyLinkedReleases } from "@/hooks/use-discography-linked-releases"
 import { useGuestGroups } from "@/hooks/use-setlist-display"
 import { Card, CardContent } from "@/components/ui/card"
+import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { Separator } from "@/components/ui/separator"
 import type { SetlistEntry } from "@/types/setlist"
+import { formatLengthAsHmmss, totalSetlistLength } from "@/lib/setlist-utils"
 
 const EMPTY_WTED_SHOW = {
   show_date: "",
@@ -105,6 +107,15 @@ export default function DiscographyReleasePage({
     }
   }, [release])
 
+  const discographyLengthDisplay = useMemo(() => {
+    if (linkedSetlistLoading || !linkedSetlist.length) return null
+    const sum = totalSetlistLength(linkedSetlist)
+    if (!sum) return null
+    const formatted = formatLengthAsHmmss(sum)
+    if (!formatted || formatted === "0:00:00") return null
+    return formatted
+  }, [linkedSetlist, linkedSetlistLoading])
+
   if (!id) notFound()
 
   if (loading) {
@@ -140,7 +151,7 @@ export default function DiscographyReleasePage({
 
         <div className="min-w-0 flex-1 space-y-3">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+            <h1 className="text-xl font-semibold tracking-tight leading-5 text-foreground md:text-2xl">
               {release.displayname}
             </h1>
             {release.artist ? (
@@ -165,7 +176,18 @@ export default function DiscographyReleasePage({
                 </dd>
               </div>
             ) : null}
+            {discographyLengthDisplay ? (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <dt className="text-muted-foreground">Length</dt>
+                <dd className="m-0">
+                  <span className="inline-block rounded bg-wl-dark-green px-1.5 py-[1px] text-xs font-medium tabular-nums text-white">
+                    {discographyLengthDisplay}
+                  </span>
+                </dd>
+              </div>
+            ) : null}
           </dl>
+          <SetlistShowNotes notes={release.coach_notes} />
         </div>
       </div>
 

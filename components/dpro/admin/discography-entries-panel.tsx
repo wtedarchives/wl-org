@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
 type SetlistRow = {
   entry_id: string
   entry_set: string | null
@@ -264,7 +263,7 @@ export function DiscographyEntriesPanel({
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col gap-3 overflow-visible bg-muted/15 p-4">
+    <div className="flex w-full min-w-0 flex-col gap-3 bg-muted/15">
       <h3 className="text-sm font-semibold">Setlist links</h3>
       <p className="min-w-0 hyphens-auto text-pretty text-[11px] leading-snug text-muted-foreground break-words">
         Link setlist lines to this release. Order controls display sequence.
@@ -281,7 +280,7 @@ export function DiscographyEntriesPanel({
       ) : links.length === 0 ? (
         <p className="text-xs text-muted-foreground">No links yet.</p>
       ) : (
-        <div className="max-h-[min(40vh,280px)] w-full min-w-0 overflow-y-auto overflow-x-auto rounded-md border border-border/80">
+        <div className="w-full min-w-0 overflow-x-auto rounded-md border border-border/80">
           <Table className="min-w-[18rem]">
             <TableHeader>
               <TableRow className="bg-muted/50">
@@ -354,7 +353,7 @@ export function DiscographyEntriesPanel({
         </div>
       )}
 
-      <div className="border-t border-border/60 pt-3">
+      <div className="flex flex-col gap-0 border-t border-border/60 pt-3">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-medium">Add from setlist</span>
           <AdminShowDropdown
@@ -399,7 +398,7 @@ export function DiscographyEntriesPanel({
                   : `Add selected (${selectedIds.size}) from order ${nextOrderLabel}`}
               </Button>
             </div>
-            <div className="w-full min-w-0 overflow-hidden rounded-md border border-border/80">
+            <div className="w-full min-w-0 overflow-x-auto rounded-md border border-border/80">
               <Table className="min-w-[36rem]">
                 <TableHeader>
                   <TableRow className="bg-muted/50">

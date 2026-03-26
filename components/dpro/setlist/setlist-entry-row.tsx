@@ -26,6 +26,36 @@ import { SetlistEntryNumberCell } from "./setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "./setlist-entry-wted-cell"
 import { SetlistEntryLastCell } from "./setlist-entry-last-cell"
 import { SetlistEntryGuestsCell } from "./setlist-entry-guests-cell"
+import { venueLocationAlreadyBracketed } from "@/lib/format-venue-location-brackets"
+
+function DiscographyShowVenueInner({
+  cell,
+}: {
+  cell: DiscographyShowColumnCell
+}) {
+  const label = cell.venueLabel!
+  if (cell.venueId) {
+    return (
+      <Link
+        href={`/archive/venue/${cell.venueId}`}
+        className="font-normal text-foreground hover:underline"
+      >
+        {label}
+      </Link>
+    )
+  }
+  if (cell.venueSlug) {
+    return (
+      <Link
+        href={`/archive/venue/${encodeURIComponent(cell.venueSlug)}`}
+        className="font-normal text-foreground hover:underline"
+      >
+        {label}
+      </Link>
+    )
+  }
+  return <span className="font-normal text-foreground">{label}</span>
+}
 
 export interface SetlistEntryRowProps {
   entry: SetlistEntry
@@ -183,7 +213,7 @@ export function SetlistEntryRow({
         <TableCell className="max-w-[14rem] min-w-[9rem] whitespace-normal text-left text-[11px]">
           {discographyShowCell !== undefined ? (
             discographyShowCell ? (
-              <span className="text-foreground">
+              <span className="inline-flex flex-wrap items-baseline gap-x-1.5 text-foreground">
                 <Link
                   href={getSetlistArchiveUrl(discographyShowCell.showId)}
                   className="font-medium text-foreground hover:underline"
@@ -191,29 +221,17 @@ export function SetlistEntryRow({
                   {discographyShowCell.dateLabel}
                 </Link>
                 {discographyShowCell.venueLabel ? (
-                  <>
-                    {" ["}
-                    {discographyShowCell.venueId ? (
-                      <Link
-                        href={`/archive/venue/${discographyShowCell.venueId}`}
-                        className="font-normal text-foreground hover:underline"
-                      >
-                        {discographyShowCell.venueLabel}
-                      </Link>
-                    ) : discographyShowCell.venueSlug ? (
-                      <Link
-                        href={`/archive/venue/${encodeURIComponent(discographyShowCell.venueSlug)}`}
-                        className="font-normal text-foreground hover:underline"
-                      >
-                        {discographyShowCell.venueLabel}
-                      </Link>
-                    ) : (
-                      <span className="font-normal text-foreground">
-                        {discographyShowCell.venueLabel}
-                      </span>
-                    )}
-                    {"]"}
-                  </>
+                  venueLocationAlreadyBracketed(
+                    discographyShowCell.venueLabel,
+                  ) ? (
+                    <DiscographyShowVenueInner cell={discographyShowCell} />
+                  ) : (
+                    <span>
+                      {"["}
+                      <DiscographyShowVenueInner cell={discographyShowCell} />
+                      {"]"}
+                    </span>
+                  )
                 ) : null}
               </span>
             ) : null

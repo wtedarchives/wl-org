@@ -12,6 +12,7 @@ import {
   SETLIST_ENTRY_DETAIL_SELECT,
 } from "@/lib/map-supabase-setlist-entry-row"
 import { formatDate } from "@/lib/utils/show-utils"
+import { venueLocationAlreadyBracketed } from "@/lib/format-venue-location-brackets"
 
 type ShowDiscographyFields = {
   show_id: string
@@ -52,7 +53,13 @@ function buildDiscographySourceColumns(
     }
     const dateStr = formatDate(show.show_date)
     const loc = show.show_venue_location?.trim() || null
-    labels.push(loc ? `${dateStr} [${loc}]` : dateStr)
+    labels.push(
+      loc
+        ? venueLocationAlreadyBracketed(loc)
+          ? `${dateStr} ${loc}`
+          : `${dateStr} [${loc}]`
+        : dateStr,
+    )
     const venueId = show.subvenues?.venues?.venue_id ?? null
     const venueSlug = show.show_subvenue_venue?.trim() || null
     cells.push({

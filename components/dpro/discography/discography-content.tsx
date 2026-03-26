@@ -124,7 +124,7 @@ export function DiscographyContent() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
-      <div className="grid min-w-0 grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-4 min-[1024px]:grid-cols-2 min-[1280px]:grid-cols-3 min-[1440px]:grid-cols-4 min-[1860px]:grid-cols-5">
         {DISCOGRAPHY_PUBLIC_CATEGORIES.map((category) => {
           const categoryItems = byCategory.get(category) ?? []
           return (
@@ -148,7 +148,7 @@ export function DiscographyContent() {
                             <div className="flex items-center justify-between gap-2">
                               <Link
                                 href={`/archive/discography/${item.uuid}`}
-                                className="min-w-0 flex-1 text-xs font-medium text-foreground hover:underline break-words [overflow-wrap:anywhere]"
+                                className="min-w-0 flex-1 text-xs font-medium leading-3.5 text-foreground hover:underline break-words [overflow-wrap:anywhere]"
                               >
                                 {item.displayname}
                               </Link>
