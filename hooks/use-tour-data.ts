@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { supabase } from "@/lib/supabase"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { useAuth } from "@/components/auth-context"
 import { useAttendeeData } from "@/hooks/use-attendee-data"
 import { useShowRatings } from "@/hooks/use-show-ratings"
@@ -108,7 +109,7 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
             .single()
 
           if (defaultTour) {
-            router.replace(`/archive/tours/${defaultTour.tour_id}`, {
+            router.replace(getTourArchiveUrl(defaultTour.tour_id), {
               scroll: false,
             })
           }

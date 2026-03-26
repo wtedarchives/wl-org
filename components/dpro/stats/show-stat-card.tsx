@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import Link from "next/link"
 import { Clock, Space, Flame, Users, Star } from "lucide-react"
 import {
@@ -136,7 +137,7 @@ export function ShowStatCard({
                     {item.show_tour ? (
                       item.tour_id ? (
                         <Link
-                          href={`/archive/tours/${item.tour_id}`}
+                          href={getTourArchiveUrl(item.tour_id)}
                           className="text-foreground hover:underline"
                         >
                           {item.show_tour}

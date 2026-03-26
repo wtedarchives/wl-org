@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import Link from "next/link"
 import Image from "next/image"
 import { Check, FileMusic, Star, AudioLines, Users } from "lucide-react"
@@ -246,7 +247,7 @@ export function ListShowTable({
                 <TableCell className="px-2 py-1 text-xs">
                   {show.tour_id ? (
                     <Link
-                      href={`/archive/tours/${show.tour_id}`}
+                      href={getTourArchiveUrl(show.tour_id)}
                       className="hover:underline"
                     >
                       {show.show_tour}

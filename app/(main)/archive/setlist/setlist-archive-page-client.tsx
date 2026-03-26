@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect } from "react"
-import { notFound, useSearchParams } from "next/navigation"
+import { useEffect, useMemo } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAuth } from "@/components/auth-context"
@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { formatSetlistDate, totalSetlistLength } from "@/lib/setlist-utils"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { useSetlistData, useTours, useShowDates } from "@/hooks/use-setlist-data"
 import { useSetlistNavigation } from "@/hooks/use-setlist-navigation"
 import {
@@ -39,9 +40,46 @@ import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawe
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
 
+function resolveSetlistShowIdFromSearchParams(searchParams: ReturnType<
+  typeof useSearchParams
+>): { showId: string; invalidParams: boolean } {
+  const idList = searchParams
+    .getAll("id")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (new Set(idList).size > 1) {
+    return { showId: "", invalidParams: true }
+  }
+  const fromId = idList[0] ?? ""
+  const legacyShowId = searchParams.get("show_id")?.trim() ?? ""
+  if (fromId && legacyShowId && fromId !== legacyShowId) {
+    return { showId: "", invalidParams: true }
+  }
+  return {
+    showId: fromId || legacyShowId,
+    invalidParams: false,
+  }
+}
+
 export default function SetlistArchivePageClient() {
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const showId = searchParams.get("show_id")?.trim() ?? ""
+  const { showId, invalidParams } = useMemo(
+    () => resolveSetlistShowIdFromSearchParams(searchParams),
+    [searchParams],
+  )
+
+  useEffect(() => {
+    if (invalidParams || !showId) return
+    const hasIdParam = searchParams
+      .getAll("id")
+      .map((s) => s.trim())
+      .some(Boolean)
+    const legacy = searchParams.get("show_id")?.trim() ?? ""
+    if (hasIdParam || !legacy) return
+    router.replace(getSetlistArchiveUrl(legacy), { scroll: false })
+  }, [invalidParams, showId, searchParams, router])
+
   const pageState = useSetlistPageState(showId)
   const {
     containerRef,
@@ -144,7 +182,7 @@ export default function SetlistArchivePageClient() {
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: show.show_date.slice(0, 4), href: getYearArchiveUrl(yearId) },
-      { label: tourLabel, href: `/archive/tours/${show.tour_id}` },
+      { label: tourLabel, href: getTourArchiveUrl(show.tour_id) },
       { label: lastLabel, href: getSetlistArchiveUrl(show.show_id) },
     ])
     return () => setSetlistBreadcrumbs(null)
@@ -175,6 +213,7 @@ export default function SetlistArchivePageClient() {
     }
   }, [show])
 
+  if (invalidParams) notFound()
   if (!showId) notFound()
   if (!loading && !show) notFound()
 

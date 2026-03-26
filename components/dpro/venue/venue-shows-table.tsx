@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import Link from "next/link"
 import { Star } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -128,7 +129,7 @@ export function VenueShowsTable({
                     {show.show_tour ? (
                       show.tour_id ? (
                         <Link
-                          href={`/archive/tours/${show.tour_id}`}
+                          href={getTourArchiveUrl(show.tour_id)}
                           className="text-muted-foreground hover:underline"
                         >
                           {show.show_tour}

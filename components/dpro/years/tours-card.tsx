@@ -3,6 +3,7 @@
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import {
   Card,
   CardContent,
@@ -60,7 +61,7 @@ export function ToursCard({
                   />
                   <div className="flex-1 px-2 py-1.5 leading-tight">
                     <Link
-                      href={`/archive/tours/${tour.tour_id}`}
+                      href={getTourArchiveUrl(tour.tour_id)}
                       className="text-[11px] font-medium hover:underline"
                     >
                       {label}

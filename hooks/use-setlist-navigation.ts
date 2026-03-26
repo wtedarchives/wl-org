@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import type { Show } from "@/types/setlist"
 
 export function useSetlistNavigation(show: Show | null) {
@@ -24,7 +25,7 @@ export function useSetlistNavigation(show: Show | null) {
   }, [pathname])
 
   const handleTourSelect = (tourId: string) => {
-    router.push(`/archive/tours/${tourId}`)
+    router.push(getTourArchiveUrl(tourId))
   }
 
   const handleShowSelect = (showId: string) => {

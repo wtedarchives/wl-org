@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Calendar, Building2, Music } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
@@ -104,7 +105,7 @@ export function AttendanceStats({
               {data.tourCounts.map((tour) => (
                 <li key={tour.tour}>
                   <Link
-                    href={`/archive/tours/${tour.tour_id}`}
+                    href={getTourArchiveUrl(tour.tour_id)}
                     className="text-xs font-medium text-foreground hover:underline"
                   >
                     {tour.tour}

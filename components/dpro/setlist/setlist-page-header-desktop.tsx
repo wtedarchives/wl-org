@@ -20,6 +20,7 @@ import { formatSetlistDate } from "@/lib/setlist-utils"
 import { SetlistTourDropdown } from "./setlist-tour-dropdown"
 import { SetlistShowsDropdown } from "./setlist-shows-dropdown"
 import type { Show, ShowDate } from "@/types/setlist"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import type { Tour } from "@/hooks/use-setlist-data"
 
 interface SetlistPageHeaderDesktopProps {
@@ -155,7 +156,7 @@ export function SetlistPageHeaderDesktop({
         )}
         {show.tour_id && (
           <Link
-            href={`/archive/tours/${show.tour_id}`}
+            href={getTourArchiveUrl(show.tour_id)}
             className="inline-flex h-6 items-center gap-1 rounded-md border border-border bg-muted/50 px-2 text-xs font-medium text-foreground hover:bg-muted"
           >
             <Info className="size-3.5 shrink-0" />

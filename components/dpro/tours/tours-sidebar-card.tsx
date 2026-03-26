@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import type { Tour } from "@/types/tour"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 
 function extractYear(tourName: string): string {
   const match = tourName.match(/^(\d{4})/)
@@ -103,7 +104,7 @@ export function ToursSidebarCard({
                           return (
                             <div key={tour.tour_id} className="pl-4">
                               <Link
-                                href={`/archive/tours/${tour.tour_id}`}
+                                href={getTourArchiveUrl(tour.tour_id)}
                                 onClick={() => onTourSelect?.(tour.tour_id)}
                                 className={cn(
                                   "text-[11px] font-medium hover:underline block py-1 leading-tight",

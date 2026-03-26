@@ -1,7 +1,7 @@
 "use client"
 
-import { Suspense, use, useEffect, useRef, useState } from "react"
-import { notFound } from "next/navigation"
+import { Suspense, useEffect, useMemo, useRef, useState } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { MapPin, X } from "lucide-react"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { useTourPageData } from "@/hooks/use-tour-page-data"
@@ -15,21 +15,24 @@ import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
+import { supabase } from "@/lib/supabase"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 
 const DESKTOP_MIN_WIDTH = 1280
+
+/** Landing redirect when `/archive/tours` has no `id` (matches former server page). */
+const DEFAULT_LANDING_TOUR_NAME = "2026 Misc"
+
+const TOUR_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function extractYear(tourName: string): string {
   const match = tourName.match(/^(\d{4})/)
   return match ? match[1] : "Unknown"
 }
 
-export default function TourPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id: tourId } = use(params)
+function TourPageContent({ tourId }: { tourId: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [layoutMode, setLayoutMode] = useState<"mobile" | "desktop">("desktop")
   const [windowWidth, setWindowWidth] = useState(1280)
@@ -99,7 +102,7 @@ export default function TourPage({
       ...(yearId && year !== "Unknown"
         ? [{ label: year, href: getYearArchiveUrl(yearId) }]
         : []),
-      { label: currentTour.tour, href: "" },
+      { label: currentTour.tour, href: getTourArchiveUrl(tourId) },
     ]
     setSetlistBreadcrumbs(items)
     return () => setSetlistBreadcrumbs(null)
@@ -115,7 +118,9 @@ export default function TourPage({
   useEffect(() => {
     if (currentTour) {
       document.title = `${currentTour.tour} – WysteriaLane.org`
-      return () => { document.title = "" }
+      return () => {
+        document.title = ""
+      }
     }
   }, [currentTour])
 
@@ -134,8 +139,6 @@ export default function TourPage({
   const toggleYear = (year: string) => {
     setExpandedYear((prev) => (prev === year ? null : year))
   }
-
-  if (!tourId) notFound()
 
   if (isLoading) {
     return (
@@ -258,10 +261,7 @@ export default function TourPage({
         songId={songSheetSongId}
       />
 
-      <Sheet
-        open={toursSheetOpen}
-        onOpenChange={setToursSheetOpen}
-      >
+      <Sheet open={toursSheetOpen} onOpenChange={setToursSheetOpen}>
         <SheetContent
           side="bottom"
           className="max-h-[85vh] flex flex-col rounded-t-none overflow-hidden"
@@ -292,4 +292,54 @@ export default function TourPage({
       </Sheet>
     </div>
   )
+}
+
+export default function ToursArchivePageClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const rawList = useMemo(
+    () =>
+      searchParams
+        .getAll("id")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    [searchParams],
+  )
+  const idSet = new Set(rawList)
+  const tourIdParam = rawList[0] ?? ""
+
+  useEffect(() => {
+    if (tourIdParam) return
+    let cancelled = false
+    ;(async () => {
+      if (!supabase) {
+        if (!cancelled) router.replace("/archive")
+        return
+      }
+      const { data: tour } = await supabase
+        .from("tours")
+        .select("tour_id")
+        .eq("tour", DEFAULT_LANDING_TOUR_NAME)
+        .single()
+      if (cancelled) return
+      if (tour?.tour_id) {
+        router.replace(getTourArchiveUrl(tour.tour_id))
+      } else {
+        router.replace("/archive")
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [tourIdParam, router])
+
+  if (idSet.size > 1) notFound()
+
+  if (!tourIdParam) {
+    return <LoadingPageCard message="Loading tour…" page="tour" />
+  }
+
+  if (!TOUR_ID_RE.test(tourIdParam)) notFound()
+
+  return <TourPageContent tourId={tourIdParam} />
 }

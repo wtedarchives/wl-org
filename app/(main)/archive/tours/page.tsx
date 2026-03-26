@@ -1,21 +1,15 @@
-import { redirect } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { Suspense } from "react"
 
-const DEFAULT_TOUR_NAME = "2026 Misc"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 
-export default async function DproToursPage() {
-  if (!supabase) {
-    redirect("/archive")
-  }
-  const { data: tour } = await supabase
-    .from("tours")
-    .select("tour_id")
-    .eq("tour", DEFAULT_TOUR_NAME)
-    .single()
+import ToursArchivePageClient from "./tours-archive-page-client"
 
-  if (tour?.tour_id) {
-    redirect(`/archive/tours/${tour.tour_id}`)
-  }
-
-  redirect("/archive")
+export default function DproToursPage() {
+  return (
+    <Suspense
+      fallback={<LoadingPageCard message="Loading tour…" page="tour" />}
+    >
+      <ToursArchivePageClient />
+    </Suspense>
+  )
 }

@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { useState } from "react"
 import Link from "next/link"
 import { TicketPlus } from "lucide-react"
@@ -194,7 +195,7 @@ function AttendedShowRow({
         {show?.show_tour ? (
           tourId ? (
             <Link
-              href={`/archive/tours/${tourId}`}
+              href={getTourArchiveUrl(tourId)}
               className="text-foreground hover:underline"
             >
               {show.show_tour}
