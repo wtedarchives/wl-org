@@ -15,3 +15,6 @@
 
 # Legacy path-based discography URLs → query model
 /archive/discography/*  /archive/discography?id=:splat  301
+
+# Legacy path-based list URLs → query model
+/archive/lists/*  /archive/lists?id=:splat  301

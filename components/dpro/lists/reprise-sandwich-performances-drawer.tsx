@@ -62,7 +62,7 @@ export function RepriseSandwichPerformancesDrawer({
             </p>
             <p className="text-muted-foreground">
               {sandwich?.songs.map((s, j) => (
-                <span key={s.song_id}>
+                <span key={`${s.song_id}-${j}`}>
                   {j > 0 && <span className="text-destructive"> → </span>}
                   <SongDisplayName
                     song={s.song_name}

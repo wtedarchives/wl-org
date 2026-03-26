@@ -192,7 +192,7 @@ export function UnfinishedReprisedList({ listId }: UnfinishedReprisedListProps) 
                           className="text-left font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded"
                         >
                           {row.songs.map((s, j) => (
-                            <span key={s.song_id}>
+                            <span key={`${s.song_id}-${j}`}>
                               {j > 0 && (
                                 <span className="text-destructive"> → </span>
                               )}

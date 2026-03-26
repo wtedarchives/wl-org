@@ -26,6 +26,7 @@ import {
 import type { ShowStat } from "@/lib/types/stats"
 import { getRankingText } from "@/lib/stats/stats-formatting"
 import { getRarityColor, getGapColor } from "@/lib/stats/tour-utils"
+import { getListArchiveUrl } from "@/lib/list-archive-url"
 
 const LONGEST_SHOWS_LIST_ID = "45a4b90e-adbe-4af5-9051-2f4d212069fc"
 
@@ -101,7 +102,7 @@ export function ShowStatCard({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Link
-                                href={`/archive/lists/${LONGEST_SHOWS_LIST_ID}`}
+                                href={getListArchiveUrl(LONGEST_SHOWS_LIST_ID)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-block rounded bg-yellow-500 px-1 py-0.5 text-[10px] font-medium text-black"

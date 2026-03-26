@@ -5,11 +5,12 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useListsData, type List } from "@/hooks/use-lists-data"
+import { getListArchiveUrl } from "@/lib/list-archive-url"
 
 function ListCard({ list }: { list: List }) {
   return (
     <Link
-      href={`/archive/lists/${list.list_id}`}
+      href={getListArchiveUrl(list.list_id)}
       className="block h-full min-h-0"
     >
       <Card className="h-full flex flex-col border-border/60 bg-card/80 overflow-hidden transition-colors hover:bg-muted/40 py-2">

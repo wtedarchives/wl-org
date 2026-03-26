@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useCategoryArtwork } from "@/hooks/use-category-artwork"
 import type { Show } from "@/types/setlist"
 import { cn } from "@/lib/utils"
+import { getListArchiveUrl } from "@/lib/list-archive-url"
 
 const CATEGORY_LIST_ID = "81dbe56c-7cc4-466b-b8d7-47c1ca041afc"
 const JIVE_LIST_ID = "c66cfb55-12a8-4cfe-9147-547d9e6c1736"
@@ -62,7 +63,7 @@ function CategoryCompleteBadge({ categoryName }: { categoryName: string | null }
 
   return (
     <BadgeLink
-      href={`/archive/lists/${CATEGORY_LIST_ID}`}
+      href={getListArchiveUrl(CATEGORY_LIST_ID)}
       imageSrc={loaded ? artwork : null}
       imageAlt={categoryName}
     >
@@ -81,7 +82,7 @@ function JiveCompleteBadge({ showJiveComplete }: { showJiveComplete: boolean }) 
   if (!showJiveComplete) return null
 
   return (
-    <BadgeLink href={`/archive/lists/${JIVE_LIST_ID}`} imageSrc={JIVE_ARTWORK} imageAlt="Jive Suite">
+    <BadgeLink href={getListArchiveUrl(JIVE_LIST_ID)} imageSrc={JIVE_ARTWORK} imageAlt="Jive Suite">
       <span className="leading-3">
         This show featured a full performance of the{" "}
         <span className="underline decoration-neutral-900/50 underline-offset-1 transition-colors hover:decoration-neutral-900">
@@ -102,7 +103,7 @@ function DripfieldCompleteBadge({
 
   return (
     <BadgeLink
-      href={`/archive/lists/${DRIPFIELD_LIST_ID}`}
+      href={getListArchiveUrl(DRIPFIELD_LIST_ID)}
       imageSrc={DRIPFIELD_ARTWORK}
       imageAlt="Dripfield"
     >

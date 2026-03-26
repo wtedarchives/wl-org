@@ -5,6 +5,7 @@ import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useListIndData } from "@/hooks/use-list-ind-data"
+import { getListArchiveUrl } from "@/lib/list-archive-url"
 import {
   ListContentLoadingProvider,
   useListContentLoading,
@@ -117,7 +118,7 @@ export function ListIndContent({ listId }: ListIndContentProps) {
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: "Lists", href: "/archive/lists" },
-      { label: list.list_name, href: "" },
+      { label: list.list_name, href: getListArchiveUrl(listId) },
     ])
     return () => setSetlistBreadcrumbs(null)
   }, [list, setSetlistBreadcrumbs])
