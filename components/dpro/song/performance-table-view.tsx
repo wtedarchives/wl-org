@@ -21,6 +21,7 @@ import {
 import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { PerformanceTooltipContent } from "./performance-tooltip"
 import type { SongPerformance } from "@/types/song"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface PerformanceTableViewProps {
   performances: SongPerformance[]
@@ -29,6 +30,9 @@ interface PerformanceTableViewProps {
   handleSort: (column: string) => void
   selectedGroup: string | null
   onJOTYClick?: (year: number, entryId: string | null) => void
+  /** Canonical song (songs.song) — performances are for this song. */
+  songCanonical: string
+  songDisplayName?: string | null
 }
 
 function SortIcon({
@@ -55,6 +59,8 @@ export function PerformanceTableView({
   handleSort,
   selectedGroup,
   onJOTYClick,
+  songCanonical,
+  songDisplayName,
 }: PerformanceTableViewProps) {
   const shouldHighlight = (perf: SongPerformance) => {
     if (!selectedGroup) return false
@@ -205,7 +211,12 @@ export function PerformanceTableView({
                 <TableCell className={`text-xs ${cellPadding}`}>
                   {perf.entry_song && perf.entry_song !== ">" ? (
                     <span>
-                      <span className="font-medium mr-2">{perf.entry_song}</span>
+                      <span className="font-medium mr-2 inline">
+                        <SongDisplayName
+                          song={songCanonical}
+                          songDisplayName={songDisplayName}
+                        />
+                      </span>
                       {perf.entry_short && (
                         <span className="text-destructive mr-2">
                           [{perf.entry_short}]

@@ -14,6 +14,7 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import type { Song } from "./types"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 const CATEGORY_ORDER = ["Goose", "Ted Tapes", "Cover Songs"] as const
 
@@ -27,6 +28,7 @@ function getCategoryLabel(categoryType: string | undefined): string {
 
 interface SongSearchCardProps {
   songs: Song[]
+  songDisplayNameMap: Record<string, string | null>
   selectedSong: string
   setSelectedSong: (song: string) => void
   onAddSong: () => void
@@ -35,6 +37,7 @@ interface SongSearchCardProps {
 
 export function SongSearchCard({
   songs,
+  songDisplayNameMap,
   selectedSong,
   setSelectedSong,
   onAddSong,
@@ -67,7 +70,14 @@ export function SongSearchCard({
               variant="secondary"
               className="shrink min-w-0 !max-w-[60%] overflow-hidden font-normal border-wl-orange/60 bg-wl-orange/60 text-white"
             >
-              <span className="block min-w-0 max-w-full truncate">{selectedSong}</span>
+              <span className="block min-w-0 max-w-full truncate">
+                {selectedSong ? (
+                  <SongDisplayName
+                    song={selectedSong}
+                    songDisplayName={songDisplayNameMap[selectedSong] ?? null}
+                  />
+                ) : null}
+              </span>
             </Badge>
           )}
         </div>
@@ -87,11 +97,14 @@ export function SongSearchCard({
                 {group.songs.map((song) => (
                   <CommandItem
                     key={song.song_id}
-                    value={song.song}
+                    value={`${song.song} ${song.song_displayname ?? ""}`}
                     onSelect={() => setSelectedSong(song.song)}
                     className="text-xs py-0.5 cursor-pointer"
                   >
-                    {song.song}
+                    <SongDisplayName
+                      song={song.song}
+                      songDisplayName={song.song_displayname}
+                    />
                   </CommandItem>
                 ))}
               </CommandGroup>

@@ -19,6 +19,7 @@ import { getChangeTypeIcon } from "./setlist-show-change-icon"
 import type { Show, SetlistEntry } from "@/types/setlist"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import { cn } from "@/lib/utils"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SetlistScanDrawerProps {
   open: boolean
@@ -135,10 +136,13 @@ export function SetlistScanDrawer({
                             <span className="truncate font-medium">
                               <Link
                                 href={`/archive/song/${entry.songs.song_id}`}
-                                className="hover:underline"
+                                className="hover:underline min-w-0"
                                 onClick={() => onOpenChange(false)}
                               >
-                                {entry.entry_song}
+                                <SongDisplayName
+                                  song={entry.entry_song}
+                                  songDisplayName={entry.songs.song_displayname}
+                                />
                               </Link>
                               {entry.entry_short && (
                                 <span className="ml-1 text-[10px] font-medium text-destructive">

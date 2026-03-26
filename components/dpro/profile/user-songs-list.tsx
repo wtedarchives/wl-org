@@ -138,7 +138,9 @@ function CategorySection({
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="top">
-                            <span className="text-xs">{song.song}</span>
+                            <span className="text-xs">
+                              {song.song_displayname?.trim() || song.song}
+                            </span>
                           </TooltipContent>
                         </Tooltip>
                       </li>

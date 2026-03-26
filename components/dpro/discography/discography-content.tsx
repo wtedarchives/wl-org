@@ -29,11 +29,17 @@ type DiscographyListRow = {
   category: string
 }
 
+const DISCOGRAPHY_INDEX_TITLE = "Discography – WysteriaLane.org"
+
 export function DiscographyContent() {
   const [items, setItems] = useState<DiscographyListRow[]>([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(false)
   const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    document.title = DISCOGRAPHY_INDEX_TITLE
+  }, [])
 
   useEffect(() => {
     const client = supabase

@@ -8,9 +8,11 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
 import { formatEntryLength } from "@/lib/setlist-utils"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface LiberatedSong {
   entry_song: string
+  song_displayname?: string | null
   last_count: string
   last_show_date: string | null
   last_show_id: string | null
@@ -86,6 +88,7 @@ export function LiberatedSongs({
             entry_show,
             entry_length,
             songs!inner(
+              song_displayname,
               song_category,
               categories!inner(
                 category_artwork
@@ -118,6 +121,7 @@ export function LiberatedSongs({
             const cat = Array.isArray(cats) ? cats[0] : cats
             return {
               entry_song: entry.entry_song,
+              song_displayname: song?.song_displayname ?? null,
               last_count: entry.last_count,
               last_show_date: entry.last_show_date,
               last_show_id: entry.last_show_id,
@@ -188,10 +192,15 @@ export function LiberatedSongs({
                       <div className="flex items-center justify-between gap-2">
                         <button
                           type="button"
-                          onClick={() => onSongClick?.(song.entry_song)}
-                          className="font-medium text-foreground hover:underline cursor-pointer"
+                          onClick={() =>
+                            onSongClick?.(song.entry_song, song.song_displayname)
+                          }
+                          className="font-medium text-foreground text-left cursor-pointer"
                         >
-                          {song.entry_song}
+                          <SongDisplayName
+                            song={song.entry_song}
+                            songDisplayName={song.song_displayname}
+                          />
                         </button>
                         <div className="flex items-center gap-1 shrink-0">
                           {song.last_count?.toUpperCase().includes("LIB") && (

@@ -2,11 +2,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { SetlistEntry } from "./types"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getPlacementColor, getSetDisplayName, getSongsForActualSet } from "./utils"
 
 interface ActualSetlistCardProps {
   actualSetlist: SetlistEntry[]
   songPicks: { set: string }[]
+}
+
+function entrySongDisplayName(entry: SetlistEntry): string | null {
+  const rel = entry.songs
+  if (!rel) return null
+  const row = Array.isArray(rel) ? rel[0] : rel
+  return row?.song_displayname ?? null
 }
 
 function getUniqueSetsFromPicksAndActual(
@@ -80,8 +88,11 @@ export function ActualSetlistCard({
                       >
                         {index + 1}
                       </span>
-                      <span className="text-xs font-medium truncate">
-                        {entry.entry_song}
+                      <span className="text-xs font-medium truncate min-w-0">
+                        <SongDisplayName
+                          song={entry.entry_song}
+                          songDisplayName={entrySongDisplayName(entry)}
+                        />
                       </span>
                     </div>
                   ))}

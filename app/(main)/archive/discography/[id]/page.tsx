@@ -57,6 +57,7 @@ export default function DiscographyReleasePage({
     rowKeys: linkedRowKeys,
     discographyOrders: linkedDiscographyOrders,
     discographySourceLabels: linkedDiscographySourceLabels,
+    discographyShowColumnCells: linkedDiscographyShowColumnCells,
     showContextById: linkedShowContextById,
     loading: linkedSetlistLoading,
     error: linkedSetlistError,
@@ -96,11 +97,11 @@ export default function DiscographyReleasePage({
   }, [release, setSetlistBreadcrumbs])
 
   useEffect(() => {
-    if (release) {
-      document.title = `${release.displayname} – WysteriaLane.org`
-      return () => {
-        document.title = ""
-      }
+    if (!release) return
+    const previousTitle = document.title
+    document.title = `${release.displayname} – WysteriaLane.org`
+    return () => {
+      document.title = previousTitle
     }
   }, [release])
 
@@ -206,8 +207,10 @@ export default function DiscographyReleasePage({
                     rowKeys={linkedRowKeys}
                     numberColumnValues={linkedDiscographyOrders}
                     suppressPlacementBars
+                    suppressNumberPlacementColor={false}
                     showDiscographySourceColumn
                     discographySourceLabels={linkedDiscographySourceLabels}
+                    discographyShowColumnCells={linkedDiscographyShowColumnCells}
                     hoveredReleaseId={hoveredReleaseId}
                     releaseToEntriesMap={discographyReleaseToEntriesMap}
                     onSongClick={(entry) =>

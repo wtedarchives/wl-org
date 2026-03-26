@@ -33,7 +33,7 @@ export function SongDisplayName({
 
   if (!showCanonical) {
     return (
-      <Component className={className}>
+      <Component className={cn("min-w-0 hover:underline", className)}>
         {children ?? displayName}
       </Component>
     )
@@ -41,14 +41,19 @@ export function SongDisplayName({
 
   return (
     <Component
-      className={cn("relative inline-block", className)}
+      className={cn(
+        "relative inline-block max-w-full min-w-0 text-left",
+        className,
+      )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <span
         className={cn(
           "transition-opacity duration-200",
-          isHovered ? "opacity-0 absolute left-0 top-0" : "opacity-100",
+          isHovered
+            ? "pointer-events-none absolute left-0 top-0 opacity-0"
+            : "relative opacity-100",
         )}
       >
         {children ?? displayName}
@@ -56,8 +61,11 @@ export function SongDisplayName({
       <span
         className={cn(
           "transition-opacity duration-200",
-          isHovered ? "opacity-100" : "opacity-0 absolute left-0 top-0",
+          isHovered
+            ? "relative opacity-100 underline"
+            : "pointer-events-none absolute left-0 top-0 opacity-0",
         )}
+        aria-hidden={!isHovered}
       >
         {song}
       </span>

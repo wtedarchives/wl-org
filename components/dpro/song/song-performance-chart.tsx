@@ -10,11 +10,13 @@ import { Check, X } from "lucide-react"
 import { PerformanceTimelineView } from "./performance-timeline-view"
 import { PerformanceTableView } from "./performance-table-view"
 import type { SongPerformance } from "@/types/song"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SongPerformanceChartProps {
   performances: SongPerformance[]
   selectedGroup: string | null
   songName: string
+  songDisplayName?: string | null
   onJOTYClick?: (year: number, entryId: string | null) => void
 }
 
@@ -29,6 +31,7 @@ export function SongPerformanceChart({
   performances,
   selectedGroup,
   songName,
+  songDisplayName,
   onJOTYClick,
 }: SongPerformanceChartProps) {
   const { user } = useAuth()
@@ -102,8 +105,10 @@ export function SongPerformanceChart({
         </CardHeader>
         <CardContent className="py-6">
           <p className="text-center text-sm text-muted-foreground">
-            <span className="font-medium">{songName}</span> hasn&apos;t been
-            played live.
+            <span className="font-medium inline">
+              <SongDisplayName song={songName} songDisplayName={songDisplayName} />
+            </span>{" "}
+            hasn&apos;t been played live.
           </p>
         </CardContent>
       </Card>
@@ -220,6 +225,8 @@ export function SongPerformanceChart({
               handleSort={handleSort}
               selectedGroup={selectedGroup}
               onJOTYClick={onJOTYClick}
+              songCanonical={songName}
+              songDisplayName={songDisplayName}
             />
           )}
         </CardContent>

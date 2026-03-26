@@ -107,6 +107,7 @@ export default function SongPage({
             performances={performances}
             selectedGroup={selectedGroup}
             songName={song.song}
+            songDisplayName={song.song_displayname}
             onJOTYClick={(year, entryId) => {
               setJotyYear(year)
               setJotyHighlightedEntryId(entryId)

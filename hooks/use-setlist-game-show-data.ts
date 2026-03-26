@@ -35,6 +35,7 @@ export interface PlayerStats {
 
 export interface SongStat {
   song: string
+  song_displayname?: string | null
   count: number
   percentage: number
   categoryId?: number

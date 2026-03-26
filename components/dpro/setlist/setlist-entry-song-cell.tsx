@@ -17,12 +17,12 @@ export function SetlistEntrySongCell({
 }: SetlistEntrySongCellProps) {
   const songContent = (
     <div className="flex w-full flex-nowrap items-center gap-2">
-      <span className="min-w-0 flex-1 font-medium">
+      <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-1 content-start font-medium">
         {onSongClick ? (
           <button
             type="button"
             onClick={() => onSongClick(entry)}
-            className="rounded pr-1 text-left hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1"
+            className="max-w-full rounded text-left focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1"
           >
             <SongDisplayName
               song={entry.entry_song}
@@ -36,16 +36,16 @@ export function SetlistEntrySongCell({
           />
         )}
         {entry.entry_short && (
-          <span className="ml-1 pr-1 text-[0.625rem] text-red-400">
+          <span className="text-[0.625rem] text-red-400">
             [{entry.entry_short}]
           </span>
         )}
         {entry.entry_segue && (
-          <span className="ml-1 text-red-400">
+          <span className="text-red-400">
             → {entry.entry_segue.replace(/^>\s*/, "").trim()}
           </span>
         )}
-      </span>
+      </div>
       {entry.joty_round && (
         <span className="ml-auto shrink-0">
           {(() => {

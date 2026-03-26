@@ -1,9 +1,11 @@
 "use client"
 
+import Link from "next/link"
 import {
   TableCell,
   TableRow,
 } from "@/components/ui/table"
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import {
   getLastCountBadgeStyle,
   getPlacementIndexCellBg,
@@ -14,7 +16,11 @@ import {
   formatEntryLength,
 } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
-import type { SetlistEntry, GuestGroup } from "@/types/setlist"
+import type {
+  DiscographyShowColumnCell,
+  GuestGroup,
+  SetlistEntry,
+} from "@/types/setlist"
 import { SetlistEntrySongCell } from "./setlist-entry-song-cell"
 import { SetlistEntryNumberCell } from "./setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "./setlist-entry-wted-cell"
@@ -39,6 +45,10 @@ export interface SetlistEntryRowProps {
   releaseToEntriesMap?: Record<string, Set<string>>
   /** When set (including `""`), extra column after Personnel for discography source line. */
   discographySourceLabel?: string
+  /** When set, # column omits placement bar colors (e.g. discography track listing). */
+  suppressNumberPlacementColor?: boolean
+  /** When set with object, Show column uses links; `null` is empty; omit to use label string only. */
+  discographyShowCell?: DiscographyShowColumnCell | null
 }
 
 export function SetlistEntryRow({
@@ -58,6 +68,8 @@ export function SetlistEntryRow({
   hoveredReleaseId,
   releaseToEntriesMap,
   discographySourceLabel,
+  suppressNumberPlacementColor = false,
+  discographyShowCell,
 }: SetlistEntryRowProps) {
   const rarity = calculateRarity(
     entry.times_played_num,
@@ -68,6 +80,8 @@ export function SetlistEntryRow({
   const lastBadgeStyle = getLastCountBadgeStyle(entry.last_count)
   const isCopied = copiedEntryIds?.has(entry.entry_id) ?? false
   const canCopyNumber = !!(showAdminUi && onNumberClick)
+  const numberUsesPlacementColor =
+    !suppressNumberPlacementColor && indexCellBg !== "transparent"
 
   const entryCategory =
     entry.song_category || entry.songs?.song_category || "undefined"
@@ -91,9 +105,22 @@ export function SetlistEntryRow({
       )}
     >
       <TableCell
-        className={`text-center tabular-nums ${isCopied ? "bg-green-600 text-white" : indexCellBg !== "transparent" ? "text-white" : "text-muted-foreground"}`}
+        className={`text-center tabular-nums ${
+          isCopied
+            ? "bg-green-600 text-white"
+            : suppressNumberPlacementColor
+              ? "text-foreground"
+              : numberUsesPlacementColor
+                ? "text-white"
+                : "text-muted-foreground"
+        }`}
         style={{
-          backgroundColor: isCopied ? undefined : indexCellBg !== "transparent" ? indexCellBg : undefined,
+          backgroundColor:
+            isCopied || suppressNumberPlacementColor
+              ? undefined
+              : numberUsesPlacementColor
+                ? indexCellBg
+                : undefined,
         }}
       >
         <SetlistEntryNumberCell
@@ -153,8 +180,48 @@ export function SetlistEntryRow({
         <SetlistEntryGuestsCell entry={entry} showTooltips={showTooltips} />
       </TableCell>
       {discographySourceLabel !== undefined ? (
-        <TableCell className="max-w-[14rem] min-w-[9rem] whitespace-normal text-left text-[11px] text-muted-foreground">
-          {discographySourceLabel}
+        <TableCell className="max-w-[14rem] min-w-[9rem] whitespace-normal text-left text-[11px]">
+          {discographyShowCell !== undefined ? (
+            discographyShowCell ? (
+              <span className="text-foreground">
+                <Link
+                  href={getSetlistArchiveUrl(discographyShowCell.showId)}
+                  className="font-medium text-foreground hover:underline"
+                >
+                  {discographyShowCell.dateLabel}
+                </Link>
+                {discographyShowCell.venueLabel ? (
+                  <>
+                    {" ["}
+                    {discographyShowCell.venueId ? (
+                      <Link
+                        href={`/archive/venue/${discographyShowCell.venueId}`}
+                        className="font-normal text-foreground hover:underline"
+                      >
+                        {discographyShowCell.venueLabel}
+                      </Link>
+                    ) : discographyShowCell.venueSlug ? (
+                      <Link
+                        href={`/archive/venue/${encodeURIComponent(discographyShowCell.venueSlug)}`}
+                        className="font-normal text-foreground hover:underline"
+                      >
+                        {discographyShowCell.venueLabel}
+                      </Link>
+                    ) : (
+                      <span className="font-normal text-foreground">
+                        {discographyShowCell.venueLabel}
+                      </span>
+                    )}
+                    {"]"}
+                  </>
+                ) : null}
+              </span>
+            ) : null
+          ) : (
+            <span className="text-muted-foreground">
+              {discographySourceLabel}
+            </span>
+          )}
         </TableCell>
       ) : null}
     </TableRow>

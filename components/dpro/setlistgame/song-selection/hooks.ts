@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 import type { SongPick, Song, SetlistEntry } from "./types"
 import type { SongSelectionModalProps } from "./types"
@@ -59,6 +59,7 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
             .select(`
               song, 
               song_id,
+              song_displayname,
               song_category,
               setlistgame_omit,
               categories!inner(
@@ -91,6 +92,7 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
           const songData = {
             song: item.song,
             song_id: item.song_id,
+            song_displayname: item.song_displayname ?? null,
             category_type: item.categories?.category_type
           };
           
@@ -186,7 +188,7 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
       try {
         const { data, error } = await supabase
           .from('setlist_entries')
-          .select('entry_id, entry_song, entry_set, entry_setnum, entry_placement, entry_segue, entry_length')
+          .select('entry_id, entry_song, entry_set, entry_setnum, entry_placement, entry_segue, entry_length, songs(song_displayname)')
           .eq('entry_show', show.show_id)
           .order('entry_set', { ascending: true })
           .order('entry_setnum', { ascending: true });
@@ -206,6 +208,14 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
     
     fetchActualSetlist();
   }, [show.show_id, viewMode, show.show_scored]);
+
+  const songDisplayNameMap = useMemo(() => {
+    const m: Record<string, string | null> = {}
+    for (const s of songs) {
+      m[s.song] = s.song_displayname ?? null
+    }
+    return m
+  }, [songs])
 
   // Set up live updating timer
   useEffect(() => {
@@ -287,6 +297,7 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
 
   return {
     songs,
+    songDisplayNameMap,
     loading,
     selectedSong,
     setSelectedSong,

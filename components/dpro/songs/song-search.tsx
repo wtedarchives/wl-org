@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/command"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SongBasic {
   song: string
   song_id: string
+  song_displayname?: string | null
 }
 
 const BATCH_SIZE = 1000
@@ -36,6 +38,9 @@ export function SongSearch({
   const [internalOpen, setInternalOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [selectedSong, setSelectedSong] = useState("")
+  const [selectedSongDisplayName, setSelectedSongDisplayName] = useState<
+    string | null
+  >(null)
 
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
@@ -74,7 +79,7 @@ export function SongSearch({
 
           const { data, error } = await supabase
             .from("songs")
-            .select("song, song_id")
+            .select("song, song_id, song_displayname")
             .eq("song_placeholder", false)
             .order("song", { ascending: true })
             .range(start, end)
@@ -91,8 +96,13 @@ export function SongSearch({
     fetchAllSongs()
   }, [])
 
-  const handleSelect = (songId: string, songName: string) => {
+  const handleSelect = (
+    songId: string,
+    songName: string,
+    songDisplayName?: string | null
+  ) => {
     setSelectedSong(songName)
+    setSelectedSongDisplayName(songDisplayName ?? null)
     setOpen(false)
     router.push(`/archive/song/${songId}`)
   }
@@ -106,7 +116,16 @@ export function SongSearch({
         className="w-auto justify-between gap-2 pr-2 font-semibold text-xs transition-colors hover:!bg-card/50"
         onClick={() => setOpen(true)}
       >
-        <span className="truncate">{selectedSong || "Search"}</span>
+        <span className="truncate min-w-0 text-left">
+          {selectedSong ? (
+            <SongDisplayName
+              song={selectedSong}
+              songDisplayName={selectedSongDisplayName}
+            />
+          ) : (
+            "Search"
+          )}
+        </span>
         <Search className="size-3 shrink-0" />
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen} label="Search songs">
@@ -125,10 +144,20 @@ export function SongSearch({
               <CommandItem
                 key={song.song_id}
                 value={song.song_id}
-                keywords={[song.song]}
-                onSelect={() => handleSelect(song.song_id, song.song)}
+                keywords={[
+                  song.song,
+                  ...(song.song_displayname?.trim()
+                    ? [song.song_displayname.trim()]
+                    : []),
+                ]}
+                onSelect={() =>
+                  handleSelect(song.song_id, song.song, song.song_displayname)
+                }
               >
-                {song.song}
+                <SongDisplayName
+                  song={song.song}
+                  songDisplayName={song.song_displayname}
+                />
               </CommandItem>
             ))}
           </CommandGroup>

@@ -23,6 +23,7 @@ import {
   WtedRequestSlotContent,
   WtedPendingSlotContent,
 } from "./setlist-wted-slot-content"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 const WTED_REQUEST_RATE_LIMIT_MS = 10_000
 const THIRTY_MINUTES_MS = 30 * 60 * 1000
@@ -246,8 +247,15 @@ export function SetlistWtedSheet({
                 alreadyRequestedEntryIds.has(entry.entry_id) && (
                   <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center">
                     <p className="text-xs font-normal text-foreground">
-                      <span className="font-semibold">
-                        {entry.entry_song} ({formatSetlistDate(show.show_date)})
+                      <span className="font-semibold inline-flex flex-wrap items-baseline gap-x-1">
+                        <SongDisplayName
+                          as="span"
+                          song={entry.entry_song}
+                          songDisplayName={entry.songs?.song_displayname}
+                        />
+                        <span className="tabular-nums">
+                          ({formatSetlistDate(show.show_date)})
+                        </span>
                       </span>{" "}
                       has already been requested.
                     </p>

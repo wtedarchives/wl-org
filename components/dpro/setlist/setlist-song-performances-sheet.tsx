@@ -27,6 +27,7 @@ import { formatSetlistDate, formatEntryLength } from "@/lib/setlist-utils"
 import { getPlacementIndexCellBg } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { useSongTourPerformances } from "@/hooks/use-song-tour-performances"
 import type { SetlistEntry } from "@/types/setlist"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SetlistSongPerformancesSheetProps {
   open: boolean
@@ -52,8 +53,6 @@ export function SetlistSongPerformancesSheet({
   songId: songIdProp,
 }: SetlistSongPerformancesSheetProps) {
   const songName = songNameProp ?? entry?.entry_song ?? ""
-  const songDisplayName =
-    songDisplayNameProp ?? entry?.songs?.song_displayname ?? songName
   const songId = songIdProp ?? entry?.song_id ?? null
 
   const { performances, loading, error } = useSongTourPerformances(
@@ -72,7 +71,10 @@ export function SetlistSongPerformancesSheet({
           {songName ? (
             <div className="space-y-1 text-[11px]">
               <p className="text-sm font-medium text-foreground">
-                {songDisplayName || songName}
+                <SongDisplayName
+                  song={songName}
+                  songDisplayName={songDisplayNameProp ?? entry?.songs?.song_displayname}
+                />
               </p>
               {tourName && (
                 <p className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">

@@ -5,7 +5,13 @@ import { supabase } from "@/lib/supabase"
 import type { SongStat } from "./use-setlist-game-show-data"
 
 async function fetchSongMetadata() {
-  if (!supabase) return { songIdMap: {} as Record<string, string>, categoryArtworkMap: {} as Record<string, string>, categoryIdMap: {} as Record<string, number> }
+  if (!supabase)
+    return {
+      songIdMap: {} as Record<string, string>,
+      categoryArtworkMap: {} as Record<string, string>,
+      categoryIdMap: {} as Record<string, number>,
+      songDisplayNameMap: {} as Record<string, string | null>,
+    }
 
   const { count } = await supabase
     .from("songs")
@@ -16,18 +22,21 @@ async function fetchSongMetadata() {
   const songIdMap: Record<string, string> = {}
   const categoryArtworkMap: Record<string, string> = {}
   const categoryIdMap: Record<string, number> = {}
+  const songDisplayNameMap: Record<string, string | null> = {}
 
   for (let i = 0; i < totalBatches; i++) {
     const { data } = await supabase
       .from("songs")
       .select(
-        "song, song_id, song_category, categories:song_category(category_canonid, category_artwork)"
+        "song, song_id, song_displayname, song_category, categories:song_category(category_canonid, category_artwork)"
       )
       .order("song", { ascending: true })
       .range(i * batchSize, (i + 1) * batchSize - 1)
 
     data?.forEach((s) => {
       songIdMap[s.song] = s.song_id ?? ""
+      songDisplayNameMap[s.song] =
+        (s as { song_displayname?: string | null }).song_displayname ?? null
       const cat = s.categories as { category_canonid?: number; category_artwork?: string } | null
       if (cat) {
         categoryIdMap[s.song] = cat.category_canonid ?? 0
@@ -36,7 +45,7 @@ async function fetchSongMetadata() {
     })
   }
 
-  return { songIdMap, categoryArtworkMap, categoryIdMap }
+  return { songIdMap, categoryArtworkMap, categoryIdMap, songDisplayNameMap }
 }
 
 function buildSongStats(
@@ -44,10 +53,12 @@ function buildSongStats(
   submissionCount: number,
   songIdMap: Record<string, string>,
   categoryIdMap: Record<string, number>,
-  categoryArtworkMap: Record<string, string>
+  categoryArtworkMap: Record<string, string>,
+  songDisplayNameMap: Record<string, string | null>
 ): SongStat[] {
   return Object.entries(songCounts).map(([song, count]) => ({
     song,
+    song_displayname: songDisplayNameMap[song] ?? null,
     count,
     percentage: Math.round((count / submissionCount) * 100),
     categoryId: categoryIdMap[song] ?? 0,
@@ -93,7 +104,7 @@ export function useTopSongsData(showId: string | undefined): SongStat[] {
         songCounts[p.song] = (songCounts[p.song] ?? 0) + 1
       })
 
-      const { songIdMap, categoryArtworkMap, categoryIdMap } =
+      const { songIdMap, categoryArtworkMap, categoryIdMap, songDisplayNameMap } =
         await fetchSongMetadata()
 
       const stats = buildSongStats(
@@ -101,7 +112,8 @@ export function useTopSongsData(showId: string | undefined): SongStat[] {
         submissionsData.length,
         songIdMap,
         categoryIdMap,
-        categoryArtworkMap
+        categoryArtworkMap,
+        songDisplayNameMap
       )
       setTopSongs(sortSongStats(stats).slice(0, 8))
     }
@@ -141,7 +153,7 @@ export function useTopOpenersData(showId: string | undefined): SongStat[] {
         songCounts[p.song] = (songCounts[p.song] ?? 0) + 1
       })
 
-      const { songIdMap, categoryArtworkMap, categoryIdMap } =
+      const { songIdMap, categoryArtworkMap, categoryIdMap, songDisplayNameMap } =
         await fetchSongMetadata()
 
       const stats = buildSongStats(
@@ -149,7 +161,8 @@ export function useTopOpenersData(showId: string | undefined): SongStat[] {
         submissionsData.length,
         songIdMap,
         categoryIdMap,
-        categoryArtworkMap
+        categoryArtworkMap,
+        songDisplayNameMap
       )
       setTopOpeners(sortSongStats(stats).slice(0, 8))
     }
@@ -194,7 +207,7 @@ export function useTopClosersData(showId: string | undefined): SongStat[] {
         }
       }
 
-      const { songIdMap, categoryArtworkMap, categoryIdMap } =
+      const { songIdMap, categoryArtworkMap, categoryIdMap, songDisplayNameMap } =
         await fetchSongMetadata()
 
       const stats = buildSongStats(
@@ -202,7 +215,8 @@ export function useTopClosersData(showId: string | undefined): SongStat[] {
         submissionsData.length,
         songIdMap,
         categoryIdMap,
-        categoryArtworkMap
+        categoryArtworkMap,
+        songDisplayNameMap
       )
       setTopClosers(sortSongStats(stats).slice(0, 8))
     }

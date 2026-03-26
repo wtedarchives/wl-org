@@ -109,6 +109,17 @@ export interface ShowPosition {
   nextShowId: string | null
 }
 
+/** Per-row “Show” cell data on discography track table when source show has discography_display. */
+export interface DiscographyShowColumnCell {
+  showId: string
+  /** From `subvenues.venues.venue_id` (same as tour shows). */
+  venueId: string | null
+  /** `shows.show_subvenue_venue` when linking by slug (`/archive/venue/...`), matching TourShowRow. */
+  venueSlug: string | null
+  dateLabel: string
+  venueLabel: string | null
+}
+
 export interface ModalSongData {
   isOpen: boolean
   songName: string

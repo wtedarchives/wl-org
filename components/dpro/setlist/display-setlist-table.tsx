@@ -15,7 +15,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { SetlistEntry, GuestGroup } from "@/types/setlist"
+import type {
+  DiscographyShowColumnCell,
+  GuestGroup,
+  SetlistEntry,
+} from "@/types/setlist"
 import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import { getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
@@ -58,10 +62,17 @@ export interface DisplaySetlistTableProps {
   plainAscendingNumbers?: boolean
   /** Hide Set Break / Encore divider rows (e.g. when rows come from multiple shows). */
   suppressPlacementBars?: boolean
+  /**
+   * When false, # column still uses placement colors even if `suppressPlacementBars` is true.
+   * When undefined, # column colors follow `suppressPlacementBars` (legacy behavior).
+   */
+  suppressNumberPlacementColor?: boolean
   /** Request extra column after Personnel (hidden automatically if every label is blank). */
   showDiscographySourceColumn?: boolean
   /** Parallel to `setlist`; cell shows `mm.dd.yy [venue]` when the show has `discography_display`. */
   discographySourceLabels?: string[]
+  /** When aligned with `setlist`, Show column uses linked setlist/venue URLs and song-matched text styles. */
+  discographyShowColumnCells?: (DiscographyShowColumnCell | null)[]
 }
 
 export function DisplaySetlistTable({
@@ -82,19 +93,30 @@ export function DisplaySetlistTable({
   numberColumnValues,
   plainAscendingNumbers = false,
   suppressPlacementBars = false,
+  suppressNumberPlacementColor: suppressNumberPlacementColorProp,
   showDiscographySourceColumn = false,
   discographySourceLabels = [],
+  discographyShowColumnCells = [],
 }: DisplaySetlistTableProps) {
   if (setlist.length === 0) {
     return null
   }
 
+  const suppressNumberPlacementColor =
+    suppressNumberPlacementColorProp !== undefined
+      ? suppressNumberPlacementColorProp
+      : suppressPlacementBars
+
   const discographySourceLabelsAligned =
     discographySourceLabels.length === setlist.length
+  const discographyShowCellsAligned =
+    discographyShowColumnCells.length === setlist.length
   const showDiscographySourceCol =
     showDiscographySourceColumn &&
     discographySourceLabelsAligned &&
-    discographySourceLabels.some((s) => s.trim().length > 0)
+    (discographySourceLabels.some((s) => s.trim().length > 0) ||
+      (discographyShowCellsAligned &&
+        discographyShowColumnCells.some((c) => c != null)))
 
   const useRowKeys = rowKeys?.length === setlist.length
   const rowKeyAt = (index: number, entry: SetlistEntry) =>
@@ -302,9 +324,15 @@ export function DisplaySetlistTable({
                     hoveredCategory={hoveredCategory}
                     hoveredReleaseId={hoveredReleaseId}
                     releaseToEntriesMap={releaseToEntriesMap}
+                    suppressNumberPlacementColor={suppressNumberPlacementColor}
                     discographySourceLabel={
                       showDiscographySourceCol
                         ? (discographySourceLabels[index] ?? "")
+                        : undefined
+                    }
+                    discographyShowCell={
+                      showDiscographySourceCol && discographyShowCellsAligned
+                        ? (discographyShowColumnCells[index] ?? null)
                         : undefined
                     }
                   />

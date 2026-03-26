@@ -10,11 +10,12 @@ import {
   getUniqueSets,
   getAllUniqueSets,
   getSongsForSet,
-  getSongsForActualSet,
 } from "./utils"
 import { TooltipContainer } from "./tooltip-container"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface PicksDisplayCardProps {
+  songDisplayNameMap: Record<string, string | null>
   songPicks: SongPick[]
   actualSetlist: SetlistEntry[]
   viewMode: boolean
@@ -27,6 +28,7 @@ interface PicksDisplayCardProps {
 }
 
 export function PicksDisplayCard({
+  songDisplayNameMap,
   songPicks,
   actualSetlist,
   viewMode,
@@ -93,9 +95,16 @@ export function PicksDisplayCard({
                         {index + 1}
                       </span>
                       <span
-                        className={`font-medium truncate ${viewMode ? "text-xs" : "text-sm"}`}
+                        className={`font-medium truncate min-w-0 ${viewMode ? "text-xs" : "text-sm"}`}
                       >
-                        {pick.song}
+                        {pick.isBreak ? (
+                          pick.song
+                        ) : (
+                          <SongDisplayName
+                            song={pick.song}
+                            songDisplayName={songDisplayNameMap[pick.song] ?? null}
+                          />
+                        )}
                       </span>
                       {pick.placement &&
                         (!viewMode || !isSelectionClosed) &&

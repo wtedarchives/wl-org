@@ -43,6 +43,7 @@ export interface SongSelectionModalProps {
 export interface Song {
   song: string
   song_id: string
+  song_displayname?: string | null
   category_type?: string
 }
 
@@ -54,6 +55,10 @@ export interface SetlistEntry {
   entry_placement?: string
   entry_segue?: string
   entry_length?: string
+  songs?:
+    | { song_displayname?: string | null }
+    | { song_displayname?: string | null }[]
+    | null
 }
 
 export interface SongPick {

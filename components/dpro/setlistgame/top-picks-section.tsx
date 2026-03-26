@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { SongStat } from "@/hooks/use-setlist-game-show-data"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface TopPicksSectionProps {
   topSongs: SongStat[]
@@ -31,13 +32,16 @@ function SongRow({ song, index }: { song: SongStat; index: number }) {
         <Link
           href={song.song_id ? `/archive/song/${song.song_id}` : "#"}
           className={cn(
-            "text-xs font-medium truncate",
+            "text-xs font-medium truncate min-w-0",
             song.song_id
               ? "text-foreground no-underline hover:underline"
               : "text-muted-foreground cursor-default"
           )}
         >
-          {song.song}
+          <SongDisplayName
+            song={song.song}
+            songDisplayName={song.song_displayname}
+          />
         </Link>
       </div>
       <span className="text-xs text-white bg-white/10 px-1.5 py-0.5 rounded font-medium min-w-[24px] text-center shrink-0">

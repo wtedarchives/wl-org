@@ -93,6 +93,7 @@ export function SongSelectionDialog({
 
   const {
     songs,
+    songDisplayNameMap,
     loading,
     selectedSong,
     setSelectedSong,
@@ -211,6 +212,7 @@ export function SongSelectionDialog({
                   }
                 >
                   <PicksDisplayCard
+                    songDisplayNameMap={songDisplayNameMap}
                     songPicks={songPicks}
                     actualSetlist={actualSetlist}
                     viewMode={true}
@@ -257,6 +259,7 @@ export function SongSelectionDialog({
                   />
                   <SongSearchCard
                     songs={songs}
+                    songDisplayNameMap={songDisplayNameMap}
                     selectedSong={selectedSong}
                     setSelectedSong={setSelectedSong}
                     onAddSong={() => {
@@ -276,6 +279,7 @@ export function SongSelectionDialog({
                 </div>
                 <div className="flex flex-col gap-3 order-2">
                   <PicksDisplayCard
+                    songDisplayNameMap={songDisplayNameMap}
                     songPicks={songPicks}
                     actualSetlist={actualSetlist}
                     viewMode={false}
