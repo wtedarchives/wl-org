@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import Link from "next/link"
 import {
   Table,
@@ -69,7 +70,7 @@ export function UserSongMatrix({
               >
                 {yearIdMap[group.year] ? (
                   <Link
-                    href={`/archive/years/${yearIdMap[group.year]}`}
+                    href={getYearArchiveUrl(yearIdMap[group.year])}
                     className="hover:underline"
                   >
                     {group.year}

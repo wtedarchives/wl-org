@@ -113,12 +113,14 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const isMobile = useIsMobile()
   const isDesktopContent = useIsDesktopContentLayout()
   const { toggleSidebar } = useSidebar()
-  const { yearLabel } = useYearBreadcrumb()
+  const { yearLabel, yearDetailHref } = useYearBreadcrumb()
   const { setlistBreadcrumbs } = useSetlistBreadcrumb()
   const { publicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
   const isPublicUserProfilePath = (pathname ?? "").startsWith("/archive/user")
   const useYearOverride =
-    (pathname ?? "").startsWith("/archive/years/") && yearLabel != null
+    ((pathname ?? "") === "/archive/years" ||
+      (pathname ?? "").startsWith("/archive/years/")) &&
+    yearLabel != null
   const useProfileTrail = (pathname ?? "").startsWith("/archive/profile")
   const useSetlistTrail =
     ((pathname ?? "") === "/archive/setlist" ||
@@ -148,7 +150,23 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
         ]
       : useSetlistTrail
       ? setlistBreadcrumbs
-      : pathnameToBreadcrumbs(pathname ?? "", useYearOverride ? yearLabel : undefined)
+      : (() => {
+          const trail = pathnameToBreadcrumbs(
+            pathname ?? "",
+            useYearOverride ? yearLabel : undefined,
+          )
+          if (
+            useYearOverride &&
+            yearDetailHref &&
+            trail.length > 0
+          ) {
+            const last = trail.length - 1
+            return trail.map((item, i) =>
+              i === last ? { ...item, href: yearDetailHref } : item,
+            )
+          }
+          return trail
+        })()
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">

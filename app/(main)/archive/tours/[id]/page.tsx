@@ -14,6 +14,7 @@ import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
+import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 
 const DESKTOP_MIN_WIDTH = 1280
@@ -96,7 +97,7 @@ export default function TourPage({
     const items: { label: string; href: string }[] = [
       { label: "Setlist Archive", href: "/archive" },
       ...(yearId && year !== "Unknown"
-        ? [{ label: year, href: `/archive/years/${yearId}` }]
+        ? [{ label: year, href: getYearArchiveUrl(yearId) }]
         : []),
       { label: currentTour.tour, href: "" },
     ]

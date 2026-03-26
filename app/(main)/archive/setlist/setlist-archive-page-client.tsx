@@ -7,6 +7,8 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatSetlistDate, totalSetlistLength } from "@/lib/setlist-utils"
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import { useSetlistData, useTours, useShowDates } from "@/hooks/use-setlist-data"
 import { useSetlistNavigation } from "@/hooks/use-setlist-navigation"
 import {
@@ -141,9 +143,9 @@ export default function SetlistArchivePageClient() {
       : dateLabel
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
-      { label: show.show_date.slice(0, 4), href: `/archive/years/${yearId}` },
+      { label: show.show_date.slice(0, 4), href: getYearArchiveUrl(yearId) },
       { label: tourLabel, href: `/archive/tours/${show.tour_id}` },
-      { label: lastLabel, href: "" },
+      { label: lastLabel, href: getSetlistArchiveUrl(show.show_id) },
     ])
     return () => setSetlistBreadcrumbs(null)
   }, [show, yearId, setSetlistBreadcrumbs])

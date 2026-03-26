@@ -1,7 +1,17 @@
-import { redirect } from "next/navigation"
+import { Suspense } from "react"
 
-const DEFAULT_YEAR_ID = "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+
+import YearsArchivePageClient from "./years-archive-page-client"
 
 export default function DproYearsPage() {
-  redirect(`/archive/years/${DEFAULT_YEAR_ID}`)
+  return (
+    <Suspense
+      fallback={
+        <LoadingPageCard message="Loading years…" page="years" />
+      }
+    >
+      <YearsArchivePageClient />
+    </Suspense>
+  )
 }

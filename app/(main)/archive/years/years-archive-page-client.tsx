@@ -1,7 +1,7 @@
 "use client"
 
-import { use, useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 
 import { useYearBreadcrumb } from "@/components/year-breadcrumb-context"
 import { YearsProvider, useYears } from "@/components/years-provider"
@@ -19,19 +19,22 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { ListFilter, ListMusic, MapPin, X } from "lucide-react"
+import { getYearArchiveUrl } from "@/lib/year-archive-url"
 
+const DEFAULT_YEAR_ID = "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445"
 const DEFAULT_YEAR = "2025"
 const DESKTOP_MIN_WIDTH = 1280
+const YEAR_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 type MobileModal = "tours" | "groups" | "setlist" | null
 
-function YearPageContent({ yearId }: { yearId?: string }) {
+function YearPageContent({ yearId }: { yearId: string }) {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const { years, loading: yearsLoading } = useYears()
-  const { setYearLabel } = useYearBreadcrumb()
+  const { setYearBreadcrumb } = useYearBreadcrumb()
 
-  // Default to desktop so containers show until we measure < 1280
   const [layoutMode, setLayoutMode] = useState<"mobile" | "desktop">("desktop")
   const [mobileModal, setMobileModal] = useState<MobileModal>(null)
   const [currentYear, setCurrentYear] = useState<string>("")
@@ -58,7 +61,7 @@ function YearPageContent({ yearId }: { yearId?: string }) {
     const updateLayout = () => {
       const width = el.clientWidth
       setLayoutMode((prev) =>
-        width >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile"
+        width >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile",
       )
     }
     updateLayout()
@@ -79,49 +82,46 @@ function YearPageContent({ yearId }: { yearId?: string }) {
 
   useEffect(() => {
     if (years.length === 0) return
-
-    const fallbackYear = years.find((y) => y.year === DEFAULT_YEAR)
-
-    if (!yearId) {
-      if (fallbackYear) {
-        router.replace(`/archive/years/${fallbackYear.year_id}`, {
-          scroll: false,
-        })
-      }
-      return
-    }
-
     const yearData = years.find((y) => y.year_id === yearId)
     if (yearData) {
       setCurrentYear(yearData.year)
-    } else if (fallbackYear) {
-      router.replace(`/archive/years/${fallbackYear.year_id}`, {
-        scroll: false,
-      })
     }
-  }, [yearId, years, router])
+  }, [yearId, years])
+
+  useEffect(() => {
+    if (yearsLoading || years.length === 0) return
+    if (!years.some((y) => y.year_id === yearId)) {
+      notFound()
+    }
+  }, [years, yearsLoading, yearId])
 
   useEffect(() => {
     if (yearId !== previousYearId) {
-      setPreviousYearId(yearId ?? null)
+      setPreviousYearId(yearId)
       setSelectedGroups([])
     }
   }, [yearId, previousYearId])
 
   useEffect(() => {
-    setYearLabel(currentYear || null)
-    return () => setYearLabel(null)
-  }, [currentYear, setYearLabel])
+    setYearBreadcrumb({
+      label: currentYear || null,
+      detailHref: yearId ? getYearArchiveUrl(yearId) : null,
+    })
+    return () =>
+      setYearBreadcrumb({ label: null, detailHref: null })
+  }, [currentYear, yearId, setYearBreadcrumb])
 
   useEffect(() => {
     if (currentYear) {
       document.title = `${currentYear} Shows – WysteriaLane.org`
     }
-    return () => { document.title = "" }
+    return () => {
+      document.title = ""
+    }
   }, [currentYear])
 
   const handleYearClick = (id: string) => {
-    router.push(`/archive/years/${id}`)
+    router.push(getYearArchiveUrl(id))
   }
 
   const toggleGroupSelection = (group: string) => {
@@ -147,6 +147,7 @@ function YearPageContent({ yearId }: { yearId?: string }) {
         <LoadingPageCard
           message={`Loading ${yearLabel} data…`}
           progress={progress}
+          page="years"
         />
       </div>
     )
@@ -331,16 +332,37 @@ function YearPageContent({ yearId }: { yearId?: string }) {
   )
 }
 
-export default function DproYearPage({
-  params,
-}: {
-  params: Promise<{ year_id?: string }>
-}) {
-  const { year_id } = use(params)
+export default function YearsArchivePageClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const rawList = useMemo(
+    () =>
+      searchParams
+        .getAll("id")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    [searchParams],
+  )
+  const idSet = new Set(rawList)
+  const yearIdParam = rawList[0] ?? ""
+
+  useEffect(() => {
+    if (!yearIdParam) {
+      router.replace(getYearArchiveUrl(DEFAULT_YEAR_ID))
+    }
+  }, [yearIdParam, router])
+
+  if (idSet.size > 1) notFound()
+
+  if (!yearIdParam) {
+    return <LoadingPageCard message="Loading years…" page="years" />
+  }
+
+  if (!YEAR_ID_RE.test(yearIdParam)) notFound()
+
   return (
     <YearsProvider>
-      <YearPageContent yearId={year_id} />
+      <YearPageContent yearId={yearIdParam} />
     </YearsProvider>
   )
 }
-

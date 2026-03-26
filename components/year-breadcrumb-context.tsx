@@ -10,7 +10,11 @@ import {
 
 type YearBreadcrumbContextValue = {
   yearLabel: string | null
-  setYearLabel: (label: string | null) => void
+  yearDetailHref: string | null
+  setYearBreadcrumb: (payload: {
+    label: string | null
+    detailHref: string | null
+  }) => void
 }
 
 const YearBreadcrumbContext = createContext<
@@ -19,11 +23,18 @@ const YearBreadcrumbContext = createContext<
 
 export function YearBreadcrumbProvider({ children }: { children: ReactNode }) {
   const [yearLabel, setYearLabelState] = useState<string | null>(null)
-  const setYearLabel = useCallback((label: string | null) => {
-    setYearLabelState(label)
-  }, [])
+  const [yearDetailHref, setYearDetailHrefState] = useState<string | null>(null)
+  const setYearBreadcrumb = useCallback(
+    (payload: { label: string | null; detailHref: string | null }) => {
+      setYearLabelState(payload.label)
+      setYearDetailHrefState(payload.detailHref)
+    },
+    [],
+  )
   return (
-    <YearBreadcrumbContext.Provider value={{ yearLabel, setYearLabel }}>
+    <YearBreadcrumbContext.Provider
+      value={{ yearLabel, yearDetailHref, setYearBreadcrumb }}
+    >
       {children}
     </YearBreadcrumbContext.Provider>
   )
@@ -31,5 +42,11 @@ export function YearBreadcrumbProvider({ children }: { children: ReactNode }) {
 
 export function useYearBreadcrumb() {
   const ctx = useContext(YearBreadcrumbContext)
-  return ctx ?? { yearLabel: null, setYearLabel: () => {} }
+  return (
+    ctx ?? {
+      yearLabel: null,
+      yearDetailHref: null,
+      setYearBreadcrumb: () => {},
+    }
+  )
 }

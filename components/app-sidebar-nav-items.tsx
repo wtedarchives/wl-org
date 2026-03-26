@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 import { sidebarMenuButtonVariants } from "@/components/ui/sidebar-menu"
 import { cn } from "@/lib/utils"
+import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import {
   WTED_RADIO_SUB,
   SETLIST_ARCHIVE_SUB,
@@ -223,7 +224,7 @@ export function AppSidebarNavItems({
               {NAV_YEARS.map((year, index) => (
                 <span key={year.year_id} className="flex items-center gap-1">
                   <Link
-                    href={`/archive/years/${year.year_id}`}
+                    href={getYearArchiveUrl(year.year_id)}
                     className="hover:underline"
                   >
                     {year.year}
