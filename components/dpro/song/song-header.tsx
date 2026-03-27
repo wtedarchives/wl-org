@@ -12,14 +12,15 @@ interface SongHeaderProps {
 export function SongHeader({ songName, songDisplayName }: SongHeaderProps) {
   return (
     <Card className="border-border/60 bg-card/80 py-0 overflow-hidden">
-      <CardContent className="flex flex-row items-center justify-between gap-2 px-3 py-2">
-        <h1 className="text-base font-semibold truncate">
+      <CardContent className="flex flex-row items-center justify-between gap-4 px-3 py-2">
+        <h1 className="min-w-0 flex-1 text-base font-semibold leading-4.5 break-words [overflow-wrap:anywhere]">
           <SongDisplayName
             song={songName}
             songDisplayName={songDisplayName}
+            underlineOnHover={false}
           />
         </h1>
-        <SongSearch />
+        <SongSearch className="shrink-0" />
       </CardContent>
     </Card>
   )

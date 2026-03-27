@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface SongBasic {
   song: string
@@ -39,9 +38,6 @@ export function SongSearch({
   const [internalOpen, setInternalOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [selectedSong, setSelectedSong] = useState("")
-  const [selectedSongDisplayName, setSelectedSongDisplayName] = useState<
-    string | null
-  >(null)
 
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
@@ -97,13 +93,8 @@ export function SongSearch({
     fetchAllSongs()
   }, [])
 
-  const handleSelect = (
-    songId: string,
-    songName: string,
-    songDisplayName?: string | null
-  ) => {
+  const handleSelect = (songId: string, songName: string) => {
     setSelectedSong(songName)
-    setSelectedSongDisplayName(songDisplayName ?? null)
     setOpen(false)
     router.push(getSongArchiveUrl(songId))
   }
@@ -118,14 +109,7 @@ export function SongSearch({
         onClick={() => setOpen(true)}
       >
         <span className="truncate min-w-0 text-left">
-          {selectedSong ? (
-            <SongDisplayName
-              song={selectedSong}
-              songDisplayName={selectedSongDisplayName}
-            />
-          ) : (
-            "Search"
-          )}
+          {selectedSong || "Search"}
         </span>
         <Search className="size-3 shrink-0" />
       </Button>
@@ -151,14 +135,9 @@ export function SongSearch({
                     ? [song.song_displayname.trim()]
                     : []),
                 ]}
-                onSelect={() =>
-                  handleSelect(song.song_id, song.song, song.song_displayname)
-                }
+                onSelect={() => handleSelect(song.song_id, song.song)}
               >
-                <SongDisplayName
-                  song={song.song}
-                  songDisplayName={song.song_displayname}
-                />
+                <span className="text-xs">{song.song}</span>
               </CommandItem>
             ))}
           </CommandGroup>

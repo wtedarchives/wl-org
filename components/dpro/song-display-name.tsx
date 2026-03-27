@@ -14,6 +14,11 @@ interface SongDisplayNameProps {
   as?: "span" | "div"
   /** Child content - if provided, wraps children instead of rendering text */
   children?: React.ReactNode
+  /**
+   * When the name sits inside a link, hover underline reinforces that it’s clickable.
+   * Set false for plain headings or body copy (e.g. song page title).
+   */
+  underlineOnHover?: boolean
 }
 
 /**
@@ -26,6 +31,7 @@ export function SongDisplayName({
   className,
   as: Component = "span",
   children,
+  underlineOnHover = true,
 }: SongDisplayNameProps) {
   const [isHovered, setIsHovered] = useState(false)
   const displayName = songDisplayName?.trim() || song
@@ -33,7 +39,13 @@ export function SongDisplayName({
 
   if (!showCanonical) {
     return (
-      <Component className={cn("min-w-0 hover:underline", className)}>
+      <Component
+        className={cn(
+          "min-w-0",
+          underlineOnHover && "hover:underline",
+          className,
+        )}
+      >
         {children ?? displayName}
       </Component>
     )
@@ -62,7 +74,10 @@ export function SongDisplayName({
         className={cn(
           "transition-opacity duration-200",
           isHovered
-            ? "relative opacity-100 underline"
+            ? cn(
+                "relative opacity-100",
+                underlineOnHover && "underline",
+              )
             : "pointer-events-none absolute left-0 top-0 opacity-0",
         )}
         aria-hidden={!isHovered}

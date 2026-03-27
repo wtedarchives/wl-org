@@ -106,7 +106,11 @@ export function SongPerformanceChart({
         <CardContent className="py-6">
           <p className="text-center text-sm text-muted-foreground">
             <span className="font-medium inline">
-              <SongDisplayName song={songName} songDisplayName={songDisplayName} />
+              <SongDisplayName
+                song={songName}
+                songDisplayName={songDisplayName}
+                underlineOnHover={false}
+              />
             </span>{" "}
             hasn&apos;t been played live.
           </p>
