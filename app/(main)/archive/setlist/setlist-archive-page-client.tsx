@@ -320,13 +320,7 @@ export default function SetlistArchivePageClient() {
                 />
               </CardContent>
             </Card>
-          ) : (
-            <Card className="border-border/60 bg-card/80 py-0">
-              <CardContent className="py-6 text-center text-sm text-muted-foreground">
-                No setlist data for this show.
-              </CardContent>
-            </Card>
-          )}
+          ) : null}
           {layoutMode === "mobile" && (
             <SetlistShowStatsCard
               show={show}
