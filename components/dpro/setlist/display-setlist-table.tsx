@@ -133,11 +133,11 @@ export function DisplaySetlistTable({
   const hasSinglePlacementType = uniquePlacements.size === 1
   const fullColSpan =
     2 +
+    (showDiscographySourceCol ? 1 : 0) +
     (showWtedColumn ? 1 : 0) +
     1 +
     (showCanonColumns ? 3 : 0) +
-    1 +
-    (showDiscographySourceCol ? 1 : 0) // #, Song, WTED?, Time, Last+Tour+Rarity?, Personnel, Source?
+    1 // #, Song, Show?, WTED?, Time, Last+Tour+Rarity?, Personnel
   const hasLastBadges =
     showCanonColumns &&
     setlist.some((e) => {
@@ -208,6 +208,11 @@ export function DisplaySetlistTable({
                   "Song"
                 )}
               </TableHead>
+              {showDiscographySourceCol ? (
+                <TableHead className="h-8 min-w-[9rem] whitespace-nowrap text-left text-muted-foreground">
+                  Show
+                </TableHead>
+              ) : null}
               {showWtedColumn && (
                 <TableHead className="h-8 text-center text-muted-foreground">
                   {isDesktop ? (
@@ -256,11 +261,6 @@ export function DisplaySetlistTable({
               <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
                 Personnel
               </TableHead>
-              {showDiscographySourceCol ? (
-                <TableHead className="h-8 min-w-[9rem] max-w-[14rem] text-left text-muted-foreground">
-                  Show
-                </TableHead>
-              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>

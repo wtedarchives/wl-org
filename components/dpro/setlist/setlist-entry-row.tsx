@@ -74,7 +74,7 @@ export interface SetlistEntryRowProps {
   hoveredCategory?: string | null
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: Record<string, Set<string>>
-  /** When set (including `""`), extra column after Personnel for discography source line. */
+  /** When set (including `""`), extra Show column between Song and WTED (discography track listing). */
   discographySourceLabel?: string
   /** When set, # column omits placement bar colors (e.g. discography track listing). */
   suppressNumberPlacementColor?: boolean
@@ -169,6 +169,39 @@ export function SetlistEntryRow({
           onJotyClick={onJotyClick}
         />
       </TableCell>
+      {discographySourceLabel !== undefined ? (
+        <TableCell className="min-w-[9rem] whitespace-nowrap text-left text-[11px]">
+          {discographyShowCell !== undefined ? (
+            discographyShowCell ? (
+              <span className="inline-flex flex-nowrap items-baseline gap-x-1.5 text-foreground">
+                <Link
+                  href={getSetlistArchiveUrl(discographyShowCell.showId)}
+                  className="font-medium text-foreground hover:underline"
+                >
+                  {discographyShowCell.dateLabel}
+                </Link>
+                {discographyShowCell.venueLabel ? (
+                  venueLocationAlreadyBracketed(
+                    discographyShowCell.venueLabel,
+                  ) ? (
+                    <DiscographyShowVenueInner cell={discographyShowCell} />
+                  ) : (
+                    <span>
+                      {"["}
+                      <DiscographyShowVenueInner cell={discographyShowCell} />
+                      {"]"}
+                    </span>
+                  )
+                ) : null}
+              </span>
+            ) : null
+          ) : (
+            <span className="text-muted-foreground">
+              {discographySourceLabel}
+            </span>
+          )}
+        </TableCell>
+      ) : null}
       {showWtedColumn && (
         <TableCell className="text-center">
           <SetlistEntryWtedCell
@@ -210,39 +243,6 @@ export function SetlistEntryRow({
       <TableCell className="min-w-[400px] max-w-[600px]">
         <SetlistEntryGuestsCell entry={entry} showTooltips={showTooltips} />
       </TableCell>
-      {discographySourceLabel !== undefined ? (
-        <TableCell className="max-w-[14rem] min-w-[9rem] whitespace-normal text-left text-[11px]">
-          {discographyShowCell !== undefined ? (
-            discographyShowCell ? (
-              <span className="inline-flex flex-wrap items-baseline gap-x-1.5 text-foreground">
-                <Link
-                  href={getSetlistArchiveUrl(discographyShowCell.showId)}
-                  className="font-medium text-foreground hover:underline"
-                >
-                  {discographyShowCell.dateLabel}
-                </Link>
-                {discographyShowCell.venueLabel ? (
-                  venueLocationAlreadyBracketed(
-                    discographyShowCell.venueLabel,
-                  ) ? (
-                    <DiscographyShowVenueInner cell={discographyShowCell} />
-                  ) : (
-                    <span>
-                      {"["}
-                      <DiscographyShowVenueInner cell={discographyShowCell} />
-                      {"]"}
-                    </span>
-                  )
-                ) : null}
-              </span>
-            ) : null
-          ) : (
-            <span className="text-muted-foreground">
-              {discographySourceLabel}
-            </span>
-          )}
-        </TableCell>
-      ) : null}
     </TableRow>
   )
 }
