@@ -1,19 +1,22 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import type { ShowData, AdminSetlistEntryData } from "@/types/admin"
 
 const PAGE_SIZE = 1000
 
 export function useAdminSetlist() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [shows, setShows] = useState<ShowData[]>([])
   const [setlistEntries, setSetlistEntries] = useState<AdminSetlistEntryData[]>([])
   const [selectedShow, setSelectedShow] = useState<ShowData | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
   const mountedRef = useRef(false)
-  const showDataLoadedRef = useRef(false)
+  const appliedSelectionRef = useRef<string | null>(null)
 
   const fetchShows = async () => {
     if (!supabase) return
@@ -54,7 +57,7 @@ export function useAdminSetlist() {
     }
   }
 
-  const fetchSetlistEntries = async (showId: string) => {
+  const fetchSetlistEntries = useCallback(async (showId: string) => {
     if (!supabase) return
     try {
       setLoading(true)
@@ -88,9 +91,10 @@ export function useAdminSetlist() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const handleShowSelect = (show: ShowData) => {
+    appliedSelectionRef.current = show.show_id
     setSelectedShow(show)
     fetchSetlistEntries(show.show_id)
     try {
@@ -108,22 +112,38 @@ export function useAdminSetlist() {
   }, [])
 
   useEffect(() => {
-    if (shows.length > 0 && !showDataLoadedRef.current) {
-      showDataLoadedRef.current = true
-      try {
-        const storedShowId = localStorage.getItem("adminSelectedShowId")
-        if (storedShowId) {
-          const storedShow = shows.find((s) => s.show_id === storedShowId)
-          if (storedShow) {
-            setSelectedShow(storedShow)
-            fetchSetlistEntries(storedShowId)
-          }
-        }
-      } catch (e) {
-        console.error("Error restoring selected show from localStorage:", e)
-      }
+    if (shows.length === 0) return
+
+    const fromUrl = searchParams.get("show_id")?.trim() ?? ""
+    let fromStorage = ""
+    try {
+      fromStorage =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("adminSelectedShowId")?.trim() ?? ""
+          : ""
+    } catch {
+      fromStorage = ""
     }
-  }, [shows])
+    const targetId = fromUrl || fromStorage
+    if (!targetId) return
+
+    if (appliedSelectionRef.current === targetId && !fromUrl) return
+
+    const match = shows.find((s) => s.show_id === targetId)
+    if (!match) return
+
+    appliedSelectionRef.current = targetId
+    setSelectedShow(match)
+    fetchSetlistEntries(targetId)
+    try {
+      localStorage.setItem("adminSelectedShowId", targetId)
+    } catch (e) {
+      console.error("Error saving selected show to localStorage:", e)
+    }
+    if (fromUrl) {
+      router.replace("/archive/admin", { scroll: false })
+    }
+  }, [shows, searchParams, router, fetchSetlistEntries])
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -134,7 +154,7 @@ export function useAdminSetlist() {
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange)
-  }, [selectedShow])
+  }, [selectedShow, fetchSetlistEntries])
 
   return {
     shows,

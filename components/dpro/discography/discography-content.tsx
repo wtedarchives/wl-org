@@ -26,10 +26,31 @@ import {
 
 type DiscographyListRow = {
   uuid: string
+  name: string | null
   displayname: string
   artwork: string | null
   canon_id: number
   category: string
+}
+
+/** Side Projects only: hyphen surrounded by spaces → en dash (U+2013). */
+function formatSideProjectName(name: string): string {
+  return name.replace(/ - /g, " – ")
+}
+
+function sideProjectSortKey(row: DiscographyListRow): string {
+  const n = row.name?.trim()
+  if (n) return formatSideProjectName(n)
+  return row.displayname.trim()
+}
+
+function rowLinkLabel(item: DiscographyListRow, category: string): string {
+  if (category === "Side Projects") {
+    const n = item.name?.trim()
+    if (n) return formatSideProjectName(n)
+    return item.displayname
+  }
+  return item.displayname
 }
 
 const DISCOGRAPHY_INDEX_TITLE = "Discography – WysteriaLane.org"
@@ -64,7 +85,7 @@ function DiscographyCategoryCard({
                         href={getDiscographyArchiveUrl(item.uuid)}
                         className="min-w-0 flex-1 text-xs font-medium leading-3.5 text-foreground hover:underline break-words [overflow-wrap:anywhere]"
                       >
-                        {item.displayname}
+                        {rowLinkLabel(item, category)}
                       </Link>
                       {item.artwork ? (
                         <span className="inline-block w-max max-w-5 shrink-0">
@@ -128,7 +149,7 @@ export function DiscographyContent() {
       const cats = [...DISCOGRAPHY_PUBLIC_CATEGORIES]
       const { data, error } = await sb
         .from("discography")
-        .select("uuid, displayname, artwork, canon_id, category")
+        .select("uuid, name, displayname, artwork, canon_id, category")
         .in("category", cats)
         .order("canon_id", { ascending: true })
 
@@ -163,7 +184,7 @@ export function DiscographyContent() {
     const sideProjects = map.get("Side Projects")
     if (sideProjects?.length) {
       sideProjects.sort((a, b) =>
-        a.displayname.localeCompare(b.displayname, undefined, {
+        sideProjectSortKey(a).localeCompare(sideProjectSortKey(b), undefined, {
           sensitivity: "base",
         }),
       )

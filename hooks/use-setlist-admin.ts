@@ -74,7 +74,9 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
       localStorage.setItem("adminSelectedShowId", showId)
       localStorage.setItem("adminActiveTab", "Setlist")
     }
-    router.push("/admin")
+    router.push(
+      `/archive/admin?show_id=${encodeURIComponent(showId)}`,
+    )
   }, [showId, router])
 
   const handleWlMouseEnter = useCallback(() => setWlHovered(true), [])

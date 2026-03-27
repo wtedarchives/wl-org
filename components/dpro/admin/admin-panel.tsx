@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { ChevronDownIcon } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -163,7 +163,15 @@ export function AdminPanel() {
 
         <div className="mt-4 w-full overflow-x-auto rounded-lg border">
           <TabsContent value="Setlist" className="mt-0 w-full p-3 sm:p-4">
-            <AdminSetlist />
+            <Suspense
+              fallback={
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Loading setlist admin…
+                </div>
+              }
+            >
+              <AdminSetlist />
+            </Suspense>
           </TabsContent>
           <TabsContent value="Artist" className="mt-0 w-full p-3 sm:p-4">
             <AdminArtist />
