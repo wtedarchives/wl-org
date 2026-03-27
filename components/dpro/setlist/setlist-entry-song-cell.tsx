@@ -2,18 +2,30 @@
 
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { SetlistEntry } from "@/types/setlist"
+import {
+  entryHasSongStatsLines,
+  SetlistEntryStatsTooltipContent,
+} from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
 
 interface SetlistEntrySongCellProps {
   entry: SetlistEntry
   onSongClick?: (entry: SetlistEntry) => void
   onJotyClick?: (entry: SetlistEntry) => void
+  /** Desktop layout: show per-row stats tooltip when API fields are present. */
+  showStatsTooltip?: boolean
 }
 
 export function SetlistEntrySongCell({
   entry,
   onSongClick,
   onJotyClick,
+  showStatsTooltip = false,
 }: SetlistEntrySongCellProps) {
   const songContent = (
     <div className="flex w-full flex-nowrap items-center gap-2">
@@ -74,15 +86,35 @@ export function SetlistEntrySongCell({
     </div>
   )
 
-  return (
-    <div className="flex flex-col gap-0.5">
+  const coachNotes =
+    entry.entry_coachnotes?.trim() ? (
+      <div
+        className="min-w-[300px] max-w-[470px] break-words whitespace-normal text-[10px] leading-2.5 text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline"
+        dangerouslySetInnerHTML={{ __html: entry.entry_coachnotes.trim() }}
+      />
+    ) : null
+
+  const body = (
+    <>
       {songContent}
-      {entry.entry_coachnotes?.trim() && (
-        <div
-          className="min-w-[300px] max-w-[470px] break-words whitespace-normal text-[10px] leading-2.5 text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline"
-          dangerouslySetInnerHTML={{ __html: entry.entry_coachnotes.trim() }}
-        />
-      )}
-    </div>
+      {coachNotes}
+    </>
   )
+
+  if (showStatsTooltip && entryHasSongStatsLines(entry)) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex w-full cursor-default flex-col gap-0.5 text-left">
+            {body}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-[280px] leading-tight" side="top">
+          <SetlistEntryStatsTooltipContent entry={entry} />
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return <div className="flex flex-col gap-0.5">{body}</div>
 }

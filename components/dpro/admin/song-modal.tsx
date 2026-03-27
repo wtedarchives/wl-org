@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Save, X } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import { updateSong } from "@/lib/utils/song-utils"
 import type { SongDataFull } from "@/types/admin"
 import {
   Dialog,
@@ -122,16 +123,7 @@ export function SongModal({
         })
         if (error) throw error
       } else {
-        const { error } = await supabase.rpc("update_song", {
-          song_id_param: songToSave.song_id,
-          song_param: songToSave.song,
-          song_displayname_param: songToSave.song_displayname,
-          song_category_param: songToSave.song_category,
-          song_originalartist_param: songToSave.song_originalartist,
-          song_categoryorder_param: songToSave.song_categoryorder,
-          song_coachnotes_param: songToSave.song_coachnotes,
-        })
-        if (error) throw error
+        await updateSong(songToSave as SongDataFull)
       }
       onSave()
       onClose()

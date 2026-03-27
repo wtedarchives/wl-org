@@ -167,6 +167,7 @@ export function SetlistEntryRow({
           entry={entry}
           onSongClick={onSongClick}
           onJotyClick={onJotyClick}
+          showStatsTooltip={showTooltips}
         />
       </TableCell>
       {discographySourceLabel !== undefined ? (

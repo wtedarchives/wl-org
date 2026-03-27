@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { LiberatedSong } from "@/lib/types/stats"
 import { formatDate, extractShowCount } from "@/lib/stats/stats-formatting"
+import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
 
 interface LiberatedSongsCardProps {
   items: LiberatedSong[]
@@ -133,7 +134,7 @@ export function LiberatedSongsCard({
                         {song.venue_location && (
                           <span className="text-muted-foreground/70">
                             {" "}
-                            [{song.venue_location}]
+                            {formatVenueLocationWithBrackets(song.venue_location)}
                           </span>
                         )}
                       </>

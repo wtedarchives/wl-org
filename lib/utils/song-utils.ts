@@ -22,15 +22,17 @@ export function transformSongForUpdate(song: SongDataFull) {
 
 export async function updateSong(songData: SongDataFull) {
   if (!supabase) throw new Error("Supabase not configured")
-  const { error } = await supabase.rpc("update_song", {
-    song_id_param: songData.song_id,
-    song_param: songData.song,
-    song_displayname_param: songData.song_displayname,
-    song_category_param: songData.song_category,
-    song_originalartist_param: songData.song_originalartist,
-    song_categoryorder_param: songData.song_categoryorder,
-    song_coachnotes_param: songData.song_coachnotes,
-  })
+  const { error } = await supabase
+    .from("songs")
+    .update({
+      song: songData.song,
+      song_displayname: songData.song_displayname,
+      song_category: songData.song_category,
+      song_originalartist: songData.song_originalartist,
+      song_categoryorder: songData.song_categoryorder,
+      song_coachnotes: songData.song_coachnotes,
+    })
+    .eq("song_id", songData.song_id)
   if (error) throw error
   return songData
 }

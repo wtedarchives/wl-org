@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table"
 import type { LongestSong } from "@/lib/types/stats"
 import { formatTime, formatDate } from "@/lib/stats/stats-formatting"
+import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
 
 interface LongestSongsCardProps {
   items: LongestSong[]
@@ -93,7 +94,7 @@ export function LongestSongsCard({
                         {song.venue_location && (
                           <span className="text-muted-foreground/70">
                             {" "}
-                            [{song.venue_location}]
+                            {formatVenueLocationWithBrackets(song.venue_location)}
                           </span>
                         )}
                       </>
