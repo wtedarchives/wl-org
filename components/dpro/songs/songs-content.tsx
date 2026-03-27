@@ -87,7 +87,7 @@ function CategorySection({
                       {categorySongs.map((song) => (
                         <li
                           key={song.song_id}
-                          className="border-t border-border/40 bg-background/70 hover:bg-muted/40 transition-colors"
+                          className="border-t border-border/40 bg-muted/40 hover:bg-muted/20 transition-colors"
                         >
                           <Link
                             href={getSongArchiveUrl(song.song_id)}
