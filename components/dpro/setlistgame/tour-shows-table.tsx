@@ -16,6 +16,7 @@ import {
 } from "@/lib/setlist-game-utils"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
 import type { TourGameShow } from "@/hooks/use-setlist-game-tour-details"
+import { getSetlistGameShowArchiveUrl } from "@/lib/setlist-game-archive-url"
 
 interface TourShowsTableProps {
   gameShows: TourGameShow[]
@@ -86,7 +87,7 @@ export function TourShowsTable({ gameShows }: TourShowsTableProps) {
               >
                 <TableCell className="text-center font-medium px-2 py-0.5">
                   <Link
-                    href={`/archive/setlistgame/${show.show_id}`}
+                    href={getSetlistGameShowArchiveUrl(show.show_id)}
                     className="no-underline hover:underline"
                   >
                     {formatSetlistGameDate(show.show_date)}

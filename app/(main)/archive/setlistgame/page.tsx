@@ -1,6 +1,8 @@
 import { Suspense } from "react"
+
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
-import { SetlistGameContent } from "@/components/dpro/setlistgame/setlist-game-content"
+
+import SetlistGameArchivePageClient from "./setlistgame-archive-page-client"
 
 export const metadata = {
   title: "Setlist Game – WysteriaLane.org",
@@ -9,7 +11,7 @@ export const metadata = {
 export default function SetlistGamePage() {
   return (
     <Suspense fallback={<LoadingPageCard message="Loading setlist game…" />}>
-      <SetlistGameContent />
+      <SetlistGameArchivePageClient />
     </Suspense>
   )
 }

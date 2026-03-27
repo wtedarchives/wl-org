@@ -21,3 +21,15 @@
 
 # Legacy path-based venue URLs → query model
 /archive/venue/*  /archive/venue?id=:splat  301
+
+# Setlist Game: tour paths before generic show path
+/archive/setlistgame/tour/*  /archive/setlistgame?tour_id=:splat  301
+/archive/setlistgame/*  /archive/setlistgame?id=:splat  301
+
+# Public user stats: path tab → query (incoming ?id= preserved by Netlify)
+/archive/user/overview  /archive/user?tab=overview  301
+/archive/user/shows  /archive/user?tab=shows  301
+/archive/user/songs  /archive/user?tab=songs  301
+/archive/user/slots  /archive/user?tab=slots  301
+/archive/user/personnel  /archive/user?tab=personnel  301
+/archive/user/loose-ends  /archive/user?tab=loose-ends  301

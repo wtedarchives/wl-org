@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import type { TourStats } from "@/hooks/use-past-tours"
+import { getSetlistGameTourArchiveUrl } from "@/lib/setlist-game-archive-url"
 
 interface PastToursProps {
   currentLeague: string
@@ -61,7 +62,7 @@ export function PastTours({
               <TableRow key={tour.tour} className="text-[11px]">
                 <TableCell className="px-2 py-0.5 font-medium">
                   <Link
-                    href={`/archive/setlistgame/tour/${tour.tour_id}`}
+                    href={getSetlistGameTourArchiveUrl(tour.tour_id)}
                     className="no-underline hover:underline underline-offset-2 hover:text-foreground"
                   >
                     {tour.tour}

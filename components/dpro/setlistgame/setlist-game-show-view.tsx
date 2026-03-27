@@ -1,14 +1,21 @@
 "use client"
 
-import { use, useState, useEffect } from "react"
-import { notFound } from "next/navigation"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/components/auth-context"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
+import {
+  getSetlistGameShowArchiveUrl,
+  getSetlistGameTourArchiveUrl,
+} from "@/lib/setlist-game-archive-url"
 import { supabase } from "@/lib/supabase"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSetlistGameShowData } from "@/hooks/use-setlist-game-show-data"
-import { useTopSongsData, useTopOpenersData, useTopClosersData } from "@/hooks/use-top-songs-data"
+import {
+  useTopSongsData,
+  useTopOpenersData,
+  useTopClosersData,
+} from "@/hooks/use-top-songs-data"
 import type { GameShow } from "@/hooks/use-setlist-game-show-data"
 import type { UserPick } from "@/hooks/use-user-picks"
 import { ShowHeader } from "@/components/dpro/setlistgame/show-header"
@@ -31,34 +38,33 @@ interface SubmissionDetails {
 }
 
 async function fetchPicksBySubmissionId(
-  submissionId: string
+  submissionId: string,
 ): Promise<UserPick[]> {
   if (!supabase) return []
   const { data } = await supabase
     .from("setlist_game_picks")
-    .select("song, set, setnum, placement, score, result, showcloser_correct, showopener_correct")
+    .select(
+      "song, set, setnum, placement, score, result, showcloser_correct, showopener_correct",
+    )
     .eq("submission_id", submissionId)
     .order("setnum", { ascending: true })
   return data ?? []
 }
 
-export default function SetlistGameShowPage({
-  params,
-}: {
-  params: Promise<{ show_id: string }>
-}) {
-  const { show_id: showId } = use(params)
+export function SetlistGameShowView({ showId }: { showId: string }) {
   const { user } = useAuth()
   const [activeSongSelectionShow, setActiveSongSelectionShow] =
     useState<GameShow | null>(null)
   const [userPicks, setUserPicks] = useState<UserPick[]>([])
   const [viewMode, setViewMode] = useState(true)
-  const [submissionDetails, setSubmissionDetails] = useState<SubmissionDetails>({
-    totalScore: 0,
-    songsPicked: 0,
-    songsPlayed: 0,
-    setlist: [],
-  })
+  const [submissionDetails, setSubmissionDetails] = useState<SubmissionDetails>(
+    {
+      totalScore: 0,
+      songsPicked: 0,
+      songsPlayed: 0,
+      setlist: [],
+    },
+  )
   const [viewingUserId, setViewingUserId] = useState<string | null>(null)
 
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
@@ -114,7 +120,7 @@ export default function SetlistGameShowPage({
 
   const handleViewOtherUserSubmission = async (
     userId: string,
-    username: string
+    username: string,
   ) => {
     if (!showId || !show || !supabase) return
     if (!user) {
@@ -146,8 +152,6 @@ export default function SetlistGameShowPage({
     }
   }
 
-  if (!showId) notFound()
-
   useEffect(() => {
     if (show) {
       const dateLabel = formatSetlistGameDate(show.show_date)
@@ -155,7 +159,9 @@ export default function SetlistGameShowPage({
       const titlePart = venuePart ? `${dateLabel} - ${venuePart}` : dateLabel
       document.title = `Setlist Game (${titlePart}) – WysteriaLane.org`
     }
-    return () => { document.title = "" }
+    return () => {
+      document.title = ""
+    }
   }, [show])
 
   useEffect(() => {
@@ -176,15 +182,15 @@ export default function SetlistGameShowPage({
         ? [
             {
               label: show.show_tour,
-              href: `/archive/setlistgame/tour/${tours.tour_id}`,
+              href: getSetlistGameTourArchiveUrl(tours.tour_id),
             },
           ]
         : []),
-      { label: lastLabel, href: "" },
+      { label: lastLabel, href: getSetlistGameShowArchiveUrl(showId) },
     ]
     setSetlistBreadcrumbs(items)
     return () => setSetlistBreadcrumbs(null)
-  }, [show, setSetlistBreadcrumbs])
+  }, [show, showId, setSetlistBreadcrumbs])
 
   if (loading) {
     return (

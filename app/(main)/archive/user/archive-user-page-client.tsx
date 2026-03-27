@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { notFound, useParams, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 
 import { useAuth } from "@/components/auth-context"
@@ -12,22 +12,63 @@ import {
   type ProfileStatsTabSlug,
 } from "@/components/dpro/profile/profile-stats-tab-config"
 import { ProfileStatsTabsShell } from "@/components/dpro/profile/profile-stats-tabs-shell"
+import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { getUserProfileUrl } from "@/lib/user-profile-url"
 import { supabase } from "@/lib/supabase"
 
-export function PublicProfileTabPageClient() {
-  const params = useParams()
+function resolveUserPageParams(
+  searchParams: ReturnType<typeof useSearchParams>,
+): {
+  profileUserId: string | null
+  tabRaw: string
+  invalidParams: boolean
+} {
+  const ids = searchParams
+    .getAll("id")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (new Set(ids).size > 1) {
+    return { profileUserId: null, tabRaw: "", invalidParams: true }
+  }
+  const tabs = searchParams
+    .getAll("tab")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (new Set(tabs).size > 1) {
+    return { profileUserId: null, tabRaw: "", invalidParams: true }
+  }
+  const profileUserId = ids[0] ?? null
+  const tabRaw = tabs[0] ?? ""
+  return { profileUserId, tabRaw, invalidParams: false }
+}
+
+export default function ArchiveUserPageClient() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const { setPublicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
   const [username, setUsername] = useState<string | null>(null)
   const [shareCopied, setShareCopied] = useState(false)
 
-  const rawTab = params.tab
-  const idRaw = searchParams.get("id")
-  const profileUserId = idRaw?.trim() ? idRaw.trim() : null
+  const { profileUserId, tabRaw, invalidParams } = useMemo(
+    () => resolveUserPageParams(searchParams),
+    [searchParams],
+  )
 
-  const isOwnProfile = !!(user && profileUserId && user.id === profileUserId)
+  const isOwnProfile = !!(
+    user &&
+    profileUserId &&
+    user.id === profileUserId
+  )
+
+  useEffect(() => {
+    if (invalidParams) return
+    if (profileUserId && !tabRaw) {
+      router.replace(
+        `/archive/user?tab=overview&id=${encodeURIComponent(profileUserId)}`,
+      )
+    }
+  }, [invalidParams, profileUserId, tabRaw, router])
 
   useEffect(() => {
     setUsername(null)
@@ -58,10 +99,29 @@ export function PublicProfileTabPageClient() {
     setPublicProfileBreadcrumbLabel,
   ])
 
-  if (typeof rawTab !== "string" || !isProfileStatsTabSlug(rawTab)) {
+  if (invalidParams) notFound()
+
+  if (tabRaw && !isProfileStatsTabSlug(tabRaw)) {
     notFound()
   }
-  const tab: ProfileStatsTabSlug = rawTab
+
+  if (profileUserId && !tabRaw) {
+    return <LoadingPageCard message="Loading profile…" />
+  }
+
+  if (!profileUserId) {
+    return (
+      <div className="flex flex-col gap-6 rounded-b-none p-4 md:rounded-b-xl md:p-6">
+        <div className="rounded-lg border border-border bg-card p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            No user ID provided. Use a share link to view a user&apos;s profile.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const tab = tabRaw as ProfileStatsTabSlug
 
   const handleShare = async () => {
     if (!user || !profileUserId) return
@@ -79,18 +139,6 @@ export function PublicProfileTabPageClient() {
     }
   }
 
-  if (!profileUserId) {
-    return (
-      <div className="flex flex-col gap-6 rounded-b-none p-4 md:rounded-b-xl md:p-6">
-        <div className="rounded-lg border border-border bg-card p-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            No user ID provided. Use a share link to view a user&apos;s profile.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   const title = isOwnProfile
     ? "My Stats"
     : `${username ?? "User"}'s Stats`
@@ -100,7 +148,7 @@ export function PublicProfileTabPageClient() {
       : undefined
 
   const tabHref = (slug: string) =>
-    `/archive/user/${slug}?id=${encodeURIComponent(profileUserId)}`
+    `/archive/user?tab=${encodeURIComponent(slug)}&id=${encodeURIComponent(profileUserId)}`
 
   return (
     <ProfileStatsTabsShell

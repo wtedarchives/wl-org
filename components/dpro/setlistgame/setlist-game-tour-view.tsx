@@ -1,21 +1,16 @@
 "use client"
 
-import { use, useEffect } from "react"
-import { notFound } from "next/navigation"
+import { useEffect } from "react"
 import { useAuth } from "@/components/auth-context"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import { getSetlistGameTourArchiveUrl } from "@/lib/setlist-game-archive-url"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSetlistGameTourDetails } from "@/hooks/use-setlist-game-tour-details"
 import { TourHeader } from "@/components/dpro/setlistgame/tour-header"
 import { TourShowsTable } from "@/components/dpro/setlistgame/tour-shows-table"
 import { TourStandingsTable } from "@/components/dpro/setlistgame/tour-standings-table"
 
-export default function SetlistGameTourPage({
-  params,
-}: {
-  params: Promise<{ tour_id: string }>
-}) {
-  const { tour_id: tourId } = use(params)
+export function SetlistGameTourView({ tourId }: { tourId: string }) {
   const { user } = useAuth()
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const {
@@ -30,7 +25,9 @@ export default function SetlistGameTourPage({
     if (tourInfo) {
       document.title = `Setlist Game (${tourInfo.tour}) – WysteriaLane.org`
     }
-    return () => { document.title = "" }
+    return () => {
+      document.title = ""
+    }
   }, [tourInfo])
 
   useEffect(() => {
@@ -41,12 +38,13 @@ export default function SetlistGameTourPage({
     setSetlistBreadcrumbs([
       { label: "Setlist Archive", href: "/archive" },
       { label: "Setlist Game", href: "/archive/setlistgame" },
-      { label: tourInfo.tour, href: "" },
+      {
+        label: tourInfo.tour,
+        href: getSetlistGameTourArchiveUrl(tourId),
+      },
     ])
     return () => setSetlistBreadcrumbs(null)
-  }, [tourInfo, setSetlistBreadcrumbs])
-
-  if (!tourId) notFound()
+  }, [tourInfo, setSetlistBreadcrumbs, tourId])
 
   if (loading) {
     return (

@@ -2,6 +2,7 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getUserProfileUrl } from "@/lib/user-profile-url"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -38,7 +39,7 @@ export function FindDialog({ open, onOpenChange }: FindDialogProps) {
     const trimmed = userId.trim()
     if (!trimmed) return
     onOpenChange(false)
-    router.push(`/profile/${trimmed}`)
+    router.push(getUserProfileUrl(trimmed))
     setUserId("")
   }
 

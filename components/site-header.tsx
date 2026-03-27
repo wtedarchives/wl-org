@@ -125,7 +125,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const useSetlistTrail =
     ((pathname ?? "") === "/archive/setlist" ||
       (pathname ?? "").startsWith("/archive/setlist/") ||
-      (pathname ?? "").startsWith("/archive/setlistgame/") ||
+      (pathname ?? "") === "/archive/setlistgame" ||
       (pathname ?? "") === "/archive/tours" ||
       (pathname ?? "").startsWith("/archive/tours/") ||
       (pathname ?? "") === "/archive/song" ||
