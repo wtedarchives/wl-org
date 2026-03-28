@@ -31,6 +31,17 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
       />
     )
   }
+  if (key === "discogs") {
+    return (
+      <Image
+        src="/discogs.png"
+        alt=""
+        width={14}
+        height={14}
+        className="shrink-0 rounded-sm object-contain"
+      />
+    )
+  }
   if (key === "youtube") {
     return <FaYoutube className="shrink-0 size-3.5" style={{ color: SERVICE_COLORS.youtube }} />
   }
