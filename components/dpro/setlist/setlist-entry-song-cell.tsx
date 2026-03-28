@@ -29,7 +29,7 @@ export function SetlistEntrySongCell({
 }: SetlistEntrySongCellProps) {
   const songContent = (
     <div className="flex w-full flex-nowrap items-center gap-2">
-      <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-1 content-start font-medium">
+      <div className="flex min-w-0 flex-1 flex-nowrap items-center gap-x-2 font-medium">
         {onSongClick ? (
           <button
             type="button"
