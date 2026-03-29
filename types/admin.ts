@@ -30,6 +30,11 @@ export interface AdminShowData {
   show_time?: string | null
   show_callbacks?: string | null
   show_wl_link?: string | null
+  show_setlistcomplete?: boolean | null
+  discography_display?: boolean | null
+  show_dripfieldcomplete?: boolean | null
+  show_jivecomplete?: boolean | null
+  show_listcategorycomplete?: string | null
 }
 
 export interface AdminSetlistEntryData {

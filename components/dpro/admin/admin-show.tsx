@@ -10,6 +10,7 @@ import { useShowModals } from "@/hooks/use-show-modals"
 import { AdminShowHeader } from "./admin-show-header"
 import { ShowFormFields } from "./show-form-fields"
 import { ReleasesTable } from "./releases-table"
+import { ShowCompletionFlagsSection } from "./show-completion-flags-section"
 import { ShowModal } from "./show-modal"
 import { ShowReleaseModal } from "./show-release-modal"
 
@@ -37,6 +38,7 @@ export function AdminShow() {
     handleShowSelect,
     handleInputChange,
     toggleEdit,
+    patchShow,
   } = useShowActions(allShows, fetchAllShows, fetchShowReleases)
   const {
     isShowModalOpen,
@@ -121,6 +123,11 @@ export function AdminShow() {
             loadingReleases={loadingReleases}
             onAddRelease={handleAddRelease}
             onEditRelease={handleEditRelease}
+          />
+          <ShowCompletionFlagsSection
+            show={selectedShow}
+            onSaveSuccess={patchShow}
+            onRefreshShows={fetchAllShows}
           />
         </div>
       )}

@@ -372,11 +372,7 @@ export async function fetchShowStatsData(
       .map(({ _sortValue, _canonid, ...rest }) => rest as ShowStat)
 
     const lowestRarity = showsWithLength
-      .filter(
-        (s) =>
-          s.show_rarity != null &&
-          s.show_setlistcomplete === true
-      )
+      .filter((s) => s.show_rarity != null)
       .map((s) => ({
         ...generateShowStat(s, s.show_rarity_formatted!, s.show_rarity!),
         _sortValue: s.show_rarity!,
@@ -391,11 +387,7 @@ export async function fetchShowStatsData(
       .map(({ _sortValue, _canonid, ...rest }) => rest as ShowStat)
 
     const highestGap = showsWithLength
-      .filter(
-        (s) =>
-          s.show_gap != null &&
-          s.show_setlistcomplete === true
-      )
+      .filter((s) => s.show_gap != null)
       .map((s) => ({
         ...generateShowStat(s, s.show_gap_formatted!, s.show_gap!),
         _sortValue: s.show_gap!,

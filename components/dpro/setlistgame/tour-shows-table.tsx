@@ -97,17 +97,17 @@ export function TourShowsTable({ gameShows }: TourShowsTableProps) {
                   {show.show_venue_location}
                 </TableCell>
                 <TableCell className="text-center px-2 py-0.5 text-muted-foreground">
-                  {show.playerCount ?? "-"}
+                  {show.playerCount ?? ""}
                 </TableCell>
                 <TableCell className="text-center px-2 py-0.5 font-medium">
                   {show.show_scored && show.highScore != null
                     ? show.highScore
-                    : "-"}
+                    : ""}
                 </TableCell>
                 <TableCell className="text-center px-2 py-0.5 text-muted-foreground">
                   {show.show_scored && show.averageScore != null
                     ? show.averageScore.toFixed(2)
-                    : "-"}
+                    : ""}
                 </TableCell>
                 <TableCell
                   className={`text-center px-2 py-0.5 ${getOverUnderTextColor(
@@ -123,22 +123,22 @@ export function TourShowsTable({ gameShows }: TourShowsTableProps) {
                 <TableCell className="text-center px-2 py-0.5 text-muted-foreground">
                   {show.show_scored && show.totalCorrectSongs != null
                     ? show.totalCorrectSongs
-                    : "-"}
+                    : ""}
                 </TableCell>
                 <TableCell className="text-center px-2 py-0.5 text-muted-foreground">
                   {show.show_scored && show.totalCorrectSets != null
                     ? show.totalCorrectSets
-                    : "-"}
+                    : ""}
                 </TableCell>
                 <TableCell className="text-center px-2 py-0.5 text-muted-foreground">
                   {show.show_scored && show.usersPickedOpener != null
                     ? show.usersPickedOpener
-                    : "-"}
+                    : ""}
                 </TableCell>
                 <TableCell className="text-center px-2 py-0.5 text-muted-foreground">
                   {show.show_scored && show.usersPickedCloser != null
                     ? show.usersPickedCloser
-                    : "-"}
+                    : ""}
                 </TableCell>
               </TableRow>
             ))}

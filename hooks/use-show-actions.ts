@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
 import { convertFromEasternToUTC } from "@/lib/utils/show-utils"
 import type { AdminShowData } from "@/types/admin"
@@ -70,6 +70,11 @@ export function useShowActions(
     else setIsEditing(true)
   }
 
+  const patchShow = useCallback((patch: Partial<AdminShowData>) => {
+    setSelectedShow((prev) => (prev ? { ...prev, ...patch } : null))
+    setEditedShow((prev) => (prev ? { ...prev, ...patch } : null))
+  }, [])
+
   const handleSaveChanges = async () => {
     if (!editedShow || !supabase) return
     setIsSubmitting(true)
@@ -115,5 +120,6 @@ export function useShowActions(
     handleShowSelect,
     handleInputChange,
     toggleEdit,
+    patchShow,
   }
 }

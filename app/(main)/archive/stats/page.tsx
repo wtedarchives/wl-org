@@ -22,7 +22,7 @@ import {
   GapValue,
 } from "@/components/dpro/stats/show-stat-card"
 
-const DEFAULT_YEAR = 2025
+const DEFAULT_YEAR = 2026
 const YEARS = [
   "all-time",
   ...Array.from({ length: 13 }, (_, i) => 2026 - i),

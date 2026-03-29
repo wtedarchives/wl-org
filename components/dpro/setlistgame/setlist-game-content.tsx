@@ -20,7 +20,7 @@ import { SetlistGameRulesDialog } from "./setlist-game-rules-dialog"
 import { ScoringDialog } from "./scoring-dialog"
 import { SongSelectionDialog } from "./song-selection-dialog"
 
-const ACTIVE_LEAGUE = "2026 Misc"
+const ACTIVE_LEAGUE = "2026 Spring"
 
 interface SubmissionDetails {
   totalScore: number

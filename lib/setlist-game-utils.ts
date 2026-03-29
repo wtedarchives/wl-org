@@ -21,6 +21,6 @@ export function formatOverUnderValue(
   averageOverUnder: number | undefined,
   showScored: boolean
 ): string {
-  if (!showScored || averageOverUnder === undefined) return "-"
+  if (!showScored || averageOverUnder === undefined) return ""
   return (averageOverUnder > 0 ? "+" : "") + averageOverUnder.toFixed(2)
 }

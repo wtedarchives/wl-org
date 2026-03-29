@@ -84,15 +84,13 @@ export function SetlistGameShowTable({
                 )}
               </TableCell>
               <TableCell className="px-2 py-0.5 text-center text-muted-foreground">
-                {show.playerCount ?? "-"}
+                {show.playerCount ?? ""}
               </TableCell>
               {user && (
                 <TableCell className="px-2 py-0.5 text-center">
                   {show.show_scored && show.score != null ? (
                     <span className="font-medium">{show.score}</span>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
+                  ) : null}
                 </TableCell>
               )}
               <TableCell className="px-2 py-0.5 text-center">
