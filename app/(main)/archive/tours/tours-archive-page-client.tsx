@@ -22,7 +22,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 const DESKTOP_MIN_WIDTH = 1280
 
 /** Landing redirect when `/archive/tours` has no `id` (matches former server page). */
-const DEFAULT_LANDING_TOUR_NAME = "2026 Misc"
+const DEFAULT_LANDING_TOUR_NAME = "2026 Spring"
 
 const TOUR_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
