@@ -27,6 +27,8 @@ interface TourSongMatrixProps {
   sortMode?: MatrixSortMode
   tourId?: string
   onSongClick?: (songName: string, songDisplayName?: string | null) => void
+  /** Keeps parent “Songs Played” count in sync when this view is active (excludes jam placeholder, teases, etc.). */
+  onSongCountChange?: (count: number) => void
 }
 
 export function TourSongMatrix({
@@ -34,6 +36,7 @@ export function TourSongMatrix({
   hideTitle = false,
   sortMode = "alphabetical",
   onSongClick,
+  onSongCountChange,
 }: TourSongMatrixProps) {
   const [showsWithEntries, setShowsWithEntries] = useState<Set<string>>(
     new Set(),
@@ -88,6 +91,24 @@ export function TourSongMatrix({
     filteredShows,
     sortMode,
   )
+
+  useEffect(() => {
+    if (
+      !onSongCountChange ||
+      isFiltering ||
+      isLoading ||
+      errorMessage
+    ) {
+      return
+    }
+    onSongCountChange(songMatrix.songs.length)
+  }, [
+    onSongCountChange,
+    isFiltering,
+    isLoading,
+    errorMessage,
+    songMatrix.songs.length,
+  ])
 
   if (isFiltering || isLoading) {
     return (

@@ -22,6 +22,7 @@ import type {
   SlotShowData,
   SlotData,
 } from "@/types/tour"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 
 const DEFAULT_TOUR_NAME = "2025 Holiday Run"
 const BATCH_SIZE = 1000
@@ -301,7 +302,11 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
         }
         setHasGuestAppearances(hasGuests)
 
-        const uniqueSongs = new Set(allEntries.map((e) => e.entry_song)).size
+        const uniqueSongs = new Set(
+          allEntries
+            .filter((e) => e.entry_song !== INDEX_SKIP_SONG_IMPROV_JAM)
+            .map((e) => e.entry_song),
+        ).size
         setUniqueSongCount(uniqueSongs)
 
         if (showIds.length > 0) {

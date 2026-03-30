@@ -218,6 +218,7 @@ export function TourSongsCombined({
             sortMode={matrixSortMode}
             tourId={tourId}
             onSongClick={onSongClick}
+            onSongCountChange={onSongCountChange}
           />
         )}
       </CardContent>

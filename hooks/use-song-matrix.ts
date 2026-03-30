@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 function formatShowDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z")
   const m = String(d.getUTCMonth() + 1).padStart(2, "0")
@@ -76,7 +77,8 @@ export function useSongMatrix(
         const skipShorts = ["fake", "tease", "reprise", "aborted"]
         const validEntriesRaw = (entriesData ?? []).filter(
           (e: any) =>
-            !e.entry_short || !skipShorts.includes(e.entry_short.toLowerCase()),
+            e.entry_song !== INDEX_SKIP_SONG_IMPROV_JAM &&
+            (!e.entry_short || !skipShorts.includes(e.entry_short.toLowerCase())),
         )
 
         /** Set order for chronological sort: 1,2,3,4,5 then E1,E2,E3 */

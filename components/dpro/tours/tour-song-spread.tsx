@@ -5,6 +5,7 @@ import {
   SongSpreadDisplay,
   type CategorySpread,
 } from "@/components/dpro/song-spread-display"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 
 const SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 const COVER_CATEGORIES = ["Cover Songs", "Miscellaneous Covers"]
@@ -39,6 +40,7 @@ export function TourSongSpread({ shows }: TourSongSpreadProps) {
     for (const show of shows) {
       const songsWithValidPerformance = new Set<string>()
       show.setlist_entries?.forEach((entry) => {
+        if (entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return
         if (
           !entry.entry_short ||
           !SKIP_SHORTS.includes(entry.entry_short.toLowerCase())
@@ -49,6 +51,7 @@ export function TourSongSpread({ shows }: TourSongSpreadProps) {
 
       const showSongKeys = new Set<string>()
       show.setlist_entries?.forEach((entry) => {
+        if (entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return
         if (!songsWithValidPerformance.has(entry.entry_song)) return
         const songKey = `${entry.entry_song}-${entry.songs?.song_category ?? ""}`
         const category = entry.songs?.song_category || "undefined"

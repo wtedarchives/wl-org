@@ -6,6 +6,7 @@ import {
   type CategorySpread,
 } from "@/components/dpro/song-spread-display"
 import type { SetlistEntry } from "@/types/setlist"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 
 const EXCLUDED_SHORTS = ["aborted", "fake", "reprise", "tease"]
 const COVER_CATEGORIES = ["Cover Songs", "Miscellaneous Covers"]
@@ -23,6 +24,7 @@ export function SetlistSongSpreadCard({
 }: SetlistSongSpreadCardProps) {
   const spread = useMemo((): CategorySpread[] => {
     const filteredSetlist = setlist.filter((entry) => {
+      if (entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return false
       const short = (entry.entry_short ?? "").toLowerCase().trim()
       return !EXCLUDED_SHORTS.includes(short)
     })

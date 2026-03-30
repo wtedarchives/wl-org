@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useCategoryArtwork } from "@/hooks/use-category-artwork"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 
 interface Show {
   show_id: string
@@ -141,6 +142,7 @@ export function TourSongStats({
     for (const show of shows) {
       const validSongs = new Set<string>()
       show.setlist_entries?.forEach((e) => {
+        if (e.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return
         if (
           !e.entry_short ||
           !SKIP_SHORTS.includes(e.entry_short.toLowerCase())
@@ -151,6 +153,7 @@ export function TourSongStats({
 
       const uniqueInShow = new Set<string>()
       show.setlist_entries?.forEach((e) => {
+        if (e.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return
         if (!validSongs.has(e.entry_song)) return
         const curr = songMap.get(e.entry_song) ?? {
           song_id: songIdMap[e.entry_song] ?? "",

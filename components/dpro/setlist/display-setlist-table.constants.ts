@@ -3,10 +3,14 @@ import type { SetlistEntry } from "@/types/setlist"
 /** Rows with these entry_short values (case-insensitive) get no number in the # column. */
 export const INDEX_SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 
+/** entry_song value that never receives a # (placeholder jam row). */
+export const INDEX_SKIP_SONG_IMPROV_JAM = "[Improv/Jam]"
+
 /**
  * Compute display number for each setlist row: running count 1, 2, 3, …
- * Skip (null) when entry_short is in INDEX_SKIP_SHORTS or when we've already
- * assigned a number to that entry_song (first occurrence gets the number, duplicates get none).
+ * Skip (null) when entry_short is in INDEX_SKIP_SHORTS, when entry_song is
+ * INDEX_SKIP_SONG_IMPROV_JAM, or when we've already assigned a number to that
+ * entry_song (first occurrence gets the number, duplicates get none).
  */
 export function computeDisplayNumbers(setlist: SetlistEntry[]): (number | null)[] {
   const result: (number | null)[] = []
@@ -16,8 +20,9 @@ export function computeDisplayNumbers(setlist: SetlistEntry[]): (number | null)[
     const short = entry.entry_short?.toLowerCase()
     const skipByShort =
       short != null && INDEX_SKIP_SHORTS.some((s) => s === short)
+    const skipByImprovJam = entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM
     const skipByDuplicate = songsNumbered.has(entry.entry_song)
-    if (skipByShort || skipByDuplicate) {
+    if (skipByShort || skipByImprovJam || skipByDuplicate) {
       result.push(null)
     } else {
       result.push(counter)
