@@ -10,7 +10,9 @@ import { WtedRequestSongCard } from "@/components/wted-request-song-card"
 
 export function WlHome() {
   return (
-    <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green bg-[url('/bg.jpg')] bg-cover bg-center bg-fixed md:rounded-b-xl">
+    <div
+      className="flex h-full flex-col rounded-b-none bg-wl-dark-green bg-[linear-gradient(to_bottom,rgba(40,91,78,0.8),rgba(40,91,78,0.8)),url('/newbg.png')] bg-cover bg-center bg-fixed md:rounded-b-xl"
+    >
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6 lg:py-8">
           {/* Hero: image + text blurb above columns */}
