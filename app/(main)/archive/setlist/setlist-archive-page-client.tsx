@@ -35,6 +35,7 @@ import { SetlistShowNotes } from "@/components/dpro/setlist/setlist-show-notes"
 import { SetlistPageHeader } from "@/components/dpro/setlist/setlist-page-header"
 import { SetlistRatingCard } from "@/components/dpro/setlist/setlist-rating-card"
 import { SetlistAttendanceCard } from "@/components/dpro/setlist/setlist-attendance-card"
+import { SetlistCommunityForumButton } from "@/components/dpro/setlist/setlist-community-forum-button"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawers"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
@@ -280,6 +281,9 @@ export default function SetlistArchivePageClient() {
               </div>
             </div>
           )}
+          {layoutMode === "mobile" && (
+            <SetlistCommunityForumButton href={show.show_wl_link} />
+          )}
 
           <SetlistShowNotes notes={show.show_coachnotes} />
           {setlist.length > 0 ? (
@@ -376,6 +380,7 @@ export default function SetlistArchivePageClient() {
                 />
               </div>
             </div>
+            <SetlistCommunityForumButton href={show.show_wl_link} />
             <SetlistSidebar
               show={show}
               setlist={setlist}

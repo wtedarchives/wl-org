@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import {
   ArrowLeft,
   ArrowRight,
@@ -63,26 +62,6 @@ export function SetlistPageHeaderDesktop({
           Setlist
         </h2>
         <div className="flex items-center gap-1">
-          {show.show_wl_link && (
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() =>
-                show.show_wl_link && window.open(show.show_wl_link, "_blank")
-              }
-              title="Chat on WysteriaLane.org!"
-              aria-label="Wysteria Lane"
-              className="hover:bg-muted/80 hover:border-muted-foreground/30"
-            >
-              <Image
-                src="/WL.png"
-                alt=""
-                width={16}
-                height={16}
-                className="size-3"
-              />
-            </Button>
-          )}
           {showAdminUi && (
             <>
               <Button
