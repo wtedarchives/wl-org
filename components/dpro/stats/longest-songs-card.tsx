@@ -36,45 +36,47 @@ export function LongestSongsCard({
       <CardHeader className="bg-gray-500 py-2">
         <CardTitle className="text-sm font-medium">Longest Songs</CardTitle>
       </CardHeader>
-      <CardContent className="overflow-y-auto p-0">
+      <CardContent className="p-0">
         {items.length === 0 && showEmptyState ? (
           <div className="px-3 py-4 text-center text-xs text-muted-foreground">
             No data to display for this year.
           </div>
         ) : (
-          <Table>
+          <Table className="min-w-max w-max">
             <TableBody>
               {items.map((song, index) => (
                 <TableRow key={`${song.song}-${index}`}>
-                  <TableCell className="py-0.5 pl-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link
-                        href={getSongArchiveUrl(song.song_id)}
-                        className="text-xs font-medium text-foreground hover:underline"
-                      >
-                        <SongDisplayName
-                          song={song.song}
-                          songDisplayName={song.song_displayname}
-                        />
-                      </Link>
-                      {song.category_artwork && (
-                        <Image
-                          src={song.category_artwork}
-                          alt=""
-                          width={16}
-                          height={16}
-                          className="size-5 shrink-0 rounded object-cover border border-border"
-                          unoptimized
-                          onError={(e) => {
-                            const el = e.target as HTMLImageElement
-                            if (el) el.style.display = "none"
-                          }}
-                        />
-                      )}
-                    </div>
+                  <TableCell className="w-min shrink-0 py-1.5 pl-3">
+                    <Link
+                      href={getSongArchiveUrl(song.song_id)}
+                      className="text-xs font-medium text-foreground hover:underline whitespace-nowrap"
+                    >
+                      <SongDisplayName
+                        song={song.song}
+                        songDisplayName={song.song_displayname}
+                      />
+                    </Link>
                   </TableCell>
-                  <TableCell className="w-[50px] py-1.5 text-center text-xs font-medium tabular-nums">
-                    {formatTime(song.entry_length)}
+                  <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2 text-center">
+                    <span className="inline-block size-0" aria-hidden />
+                  </TableCell>
+                  <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2">
+                    {song.category_artwork ? (
+                      <Image
+                        src={song.category_artwork}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="size-5 shrink-0 rounded object-cover border border-border"
+                        unoptimized
+                        onError={(e) => {
+                          const el = e.target as HTMLImageElement
+                          if (el) el.style.display = "none"
+                        }}
+                      />
+                    ) : (
+                      <span className="inline-block size-4" aria-hidden />
+                    )}
                   </TableCell>
                   <TableCell className="py-1.5 pl-2 text-xs text-muted-foreground">
                     {song.show_date && (
@@ -99,6 +101,11 @@ export function LongestSongsCard({
                         )}
                       </>
                     )}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap py-1.5 pl-2 text-xs text-muted-foreground">
+                    <span className="font-medium tabular-nums text-foreground">
+                      {formatTime(song.entry_length)}
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}
