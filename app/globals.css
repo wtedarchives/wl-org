@@ -156,6 +156,23 @@
   animation: pulse-ring 2s ease-in-out infinite;
 }
 
+/** One-shot ring around the home-page radio embed (promo card click, xl+). */
+@keyframes home-radio-embed-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--wl-orange) 100%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 24px color-mix(in oklch, var(--wl-orange) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.animate-home-radio-embed-pulse {
+  animation: home-radio-embed-pulse 0.9s ease-out forwards;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

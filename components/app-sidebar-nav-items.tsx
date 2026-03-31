@@ -3,7 +3,15 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDownIcon, LinkIcon, MessageCircle, Settings2Icon } from "lucide-react"
+import {
+  ChevronDownIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+  MessageCircle,
+  RssIcon,
+  Settings2Icon,
+  ShoppingCartIcon,
+} from "lucide-react"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -20,6 +28,8 @@ import {
   SETLIST_ARCHIVE_SUB,
   NAV_YEARS,
   LINKS,
+  MERCH_LINKS,
+  PUBLICATIONS_AND_PODCASTS_LINKS,
   COMMUNITY_FORUM_SUB,
   navMainItems,
   ADMIN_SUB,
@@ -30,6 +40,10 @@ interface AppSidebarNavItemsProps {
   setWtedOpen: (fn: (o: boolean) => boolean) => void
   linksOpen: boolean
   setLinksOpen: (fn: (o: boolean) => boolean) => void
+  merchOpen: boolean
+  setMerchOpen: (fn: (o: boolean) => boolean) => void
+  publicationsOpen: boolean
+  setPublicationsOpen: (fn: (o: boolean) => boolean) => void
   setlistOpen: boolean
   setSetlistOpen: (fn: (o: boolean) => boolean) => void
   isAdmin: boolean
@@ -42,6 +56,10 @@ export function AppSidebarNavItems({
   setWtedOpen,
   linksOpen,
   setLinksOpen,
+  merchOpen,
+  setMerchOpen,
+  publicationsOpen,
+  setPublicationsOpen,
   setlistOpen,
   setSetlistOpen,
   isAdmin,
@@ -55,13 +73,13 @@ export function AppSidebarNavItems({
       <SidebarMenuItem className="group/item" data-open={wtedOpen || undefined}>
         <SidebarMenuButton
           tooltip="WTED Radio"
-          isActive={pathname === "/wted/info"}
+          isActive={pathname.startsWith("/wted")}
           className="group-data-[state=open]:bg-sidebar-accent data-[slot=sidebar-menu-button]:p-0"
           asChild
         >
           <div className="flex w-full min-w-0 items-center">
             <Link
-              href="/wted/info"
+              href="/wted/about"
               className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5"
             >
               <Image
@@ -107,7 +125,7 @@ export function AppSidebarNavItems({
             href="https://community.wysterialane.org"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2"
+            className="flex min-w-0 items-center gap-2"
           >
             <Image
               src="/WL.png"
@@ -116,7 +134,8 @@ export function AppSidebarNavItems({
               height={16}
               className="size-4 shrink-0 object-contain"
             />
-            <span>Community Forum</span>
+            <span className="min-w-0 flex-1">Community Forum</span>
+            <ExternalLinkIcon className="size-4 shrink-0" aria-hidden />
           </a>
         </SidebarMenuButton>
         <SidebarMenuSub>
@@ -140,46 +159,6 @@ export function AppSidebarNavItems({
             </SidebarMenuSubItem>
           ))}
         </SidebarMenuSub>
-      </SidebarMenuItem>
-      {navMainItems.map((item) => (
-        <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton
-            tooltip={item.title}
-            asChild
-            isActive={pathname === item.url}
-          >
-            <Link href={item.url}>
-              {item.icon}
-              <span>{item.title}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
-      <SidebarMenuItem className="group/item" data-open={linksOpen || undefined}>
-        <SidebarMenuButton
-          tooltip="Links"
-          className="group-data-[state=open]:bg-sidebar-accent"
-          onClick={() => setLinksOpen((o) => !o)}
-        >
-          <LinkIcon className="size-4" />
-          <span>Links</span>
-          <ChevronDownIcon
-            className={`ml-auto size-4 transition-transform ${linksOpen ? "rotate-180" : ""}`}
-          />
-        </SidebarMenuButton>
-        {linksOpen && (
-          <SidebarMenuSub>
-            {LINKS.map((item) => (
-              <SidebarMenuSubItem key={item.title}>
-                <SidebarMenuSubButton asChild>
-                  <a href={item.href} target="_blank" rel="noreferrer">
-                    {item.title}
-                  </a>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            ))}
-          </SidebarMenuSub>
-        )}
       </SidebarMenuItem>
       <SidebarMenuItem className="group/item" data-open={setlistOpen || undefined}>
         <SidebarMenuButton
@@ -255,6 +234,101 @@ export function AppSidebarNavItems({
           </SidebarMenuSub>
         )}
       </SidebarMenuItem>
+      <SidebarMenuItem className="group/item" data-open={linksOpen || undefined}>
+        <SidebarMenuButton
+          tooltip="Links"
+          className="group-data-[state=open]:bg-sidebar-accent"
+          onClick={() => setLinksOpen((o) => !o)}
+        >
+          <LinkIcon className="size-4" />
+          <span>Links</span>
+          <ChevronDownIcon
+            className={`ml-auto size-4 transition-transform ${linksOpen ? "rotate-180" : ""}`}
+          />
+        </SidebarMenuButton>
+        {linksOpen && (
+          <SidebarMenuSub>
+            {LINKS.map((item) => (
+              <SidebarMenuSubItem key={item.title}>
+                <SidebarMenuSubButton asChild>
+                  <a href={item.href} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        )}
+      </SidebarMenuItem>
+      <SidebarMenuItem className="group/item" data-open={merchOpen || undefined}>
+        <SidebarMenuButton
+          tooltip="Merch"
+          className="group-data-[state=open]:bg-sidebar-accent"
+          onClick={() => setMerchOpen((o) => !o)}
+        >
+          <ShoppingCartIcon className="size-4" />
+          <span>Merch</span>
+          <ChevronDownIcon
+            className={`ml-auto size-4 transition-transform ${merchOpen ? "rotate-180" : ""}`}
+          />
+        </SidebarMenuButton>
+        {merchOpen && (
+          <SidebarMenuSub>
+            {MERCH_LINKS.map((item) => (
+              <SidebarMenuSubItem key={item.title}>
+                <SidebarMenuSubButton asChild>
+                  <a href={item.href} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        )}
+      </SidebarMenuItem>
+      <SidebarMenuItem
+        className="group/item"
+        data-open={publicationsOpen || undefined}
+      >
+        <SidebarMenuButton
+          tooltip="Publications and Podcasts"
+          className="group-data-[state=open]:bg-sidebar-accent"
+          onClick={() => setPublicationsOpen((o) => !o)}
+        >
+          <RssIcon className="size-4" />
+          <span>Publications and Podcasts</span>
+          <ChevronDownIcon
+            className={`ml-auto size-4 transition-transform ${publicationsOpen ? "rotate-180" : ""}`}
+          />
+        </SidebarMenuButton>
+        {publicationsOpen && (
+          <SidebarMenuSub>
+            {PUBLICATIONS_AND_PODCASTS_LINKS.map((item) => (
+              <SidebarMenuSubItem key={item.title}>
+                <SidebarMenuSubButton asChild>
+                  <a href={item.href} target="_blank" rel="noreferrer">
+                    {item.title}
+                  </a>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        )}
+      </SidebarMenuItem>
+      {navMainItems.map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton
+            tooltip={item.title}
+            asChild
+            isActive={pathname === item.url}
+          >
+            <Link href={item.url}>
+              {item.icon}
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
       {isAdmin && (
         <SidebarMenuItem className="group/item" data-open>
           <div

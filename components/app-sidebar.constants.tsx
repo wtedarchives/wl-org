@@ -1,7 +1,6 @@
 import { BookOpenIcon } from "lucide-react"
 
 export const WTED_RADIO_SUB = [
-  { title: "WTED Info", url: "/wted/info" },
   { title: "GORPs and Contributors", url: "/wted/gorps" },
   { title: "Shows and More", url: "/wted/shows" },
   { title: "About Us and FAQ", url: "/wted/about" },
@@ -40,10 +39,41 @@ export const NAV_YEARS = [
 
 export const LINKS = [
   { title: "Goose Website", href: "https://www.goosetheband.com/" },
-  { title: "Goose Bandcamp Page", href: "https://goosetheband.bandcamp.com/" },
   { title: "Western Sun Foundation", href: "https://westernsunfoundation.org/" },
-  { title: "Cash or Trade", href: "https://cashortrade.org/goose-tickets/" },
-  { title: "ElGoose.net", href: "https://elgoose.net/" },
+  { title: "Conscious Alliance", href: "https://consciousalliance.org/" },
+  { title: "ElGoose.Net", href: "https://elgoose.net/" },
+  { title: "Cash or Trade", href: "https://cashortrade.org/" },
+  { title: "Goose Bandcamp Page", href: "https://goosetheband.bandcamp.com/" },
+] as const
+
+export const MERCH_LINKS = [
+  {
+    title: "Jungle Room",
+    href: "https://junglerooooom.com/collections/wted",
+  },
+  {
+    title: "Tees That Jam",
+    href: "https://www.teesthatjam.com/product/2025-wted-fund-raiser-%F0%9F%AA%BF/",
+  },
+] as const
+
+export const PUBLICATIONS_AND_PODCASTS_LINKS = [
+  {
+    title: "El Goose Times",
+    href: "https://www.elgoosetimes.com/",
+  },
+  {
+    title: "Always Almost There Podcast",
+    href: "https://aatgoosepod.com/",
+  },
+  {
+    title: "The Femme Flock",
+    href: "https://www.thefemmeflock.com/",
+  },
+  {
+    title: "Slow Ready Podcast",
+    href: "https://slowreadypod.buzzsprout.com/",
+  },
 ] as const
 
 export const COMMUNITY_FORUM_SUB = [

@@ -3,6 +3,7 @@
 import { Calendar1 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 
 const FLODOWN_EVENTS = [
   { month: "APR", date: "10", title: "Asheville Flodown", subtext: "Asheville Brewery – Asheville, NC" },
@@ -11,9 +12,22 @@ const FLODOWN_EVENTS = [
   { month: "DEC", date: "24", title: "Goosemas Flodown", subtext: "United Center – Chicago, IL" },
 ] as const
 
-function CalendarIcon({ month, date }: { month: string; date: string }) {
+function CalendarIcon({
+  month,
+  date,
+  square,
+}: {
+  month: string
+  date: string
+  square?: boolean
+}) {
   return (
-    <div className="flex h-14 w-14 flex-col items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+    <div
+      className={cn(
+        "flex h-14 w-14 flex-col items-center justify-center overflow-hidden bg-white shadow-sm",
+        square ? "rounded-none" : "rounded-xl",
+      )}
+    >
       <span className="text-[11px] font-bold uppercase leading-none text-[#FF3B30]">
         {month}
       </span>
@@ -24,20 +38,30 @@ function CalendarIcon({ month, date }: { month: string; date: string }) {
   )
 }
 
-const cardClassName =
-  "rounded-xl border border-wl-dark-grey/50 bg-[#844b45] py-0 text-xs shadow-sm ring-0"
+export function FlodownEventsCard({
+  variant = "default",
+}: {
+  variant?: "default" | "accordion"
+}) {
+  const isAccordion = variant === "accordion"
 
-export function FlodownEventsCard() {
   return (
-    <Card className={cardClassName}>
-      <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-[#b2655e]">
-        <div className="flex flex-row items-center justify-between gap-2 min-w-0">
-          <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
-            Upcoming Community Events
-          </CardTitle>
-          <Calendar1 className="size-4 shrink-0 text-wl-white/80" />
-        </div>
-      </CardHeader>
+    <Card
+      className={cn(
+        "bg-[#844b45] py-0 text-xs shadow-sm ring-0 border border-wl-dark-grey/50",
+        isAccordion ? "rounded-none border-0 shadow-none" : "rounded-xl",
+      )}
+    >
+      {!isAccordion ? (
+        <CardHeader className="border-b border-wl-dark-grey/50 py-2 bg-[#b2655e]">
+          <div className="flex flex-row items-center justify-between gap-2 min-w-0">
+            <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
+              Upcoming Community Events
+            </CardTitle>
+            <Calendar1 className="size-4 shrink-0 text-wl-white/80" />
+          </div>
+        </CardHeader>
+      ) : null}
       <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
         <Table className="w-full min-w-0 table-fixed text-[11px] [&_tr:last-child_td]:pb-2">
           <TableBody>
@@ -47,7 +71,7 @@ export function FlodownEventsCard() {
                 className="border-wl-dark-grey/40 hover:bg-[#b2655e]"
               >
                 <TableCell className="w-[66px] pl-2 pr-2 py-1 align-middle">
-                  <CalendarIcon month={item.month} date={item.date} />
+                  <CalendarIcon month={item.month} date={item.date} square={isAccordion} />
                 </TableCell>
                 <TableCell className="min-w-0 pl-2 pr-2 py-1 align-middle whitespace-normal">
                   <div className="flex min-w-0 flex-1 flex-col">

@@ -1,14 +1,20 @@
-import { RadioEmbed } from "@/components/radio-embed"
+"use client"
+
+import { RadioMobileSlot } from "@/components/persistent-radio"
+import { useIsBelowXl } from "@/hooks/use-mobile"
 
 /**
- * Renders the WTED Radio embed above the header on mobile only.
- * Placed in the layout so it persists across navigation (iframe state preserved).
- * Uses md:hidden so it shows below 768px (matches useIsMobile breakpoint).
+ * Below Tailwind `xl` (1280px): persistent radio mount above the header (all routes, including `/`).
+ * At `xl` and up: renders nothing so the mobile slot ref never attaches.
  */
 export function MobileRadioBar() {
+  const isBelowXl = useIsBelowXl()
+
+  if (!isBelowXl) return null
+
   return (
-    <div className="shrink-0 border-b border-border bg-background px-2 py-1.5 md:hidden">
-      <RadioEmbed />
+    <div className="shrink-0 border-b border-border bg-background px-2 py-1.5">
+      <RadioMobileSlot />
     </div>
   )
 }

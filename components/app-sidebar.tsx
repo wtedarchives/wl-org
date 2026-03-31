@@ -23,8 +23,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { RadioEmbed } from "@/components/radio-embed"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { RadioSidebarSlot } from "@/components/persistent-radio"
+import { useIsBelowXl } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 import { AppSidebarNavItems } from "./app-sidebar-nav-items"
 import { SETLIST_ARCHIVE_SUB } from "./app-sidebar.constants"
 
@@ -44,7 +45,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [wtedOpen, setWtedOpen] = useState(isWtedPath)
   const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
   const [linksOpen, setLinksOpen] = useState(false)
-  const isMobile = useIsMobile()
+  const [merchOpen, setMerchOpen] = useState(false)
+  const [publicationsOpen, setPublicationsOpen] = useState(false)
+  const isBelowXl = useIsBelowXl()
 
   useEffect(() => {
     if (isWtedPath) setWtedOpen(true)
@@ -78,6 +81,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      {!isBelowXl && (
+        <div
+          className={cn(
+            "w-full shrink-0 border-b border-sidebar-border px-2 py-2",
+            pathname === "/" && "hidden",
+          )}
+        >
+          <RadioSidebarSlot />
+        </div>
+      )}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent className="flex flex-col gap-2">
@@ -86,6 +99,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               setWtedOpen={setWtedOpen}
               linksOpen={linksOpen}
               setLinksOpen={setLinksOpen}
+              merchOpen={merchOpen}
+              setMerchOpen={setMerchOpen}
+              publicationsOpen={publicationsOpen}
+              setPublicationsOpen={setPublicationsOpen}
               setlistOpen={setlistOpen}
               setSetlistOpen={setSetlistOpen}
               isAdmin={isAdmin}
@@ -120,11 +137,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {!isMobile && (
-          <div className="w-full border-t border-sidebar-border px-2 py-2">
-            <RadioEmbed />
-          </div>
-        )}
       </SidebarContent>
       <SidebarFooter className="pt-0 pb-2">
         <NavUser />

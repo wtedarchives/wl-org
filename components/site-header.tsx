@@ -53,9 +53,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   overview: "Overview",
 }
 
-/** Override breadcrumb label for specific full paths (e.g. wted/info, wted/gorps). */
+/** Override breadcrumb label for specific full paths (e.g. wted/gorps). */
 const PATH_LABELS: Record<string, string> = {
-  "wted/info": "WTED Info",
   "wted/gorps": "GORPs and Contributors",
   "wted/shows": "Shows and More",
   "wted/about": "About Us and FAQ",
@@ -173,7 +172,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
         })()
 
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+    <header className="flex h-11 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-11">
       <div className="flex w-full items-center justify-between gap-1 px-4 lg:gap-2 lg:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-1 lg:gap-2">
           <Button

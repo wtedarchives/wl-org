@@ -17,6 +17,7 @@ import { useShowsData } from "@/hooks/use-shows-data"
 import { useShowMetadata } from "@/hooks/use-show-metadata"
 import { AudioLines, FileMusic, Music } from "lucide-react"
 import { formatShowDate } from "./format-show-date"
+import { cn } from "@/lib/utils"
 
 function getPlacementColor(placement: string | null): string {
   if (placement === "Set 1 Opener") return "#047857"
@@ -40,7 +41,14 @@ function getPlacementColor(placement: string | null): string {
   return "transparent"
 }
 
-export function MostRecentShowCard() {
+const cardShell =
+  "rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
+
+export function MostRecentShowCard({
+  hideHeader = false,
+}: {
+  hideHeader?: boolean
+}) {
   const {
     mostRecentShow,
     setlist,
@@ -55,13 +63,17 @@ export function MostRecentShowCard() {
 
   if (loadingMostRecent) {
     return (
-      <Card className="rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0">
-        <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-wl-dark-grey/50 py-2 bg-black/30">
-          <CardTitle className="text-[13px] font-semibold text-wl-white">
-            Most Recent Show
-          </CardTitle>
-          <Music className="size-4 shrink-0 text-wl-white/80" />
-        </CardHeader>
+      <Card
+        className={cn(cardShell, hideHeader && "rounded-none border-0 shadow-none")}
+      >
+        {!hideHeader ? (
+          <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-wl-dark-grey/50 bg-black/30 py-2">
+            <CardTitle className="text-[13px] font-semibold text-wl-white">
+              Most Recent Show
+            </CardTitle>
+            <Music className="size-4 shrink-0 text-wl-white/80" />
+          </CardHeader>
+        ) : null}
         <CardContent className="px-3 py-6 text-center text-[11px] text-wl-white/70">
           Loading show…
         </CardContent>
@@ -71,13 +83,17 @@ export function MostRecentShowCard() {
 
   if (!mostRecentShow) {
     return (
-      <Card className="rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0">
-        <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-wl-dark-grey/50 py-2 bg-black/30">
-          <CardTitle className="text-[13px] font-semibold text-wl-white">
-            Most Recent Show
-          </CardTitle>
-          <Music className="size-4 shrink-0 text-wl-white/80" />
-        </CardHeader>
+      <Card
+        className={cn(cardShell, hideHeader && "rounded-none border-0 shadow-none")}
+      >
+        {!hideHeader ? (
+          <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-wl-dark-grey/50 bg-black/30 py-2">
+            <CardTitle className="text-[13px] font-semibold text-wl-white">
+              Most Recent Show
+            </CardTitle>
+            <Music className="size-4 shrink-0 text-wl-white/80" />
+          </CardHeader>
+        ) : null}
         <CardContent className="px-3 py-4 text-center text-[11px] text-wl-white/70">
           No recent shows found.
         </CardContent>
@@ -86,13 +102,17 @@ export function MostRecentShowCard() {
   }
 
   return (
-    <Card className="rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0">
-      <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-wl-dark-grey/50 py-2 bg-black/30">
-        <CardTitle className="text-[13px] font-semibold text-wl-white">
-          Most Recent Show
-        </CardTitle>
-        <Music className="size-4 shrink-0 text-wl-white/80" />
-      </CardHeader>
+    <Card
+      className={cn(cardShell, hideHeader && "rounded-none border-0 shadow-none")}
+    >
+      {!hideHeader ? (
+        <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-wl-dark-grey/50 bg-black/30 py-2">
+          <CardTitle className="text-[13px] font-semibold text-wl-white">
+            Most Recent Show
+          </CardTitle>
+          <Music className="size-4 shrink-0 text-wl-white/80" />
+        </CardHeader>
+      ) : null}
       <CardContent className="space-y-2 px-3 py-2">
         <div className="text-[11px] leading-tight text-wl-white">
           <div className="flex items-center justify-between gap-2">

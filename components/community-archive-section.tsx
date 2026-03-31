@@ -1,7 +1,13 @@
 "use client"
 
-import { ArrowLeft, ArrowRight, History } from "lucide-react"
+import { ArrowLeft, ArrowRight, Calendar1, History, MessageCircle, Music } from "lucide-react"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { isSupabaseConfigured } from "@/lib/supabase"
 import { useShowsData } from "@/hooks/use-shows-data"
 import { ColumnBanner } from "@/components/column-banner"
@@ -10,7 +16,41 @@ import { FlodownEventsCard } from "@/components/flodown-events-card"
 import { MostRecentShowCard } from "@/components/home-stats-column/most-recent-show-card"
 import { ShowsTableCard } from "@/components/home-stats-column/shows-table-card"
 
-function SetlistSectionContent() {
+function CommunityHighlightsAccordion() {
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue="featured"
+      className="overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] text-xs shadow-sm ring-0"
+    >
+      <AccordionItem value="featured" className="border-0 border-b border-wl-dark-grey/50">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>Featured Topics</span>
+            <MessageCircle className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <FeaturedTopicsCard variant="accordion" />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="events" className="border-0">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>Upcoming Community Events</span>
+            <Calendar1 className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <FlodownEventsCard variant="accordion" />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+function SetlistArchiveAccordion() {
   const {
     recentShows,
     upcomingShows,
@@ -28,90 +68,117 @@ function SetlistSectionContent() {
     )
   }
 
-  const last5 = (
-    <ShowsTableCard
-      title="Last 5 Shows"
-      shows={recentShows}
-      loading={loading}
-      icon={<ArrowLeft className="size-4" />}
-    />
-  )
-  const mostRecent = <MostRecentShowCard />
-  const next5 = (
-    <ShowsTableCard
-      title="Next 5 Shows"
-      shows={upcomingShows}
-      loading={loadingUpcoming}
-      icon={<ArrowRight className="size-4" />}
-    />
-  )
-  const thisDay = (
-    <ShowsTableCard
-      title="This Day in Goose History"
-      shows={historicalShows}
-      loading={loadingHistorical}
-      emptyMessage="No shows occurred on this date in Goose history."
-      icon={<History className="size-4" />}
-    />
-  )
-
   return (
-    <>
-      {/* Left column: Setlist Archive banner — stretches to match tallest of middle/right */}
-      <div className="flex min-h-[140px] flex-col lg:min-h-0 lg:flex-1 lg:min-w-0">
-        <ColumnBanner
-          src="/archive-banner.jpg"
-          alt="Setlist Archive"
-          label="Setlist Archive"
-          description="The ultimate show history archive for Goose."
-          href="/archive"
-          mutedBg
-          logoSrc="/wted-sa-cropped-2.png"
-        />
-      </div>
-      {/* Middle column: three cards stacked with natural height */}
-      <div className="flex flex-col gap-3 lg:flex-1 lg:min-w-0">
-        {last5}
-        {next5}
-        {thisDay}
-      </div>
-      {/* Right column: Most Recent Show */}
-      <div className="flex flex-col lg:flex-1 lg:min-w-0">
-        {mostRecent}
-      </div>
-    </>
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue="most-recent"
+      className="overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] text-xs shadow-sm ring-0"
+    >
+      <AccordionItem value="last-5" className="border-0 border-b border-wl-dark-grey/50">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>Last 5 Shows</span>
+            <ArrowLeft className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <ShowsTableCard
+            title="Last 5 Shows"
+            shows={recentShows}
+            loading={loading}
+            hideHeader
+          />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="next-5" className="border-0 border-b border-wl-dark-grey/50">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>Next 5 Shows</span>
+            <ArrowRight className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <ShowsTableCard
+            title="Next 5 Shows"
+            shows={upcomingShows}
+            loading={loadingUpcoming}
+            hideHeader
+          />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="most-recent" className="border-0 border-b border-wl-dark-grey/50">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>Most Recent Show</span>
+            <Music className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <MostRecentShowCard hideHeader />
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="this-day" className="border-0">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>This Day in Goose History</span>
+            <History className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <ShowsTableCard
+            title="This Day in Goose History"
+            shows={historicalShows}
+            loading={loadingHistorical}
+            emptyMessage="No shows occurred on this date in Goose history."
+            hideHeader
+          />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }
 
 export function CommunityArchiveSection() {
   return (
-    <div className="flex flex-col gap-6">
-      {/* Community: 3 columns – header, Featured Topics, Flodown Events */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-6">
-        <ColumnBanner
-          src="/community-banner.jpg"
-          alt="Community Forum"
-          label="Community Forum"
-          description="A community made for Goose fans, by Goose fans."
-          href="https://community.wysterialane.org"
-          dim
-          mutedBg
-          logoSrc="/WL.png"
-        />
-        <div className="flex min-h-0 flex-col">
+    <TooltipProvider>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-x-4 lg:gap-y-4">
+        <div className="min-h-0 lg:col-span-2 lg:row-start-1">
+          <ColumnBanner
+            src="/community-banner.jpg"
+            alt="Community Forum"
+            label="Community Forum"
+            description="A community made for Goose fans, by Goose fans."
+            href="https://community.wysterialane.org"
+            dim
+            mutedBg
+            logoSrc="/WL.png"
+          />
+        </div>
+        <div className="min-h-0 lg:hidden">
+          <CommunityHighlightsAccordion />
+        </div>
+        <div className="min-h-0 hidden lg:block lg:col-start-1 lg:row-start-2 lg:self-start">
           <FeaturedTopicsCard />
         </div>
-        <div className="flex min-h-0 flex-col">
+        <div className="min-h-0 hidden lg:block lg:col-start-2 lg:row-start-2 lg:self-start">
           <FlodownEventsCard />
         </div>
-      </div>
-
-      {/* Setlist: mobile stacked; desktop 3 columns — left stretches to match tallest of middle/right */}
-      <TooltipProvider>
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-x-6">
-          <SetlistSectionContent />
+        <div className="min-h-0 lg:col-start-3 lg:row-start-1 lg:pl-2">
+          <ColumnBanner
+            src="/archive-banner.jpg"
+            alt="Setlist Archive"
+            label="Setlist Archive"
+            description="The ultimate show history archive for Goose."
+            href="/archive"
+            mutedBg
+            logoSrc="/wted-sa-cropped-2.png"
+          />
         </div>
-      </TooltipProvider>
-    </div>
+        <div className="min-h-0 lg:col-start-3 lg:row-start-2 lg:self-start lg:pl-2">
+          <SetlistArchiveAccordion />
+        </div>
+      </div>
+    </TooltipProvider>
   )
 }

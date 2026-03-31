@@ -31,11 +31,11 @@ export function ColumnBanner({
       ? "brightness-[0.7] group-hover:brightness-[0.85]"
       : "brightness-90 group-hover:brightness-95"
 
-  const wrapperClassName =
-    "group relative flex w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] transition-all duration-200"
+  const wrapperBase =
+    "group relative w-full overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] transition-all duration-200"
 
   const textOverlay = (
-    <div className="relative flex w-full flex-col items-center justify-center gap-0.5 px-4 py-6">
+    <div className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-0.5 px-4 py-4">
       {logoSrc ? (
         <Image
           src={logoSrc}
@@ -61,7 +61,7 @@ export function ColumnBanner({
   if (rightContent) {
     const isExternal = href?.startsWith("http")
     return (
-      <div className={`${wrapperClassName} flex-col xl:flex-row`}>
+      <div className={`${wrapperBase} flex flex-col xl:flex-row`}>
         <Image
           src={src}
           alt={alt}
@@ -90,8 +90,8 @@ export function ColumnBanner({
     )
   }
 
-  const content = (
-    <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl">
+  const backgroundLayer = (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
       <Image
         src={src}
         alt={alt}
@@ -100,27 +100,6 @@ export function ColumnBanner({
         className={`object-cover grayscale transition-all duration-300 ease-out group-hover:scale-105 group-hover:blur-[1px] group-hover:grayscale-0 ${brightnessClasses}`}
         unoptimized
       />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-4">
-        {logoSrc ? (
-          <Image
-            src={logoSrc}
-            alt=""
-            width={64}
-            height={64}
-            className="h-14 w-auto object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:h-16"
-            unoptimized
-          />
-        ) : null}
-        <span className="text-center text-xl font-semibold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:text-2xl">
-          {label}
-        </span>
-        {description ? (
-          <span className="mt-1.5 flex items-center gap-1.5 text-center text-sm font-medium leading-tight text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:text-base">
-            {description}
-            <ExternalLink className="size-4 shrink-0" aria-hidden />
-          </span>
-        ) : null}
-      </div>
     </div>
   )
 
@@ -129,17 +108,19 @@ export function ColumnBanner({
     return (
       <Link
         href={href}
-        className={`${wrapperClassName} flex min-h-[140px] flex-col lg:min-h-0 lg:h-full`}
+        className={`${wrapperBase} flex h-full min-h-0 w-full flex-col`}
         {...(isExternal && { target: "_blank", rel: "noopener noreferrer" })}
       >
-        {content}
+        {backgroundLayer}
+        {textOverlay}
       </Link>
     )
   }
 
   return (
-    <div className={`${wrapperClassName} flex min-h-[140px] flex-col lg:min-h-0 lg:h-full`}>
-      {content}
+    <div className={`${wrapperBase} flex h-full min-h-0 flex-col`}>
+      {backgroundLayer}
+      {textOverlay}
     </div>
   )
 }

@@ -21,6 +21,28 @@ export function useIsMobile() {
   return !!isMobile
 }
 
+/**
+ * Tailwind `xl` (1280px): true when viewport is below that width.
+ * Used for persistent radio (top bar vs home/sidebar slots). Do not use for general “mobile” UI — that stays at 768 (`useIsMobile`).
+ */
+export function useIsBelowXl() {
+  const [belowXl, setBelowXl] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(
+      `(max-width: ${DESKTOP_CONTENT_MIN_WIDTH - 1}px)`,
+    )
+    const onChange = () => {
+      setBelowXl(window.innerWidth < DESKTOP_CONTENT_MIN_WIDTH)
+    }
+    mql.addEventListener("change", onChange)
+    setBelowXl(window.innerWidth < DESKTOP_CONTENT_MIN_WIDTH)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!belowXl
+}
+
 /** True when viewport is at or above the desktop content breakpoint (e.g. full breadcrumbs, setlist sidebar). */
 export function useIsDesktopContentLayout() {
   const [isDesktop, setIsDesktop] = React.useState<boolean | undefined>(undefined)
@@ -36,4 +58,21 @@ export function useIsDesktopContentLayout() {
   }, [])
 
   return isDesktop !== false
+}
+
+/** Tailwind `xl` (1280px) — home WTED cards: 3-column grid at/above; accordion below. */
+export function useIsMinXl() {
+  const [match, setMatch] = React.useState(false)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1280px)")
+    const onChange = () => {
+      setMatch(mql.matches)
+    }
+    mql.addEventListener("change", onChange)
+    setMatch(mql.matches)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return match
 }
