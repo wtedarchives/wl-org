@@ -12,45 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { DiscographyEntriesPanel } from "./discography-entries-panel"
 import { cn } from "@/lib/utils"
-
-type DiscographyFormFields = Omit<DiscographyAdminRecord, "uuid" | "canon_id"> & {
-  canon_id: string
-}
-
-const emptyForm = (): DiscographyFormFields => ({
-  name: "",
-  displayname: "",
-  artist: "",
-  category: "",
-  artwork: "",
-  canon_id: "0",
-  release_date: null,
-  coach_notes: null,
-})
-
-function recordToForm(row: DiscographyAdminRecord): DiscographyFormFields {
-  return {
-    name: row.name,
-    displayname: row.displayname,
-    artist: row.artist,
-    category: row.category,
-    artwork: row.artwork,
-    canon_id: String(row.canon_id),
-    release_date: row.release_date,
-    coach_notes: row.coach_notes ?? null,
-  }
-}
+import {
+  emptyDiscographyForm,
+  discographyRecordToForm,
+  type DiscographyFormFields,
+} from "@/components/dpro/admin/discography-modal-form"
+import { DiscographyModalDetailsFields } from "@/components/dpro/admin/discography-modal-details-fields"
 
 interface DiscographyModalProps {
   isOpen: boolean
@@ -67,7 +36,9 @@ export function DiscographyModal({
   record,
   isAddMode,
 }: DiscographyModalProps) {
-  const [formData, setFormData] = useState<DiscographyFormFields>(emptyForm)
+  const [formData, setFormData] = useState<DiscographyFormFields>(
+    emptyDiscographyForm(),
+  )
   const [categories, setCategories] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -92,9 +63,9 @@ export function DiscographyModal({
 
   useEffect(() => {
     if (record && !isAddMode) {
-      setFormData(recordToForm(record))
+      setFormData(discographyRecordToForm(record))
     } else if (isAddMode) {
-      setFormData(emptyForm())
+      setFormData(emptyDiscographyForm())
     }
   }, [record, isAddMode])
 
@@ -205,146 +176,14 @@ export function DiscographyModal({
   const isLinksSection = activeSection === "links"
 
   const detailsForm = (
-    <>
-      {error && (
-        <div className="rounded border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </div>
-      )}
-      <div className="space-y-2">
-        {!isAddMode && record && (
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">UUID</label>
-            <Input value={record.uuid} disabled className="h-8 text-xs" />
-          </div>
-        )}
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Name (search key) <span className="text-destructive">*</span>
-          </label>
-          <Input
-            value={formData.name}
-            onChange={(e) => setField("name", e.target.value)}
-            placeholder="Internal / canonical name"
-            className="h-8 text-xs"
-          />
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Display name <span className="text-destructive">*</span>
-          </label>
-          <Input
-            value={formData.displayname}
-            onChange={(e) => setField("displayname", e.target.value)}
-            placeholder="Public display name"
-            className="h-8 text-xs"
-          />
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Artist <span className="text-destructive">*</span>
-          </label>
-          <Input
-            value={formData.artist}
-            onChange={(e) => setField("artist", e.target.value)}
-            placeholder="Artist"
-            className="h-8 text-xs"
-          />
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Category <span className="text-destructive">*</span>
-          </label>
-          <Select
-            value={formData.category || undefined}
-            onValueChange={(v) => setField("category", v)}
-          >
-            <SelectTrigger className="h-8 w-full text-xs">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categoryOptions.map((c) => (
-                <SelectItem key={c} value={c} className="text-xs">
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {categoryOptions.length === 0 && (
-            <p className="mt-1 text-[10px] text-muted-foreground">
-              No categories loaded. Check discography_categories in Supabase.
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Artwork URL <span className="text-destructive">*</span>
-          </label>
-          <Input
-            value={formData.artwork}
-            onChange={(e) => setField("artwork", e.target.value)}
-            placeholder="Image URL"
-            className="h-8 text-xs"
-          />
-          {formData.artwork ? (
-            <div className="mt-1 w-max max-w-xs">
-              <img
-                src={formData.artwork}
-                alt=""
-                className="block h-auto max-h-48 w-auto max-w-full rounded border border-border bg-muted/20"
-                onError={(e) => {
-                  ;(e.target as HTMLImageElement).style.display = "none"
-                }}
-              />
-            </div>
-          ) : null}
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Canon ID <span className="text-destructive">*</span>
-          </label>
-          <Input
-            type="number"
-            min={0}
-            value={formData.canon_id}
-            onChange={(e) => setField("canon_id", e.target.value)}
-            className="h-8 text-xs"
-          />
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Release date
-          </label>
-          <Input
-            type="date"
-            value={formData.release_date ?? ""}
-            onChange={(e) =>
-              setField(
-                "release_date",
-                e.target.value ? e.target.value : null,
-              )
-            }
-            className="h-8 text-xs"
-          />
-        </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Coach notes
-          </label>
-          <Textarea
-            value={formData.coach_notes ?? ""}
-            onChange={(e) =>
-              setField(
-                "coach_notes",
-                e.target.value === "" ? null : e.target.value,
-              )
-            }
-            placeholder="Optional internal notes"
-            className="min-h-20 text-xs"
-          />
-        </div>
-      </div>
-    </>
+    <DiscographyModalDetailsFields
+      error={error}
+      isAddMode={isAddMode}
+      record={record}
+      formData={formData}
+      setField={setField}
+      categoryOptions={categoryOptions}
+    />
   )
 
   return (
@@ -460,9 +299,7 @@ export function DiscographyModal({
             </div>
           </div>
         ) : (
-          <div className="space-y-4 overflow-y-auto p-4 sm:p-6">
-            {detailsForm}
-          </div>
+          <div className="space-y-4 overflow-y-auto p-4 sm:p-6">{detailsForm}</div>
         )}
       </DialogContent>
     </Dialog>

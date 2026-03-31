@@ -1,15 +1,11 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
-import { notFound, useRouter, useSearchParams } from "next/navigation"
+import { notFound } from "next/navigation"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatSetlistDate, totalSetlistLength } from "@/lib/setlist-utils"
-import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
-import { getYearArchiveUrl } from "@/lib/year-archive-url"
-import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { useSetlistData, useTours, useShowDates } from "@/hooks/use-setlist-data"
 import { useSetlistNavigation } from "@/hooks/use-setlist-navigation"
 import {
@@ -40,46 +36,15 @@ import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-sec
 import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawers"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
-
-function resolveSetlistShowIdFromSearchParams(searchParams: ReturnType<
-  typeof useSearchParams
->): { showId: string; invalidParams: boolean } {
-  const idList = searchParams
-    .getAll("id")
-    .map((s) => s.trim())
-    .filter(Boolean)
-  if (new Set(idList).size > 1) {
-    return { showId: "", invalidParams: true }
-  }
-  const fromId = idList[0] ?? ""
-  const legacyShowId = searchParams.get("show_id")?.trim() ?? ""
-  if (fromId && legacyShowId && fromId !== legacyShowId) {
-    return { showId: "", invalidParams: true }
-  }
-  return {
-    showId: fromId || legacyShowId,
-    invalidParams: false,
-  }
-}
+import { useSetlistArchiveShowId } from "@/hooks/use-setlist-archive-show-id"
+import {
+  useSetlistArchiveBreadcrumbs,
+  useSetlistArchiveDocumentTitle,
+  useSetlistScanDrawerFromNavigation,
+} from "@/hooks/use-setlist-archive-page-meta"
 
 export default function SetlistArchivePageClient() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { showId, invalidParams } = useMemo(
-    () => resolveSetlistShowIdFromSearchParams(searchParams),
-    [searchParams],
-  )
-
-  useEffect(() => {
-    if (invalidParams || !showId) return
-    const hasIdParam = searchParams
-      .getAll("id")
-      .map((s) => s.trim())
-      .some(Boolean)
-    const legacy = searchParams.get("show_id")?.trim() ?? ""
-    if (hasIdParam || !legacy) return
-    router.replace(getSetlistArchiveUrl(legacy), { scroll: false })
-  }, [invalidParams, showId, searchParams, router])
+  const { showId, invalidParams } = useSetlistArchiveShowId()
 
   const pageState = useSetlistPageState(showId)
   const {
@@ -170,49 +135,13 @@ export default function SetlistArchivePageClient() {
     setAttendeeCount,
   )
 
-  useEffect(() => {
-    if (!show || !yearId) {
-      setSetlistBreadcrumbs(null)
-      return
-    }
-    const dateLabel = formatSetlistDate(show.show_date)
-    const tourLabel = show.show_tour ?? "Tour"
-    const lastLabel = show.show_venue_location
-      ? `${dateLabel} – ${show.show_venue_location}`
-      : dateLabel
-    setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
-      { label: show.show_date.slice(0, 4), href: getYearArchiveUrl(yearId) },
-      { label: tourLabel, href: getTourArchiveUrl(show.tour_id) },
-      { label: lastLabel, href: getSetlistArchiveUrl(show.show_id) },
-    ])
-    return () => setSetlistBreadcrumbs(null)
-  }, [show, yearId, setSetlistBreadcrumbs])
-
-  useEffect(() => {
-    if (openChangesModal && setlistUrl) {
-      setSetlistScanDrawerOpen(true)
-    }
-  }, [openChangesModal, setlistUrl])
-
-  useEffect(() => {
-    if (!show) return
-    const datePart = formatSetlistDate(show.show_date)
-    const group = show.show_group?.trim() || ""
-    const venue = show.show_venue_location?.trim() || ""
-    const middle =
-      group && venue
-        ? ` (${group} - ${venue})`
-        : group
-          ? ` (${group})`
-          : venue
-            ? ` (${venue})`
-            : ""
-    document.title = `${datePart}${middle} – WysteriaLane.org`
-    return () => {
-      document.title = ""
-    }
-  }, [show])
+  useSetlistArchiveBreadcrumbs(show, yearId, setSetlistBreadcrumbs)
+  useSetlistArchiveDocumentTitle(show)
+  useSetlistScanDrawerFromNavigation(
+    openChangesModal,
+    setlistUrl,
+    setSetlistScanDrawerOpen,
+  )
 
   if (invalidParams) notFound()
   if (!showId) notFound()
