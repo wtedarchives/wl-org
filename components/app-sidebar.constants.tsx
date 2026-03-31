@@ -37,6 +37,48 @@ export const NAV_YEARS = [
   { year: "2026", year_id: "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445" },
 ] as const
 
+/** Social links under sidebar "Follow Us" (brand asset + platform icon per row). */
+export const FOLLOW_US_LINKS = [
+  {
+    label: "@WysteriaLane.org",
+    href: "https://bsky.app/profile/wysterialane.org",
+    brandSrc: "/WL.png",
+    network: "bluesky" as const,
+  },
+  {
+    label: "@WTEDRadio.com",
+    href: "https://bsky.app/profile/wtedradio.com",
+    brandSrc: "/WTED2.png",
+    network: "bluesky" as const,
+  },
+  {
+    label: "@WTEDRadio",
+    href: "https://www.instagram.com/wtedradio/",
+    brandSrc: "/WTED2.png",
+    network: "instagram" as const,
+  },
+  {
+    label: "WTED Goose Radio",
+    href: "https://www.facebook.com/profile.php?id=100095630467139",
+    brandSrc: "/WTED2.png",
+    network: "facebook" as const,
+  },
+  {
+    label: "@WysteriaArchive",
+    href: "https://bsky.app/profile/dripfield.pro",
+    brandSrc: "/wted-sa-cropped-2.png",
+    network: "bluesky" as const,
+  },
+  {
+    label: "@WysteriaArchive",
+    href: "https://x.com/WysteriaArchive",
+    brandSrc: "/wted-sa-cropped-2.png",
+    network: "x" as const,
+  },
+] as const
+
+export type FollowUsNetwork = (typeof FOLLOW_US_LINKS)[number]["network"]
+
 export const LINKS = [
   { title: "Goose Website", href: "https://www.goosetheband.com/" },
   { title: "Western Sun Foundation", href: "https://westernsunfoundation.org/" },
