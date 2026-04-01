@@ -60,6 +60,23 @@ export function useIsDesktopContentLayout() {
   return isDesktop !== false
 }
 
+/** Tailwind `md` (768px). */
+export function useIsMinMd() {
+  const [match, setMatch] = React.useState(false)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT}px)`)
+    const onChange = () => {
+      setMatch(mql.matches)
+    }
+    mql.addEventListener("change", onChange)
+    setMatch(mql.matches)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return match
+}
+
 /** Tailwind `xl` (1280px) — home WTED cards: 3-column grid at/above; accordion below. */
 export function useIsMinXl() {
   const [match, setMatch] = React.useState(false)

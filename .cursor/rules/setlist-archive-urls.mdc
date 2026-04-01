@@ -28,7 +28,7 @@ All URL slugs for **Setlist Archive** pages must start with `/archive`.
 - **App Router**: Place Setlist Archive pages under `app/(main)/archive/...` (e.g. `app/(main)/archive/years/page.tsx`, …, `app/(main)/archive/setlistgame/page.tsx`, `app/(main)/archive/user/page.tsx`).
 - **Links**: Use `/archive/...` and the `get*ArchiveUrl` helpers above for internal links (show setlist, year, tour on archive, song, personnel, list, venue, discography, setlist game show/tour). For public user profile links, use `getUserProfileUrl`.
 - **Breadcrumbs**: For any Setlist Archive page, the first breadcrumb segment after Home must show **"Setlist Archive"** (not "Dpro"); link target remains `/archive`.
-- **Pathname checks**: Treat `pathname.startsWith("/archive")` as “user is in Setlist Archive” for sidebar expansion and active state.
+- **Pathname checks**: Treat `pathname.startsWith("/archive")` as “user is in B” for sidebar expansion and active state.
 
 ## Checklist when adding or changing Setlist Archive routes
 
