@@ -31,8 +31,7 @@ type PersistentRadioContextValue = {
 const PersistentRadioContext =
   createContext<PersistentRadioContextValue | null>(null)
 
-/** Passive + capture so we catch nested scrollers and trackpad gestures (incl. overscroll rubber-band). */
-const GESTURE_LISTENER_OPTS = { passive: true, capture: true } as const
+const SCROLL_LISTENER_OPTS = { passive: true, capture: true } as const
 
 function usePersistentRadio() {
   const ctx = useContext(PersistentRadioContext)
@@ -48,7 +47,7 @@ export function useBumpHomeRadioEmbedPulse() {
   return ctx?.bumpHomeEmbedPulse ?? (() => {})
 }
 
-/** Placeholder for layout + measurement (`getBoundingClientRect`). Player renders in a body portal. */
+/** Layout placeholder; player stays on `document.body` (see shell) so the iframe is never reparented. */
 export function RadioHomeSlot({ className }: { className?: string }) {
   const { setHomeNode } = usePersistentRadio()
   return (
@@ -82,7 +81,11 @@ export function RadioMobileSlot({ className }: { className?: string }) {
   )
 }
 
-/** One stable `document.body` portal; iframe stays mounted — shell moves with measured slot. */
+/**
+ * Single iframe on `document.body`. Aligns to the slot with `fixed` + `translate3d`.
+ * Updates are rAF-coalesced (scroll / wheel / resize / etc.) — not a perpetual rAF loop —
+ * to reduce overscroll jitter while keeping playback across route changes.
+ */
 function PersistentRadioBodyShell({
   measureTarget,
   homeEmbedPulseGen,
@@ -90,11 +93,11 @@ function PersistentRadioBodyShell({
 }: {
   measureTarget: HTMLElement | null
   homeEmbedPulseGen: number
-  /** True on `/` when the WTED card bump should animate the player (home slot or top bar, any width). */
   pulseEmbedOnHomeBump: boolean
 }) {
   const shellRef = useRef<HTMLDivElement | null>(null)
   const pulseOverlayRef = useRef<HTMLDivElement | null>(null)
+  const rafRef = useRef(0)
 
   const sync = useCallback(() => {
     const shell = shellRef.current
@@ -117,64 +120,60 @@ function PersistentRadioBodyShell({
     shell.style.position = "fixed"
     shell.style.top = "0"
     shell.style.left = "0"
-    /** Below modal overlays (z-50) so dialogs blur and cover the floating player. */
+    /** Below modal overlays (z-50). */
     shell.style.zIndex = "40"
     shell.style.width = `${r.width}px`
-    /** translate3d tracks compositor-driven movement (e.g. Chrome elastic overscroll) better than top/left in some cases. */
     shell.style.transform = `translate3d(${r.left}px, ${r.top}px, 0)`
   }, [measureTarget])
+
+  const scheduleSync = useCallback(() => {
+    if (rafRef.current !== 0) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0
+      sync()
+    })
+  }, [sync])
 
   useLayoutEffect(() => {
     sync()
   }, [sync])
 
   useEffect(() => {
-    sync()
+    scheduleSync()
     const ro =
       typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => sync())
+        ? new ResizeObserver(() => scheduleSync())
         : null
     if (measureTarget && ro) ro.observe(measureTarget)
 
-    window.addEventListener("resize", sync)
+    window.addEventListener("resize", scheduleSync)
 
-    window.addEventListener("wheel", sync, GESTURE_LISTENER_OPTS)
-    window.addEventListener("touchmove", sync, GESTURE_LISTENER_OPTS)
+    document.addEventListener("scroll", scheduleSync, SCROLL_LISTENER_OPTS)
+    document.addEventListener("wheel", scheduleSync, SCROLL_LISTENER_OPTS)
+    document.addEventListener("touchmove", scheduleSync, SCROLL_LISTENER_OPTS)
 
     const vv = window.visualViewport
     if (vv) {
-      vv.addEventListener("scroll", sync, GESTURE_LISTENER_OPTS)
-      vv.addEventListener("resize", sync)
+      vv.addEventListener("scroll", scheduleSync, { passive: true })
+      vv.addEventListener("resize", scheduleSync)
     }
-
-    let rafId = 0
-    const tick = () => {
-      sync()
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-
-    const onVisibility = () => {
-      cancelAnimationFrame(rafId)
-      if (document.visibilityState === "hidden") return
-      sync()
-      rafId = requestAnimationFrame(tick)
-    }
-    document.addEventListener("visibilitychange", onVisibility)
 
     return () => {
-      cancelAnimationFrame(rafId)
-      ro?.disconnect()
-      window.removeEventListener("resize", sync)
-      window.removeEventListener("wheel", sync, GESTURE_LISTENER_OPTS)
-      window.removeEventListener("touchmove", sync, GESTURE_LISTENER_OPTS)
-      if (vv) {
-        vv.removeEventListener("scroll", sync, GESTURE_LISTENER_OPTS)
-        vv.removeEventListener("resize", sync)
+      if (rafRef.current !== 0) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = 0
       }
-      document.removeEventListener("visibilitychange", onVisibility)
+      ro?.disconnect()
+      window.removeEventListener("resize", scheduleSync)
+      document.removeEventListener("scroll", scheduleSync, SCROLL_LISTENER_OPTS)
+      document.removeEventListener("wheel", scheduleSync, SCROLL_LISTENER_OPTS)
+      document.removeEventListener("touchmove", scheduleSync, SCROLL_LISTENER_OPTS)
+      if (vv) {
+        vv.removeEventListener("scroll", scheduleSync)
+        vv.removeEventListener("resize", scheduleSync)
+      }
     }
-  }, [sync, measureTarget])
+  }, [measureTarget, scheduleSync])
 
   useEffect(() => {
     if (!pulseEmbedOnHomeBump || homeEmbedPulseGen === 0) return

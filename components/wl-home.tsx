@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { History, Pencil, Radio } from "lucide-react"
@@ -47,6 +47,30 @@ const HOME_BG_IMAGES = [
   "/newbg3.jpeg",
   "/newbg4.jpeg",
 ] as const
+
+/** Matches `id` on the scrollable region in `app/(main)/layout.tsx`. */
+const MAIN_INSET_SCROLL_ID = "main-inset-scroll"
+
+/** Smooth-scroll main column to top, then run `pulse` (for browsers without `scrollend`, uses a short delay). */
+function scrollMainInsetToTopThenPulse(pulse: () => void) {
+  const el = document.getElementById(MAIN_INSET_SCROLL_ID)
+  if (!el || el.scrollTop <= 0) {
+    pulse()
+    return
+  }
+  let done = false
+  const fire = () => {
+    if (done) return
+    done = true
+    pulse()
+  }
+  el.scrollTo({ top: 0, behavior: "smooth" })
+  const useScrollEnd = "onscrollend" in window
+  if (useScrollEnd) {
+    el.addEventListener("scrollend", fire, { once: true })
+  }
+  globalThis.setTimeout(fire, useScrollEnd ? 900 : 480)
+}
 
 function WtedExploreRadioNavInner() {
   return (
@@ -158,6 +182,10 @@ export function WlHome() {
   const bumpHomeRadioEmbedPulse = useBumpHomeRadioEmbedPulse()
   const [homeBgIndex, setHomeBgIndex] = useState(0)
 
+  const handleWtedCardClick = useCallback(() => {
+    scrollMainInsetToTopThenPulse(bumpHomeRadioEmbedPulse)
+  }, [bumpHomeRadioEmbedPulse])
+
   useEffect(() => {
     const id = window.setInterval(() => {
       setHomeBgIndex((i) => (i + 1) % HOME_BG_IMAGES.length)
@@ -228,7 +256,7 @@ export function WlHome() {
           {/* WTED: full-card bg image; click (xl+) pulses the radio embed; inner links still navigate */}
           <div
             className="group relative isolate mb-4 overflow-hidden rounded-xl border border-wl-dark-grey/50 shadow-sm transition-all duration-200 ease-out"
-            onClick={() => bumpHomeRadioEmbedPulse()}
+            onClick={handleWtedCardClick}
           >
             <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
               <div className="relative size-full">
