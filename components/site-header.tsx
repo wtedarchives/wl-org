@@ -5,7 +5,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { usePublicProfileBreadcrumb } from "@/components/public-profile-breadcrumb-context"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { useYearBreadcrumb } from "@/components/year-breadcrumb-context"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,10 +33,10 @@ import {
 } from "@/hooks/use-mobile"
 
 const SEGMENT_LABELS: Record<string, string> = {
-  dpro: "Setlist Archive",
+  dpro: WTED_ARCHIVES_BREADCRUMB_ROOT.label,
   years: "Years",
   wted: "WTED Radio",
-  forum: "Community Forum",
+  forum: "Wysteria Lane Community",
   goose101: "Goose 101",
   links: "Links",
   tours: "Tours",
@@ -59,7 +62,7 @@ const PATH_LABELS: Record<string, string> = {
   "wted/shows": "Shows and More",
   "wted/about": "About Us and FAQ",
   support: "Support Wysteria Lane",
-  archive: "Setlist Archive",
+  archive: WTED_ARCHIVES_BREADCRUMB_ROOT.label,
 }
 
 /** True if segment looks like a UUID (so we show a placeholder instead of raw id in breadcrumbs). */
@@ -81,7 +84,7 @@ function pathnameToBreadcrumbs(
   if (segments.length === 1 && (segments[0] === "forum" || segments[0] === "goose101")) {
     const label =
       segments[0] === "forum"
-        ? (SEGMENT_LABELS.forum ?? "Community Forum")
+        ? (SEGMENT_LABELS.forum ?? "Wysteria Lane Community")
         : (SEGMENT_LABELS.goose101 ?? "Goose 101")
     return [{ label, href: `/${segments[0]}` }]
   }

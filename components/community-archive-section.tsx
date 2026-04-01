@@ -146,8 +146,8 @@ export function CommunityArchiveSection() {
         <div className="min-h-0 lg:col-span-2 lg:row-start-1">
           <ColumnBanner
             src="/community-banner.jpg"
-            alt="Community Forum"
-            label="Community Forum"
+            alt="Wysteria Lane Community"
+            label="Wysteria Lane Community"
             description="A community made for Goose fans, by Goose fans."
             href="https://community.wysterialane.org"
             dim
@@ -167,8 +167,8 @@ export function CommunityArchiveSection() {
         <div className="min-h-0 lg:col-start-3 lg:row-start-1 lg:pl-2">
           <ColumnBanner
             src="/archive-banner.jpg"
-            alt="Setlist Archive"
-            label="Setlist Archive"
+            alt="WTED Archives"
+            label="WTED Archives"
             description="The ultimate show history archive for Goose."
             href="/archive"
             mutedBg

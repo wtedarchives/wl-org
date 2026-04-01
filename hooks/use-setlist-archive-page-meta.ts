@@ -5,7 +5,10 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import { formatSetlistDate } from "@/lib/setlist-utils"
-import type { BreadcrumbItem } from "@/components/setlist-breadcrumb-context"
+import {
+  type BreadcrumbItem,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import type { Show } from "@/types/setlist"
 
 export function useSetlistArchiveBreadcrumbs(
@@ -24,7 +27,7 @@ export function useSetlistArchiveBreadcrumbs(
       ? `${dateLabel} – ${show.show_venue_location}`
       : dateLabel
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: show.show_date.slice(0, 4), href: getYearArchiveUrl(yearId) },
       { label: tourLabel, href: getTourArchiveUrl(show.tour_id) },
       { label: lastLabel, href: getSetlistArchiveUrl(show.show_id) },

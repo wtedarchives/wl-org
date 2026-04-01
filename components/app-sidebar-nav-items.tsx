@@ -120,7 +120,7 @@ export function AppSidebarNavItems({
         )}
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton tooltip="Community Forum" asChild>
+        <SidebarMenuButton tooltip="Wysteria Lane Community" asChild>
           <a
             href="https://community.wysterialane.org"
             target="_blank"
@@ -134,7 +134,7 @@ export function AppSidebarNavItems({
               height={16}
               className="size-4 shrink-0 object-contain"
             />
-            <span className="min-w-0 flex-1">Community Forum</span>
+            <span className="min-w-0 flex-1">Wysteria Lane Community</span>
             <ExternalLinkIcon className="size-4 shrink-0" aria-hidden />
           </a>
         </SidebarMenuButton>
@@ -162,7 +162,7 @@ export function AppSidebarNavItems({
       </SidebarMenuItem>
       <SidebarMenuItem className="group/item" data-open={setlistOpen || undefined}>
         <SidebarMenuButton
-          tooltip="Setlist Archive"
+          tooltip="WTED Archives"
           isActive={pathname === "/archive"}
           className="group-data-[state=open]:bg-sidebar-accent data-[slot=sidebar-menu-button]:p-0"
           asChild
@@ -179,7 +179,7 @@ export function AppSidebarNavItems({
                 height={16}
                 className="size-4 shrink-0 object-contain"
               />
-              <span>Setlist Archive</span>
+              <span>WTED Archives</span>
             </Link>
             <button
               type="button"
@@ -189,7 +189,7 @@ export function AppSidebarNavItems({
                 e.stopPropagation()
                 setSetlistOpen((o) => !o)
               }}
-              aria-label="Toggle Setlist Archive submenu"
+              aria-label="Toggle WTED Archives submenu"
             >
               <ChevronDownIcon
                 className={`size-4 transition-transform ${setlistOpen ? "rotate-180" : ""}`}

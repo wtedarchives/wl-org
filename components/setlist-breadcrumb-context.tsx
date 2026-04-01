@@ -10,6 +10,12 @@ import {
 
 export type BreadcrumbItem = { label: string; href: string }
 
+/** First segment for /archive routes in the site header breadcrumb. */
+export const WTED_ARCHIVES_BREADCRUMB_ROOT: BreadcrumbItem = {
+  label: "WTED Archives",
+  href: "/archive",
+}
+
 type SetlistBreadcrumbContextValue = {
   setlistBreadcrumbs: BreadcrumbItem[] | null
   setSetlistBreadcrumbs: (items: BreadcrumbItem[] | null) => void

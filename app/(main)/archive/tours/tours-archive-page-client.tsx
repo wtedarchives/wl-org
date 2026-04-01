@@ -3,7 +3,10 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react"
 import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { MapPin, X } from "lucide-react"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { useTourPageData } from "@/hooks/use-tour-page-data"
 import { useYearIdFromYear } from "@/hooks/use-setlist-year-id"
 import { TourShowsTable } from "@/components/dpro/tours/tour-shows-table"
@@ -98,7 +101,7 @@ function TourPageContent({ tourId }: { tourId: string }) {
     }
     const year = extractYear(currentTour.tour)
     const items: { label: string; href: string }[] = [
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       ...(yearId && year !== "Unknown"
         ? [{ label: year, href: getYearArchiveUrl(yearId) }]
         : []),

@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react"
 import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { DisplaySetlistTable } from "@/components/dpro/setlist/display-setlist-table"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
@@ -105,7 +108,7 @@ function DiscographyReleasePageContent({ id }: { id: string }) {
       return
     }
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Discography", href: "/archive/discography" },
       { label: release.displayname, href: getDiscographyArchiveUrl(id) },
     ])

@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { ArchiveLanding } from "@/components/archive-landing"
 
 export const metadata: Metadata = {
-  title: "Setlist Archive",
+  title: "WTED Archives",
   description:
     "The ultimate show history archive for Goose. Browse years, tours, songs, stats, personnel, venues, and more.",
 }

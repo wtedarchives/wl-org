@@ -1,7 +1,10 @@
 "use client"
 
 import { useEffect } from "react"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { Card, CardContent } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useListIndData } from "@/hooks/use-list-ind-data"
@@ -116,7 +119,7 @@ export function ListIndContent({ listId }: ListIndContentProps) {
   useEffect(() => {
     if (!list) return
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Lists", href: "/archive/lists" },
       { label: list.list_name, href: getListArchiveUrl(listId) },
     ])

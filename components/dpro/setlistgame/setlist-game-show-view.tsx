@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/components/auth-context"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
 import {
   getSetlistGameShowArchiveUrl,
@@ -176,7 +179,7 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
     const lastLabel = `${dateLabel}${venuePart}`
     const tours = show.tours as { tour_id: string } | null | undefined
     const items = [
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Setlist Game", href: "/archive/setlistgame" },
       ...(show.show_tour && tours?.tour_id
         ? [

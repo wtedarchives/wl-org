@@ -185,7 +185,7 @@ export function MostRecentShowCard({
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    Chat in the Community Forum
+                    Chat in the Wysteria Lane Community
                   </TooltipContent>
                 </Tooltip>
               ) : null}

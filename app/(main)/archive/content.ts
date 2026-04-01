@@ -6,7 +6,7 @@ export type ArchiveEntry = {
 }
 
 export const ARCHIVE_INTRO = {
-  title: "Setlist Archive",
+  title: "WTED Archives",
   description:
     "The ultimate show history archive for Goose. Browse years, tours, songs, stats, personnel, venues, and more—all in one place.",
 }

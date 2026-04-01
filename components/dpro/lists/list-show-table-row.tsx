@@ -244,7 +244,7 @@ export function ListShowTableRow({
               </TooltipTrigger>
               <TooltipContent side="top">
                 <span className="text-[11px]">
-                  Chat in the Community Forum
+                  Chat in the Wysteria Lane Community
                 </span>
               </TooltipContent>
             </Tooltip>

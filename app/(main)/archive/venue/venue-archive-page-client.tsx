@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { notFound, useRouter, useSearchParams } from "next/navigation"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { useSidebar } from "@/components/ui/sidebar"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useVenueData } from "@/hooks/use-venue-data"
@@ -60,7 +63,7 @@ function VenueDetailContent({ venueKey }: { venueKey: string }) {
       return
     }
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Venues", href: "/archive/venues" },
       { label: venueName, href: getVenueArchiveUrl(venue.venue_id) },
     ])

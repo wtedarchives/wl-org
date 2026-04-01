@@ -2,7 +2,10 @@
 
 import { useEffect } from "react"
 import { useAuth } from "@/components/auth-context"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { getSetlistGameTourArchiveUrl } from "@/lib/setlist-game-archive-url"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSetlistGameTourDetails } from "@/hooks/use-setlist-game-tour-details"
@@ -36,7 +39,7 @@ export function SetlistGameTourView({ tourId }: { tourId: string }) {
       return
     }
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Setlist Game", href: "/archive/setlistgame" },
       {
         label: tourInfo.tour,

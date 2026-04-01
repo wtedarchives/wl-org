@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { notFound, useRouter, useSearchParams } from "next/navigation"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSongData } from "@/hooks/use-song-data"
 import { SongHeader } from "@/components/dpro/song/song-header"
@@ -42,7 +45,7 @@ function SongPageContent({ songId }: { songId: string }) {
       return
     }
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Songs", href: "/archive/songs" },
       { label: song.song, href: getSongArchiveUrl(songId) },
     ])

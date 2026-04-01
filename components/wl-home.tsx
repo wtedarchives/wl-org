@@ -231,22 +231,30 @@ export function WlHome() {
               </h1>
               <p className="text-sm leading-5 text-wl-white lg:text-left">
                 <span className="font-bold">Wysteria Lane </span>
-                is the home for WTED Goose Radio, a 24/7 radio station dedicated to Goose music.
-                Join us in the{" "}
+                is the home for{" "}
+                <button
+                  type="button"
+                  onClick={handleWtedCardClick}
+                  className="inline min-h-0 border-0 bg-transparent p-0 text-left font-bold text-wl-orange hover:underline decoration-wl-white/45 underline-offset-2 transition-colors hover:cursor-pointer hover:decoration-wl-orange hover:text-wl-light-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wl-orange/80"
+                  aria-label="Scroll to top and highlight WTED radio player"
+                >
+                  WTED Goose Radio
+                </button>
+                , a 24/7 radio station dedicated to Goose music. Join us in the{" "}
                 <a
                   href="https://community.wysterialane.org"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold text-wl-orange hover:underline decoration-wl-white/45 underline-offset-2 transition-colors hover:decoration-wl-orange hover:text-wl-light-orange"
                 >
-                  Community Forum
-                </a>
-                , and explore our comprehensive{" "}
+                  Wysteria Lane Community
+                </a>{" "}
+                forum, and explore our comprehensive concert{" "}
                 <Link
                   href="/archive"
                   className="font-bold text-wl-orange hover:underline decoration-wl-white/45 underline-offset-2 transition-colors hover:decoration-wl-orange hover:text-wl-light-orange"
                 >
-                  Setlist Archive
+                  WTED Archives
                 </Link>
                 , all available free of charge.
               </p>

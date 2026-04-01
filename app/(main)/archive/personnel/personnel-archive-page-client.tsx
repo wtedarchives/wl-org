@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { notFound, useSearchParams } from "next/navigation"
-import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import {
+  useSetlistBreadcrumb,
+  WTED_ARCHIVES_BREADCRUMB_ROOT,
+} from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useGuestData } from "@/hooks/use-guest-data"
 import type { SongCount, SongSpreadCategory } from "@/hooks/use-guest-data"
@@ -54,7 +57,7 @@ function PersonnelDetailPageContent({ guestId }: { guestId: string }) {
       return
     }
     setSetlistBreadcrumbs([
-      { label: "Setlist Archive", href: "/archive" },
+      WTED_ARCHIVES_BREADCRUMB_ROOT,
       { label: "Personnel", href: "/archive/personnel" },
       { label: guestName, href: getPersonnelArchiveUrl(guestId) },
     ])
