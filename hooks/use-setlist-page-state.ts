@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { SetlistEntry } from "@/types/setlist"
 
-const DESKTOP_MIN_WIDTH = 1280
+const DESKTOP_MIN_WIDTH = 984
 
 export function useSetlistPageState(showId: string) {
   const containerRef = useRef<HTMLDivElement>(null)

@@ -25,7 +25,7 @@ export function SetlistCommunityForumButton({
         height={20}
         className="size-5 shrink-0"
       />
-      <span className="text-balance text-center leading-snug">
+      <span className="text-balance text-center leading-tight tracking-tight font-bold text-[0.82rem]">
         Chat in the Wysteria Lane Community
       </span>
     </Button>
