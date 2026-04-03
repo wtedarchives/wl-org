@@ -2,7 +2,12 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardTitle } from "@/components/ui/card"
+import {
+  CategoryCompleteRotatingArtwork,
+  DripfieldRotatingArtwork,
+  JiveRotatingArtwork,
+} from "@/components/dpro/rotating-bandcamp-artwork"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useListsData, type List } from "@/hooks/use-lists-data"
 import { getListArchiveUrl } from "@/lib/list-archive-url"
@@ -14,16 +19,34 @@ function ListCard({ list }: { list: List }) {
       className="block h-full min-h-0"
     >
       <Card className="h-full flex flex-col border-border/60 bg-card/80 overflow-hidden transition-colors hover:bg-muted/40 py-2">
-        <CardHeader className="py-0.5">
-          <CardTitle className="text-xs font-medium">{list.list_name}</CardTitle>
-        </CardHeader>
-        {list.list_description?.trim() && (
-          <CardContent className="py-0.5">
-            <p className="text-[11px] text-muted-foreground leading-tight">
+        <div className="px-4 py-0.5">
+          {list.list_type === "dripfield_complete" && (
+            <DripfieldRotatingArtwork
+              className="float-right mb-1 ml-2 size-8 border-border/60"
+              imageSizes="32px"
+            />
+          )}
+          {list.list_type === "category_complete" && (
+            <CategoryCompleteRotatingArtwork
+              className="float-right mb-1 ml-2 size-8 border-border/60"
+              imageSizes="32px"
+            />
+          )}
+          {list.list_type === "jive_complete" && (
+            <JiveRotatingArtwork
+              className="float-right mb-1 ml-2 size-8 border-border/60"
+              imageSizes="32px"
+            />
+          )}
+          <CardTitle className="text-xs font-medium leading-snug">
+            {list.list_name}
+          </CardTitle>
+          {list.list_description?.trim() && (
+            <p className="mt-1 text-[11px] text-muted-foreground leading-tight">
               {list.list_description}
             </p>
-          </CardContent>
-        )}
+          )}
+        </div>
       </Card>
     </Link>
   )

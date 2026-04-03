@@ -9,6 +9,7 @@ export interface List {
   list_description: string | null
   list_category: string
   list_order: number
+  list_type: string | null
 }
 
 export function useListsData() {
@@ -31,12 +32,16 @@ export function useListsData() {
         const [songRes, showRes] = await Promise.all([
           sb
             .from("lists")
-            .select("list_id, list_name, list_description, list_category, list_order")
+            .select(
+              "list_id, list_name, list_description, list_category, list_order, list_type",
+            )
             .eq("list_category", "songs")
             .order("list_order", { ascending: true }),
           sb
             .from("lists")
-            .select("list_id, list_name, list_description, list_category, list_order")
+            .select(
+              "list_id, list_name, list_description, list_category, list_order, list_type",
+            )
             .eq("list_category", "shows")
             .order("list_order", { ascending: true }),
         ])

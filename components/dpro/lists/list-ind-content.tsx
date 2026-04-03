@@ -6,6 +6,11 @@ import {
   WTED_ARCHIVES_BREADCRUMB_ROOT,
 } from "@/components/setlist-breadcrumb-context"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  CategoryCompleteRotatingArtwork,
+  DripfieldRotatingArtwork,
+  JiveRotatingArtwork,
+} from "@/components/dpro/rotating-bandcamp-artwork"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useListIndData } from "@/hooks/use-list-ind-data"
 import { getListArchiveUrl } from "@/lib/list-archive-url"
@@ -83,8 +88,30 @@ function ListContentWithLoading({
       >
         <div className="flex flex-1 flex-col gap-4 px-4 md:px-6 py-2 md:py-4 rounded-b-none md:rounded-b-xl overflow-hidden">
           <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
-            <div className="border-b border-border/60 bg-muted/60 px-3 py-2 space-y-2">
-              <h1 className="text-sm font-semibold">{list.list_name}</h1>
+            <div className="border-b border-border/60 bg-muted/60 px-3 py-1 space-y-2">
+              <div className="flex items-center gap-3">
+                {listType === "dripfield_complete" && (
+                  <DripfieldRotatingArtwork
+                    className="size-8 shrink-0 border-border/60"
+                    imageSizes="40px"
+                  />
+                )}
+                {listType === "category_complete" && (
+                  <CategoryCompleteRotatingArtwork
+                    className="size-8 shrink-0 border-border/60"
+                    imageSizes="40px"
+                  />
+                )}
+                {listType === "jive_complete" && (
+                  <JiveRotatingArtwork
+                    className="size-8 shrink-0 border-border/60"
+                    imageSizes="40px"
+                  />
+                )}
+                <div className="min-w-0 flex-1 space-y-2">
+                  <h1 className="text-sm font-semibold">{list.list_name}</h1>
+                </div>
+              </div>
             </div>
             {list.list_description?.trim() && (
               <div className="px-3 py-2">
@@ -184,7 +211,7 @@ export function ListIndContent({ listId }: ListIndContentProps) {
   return (
     <div className="flex flex-1 flex-col gap-4 px-4 md:px-6 py-2 md:py-4 rounded-b-none md:rounded-b-xl overflow-hidden">
       <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
-        <div className="border-b border-border/60 bg-muted/60 px-3 py-2 space-y-2">
+        <div className="border-b border-border/60 bg-muted/60 px-3 py-1 space-y-2">
           <h1 className="text-sm font-semibold">{list.list_name}</h1>
         </div>
         {list.list_description?.trim() && (
