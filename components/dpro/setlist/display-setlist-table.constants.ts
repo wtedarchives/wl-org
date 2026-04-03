@@ -3,6 +3,28 @@ import type { SetlistEntry } from "@/types/setlist"
 /** Rows with these entry_short values (case-insensitive) get no number in the # column. */
 export const INDEX_SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 
+/** If `entry_song` matches exactly, `[entry_short]` is not shown in setlist UI. */
+export const ENTRY_SHORT_HIDDEN_FOR_SONGS = [
+  "Charge",
+  "First Call",
+  "Happy Birthday to You",
+  "[Trevor Reads Poetry]",
+] as const
+
+const ENTRY_SHORT_HIDDEN_FOR_SONG_SET = new Set<string>(ENTRY_SHORT_HIDDEN_FOR_SONGS)
+
+/**
+ * Whether to render `[entry_short]` for this row (song cell, tooltips, scan drawer, WTED slots, JOTY sheet).
+ */
+export function shouldShowSetlistEntryShort(
+  entrySong: string | null | undefined,
+  entryShort: string | null | undefined,
+): boolean {
+  if (!entryShort) return false
+  if (entrySong != null && ENTRY_SHORT_HIDDEN_FOR_SONG_SET.has(entrySong)) return false
+  return true
+}
+
 /** entry_song value that never receives a # (placeholder jam row). */
 export const INDEX_SKIP_SONG_IMPROV_JAM = "[Improv/Jam]"
 

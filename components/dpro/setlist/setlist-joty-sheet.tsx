@@ -1,6 +1,7 @@
 "use client"
 
 import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistJotySheetProps {
@@ -15,7 +16,11 @@ export function SetlistJotySheet({
   entry,
 }: SetlistJotySheetProps) {
   const songLabel = entry
-    ? [entry.entry_song, entry.entry_short && `[${entry.entry_short}]`]
+    ? [
+        entry.entry_song,
+        shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) &&
+          `[${entry.entry_short}]`,
+      ]
         .filter(Boolean)
         .join(" ")
     : ""

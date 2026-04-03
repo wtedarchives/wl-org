@@ -26,7 +26,10 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { formatSetlistDate, formatEntryLength } from "@/lib/setlist-utils"
-import { getPlacementIndexCellBg } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  getPlacementIndexCellBg,
+  shouldShowSetlistEntryShort,
+} from "@/components/dpro/setlist/display-setlist-table.constants"
 import { useSongTourPerformances } from "@/hooks/use-song-tour-performances"
 import type { SetlistEntry } from "@/types/setlist"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -175,7 +178,10 @@ export function SetlistSongPerformancesSheet({
                         </TableCell>
                         <TableCell className="align-middle px-2 py-1 text-left text-[11px]">
                           <div className="inline-flex items-center gap-1">
-                            {perf.entry_short && (
+                            {shouldShowSetlistEntryShort(
+                              perf.entry_song,
+                              perf.entry_short,
+                            ) && (
                               <span className="text-[0.625rem] text-red-400">
                                 [{perf.entry_short}]
                               </span>

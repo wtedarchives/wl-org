@@ -25,6 +25,7 @@ import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import { getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
 import {
   computeDisplayNumbers,
+  shouldShowSetlistEntryShort,
   getJotyBadgeStyle,
   JOTY_EXPLANATIONS,
   JOTY_ROUND_ORDER,
@@ -148,6 +149,7 @@ export function DisplaySetlistTable({
   const hasSegue = setlist.some((e) => !!e.entry_segue)
   const shorts = new Set(
     setlist
+      .filter((e) => shouldShowSetlistEntryShort(e.entry_song, e.entry_short))
       .map((e) => e.entry_short?.toLowerCase())
       .filter((s): s is string => !!s && s in SHORT_EXPLANATIONS)
   )

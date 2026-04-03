@@ -5,6 +5,7 @@ import { Check, Loader2 } from "lucide-react"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { SetlistEntry } from "@/types/setlist"
 import type { WtedRequestEnriched } from "@/types/wted"
 
@@ -48,7 +49,10 @@ export function WtedRequestSlotContent({
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-foreground">
           {request.entry_song}
-          {request.entry_short && (
+          {shouldShowSetlistEntryShort(
+            request.entry_song,
+            request.entry_short,
+          ) && (
             <span className="ml-1 text-[0.625rem] text-red-400">
               [{request.entry_short}]
             </span>
@@ -130,7 +134,7 @@ export function WtedPendingSlotContent({
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-foreground">
           {entry.entry_song}
-          {entry.entry_short && (
+          {shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) && (
             <span className="ml-1 text-[0.625rem] text-red-400">
               [{entry.entry_short}]
             </span>

@@ -1,6 +1,7 @@
 "use client"
 
 import { MoveRight } from "lucide-react"
+import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { SetlistEntry } from "@/types/setlist"
 
 const statHtmlClass =
@@ -24,7 +25,7 @@ export function SetlistEntryStatsTooltipContent({
     <div className="space-y-1 text-left leading-tight">
       <div className="font-medium leading-tight">
         <span>{entry.entry_song}</span>
-        {entry.entry_short ? (
+        {shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) ? (
           <span className="ml-2 text-destructive">[{entry.entry_short}]</span>
         ) : null}
         {entry.entry_segue ? (

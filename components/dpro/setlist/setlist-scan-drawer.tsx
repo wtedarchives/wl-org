@@ -16,6 +16,7 @@ import {
   getPlacementColor,
 } from "@/lib/setlist-utils"
 import { getChangeTypeIcon } from "./setlist-show-change-icon"
+import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { Show, SetlistEntry } from "@/types/setlist"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import { cn } from "@/lib/utils"
@@ -145,7 +146,10 @@ export function SetlistScanDrawer({
                                   songDisplayName={entry.songs.song_displayname}
                                 />
                               </Link>
-                              {entry.entry_short && (
+                              {shouldShowSetlistEntryShort(
+                                entry.entry_song,
+                                entry.entry_short,
+                              ) && (
                                 <span className="ml-1 text-[10px] font-medium text-destructive">
                                   [{entry.entry_short}]
                                 </span>

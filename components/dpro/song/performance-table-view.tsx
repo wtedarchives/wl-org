@@ -19,7 +19,10 @@ import {
   PLACEMENT_COLORS,
   formatPerformanceLength,
 } from "@/lib/song-performance-utils"
-import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  getJotyBadgeStyle,
+  shouldShowSetlistEntryShort,
+} from "@/components/dpro/setlist/display-setlist-table.constants"
 import { PerformanceTooltipContent } from "./performance-tooltip"
 import type { SongPerformance } from "@/types/song"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
@@ -217,7 +220,10 @@ export function PerformanceTableView({
                           songDisplayName={songDisplayName}
                         />
                       </span>
-                      {perf.entry_short && (
+                      {shouldShowSetlistEntryShort(
+                        perf.entry_song ?? songCanonical,
+                        perf.entry_short,
+                      ) && (
                         <span className="text-destructive mr-2">
                           [{perf.entry_short}]
                         </span>

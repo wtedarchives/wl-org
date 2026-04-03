@@ -1,5 +1,6 @@
 "use client"
 
+import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { formatPerformanceLength } from "@/lib/song-performance-utils"
 import type { SongPerformance } from "@/types/song"
@@ -16,7 +17,10 @@ export function PerformanceTooltipContent({
     <div className="space-y-0.5 max-w-[250px]">
       <div className="font-medium">
         {formatSetlistDate(fullData.show_date)}
-        {fullData.entry_short && (
+        {shouldShowSetlistEntryShort(
+          fullData.entry_song,
+          fullData.entry_short,
+        ) && (
           <span className="text-destructive ml-1">
             [{fullData.entry_short}]
           </span>

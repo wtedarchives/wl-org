@@ -1,7 +1,10 @@
 "use client"
 
 import { SongDisplayName } from "@/components/dpro/song-display-name"
-import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  getJotyBadgeStyle,
+  shouldShowSetlistEntryShort,
+} from "@/components/dpro/setlist/display-setlist-table.constants"
 import {
   Tooltip,
   TooltipContent,
@@ -47,7 +50,7 @@ export function SetlistEntrySongCell({
             songDisplayName={entry.songs?.song_displayname}
           />
         )}
-        {entry.entry_short && (
+        {shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) && (
           <span className="text-[0.625rem] text-red-400">
             [{entry.entry_short}]
           </span>
