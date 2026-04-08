@@ -39,6 +39,20 @@ function WtedCardSectionHeader({ children }: { children: React.ReactNode }) {
 const accordionPanelCardClassName =
   "h-[328px] min-h-0 flex flex-col overflow-hidden rounded-none border-0 shadow-none ring-0"
 
+/** Hero blurb: label + hover underline (focus ring added on interactive root). */
+const welcomeHeroInlineLinkTextClassName = cn(
+  "font-bold text-wl-orange underline-offset-2 transition-colors",
+  "decoration-wl-white/45 hover:cursor-pointer hover:underline hover:decoration-wl-orange hover:text-wl-light-orange"
+)
+
+const welcomeHeroInlineLinkFocusClassName =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wl-orange/80"
+
+const welcomeHeroInlineLinkClassName = cn(
+  welcomeHeroInlineLinkTextClassName,
+  welcomeHeroInlineLinkFocusClassName
+)
+
 const HOME_BG_ROTATION_MS = 5000
 
 const HOME_BG_IMAGES = [
@@ -232,31 +246,46 @@ export function WlHome() {
               <p className="text-sm leading-5 text-wl-white lg:text-left">
                 <span className="font-bold">Wysteria Lane </span>
                 is the home for{" "}
-                <button
-                  type="button"
-                  onClick={handleWtedCardClick}
-                  className="inline min-h-0 border-0 bg-transparent p-0 text-left font-bold text-wl-orange hover:underline decoration-wl-white/45 underline-offset-2 transition-colors hover:cursor-pointer hover:decoration-wl-orange hover:text-wl-light-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wl-orange/80"
+                <a
+                  href={`#${MAIN_INSET_SCROLL_ID}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleWtedCardClick()
+                  }}
+                  className={cn(
+                    "inline cursor-pointer text-left",
+                    welcomeHeroInlineLinkFocusClassName
+                  )}
                   aria-label="Scroll to top and highlight WTED radio player"
                 >
-                  WTED Goose Radio
-                </button>
-                , a 24/7 radio station dedicated to Goose music. Join us in the{" "}
+                  <span className={welcomeHeroInlineLinkTextClassName}>
+                    WTED Goose Radio
+                  </span>
+                  <span className="font-normal text-inherit">,</span>
+                </a>{" "}
+                a 24/7 radio station dedicated to Goose music. Join us in the{" "}
                 <a
                   href="https://community.wysterialane.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-bold text-wl-orange hover:underline decoration-wl-white/45 underline-offset-2 transition-colors hover:decoration-wl-orange hover:text-wl-light-orange"
+                  className={welcomeHeroInlineLinkClassName}
                 >
                   Wysteria Lane Community
                 </a>{" "}
                 forum, and explore our comprehensive concert{" "}
-                <Link
+                <a
                   href="/archive"
-                  className="font-bold text-wl-orange hover:underline decoration-wl-white/45 underline-offset-2 transition-colors hover:decoration-wl-orange hover:text-wl-light-orange"
+                  className={cn(
+                    "inline cursor-pointer text-left",
+                    welcomeHeroInlineLinkFocusClassName
+                  )}
                 >
-                  WTED Archives
-                </Link>
-                , all available free of charge.
+                  <span className={welcomeHeroInlineLinkTextClassName}>
+                    WTED Archives
+                  </span>
+                  <span className="font-normal text-inherit">,</span>
+                </a>{" "}
+                all available free of charge.
               </p>
             </div>
           </div>
