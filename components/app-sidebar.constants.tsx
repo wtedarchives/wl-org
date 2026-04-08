@@ -146,5 +146,6 @@ export const navMainItems = [
 
 export const ADMIN_SUB = [
   { title: "Admin Panel", url: "/archive/admin" },
+  { title: "Radio", url: "/archive/admin/radio" },
   { title: "Bugs", url: "/archive/bugs" },
 ] as const
