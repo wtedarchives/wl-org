@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/collapsible"
 import { useLooseEndsData } from "@/hooks/use-loose-ends-data"
 import { cn } from "@/lib/utils"
+
+/** First N badges get preload + high fetch priority (roughly first screen across breakpoints). */
+const LOOSE_END_BADGE_PRIORITY_COUNT = 16
 
 interface LooseEndsContentProps {
   userId: string | null
@@ -34,6 +37,19 @@ export function LooseEndsContent({
     error,
     refetch,
   } = useLooseEndsData(userId)
+
+  const priorityBadgeIds = useMemo(() => {
+    const ids: string[] = []
+    for (const category of categories) {
+      for (const le of groupedLooseEnds[category] ?? []) {
+        ids.push(le.end_id)
+        if (ids.length >= LOOSE_END_BADGE_PRIORITY_COUNT) {
+          return new Set(ids)
+        }
+      }
+    }
+    return new Set(ids)
+  }, [categories, groupedLooseEnds])
 
   useEffect(() => {
     if (!error) return
@@ -128,6 +144,7 @@ export function LooseEndsContent({
                         <LooseEndCard
                           key={looseEnd.end_id}
                           looseEnd={looseEnd}
+                          imagePriority={priorityBadgeIds.has(looseEnd.end_id)}
                         />
                       ))}
                     </div>

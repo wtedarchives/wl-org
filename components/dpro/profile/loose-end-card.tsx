@@ -9,11 +9,17 @@ import { looseEndBadgePublicPath } from "@/lib/loose-end-badge-path"
 import { cn } from "@/lib/utils"
 import type { LooseEndDisplay } from "@/types/loose-ends"
 
+/** Hint preload for the first N badges (visible Loose Ends grid); same files, earlier fetch. */
 interface LooseEndCardProps {
   looseEnd: LooseEndDisplay
+  /** When true, Next/Image adds preload + high fetch priority (use sparingly, ~first screen of cards). */
+  imagePriority?: boolean
 }
 
-export function LooseEndCard({ looseEnd }: LooseEndCardProps) {
+export function LooseEndCard({
+  looseEnd,
+  imagePriority = false,
+}: LooseEndCardProps) {
   const [imgFailed, setImgFailed] = useState(false)
 
   const badgeSrc = looseEndBadgePublicPath(looseEnd.end_local_file)
@@ -48,6 +54,8 @@ export function LooseEndCard({ looseEnd }: LooseEndCardProps) {
               height={116}
               className="size-full object-cover"
               sizes="(max-width: 639px) 80px, (max-width: 1023px) 96px, 116px"
+              priority={imagePriority}
+              fetchPriority={imagePriority ? "high" : "low"}
               onError={() => setImgFailed(true)}
             />
           ) : (
