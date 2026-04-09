@@ -37,47 +37,82 @@ export const NAV_YEARS = [
   { year: "2026", year_id: "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445" },
 ] as const
 
-/** Social links under sidebar "Follow Us" (brand asset + platform icon per row). */
-export const FOLLOW_US_LINKS = [
-  {
-    label: "@WysteriaLane.org",
-    href: "https://bsky.app/profile/wysterialane.org",
-    brandSrc: "/WL.png",
-    network: "bluesky" as const,
-  },
-  {
-    label: "@WTEDRadio.com",
-    href: "https://bsky.app/profile/wtedradio.com",
-    brandSrc: "/WTED2.png",
-    network: "bluesky" as const,
-  },
-  {
-    label: "@WTEDRadio",
-    href: "https://www.instagram.com/wtedradio/",
-    brandSrc: "/WTED2.png",
-    network: "instagram" as const,
-  },
-  {
-    label: "WTED Goose Radio",
-    href: "https://www.facebook.com/profile.php?id=100095630467139",
-    brandSrc: "/WTED2.png",
-    network: "facebook" as const,
-  },
-  {
-    label: "@WysteriaArchive",
-    href: "https://bsky.app/profile/dripfield.pro",
-    brandSrc: "/wted-sa-cropped-2.png",
-    network: "bluesky" as const,
-  },
-  {
-    label: "@WysteriaArchive",
-    href: "https://x.com/WysteriaArchive",
-    brandSrc: "/wted-sa-cropped-2.png",
-    network: "x" as const,
-  },
-] as const
+export type FollowUsNetwork =
+  | "bluesky"
+  | "instagram"
+  | "facebook"
+  | "x"
 
-export type FollowUsNetwork = (typeof FOLLOW_US_LINKS)[number]["network"]
+export type FollowUsLinkItem = {
+  label: string
+  href: string
+  network: FollowUsNetwork
+}
+
+export type FollowUsGroup = {
+  id: string
+  title: string
+  brandSrc: string
+  links: readonly FollowUsLinkItem[]
+  /** When set, overrides default platform sort for this group’s links. */
+  platformOrder?: readonly FollowUsNetwork[]
+}
+
+/** Social links for sidebar "Follow Us" mega-menu (grouped by brand). */
+export const FOLLOW_US_GROUPS = [
+  {
+    id: "radio",
+    title: "WTED Radio",
+    brandSrc: "/WTED2.png",
+    links: [
+      {
+        label: "@WTEDRadio.com",
+        href: "https://bsky.app/profile/wtedradio.com",
+        network: "bluesky",
+      },
+      {
+        label: "@WTEDRadio",
+        href: "https://www.instagram.com/wtedradio/",
+        network: "instagram",
+      },
+      {
+        label: "WTED Goose Radio",
+        href: "https://www.facebook.com/profile.php?id=100095630467139",
+        network: "facebook",
+      },
+    ],
+  },
+  {
+    id: "community",
+    title: "Wysteria Lane",
+    brandSrc: "/WL.png",
+    links: [
+      {
+        label: "@WysteriaLane.org",
+        href: "https://bsky.app/profile/wysterialane.org",
+        network: "bluesky",
+      },
+    ],
+  },
+  {
+    id: "archive",
+    title: "WTED Archives",
+    brandSrc: "/wted-sa-cropped-2.png",
+    platformOrder: ["x", "bluesky", "instagram", "facebook"],
+    links: [
+      {
+        label: "@WTEDArchives",
+        href: "https://x.com/WTEDArchives",
+        network: "x",
+      },
+      {
+        label: "@WTEDArchives",
+        href: "https://bsky.app/profile/WTEDArchives.bsky.social",
+        network: "bluesky",
+      },
+    ],
+  },
+] satisfies readonly FollowUsGroup[]
 
 export const LINKS = [
   { title: "Goose Website", href: "https://www.goosetheband.com/" },

@@ -79,7 +79,12 @@ export async function syncWtedRadioIds(
     }))
 
   const toRemoveUuids = allDb
-    .filter((r) => !apiIdSet.has(r.radio_id) && r.status !== "REMOVED")
+    .filter(
+      (r) =>
+        !apiIdSet.has(r.radio_id) &&
+        r.status !== "REMOVED" &&
+        r.status !== "skipped",
+    )
     .map((r) => r.uuid)
 
   const insertedRows: WtedRadioIdRow[] = []

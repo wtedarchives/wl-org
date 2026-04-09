@@ -77,6 +77,24 @@ export function useIsMinMd() {
   return match
 }
 
+/** Tailwind `lg` (1024px): true when viewport is below that width. */
+export function useIsBelowLg() {
+  const LG_BREAKPOINT = 1024
+  const [belowLg, setBelowLg] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${LG_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setBelowLg(window.innerWidth < LG_BREAKPOINT)
+    }
+    mql.addEventListener("change", onChange)
+    setBelowLg(window.innerWidth < LG_BREAKPOINT)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!belowLg
+}
+
 /** Tailwind `xl` (1280px) — home WTED cards: 3-column grid at/above; accordion below. */
 export function useIsMinXl() {
   const [match, setMatch] = React.useState(false)

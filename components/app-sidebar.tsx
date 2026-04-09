@@ -4,17 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  FaBluesky,
-  FaFacebook,
-  FaInstagram,
-  FaXTwitter,
-} from "react-icons/fa6"
-import {
-  ChevronDownIcon,
-  CircleDollarSignIcon,
-  Share2Icon,
-} from "lucide-react"
+import { CircleDollarSignIcon } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
 import { useAuth } from "@/components/auth-context"
@@ -31,33 +21,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { RadioSidebarSlot } from "@/components/persistent-radio"
 import { useIsBelowXl } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { AppSidebarNavItems } from "./app-sidebar-nav-items"
-import {
-  FOLLOW_US_LINKS,
-  SETLIST_ARCHIVE_SUB,
-  type FollowUsNetwork,
-} from "./app-sidebar.constants"
-
-function FollowUsPlatformIcon({ network }: { network: FollowUsNetwork }) {
-  const iconClass = "size-4 shrink-0"
-  switch (network) {
-    case "bluesky":
-      return <FaBluesky className={iconClass} aria-hidden />
-    case "instagram":
-      return <FaInstagram className={iconClass} aria-hidden />
-    case "facebook":
-      return <FaFacebook className={iconClass} aria-hidden />
-    case "x":
-      return <FaXTwitter className={iconClass} aria-hidden />
-  }
-}
+import { AppSidebarFollowUs } from "./app-sidebar-follow-us"
+import { SETLIST_ARCHIVE_SUB } from "./app-sidebar.constants"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
@@ -77,7 +47,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [linksOpen, setLinksOpen] = useState(false)
   const [merchOpen, setMerchOpen] = useState(false)
   const [publicationsOpen, setPublicationsOpen] = useState(false)
-  const [followUsOpen, setFollowUsOpen] = useState(false)
   const isBelowXl = useIsBelowXl()
 
   useEffect(() => {
@@ -153,50 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem
-                className="group/item"
-                data-open={followUsOpen || undefined}
-              >
-                <SidebarMenuButton
-                  type="button"
-                  className="group-data-[state=open]:bg-sidebar-accent"
-                  onClick={() => setFollowUsOpen((o) => !o)}
-                >
-                  <Share2Icon className="size-4" aria-hidden />
-                  <span>Follow Us</span>
-                  <ChevronDownIcon
-                    className={`ml-auto size-4 shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none ${followUsOpen ? "rotate-180" : ""}`}
-                  />
-                </SidebarMenuButton>
-                {followUsOpen && (
-                  <SidebarMenuSub>
-                    {FOLLOW_US_LINKS.map((item) => (
-                      <SidebarMenuSubItem key={item.href}>
-                        <SidebarMenuSubButton asChild>
-                          <a
-                            href={item.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex min-w-0 items-center gap-2"
-                          >
-                            <Image
-                              src={item.brandSrc}
-                              alt=""
-                              width={16}
-                              height={16}
-                              className="size-4 shrink-0 object-contain"
-                            />
-                            <FollowUsPlatformIcon network={item.network} />
-                            <span className="min-w-0 flex-1 text-left leading-snug">
-                              {item.label}
-                            </span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                )}
-              </SidebarMenuItem>
+              <AppSidebarFollowUs />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
