@@ -61,8 +61,6 @@ export function ProgramDirectorContent() {
               mix of studio and live recordings from the band&apos;s various
               catalogs as well as commentary, special event simulcasts, and
               other programming. Below is a list of shows and episodes on WTED.
-              Episodes with a published track listing link to the full episode
-              page.
             </p>
           </CardContent>
         </Card>
