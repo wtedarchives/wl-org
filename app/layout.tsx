@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: "WysteriaLane.org",
+    /** Child `metadata.title` values must omit " – WysteriaLane.org"; this template adds it. */
     template: "%s – WysteriaLane.org",
   },
   description: "WysteriaLane.org",

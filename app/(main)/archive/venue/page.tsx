@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import VenueArchivePageClient from "./venue-archive-page-client"
 
 export const metadata = {
-  title: "Venue – WysteriaLane.org",
+  title: "Venue",
 }
 
 export default function VenueArchivePage() {

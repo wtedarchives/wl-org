@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { getDefaultPlacementForSet } from "@/lib/setlist-default-placement"
 import { supabase } from "@/lib/supabase"
 import type {
   AdminSetlistEntryData,
@@ -19,19 +20,10 @@ export function useSetlistEntryForm(
   const [selectedSongName, setSelectedSongName] = useState("")
   const [selectedNewSongOption, setSelectedNewSongOption] = useState("N/A")
 
-  const getDefaultPlacement = (setName: string): string | null => {
-    if (!setName || setName === "--") return null
-    const mainSetMatch = setName.match(/^(?:Set )?(\d)$/)
-    if (mainSetMatch) return `Main Set ${mainSetMatch[1]}`
-    const encoreMatch = setName.match(/^E(\d)$/)
-    if (encoreMatch) return `Encore ${encoreMatch[1]}`
-    return null
-  }
-
   useEffect(() => {
     if (entry) {
       if (isNewEntry) {
-        const defaultPlacement = getDefaultPlacement(entry.entry_set || "")
+        const defaultPlacement = getDefaultPlacementForSet(entry.entry_set || "")
         const entryWithDefaults: AdminSetlistEntryData = {
           ...entry,
           entry_set: entry.entry_set || "--",
@@ -86,7 +78,7 @@ export function useSetlistEntryForm(
     if (!editedEntry) return
     const { name, value } = e.target
     if (name === "entry_set" && isNewEntry) {
-      const defaultPlacement = getDefaultPlacement(value)
+      const defaultPlacement = getDefaultPlacementForSet(value)
       setEditedEntry({
         ...editedEntry,
         [name]: value === "--" ? null : value,
@@ -146,6 +138,6 @@ export function useSetlistEntryForm(
     handleSongSelection,
     handleGuestSelection,
     handleSelectAllGooseMembers,
-    getDefaultPlacement,
+    getDefaultPlacement: getDefaultPlacementForSet,
   }
 }

@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import PersonnelArchivePageClient from "./personnel-archive-page-client"
 
 export const metadata = {
-  title: "Personnel – WysteriaLane.org",
+  title: "Personnel",
 }
 
 export default function DproPersonnelPage() {

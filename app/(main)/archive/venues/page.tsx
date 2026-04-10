@@ -3,7 +3,7 @@ import { VenuesContent } from "@/components/dpro/venues/venues-content"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 
 export const metadata = {
-  title: "Venues – WysteriaLane.org",
+  title: "Venues",
 }
 
 export default function DproVenuesPage() {

@@ -221,7 +221,6 @@ export function WtedEpisodeSetlistTable({
             onSongClick={(entry) =>
               router.push(getSongArchiveUrl(entry.song_id))
             }
-            showStatsTooltip={isDesktop}
           />
         </TableCell>
         <TableCell className="whitespace-nowrap text-center tabular-nums text-muted-foreground">

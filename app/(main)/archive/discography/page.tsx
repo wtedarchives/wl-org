@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import DiscographyArchivePageClient from "./discography-archive-page-client"
 
 export const metadata = {
-  title: "Discography – WysteriaLane.org",
+  title: "Discography",
 }
 
 export default function DiscographyPage() {

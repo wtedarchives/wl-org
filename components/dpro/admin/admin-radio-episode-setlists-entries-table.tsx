@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { getDefaultPlacementForSet } from "@/lib/setlist-default-placement"
 import { cn } from "@/lib/utils"
 
 export const EPISODE_SETLIST_NULL = "__none__"
@@ -39,6 +40,10 @@ function orderSelectValue(v: string | null) {
 function placementSelectValue(v: string | null) {
   return v === EPISODE_SETLIST_NULL || !v ? null : v
 }
+
+/** Overrides SelectTrigger’s default truncated SelectValue so labels show in full. */
+const episodeSetlistSelectTriggerClass =
+  "h-auto min-h-6 w-max max-w-none shrink-0 px-1.5 py-1 text-[0.65rem] leading-tight [&_svg]:size-3 [&_[data-slot=select-value]]:!flex-none [&_[data-slot=select-value]]:!overflow-visible [&_[data-slot=select-value]]:whitespace-nowrap"
 
 function EpisodeSetlistEntryTableRow({
   r,
@@ -103,15 +108,19 @@ function EpisodeSetlistEntryTableRow({
       <TableCell className="align-top py-1.5 px-2 text-xs break-words leading-tight">
         {r.showGroup ?? "—"}
       </TableCell>
-      <TableCell className="align-top py-1 px-1.5">
+      <TableCell className="align-top whitespace-nowrap py-1 px-1.5">
         <Select
           value={draftSet ?? EPISODE_SETLIST_NULL}
-          onValueChange={(v) => setDraftSet(setSelectValue(v))}
+          onValueChange={(v) => {
+            const next = setSelectValue(v)
+            setDraftSet(next)
+            setDraftPlacement(getDefaultPlacementForSet(next))
+          }}
           disabled={busy}
         >
           <SelectTrigger
             size="sm"
-            className="w-[5rem] px-1.5 text-[0.65rem] [&_svg]:size-3"
+            className={episodeSetlistSelectTriggerClass}
           >
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -128,7 +137,7 @@ function EpisodeSetlistEntryTableRow({
           </SelectContent>
         </Select>
       </TableCell>
-      <TableCell className="align-top py-1 px-1.5">
+      <TableCell className="align-top whitespace-nowrap py-1 px-1.5">
         <Select
           value={
             draftOrder != null ? String(draftOrder) : EPISODE_SETLIST_NULL
@@ -138,7 +147,7 @@ function EpisodeSetlistEntryTableRow({
         >
           <SelectTrigger
             size="sm"
-            className="w-[4rem] px-1.5 text-[0.65rem] [&_svg]:size-3"
+            className={episodeSetlistSelectTriggerClass}
           >
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -156,7 +165,7 @@ function EpisodeSetlistEntryTableRow({
           </SelectContent>
         </Select>
       </TableCell>
-      <TableCell className="align-top py-1 px-1.5">
+      <TableCell className="align-top whitespace-nowrap py-1 px-1.5">
         <Select
           value={draftPlacement ?? EPISODE_SETLIST_NULL}
           onValueChange={(v) =>
@@ -166,7 +175,7 @@ function EpisodeSetlistEntryTableRow({
         >
           <SelectTrigger
             size="sm"
-            className="w-[5.25rem] px-1.5 text-[0.65rem] [&_svg]:size-3"
+            className={episodeSetlistSelectTriggerClass}
           >
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -286,13 +295,13 @@ export function AdminRadioEpisodeSetlistsEntriesTable({
               <TableHead className="h-auto w-[4rem] py-1.5 pr-2 pl-2 text-xs leading-tight">
                 Group
               </TableHead>
-              <TableHead className="h-auto w-[5.25rem] py-1.5 pr-2 pl-2 text-xs leading-tight">
+              <TableHead className="h-auto w-auto min-w-0 whitespace-nowrap py-1.5 pr-2 pl-2 text-xs leading-tight">
                 Set
               </TableHead>
-              <TableHead className="h-auto w-[4.25rem] py-1.5 pr-2 pl-2 text-xs leading-tight">
+              <TableHead className="h-auto w-auto min-w-0 whitespace-nowrap py-1.5 pr-2 pl-2 text-xs leading-tight">
                 Order
               </TableHead>
-              <TableHead className="h-auto w-[5.5rem] py-1.5 pr-2 pl-2 text-xs leading-tight">
+              <TableHead className="h-auto w-auto min-w-0 whitespace-nowrap py-1.5 pr-2 pl-2 text-xs leading-tight">
                 Placement
               </TableHead>
               <TableHead className="h-auto w-[4.5rem] py-1.5 pr-1 pl-2 text-xs leading-tight text-right">

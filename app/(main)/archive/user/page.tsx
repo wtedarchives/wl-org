@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import ArchiveUserPageClient from "./archive-user-page-client"
 
 export const metadata = {
-  title: "User – WysteriaLane.org",
+  title: "User",
 }
 
 export default function UserProfilePage() {

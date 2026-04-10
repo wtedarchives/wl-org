@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import ListsArchivePageClient from "./lists-archive-page-client"
 
 export const metadata = {
-  title: "Lists – WysteriaLane.org",
+  title: "Lists",
 }
 
 export default function DproListsPage() {

@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
@@ -11,13 +10,6 @@ import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
 
 export function ProgramDirectorContent() {
   const { shows, loading, error } = useProgramDirectorData()
-
-  useEffect(() => {
-    document.title = "Program Director – WysteriaLane.org"
-    return () => {
-      document.title = ""
-    }
-  }, [])
 
   if (loading) {
     return <LoadingPageCard message="Loading program director data…" />

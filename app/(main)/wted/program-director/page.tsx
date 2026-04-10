@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { ProgramDirectorContent } from "@/components/wted/program-director-content"
 
 export const metadata: Metadata = {
-  title: "Program Director – WysteriaLane.org",
+  title: "Program Director",
   description:
     "WTED Radio shows and episodes with links to published track listings.",
 }

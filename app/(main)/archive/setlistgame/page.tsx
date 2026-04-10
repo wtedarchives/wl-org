@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import SetlistGameArchivePageClient from "./setlistgame-archive-page-client"
 
 export const metadata = {
-  title: "Setlist Game – WysteriaLane.org",
+  title: "Setlist Game",
 }
 
 export default function SetlistGamePage() {
