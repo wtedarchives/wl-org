@@ -3,6 +3,7 @@ import { BookOpenIcon } from "lucide-react"
 export const WTED_RADIO_SUB = [
   { title: "GORPs and Contributors", url: "/wted/gorps" },
   { title: "Shows and More", url: "/wted/shows" },
+  { title: "Program Director", url: "/wted/program-director" },
   { title: "About Us and FAQ", url: "/wted/about" },
 ] as const
 

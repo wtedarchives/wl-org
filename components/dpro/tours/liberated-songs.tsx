@@ -8,6 +8,7 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
 import { formatEntryLength } from "@/lib/setlist-utils"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface LiberatedSong {
@@ -101,6 +102,7 @@ export function LiberatedSongs({
           `,
           )
           .in("entry_show", showIds)
+          .neq("entry_song", INDEX_SKIP_SONG_IMPROV_JAM)
 
         if (error) throw error
 
@@ -265,7 +267,7 @@ export function LiberatedSongs({
                         </>
                       )}
                     </td>
-                    <td className="py-1.5 pl-2 text-muted-foreground text-xs whitespace-nowrap">
+                    <td className="py-1.5 px-2 text-muted-foreground text-xs whitespace-nowrap">
                       {song.last_show_date && (
                         <>
                           <span className="text-muted-foreground">LTP </span>

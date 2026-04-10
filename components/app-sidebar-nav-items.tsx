@@ -51,6 +51,12 @@ interface AppSidebarNavItemsProps {
   onFindClick: () => void
 }
 
+function isWtedSubItemActive(pathname: string, url: (typeof WTED_RADIO_SUB)[number]["url"]) {
+  if (pathname === url) return true
+  if (url === "/wted/program-director" && pathname === "/wted/episode") return true
+  return false
+}
+
 export function AppSidebarNavItems({
   wtedOpen,
   setWtedOpen,
@@ -111,7 +117,10 @@ export function AppSidebarNavItems({
           <SidebarMenuSub>
             {WTED_RADIO_SUB.map((item) => (
               <SidebarMenuSubItem key={item.title}>
-                <SidebarMenuSubButton asChild isActive={pathname === item.url}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isWtedSubItemActive(pathname, item.url)}
+                >
                   <Link href={item.url}>{item.title}</Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>

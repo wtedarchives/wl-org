@@ -10,13 +10,23 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   ClickableRadioTracksTable,
   NewDispositionDialog,
   type NewDispositionStatus,
   RemovedDispositionDialog,
 } from "@/components/dpro/admin/admin-radio-tables"
 
+type AdminRadioSection = "tracks" | "playlists"
+
 export function AdminRadio() {
+  const [section, setSection] = useState<AdminRadioSection>("tracks")
   const [newRows, setNewRows] = useState<WtedRadioIdRow[]>([])
   const [removedRows, setRemovedRows] = useState<WtedRadioIdRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -166,136 +176,174 @@ export function AdminRadio() {
 
   return (
     <div className="w-full space-y-4 xl:mx-auto xl:max-w-[1024px]">
-      <NewDispositionDialog
-        row={newDispositionRow}
-        open={newDispositionRow !== null}
-        onOpenChange={(nextOpen) => {
-          if (nextOpen) return
-          if (savingNewDisposition) return
-          setNewDispositionRow(null)
-        }}
-        onConfirm={confirmNewDisposition}
-        updating={savingNewDisposition}
-      />
-
-      <RemovedDispositionDialog
-        row={removedDispositionRow}
-        open={removedDispositionRow !== null}
-        onOpenChange={(nextOpen) => {
-          if (nextOpen) return
-          if (savingRemovedDisposition) return
-          setRemovedDispositionRow(null)
-        }}
-        onConfirmSkipped={confirmRemovedSkipped}
-        updating={savingRemovedDisposition}
-      />
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-md font-semibold">Radio request tracks</h2>
-          <p className="text-sm text-muted-foreground">
-            Compare Radio.co request tracks with{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              wted_radio_ids
-            </code>
-            . Rows in both are left unchanged.
-          </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            View
+          </label>
+          <Select
+            value={section}
+            onValueChange={(v) => setSection(v as AdminRadioSection)}
+          >
+            <SelectTrigger className="h-10 w-full min-w-[12rem] sm:w-[14rem]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="tracks">Tracks</SelectItem>
+              <SelectItem value="playlists">Playlists</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Button
-          type="button"
-          size="default"
-          className="min-h-11 w-full shrink-0 touch-manipulation sm:w-auto sm:min-h-10"
-          onClick={handleSync}
-          disabled={syncing || loading}
-        >
-          {syncing ? (
-            <>
-              <RefreshCwIcon className="mr-2 size-4 animate-spin" />
-              Syncing…
-            </>
-          ) : (
-            <>
-              <RefreshCwIcon className="mr-2 size-4" />
-              Sync from Radio.co
-            </>
-          )}
-        </Button>
       </div>
 
-      {syncBanner && (
-        <div
-          role="status"
-          className={`rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-out ${
-            syncBanner.kind === "error"
-              ? "border-destructive/50 bg-destructive/10 text-destructive"
-              : syncBanner.kind === "no-change"
-                ? "border-muted-foreground/25 bg-muted/40 text-muted-foreground"
-                : "border-primary/30 bg-primary/5 text-foreground"
-          }`}
-        >
-          {syncBanner.message}
-        </div>
-      )}
+      <div className="min-h-0 transition-opacity duration-200 ease-out">
+        {section === "tracks" ? (
+          <>
+            <NewDispositionDialog
+              row={newDispositionRow}
+              open={newDispositionRow !== null}
+              onOpenChange={(nextOpen) => {
+                if (nextOpen) return
+                if (savingNewDisposition) return
+                setNewDispositionRow(null)
+              }}
+              onConfirm={confirmNewDisposition}
+              updating={savingNewDisposition}
+            />
 
-      {error && !syncBanner && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive transition-all duration-200">
-          {error}
-        </div>
-      )}
+            <RemovedDispositionDialog
+              row={removedDispositionRow}
+              open={removedDispositionRow !== null}
+              onOpenChange={(nextOpen) => {
+                if (nextOpen) return
+                if (savingRemovedDisposition) return
+                setRemovedDispositionRow(null)
+              }}
+              onConfirmSkipped={confirmRemovedSkipped}
+              updating={savingRemovedDisposition}
+            />
 
-      <div className="flex flex-col gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">
-              NEW{" "}
-              <span className="font-normal text-muted-foreground">
-                ({loading ? "…" : newRows.length})
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            ) : (
-              <ClickableRadioTracksTable
-                listKind="new"
-                rows={newRows}
-                updatingUuid={updatingUuid}
-                onRowClick={(row) => {
-                  if (updatingUuid !== null) return
-                  setRemovedDispositionRow(null)
-                  setNewDispositionRow(row)
-                }}
-              />
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-md font-semibold">Radio request tracks</h2>
+                <p className="text-sm text-muted-foreground">
+                  Compare Radio.co request tracks with{" "}
+                  <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                    wted_radio_ids
+                  </code>
+                  . Rows in both are left unchanged.
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="default"
+                className="min-h-11 w-full shrink-0 touch-manipulation sm:w-auto sm:min-h-10"
+                onClick={handleSync}
+                disabled={syncing || loading}
+              >
+                {syncing ? (
+                  <>
+                    <RefreshCwIcon className="mr-2 size-4 animate-spin" />
+                    Syncing…
+                  </>
+                ) : (
+                  <>
+                    <RefreshCwIcon className="mr-2 size-4" />
+                    Sync from Radio.co
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {syncBanner && (
+              <div
+                role="status"
+                className={`rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-out ${
+                  syncBanner.kind === "error"
+                    ? "border-destructive/50 bg-destructive/10 text-destructive"
+                    : syncBanner.kind === "no-change"
+                      ? "border-muted-foreground/25 bg-muted/40 text-muted-foreground"
+                      : "border-primary/30 bg-primary/5 text-foreground"
+                }`}
+              >
+                {syncBanner.message}
+              </div>
             )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">
-              REMOVED{" "}
-              <span className="font-normal text-muted-foreground">
-                ({loading ? "…" : removedRows.length})
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            ) : (
-              <ClickableRadioTracksTable
-                listKind="removed"
-                rows={removedRows}
-                updatingUuid={updatingUuid}
-                onRowClick={(row) => {
-                  if (updatingUuid !== null) return
-                  setNewDispositionRow(null)
-                  setRemovedDispositionRow(row)
-                }}
-              />
+
+            {error && !syncBanner && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive transition-all duration-200">
+                {error}
+              </div>
             )}
-          </CardContent>
-        </Card>
+
+            <div className="mt-4 flex flex-col gap-4 pb-2">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">
+                    NEW{" "}
+                    <span className="font-normal text-muted-foreground">
+                      ({loading ? "…" : newRows.length})
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm text-muted-foreground">Loading…</p>
+                  ) : (
+                    <ClickableRadioTracksTable
+                      listKind="new"
+                      rows={newRows}
+                      updatingUuid={updatingUuid}
+                      onRowClick={(row) => {
+                        if (updatingUuid !== null) return
+                        setRemovedDispositionRow(null)
+                        setNewDispositionRow(row)
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">
+                    REMOVED{" "}
+                    <span className="font-normal text-muted-foreground">
+                      ({loading ? "…" : removedRows.length})
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <p className="text-sm text-muted-foreground">Loading…</p>
+                  ) : (
+                    <ClickableRadioTracksTable
+                      listKind="removed"
+                      rows={removedRows}
+                      updatingUuid={updatingUuid}
+                      onRowClick={(row) => {
+                        if (updatingUuid !== null) return
+                        setNewDispositionRow(null)
+                        setRemovedDispositionRow(row)
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <Card className="mt-4 border-border/60">
+            <CardHeader>
+              <CardTitle className="text-base">Playlists</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              <p>
+                Playlist management for Radio.co will appear here. This section
+                is not wired up yet.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

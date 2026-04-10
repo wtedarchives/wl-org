@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { formatEntryLength } from "@/lib/setlist-utils"
 
 interface LongestSongsProps {
@@ -77,6 +78,7 @@ export function LongestSongs({
           `,
           )
           .in("entry_show", showIds)
+          .neq("entry_song", INDEX_SKIP_SONG_IMPROV_JAM)
           .not("entry_length", "is", null)
           .order("entry_length", { ascending: false })
           .limit(8)

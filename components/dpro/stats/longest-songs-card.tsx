@@ -42,32 +42,30 @@ export function LongestSongsCard({
             No data to display for this year.
           </div>
         ) : (
-          <Table className="min-w-max w-max">
+          <Table className="min-w-full w-max max-w-none">
             <TableBody>
               {items.map((song, index) => (
                 <TableRow key={`${song.song}-${index}`}>
-                  <TableCell className="w-min shrink-0 py-1.5 pl-3">
+                  <TableCell className="whitespace-nowrap py-1.5 pl-3 pr-2 align-middle">
                     <Link
                       href={getSongArchiveUrl(song.song_id)}
-                      className="text-xs font-medium text-foreground hover:underline whitespace-nowrap"
+                      className="inline-block max-w-none text-xs font-medium whitespace-nowrap text-foreground hover:underline"
                     >
                       <SongDisplayName
                         song={song.song}
                         songDisplayName={song.song_displayname}
+                        className="max-w-none min-w-max whitespace-nowrap"
                       />
                     </Link>
                   </TableCell>
-                  <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2 text-center">
-                    <span className="inline-block size-0" aria-hidden />
-                  </TableCell>
-                  <TableCell className="w-min shrink-0 py-0.5 pl-0 pr-2">
+                  <TableCell className="whitespace-nowrap py-0.5 pr-1 text-center align-middle">
                     {song.category_artwork ? (
                       <Image
                         src={song.category_artwork}
                         alt=""
                         width={16}
                         height={16}
-                        className="size-5 shrink-0 rounded object-cover border border-border"
+                        className="mx-auto size-5 shrink-0 rounded object-cover border border-border"
                         unoptimized
                         onError={(e) => {
                           const el = e.target as HTMLImageElement
@@ -75,26 +73,26 @@ export function LongestSongsCard({
                         }}
                       />
                     ) : (
-                      <span className="inline-block size-4" aria-hidden />
+                      <span className="mx-auto inline-block size-5" aria-hidden />
                     )}
                   </TableCell>
-                  <TableCell className="py-1.5 pl-2 text-xs text-muted-foreground">
+                  <TableCell className="whitespace-nowrap py-1.5 pl-1 pr-2 text-xs text-muted-foreground align-middle">
                     {song.show_date && (
                       <>
                         {song.show_id ? (
                           <Link
                             href={getSetlistArchiveUrl(song.show_id)}
-                            className="font-medium text-foreground hover:underline"
+                            className="font-medium whitespace-nowrap text-foreground hover:underline"
                           >
                             {formatDate(song.show_date)}
                           </Link>
                         ) : (
-                          <span className="font-medium">
+                          <span className="font-medium whitespace-nowrap">
                             {formatDate(song.show_date)}
                           </span>
                         )}
                         {song.venue_location && (
-                          <span className="text-muted-foreground/70">
+                          <span className="whitespace-nowrap text-muted-foreground/70">
                             {" "}
                             {formatVenueLocationWithBrackets(song.venue_location)}
                           </span>
@@ -102,7 +100,7 @@ export function LongestSongsCard({
                       </>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap py-1.5 pl-2 text-xs text-muted-foreground">
+                  <TableCell className="whitespace-nowrap py-1.5 pr-3 text-right text-xs text-muted-foreground align-middle">
                     <span className="font-medium tabular-nums text-foreground">
                       {formatTime(song.entry_length)}
                     </span>

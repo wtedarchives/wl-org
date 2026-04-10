@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { supabase } from "@/lib/supabase"
 
 export interface NotPlayedSong {
@@ -135,6 +136,7 @@ export function useNotPlayedInTour(
           const songId = songRow?.song_id
           const showId = entry.entry_show
           if (!songId || !showId) continue
+          if (entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) continue
           if (!songShowCounts[songId]) {
             songShowCounts[songId] = {
               song: entry.entry_song ?? "",
