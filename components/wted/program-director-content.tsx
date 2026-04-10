@@ -56,7 +56,7 @@ export function ProgramDirectorContent() {
               >
                 WTED Goose Radio
               </a>{" "}
-              is an Internet streaming radio station that celebrates the band Goose as well as Goose-related projects
+              is a streaming radio station that celebrates the band Goose as well as Goose-related projects
               and forerunners like Vasudo, Great Blue, and Orebolo. It streams a
               mix of studio and live recordings from the band&apos;s various
               catalogs as well as commentary, special event simulcasts, and
