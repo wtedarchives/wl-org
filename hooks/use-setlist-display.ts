@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 import type { SetlistEntry, Show, ShowDate, GuestGroup } from "@/types/setlist"
 import { calculateShowPosition } from "@/lib/setlist-utils"
@@ -63,9 +63,7 @@ const GUEST_COLORS = [
 ]
 
 export function useGuestGroups(setlist: SetlistEntry[]): GuestGroup[] {
-  const [groups, setGroups] = useState<GuestGroup[]>([])
-
-  useEffect(() => {
+  return useMemo(() => {
     const seen = new Set<string>()
     const result: GuestGroup[] = []
     setlist.forEach((entry) => {
@@ -77,10 +75,8 @@ export function useGuestGroups(setlist: SetlistEntry[]): GuestGroup[] {
       const color = GUEST_COLORS[result.length % GUEST_COLORS.length]
       result.push({ color, guests: sorted })
     })
-    setGroups(result)
+    return result
   }, [setlist])
-
-  return groups
 }
 
 export function useHoverStates() {

@@ -114,9 +114,9 @@ export function ProgramDirectorContent() {
                           </span>
                         </Link>
                       ) : (
-                        <div className="flex min-h-11 items-center gap-2 py-1.5 pl-3 pr-2 text-xs font-normal text-muted-foreground sm:min-h-0">
+                        <div className="flex items-center gap-2 py-1 pl-3 pr-2 text-xs font-normal text-muted-foreground sm:min-h-0">
                           {ep.artwork?.trim() ? (
-                            <span className="relative size-7 shrink-0 overflow-hidden rounded border border-border opacity-90 sm:size-5">
+                            <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border opacity-90 sm:size-5">
                               <Image
                                 src={ep.artwork}
                                 alt=""

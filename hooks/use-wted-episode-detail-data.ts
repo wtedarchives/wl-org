@@ -17,6 +17,8 @@ export interface WtedEpisodeMeta {
   artwork: string | null
   host: string | null
   host_displayname: string | null
+  /** Public notes / blurb for the episode page (wted_episodes.description). */
+  description: string | null
 }
 
 export interface WtedEpisodeShowLabel {
@@ -68,6 +70,7 @@ function parseShowJoin(raw: Record<string, unknown>): {
   }
 }
 
+/** Radio IDs that have at least one `wted_episode_entries` row (episode column = radio_id). */
 async function entryIdsWithListingsForShow(
   showName: string,
 ): Promise<Set<string>> {
@@ -75,17 +78,18 @@ async function entryIdsWithListingsForShow(
   if (!supabase) return withListings
   const { data: eps, error: epsErr } = await supabase
     .from("wted_episodes")
-    .select("uuid, status")
+    .select("status, radio_id")
     .eq("show", showName)
   if (epsErr || !eps?.length) return withListings
-  const ids = eps
+  const radioIds = eps
     .filter((e) => e.status !== "skipped")
-    .map((e) => e.uuid)
-  if (ids.length === 0) return withListings
+    .map((e) => e.radio_id)
+    .filter((r): r is string => Boolean(r && String(r).trim() !== ""))
+  if (radioIds.length === 0) return withListings
   const { data: rows, error: entErr } = await supabase
     .from("wted_episode_entries")
     .select("episode")
-    .in("episode", ids)
+    .in("episode", radioIds)
   if (entErr || !rows) return withListings
   for (const r of rows) {
     if (r.episode) withListings.add(r.episode)
@@ -125,7 +129,7 @@ export function useWtedEpisodeDetailData(episodeId: string | undefined) {
         const { data: epRow, error: epErr } = await client
           .from("wted_episodes")
           .select(
-            "uuid, episode, display_name, order, show, artwork, host, host_displayname, status",
+            "uuid, episode, display_name, order, show, artwork, host, host_displayname, description, status, radio_id",
           )
           .eq("uuid", episodeId)
           .maybeSingle()
@@ -160,14 +164,16 @@ export function useWtedEpisodeDetailData(episodeId: string | undefined) {
         const withListings = await entryIdsWithListingsForShow(epRow.show)
         const { data: sibRows, error: sibErr } = await client
           .from("wted_episodes")
-          .select("uuid, episode, display_name, status, order")
+          .select("uuid, episode, display_name, status, order, radio_id")
           .eq("show", epRow.show)
 
         if (!cancelled && !sibErr && sibRows) {
           const siblingsSorted = sibRows
             .filter(
               (s) =>
-                s.status !== "skipped" && withListings.has(s.uuid),
+                s.status !== "skipped" &&
+                s.radio_id &&
+                withListings.has(String(s.radio_id)),
             )
             .map((s) => ({
               uuid: s.uuid,
@@ -181,14 +187,27 @@ export function useWtedEpisodeDetailData(episodeId: string | undefined) {
           setSiblings([])
         }
 
-        const { data: epEntries, error: eeErr } = await client
-          .from("wted_episode_entries")
-          .select("song, set, placement, order")
-          .eq("episode", episodeId)
-          .order("set", { ascending: true })
-          .order("order", { ascending: true })
+        const radioKey =
+          epRow.radio_id != null && String(epRow.radio_id).trim() !== "" ?
+            String(epRow.radio_id)
+          : null
 
-        if (eeErr) throw eeErr
+        let epEntries: {
+          song: string
+          set: string | null
+          placement: string | null
+          order: number | null
+        }[] = []
+        if (radioKey) {
+          const { data, error: eeErr } = await client
+            .from("wted_episode_entries")
+            .select("song, set, placement, order")
+            .eq("episode", radioKey)
+            .order("set", { ascending: true })
+            .order("order", { ascending: true })
+          if (eeErr) throw eeErr
+          epEntries = data ?? []
+        }
 
         if (!epEntries?.length) {
           if (!cancelled) setRows([])

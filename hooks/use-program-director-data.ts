@@ -10,6 +10,8 @@ export interface ProgramDirectorEpisode {
   display_name: string | null
   order: number | null
   artwork: string | null
+  /** `wted_episode_entries.episode` references this (Radio.co playlist id). */
+  radio_id: string | null
   hasEntries: boolean
 }
 
@@ -21,7 +23,8 @@ export interface ProgramDirectorShow {
 
 const PAGE = 1000
 
-async function fetchEpisodeUuidsWithEntries(): Promise<Set<string>> {
+/** Distinct `wted_episode_entries.episode` values (= `wted_episodes.radio_id`). */
+async function fetchRadioIdsWithEpisodeEntries(): Promise<Set<string>> {
   const ids = new Set<string>()
   if (!supabase) return ids
   let from = 0
@@ -59,7 +62,7 @@ export function useProgramDirectorData() {
     setError(false)
     try {
       const [withEntries, showsRes] = await Promise.all([
-        fetchEpisodeUuidsWithEntries(),
+        fetchRadioIdsWithEpisodeEntries(),
         supabase
           .from("wted_shows")
           .select("show, order")
@@ -70,7 +73,9 @@ export function useProgramDirectorData() {
 
       const episodesRes = await supabase
         .from("wted_episodes")
-        .select("uuid, episode, display_name, order, show, artwork, status")
+        .select(
+          "uuid, episode, display_name, order, show, artwork, status, radio_id",
+        )
 
       if (episodesRes.error) throw episodesRes.error
 
@@ -78,13 +83,18 @@ export function useProgramDirectorData() {
       for (const row of episodesRes.data ?? []) {
         if (row.status === "skipped") continue
         const list = byShow.get(row.show) ?? []
+        const rid =
+          row.radio_id != null && String(row.radio_id).trim() !== "" ?
+            String(row.radio_id)
+          : null
         list.push({
           uuid: row.uuid,
           episode: row.episode,
           display_name: row.display_name,
           order: row.order,
           artwork: row.artwork,
-          hasEntries: withEntries.has(row.uuid),
+          radio_id: rid,
+          hasEntries: rid != null && withEntries.has(rid),
         })
         byShow.set(row.show, list)
       }

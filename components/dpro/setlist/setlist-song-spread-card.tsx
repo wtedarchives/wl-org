@@ -15,32 +15,41 @@ interface SetlistSongSpreadCardProps {
   setlist: SetlistEntry[]
   hoveredCategory?: string | null
   onCategoryHover?: (category: string | null) => void
+  /**
+   * WTED episode playlist: count every row (no improv/jam or short-label exclusions,
+   * and repeated songs each count toward their category).
+   */
+  includeAllEpisodeEntries?: boolean
 }
 
 export function SetlistSongSpreadCard({
   setlist,
   hoveredCategory = null,
   onCategoryHover,
+  includeAllEpisodeEntries = false,
 }: SetlistSongSpreadCardProps) {
   const spread = useMemo((): CategorySpread[] => {
-    const filteredSetlist = setlist.filter((entry) => {
-      if (entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return false
-      const short = (entry.entry_short ?? "").toLowerCase().trim()
-      return !EXCLUDED_SHORTS.includes(short)
-    })
+    const source = includeAllEpisodeEntries
+      ? setlist
+      : setlist.filter((entry) => {
+          if (entry.entry_song === INDEX_SKIP_SONG_IMPROV_JAM) return false
+          const short = (entry.entry_short ?? "").toLowerCase().trim()
+          return !EXCLUDED_SHORTS.includes(short)
+        })
 
     const counts: Record<string, number> = {}
     const songsByCategory: Record<string, string[]> = {}
     const canonids: Record<string, number> = {}
     const seenSongs = new Set<string>()
 
-    for (const entry of filteredSetlist) {
+    for (const entry of source) {
       const category = entry.songs?.song_category ?? "undefined"
       const songKey = entry.entry_song
 
-      if (seenSongs.has(songKey)) continue
-
-      seenSongs.add(songKey)
+      if (!includeAllEpisodeEntries) {
+        if (seenSongs.has(songKey)) continue
+        seenSongs.add(songKey)
+      }
       counts[category] = (counts[category] ?? 0) + 1
 
       if (!songsByCategory[category]) {
@@ -67,7 +76,7 @@ export function SetlistSongSpreadCard({
         ),
       }))
       .sort((a, b) => b.count - a.count || a.canonid - b.canonid)
-  }, [setlist])
+  }, [setlist, includeAllEpisodeEntries])
 
   return (
     <SongSpreadDisplay

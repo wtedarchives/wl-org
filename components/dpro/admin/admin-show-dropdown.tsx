@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { getShowDisplayData } from "@/lib/utils/show-utils"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -34,6 +35,17 @@ interface AdminShowDropdownProps {
    * blocked by Radix inert/pointer behavior).
    */
   portalToBody?: boolean
+  /**
+   * When portaling: anchor the menu’s **left** edge to the trigger’s left edge
+   * (viewport coords). Use in wide modals so the panel doesn’t extend past the
+   * dialog’s left clipped edge. Ignored when `portalToBody` is false.
+   */
+  portalAlignTriggerStart?: boolean
+  /**
+   * When not portaling: `left` = align menu’s left edge to trigger; `right` =
+   * current behavior (menu’s right edge to trigger’s right).
+   */
+  menuAlign?: "left" | "right"
 }
 
 export function AdminShowDropdown({
@@ -48,8 +60,14 @@ export function AdminShowDropdown({
   selectedShow,
   triggerLabel = "Show",
   portalToBody = true,
+  portalAlignTriggerStart = false,
+  menuAlign = "right",
 }: AdminShowDropdownProps) {
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number
+    left?: number
+    right?: number
+  }>({ top: 0, right: 0 })
   const triggerRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -58,11 +76,21 @@ export function AdminShowDropdown({
   useEffect(() => {
     if (!portalToBody || !isOpen || !triggerRef.current) return
     const rect = triggerRef.current.getBoundingClientRect()
-    setDropdownPosition({
-      top: rect.bottom + 8,
-      right: window.innerWidth - rect.right,
-    })
-  }, [isOpen, portalToBody])
+    if (portalAlignTriggerStart) {
+      const margin = 8
+      const w = 320 // w-80
+      const left = Math.max(
+        margin,
+        Math.min(rect.left, window.innerWidth - w - margin),
+      )
+      setDropdownPosition({ top: rect.bottom + margin, left })
+    } else {
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [isOpen, portalToBody, portalAlignTriggerStart])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -162,21 +190,30 @@ export function AdminShowDropdown({
     </>
   )
 
+  /** Marks portaled panel so parent modals (e.g. Radix Dialog) can ignore it in outside-interaction handlers. */
   const dropdownPanel = (
     <div
       ref={dropdownRef}
+      data-admin-show-dropdown-panel=""
       className={
         portalToBody
-          ? "fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
-          : "absolute right-0 top-[calc(100%+0.5rem)] z-[200] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+          ? "fixed z-[200] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+          : cn(
+              "absolute top-[calc(100%+0.5rem)] z-[200] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg",
+              menuAlign === "left" ? "left-0" : "right-0",
+            )
       }
       style={
-        portalToBody
-          ? {
-              top: dropdownPosition.top,
-              right: dropdownPosition.right,
-            }
-          : undefined
+        !portalToBody ? undefined
+        : portalAlignTriggerStart ?
+          {
+            top: dropdownPosition.top,
+            left: dropdownPosition.left ?? 8,
+          }
+        : {
+            top: dropdownPosition.top,
+            right: dropdownPosition.right,
+          }
       }
     >
       {dropdownInner}

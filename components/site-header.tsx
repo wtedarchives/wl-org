@@ -126,7 +126,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     yearLabel != null
   const useProfileTrail = (pathname ?? "").startsWith("/archive/profile")
   const useSetlistTrail =
-    ((pathname ?? "") === "/archive/setlist" ||
+    (((pathname ?? "") === "/archive/setlist" ||
       (pathname ?? "").startsWith("/archive/setlist/") ||
       (pathname ?? "") === "/archive/setlistgame" ||
       (pathname ?? "") === "/archive/tours" ||
@@ -138,7 +138,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
       (pathname ?? "") === "/archive/venue" ||
       (pathname ?? "") === "/archive/lists" ||
       (pathname ?? "") === "/archive/discography" ||
-      (pathname ?? "").startsWith("/archive/discography/")) &&
+      (pathname ?? "").startsWith("/archive/discography/")) ||
+      (pathname ?? "") === "/wted/episode") &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride
@@ -224,8 +225,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" side="bottom">
-                        {breadcrumbs.slice(0, -1).map((item) => (
-                          <DropdownMenuItem key={item.href} asChild>
+                        {breadcrumbs.slice(0, -1).map((item, i) => (
+                          <DropdownMenuItem key={`${i}-${item.label}-${item.href}`} asChild>
                             {item.href ? (
                               <Link href={item.href}>{item.label}</Link>
                             ) : (
@@ -245,7 +246,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
                 </>
               ) : breadcrumbs.length > 1 && isDesktopContent ? (
                 breadcrumbs.map((item, i) => (
-                  <span key={item.href} className="contents">
+                  <span key={`${i}-${item.label}-${item.href}`} className="contents">
                     {i > 0 && <BreadcrumbSeparator />}
                     <BreadcrumbItem className="min-w-0 shrink">
                       {i === breadcrumbs.length - 1 ? (

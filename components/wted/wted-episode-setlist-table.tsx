@@ -1,9 +1,8 @@
 "use client"
 
 import type { ReactNode } from "react"
-import Image from "next/image"
 import Link from "next/link"
-import { MoveRight } from "lucide-react"
+import { useRouter } from "next/navigation"
 import {
   Table,
   TableBody,
@@ -12,52 +11,75 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 import type { WtedEpisodeTableRow } from "@/types/wted-episode"
-import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
+import { getPlacementIndexCellBg } from "@/components/dpro/setlist/display-setlist-table.constants"
 import {
   formatEntryLength,
   formatSetlistDate,
   getEncoreLabel,
-  getGuestColor,
-  getPlacementColor,
   shouldShowSetBreak,
 } from "@/lib/setlist-utils"
-import type { GuestGroup } from "@/types/setlist"
-import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
+import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
+import { SetlistEntrySongCell } from "@/components/dpro/setlist/setlist-entry-song-cell"
+import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import type { SetlistEntry } from "@/types/setlist"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
+import { wtedEpisodeShowGroupKey } from "@/lib/wted-episode-show-group"
 import { cn } from "@/lib/utils"
+import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 
 function WtedEpisodeSetlistTableHead({
   showGroupColumn,
+  showWtedColumn,
+  isDesktop,
 }: {
   showGroupColumn: boolean
+  showWtedColumn: boolean
+  isDesktop: boolean
 }) {
   return (
     <TableRow className="h-8 border-border/60 hover:bg-transparent">
-      <TableHead className="h-8 w-10 text-center text-xs text-muted-foreground">
+      <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">
         #
       </TableHead>
-      <TableHead className="h-8 min-w-[8rem] text-left text-xs text-muted-foreground">
+      <TableHead className="h-8 max-w-[470px] text-muted-foreground">
         Song
       </TableHead>
-      <TableHead className="h-8 text-center text-xs text-muted-foreground whitespace-nowrap">
+      <TableHead className="h-8 whitespace-nowrap text-center text-muted-foreground">
         Date
       </TableHead>
-      <TableHead className="h-8 text-left text-xs text-muted-foreground">
-        Location
-      </TableHead>
-      <TableHead className="h-8 text-center text-xs text-muted-foreground whitespace-nowrap">
+      <TableHead className="h-8 text-muted-foreground">Location</TableHead>
+      {showWtedColumn ?
+        <TableHead className="h-8 text-center text-muted-foreground">
+          {isDesktop ?
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-help">WTED</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                Use the icons below to request songs on WTED Goose Radio.
+              </TooltipContent>
+            </Tooltip>
+          : "WTED"}
+        </TableHead>
+      : null}
+      <TableHead className="h-8 text-center text-muted-foreground">
         Time
       </TableHead>
-      {showGroupColumn && (
-        <TableHead className="h-8 text-center text-xs text-muted-foreground whitespace-nowrap">
+      {showGroupColumn ?
+        <TableHead className="h-8 text-center text-muted-foreground">
           Group
         </TableHead>
-      )}
-      <TableHead className="h-8 text-left text-xs text-muted-foreground">
+      : null}
+      <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
         Personnel
       </TableHead>
     </TableRow>
@@ -66,20 +88,34 @@ function WtedEpisodeSetlistTableHead({
 
 export function WtedEpisodeSetlistTable({
   rows,
-  guestGroups,
+  hoveredCategory = null,
+  hoveredPerformanceYear = null,
+  hoveredShowGroupKey = null,
+  onWtedClick,
 }: {
   rows: WtedEpisodeTableRow[]
-  guestGroups: GuestGroup[]
+  /** When set, highlights matching song categories and dims others (song spread hover). */
+  hoveredCategory?: string | null
+  /** When set, highlights rows whose adjoining show date is in this year (performance spread hover). */
+  hoveredPerformanceYear?: string | null
+  /** When set, highlights rows whose adjoining show matches this normalized `show_group` (group spread hover). */
+  hoveredShowGroupKey?: string | null
+  /** Opens WTED request sheet (logged in) or login dialog (guest). */
+  onWtedClick?: (entry: SetlistEntry) => void
 }) {
+  const router = useRouter()
+  const isDesktop = useIsDesktopContentLayout()
   const showGroupColumn = rows.some(
     (r) => r.showGroup != null && r.showGroup !== "Goose",
   )
+  const showWtedColumn = rows.some((r) => !!r.setlistEntry.radio_id)
 
   const placements = new Set(
     rows.map((r) => r.wtedPlacement).filter((p): p is string => !!p?.length),
   )
   const hasSinglePlacementType = placements.size <= 1
-  const colSpan = showGroupColumn ? 7 : 6
+  const colSpan =
+    6 + (showWtedColumn ? 1 : 0) + (showGroupColumn ? 1 : 0)
 
   let displayNum = 0
 
@@ -99,11 +135,11 @@ export function WtedEpisodeSetlistTable({
           body.push(
             <TableRow
               key={`encore-${row.refId}-${index}`}
-              className="bg-destructive/15"
+              className="border-border/60 hover:bg-transparent"
             >
               <TableCell
                 colSpan={colSpan}
-                className="py-1 text-center text-xs font-medium text-foreground"
+                className="border-y border-border bg-gray-700 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
               >
                 {getEncoreLabel(row.wtedSet)}
               </TableCell>
@@ -120,11 +156,11 @@ export function WtedEpisodeSetlistTable({
         body.push(
           <TableRow
             key={`setbreak-${row.refId}-${index}`}
-            className="bg-muted/80"
+            className="border-border/60 hover:bg-transparent"
           >
             <TableCell
               colSpan={colSpan}
-              className="py-1 text-center text-xs font-medium text-muted-foreground"
+              className="border-y border-border bg-gray-800 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
             >
               Set Break
             </TableCell>
@@ -134,136 +170,125 @@ export function WtedEpisodeSetlistTable({
     }
 
     displayNum += 1
-    const placementColor = getPlacementColor(row.wtedPlacement ?? "")
+    const indexCellBg = getPlacementIndexCellBg(row.wtedPlacement ?? null)
+    const numberUsesPlacementColor = indexCellBg !== "transparent"
+    const entryCategory =
+      sl.song_category || sl.songs?.song_category || "undefined"
+    const d = row.showDate?.trim()
+    const yearPrefix = d && d.length >= 4 ? d.slice(0, 4) : ""
+    const rowYear = /^\d{4}$/.test(yearPrefix) ? yearPrefix : null
+    const yearMatches =
+      !!hoveredPerformanceYear &&
+      rowYear != null &&
+      rowYear === hoveredPerformanceYear
+    const rowGroupKey = wtedEpisodeShowGroupKey(row.showGroup)
+    const groupMatches =
+      !!hoveredShowGroupKey && rowGroupKey === hoveredShowGroupKey
+    const categoryHighlight =
+      !!hoveredCategory && entryCategory === hoveredCategory
+    const shouldHighlightRow =
+      categoryHighlight || yearMatches || groupMatches
+    const categoryDim = !!hoveredCategory && !categoryHighlight
+    const yearDim = !!hoveredPerformanceYear && !yearMatches
+    const groupDim = !!hoveredShowGroupKey && !groupMatches
+    const shouldDimRow = categoryDim || yearDim || groupDim
 
     body.push(
       <TableRow
         key={row.refId}
-        className="bg-background/70 hover:bg-muted/40 transition-colors"
+        className={cn(
+          "border-border/60 transition-opacity",
+          shouldHighlightRow && "bg-primary/20",
+          shouldDimRow && "opacity-10",
+        )}
       >
-        <TableCell className="relative w-10 py-0.5 text-center text-xs font-medium tabular-nums">
-          <span
-            className="absolute inset-0 z-0"
-            style={{ backgroundColor: placementColor }}
-            aria-hidden
+        <TableCell
+          className={cn(
+            "text-center tabular-nums",
+            numberUsesPlacementColor ? "text-white" : "text-muted-foreground",
+          )}
+          style={{
+            backgroundColor: numberUsesPlacementColor ?
+                indexCellBg
+              : undefined,
+          }}
+        >
+          {displayNum}
+        </TableCell>
+        <TableCell className="max-w-[470px]">
+          <SetlistEntrySongCell
+            entry={sl}
+            onSongClick={(entry) =>
+              router.push(getSongArchiveUrl(entry.song_id))
+            }
+            showStatsTooltip={isDesktop}
           />
-          <span
-            className={cn(
-              "relative z-[1]",
-              placementColor !== "transparent" ? "text-white" : "",
-            )}
-          >
-            {displayNum}
-          </span>
         </TableCell>
-        <TableCell className="py-0.5 align-middle">
-          <div className="flex min-w-0 items-center gap-1.5">
-            {sl.songs?.categories?.category_artwork?.trim() ? (
-              <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border">
-                <Image
-                  src={sl.songs.categories.category_artwork}
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="size-5 object-cover"
-                  unoptimized
-                />
-              </span>
-            ) : null}
-            <div className="min-w-0 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs font-medium">
-              <Link
-                href={getSongArchiveUrl(sl.song_id)}
-                className="text-foreground hover:underline"
-              >
-                <SongDisplayName
-                  song={sl.entry_song}
-                  songDisplayName={sl.songs?.song_displayname ?? null}
-                />
-              </Link>
-              {shouldShowSetlistEntryShort(sl.entry_song, sl.entry_short) && (
-                <span className="text-destructive">
-                  [{String(sl.entry_short)}]
-                </span>
-              )}
-              {sl.entry_segue ? (
-                <MoveRight
-                  className="inline size-3.5 shrink-0 text-destructive"
-                  aria-hidden
-                />
-              ) : null}
-            </div>
-          </div>
-        </TableCell>
-        <TableCell className="py-0.5 text-center text-xs whitespace-nowrap">
-          {row.showDate && row.showId ? (
+        <TableCell className="whitespace-nowrap text-center tabular-nums text-muted-foreground">
+          {row.showDate && row.showId ?
             <Link
               href={getSetlistArchiveUrl(row.showId)}
-              className="font-medium hover:underline"
+              className="font-medium text-foreground hover:underline"
             >
               {formatSetlistDate(row.showDate)}
             </Link>
-          ) : row.showDate ? (
+          : row.showDate ?
             formatSetlistDate(row.showDate)
-          ) : (
-            ""
-          )}
+          : ""}
         </TableCell>
-        <TableCell className="py-0.5 text-xs text-muted-foreground whitespace-nowrap">
-          {row.venueLocation ? (
-            row.venueId ? (
+        <TableCell className="whitespace-nowrap text-muted-foreground">
+          {row.venueLocation ?
+            row.venueId ?
               <Link
                 href={getVenueArchiveUrl(row.venueId)}
-                className="hover:underline text-foreground"
+                className="font-normal text-foreground hover:underline"
               >
                 {row.venueLocation}
               </Link>
-            ) : (
-              row.venueLocation
-            )
-          ) : (
-            ""
-          )}
+            : row.venueLocation
+          : ""}
         </TableCell>
-        <TableCell className="py-0.5 text-center text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-          {formatEntryLength(sl.entry_length) || ""}
+        {showWtedColumn ?
+          <TableCell className="text-center">
+            <SetlistEntryWtedCell
+              entry={sl}
+              onWtedClick={onWtedClick}
+              showTooltips={isDesktop}
+            />
+          </TableCell>
+        : null}
+        <TableCell className="text-center tabular-nums text-muted-foreground">
+          {formatEntryLength(sl.entry_length) ?? ""}
         </TableCell>
-        {showGroupColumn && (
-          <TableCell className="py-0.5 text-center text-xs whitespace-nowrap">
+        {showGroupColumn ?
+          <TableCell className="text-center text-muted-foreground">
             {row.showGroup ?? ""}
           </TableCell>
-        )}
-        <TableCell className="py-0.5 text-xs">
-          {sl.guests?.length ? (
-            <span className="flex flex-wrap gap-1">
-              {sl.guests.map((g) => (
-                <Link
-                  key={g.guest_id}
-                  href={getPersonnelArchiveUrl(g.guest_id)}
-                  className="inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium hover:underline"
-                  style={{
-                    borderColor: getGuestColor(sl, guestGroups),
-                  }}
-                >
-                  {g.guest_display_name}
-                </Link>
-              ))}
-            </span>
-          ) : (
-            ""
-          )}
+        : null}
+        <TableCell className="min-w-[400px] max-w-[600px]">
+          <SetlistEntryGuestsCell
+            entry={sl}
+            showTooltips={isDesktop}
+          />
         </TableCell>
       </TableRow>,
     )
   })
 
   return (
-    <div className="w-full min-w-0 overflow-x-auto rounded-lg border border-border/60">
-      <Table className="[&_td]:px-2 [&_th]:px-2 min-w-max">
-        <TableHeader>
-          <WtedEpisodeSetlistTableHead showGroupColumn={showGroupColumn} />
-        </TableHeader>
-        <TableBody>{body}</TableBody>
-      </Table>
-    </div>
+    <TooltipProvider delayDuration={0}>
+      <div className="w-full overflow-x-auto">
+        <Table className="[&_th]:py-1 [&_th]:px-2 [&_th]:align-middle [&_td]:py-0.5 [&_td]:px-2 [&_td]:align-middle">
+          <TableHeader>
+            <WtedEpisodeSetlistTableHead
+              showGroupColumn={showGroupColumn}
+              showWtedColumn={showWtedColumn}
+              isDesktop={isDesktop}
+            />
+          </TableHeader>
+          <TableBody>{body}</TableBody>
+        </Table>
+      </div>
+    </TooltipProvider>
   )
 }

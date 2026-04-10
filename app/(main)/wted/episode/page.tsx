@@ -5,7 +5,7 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { WtedEpisodePageClient } from "@/components/wted/wted-episode-page-client"
 
 export const metadata: Metadata = {
-  title: "Program Director – WysteriaLane.org",
+  title: "WTED Radio – Episode – WysteriaLane.org",
   description: "WTED Radio episode track listing.",
 }
 
