@@ -60,7 +60,7 @@ export function ProgramDirectorContent() {
               and forerunners like Vasudo, Great Blue, and Orebolo. It streams a
               mix of studio and live recordings from the band&apos;s various
               catalogs as well as commentary, special event simulcasts, and
-              other programming. Below is a list of shows and episodes on WTED.
+              other programming.
             </p>
           </CardContent>
         </Card>
