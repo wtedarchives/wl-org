@@ -40,6 +40,8 @@ export function AdminRadioEpisodeSetlistsPickerSection({
   loadingPicker,
   radioId,
   onPickEntry,
+  /** When false, the show menu stays in the dialog (required with modal dialogs). */
+  showDropdownPortalToBody = true,
 }: {
   allShows: AdminShowData[]
   showsLoading: boolean
@@ -55,6 +57,7 @@ export function AdminRadioEpisodeSetlistsPickerSection({
   loadingPicker: boolean
   radioId: string
   onPickEntry: (entry: SetlistPickerEntry) => void
+  showDropdownPortalToBody?: boolean
 }) {
   return (
     <section className="space-y-2 transition-opacity duration-200">
@@ -76,8 +79,9 @@ export function AdminRadioEpisodeSetlistsPickerSection({
           loadingProgress={loadingProgress}
           selectedShow={selectedShow}
           triggerLabel="Show"
-          portalToBody
-          portalAlignTriggerStart
+          portalToBody={showDropdownPortalToBody}
+          portalAlignTriggerStart={showDropdownPortalToBody}
+          menuAlign={showDropdownPortalToBody ? "right" : "left"}
         />
       </div>
 

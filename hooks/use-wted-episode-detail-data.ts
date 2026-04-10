@@ -7,6 +7,10 @@ import type { WtedEpisodeTableRow } from "@/types/wted-episode"
 import { mapSupabaseSetlistRowToEntry } from "@/lib/map-supabase-setlist-entry-row"
 import { WTED_EPISODE_SETLIST_ENTRY_SELECT } from "@/lib/wted-episode-setlist-select"
 import { compareWtedEpisodesByOrderThenDisplayName } from "@/lib/wted-episode-display-name"
+import {
+  parseWtedEpisodeHosts,
+  type WtedEpisodeHostEntry,
+} from "@/lib/wted-episode-host"
 
 export interface WtedEpisodeMeta {
   uuid: string
@@ -15,8 +19,8 @@ export interface WtedEpisodeMeta {
   order: number | null
   show: string
   artwork: string | null
-  host: string | null
-  host_displayname: string | null
+  /** Parsed from `wted_episodes.host` JSONB. */
+  hosts: WtedEpisodeHostEntry[]
   /** Public notes / blurb for the episode page (wted_episodes.description). */
   description: string | null
 }
@@ -129,7 +133,7 @@ export function useWtedEpisodeDetailData(episodeId: string | undefined) {
         const { data: epRow, error: epErr } = await client
           .from("wted_episodes")
           .select(
-            "uuid, episode, display_name, order, show, artwork, host, host_displayname, description, status, radio_id",
+            "uuid, episode, display_name, order, show, artwork, host, description, status, radio_id",
           )
           .eq("uuid", episodeId)
           .maybeSingle()
@@ -147,7 +151,16 @@ export function useWtedEpisodeDetailData(episodeId: string | undefined) {
         }
 
         if (cancelled) return
-        setEpisode(epRow as WtedEpisodeMeta)
+        setEpisode({
+          uuid: epRow.uuid,
+          episode: epRow.episode,
+          display_name: epRow.display_name,
+          order: epRow.order,
+          show: epRow.show,
+          artwork: epRow.artwork,
+          hosts: parseWtedEpisodeHosts(epRow.host),
+          description: epRow.description,
+        })
 
         const { data: showRow, error: showErr } = await client
           .from("wted_shows")

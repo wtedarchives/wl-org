@@ -205,26 +205,22 @@ export function AdminRadioEpisodeSetlistsDialog({
       getWtedEpisodeDisplayName(episode.episode, episode.display_name)
     : ""
 
-  const isPortaledShowMenuTarget = (target: EventTarget | null) =>
-    target instanceof Element &&
-    target.closest("[data-admin-show-dropdown-panel]") != null
+  /** Main scroll lives on #main-inset-scroll, not document.body — lock it while open. */
+  useEffect(() => {
+    if (!open) return
+    const main = document.getElementById("main-inset-scroll")
+    const prev = main?.style.overflow ?? ""
+    if (main) main.style.overflow = "hidden"
+    return () => {
+      if (main) main.style.overflow = prev
+    }
+  }, [open])
 
   return (
-    // Non-modal so portaled AdminShowDropdown (body) receives clicks/scroll; modal traps
-    // pointer-events on everything except the dialog layer, which breaks body-portaled UI.
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="flex max-h-[min(92vh,48rem)] max-w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl md:max-w-5xl"
-        onPointerDownOutside={(e) => {
-          if (isPortaledShowMenuTarget(e.target)) e.preventDefault()
-        }}
-        onInteractOutside={(e) => {
-          if (isPortaledShowMenuTarget(e.target)) e.preventDefault()
-        }}
-        onFocusOutside={(e) => {
-          if (isPortaledShowMenuTarget(e.target)) e.preventDefault()
-        }}
+        className="flex h-[90vh] max-w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl md:max-w-5xl"
       >
         <DialogHeader className="shrink-0 space-y-1 border-b px-4 py-3 sm:px-6">
           <DialogTitle className="text-base sm:text-lg">Episode setlist</DialogTitle>
@@ -241,54 +237,59 @@ export function AdminRadioEpisodeSetlistsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 sm:px-6">
-          {!radioId && episode ?
-            <p className="text-sm text-amber-700 dark:text-amber-400">
-              This episode has no{" "}
-              <code className="rounded bg-muted px-1 py-0.5 text-xs">radio_id</code>
-              . Add one in the database before attaching setlist entries.
-            </p>
-          : null}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="shrink-0 space-y-4 px-4 pt-3 sm:px-6">
+            {!radioId && episode ?
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                This episode has no{" "}
+                <code className="rounded bg-muted px-1 py-0.5 text-xs">radio_id</code>
+                . Add one in the database before attaching setlist entries.
+              </p>
+            : null}
 
-          {panelError ?
-            <p className="rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1.5 text-sm text-destructive transition-all duration-200">
-              {panelError}
-            </p>
-          : null}
+            {panelError ?
+              <p className="rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1.5 text-sm text-destructive transition-all duration-200">
+                {panelError}
+              </p>
+            : null}
 
-          <AdminRadioEpisodeSetlistsPickerSection
-            allShows={allShows}
-            showsLoading={showsLoading}
-            loadingProgress={loadingProgress}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            isDropdownOpen={isDropdownOpen}
-            onToggleDropdown={() => setIsDropdownOpen((o) => !o)}
-            filteredShows={filteredShows}
-            onShowSelect={handleShowPick}
-            selectedShow={selectedShow}
-            pickerEntries={pickerEntries}
-            loadingPicker={loadingPicker}
-            radioId={radioId}
-            onPickEntry={(pe) => void addEntry(pe)}
-          />
-
-          <section className="space-y-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Episode listing
-            </h3>
-            <AdminRadioEpisodeSetlistsEntriesTable
-              rows={rows}
-              loadingRows={loadingRows}
-              sets={sets}
-              setnums={setnums}
-              placements={placements}
-              savingUuid={savingUuid}
-              deletingUuid={deletingUuid}
-              onSaveRow={(id, f) => void saveRowFields(id, f)}
-              onDeleteRow={(id) => void deleteRow(id)}
+            <AdminRadioEpisodeSetlistsPickerSection
+              allShows={allShows}
+              showsLoading={showsLoading}
+              loadingProgress={loadingProgress}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              isDropdownOpen={isDropdownOpen}
+              onToggleDropdown={() => setIsDropdownOpen((o) => !o)}
+              filteredShows={filteredShows}
+              onShowSelect={handleShowPick}
+              selectedShow={selectedShow}
+              pickerEntries={pickerEntries}
+              loadingPicker={loadingPicker}
+              radioId={radioId}
+              onPickEntry={(pe) => void addEntry(pe)}
+              showDropdownPortalToBody={false}
             />
-          </section>
+          </div>
+
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 pb-3 sm:px-6">
+            <section className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Episode listing
+              </h3>
+              <AdminRadioEpisodeSetlistsEntriesTable
+                rows={rows}
+                loadingRows={loadingRows}
+                sets={sets}
+                setnums={setnums}
+                placements={placements}
+                savingUuid={savingUuid}
+                deletingUuid={deletingUuid}
+                onSaveRow={(id, f) => void saveRowFields(id, f)}
+                onDeleteRow={(id) => void deleteRow(id)}
+              />
+            </section>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

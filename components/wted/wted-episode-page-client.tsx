@@ -32,10 +32,6 @@ import { wtedEpisodeHasMultipleShowGroups } from "@/lib/wted-episode-show-group"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
 import type { SetlistEntry } from "@/types/setlist"
 
-function isHttpUrl(s: string): boolean {
-  return /^https?:\/\//i.test(s.trim())
-}
-
 export function WtedEpisodePageClient() {
   const router = useRouter()
   const { user } = useAuth()
@@ -188,8 +184,7 @@ export function WtedEpisodePageClient() {
   )
   const showName = wtedShow?.show ?? episode.show
   const description = episode.description?.trim() ?? ""
-  const hostRaw = episode.host?.trim() ?? ""
-  const hostDisplay = episode.host_displayname?.trim() ?? ""
+  const hosts = episode.hosts
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
@@ -216,69 +211,71 @@ export function WtedEpisodePageClient() {
           </div>
 
           {siblings.length > 1 ?
-            <div className="flex max-w-md flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-              <span className="shrink-0 text-xs font-medium text-muted-foreground">
+            <div className="w-max max-w-full">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Episode
-              </span>
-              <Select
-                value={episode.uuid}
-                onValueChange={(id) =>
-                  router.push(getWtedEpisodeUrl(id), { scroll: false })
-                }
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="h-8 min-w-[10rem] max-w-[min(100%,20rem)] border-border text-xs font-medium"
+              </h2>
+              <div className="mt-2">
+                <Select
+                  value={episode.uuid}
+                  onValueChange={(id) =>
+                    router.push(getWtedEpisodeUrl(id), { scroll: false })
+                  }
                 >
-                  <SelectValue placeholder="Episode" />
-                </SelectTrigger>
-                <SelectContent>
-                  {siblings.map((s) => (
-                    <SelectItem key={s.uuid} value={s.uuid} className="text-xs">
-                      {getWtedEpisodeDisplayName(s.episode, s.display_name)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectTrigger
+                    size="sm"
+                    className="h-auto min-h-8 w-max max-w-full shrink-0 border-border px-2 py-1 text-xs font-medium [&_[data-slot=select-value]]:!flex-none [&_[data-slot=select-value]]:!overflow-visible [&_[data-slot=select-value]]:whitespace-nowrap"
+                  >
+                    <SelectValue placeholder="Episode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {siblings.map((s) => (
+                      <SelectItem
+                        key={s.uuid}
+                        value={s.uuid}
+                        className="text-xs"
+                      >
+                        {getWtedEpisodeDisplayName(s.episode, s.display_name)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           : null}
 
-          {(hostDisplay || hostRaw) || description ?
+          {(hosts.length > 0) || description ?
             <Separator />
           : null}
 
-          {hostDisplay || hostRaw ?
-            <dl className="grid gap-2 text-sm">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <dt className="shrink-0 text-muted-foreground">Host</dt>
-                <dd className="m-0 flex min-w-0 flex-wrap items-center gap-2 font-medium text-foreground">
-                  {hostDisplay ?
-                    <span className="text-sm font-normal">{hostDisplay}</span>
-                  : null}
-                  {hostRaw ?
-                    isHttpUrl(hostRaw) ?
-                      <a
-                        href={hostRaw}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-primary underline-offset-4 hover:underline hover:opacity-90"
-                      >
-                        {hostRaw}
-                      </a>
-                    : (
-                      <span className="inline-flex max-w-full items-center rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
-                        {hostRaw}
+          {hosts.length > 0 ?
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {hosts.length > 1 ? "Hosts" : "Host"}
+              </h2>
+              <ul className="m-0 mt-2 list-none space-y-2 p-0 font-medium text-foreground">
+                {hosts.map((h, i) => (
+                  <li
+                    key={`${h.name}-${h.handle}-${i}`}
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    {h.name ?
+                      <span className="text-sm font-normal">{h.name}</span>
+                    : null}
+                    {h.handle ?
+                      <span className="inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
+                        {h.handle}
                       </span>
-                    )
-                  : null}
-                </dd>
-              </div>
-            </dl>
+                    : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
           : null}
 
           {description ?
             <>
-              {hostDisplay || hostRaw ?
+              {hosts.length > 0 ?
                 <Separator />
               : null}
               <div>
