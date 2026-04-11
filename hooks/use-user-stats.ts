@@ -689,6 +689,7 @@ export function useUserStats(effectiveUserId: string | null) {
               "Set 3 Opener",
               "Set 4 Opener",
               "Set 5 Opener",
+              "Set 6 Opener",
             ],
             setSetOpeners,
             setLoadingSetOpeners
@@ -703,6 +704,7 @@ export function useUserStats(effectiveUserId: string | null) {
               "Set 3 Closer",
               "Set 4 Closer",
               "Set 5 Closer",
+              "Set 6 Closer",
             ],
             setSetClosers,
             setLoadingSetClosers

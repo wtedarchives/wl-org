@@ -69,31 +69,38 @@ export function ActualSetlistCard({
                 key={setId}
                 className="rounded-md border border-border overflow-hidden"
               >
-                <div className="px-2 py-1 bg-muted/60">
-                  <span className="text-xs font-medium">
+                <div className="grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1 bg-muted/60 min-h-8">
+                  <span className="min-w-0 text-xs font-medium">
                     {getSetDisplayName(setId)}
                   </span>
+                  <div className="flex shrink-0 justify-end" />
                 </div>
                 <div className="space-y-0.5 p-2">
                   {entries.map((entry, index) => (
                     <div
                       key={entry.entry_id}
-                      className="flex items-center gap-2 rounded-md py-0.5 px-2 hover:bg-muted/40 transition-colors"
+                      className="flex items-center gap-2 rounded-md py-0.5 px-2 transition-colors hover:bg-muted/40"
                     >
-                      <span
-                        className="shrink-0 text-xs text-white px-1.5 py-0.5 rounded font-medium"
-                        style={{
-                          backgroundColor: getPlacementColor(entry.entry_placement),
-                        }}
-                      >
-                        {index + 1}
-                      </span>
-                      <span className="text-xs font-medium truncate min-w-0">
-                        <SongDisplayName
-                          song={entry.entry_song}
-                          songDisplayName={entrySongDisplayName(entry)}
-                        />
-                      </span>
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <span
+                          className="shrink-0 text-xs text-white px-1.5 py-0.5 rounded font-medium"
+                          style={{
+                            backgroundColor: getPlacementColor(entry.entry_placement),
+                          }}
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="min-w-0 truncate text-xs font-medium">
+                          <SongDisplayName
+                            song={entry.entry_song}
+                            songDisplayName={entrySongDisplayName(entry)}
+                          />
+                        </span>
+                      </div>
+                      <div
+                        className="flex w-11 shrink-0 items-center justify-end"
+                        aria-hidden={true}
+                      />
                     </div>
                   ))}
                 </div>

@@ -18,6 +18,8 @@ export interface UserSlotShowData {
   Set_4_Closer: UserSongEntryWithId[] | null
   Set_5_Opener: UserSongEntryWithId[] | null
   Set_5_Closer: UserSongEntryWithId[] | null
+  Set_6_Opener: UserSongEntryWithId[] | null
+  Set_6_Closer: UserSongEntryWithId[] | null
   Encore_1: UserSongEntryWithId[] | null
   Encore_2: UserSongEntryWithId[] | null
   Encore_3: UserSongEntryWithId[] | null

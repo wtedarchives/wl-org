@@ -84,16 +84,16 @@ export function ProgramDirectorContent() {
                       {ep.hasEntries ? (
                         <Link
                           href={getWtedEpisodeUrl(ep.uuid)}
-                          className="flex min-h-11 items-center gap-2 py-1.5 pl-3 pr-2 text-xs font-medium text-foreground hover:underline sm:min-h-0"
+                          className="flex items-center gap-2 py-1 pl-3 pr-2 text-xs font-medium text-foreground hover:underline"
                         >
                           {ep.artwork?.trim() ? (
-                            <span className="relative size-7 shrink-0 overflow-hidden rounded border border-border sm:size-5">
+                            <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border sm:size-5">
                               <Image
                                 src={ep.artwork}
                                 alt=""
                                 width={28}
                                 height={28}
-                                className="size-7 object-cover sm:size-5"
+                                className="size-5 object-cover sm:size-5"
                                 unoptimized
                               />
                             </span>
@@ -114,7 +114,7 @@ export function ProgramDirectorContent() {
                                 alt=""
                                 width={28}
                                 height={28}
-                                className="size-7 object-cover sm:size-5"
+                                className="size-5 object-cover sm:size-5"
                                 unoptimized
                               />
                             </span>

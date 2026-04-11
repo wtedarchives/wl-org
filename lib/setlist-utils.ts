@@ -96,14 +96,16 @@ export function getPlacementColor(placement: string | null | undefined): string 
     placement === "Set 2 Opener" ||
     placement === "Set 3 Opener" ||
     placement === "Set 4 Opener" ||
-    placement === "Set 5 Opener"
+    placement === "Set 5 Opener" ||
+    placement === "Set 6 Opener"
   )
     return "#10b981"
   if (
     placement === "Set 2 Closer" ||
     placement === "Set 3 Closer" ||
     placement === "Set 4 Closer" ||
-    placement === "Set 5 Closer"
+    placement === "Set 5 Closer" ||
+    placement === "Set 6 Closer"
   )
     return "#3b82f6"
   if (placement === "Encore 1") return "#be123c"
@@ -249,10 +251,12 @@ export function calculateRarity(
   return Math.round(percentage) + "%"
 }
 
-/** Main sets only (1–5); encores E1, E2, E3 are not main. */
+/** Main sets only (numeric set id); encores E1, E2, E3 are not main. */
 export function isMainSet(set: string | null | undefined): boolean {
   if (!set) return false
-  return ["1", "2", "3", "4", "5"].includes(String(set))
+  const s = String(set).trim()
+  if (!/^\d+$/.test(s)) return false
+  return Number.parseInt(s, 10) >= 1
 }
 
 /** Show Set Break bar between two different main sets (e.g. Set 1 → Set 2). */

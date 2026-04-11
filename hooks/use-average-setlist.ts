@@ -543,6 +543,7 @@ export function useAverageSetlist(
           else if (set === "3") placement = "Set 3"
           else if (set === "4") placement = "Set 4"
           else if (set === "5") placement = "Set 5"
+          else if (set === "6") placement = "Set 6"
           else if (set === "E1") placement = "Encore 1"
           else if (set === "E2") placement = "Encore 2"
           else if (set === "E3") placement = "Encore 3"

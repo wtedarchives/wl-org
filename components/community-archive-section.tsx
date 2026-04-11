@@ -20,8 +20,8 @@ import { ShowsTableCard } from "@/components/home-stats-column/shows-table-card"
 
 const SETLIST_ARCHIVE_AUTO_SECTION_ORDER = [
   "last-5",
-  "next-5",
   "most-recent",
+  "next-5",
   "this-day",
 ] as const
 
@@ -75,7 +75,7 @@ function SetlistArchiveAccordion() {
   } = useShowsData()
 
   const isMinMd = useIsMinMd()
-  const [openSection, setOpenSection] = useState<string>("most-recent")
+  const [openSection, setOpenSection] = useState<string>("last-5")
   const [userControlledAccordion, setUserControlledAccordion] = useState(false)
   const staggerOpenRef = useRef<number | null>(null)
 
@@ -156,6 +156,17 @@ function SetlistArchiveAccordion() {
           />
         </AccordionContent>
       </AccordionItem>
+      <AccordionItem value="most-recent" className="border-0 border-b border-wl-dark-grey/50">
+        <AccordionTrigger className="bg-black/30">
+          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
+            <span>Most Recent Show</span>
+            <Music className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+          </span>
+        </AccordionTrigger>
+        <AccordionContent forceMount>
+          <MostRecentShowCard hideHeader />
+        </AccordionContent>
+      </AccordionItem>
       <AccordionItem value="next-5" className="border-0 border-b border-wl-dark-grey/50">
         <AccordionTrigger className="bg-black/30">
           <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
@@ -170,17 +181,6 @@ function SetlistArchiveAccordion() {
             loading={loadingUpcoming}
             hideHeader
           />
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="most-recent" className="border-0 border-b border-wl-dark-grey/50">
-        <AccordionTrigger className="bg-black/30">
-          <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-1">
-            <span>Most Recent Show</span>
-            <Music className="size-4 shrink-0 text-wl-white/80" aria-hidden />
-          </span>
-        </AccordionTrigger>
-        <AccordionContent forceMount>
-          <MostRecentShowCard hideHeader />
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="this-day" className="border-0">

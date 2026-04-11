@@ -6,10 +6,12 @@ export const PLACEMENT_COLORS: Record<string, string> = {
   "Set 3 Opener": "#10b981",
   "Set 4 Opener": "#10b981",
   "Set 5 Opener": "#10b981",
+  "Set 6 Opener": "#10b981",
   "Set 2 Closer": "#3b82f6",
   "Set 3 Closer": "#3b82f6",
   "Set 4 Closer": "#3b82f6",
   "Set 5 Closer": "#3b82f6",
+  "Set 6 Closer": "#3b82f6",
   "Encore 1": "#be123c",
   "Encore 2": "#f43f5e",
   "Encore 3": "#f43f5e",
@@ -18,6 +20,7 @@ export const PLACEMENT_COLORS: Record<string, string> = {
   "Main Set 3": "#4c4c4c",
   "Main Set 4": "#4c4c4c",
   "Main Set 5": "#4c4c4c",
+  "Main Set 6": "#4c4c4c",
 }
 
 /** Format interval/length string (e.g. "00:05:30" -> "5:30"). */

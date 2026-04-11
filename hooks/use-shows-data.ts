@@ -44,6 +44,21 @@ interface ShowResponse {
   }
 }
 
+/** YYYY-MM-DD in the user's local timezone (same basis as "This Day in Goose History"). */
+function localCalendarDateString(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${y}-${m}-${day}`
+}
+
+/** Start of the next local calendar day as YYYY-MM-DD (exclusive upper bound for "past" shows). */
+function localTomorrowDateString(): string {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  return localCalendarDateString(d)
+}
+
 export function useShowsData() {
   const { user } = useAuth()
   const [recentShows, setRecentShows] = useState<HomeShow[]>([])
@@ -105,9 +120,7 @@ export function useShowsData() {
     const client = supabase
     const fetchRecentShows = async () => {
       try {
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        const tomorrowString = tomorrow.toISOString().split("T")[0]
+        const tomorrowString = localTomorrowDateString()
 
         const { data, error } = await client
           .from("shows")
@@ -175,9 +188,7 @@ export function useShowsData() {
     const client = supabase
     const fetchUpcomingShows = async () => {
       try {
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        const tomorrowString = tomorrow.toISOString().split("T")[0]
+        const tomorrowString = localTomorrowDateString()
 
         const { data, error } = await client
           .from("shows")
@@ -245,9 +256,9 @@ export function useShowsData() {
     const client = supabase
     const fetchHistoricalShows = async () => {
       try {
-        const today = new Date()
-        const month = String(today.getMonth() + 1).padStart(2, "0")
-        const day = String(today.getDate()).padStart(2, "0")
+        const todayStr = localCalendarDateString(new Date())
+        const month = todayStr.slice(5, 7)
+        const day = todayStr.slice(8, 10)
 
         const startDate = `1900-${month}-${day}`
         const endDate = `2099-${month}-${day}`
@@ -343,9 +354,7 @@ export function useShowsData() {
     const client = supabase
     const fetchMostRecentShow = async () => {
       try {
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        const tomorrowString = tomorrow.toISOString().split("T")[0]
+        const tomorrowString = localTomorrowDateString()
 
         const { data, error } = await client
           .from("shows")

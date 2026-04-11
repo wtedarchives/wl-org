@@ -211,11 +211,11 @@ export function WtedEpisodePageClient() {
           </div>
 
           {siblings.length > 1 ?
-            <div className="w-max max-w-full">
+            <div className="min-w-0 w-fit max-w-full">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Episode
               </h2>
-              <div className="mt-2">
+              <div className="mt-2 min-w-0 w-fit max-w-full">
                 <Select
                   value={episode.uuid}
                   onValueChange={(id) =>
@@ -224,7 +224,7 @@ export function WtedEpisodePageClient() {
                 >
                   <SelectTrigger
                     size="sm"
-                    className="h-auto min-h-8 w-max max-w-full shrink-0 border-border px-2 py-1 text-xs font-medium [&_[data-slot=select-value]]:!flex-none [&_[data-slot=select-value]]:!overflow-visible [&_[data-slot=select-value]]:whitespace-nowrap"
+                    className="h-auto min-h-8 min-w-0 max-w-full border-border px-2 py-1 text-xs font-medium"
                   >
                     <SelectValue placeholder="Episode" />
                   </SelectTrigger>

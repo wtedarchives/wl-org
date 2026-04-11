@@ -44,13 +44,15 @@ export function SetlistDisplay({
           placement === "Set 2 Opener" ||
           placement === "Set 3 Opener" ||
           placement === "Set 4 Opener" ||
-          placement === "Set 5 Opener"
+          placement === "Set 5 Opener" ||
+          placement === "Set 6 Opener"
         const isCloser =
           placement === "Set 1 Closer" ||
           placement === "Set 2 Closer" ||
           placement === "Set 3 Closer" ||
           placement === "Set 4 Closer" ||
-          placement === "Set 5 Closer"
+          placement === "Set 5 Closer" ||
+          placement === "Set 6 Closer"
         const isEncore =
           placement === "Encore 1" ||
           placement === "Encore 2" ||

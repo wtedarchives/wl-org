@@ -20,6 +20,7 @@ const SET_OPENERS = [
   "Set 3 Opener",
   "Set 4 Opener",
   "Set 5 Opener",
+  "Set 6 Opener",
 ]
 const SET_CLOSERS = [
   "Set 1 Closer",
@@ -27,6 +28,7 @@ const SET_CLOSERS = [
   "Set 3 Closer",
   "Set 4 Closer",
   "Set 5 Closer",
+  "Set 6 Closer",
 ]
 const ENCORES = ["Encore 1", "Encore 2", "Encore 3"]
 

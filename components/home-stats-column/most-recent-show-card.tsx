@@ -26,14 +26,16 @@ function getPlacementColor(placement: string | null): string {
     placement === "Set 2 Opener" ||
     placement === "Set 3 Opener" ||
     placement === "Set 4 Opener" ||
-    placement === "Set 5 Opener"
+    placement === "Set 5 Opener" ||
+    placement === "Set 6 Opener"
   )
     return "#10b981"
   if (
     placement === "Set 2 Closer" ||
     placement === "Set 3 Closer" ||
     placement === "Set 4 Closer" ||
-    placement === "Set 5 Closer"
+    placement === "Set 5 Closer" ||
+    placement === "Set 6 Closer"
   )
     return "#3b82f6"
   if (placement === "Encore 1") return "#be123c"

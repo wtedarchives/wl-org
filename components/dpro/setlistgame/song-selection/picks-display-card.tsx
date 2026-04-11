@@ -3,6 +3,7 @@
 import { X, ChevronUp, ChevronDown, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 import type { SongPick, SetlistEntry } from "./types"
 import {
   getPlacementColor,
@@ -43,6 +44,8 @@ export function PicksDisplayCard({
     ? getAllUniqueSets(songPicks, actualSetlist)
     : getUniqueSets(songPicks)
 
+  const resultsGridLayout = viewMode && show_scored
+
   if (songPicks.length === 0 && !(viewMode && show_scored && actualSetlist.length > 0)) {
     return (
       <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
@@ -67,27 +70,41 @@ export function PicksDisplayCard({
         <div className="space-y-2">
           {uniqueSets.map((setId) => (
             <div key={setId} className="rounded-md border border-border overflow-hidden">
-              <div className="flex justify-between items-center px-2 py-1 bg-muted/60">
-                <span className="text-xs font-medium">{getSetDisplayName(setId)}</span>
-                {!viewMode && (
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    onClick={() => onRemoveSet(setId)}
-                    className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="size-3.5" />
-                    <span className="sr-only">Remove set</span>
-                  </Button>
-                )}
-              </div>
+              {resultsGridLayout ? (
+                <div className="grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1 bg-muted/60 min-h-8">
+                  <span className="min-w-0 text-xs font-medium">
+                    {getSetDisplayName(setId)}
+                  </span>
+                  <div className="flex shrink-0 justify-end" />
+                </div>
+              ) : (
+                <div className="flex min-h-8 items-center justify-between gap-2 px-2 py-1 bg-muted/60">
+                  <span className="min-w-0 text-xs font-medium">
+                    {getSetDisplayName(setId)}
+                  </span>
+                  {!viewMode && (
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => onRemoveSet(setId)}
+                      className="h-6 w-6 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="size-3.5" />
+                      <span className="sr-only">Remove set</span>
+                    </Button>
+                  )}
+                </div>
+              )}
               <div className="space-y-0.5 p-2">
                 {getSongsForSet(songPicks, setId).map((pick, index) => (
                   <div
                     key={pick.id}
-                    className="flex justify-between items-center rounded-md py-0.5 px-2 hover:bg-muted/40 transition-colors"
+                    className={cn(
+                      "flex items-center gap-2 rounded-md py-0.5 px-2 transition-colors hover:bg-muted/40",
+                      resultsGridLayout ? "" : "justify-between"
+                    )}
                   >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
                       <span
                         className="shrink-0 text-xs text-white px-1.5 py-0.5 rounded font-medium"
                         style={{ backgroundColor: getPlacementColor(pick.placement) }}
@@ -118,7 +135,7 @@ export function PicksDisplayCard({
                         )}
                     </div>
                     {!viewMode ? (
-                      <div className="flex items-center gap-0.5 shrink-0">
+                      <div className="flex shrink-0 items-center gap-0.5">
                         <Button
                           variant="ghost"
                           size="icon-xs"
@@ -150,16 +167,19 @@ export function PicksDisplayCard({
                           <span className="sr-only">Remove</span>
                         </Button>
                       </div>
-                    ) : (
-                      show_scored &&
-                      (pick.result !== undefined || pick.score !== undefined) && (
-                        <TooltipContainer
-                          result={pick.result}
-                          score={pick.score ?? 0}
-                          pick={pick}
-                        />
-                      )
-                    )}
+                    ) : resultsGridLayout ? (
+                      <div className="flex w-11 shrink-0 items-center justify-end">
+                        {pick.result !== undefined || pick.score !== undefined ? (
+                          <TooltipContainer
+                            result={pick.result}
+                            score={pick.score ?? 0}
+                            pick={pick}
+                          />
+                        ) : (
+                          <span className="inline-block size-5 shrink-0" aria-hidden />
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>

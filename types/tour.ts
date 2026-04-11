@@ -60,6 +60,8 @@ export interface SlotShowData {
   Set_4_Closer: SongEntryWithId[] | null
   Set_5_Opener: SongEntryWithId[] | null
   Set_5_Closer: SongEntryWithId[] | null
+  Set_6_Opener: SongEntryWithId[] | null
+  Set_6_Closer: SongEntryWithId[] | null
   Encore_1: SongEntryWithId[] | null
   Encore_2: SongEntryWithId[] | null
   Encore_3: SongEntryWithId[] | null

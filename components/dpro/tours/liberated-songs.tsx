@@ -171,6 +171,10 @@ export function LiberatedSongs({
 
   if (!loading && liberatedSongs.length === 0) return null
 
+  const showDurationColumn = liberatedSongs.some(
+    (s) => formatEntryLength(s.entry_length ?? null) !== "",
+  )
+
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
       <div className="px-3 py-1.5 flex justify-between items-center bg-muted/60">
@@ -241,9 +245,11 @@ export function LiberatedSongs({
                         </div>
                       </div>
                     </td>
-                    <td className="w-[50px] py-1.5 text-center font-medium tabular-nums text-foreground">
-                      {formatEntryLength(song.entry_length ?? null)}
-                    </td>
+                    {showDurationColumn ?
+                      <td className="w-[50px] py-1.5 text-center font-medium tabular-nums text-foreground">
+                        {formatEntryLength(song.entry_length ?? null)}
+                      </td>
+                    : null}
                     <td className="py-1.5 pl-2 text-muted-foreground text-xs">
                       {song.show_date && (
                         <>
