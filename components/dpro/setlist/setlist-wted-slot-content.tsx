@@ -5,15 +5,46 @@ import { Check, Loader2 } from "lucide-react"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { SetlistEntry } from "@/types/setlist"
-import type { WtedRequestEnriched } from "@/types/wted"
+import type { WtedRequestEnriched, WtedRequestEnrichedSegment } from "@/types/wted"
 
 const PILL_CLASSES = {
   date: "rounded-full border border-border bg-wl-orange/30 px-2 py-0.5 text-[10px] font-medium tabular-nums text-foreground",
   group: "rounded-full border border-border bg-wl-orange/50 px-2 py-0.5 text-[10px] font-medium text-foreground",
   venue: "rounded-full border border-border bg-wl-green/30 px-2 py-0.5 text-[10px] font-medium text-foreground",
 } as const
+
+export function WtedSegmentsTitle({
+  segments,
+}: {
+  segments: WtedRequestEnrichedSegment[]
+}) {
+  return (
+    <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1 text-xs font-medium text-foreground">
+      {segments.map((seg, i) => (
+        <span key={i} className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1">
+          {i > 0 ?
+            <span className="shrink-0 text-muted-foreground" aria-hidden>
+              →
+            </span>
+          : null}
+          <SongDisplayName
+            as="span"
+            song={seg.song}
+            songDisplayName={seg.song_displayname}
+          />
+          {shouldShowSetlistEntryShort(seg.song, seg.entry_short) && (
+            <span className="text-[0.625rem] text-red-400">
+              [{seg.entry_short}]
+            </span>
+          )}
+        </span>
+      ))}
+    </span>
+  )
+}
 
 export function WtedRequestSlotContent({
   request,
@@ -47,17 +78,7 @@ export function WtedRequestSlotContent({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-foreground">
-          {request.entry_song}
-          {shouldShowSetlistEntryShort(
-            request.entry_song,
-            request.entry_short,
-          ) && (
-            <span className="ml-1 text-[0.625rem] text-red-400">
-              [{request.entry_short}]
-            </span>
-          )}
-        </p>
+        <WtedSegmentsTitle segments={request.segments} />
         <div className="mt-1 flex flex-wrap gap-1">
           {pills.map(({ label, type }) => (
             <span key={label} className={cn("inline-flex", PILL_CLASSES[type])}>
@@ -77,7 +98,7 @@ export function WtedRequestSlotContent({
 }
 
 export function WtedPendingSlotContent({
-  entry,
+  groupEntries,
   show,
   releaseArtwork,
   releaseArtworkLoading = false,
@@ -86,7 +107,7 @@ export function WtedPendingSlotContent({
   submitError,
   waitSeconds,
 }: {
-  entry: SetlistEntry
+  groupEntries: SetlistEntry[]
   show: {
     show_date: string
     show_venue_location: string | null
@@ -113,6 +134,12 @@ export function WtedPendingSlotContent({
 
   const mustWait = waitSeconds > 0
 
+  const segments: WtedRequestEnrichedSegment[] = groupEntries.map((e) => ({
+    song: e.songs?.song ?? e.entry_song,
+    song_displayname: e.songs?.song_displayname ?? null,
+    entry_short: e.entry_short,
+  }))
+
   return (
     <>
       {releaseArtworkLoading ? (
@@ -132,14 +159,7 @@ export function WtedPendingSlotContent({
         </div>
       ) : null}
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-foreground">
-          {entry.entry_song}
-          {shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) && (
-            <span className="ml-1 text-[0.625rem] text-red-400">
-              [{entry.entry_short}]
-            </span>
-          )}
-        </p>
+        <WtedSegmentsTitle segments={segments} />
         <div className="mt-1 flex flex-wrap gap-1">
           {pills.map(({ label, type }) => (
             <span key={label} className={cn("inline-flex", PILL_CLASSES[type])}>
@@ -153,7 +173,11 @@ export function WtedPendingSlotContent({
       </div>
       <Button
         size="sm"
-        className={cn("shrink-0", !submitting && !mustWait && "animate-pulse-ring")}
+        className={cn(
+          "shrink-0",
+          mustWait && "text-sm",
+          !submitting && !mustWait && "animate-pulse-ring",
+        )}
         onClick={onRequest}
         disabled={submitting || mustWait}
       >

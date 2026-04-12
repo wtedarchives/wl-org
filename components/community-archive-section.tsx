@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { isSupabaseConfigured } from "@/lib/supabase"
-import { useIsMinMd } from "@/hooks/use-mobile"
+import { MOBILE_BREAKPOINT, useIsMinMd } from "@/hooks/use-mobile"
 import { useShowsData } from "@/hooks/use-shows-data"
 import { ColumnBanner } from "@/components/column-banner"
 import { FeaturedTopicsCard } from "@/components/featured-topics-card"
@@ -75,9 +75,16 @@ function SetlistArchiveAccordion() {
   } = useShowsData()
 
   const isMinMd = useIsMinMd()
-  const [openSection, setOpenSection] = useState<string>("last-5")
+  /** Mobile-first default; desktop switches to last-5 after mount (see effect) so carousel start matches prior behavior. */
+  const [openSection, setOpenSection] = useState<string>("most-recent")
   const [userControlledAccordion, setUserControlledAccordion] = useState(false)
   const staggerOpenRef = useRef<number | null>(null)
+
+  /** Desktop: start expanded section at "last-5" for the auto-advance cycle (avoids SSR/client mismatch if we read window in useState). */
+  useEffect(() => {
+    if (!window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT}px)`).matches) return
+    setOpenSection("last-5")
+  }, [])
 
   const clearStaggerOpen = () => {
     if (staggerOpenRef.current != null) {

@@ -148,6 +148,7 @@ export function SetlistPageDrawers({
         open={wtedSheetOpen}
         onOpenChange={setWtedSheetOpen}
         entry={wtedSheetEntry}
+        setlist={setlist}
         show={{
           show_date: show.show_date,
           show_venue_location: show.show_venue_location,

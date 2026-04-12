@@ -362,6 +362,7 @@ export function WtedEpisodePageClient() {
             open={wtedSheetOpen}
             onOpenChange={setWtedSheetOpen}
             entry={wtedSheetEntry}
+            setlist={playlistSetlist}
             show={
               wtedSheetEntry ?
                 (() => {

@@ -1,11 +1,12 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 
 import { useAuth } from "@/components/auth-context"
 import { useWtedRequests } from "@/hooks/use-wted-requests"
 import { useWtedEntryReleaseArtwork } from "@/hooks/use-wted-entry-release-artwork"
+import { getWtedEntriesForRadioGroup } from "@/lib/wted-group-entries"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -22,8 +23,8 @@ import type { WtedRequestEnriched } from "@/types/wted"
 import {
   WtedRequestSlotContent,
   WtedPendingSlotContent,
+  WtedSegmentsTitle,
 } from "./setlist-wted-slot-content"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 const WTED_REQUEST_RATE_LIMIT_MS = 10_000
 const THIRTY_MINUTES_MS = 30 * 60 * 1000
@@ -47,6 +48,8 @@ interface SetlistWtedSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   entry: SetlistEntry | null
+  /** Full setlist for the current show (used to group medley rows by `radio_id`). */
+  setlist: SetlistEntry[]
   show: { show_date: string; show_venue_location: string | null; show_group: string | null }
   /** When entry-based artwork cannot be resolved (no SEM, etc.). */
   fallbackReleaseArtwork: string | null
@@ -56,13 +59,29 @@ export function SetlistWtedSheet({
   open,
   onOpenChange,
   entry,
+  setlist,
   show,
   fallbackReleaseArtwork,
 }: SetlistWtedSheetProps) {
+  const groupEntries = useMemo(
+    () => getWtedEntriesForRadioGroup(setlist, entry),
+    [setlist, entry],
+  )
+  const artworkEntry = groupEntries[0] ?? entry
   const { releaseArtwork, artworkLoading } = useWtedEntryReleaseArtwork(
-    entry,
+    artworkEntry,
     open,
     fallbackReleaseArtwork,
+  )
+
+  const segmentsForBanner = useMemo(
+    () =>
+      groupEntries.map((e) => ({
+        song: e.songs?.song ?? e.entry_song,
+        song_displayname: e.songs?.song_displayname ?? null,
+        entry_short: e.entry_short,
+      })),
+    [groupEntries],
   )
   const { session } = useAuth()
   const accessToken = session?.access_token ?? null
@@ -73,6 +92,13 @@ export function SetlistWtedSheet({
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [countdownMs, setCountdownMs] = useState<number>(0)
   const [requestWaitMs, setRequestWaitMs] = useState<number>(0)
+  /** Hides the “already requested” banner right after a successful submit (refetch would otherwise match this `radio_id`). */
+  const [suppressAlreadyRequestedBannerRadioId, setSuppressAlreadyRequestedBannerRadioId] =
+    useState<string | null>(null)
+
+  useEffect(() => {
+    setSuppressAlreadyRequestedBannerRadioId(null)
+  }, [entry?.radio_id])
 
   useEffect(() => {
     if (lastRequestTime === 0) {
@@ -114,18 +140,23 @@ export function SetlistWtedSheet({
     return () => clearInterval(id)
   }, [nextAvailableAtTimestamp])
 
-  const alreadyRequestedEntryIds = new Set(requests.map((r) => r.entry_id))
+  const alreadyRequestedRadioIds = new Set(
+    requests.map((r) => String(r.radio_id)),
+  )
   const canRequestThisEntry =
     entry &&
     entry.radio_id &&
     hasOpenSlot &&
-    !alreadyRequestedEntryIds.has(entry.entry_id) &&
+    !alreadyRequestedRadioIds.has(String(entry.radio_id)) &&
     canRequestByTime
   const requestWaitSeconds = Math.ceil(requestWaitMs / 1000)
 
   const handleOpenChange = useCallback(
     (next: boolean) => {
-      if (!next) setSubmitError(null)
+      if (!next) {
+        setSubmitError(null)
+        setSuppressAlreadyRequestedBannerRadioId(null)
+      }
       onOpenChange(next)
     },
     [onOpenChange]
@@ -147,12 +178,13 @@ export function SetlistWtedSheet({
           Authorization: `Bearer ${accessToken}`,
           ...(anon ? { apikey: anon } : {}),
         },
-        body: JSON.stringify({ entry_id: entry.entry_id }),
+        body: JSON.stringify({ radio_id: String(entry.radio_id) }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         throw new Error(data.error ?? "Failed to submit request")
       }
+      setSuppressAlreadyRequestedBannerRadioId(String(entry.radio_id))
       setLastRequestTime(Date.now())
       await refetch()
     } catch (err) {
@@ -166,14 +198,14 @@ export function SetlistWtedSheet({
 
   const buildSlots = (): Array<
     | { type: "request"; request: WtedRequestEnriched }
-    | { type: "pending"; entry: SetlistEntry }
+    | { type: "pending"; groupEntries: SetlistEntry[] }
     | { type: "waiting"; waitSeconds: number }
     | { type: "request-another" }
     | { type: "empty" }
   > => {
     const slots: Array<
       | { type: "request"; request: WtedRequestEnriched }
-      | { type: "pending"; entry: SetlistEntry }
+      | { type: "pending"; groupEntries: SetlistEntry[] }
       | { type: "waiting"; waitSeconds: number }
       | { type: "request-another" }
       | { type: "empty" }
@@ -185,10 +217,10 @@ export function SetlistWtedSheet({
         i === requests.length &&
         entry?.radio_id &&
         hasOpenSlot &&
-        !alreadyRequestedEntryIds.has(entry.entry_id) &&
+        !alreadyRequestedRadioIds.has(String(entry.radio_id)) &&
         canRequestByTime
       ) {
-        slots.push({ type: "pending", entry })
+        slots.push({ type: "pending", groupEntries })
       } else if (
         i === requests.length &&
         hasOpenSlot &&
@@ -244,15 +276,14 @@ export function SetlistWtedSheet({
           ) : (
             <div className="space-y-3">
               {entry &&
-                alreadyRequestedEntryIds.has(entry.entry_id) && (
+                entry.radio_id &&
+                alreadyRequestedRadioIds.has(String(entry.radio_id)) &&
+                suppressAlreadyRequestedBannerRadioId !==
+                  String(entry.radio_id) && (
                   <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center">
                     <p className="text-xs font-normal text-foreground">
-                      <span className="font-semibold inline-flex flex-wrap items-baseline gap-x-1">
-                        <SongDisplayName
-                          as="span"
-                          song={entry.entry_song}
-                          songDisplayName={entry.songs?.song_displayname}
-                        />
+                      <span className="font-semibold inline-flex flex-wrap items-baseline justify-center gap-x-1">
+                        <WtedSegmentsTitle segments={segmentsForBanner} />
                         <span className="tabular-nums">
                           ({formatSetlistDate(show.show_date)})
                         </span>
@@ -294,7 +325,7 @@ export function SetlistWtedSheet({
                   )}
                   {slot.type === "pending" && (
                     <WtedPendingSlotContent
-                      entry={slot.entry}
+                      groupEntries={slot.groupEntries}
                       show={show}
                       releaseArtwork={releaseArtwork}
                       releaseArtworkLoading={artworkLoading}
@@ -305,7 +336,7 @@ export function SetlistWtedSheet({
                     />
                   )}
                   {slot.type === "waiting" && (
-                    <div className="flex min-h-[52px] w-full items-center justify-center text-[11px] font-medium tabular-nums text-muted-foreground">
+                    <div className="flex min-h-[52px] w-full items-center justify-center text-xs font-medium tabular-nums text-muted-foreground">
                       Wait {slot.waitSeconds}s
                     </div>
                   )}

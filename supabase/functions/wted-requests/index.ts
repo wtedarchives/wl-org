@@ -4,6 +4,39 @@ import { corsHeaders } from "../_shared/cors.ts"
 
 const THIRTY_MINUTES_MS = 30 * 60 * 1000
 
+type SongRow = {
+  song_displayname: string | null
+  song: string | null
+}
+
+type EntryRow = {
+  entry_id: string
+  entry_song: string
+  entry_short: string | null
+  entry_set: string
+  entry_setnum: number
+  entry_show: string
+  radio_id: string
+  songs: SongRow | SongRow[] | null
+}
+
+function sortEntriesBySet(a: EntryRow, b: EntryRow): number {
+  const setCmp = String(a.entry_set).localeCompare(String(b.entry_set), undefined, {
+    numeric: true,
+  })
+  if (setCmp !== 0) return setCmp
+  return a.entry_setnum - b.entry_setnum
+}
+
+function songFromRow(row: EntryRow): { song: string; song_displayname: string | null } {
+  const songs = row.songs
+  const single = Array.isArray(songs) ? songs[0] : songs
+  return {
+    song: single?.song?.trim() ?? row.entry_song,
+    song_displayname: single?.song_displayname ?? null,
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -55,7 +88,7 @@ serve(async (req) => {
 
   const { data: requests, error: reqError } = await client
     .from("wted_requests")
-    .select("id, entry_id, requested_at")
+    .select("id, radio_id, requested_at")
     .eq("user_id", user.id)
     .gte("requested_at", since)
     .order("requested_at", { ascending: true })
@@ -67,30 +100,47 @@ serve(async (req) => {
     )
   }
 
-  const entryIds = requests.map((r) => r.entry_id)
+  const radioIds = [...new Set(requests.map((r) => String(r.radio_id)))]
 
-  const { data: entries, error: entriesError } = await supabase
+  const { data: entryRows, error: entriesError } = await supabase
     .from("setlist_entries")
     .select(
       `
       entry_id,
       entry_song,
       entry_short,
+      entry_set,
+      entry_setnum,
       entry_show,
-      radio_id
-    `
+      radio_id,
+      songs ( song_displayname, song )
+    `,
     )
-    .in("entry_id", entryIds)
+    .in("radio_id", radioIds)
 
-  if (entriesError || !entries) {
+  if (entriesError || !entryRows) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch entry data" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }
 
-  const entryMap = new Map(entries.map((e) => [e.entry_id, e]))
-  const showIds = [...new Set(entries.map((e) => e.entry_show))]
+  const byRadio = new Map<string, EntryRow[]>()
+  for (const row of entryRows as EntryRow[]) {
+    const rid = String(row.radio_id ?? "")
+    if (!rid) continue
+    const list = byRadio.get(rid) ?? []
+    list.push(row)
+    byRadio.set(rid, list)
+  }
+
+  for (const [, list] of byRadio) {
+    list.sort(sortEntriesBySet)
+  }
+
+  const showIds = [...new Set(
+    (entryRows as EntryRow[]).map((e) => e.entry_show),
+  )]
 
   const { data: shows, error: showsError } = await supabase
     .from("shows")
@@ -146,17 +196,27 @@ serve(async (req) => {
   )
 
   const enriched = requests.map((r) => {
-    const entry = entryMap.get(r.entry_id)
-    const show = entry ? showMap.get(entry.entry_show) : null
-    const releaseId = entry ? showToRelease.get(entry.entry_show) : null
+    const rid = String(r.radio_id)
+    const list = byRadio.get(rid) ?? []
+    const first = list[0]
+    const show = first ? showMap.get(first.entry_show) : null
+    const releaseId = first ? showToRelease.get(first.entry_show) : null
     const artwork = releaseId ? releaseMap.get(releaseId) ?? null : null
+
+    const segments = list.map((row) => {
+      const s = songFromRow(row)
+      return {
+        song: s.song,
+        song_displayname: s.song_displayname,
+        entry_short: row.entry_short,
+      }
+    })
 
     return {
       id: r.id,
-      entry_id: r.entry_id,
+      radio_id: rid,
       requested_at: r.requested_at,
-      entry_song: entry?.entry_song ?? "",
-      entry_short: entry?.entry_short ?? null,
+      segments,
       show_date: show?.show_date ?? "",
       show_venue_location: show?.show_venue_location ?? null,
       show_group: show?.show_group ?? null,

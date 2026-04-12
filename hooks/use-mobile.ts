@@ -1,6 +1,7 @@
 import * as React from "react"
 
-const MOBILE_BREAKPOINT = 768
+/** Tailwind `md` (px); matches `useIsMinMd` / `(min-width: 768px)`. */
+export const MOBILE_BREAKPOINT = 768
 
 /** Breakpoint (px) at which main content switches to desktop layout (e.g. setlist page sidebar). */
 export const DESKTOP_CONTENT_MIN_WIDTH = 1280

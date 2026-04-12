@@ -286,6 +286,7 @@ function DiscographyReleasePageContent({ id }: { id: string }) {
         open={wtedSheetOpen}
         onOpenChange={setWtedSheetOpen}
         entry={wtedSheetEntry}
+        setlist={linkedSetlist}
         show={
           wtedSheetEntry
             ? (linkedShowContextById[wtedSheetEntry.entry_show] ??

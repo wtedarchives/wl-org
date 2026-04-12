@@ -63,7 +63,7 @@ serve(async (req) => {
     )
   }
 
-  let body: { entry_id?: string }
+  let body: { radio_id?: string }
   try {
     body = await req.json()
   } catch {
@@ -73,36 +73,28 @@ serve(async (req) => {
     )
   }
 
-  const entryId = body?.entry_id
-  if (!entryId || typeof entryId !== "string") {
+  const radioId = typeof body?.radio_id === "string" ? body.radio_id.trim() : ""
+  if (!radioId) {
     return new Response(
-      JSON.stringify({ error: "Missing or invalid entry_id" }),
+      JSON.stringify({ error: "Missing or invalid radio_id" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }
 
-  const { data: entry, error: entryError } = await supabase
-    .from("setlist_entries")
-    .select("entry_id, radio_id, entry_show")
-    .eq("entry_id", entryId)
-    .single()
+  const { data: catalogRow, error: catalogError } = await supabase
+    .from("wted_radio_ids")
+    .select("radio_id")
+    .eq("radio_id", radioId)
+    .maybeSingle()
 
-  if (entryError || !entry) {
-    return new Response(
-      JSON.stringify({ error: "Entry not found" }),
-      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    )
-  }
-
-  const trackId = entry.radio_id
-  if (!trackId) {
+  if (catalogError || !catalogRow) {
     return new Response(
       JSON.stringify({ error: "This track is not available for request" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }
 
-  const trackIdNum = parseInt(String(trackId), 10)
+  const trackIdNum = parseInt(String(radioId), 10)
   if (Number.isNaN(trackIdNum)) {
     return new Response(
       JSON.stringify({ error: "Invalid track ID" }),
@@ -114,7 +106,7 @@ serve(async (req) => {
 
   const { data: recentRequests, error: reqError } = await client
     .from("wted_requests")
-    .select("entry_id, requested_at")
+    .select("radio_id, requested_at")
     .eq("user_id", user.id)
     .gte("requested_at", since)
     .order("requested_at", { ascending: true })
@@ -142,20 +134,8 @@ serve(async (req) => {
     )
   }
 
-  const entryIds = requests.map((r) => r.entry_id)
-  const { data: existingEntries } = await supabase
-    .from("setlist_entries")
-    .select("entry_id, radio_id")
-    .in("entry_id", [...entryIds, entryId])
-
-  const requestedRadioIds = new Set(
-    (existingEntries ?? [])
-      .filter((e) => entryIds.includes(e.entry_id))
-      .map((e) => String(e.radio_id ?? ""))
-      .filter(Boolean)
-  )
-
-  if (requestedRadioIds.has(String(trackId))) {
+  const alreadyRequested = requests.some((r) => String(r.radio_id) === radioId)
+  if (alreadyRequested) {
     return new Response(
       JSON.stringify({
         error:
@@ -196,7 +176,7 @@ serve(async (req) => {
 
   const { error: insertError } = await client.from("wted_requests").insert({
     user_id: user.id,
-    entry_id: entryId,
+    radio_id: radioId,
     requested_at: new Date().toISOString(),
   })
 
