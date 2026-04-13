@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import {
   TableCell,
   TableRow,
@@ -22,6 +23,10 @@ import type {
   GuestGroup,
   SetlistEntry,
 } from "@/types/setlist"
+import {
+  SetlistTruncatableCell,
+  SetlistTruncatableHtmlCell,
+} from "@/components/dpro/setlist/setlist-truncatable-cell"
 import { SetlistEntrySongCell } from "./setlist-entry-song-cell"
 import { SetlistEntryNumberCell } from "./setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "./setlist-entry-wted-cell"
@@ -114,6 +119,9 @@ export function SetlistEntryRow({
   const numberUsesPlacementColor =
     !suppressNumberPlacementColor && indexCellBg !== "transparent"
 
+  const [guestsTruncCollapsed, setGuestsTruncCollapsed] = useState(false)
+  const [coachTruncCollapsed, setCoachTruncCollapsed] = useState(false)
+
   const entryCategory =
     entry.song_category || entry.songs?.song_category || "undefined"
   const entryIdsForRelease = hoveredReleaseId
@@ -162,7 +170,7 @@ export function SetlistEntryRow({
           onNumberClick={onNumberClick}
         />
       </TableCell>
-      <TableCell className="max-w-[470px]">
+      <TableCell className="align-top">
         <SetlistEntrySongCell
           entry={entry}
           onSongClick={onSongClick}
@@ -241,8 +249,40 @@ export function SetlistEntryRow({
           ) : null}
         </TableCell>
       )}
-      <TableCell className="min-w-[400px] max-w-[600px]">
-        <SetlistEntryGuestsCell entry={entry} showTooltips={showTooltips} />
+      <TableCell
+        className={cn(
+          "w-max max-w-[300px] !py-0",
+          guestsTruncCollapsed ? "align-middle" : "align-top",
+        )}
+      >
+        {entry.guests?.length ?
+          <SetlistTruncatableCell
+            maxWidthClass="max-w-[300px]"
+            measureWidthClass="w-max max-w-[300px]"
+            measureKey={`${entry.entry_id}-guests`}
+            expandLabel="Show all personnel"
+            onTruncatedCollapsedChange={setGuestsTruncCollapsed}
+          >
+            <SetlistEntryGuestsCell entry={entry} showTooltips={showTooltips} />
+          </SetlistTruncatableCell>
+        : null}
+      </TableCell>
+      <TableCell
+        className={cn(
+          "w-max max-w-[400px] !py-0",
+          coachTruncCollapsed ? "align-middle" : "align-top",
+        )}
+      >
+        {entry.entry_coachnotes?.trim() ?
+          <SetlistTruncatableHtmlCell
+            maxWidthClass="max-w-[400px]"
+            measureWidthClass="w-max max-w-[400px]"
+            measureKey={`${entry.entry_id}-coach`}
+            html={entry.entry_coachnotes.trim()}
+            expandLabel="Show full coach notes"
+            onTruncatedCollapsedChange={setCoachTruncCollapsed}
+          />
+        : null}
       </TableCell>
     </TableRow>
   )

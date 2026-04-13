@@ -89,20 +89,7 @@ export function SetlistEntrySongCell({
     </div>
   )
 
-  const coachNotes =
-    entry.entry_coachnotes?.trim() ? (
-      <div
-        className="min-w-[300px] max-w-[470px] break-words whitespace-normal text-[10px] leading-2.5 text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline"
-        dangerouslySetInnerHTML={{ __html: entry.entry_coachnotes.trim() }}
-      />
-    ) : null
-
-  const body = (
-    <>
-      {songContent}
-      {coachNotes}
-    </>
-  )
+  const body = songContent
 
   if (showStatsTooltip && entryHasSongStatsLines(entry)) {
     return (
@@ -119,5 +106,5 @@ export function SetlistEntrySongCell({
     )
   }
 
-  return <div className="flex flex-col gap-0.5">{body}</div>
+  return <div className="flex flex-col gap-0.5 text-left">{body}</div>
 }

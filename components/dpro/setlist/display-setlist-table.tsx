@@ -138,7 +138,8 @@ export function DisplaySetlistTable({
     (showWtedColumn ? 1 : 0) +
     1 +
     (showCanonColumns ? 3 : 0) +
-    1 // #, Song, Show?, WTED?, Time, Last+Tour+Rarity?, Personnel
+    1 + // Personnel
+    1 // Coach's Notes
   const hasLastBadges =
     showCanonColumns &&
     setlist.some((e) => {
@@ -196,7 +197,7 @@ export function DisplaySetlistTable({
               <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">
                 #
               </TableHead>
-              <TableHead className="h-8 max-w-[470px] text-muted-foreground">
+              <TableHead className="h-8 text-muted-foreground">
                 {hasSongHeaderTooltipItems && isDesktop ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -260,8 +261,11 @@ export function DisplaySetlistTable({
                   Rarity
                 </TableHead>
               )}
-              <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
+              <TableHead className="h-8 w-max max-w-[300px] text-muted-foreground">
                 Personnel
+              </TableHead>
+              <TableHead className="h-8 w-max max-w-[400px] text-muted-foreground">
+                Coach&apos;s Notes
               </TableHead>
             </TableRow>
           </TableHeader>

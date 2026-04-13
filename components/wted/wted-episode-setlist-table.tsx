@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -19,6 +19,10 @@ import {
   getEncoreLabel,
   shouldShowSetBreak,
 } from "@/lib/setlist-utils"
+import {
+  SetlistTruncatableCell,
+  SetlistTruncatableHtmlCell,
+} from "@/components/dpro/setlist/setlist-truncatable-cell"
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
 import { SetlistEntrySongCell } from "@/components/dpro/setlist/setlist-entry-song-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
@@ -50,9 +54,7 @@ function WtedEpisodeSetlistTableHead({
       <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">
         #
       </TableHead>
-      <TableHead className="h-8 max-w-[470px] text-muted-foreground">
-        Song
-      </TableHead>
+      <TableHead className="h-8 text-muted-foreground">Song</TableHead>
       <TableHead className="h-8 whitespace-nowrap text-center text-muted-foreground">
         Date
       </TableHead>
@@ -79,9 +81,146 @@ function WtedEpisodeSetlistTableHead({
           Group
         </TableHead>
       : null}
-      <TableHead className="h-8 min-w-[400px] max-w-[600px] text-muted-foreground">
+      <TableHead className="h-8 w-max max-w-[300px] text-muted-foreground">
         Personnel
       </TableHead>
+      <TableHead className="h-8 w-max max-w-[400px] text-muted-foreground">
+        Coach&apos;s Notes
+      </TableHead>
+    </TableRow>
+  )
+}
+
+function WtedEpisodeSetlistDataRow({
+  row,
+  displayNum,
+  indexCellBg,
+  numberUsesPlacementColor,
+  shouldHighlightRow,
+  shouldDimRow,
+  router,
+  isDesktop,
+  showWtedColumn,
+  showGroupColumn,
+  onWtedClick,
+}: {
+  row: WtedEpisodeTableRow
+  displayNum: number
+  indexCellBg: string
+  numberUsesPlacementColor: boolean
+  shouldHighlightRow: boolean
+  shouldDimRow: boolean
+  router: ReturnType<typeof useRouter>
+  isDesktop: boolean
+  showWtedColumn: boolean
+  showGroupColumn: boolean
+  onWtedClick?: (entry: SetlistEntry) => void
+}) {
+  const [guestsTruncCollapsed, setGuestsTruncCollapsed] = useState(false)
+  const [coachTruncCollapsed, setCoachTruncCollapsed] = useState(false)
+  const sl = row.setlistEntry
+
+  return (
+    <TableRow
+      className={cn(
+        "border-border/60 transition-opacity",
+        shouldHighlightRow && "bg-primary/20",
+        shouldDimRow && "opacity-10",
+      )}
+    >
+      <TableCell
+        className={cn(
+          "text-center tabular-nums",
+          numberUsesPlacementColor ? "text-white" : "text-muted-foreground",
+        )}
+        style={{
+          backgroundColor: numberUsesPlacementColor ? indexCellBg : undefined,
+        }}
+      >
+        {displayNum}
+      </TableCell>
+      <TableCell className="align-top">
+        <SetlistEntrySongCell
+          entry={sl}
+          onSongClick={(entry) => router.push(getSongArchiveUrl(entry.song_id))}
+        />
+      </TableCell>
+      <TableCell className="whitespace-nowrap text-center tabular-nums text-muted-foreground">
+        {row.showDate && row.showId ?
+          <Link
+            href={getSetlistArchiveUrl(row.showId)}
+            className="font-medium text-foreground hover:underline"
+          >
+            {formatSetlistDate(row.showDate)}
+          </Link>
+        : row.showDate ?
+          formatSetlistDate(row.showDate)
+        : ""}
+      </TableCell>
+      <TableCell className="whitespace-nowrap text-muted-foreground">
+        {row.venueLocation ?
+          row.venueId ?
+            <Link
+              href={getVenueArchiveUrl(row.venueId)}
+              className="font-normal text-foreground hover:underline"
+            >
+              {row.venueLocation}
+            </Link>
+          : row.venueLocation
+        : ""}
+      </TableCell>
+      {showWtedColumn ?
+        <TableCell className="text-center">
+          <SetlistEntryWtedCell
+            entry={sl}
+            onWtedClick={onWtedClick}
+            showTooltips={isDesktop}
+          />
+        </TableCell>
+      : null}
+      <TableCell className="text-center tabular-nums text-muted-foreground">
+        {formatEntryLength(sl.entry_length) ?? ""}
+      </TableCell>
+      {showGroupColumn ?
+        <TableCell className="text-center text-muted-foreground">
+          {row.showGroup ?? ""}
+        </TableCell>
+      : null}
+      <TableCell
+        className={cn(
+          "w-max max-w-[300px] !py-0",
+          guestsTruncCollapsed ? "align-middle" : "align-top",
+        )}
+      >
+        {sl.guests?.length ?
+          <SetlistTruncatableCell
+            maxWidthClass="max-w-[300px]"
+            measureWidthClass="w-max max-w-[300px]"
+            measureKey={`${sl.entry_id}-guests`}
+            expandLabel="Show all personnel"
+            onTruncatedCollapsedChange={setGuestsTruncCollapsed}
+          >
+            <SetlistEntryGuestsCell entry={sl} showTooltips={isDesktop} />
+          </SetlistTruncatableCell>
+        : null}
+      </TableCell>
+      <TableCell
+        className={cn(
+          "w-max max-w-[400px] !py-0",
+          coachTruncCollapsed ? "align-middle" : "align-top",
+        )}
+      >
+        {sl.entry_coachnotes?.trim() ?
+          <SetlistTruncatableHtmlCell
+            maxWidthClass="max-w-[400px]"
+            measureWidthClass="w-max max-w-[400px]"
+            measureKey={`${sl.entry_id}-coach`}
+            html={sl.entry_coachnotes.trim()}
+            expandLabel="Show full coach notes"
+            onTruncatedCollapsedChange={setCoachTruncCollapsed}
+          />
+        : null}
+      </TableCell>
     </TableRow>
   )
 }
@@ -115,7 +254,7 @@ export function WtedEpisodeSetlistTable({
   )
   const hasSinglePlacementType = placements.size <= 1
   const colSpan =
-    6 + (showWtedColumn ? 1 : 0) + (showGroupColumn ? 1 : 0)
+    7 + (showWtedColumn ? 1 : 0) + (showGroupColumn ? 1 : 0)
 
   let displayNum = 0
 
@@ -194,83 +333,20 @@ export function WtedEpisodeSetlistTable({
     const shouldDimRow = categoryDim || yearDim || groupDim
 
     body.push(
-      <TableRow
+      <WtedEpisodeSetlistDataRow
         key={row.refId}
-        className={cn(
-          "border-border/60 transition-opacity",
-          shouldHighlightRow && "bg-primary/20",
-          shouldDimRow && "opacity-10",
-        )}
-      >
-        <TableCell
-          className={cn(
-            "text-center tabular-nums",
-            numberUsesPlacementColor ? "text-white" : "text-muted-foreground",
-          )}
-          style={{
-            backgroundColor: numberUsesPlacementColor ?
-                indexCellBg
-              : undefined,
-          }}
-        >
-          {displayNum}
-        </TableCell>
-        <TableCell className="max-w-[470px]">
-          <SetlistEntrySongCell
-            entry={sl}
-            onSongClick={(entry) =>
-              router.push(getSongArchiveUrl(entry.song_id))
-            }
-          />
-        </TableCell>
-        <TableCell className="whitespace-nowrap text-center tabular-nums text-muted-foreground">
-          {row.showDate && row.showId ?
-            <Link
-              href={getSetlistArchiveUrl(row.showId)}
-              className="font-medium text-foreground hover:underline"
-            >
-              {formatSetlistDate(row.showDate)}
-            </Link>
-          : row.showDate ?
-            formatSetlistDate(row.showDate)
-          : ""}
-        </TableCell>
-        <TableCell className="whitespace-nowrap text-muted-foreground">
-          {row.venueLocation ?
-            row.venueId ?
-              <Link
-                href={getVenueArchiveUrl(row.venueId)}
-                className="font-normal text-foreground hover:underline"
-              >
-                {row.venueLocation}
-              </Link>
-            : row.venueLocation
-          : ""}
-        </TableCell>
-        {showWtedColumn ?
-          <TableCell className="text-center">
-            <SetlistEntryWtedCell
-              entry={sl}
-              onWtedClick={onWtedClick}
-              showTooltips={isDesktop}
-            />
-          </TableCell>
-        : null}
-        <TableCell className="text-center tabular-nums text-muted-foreground">
-          {formatEntryLength(sl.entry_length) ?? ""}
-        </TableCell>
-        {showGroupColumn ?
-          <TableCell className="text-center text-muted-foreground">
-            {row.showGroup ?? ""}
-          </TableCell>
-        : null}
-        <TableCell className="min-w-[400px] max-w-[600px]">
-          <SetlistEntryGuestsCell
-            entry={sl}
-            showTooltips={isDesktop}
-          />
-        </TableCell>
-      </TableRow>,
+        row={row}
+        displayNum={displayNum}
+        indexCellBg={indexCellBg}
+        numberUsesPlacementColor={numberUsesPlacementColor}
+        shouldHighlightRow={shouldHighlightRow}
+        shouldDimRow={shouldDimRow}
+        router={router}
+        isDesktop={isDesktop}
+        showWtedColumn={showWtedColumn}
+        showGroupColumn={showGroupColumn}
+        onWtedClick={onWtedClick}
+      />,
     )
   })
 

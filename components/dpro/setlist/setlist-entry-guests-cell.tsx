@@ -8,16 +8,20 @@ import {
 } from "@/components/ui/tooltip"
 import { getPersonnelPillClassName } from "@/lib/setlist-utils"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
+import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistEntryGuestsCellProps {
   entry: SetlistEntry
   showTooltips?: boolean
+  /** When true, keep all pills on one row (for truncation / horizontal clip). */
+  nowrap?: boolean
 }
 
 export function SetlistEntryGuestsCell({
   entry,
   showTooltips = true,
+  nowrap = false,
 }: SetlistEntryGuestsCellProps) {
   if (!entry.guests?.length) return null
 
@@ -26,7 +30,14 @@ export function SetlistEntryGuestsCell({
   )
 
   return (
-    <div className="flex flex-wrap gap-0.5">
+    <div
+      className={cn(
+        "flex gap-0.5",
+        nowrap ?
+          "min-w-0 flex-nowrap [&_a]:shrink-0"
+        : "flex-wrap",
+      )}
+    >
       {sortedGuests.map((g) =>
         showTooltips ? (
           <Tooltip key={g.guest_id}>
