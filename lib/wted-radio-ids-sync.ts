@@ -12,12 +12,31 @@ export type WtedRadioIdRow = {
   track_artist: string | null
   track_title: string | null
   status: string | null
+  artwork: string | null
 }
 
 export type RadioCoApiTrack = {
   id: number
   artist: string
   title: string
+  artwork?: {
+    url?: string | null
+    large_url?: string | null
+  } | null
+}
+
+/** Non-empty `artwork.large_url` from API, or null → caller should not change DB `artwork`. */
+export function artworkLargeUrlFromTrack(t: RadioCoApiTrack): string | null {
+  const raw = t.artwork?.large_url
+  if (raw == null || typeof raw !== "string") return null
+  const trimmed = raw.trim()
+  return trimmed === "" ? null : trimmed
+}
+
+function normalizedDbArtwork(value: string | null | undefined): string | null {
+  if (value == null || typeof value !== "string") return null
+  const trimmed = value.trim()
+  return trimmed === "" ? null : trimmed
 }
 
 type RadioCoApiResponse = {
@@ -44,7 +63,7 @@ export async function fetchAllWtedRadioIds(
   for (;;) {
     const { data, error } = await client
       .from("wted_radio_ids")
-      .select("uuid, radio_id, track_artist, track_title, status")
+      .select("uuid, radio_id, track_artist, track_title, status, artwork")
       .order("radio_id", { ascending: true })
       .range(from, from + WTED_RADIO_IDS_PAGE_SIZE - 1)
     if (error) throw error
@@ -56,9 +75,12 @@ export async function fetchAllWtedRadioIds(
   return acc
 }
 
+export const WTED_RADIO_IDS_ARTWORK_UPDATE_CONCURRENCY = 25
+
 export type SyncWtedRadioIdsResult = {
   inserted: WtedRadioIdRow[]
   updatedToRemoved: WtedRadioIdRow[]
+  updatedArtwork: WtedRadioIdRow[]
 }
 
 export async function syncWtedRadioIds(
@@ -76,7 +98,18 @@ export async function syncWtedRadioIds(
       track_artist: t.artist,
       track_title: t.title,
       status: "NEW",
+      artwork: artworkLargeUrlFromTrack(t),
     }))
+
+  const toUpdateArtwork: { uuid: string; artwork: string }[] = []
+  for (const t of tracks) {
+    const row = dbByRadioId.get(String(t.id))
+    if (!row) continue
+    const apiArt = artworkLargeUrlFromTrack(t)
+    if (apiArt === null) continue
+    if (normalizedDbArtwork(row.artwork) === apiArt) continue
+    toUpdateArtwork.push({ uuid: row.uuid, artwork: apiArt })
+  }
 
   const toRemoveUuids = allDb
     .filter(
@@ -93,7 +126,7 @@ export async function syncWtedRadioIds(
     const { data, error } = await client
       .from("wted_radio_ids")
       .insert(batch)
-      .select("uuid, radio_id, track_artist, track_title, status")
+      .select("uuid, radio_id, track_artist, track_title, status, artwork")
     if (error) throw error
     if (data) insertedRows.push(...(data as WtedRadioIdRow[]))
   }
@@ -105,10 +138,41 @@ export async function syncWtedRadioIds(
       .from("wted_radio_ids")
       .update({ status: "REMOVED" })
       .in("uuid", uuids)
-      .select("uuid, radio_id, track_artist, track_title, status")
+      .select("uuid, radio_id, track_artist, track_title, status, artwork")
     if (error) throw error
     if (data) updatedRows.push(...(data as WtedRadioIdRow[]))
   }
 
-  return { inserted: insertedRows, updatedToRemoved: updatedRows }
+  const updatedArtwork: WtedRadioIdRow[] = []
+  for (
+    let i = 0;
+    i < toUpdateArtwork.length;
+    i += WTED_RADIO_IDS_ARTWORK_UPDATE_CONCURRENCY
+  ) {
+    const slice = toUpdateArtwork.slice(
+      i,
+      i + WTED_RADIO_IDS_ARTWORK_UPDATE_CONCURRENCY,
+    )
+    const results = await Promise.all(
+      slice.map(async ({ uuid, artwork }) => {
+        const { data, error } = await client
+          .from("wted_radio_ids")
+          .update({ artwork })
+          .eq("uuid", uuid)
+          .select("uuid, radio_id, track_artist, track_title, status, artwork")
+        if (error) throw error
+        const row = data?.[0] as WtedRadioIdRow | undefined
+        return row ?? null
+      }),
+    )
+    for (const r of results) {
+      if (r) updatedArtwork.push(r)
+    }
+  }
+
+  return {
+    inserted: insertedRows,
+    updatedToRemoved: updatedRows,
+    updatedArtwork,
+  }
 }

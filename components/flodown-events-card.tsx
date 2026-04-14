@@ -6,10 +6,27 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
 const FLODOWN_EVENTS = [
-  { month: "APR", date: "10", title: "Asheville Flodown", subtext: "Asheville Brewery – Asheville, NC" },
-  { month: "APR", date: "17", title: "Clearwater Flodown", subtext: "Clearwater Public Park – Clearwater, FL" },
-  { month: "APR", date: "25", title: "Irving Flodown", subtext: "Celestial Beerworks – Dallas, TX" },
-  { month: "DEC", date: "24", title: "Goosemas Flodown", subtext: "United Center – Chicago, IL" },
+  {
+    month: "APR",
+    day: 19,
+    name: "St. Augustine Flamingo Flodown",
+    venue: "Spinster Abbott's",
+    location: "St Augustine, FL",
+  },
+  {
+    month: "APR",
+    day: 22,
+    name: "NOLA Flodown",
+    venue: "Miel Brewery and Taproom",
+    location: "New Orleans, LA",
+  },
+  {
+    month: "APR",
+    day: 25,
+    name: "Dallas Flodown",
+    venue: "Celestial Beerworks",
+    location: "Dallas, TX",
+  },
 ] as const
 
 function CalendarIcon({
@@ -71,17 +88,23 @@ export function FlodownEventsCard({
                 className="border-wl-dark-grey/40 hover:bg-[#b2655e]"
               >
                 <TableCell className="w-[66px] pl-2 pr-2 py-1 align-middle">
-                  <CalendarIcon month={item.month} date={item.date} square={isAccordion} />
+                  <CalendarIcon
+                    month={item.month}
+                    date={String(item.day)}
+                    square={isAccordion}
+                  />
                 </TableCell>
                 <TableCell className="min-w-0 pl-2 pr-2 py-1 align-middle whitespace-normal">
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span
                       className="break-words text-[12px] font-semibold text-wl-white leading-3.5"
-                      title={item.title}
+                      title={item.name}
                     >
-                      {item.title}
+                      {item.name}
                     </span>
-                    <span className="text-[11px] text-wl-white/80">{item.subtext}</span>
+                    <span className="text-[11px] text-wl-white/80">
+                      {item.venue} – {item.location}
+                    </span>
                   </div>
                 </TableCell>
               </TableRow>

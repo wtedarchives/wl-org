@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
         hostname: "images.radio.co",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.discourse-cdn.com",
+        pathname: "/**",
+      },
     ],
   },
 };

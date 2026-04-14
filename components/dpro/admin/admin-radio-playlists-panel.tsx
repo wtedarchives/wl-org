@@ -242,37 +242,41 @@ export function AdminRadioPlaylistsPanel() {
           ) : (
             <>
               <RefreshCwIcon className="mr-2 size-4" />
-              Sync from Radio.co
+              Sync
             </>
           )}
         </Button>
       </div>
 
-      {!authReady && (
-        <p className="text-sm text-muted-foreground">
-          Sign in to sync playlists (Studio API runs through a secure edge
-          function).
-        </p>
-      )}
+      {(!authReady || syncBanner || (error && !syncBanner)) && (
+        <div className="mt-5 flex flex-col gap-2">
+          {!authReady && (
+            <p className="text-sm text-muted-foreground">
+              Sign in to sync playlists (Studio API runs through a secure edge
+              function).
+            </p>
+          )}
 
-      {syncBanner && (
-        <div
-          role="status"
-          className={`rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-out ${
-            syncBanner.kind === "error"
-              ? "border-destructive/50 bg-destructive/10 text-destructive"
-              : syncBanner.kind === "no-change"
-                ? "border-muted-foreground/25 bg-muted/40 text-muted-foreground"
-                : "border-primary/30 bg-primary/5 text-foreground"
-          }`}
-        >
-          {syncBanner.message}
-        </div>
-      )}
+          {syncBanner && (
+            <div
+              role="status"
+              className={`rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-out ${
+                syncBanner.kind === "error"
+                  ? "border-destructive/50 bg-destructive/10 text-destructive"
+                  : syncBanner.kind === "no-change"
+                    ? "border-muted-foreground/25 bg-muted/40 text-muted-foreground"
+                    : "border-primary/30 bg-primary/5 text-foreground"
+              }`}
+            >
+              {syncBanner.message}
+            </div>
+          )}
 
-      {error && !syncBanner && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive transition-all duration-200">
-          {error}
+          {error && !syncBanner && (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive transition-all duration-200">
+              {error}
+            </div>
+          )}
         </div>
       )}
 

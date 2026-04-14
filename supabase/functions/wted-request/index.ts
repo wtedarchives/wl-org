@@ -4,8 +4,8 @@ import { corsHeaders } from "../_shared/cors.ts"
 
 const RADIO_CO_REQUEST_URL =
   "https://public.radio.co/stations/s3c11c85d6/requests"
-const THIRTY_MINUTES_MS = 30 * 60 * 1000
-const MAX_REQUESTS = 3
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
+const MAX_REQUESTS_PER_WINDOW = 4
 
 const WTED_ERROR_MESSAGES: Record<number, string> = {
   403: "Requests for WTED Goose Radio have been disabled.",
@@ -102,7 +102,7 @@ serve(async (req) => {
     )
   }
 
-  const since = new Date(Date.now() - THIRTY_MINUTES_MS).toISOString()
+  const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
 
   const { data: recentRequests, error: reqError } = await client
     .from("wted_requests")
@@ -120,10 +120,10 @@ serve(async (req) => {
 
   const requests = recentRequests ?? []
 
-  if (requests.length >= MAX_REQUESTS) {
+  if (requests.length >= MAX_REQUESTS_PER_WINDOW) {
     const oldest = requests[0]
     const oldestTime = new Date(oldest.requested_at).getTime()
-    const nextAvailable = new Date(oldestTime + THIRTY_MINUTES_MS)
+    const nextAvailable = new Date(oldestTime + RATE_LIMIT_WINDOW_MS)
     return new Response(
       JSON.stringify({
         error:

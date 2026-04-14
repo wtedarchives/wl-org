@@ -27,7 +27,8 @@ import {
 } from "./setlist-wted-slot-content"
 
 const WTED_REQUEST_RATE_LIMIT_MS = 10_000
-const THIRTY_MINUTES_MS = 30 * 60 * 1000
+const WTED_REQUEST_WINDOW_MS = 60 * 60 * 1000
+const WTED_MAX_REQUESTS_PER_WINDOW = 4
 
 function formatCountdown(ms: number): string {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000))
@@ -116,10 +117,10 @@ export function SetlistWtedSheet({
   }, [lastRequestTime])
 
   const canRequestByTime = requestWaitMs === 0
-  const hasOpenSlot = requests.length < 3
+  const hasOpenSlot = requests.length < WTED_MAX_REQUESTS_PER_WINDOW
   const nextAvailableAtTimestamp =
-    requests.length >= 3 && requests[0]
-      ? new Date(requests[0].requested_at).getTime() + THIRTY_MINUTES_MS
+    requests.length >= WTED_MAX_REQUESTS_PER_WINDOW && requests[0]
+      ? new Date(requests[0].requested_at).getTime() + WTED_REQUEST_WINDOW_MS
       : null
   const nextAvailableAt =
     nextAvailableAtTimestamp != null
@@ -210,7 +211,7 @@ export function SetlistWtedSheet({
       | { type: "request-another" }
       | { type: "empty" }
     > = []
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < WTED_MAX_REQUESTS_PER_WINDOW; i++) {
       if (requests[i]) {
         slots.push({ type: "request", request: requests[i] })
       } else if (
@@ -260,7 +261,7 @@ export function SetlistWtedSheet({
             </p>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Users can request three songs every 30 minutes.
+            Users can request four songs every 60 minutes.
           </p>
         </DrawerHeader>
 

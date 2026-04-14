@@ -27,6 +27,58 @@ export interface RadioScheduleSlot {
   isNowPlaying: boolean
 }
 
+/** Merge consecutive rows when titles match and times are back-to-back; artwork stays from the first row. */
+const BACK_TO_BACK_MS_TOLERANCE = 5000
+
+/** After merging, keep this many rows visible (pull extra raw events when merges reduce the count). */
+const TARGET_VISIBLE_ROWS = 5
+
+/** Avoid unbounded work if many consecutive slots merge into one row. */
+const MAX_RAW_EVENTS_FROM_ANCHOR = 32
+
+function mergeBackToBackSameTitleSlots(
+  slots: RadioScheduleSlot[],
+  nowMs: number,
+): RadioScheduleSlot[] {
+  if (slots.length === 0) return []
+
+  const merged: RadioScheduleSlot[] = []
+  let i = 0
+  while (i < slots.length) {
+    const first = slots[i]!
+    let groupEnd = first.event.end
+    let j = i + 1
+    while (j < slots.length) {
+      const next = slots[j]!
+      const sameTitle =
+        first.event.playlist.title.trim() === next.event.playlist.title.trim()
+      const prevEnd = new Date(groupEnd).getTime()
+      const nextStart = new Date(next.event.start).getTime()
+      const backToBack = Math.abs(nextStart - prevEnd) <= BACK_TO_BACK_MS_TOLERANCE
+      if (!sameTitle || !backToBack) break
+      groupEnd = next.event.end
+      j++
+    }
+
+    merged.push({
+      event:
+        j > i + 1
+          ? { ...first.event, end: groupEnd }
+          : first.event,
+      isNowPlaying: false,
+    })
+    i = j
+  }
+
+  return merged.map((slot, idx) => ({
+    ...slot,
+    isNowPlaying:
+      idx === 0 &&
+      nowMs >= new Date(slot.event.start).getTime() &&
+      nowMs < new Date(slot.event.end).getTime(),
+  }))
+}
+
 function parseScheduleData(data: RadioScheduleEvent[]): RadioScheduleSlot[] {
   const now = new Date().getTime()
 
@@ -37,8 +89,6 @@ function parseScheduleData(data: RadioScheduleEvent[]): RadioScheduleSlot[] {
     return now >= start && now < end
   })
 
-  let hasNowPlaying = currentIndex >= 0
-
   // If not found (e.g. gap or before/after schedule), use first upcoming
   if (currentIndex === -1) {
     currentIndex = data.findIndex((item) => new Date(item.start).getTime() > now)
@@ -48,18 +98,21 @@ function parseScheduleData(data: RadioScheduleEvent[]): RadioScheduleSlot[] {
   }
 
   const slots: RadioScheduleSlot[] = []
-  const count = Math.min(5, data.length - currentIndex) // current + up to 4 next
+  let merged: RadioScheduleSlot[] = []
 
-  for (let i = 0; i < count; i++) {
-    const idx = currentIndex + i
-    if (idx >= data.length) break
+  const end = Math.min(data.length, currentIndex + MAX_RAW_EVENTS_FROM_ANCHOR)
+  for (let idx = currentIndex; idx < end; idx++) {
     slots.push({
-      event: data[idx],
-      isNowPlaying: hasNowPlaying && i === 0,
+      event: data[idx]!,
+      isNowPlaying: false,
     })
+    merged = mergeBackToBackSameTitleSlots(slots, now)
+    if (merged.length >= TARGET_VISIBLE_ROWS) {
+      return merged.slice(0, TARGET_VISIBLE_ROWS)
+    }
   }
 
-  return slots
+  return merged
 }
 
 export function useRadioSchedule() {

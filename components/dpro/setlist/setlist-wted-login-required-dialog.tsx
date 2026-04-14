@@ -35,8 +35,7 @@ export function SetlistWtedLoginRequiredDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Login Required</AlertDialogTitle>
           <AlertDialogDescription>
-            You must be logged in to request songs on WTED Radio via setlist
-            pages.
+            You must be logged in to request songs on WTED Goose Radio.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

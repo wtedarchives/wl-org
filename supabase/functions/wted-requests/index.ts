@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { corsHeaders } from "../_shared/cors.ts"
 
-const THIRTY_MINUTES_MS = 30 * 60 * 1000
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
 
 type SongRow = {
   song_displayname: string | null
@@ -84,7 +84,7 @@ serve(async (req) => {
     )
   }
 
-  const since = new Date(Date.now() - THIRTY_MINUTES_MS).toISOString()
+  const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
 
   const { data: requests, error: reqError } = await client
     .from("wted_requests")
@@ -101,6 +101,26 @@ serve(async (req) => {
   }
 
   const radioIds = [...new Set(requests.map((r) => String(r.radio_id)))]
+
+  function normalizedArtworkUrl(value: unknown): string | null {
+    if (value == null || typeof value !== "string") return null
+    const t = value.trim()
+    return t === "" ? null : t
+  }
+
+  const { data: radioArtRows } = await supabase
+    .from("wted_radio_ids")
+    .select("radio_id, artwork")
+    .in("radio_id", radioIds)
+
+  const radioArtworkByRadioId = new Map<string, string>()
+  for (const row of (radioArtRows ?? []) as {
+    radio_id: string
+    artwork: string | null
+  }[]) {
+    const art = normalizedArtworkUrl(row.artwork)
+    if (art) radioArtworkByRadioId.set(String(row.radio_id), art)
+  }
 
   const { data: entryRows, error: entriesError } = await supabase
     .from("setlist_entries")
@@ -200,8 +220,10 @@ serve(async (req) => {
     const list = byRadio.get(rid) ?? []
     const first = list[0]
     const show = first ? showMap.get(first.entry_show) : null
-    const releaseId = first ? showToRelease.get(first.entry_show) : null
-    const artwork = releaseId ? releaseMap.get(releaseId) ?? null : null
+       const releaseId = first ? showToRelease.get(first.entry_show) : null
+    const fromRelease = releaseId ? releaseMap.get(releaseId) ?? null : null
+    const artwork =
+      radioArtworkByRadioId.get(rid) ?? normalizedArtworkUrl(fromRelease)
 
     const segments = list.map((row) => {
       const s = songFromRow(row)
