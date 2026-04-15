@@ -103,6 +103,7 @@ function WtedEpisodeSetlistDataRow({
   showWtedColumn,
   showGroupColumn,
   onWtedClick,
+  onJotyClick,
 }: {
   row: WtedEpisodeTableRow
   displayNum: number
@@ -115,6 +116,7 @@ function WtedEpisodeSetlistDataRow({
   showWtedColumn: boolean
   showGroupColumn: boolean
   onWtedClick?: (entry: SetlistEntry) => void
+  onJotyClick?: (entry: SetlistEntry) => void
 }) {
   const [guestsTruncCollapsed, setGuestsTruncCollapsed] = useState(false)
   const [coachTruncCollapsed, setCoachTruncCollapsed] = useState(false)
@@ -143,6 +145,7 @@ function WtedEpisodeSetlistDataRow({
         <SetlistEntrySongCell
           entry={sl}
           onSongClick={(entry) => router.push(getSongArchiveUrl(entry.song_id))}
+          onJotyClick={onJotyClick}
         />
       </TableCell>
       <TableCell className="whitespace-nowrap text-center tabular-nums text-muted-foreground">
@@ -231,6 +234,7 @@ export function WtedEpisodeSetlistTable({
   hoveredPerformanceYear = null,
   hoveredShowGroupKey = null,
   onWtedClick,
+  onJotyClick,
 }: {
   rows: WtedEpisodeTableRow[]
   /** When set, highlights matching song categories and dims others (song spread hover). */
@@ -241,6 +245,8 @@ export function WtedEpisodeSetlistTable({
   hoveredShowGroupKey?: string | null
   /** Opens WTED request sheet (logged in) or login dialog (guest). */
   onWtedClick?: (entry: SetlistEntry) => void
+  /** Opens the same JOTY drawer as the setlist archive page. */
+  onJotyClick?: (entry: SetlistEntry) => void
 }) {
   const router = useRouter()
   const isDesktop = useIsDesktopContentLayout()
@@ -346,6 +352,7 @@ export function WtedEpisodeSetlistTable({
         showWtedColumn={showWtedColumn}
         showGroupColumn={showGroupColumn}
         onWtedClick={onWtedClick}
+        onJotyClick={onJotyClick}
       />,
     )
   })

@@ -7,7 +7,10 @@ import { Check, Loader2, Search, X } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import type { WtedRadioIdRow } from "@/lib/wted-radio-ids-sync"
+import {
+  type WtedRadioIdRow,
+  wtedRadioIdsRowArtworkUrl,
+} from "@/lib/wted-radio-ids-sync"
 
 function normalize(s: string | null | undefined): string {
   return (s ?? "").trim().toLowerCase()
@@ -23,12 +26,12 @@ const CATALOG_ROW_HEIGHT_PX = 56
 const REQUEST_CATALOG_ARTWORK_FALLBACK = "/WTED3.png"
 
 function CatalogRowThumbnail({ row }: { row: WtedRadioIdRow }) {
-  const direct = row.artwork?.trim()
-  if (direct) {
+  const dbArtwork = wtedRadioIdsRowArtworkUrl(row)
+  if (dbArtwork) {
     return (
       <div className={thumbFrame}>
         <Image
-          src={direct}
+          src={dbArtwork}
           alt=""
           width={44}
           height={44}

@@ -16,6 +16,7 @@ import {
 import { useAuth } from "@/components/auth-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { SetlistSongSpreadCard } from "@/components/dpro/setlist/setlist-song-spread-card"
+import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
 import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
@@ -32,6 +33,18 @@ import { wtedEpisodeHasMultipleShowGroups } from "@/lib/wted-episode-show-group"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
 import type { SetlistEntry } from "@/types/setlist"
 
+/** HTML from CMS passes through; plain text is escaped and newlines become `<br />`. */
+function wtedEpisodeDescriptionHtml(raw: string): string {
+  const t = raw.trim()
+  if (!t) return ""
+  if (/<[a-zA-Z][\s\S]*>/.test(t)) return t
+  return t
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br />")
+}
+
 export function WtedEpisodePageClient() {
   const router = useRouter()
   const { user } = useAuth()
@@ -47,6 +60,10 @@ export function WtedEpisodePageClient() {
     null,
   )
   const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
+  const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
+  const [jotyDrawerYear, setJotyDrawerYear] = useState<number | null>(null)
+  const [jotyDrawerHighlightedEntryId, setJotyDrawerHighlightedEntryId] =
+    useState<string | null>(null)
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { episodeId, invalidParams } = useWtedEpisodePageId()
   const {
@@ -85,6 +102,9 @@ export function WtedEpisodePageClient() {
     setWtedSheetOpen(false)
     setWtedSheetEntry(null)
     setWtedLoginRequiredOpen(false)
+    setJotyDrawerOpen(false)
+    setJotyDrawerYear(null)
+    setJotyDrawerHighlightedEntryId(null)
   }, [episodeId])
 
   const handleWtedClick = useCallback(
@@ -97,6 +117,23 @@ export function WtedEpisodePageClient() {
       setWtedSheetOpen(true)
     },
     [user],
+  )
+
+  const handleJotyClick = useCallback(
+    (entry: SetlistEntry) => {
+      const row = rows.find(
+        (r) => r.setlistEntry.entry_id === entry.entry_id,
+      )
+      const raw = row?.showDate?.trim()
+      const year =
+        raw && !Number.isNaN(new Date(raw).getTime()) ?
+          new Date(raw).getFullYear()
+        : null
+      setJotyDrawerYear(year)
+      setJotyDrawerHighlightedEntryId(entry.entry_id)
+      setJotyDrawerOpen(true)
+    },
+    [rows],
   )
 
   useEffect(() => {
@@ -282,9 +319,12 @@ export function WtedEpisodePageClient() {
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Description
                 </h2>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-4 text-foreground">
-                  {description}
-                </p>
+                <div
+                  className="mt-2 min-w-0 text-sm leading-relaxed text-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:no-underline [&_a]:underline-offset-2 [&_a]:hover:underline"
+                  dangerouslySetInnerHTML={{
+                    __html: wtedEpisodeDescriptionHtml(description),
+                  }}
+                />
               </div>
             </>
           : null}
@@ -318,6 +358,7 @@ export function WtedEpisodePageClient() {
                       hoveredPerformanceYear={hoveredPerformanceYear}
                       hoveredShowGroupKey={hoveredShowGroupKey}
                       onWtedClick={handleWtedClick}
+                      onJotyClick={handleJotyClick}
                     />
                   </CardContent>
                 </Card>
@@ -357,6 +398,12 @@ export function WtedEpisodePageClient() {
           <SetlistWtedLoginRequiredDialog
             open={wtedLoginRequiredOpen}
             onOpenChange={setWtedLoginRequiredOpen}
+          />
+          <SetlistJotyDrawer
+            open={jotyDrawerOpen}
+            onOpenChange={setJotyDrawerOpen}
+            year={jotyDrawerYear}
+            highlightedEntryId={jotyDrawerHighlightedEntryId}
           />
           <SetlistWtedSheet
             open={wtedSheetOpen}

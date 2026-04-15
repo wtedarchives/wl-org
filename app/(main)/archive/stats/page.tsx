@@ -160,7 +160,7 @@ function DproStatsContent() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Songs
           </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <StatCard
               title="Top Songs Played"
               headerClassName="bg-[#3C1E40] text-white py-2"
@@ -243,7 +243,7 @@ function DproStatsContent() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Shows
           </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             <ShowStatCard
               title="Longest Shows"
               headerClassName="bg-muted py-2"

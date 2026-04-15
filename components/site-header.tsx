@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
-import { MenuIcon, MoreHorizontalIcon, PanelLeftIcon } from "lucide-react"
+import { MenuIcon, MoreHorizontalIcon } from "lucide-react"
 import {
   useIsDesktopContentLayout,
   useIsMobile,
@@ -180,21 +180,19 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     <header className="flex h-11 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-11">
       <div className="flex w-full items-center justify-between gap-1 px-4 lg:gap-2 lg:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-1 lg:gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            data-sidebar="trigger"
-            data-slot="sidebar-trigger"
-            className="-ml-1"
-            onClick={() => toggleSidebar()}
-            aria-label="Toggle Sidebar"
-          >
-            {isMobile ? (
+          {isMobile ?
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              data-sidebar="trigger"
+              data-slot="sidebar-trigger"
+              className="-ml-1"
+              onClick={() => toggleSidebar()}
+              aria-label="Toggle Sidebar"
+            >
               <MenuIcon className="size-4" />
-            ) : (
-              <PanelLeftIcon className="size-4" />
-            )}
-          </Button>
+            </Button>
+          : null}
           <Breadcrumb className="min-w-0 flex-1 overflow-hidden">
             <BreadcrumbList className="flex-nowrap gap-1.5 text-muted-foreground">
               <BreadcrumbItem className="shrink-0">

@@ -1,5 +1,6 @@
 "use client"
 
+import { Fragment } from "react"
 import Image from "next/image"
 import { Check, Loader2 } from "lucide-react"
 import { formatSetlistDate } from "@/lib/setlist-utils"
@@ -22,12 +23,13 @@ export function WtedSegmentsTitle({
   segments: WtedRequestEnrichedSegment[]
 }) {
   return (
-    <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1 text-xs font-medium text-foreground">
+    <span className="min-w-0 break-words text-xs font-medium leading-snug text-foreground">
       {segments.map((seg, i) => (
-        <span key={i} className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1">
+        <Fragment key={i}>
           {i > 0 ?
-            <span className="shrink-0 text-muted-foreground" aria-hidden>
-              →
+            <span className="text-red-400 mr-0.5" aria-hidden>
+              {" "}
+              →{" "}
             </span>
           : null}
           <SongDisplayName
@@ -36,11 +38,11 @@ export function WtedSegmentsTitle({
             songDisplayName={seg.song_displayname}
           />
           {shouldShowSetlistEntryShort(seg.song, seg.entry_short) && (
-            <span className="text-[0.625rem] text-red-400">
+            <span className="ml-1 text-[0.625rem] text-red-400">
               [{seg.entry_short}]
             </span>
           )}
-        </span>
+        </Fragment>
       ))}
     </span>
   )
@@ -185,7 +187,7 @@ export function WtedPendingSlotContent({
           ? "Requesting…"
           : mustWait
             ? `Wait ${waitSeconds}s`
-            : "Request this song"}
+            : "Request track"}
       </Button>
     </>
   )

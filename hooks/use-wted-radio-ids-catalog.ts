@@ -8,11 +8,6 @@ import {
 } from "react"
 import { supabase } from "@/lib/supabase"
 import {
-  clearWtedRadioCatalogSessionCache,
-  readWtedRadioCatalogSessionCache,
-  writeWtedRadioCatalogSessionCache,
-} from "@/lib/wted-radio-catalog-session-cache"
-import {
   WTED_RADIO_IDS_PAGE_SIZE,
   type WtedRadioIdRow,
 } from "@/lib/wted-radio-ids-sync"
@@ -27,7 +22,7 @@ export function useWtedRadioIdsCatalog(enabled: boolean) {
   const [rows, setRows] = useState<WtedRadioIdRow[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  /** Bumps when `reload()` clears session cache so the load effect runs again. */
+  /** Bumps when `reload()` should refetch from Supabase. */
   const [catalogFetchKey, setCatalogFetchKey] = useState(0)
 
   const loadFromNetwork = useCallback(async (signal: AbortSignal) => {
@@ -61,7 +56,6 @@ export function useWtedRadioIdsCatalog(enabled: boolean) {
         await yieldToMain()
       }
       if (signal.aborted) return
-      writeWtedRadioCatalogSessionCache(acc)
       startTransition(() => {
         setRows(acc)
       })
@@ -84,16 +78,6 @@ export function useWtedRadioIdsCatalog(enabled: boolean) {
       return
     }
 
-    const cached = readWtedRadioCatalogSessionCache()
-    if (cached && cached.length > 0) {
-      startTransition(() => {
-        setRows(cached)
-      })
-      setError(null)
-      setLoading(false)
-      return
-    }
-
     const ac = new AbortController()
     void loadFromNetwork(ac.signal)
     return () => {
@@ -102,7 +86,6 @@ export function useWtedRadioIdsCatalog(enabled: boolean) {
   }, [enabled, loadFromNetwork, catalogFetchKey])
 
   const reload = useCallback(() => {
-    clearWtedRadioCatalogSessionCache()
     startTransition(() => setRows([]))
     setCatalogFetchKey((k) => k + 1)
   }, [])

@@ -283,9 +283,10 @@ export function SetlistWtedSheet({
                   String(entry.radio_id) && (
                   <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-center">
                     <p className="text-xs font-normal text-foreground">
-                      <span className="font-semibold inline-flex flex-wrap items-baseline justify-center gap-x-1">
+                      <span className="font-semibold">
                         <WtedSegmentsTitle segments={segmentsForBanner} />
                         <span className="tabular-nums">
+                          {" "}
                           ({formatSetlistDate(show.show_date)})
                         </span>
                       </span>{" "}

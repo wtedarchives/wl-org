@@ -2,7 +2,6 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
-import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import Link from "next/link"
 import { Clock, Space, Flame, Users, Star } from "lucide-react"
 import {
@@ -130,22 +129,6 @@ export function ShowStatCard({
                         </Link>
                       ) : (
                         item.show_venue_location
-                      )
-                    ) : (
-                      ""
-                    )}
-                  </TableCell>
-                  <TableCell className="py-[7.33px] pl-2 text-xs text-muted-foreground">
-                    {item.show_tour ? (
-                      item.tour_id ? (
-                        <Link
-                          href={getTourArchiveUrl(item.tour_id)}
-                          className="text-foreground hover:underline"
-                        >
-                          {item.show_tour}
-                        </Link>
-                      ) : (
-                        item.show_tour
                       )
                     ) : (
                       ""

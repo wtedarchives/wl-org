@@ -6,76 +6,31 @@ import { useAuth } from "@/components/auth-context"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
 import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { WtedRequestSongCustomPanel } from "@/components/wted/wted-request-song-custom-panel"
 import { useWtedRadioIdsCatalog } from "@/hooks/use-wted-radio-ids-catalog"
 import { supabase } from "@/lib/supabase"
 import { resolveWtedRequestFromRadioId } from "@/lib/wted-resolve-radio-request-context"
 import { setlistEntryFromWtedRadioRow } from "@/lib/wted-synthetic-setlist-entry"
 import { cn } from "@/lib/utils"
-import type { WtedRadioIdRow } from "@/lib/wted-radio-ids-sync"
+import {
+  type WtedRadioIdRow,
+  wtedRadioIdsRowArtworkUrl,
+} from "@/lib/wted-radio-ids-sync"
 import type { SetlistEntry } from "@/types/setlist"
 
-const REQUEST_IFRAME_SRC = "https://embed.radio.co/request/w2255950.html"
+// const REQUEST_IFRAME_SRC = "https://embed.radio.co/request/w2255950.html"
 
 const cardClassName =
   "flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
 
-type RequestViewMode = "embed" | "catalog"
-
-function RequestSongHeaderBar({
-  hideHeader,
-  mode,
-  onModeChange,
-}: {
-  hideHeader: boolean
-  mode: RequestViewMode
-  onModeChange: (m: RequestViewMode) => void
-}) {
-  const inner = (
-    <div className="flex min-w-0 flex-row items-center justify-between gap-2">
-      <CardTitle className="min-w-0 shrink text-[13px] font-semibold text-wl-white">
-        Request a Song
-      </CardTitle>
-      <ToggleGroup
-        type="single"
-        value={mode}
-        onValueChange={(v) => {
-          if (v === "embed" || v === "catalog") onModeChange(v)
-        }}
-        variant="outline"
-        size="sm"
-        spacing={0}
-        className="shrink-0 border border-wl-dark-grey/50 bg-black/20"
-        aria-label="Request UI mode (embed vs catalog)"
-      >
-        <ToggleGroupItem
-          value="embed"
-          className="h-8 min-h-[44px] px-2 text-[10px] font-medium text-wl-white data-[state=on]:bg-wl-orange/80 data-[state=on]:text-wl-white sm:h-7 sm:min-h-0"
-        >
-          Embed
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="catalog"
-          className="h-8 min-h-[44px] px-2 text-[10px] font-medium text-wl-white data-[state=on]:bg-wl-orange/80 data-[state=on]:text-wl-white sm:h-7 sm:min-h-0"
-        >
-          Catalog
-        </ToggleGroupItem>
-      </ToggleGroup>
-    </div>
-  )
-
-  if (hideHeader) {
-    return (
-      <div className="shrink-0 border-b border-wl-dark-grey/50 bg-black/30 px-3 py-2 md:px-4">
-        {inner}
-      </div>
-    )
-  }
+function RequestSongHeaderBar({ hideHeader }: { hideHeader: boolean }) {
+  if (hideHeader) return null
 
   return (
     <CardHeader className="shrink-0 border-b border-wl-dark-grey/50 bg-black/30 py-2">
-      {inner}
+      <CardTitle className="min-w-0 shrink text-[13px] font-semibold text-wl-white">
+        Request a Song
+      </CardTitle>
     </CardHeader>
   )
 }
@@ -97,7 +52,7 @@ export function WtedRequestSongCard({
   hideHeader = false,
   /**
    * When false, the catalog list does not fetch until this becomes true (e.g. XL column
-   * scrolls into view). Embed mode is unaffected.
+   * scrolls into view).
    */
   catalogFetchEnabled = true,
 }: {
@@ -106,11 +61,9 @@ export function WtedRequestSongCard({
   catalogFetchEnabled?: boolean
 }) {
   const { user } = useAuth()
-  const [mode, setMode] = useState<RequestViewMode>("catalog")
-  const catalogQueryEnabled = catalogFetchEnabled && mode === "catalog"
+  const catalogQueryEnabled = catalogFetchEnabled
   const { rows, loading, error } = useWtedRadioIdsCatalog(catalogQueryEnabled)
-  const catalogDeferred =
-    mode === "catalog" && !catalogFetchEnabled
+  const catalogDeferred = !catalogFetchEnabled
   const panelLoading = loading || catalogDeferred
 
   const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
@@ -130,7 +83,7 @@ export function WtedRequestSongCard({
         setWtedLoginRequiredOpen(true)
         return
       }
-      const art = row.artwork?.trim() ? row.artwork.trim() : null
+      const art = wtedRadioIdsRowArtworkUrl(row)
       if (!supabase) {
         setFallbackArtwork(art)
         const syn = setlistEntryFromWtedRadioRow(row)
@@ -177,22 +130,13 @@ export function WtedRequestSongCard({
 
   return (
     <Card className={cn(cardClassName, className)}>
-      <RequestSongHeaderBar
-        hideHeader={hideHeader}
-        mode={mode}
-        onModeChange={setMode}
-      />
+      <RequestSongHeaderBar hideHeader={hideHeader} />
       <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden p-0">
         <div className="relative flex min-h-0 flex-1 flex-col">
-          <div
-            className={cn(
-              "flex min-h-0 flex-1 flex-col transition-opacity duration-200 ease-out motion-reduce:transition-none",
-              mode === "embed" ?
-                "opacity-100"
-              : "pointer-events-none absolute inset-0 opacity-0",
-            )}
-            aria-hidden={mode !== "embed"}
-          >
+          {/*
+          Revert: Radio.co embed was toggled vs catalog (see git history / restore
+          REQUEST_IFRAME_SRC and ToggleGroup in header).
+          <div className="flex min-h-0 flex-1 flex-col">
             <iframe
               src={REQUEST_IFRAME_SRC}
               title="WTED Request a Song"
@@ -201,24 +145,15 @@ export function WtedRequestSongCard({
               className="min-h-[120px] w-full flex-1 rounded-b-xl border-0"
             />
           </div>
-          <div
-            className={cn(
-              "flex min-h-0 flex-1 flex-col transition-opacity duration-200 ease-out motion-reduce:transition-none",
-              mode === "catalog" ?
-                "opacity-100"
-              : "pointer-events-none absolute inset-0 opacity-0",
-            )}
-            aria-hidden={mode !== "catalog"}
-          >
-            <WtedRequestSongCustomPanel
-              rows={rows}
-              loading={panelLoading}
-              error={error}
-              onPickTrack={openRequestSheet}
-              busyRadioId={busyRadioId}
-              className="min-h-0 flex-1 rounded-b-xl"
-            />
-          </div>
+          */}
+          <WtedRequestSongCustomPanel
+            rows={rows}
+            loading={panelLoading}
+            error={error}
+            onPickTrack={openRequestSheet}
+            busyRadioId={busyRadioId}
+            className="min-h-0 flex-1 rounded-b-xl"
+          />
         </div>
       </CardContent>
 

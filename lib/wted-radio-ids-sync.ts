@@ -39,6 +39,11 @@ function normalizedDbArtwork(value: string | null | undefined): string | null {
   return trimmed === "" ? null : trimmed
 }
 
+/** Image URL from `wted_radio_ids.artwork`, or null when unset/blank (use a local fallback in UI). */
+export function wtedRadioIdsRowArtworkUrl(row: WtedRadioIdRow): string | null {
+  return normalizedDbArtwork(row.artwork)
+}
+
 type RadioCoApiResponse = {
   tracks: RadioCoApiTrack[]
 }
