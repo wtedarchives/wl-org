@@ -44,6 +44,29 @@ function sortLabel(song: string, songDisplayName: string | null): string {
   return (songDisplayName?.trim() || song).toLowerCase()
 }
 
+/** PostgREST/JSON may return `order` as string; keep aligned with draft numbers. */
+function coerceWtedEpisodeOrder(val: unknown): number | null {
+  if (val == null) return null
+  if (typeof val === "number" && Number.isFinite(val)) return Math.trunc(val)
+  if (typeof val === "string" && val.trim() !== "") {
+    const n = Number.parseInt(val, 10)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+function normalizeWtedEpisodeSet(val: unknown): string | null {
+  if (val == null) return null
+  const t = String(val).trim()
+  return t !== "" ? t : null
+}
+
+function normalizeWtedEpisodePlacement(val: unknown): string | null {
+  if (val == null) return null
+  const t = String(val).trim()
+  return t !== "" ? t : null
+}
+
 export function sortAdminEpisodeSetlistRows(
   rows: AdminEpisodeSetlistTableRow[],
 ): AdminEpisodeSetlistTableRow[] {
@@ -124,9 +147,9 @@ export async function loadAdminEpisodeSetlistRows(
       showDateRaw: en?.showDateRaw ?? null,
       venueLocation: en?.venueLocation ?? null,
       showGroup: en?.showGroup ?? null,
-      wtedSet: ee.set,
-      wtedOrder: ee.order,
-      wtedPlacement: ee.placement,
+      wtedSet: normalizeWtedEpisodeSet(ee.set),
+      wtedOrder: coerceWtedEpisodeOrder(ee.order),
+      wtedPlacement: normalizeWtedEpisodePlacement(ee.placement),
     })
   }
 

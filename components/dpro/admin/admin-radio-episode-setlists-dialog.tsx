@@ -1,11 +1,20 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import type { AdminShowData } from "@/types/admin"
 import { useShowData } from "@/hooks/use-show-data"
 import { useSetlistOptions } from "@/hooks/use-setlist-options"
 import { formatDate } from "@/lib/utils/show-utils"
+import {
+  collectEpisodeSetlistUpdates,
+  collectStagedEpisodeInserts,
+  EPISODE_LISTING_STAGED_PREFIX,
+  getNextWtedEpisodeEntryAutoFieldsFromState,
+  initEpisodeSetlistEditorState,
+  removeEditorRow,
+  type EpisodeSetlistEditorState,
+} from "@/lib/admin-radio-episode-setlist-entries-dnd"
 import {
   loadAdminEpisodeSetlistRows,
   type AdminEpisodeSetlistTableRow,
@@ -25,6 +34,27 @@ import {
 } from "@/components/ui/dialog"
 import type { ProgramDirectorEpisode } from "@/hooks/use-program-director-data"
 
+function buildStagedEpisodeListingRow(
+  entry: SetlistPickerEntry,
+  show: AdminShowData,
+  tempId: string,
+  fields: { set: string; order: number; placement: string | null },
+): AdminEpisodeSetlistTableRow {
+  const song = entry.entry_song?.trim() || "(no song)"
+  return {
+    eeUuid: tempId,
+    entryId: entry.entry_id,
+    entrySong: song,
+    songDisplayName: null,
+    showDateRaw: show.show_date,
+    venueLocation: show.show_venue_location ?? null,
+    showGroup: show.show_group,
+    wtedSet: fields.set,
+    wtedOrder: fields.order,
+    wtedPlacement: fields.placement,
+  }
+}
+
 export function AdminRadioEpisodeSetlistsDialog({
   open,
   onOpenChange,
@@ -43,29 +73,46 @@ export function AdminRadioEpisodeSetlistsDialog({
   const [pickerEntries, setPickerEntries] = useState<SetlistPickerEntry[]>([])
   const [loadingPicker, setLoadingPicker] = useState(false)
 
-  const [rows, setRows] = useState<AdminEpisodeSetlistTableRow[]>([])
+  const [savedRows, setSavedRows] = useState<AdminEpisodeSetlistTableRow[]>([])
+  const [stagedRows, setStagedRows] = useState<AdminEpisodeSetlistTableRow[]>([])
   const [loadingRows, setLoadingRows] = useState(false)
-  const [savingUuid, setSavingUuid] = useState<string | null>(null)
+  const [savingAll, setSavingAll] = useState(false)
   const [deletingUuid, setDeletingUuid] = useState<string | null>(null)
   const [panelError, setPanelError] = useState<string | null>(null)
+  const [listingEditor, setListingEditor] =
+    useState<EpisodeSetlistEditorState>(() => initEpisodeSetlistEditorState([]))
+  const listingEditorRef = useRef(listingEditor)
+  listingEditorRef.current = listingEditor
+  const stagedRowsRef = useRef(stagedRows)
+  stagedRowsRef.current = stagedRows
 
   const radioId = episode?.radio_id?.trim() ?? ""
 
+  const listingDisplayRows = useMemo(
+    () => [...savedRows, ...stagedRows],
+    [savedRows, stagedRows],
+  )
+
   const reloadRows = useCallback(async () => {
     if (!supabase || !radioId) {
-      setRows([])
+      setSavedRows([])
+      setStagedRows([])
+      setListingEditor(initEpisodeSetlistEditorState([]))
       return
     }
     setLoadingRows(true)
     setPanelError(null)
     try {
       const next = await loadAdminEpisodeSetlistRows(supabase, radioId)
-      setRows(next)
+      setSavedRows(next)
+      setListingEditor(initEpisodeSetlistEditorState(next))
     } catch (e) {
       setPanelError(
         e instanceof Error ? e.message : "Failed to load episode entries.",
       )
-      setRows([])
+      setSavedRows([])
+      setStagedRows([])
+      setListingEditor(initEpisodeSetlistEditorState([]))
     } finally {
       setLoadingRows(false)
     }
@@ -73,6 +120,7 @@ export function AdminRadioEpisodeSetlistsDialog({
 
   useEffect(() => {
     if (!open) return
+    setStagedRows([])
     setSelectedShow(null)
     setPickerEntries([])
     setSearchTerm("")
@@ -130,58 +178,107 @@ export function AdminRadioEpisodeSetlistsDialog({
     [fetchPickerEntries],
   )
 
-  const addEntry = async (entry: SetlistPickerEntry) => {
-    if (!supabase || !radioId) return
-    setPanelError(null)
-    try {
-      const { error } = await supabase.from("wted_episode_entries").insert({
-        song: entry.entry_id,
-        episode: radioId,
-        set: null,
-        order: null,
-        placement: null,
-      })
-      if (error) throw error
-      await reloadRows()
-    } catch (e) {
-      setPanelError(
-        e instanceof Error ? e.message : "Could not add setlist entry.",
-      )
+  const stagePickerEntry = (entry: SetlistPickerEntry) => {
+    if (!radioId) return
+    if (!selectedShow) {
+      setPanelError("Select a show before adding songs.")
+      return
     }
+    setPanelError(null)
+    const prevEditor = listingEditorRef.current
+    const prevStaged = stagedRowsRef.current
+    const combinedForSlot = [...savedRows, ...prevStaged]
+    const nextFields = getNextWtedEpisodeEntryAutoFieldsFromState(
+      combinedForSlot,
+      prevEditor,
+    )
+    const tempId = `${EPISODE_LISTING_STAGED_PREFIX}${crypto.randomUUID()}`
+    const newRow = buildStagedEpisodeListingRow(
+      entry,
+      selectedShow,
+      tempId,
+      nextFields,
+    )
+    setStagedRows((prev) => [...prev, newRow])
+    setListingEditor({
+      orderUuids: [...prevEditor.orderUuids, tempId],
+      drafts: {
+        ...prevEditor.drafts,
+        [tempId]: {
+          set: nextFields.set,
+          order: nextFields.order,
+          placement: nextFields.placement,
+        },
+      },
+    })
   }
 
-  const saveRowFields = async (
-    eeUuid: string,
-    fields: {
-      set: string | null
-      order: number | null
-      placement: string | null
-    },
-  ) => {
-    if (!supabase) return
-    setSavingUuid(eeUuid)
+  const handleSaveEpisodeListing = async () => {
+    const client = supabase
+    if (!client || !radioId) return
+    const ed = listingEditorRef.current
+    const updates = collectEpisodeSetlistUpdates(savedRows, ed)
+    const stagedMap = new Map(
+      stagedRowsRef.current.map((r) => [r.eeUuid, r]),
+    )
+    const inserts = collectStagedEpisodeInserts(ed, stagedMap)
+    if (updates.length === 0 && inserts.length === 0) return
+
+    setSavingAll(true)
     setPanelError(null)
     try {
-      const { error } = await supabase
-        .from("wted_episode_entries")
-        .update({
-          set: fields.set,
-          order: fields.order,
-          placement: fields.placement,
-        })
-        .eq("uuid", eeUuid)
-      if (error) throw error
-      await reloadRows()
+      const updateResults = await Promise.all(
+        updates.map((u) =>
+          client
+            .from("wted_episode_entries")
+            .update({
+              set: u.set,
+              order: u.order,
+              placement: u.placement,
+            })
+            .eq("uuid", u.eeUuid),
+        ),
+      )
+      const insertResults = await Promise.all(
+        inserts.map((ins) =>
+          client.from("wted_episode_entries").insert({
+            song: ins.entryId,
+            episode: radioId,
+            set: ins.set,
+            order: ins.order,
+            placement: ins.placement,
+          }),
+        ),
+      )
+      const firstErr =
+        updateResults.find((r) => r.error)?.error ??
+        insertResults.find((r) => r.error)?.error
+      if (firstErr) throw firstErr
+
+      setStagedRows([])
+      setLoadingRows(true)
+      try {
+        const next = await loadAdminEpisodeSetlistRows(client, radioId)
+        setSavedRows(next)
+        setListingEditor(initEpisodeSetlistEditorState(next))
+      } finally {
+        setLoadingRows(false)
+      }
     } catch (e) {
       setPanelError(
-        e instanceof Error ? e.message : "Could not update row.",
+        e instanceof Error ? e.message : "Could not save episode listing.",
       )
     } finally {
-      setSavingUuid(null)
+      setSavingAll(false)
     }
   }
 
   const deleteRow = async (eeUuid: string) => {
+    if (eeUuid.startsWith(EPISODE_LISTING_STAGED_PREFIX)) {
+      setStagedRows((prev) => prev.filter((r) => r.eeUuid !== eeUuid))
+      setListingEditor((ed) => removeEditorRow(ed, eeUuid))
+      return
+    }
     if (!supabase) return
     setDeletingUuid(eeUuid)
     setPanelError(null)
@@ -267,25 +364,27 @@ export function AdminRadioEpisodeSetlistsDialog({
               pickerEntries={pickerEntries}
               loadingPicker={loadingPicker}
               radioId={radioId}
-              onPickEntry={(pe) => void addEntry(pe)}
+              onPickEntry={(pe) => stagePickerEntry(pe)}
               showDropdownPortalToBody={false}
             />
           </div>
 
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 pb-3 sm:px-6">
             <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <h3 className="text-xs mt-4 font-semibold uppercase tracking-wide text-muted-foreground">
                 Episode listing
               </h3>
               <AdminRadioEpisodeSetlistsEntriesTable
-                rows={rows}
+                rows={listingDisplayRows}
+                editor={listingEditor}
+                onEditorChange={setListingEditor}
                 loadingRows={loadingRows}
                 sets={sets}
                 setnums={setnums}
                 placements={placements}
-                savingUuid={savingUuid}
+                savingAll={savingAll}
                 deletingUuid={deletingUuid}
-                onSaveRow={(id, f) => void saveRowFields(id, f)}
+                onSaveListing={() => void handleSaveEpisodeListing()}
                 onDeleteRow={(id) => void deleteRow(id)}
               />
             </section>
