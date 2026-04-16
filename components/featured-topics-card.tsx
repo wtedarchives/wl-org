@@ -64,7 +64,7 @@ export function FeaturedTopicsCard({
       <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
         <Table
           className={cn(
-            "w-full min-w-0 table-fixed text-[11px] [&_tr:last-child_td]:pb-2",
+            "w-full min-w-0 table-fixed text-[11px]",
             "transition-opacity duration-200 ease-out",
             loading ? "opacity-90" : "opacity-100",
           )}
@@ -93,47 +93,53 @@ export function FeaturedTopicsCard({
             ) : (
               topics.map((item) => {
                 const remote = /^https?:\/\//i.test(item.src)
+                const titleText = decodeHtmlEntitiesForDisplay(item.topic)
                 return (
                   <TableRow
                     key={item.id}
-                    className="border-wl-dark-grey/40 hover:bg-[#b2655e]"
+                    className="group border-wl-dark-grey/40 hover:bg-[#b2655e]"
                   >
-                    <TableCell className="w-[66px] pl-2 pr-2 py-1 align-middle">
-                      <div
+                    <TableCell colSpan={2} className="p-0 align-middle">
+                      <Link
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={titleText}
                         className={cn(
-                          "relative h-14 w-14 overflow-hidden",
-                          isAccordion ? "rounded-none" : "rounded",
+                          "flex min-h-[72px] min-w-0 flex-row items-stretch gap-0 outline-none transition-colors",
+                          "focus-visible:ring-2 focus-visible:ring-wl-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#844b45]",
                         )}
                       >
-                        <Image
-                          src={item.src}
-                          alt=""
-                          fill
-                          sizes="56px"
-                          className="object-cover object-center"
-                          unoptimized={remote}
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell className="min-w-0 pl-2 pr-2 py-1 align-middle whitespace-normal">
-                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <Link
-                          href={item.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="break-words text-[12px] font-semibold text-wl-white hover:underline leading-3"
-                          title={decodeHtmlEntitiesForDisplay(item.topic)}
-                        >
-                          {decodeHtmlEntitiesForDisplay(item.topic)}
-                        </Link>
-                        <span className="text-[11px] text-wl-white/80">
-                          {item.posts_count.toLocaleString()}{" "}
-                          {item.posts_count === 1 ? "post" : "posts"}
-                          {" · "}
-                          {item.views.toLocaleString()}{" "}
-                          {item.views === 1 ? "view" : "views"}
-                        </span>
-                      </div>
+                        <div className="flex w-[66px] shrink-0 items-center pl-2 pr-2 py-1">
+                          <div
+                            className={cn(
+                              "relative h-14 w-14 shrink-0 overflow-hidden",
+                              isAccordion ? "rounded-none" : "rounded",
+                            )}
+                          >
+                            <Image
+                              src={item.src}
+                              alt=""
+                              fill
+                              sizes="56px"
+                              className="object-cover object-center"
+                              unoptimized={remote}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-1 pl-2 pr-2 whitespace-normal">
+                          <span className="break-words text-[12px] font-semibold leading-3 text-wl-white group-hover:underline">
+                            {titleText}
+                          </span>
+                          <span className="text-[11px] text-wl-white/80">
+                            {item.posts_count.toLocaleString()}{" "}
+                            {item.posts_count === 1 ? "post" : "posts"}
+                            {" · "}
+                            {item.views.toLocaleString()}{" "}
+                            {item.views === 1 ? "view" : "views"}
+                          </span>
+                        </div>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 )
