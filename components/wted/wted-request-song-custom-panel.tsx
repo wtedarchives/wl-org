@@ -19,8 +19,8 @@ function normalize(s: string | null | undefined): string {
 const thumbFrame =
   "relative size-9 shrink-0 overflow-hidden rounded border border-wl-dark-grey/50"
 
-/** Row height estimate for TanStack Virtual (keep in sync with row layout). */
-const CATALOG_ROW_HEIGHT_PX = 56
+/** Row min height + TanStack Virtual estimate (Request a Song catalog only). */
+const CATALOG_ROW_HEIGHT_PX = 48
 
 /** When `wted_radio_ids.artwork` is empty; catalog is expected to use DB URLs after backfill. */
 const REQUEST_CATALOG_ARTWORK_FALLBACK = "/WTED3.png"
@@ -75,14 +75,14 @@ function CatalogTrackRow({
       <div className="flex min-h-0 w-full items-center gap-2 sm:gap-3">
         <CatalogRowThumbnail row={row} />
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-[11px] font-medium leading-snug text-wl-white sm:text-[12px]">
+          <p className="line-clamp-2 text-[11px] font-medium leading-3.5 text-wl-white sm:text-[12px]">
             {row.track_title?.trim() || "—"}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {row.track_artist?.trim() ?
             <span
-              className="inline-block max-w-[100px] truncate rounded-full border border-wl-dark-grey/50 bg-[#2a332f] px-2 py-0.5 text-left align-middle text-[10px] font-semibold text-wl-white"
+              className="inline-block max-w-[100px] truncate rounded-full border border-wl-dark-grey/50 bg-wl-orange/40 px-2 py-0.5 text-left align-middle text-[10px] font-semibold text-wl-white"
               title={row.track_artist.trim()}
             >
               {row.track_artist.trim()}
@@ -169,7 +169,7 @@ export function WtedRequestSongCustomPanel({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search…"
             className={cn(
-              "h-7 border-wl-dark-grey/50 bg-black/20 py-0 pl-7 text-[11px] leading-tight text-wl-white placeholder:text-wl-white/45",
+              "h-7 border-wl-dark-grey/50 !bg-white/10 py-0 pl-7 text-[11px] leading-tight text-wl-white placeholder:text-wl-white/45",
               query ? "pr-8" : "pr-2",
             )}
             autoComplete="off"

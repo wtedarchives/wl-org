@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Calendar1 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
@@ -11,7 +12,8 @@ const FLODOWN_EVENTS = [
     day: 19,
     name: "St. Augustine Flamingo Flodown",
     venue: "Spinster Abbott's",
-    location: "St Augustine, FL",
+    location: "St. Augustine, FL",
+    href: "https://www.instagram.com/p/DTBjr3WEnzU/?img_index=1",
   },
   {
     month: "APR",
@@ -19,6 +21,7 @@ const FLODOWN_EVENTS = [
     name: "NOLA Flodown",
     venue: "Miel Brewery and Taproom",
     location: "New Orleans, LA",
+    href: "https://www.instagram.com/p/DXIzhjpjK-g/?img_index=1",
   },
   {
     month: "APR",
@@ -26,6 +29,7 @@ const FLODOWN_EVENTS = [
     name: "Dallas Flodown",
     venue: "Celestial Beerworks",
     location: "Dallas, TX",
+    href: "https://www.celestialbeerworks.com/celestial-beerworks-taproom/2026/4/25/dallas-unofficial-goose-flodown",
   },
 ] as const
 
@@ -80,32 +84,40 @@ export function FlodownEventsCard({
         </CardHeader>
       ) : null}
       <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
-        <Table className="w-full min-w-0 table-fixed text-[11px] [&_tr:last-child_td]:pb-2">
+        <Table className="w-full min-w-0 table-fixed text-[11px]">
           <TableBody>
-            {FLODOWN_EVENTS.map((item, index) => (
+            {FLODOWN_EVENTS.map((item) => (
               <TableRow
-                key={index}
-                className="border-wl-dark-grey/40 hover:bg-[#b2655e]"
+                key={item.href}
+                className="group border-wl-dark-grey/40 hover:bg-[#b2655e]"
               >
-                <TableCell className="w-[66px] pl-2 pr-2 py-1 align-middle">
-                  <CalendarIcon
-                    month={item.month}
-                    date={String(item.day)}
-                    square={isAccordion}
-                  />
-                </TableCell>
-                <TableCell className="min-w-0 pl-2 pr-2 py-1 align-middle whitespace-normal">
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span
-                      className="break-words text-[12px] font-semibold text-wl-white leading-3.5"
-                      title={item.name}
-                    >
-                      {item.name}
-                    </span>
-                    <span className="text-[11px] text-wl-white/80">
-                      {item.venue} – {item.location}
-                    </span>
-                  </div>
+                <TableCell colSpan={2} className="p-0 align-middle">
+                  <Link
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={item.name}
+                    className={cn(
+                      "flex min-h-[72px] min-w-0 flex-row items-stretch gap-0 outline-none transition-colors",
+                      "focus-visible:ring-2 focus-visible:ring-wl-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#844b45]",
+                    )}
+                  >
+                    <div className="flex w-[66px] shrink-0 items-center pl-2 pr-2 py-1">
+                      <CalendarIcon
+                        month={item.month}
+                        date={String(item.day)}
+                        square={isAccordion}
+                      />
+                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 py-1 pl-2 pr-2 whitespace-normal">
+                      <span className="break-words text-[12px] font-semibold leading-3.5 text-wl-white group-hover:underline">
+                        {item.name}
+                      </span>
+                      <span className="text-[11px] text-wl-white/80">
+                        {item.venue} – {item.location}
+                      </span>
+                    </div>
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}
