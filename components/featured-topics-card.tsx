@@ -127,7 +127,7 @@ export function FeaturedTopicsCard({
                           {decodeHtmlEntitiesForDisplay(item.topic)}
                         </Link>
                         <span className="text-[11px] text-wl-white/80">
-                          {item.posts_count}{" "}
+                          {item.posts_count.toLocaleString()}{" "}
                           {item.posts_count === 1 ? "post" : "posts"}
                           {" · "}
                           {item.views.toLocaleString()}{" "}

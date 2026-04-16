@@ -13,6 +13,24 @@ export type DiscourseFeaturedTopic = {
   views: number
 }
 
+type FeaturedTopicsApiDebug = {
+  latestTopicCount: number
+  withFeaturedTagCount: number
+  returnedCount: number
+  excludedAfterFeatured: Array<{
+    id: number | undefined
+    slug: string | null
+    title: string | null
+    reason: "missing_or_invalid_slug" | "missing_id"
+  }>
+}
+
+type FeaturedTopicsApiResponse = {
+  topics?: unknown
+  error?: string
+  debug?: FeaturedTopicsApiDebug
+}
+
 export function useDiscourseFeaturedTopics() {
   const [topics, setTopics] = useState<DiscourseFeaturedTopic[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,17 +51,45 @@ export function useDiscourseFeaturedTopics() {
       }
 
       try {
-        const res = await fetch(`${base}/discourse-featured-topics`, {
+        const isDev = process.env.NODE_ENV === "development"
+        const path = `discourse-featured-topics${isDev ? "?debug=1" : ""}`
+        const res = await fetch(`${base}/${path}`, {
           headers: {
             Authorization: `Bearer ${anon}`,
             apikey: anon,
           },
         })
-        const data = await res.json().catch(() => ({}))
+        const data = (await res.json().catch(() => ({}))) as FeaturedTopicsApiResponse
         if (!res.ok) {
           throw new Error(
             typeof data.error === "string" ? data.error : `Request failed (${res.status})`,
           )
+        }
+        if (isDev) {
+          const shown = Array.isArray(data.topics) ? data.topics : []
+          console.groupCollapsed("[Featured Topics] homepage data")
+          console.log("Request:", `${base}/${path}`)
+          console.log(
+            "Topics shown in UI:",
+            shown.map((t: DiscourseFeaturedTopic) => ({
+              id: t.id,
+              title: t.topic,
+              href: t.href,
+              posts: t.posts_count,
+              views: t.views,
+            })),
+          )
+          if (data.debug) {
+            console.log(
+              "Selection (Discourse latest.json → tag `featured` → require slug):",
+              data.debug,
+            )
+          } else {
+            console.log(
+              "Tip: run `npm run dev` and reload; the client requests `?debug=1` in development for counts and excluded topics.",
+            )
+          }
+          console.groupEnd()
         }
         if (!cancelled) {
           const raw = Array.isArray(data.topics) ? data.topics : []

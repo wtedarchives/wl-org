@@ -1,7 +1,8 @@
 import { corsHeaders } from "../_shared/cors.ts"
 
 const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
-const LATEST_JSON = `${COMMUNITY_ORIGIN}/latest.json`
+/** Discourse search: topics tagged `featured` (same as `q=tags%3Afeatured`). */
+const SEARCH_JSON = `${COMMUNITY_ORIGIN}/search.json?q=${encodeURIComponent("tags:featured")}`
 
 /** Local fallback when Discourse has no topic image (matches prior static featured assets). */
 const DEFAULT_TOPIC_IMAGE = "/featured-1.jpg"
@@ -19,15 +20,16 @@ type DiscourseTopic = {
   views?: number
 }
 
-type LatestResponse = {
+type SearchResponse = {
+  topics?: DiscourseTopic[]
   topic_list?: { topics?: DiscourseTopic[] }
 }
 
-function hasFeaturedTag(tags: DiscourseTag[] | undefined): boolean {
-  if (!Array.isArray(tags)) return false
-  return tags.some(
-    (t) => t.name === "featured" || t.slug === "featured",
-  )
+/** Shape of `/t/{id}.json` — `views` and `image_url` live on the root object. */
+type TopicShowResponse = {
+  id?: number
+  views?: number
+  image_url?: string | null
 }
 
 /**
@@ -65,12 +67,14 @@ Deno.serve(async (req) => {
       )
     }
 
-    const res = await fetch(LATEST_JSON, {
-      headers: {
-        "Api-Key": apiKey,
-        "Api-Username": apiUsername,
-        Accept: "application/json",
-      },
+    const discourseAuthHeaders = {
+      "Api-Key": apiKey,
+      "Api-Username": apiUsername,
+      Accept: "application/json",
+    }
+
+    const res = await fetch(SEARCH_JSON, {
+      headers: discourseAuthHeaders,
     })
 
     if (!res.ok) {
@@ -87,9 +91,9 @@ Deno.serve(async (req) => {
       )
     }
 
-    let json: LatestResponse
+    let json: SearchResponse
     try {
-      json = (await res.json()) as LatestResponse
+      json = (await res.json()) as SearchResponse
     } catch {
       return new Response(
         JSON.stringify({ error: "Invalid JSON from Discourse" }),
@@ -100,28 +104,105 @@ Deno.serve(async (req) => {
       )
     }
 
-    const raw = json.topic_list?.topics ?? []
+    const topicRows = json.topics ?? json.topic_list?.topics ?? []
+    const byId = new Map<number, DiscourseTopic>()
+    for (const t of topicRows) {
+      if (typeof t.id !== "number") continue
+      if (!byId.has(t.id)) byId.set(t.id, t)
+    }
+    const raw = Array.from(byId.values())
 
-    const topics = raw
-      .filter((t) => hasFeaturedTag(t.tags))
-      .filter((t) => typeof t.id === "number" && Boolean(t.slug?.trim()))
-      .map((t) => {
-        const slug = t.slug!.trim()
-        const title =
-          t.fancy_title?.trim() ||
-          t.title?.trim() ||
-          slug.replace(/-/g, " ")
-        return {
-          id: t.id,
-          src: t.image_url?.trim() || DEFAULT_TOPIC_IMAGE,
-          topic: title,
-          href: `${COMMUNITY_ORIGIN}/t/${slug}/${t.id}`,
-          posts_count: typeof t.posts_count === "number" ? t.posts_count : 0,
-          views: typeof t.views === "number" ? t.views : 0,
+    const url = new URL(req.url)
+    const debugRequested = url.searchParams.has("debug")
+
+    const filtered = raw.filter(
+      (t) => typeof t.id === "number" && Boolean(t.slug?.trim()),
+    )
+
+    const detailResults = await Promise.all(
+      filtered.map(async (t) => {
+        try {
+          const topicRes = await fetch(
+            `${COMMUNITY_ORIGIN}/t/${t.id}.json`,
+            { headers: discourseAuthHeaders },
+          )
+          if (!topicRes.ok) {
+            return { image_url: null as string | null, views: 0 }
+          }
+          const body = (await topicRes.json()) as TopicShowResponse
+          const imageUrl =
+            typeof body.image_url === "string" && body.image_url.trim() !== "" ?
+              body.image_url.trim()
+            : null
+          const views =
+            typeof body.views === "number" && Number.isFinite(body.views) ?
+              body.views
+            : 0
+          return { image_url: imageUrl, views }
+        } catch {
+          return { image_url: null as string | null, views: 0 }
         }
-      })
+      }),
+    )
 
-    return new Response(JSON.stringify({ topics }), {
+    const topics = filtered.map((t, i) => {
+      const slug = t.slug!.trim()
+      const title =
+        t.fancy_title?.trim() ||
+        t.title?.trim() ||
+        slug.replace(/-/g, " ")
+      const detail = detailResults[i]!
+      return {
+        id: t.id,
+        src: detail.image_url ?? DEFAULT_TOPIC_IMAGE,
+        topic: title,
+        href: `${COMMUNITY_ORIGIN}/t/${slug}/${t.id}`,
+        posts_count: typeof t.posts_count === "number" ? t.posts_count : 0,
+        views: detail.views,
+      }
+    })
+
+    const body: {
+      topics: typeof topics
+      debug?: {
+        latestTopicCount: number
+        withFeaturedTagCount: number
+        returnedCount: number
+        /** Topics from search that were dropped (e.g. missing slug). */
+        excludedAfterFeatured: Array<{
+          id: number | undefined
+          slug: string | null
+          title: string | null
+          reason: "missing_or_invalid_slug" | "missing_id"
+        }>
+      }
+    } = { topics }
+
+    if (debugRequested) {
+      const includedIds = new Set(topics.map((t) => t.id))
+      const excludedAfterFeatured = raw
+        .filter((t) => !includedIds.has(t.id))
+        .map((t) => {
+          const reason =
+            typeof t.id !== "number" ? ("missing_id" as const)
+            : ("missing_or_invalid_slug" as const)
+          return {
+            id: t.id,
+            slug: t.slug?.trim() ? t.slug : null,
+            title: (t.fancy_title ?? t.title ?? null)?.trim() ?? null,
+            reason,
+          }
+        })
+
+      body.debug = {
+        latestTopicCount: raw.length,
+        withFeaturedTagCount: raw.length,
+        returnedCount: topics.length,
+        excludedAfterFeatured,
+      }
+    }
+
+    return new Response(JSON.stringify(body), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })
