@@ -1,19 +1,10 @@
-import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 
-import { WtedShows } from "@/components/wted-shows"
-
-export const metadata: Metadata = {
-  title: "Shows and More",
-  description:
-    "Scheduled shows and Goose content on WTED Goose Radio, including RequesTED, OnlyJams, and more.",
-}
-
+/**
+ * `/wted/shows` is disabled for end users (see `public/_redirects` on Netlify).
+ * The `WtedShows` UI remains in `@/components/wted-shows` and
+ * `@/app/(main)/wted/shows/content` for future reuse.
+ */
 export default function WtedShowsPage() {
-  return (
-    <div className="@container/main flex flex-1 flex-col gap-2">
-      <div className="flex flex-1 flex-col">
-        <WtedShows />
-      </div>
-    </div>
-  )
+  redirect("/wted/program-director")
 }

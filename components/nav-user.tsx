@@ -26,7 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { BarChart3Icon, LogIn, LogOutIcon, SettingsIcon, User } from "lucide-react"
+import { BarChart3Icon, LogIn, LogOutIcon, User } from "lucide-react"
 
 export function NavUser() {
   const { user, signOut } = useAuth()
@@ -81,17 +81,17 @@ export function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="bg-wl-black/40 text-wl-white hover:bg-wl-black/60 ring-0 ring-offset-0 outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="h-8 w-8 rounded-full">
                 <AvatarImage src="" alt={displayName} />
-                <AvatarFallback className="rounded-lg">
+                <AvatarFallback className="rounded-full">
                   {displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{displayName}</span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="truncate text-xs text-wl-white">
                   {displayEmail}
                 </span>
               </div>
@@ -129,12 +129,6 @@ export function NavUser() {
                   >
                     <BarChart3Icon className="size-4" />
                     My Stats
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings" className="flex items-center gap-2">
-                    <SettingsIcon className="size-4" />
-                    Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -1,6 +1,9 @@
 # WTED Info page removed; send legacy URLs to About
 /wted/info  /wted/about  301
 
+# Shows page retired; UI preserved in repo (components/wted-shows.tsx)
+/wted/shows  /wted/program-director  301
+
 # Legacy path-based setlist URLs → query model (static export builds one HTML file)
 /archive/setlist/*  /archive/setlist?id=:splat  301
 

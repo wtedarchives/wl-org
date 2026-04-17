@@ -18,6 +18,8 @@ export interface ProgramDirectorEpisode {
 export interface ProgramDirectorShow {
   show: string
   order: number | null
+  /** From `wted_shows.description`; shown in Program Director info dialog when set. */
+  description: string | null
   episodes: ProgramDirectorEpisode[]
 }
 
@@ -65,7 +67,7 @@ export function useProgramDirectorData() {
         fetchRadioIdsWithEpisodeEntries(),
         supabase
           .from("wted_shows")
-          .select("show, order")
+          .select("show, order, description")
           .order("order", { ascending: true }),
       ])
       if (showsRes.error) throw showsRes.error
@@ -108,6 +110,10 @@ export function useProgramDirectorData() {
           return {
             show: s.show,
             order: s.order,
+            description:
+              s.description != null && String(s.description).trim() !== "" ?
+                String(s.description).trim()
+              : null,
             episodes: sorted,
           }
         }),

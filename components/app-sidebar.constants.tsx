@@ -1,10 +1,18 @@
-import { BookOpenIcon } from "lucide-react"
+import type { ReactNode } from "react"
+
+export type NavMainItem = {
+  title: string
+  url: string
+  icon: ReactNode
+}
+
+/** Optional top-level sidebar links below Publications (e.g. standalone pages). */
+export const navMainItems: readonly NavMainItem[] = []
 
 export const WTED_RADIO_SUB = [
-  { title: "GORPs and Contributors", url: "/wted/gorps" },
-  { title: "Shows and More", url: "/wted/shows" },
   { title: "Program Director", url: "/wted/program-director" },
   { title: "About Us and FAQ", url: "/wted/about" },
+  { title: "GORPs and Contributors", url: "/wted/gorps" },
 ] as const
 
 export const SETLIST_ARCHIVE_SUB = [
@@ -16,6 +24,7 @@ export const SETLIST_ARCHIVE_SUB = [
   { title: "Discography", url: "/archive/discography" },
   { title: "Lists", url: "/archive/lists" },
   { title: "Setlist Game", url: "/archive/setlistgame" },
+  { title: "Goose 101", url: "/goose101" },
   { title: "Submit", url: "/archive/submit" },
 ] as const
 
@@ -135,7 +144,7 @@ export const MERCH_LINKS = [
   },
 ] as const
 
-export const PUBLICATIONS_AND_PODCASTS_LINKS = [
+export const MEDIA_LINKS = [
   {
     title: "El Goose Times",
     href: "https://www.elgoosetimes.com/",
@@ -169,14 +178,6 @@ export const COMMUNITY_FORUM_SUB = [
     title: "The Couch",
     url: "https://community.wysterialane.org/chat/c/the-couch/3",
     color: "#863523",
-  },
-] as const
-
-export const navMainItems = [
-  {
-    title: "Goose 101",
-    url: "/goose101",
-    icon: <BookOpenIcon className="size-4" />,
   },
 ] as const
 

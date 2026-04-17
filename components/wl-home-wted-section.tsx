@@ -51,22 +51,22 @@ function WtedExploreRadioNavInner() {
         Explore WTED Radio
       </span>
       <Link
-        href="/wted/gorps"
+        href="/wted/program-director"
         className="flex w-full min-w-0 items-center justify-center rounded-lg bg-wl-dark-green px-3 py-1 text-center text-xs font-semibold leading-tight text-wl-white transition-colors hover:bg-[#3d4842]"
       >
-        GORPs and Contributors
-      </Link>
-      <Link
-        href="/wted/shows"
-        className="flex w-full min-w-0 items-center justify-center rounded-lg bg-wl-dark-green px-3 py-1 text-center text-xs font-semibold leading-tight text-wl-white transition-colors hover:bg-[#3d4842]"
-      >
-        Shows and More
+        Program Director
       </Link>
       <Link
         href="/wted/about"
         className="flex w-full min-w-0 items-center justify-center rounded-lg bg-wl-dark-green px-3 py-1 text-center text-xs font-semibold leading-tight text-wl-white transition-colors hover:bg-[#3d4842]"
       >
         About Us and FAQ
+      </Link>
+      <Link
+        href="/wted/gorps"
+        className="flex w-full min-w-0 items-center justify-center rounded-lg bg-wl-dark-green px-3 py-1 text-center text-xs font-semibold leading-tight text-wl-white transition-colors hover:bg-[#3d4842]"
+      >
+        GORPs and Contributors
       </Link>
     </div>
   )
@@ -264,22 +264,22 @@ export function WlHomeWtedSection({
             Explore WTED Radio
           </span>
           <Link
-            href="/wted/gorps"
+            href="/wted/program-director"
             className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
           >
-            GORPs and Contributors
-          </Link>
-          <Link
-            href="/wted/shows"
-            className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
-          >
-            Shows and More
+            Program Director
           </Link>
           <Link
             href="/wted/about"
             className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
           >
             About Us and FAQ
+          </Link>
+          <Link
+            href="/wted/gorps"
+            className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
+          >
+            GORPs and Contributors
           </Link>
         </div>
         <HomeWtedRadioCards />

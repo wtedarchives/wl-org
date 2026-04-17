@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -27,8 +27,7 @@ import { useIsBelowXl } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { AppSidebarNavItems } from "./app-sidebar-nav-items"
 import { AppSidebarFollowUs } from "./app-sidebar-follow-us"
-import { SETLIST_ARCHIVE_SUB } from "./app-sidebar.constants"
-
+import { AppSidebarLinksMerchMedia } from "./app-sidebar-links-merch-media"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { user } = useAuth()
@@ -36,25 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const openBugCount = useBugCount()
   const [findDialogOpen, setFindDialogOpen] = useState(false)
 
-  const isWtedPath = pathname.startsWith("/wted")
-  const isSetlistPath =
-    pathname.startsWith("/archive") ||
-    SETLIST_ARCHIVE_SUB.some(
-      (item) => pathname === item.url || pathname.startsWith(item.url + "/")
-    )
-  const [wtedOpen, setWtedOpen] = useState(isWtedPath)
-  const [setlistOpen, setSetlistOpen] = useState(isSetlistPath)
-  const [linksOpen, setLinksOpen] = useState(false)
-  const [merchOpen, setMerchOpen] = useState(false)
-  const [publicationsOpen, setPublicationsOpen] = useState(false)
   const isBelowXl = useIsBelowXl()
-
-  useEffect(() => {
-    if (isWtedPath) setWtedOpen(true)
-  }, [pathname, isWtedPath])
-  useEffect(() => {
-    if (isSetlistPath) setSetlistOpen(true)
-  }, [pathname, isSetlistPath])
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -95,16 +76,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupContent className="flex flex-col gap-2">
             <AppSidebarNavItems
-              wtedOpen={wtedOpen}
-              setWtedOpen={setWtedOpen}
-              linksOpen={linksOpen}
-              setLinksOpen={setLinksOpen}
-              merchOpen={merchOpen}
-              setMerchOpen={setMerchOpen}
-              publicationsOpen={publicationsOpen}
-              setPublicationsOpen={setPublicationsOpen}
-              setlistOpen={setlistOpen}
-              setSetlistOpen={setSetlistOpen}
               isAdmin={isAdmin}
               openBugCount={openBugCount}
               onFindClick={() => setFindDialogOpen(true)}
@@ -114,6 +85,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
+              <AppSidebarLinksMerchMedia />
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link href="/support">
@@ -127,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="pt-0 pb-2">
+      <SidebarFooter className="bg-wl-orange py-2 rounded-md mx-2 my-2">
         <NavUser />
       </SidebarFooter>
       {isAdmin && (

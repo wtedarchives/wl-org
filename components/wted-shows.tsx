@@ -1,5 +1,7 @@
 "use client"
 
+/** Full “Shows and More” page UI — not routed at `/wted/shows` (redirects to Program Director); kept for reuse. */
+
 import Link from "next/link"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,15 +38,16 @@ export function WtedShows() {
           </div>
           <div className="mt-4 space-y-4 text-left text-wl-white leading-[1.25rem]">
             <p>
-              WTED Goose Radio features a slate of regularly occurring shows and
-              features that cover a wide range of topics and experiences, all
-              curated for your listening pleasure. You can check out the schedule
-              of shows on our homepage or in our iOS and Android apps and plan to
-              tune in.
+              WTED Goose Radio features a slate of regularly occurring shows
+              covering a wide range of topics and experiences — from seasonal
+              tour mixes and highlights from special tours like Taboose, to
+              listener-curated shows, events, and partnerships with friends of
+              WTED. Check the schedule on our homepage or in our iOS and Android
+              apps and tune in regularly.
             </p>
             <p>
-              Have an idea or want to contribute to a show? Become a GORP (Goose
-              Obsessed Radio Personality) over at the{" "}
+              Have an idea or want to contribute? Become a GORP (Goose Obsessed
+              Radio Personality) over at the{" "}
               <Link
                 href={SHOWS_INTRO.communityUrl}
                 target="_blank"
@@ -52,8 +55,9 @@ export function WtedShows() {
                 className="font-medium text-wl-orange underline hover:text-wl-light-orange"
               >
                 {SHOWS_INTRO.communityLabel}
-              </Link>
-              !
+              </Link>{" "}
+              — the limits of WTED are driven only by the creativity of listeners
+              like you.
             </p>
           </div>
 
