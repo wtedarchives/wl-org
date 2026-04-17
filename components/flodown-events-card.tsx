@@ -45,7 +45,7 @@ function CalendarIcon({
   return (
     <div
       className={cn(
-        "flex h-14 w-14 flex-col items-center justify-center overflow-hidden bg-white shadow-sm",
+        "ml-2 flex h-14 w-14 shrink-0 flex-col items-center justify-center overflow-hidden bg-white shadow-sm",
         square ? "rounded-none" : "rounded-xl",
       )}
     >
@@ -84,7 +84,7 @@ export function FlodownEventsCard({
         </CardHeader>
       ) : null}
       <CardContent className="p-0 [&_[data-slot=table-container]]:overflow-visible">
-        <Table className="w-full min-w-0 table-fixed text-[11px]">
+        <Table className="w-full min-w-0 text-[11px]">
           <TableBody>
             {FLODOWN_EVENTS.map((item) => (
               <TableRow
@@ -102,7 +102,7 @@ export function FlodownEventsCard({
                       "focus-visible:ring-2 focus-visible:ring-wl-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#844b45]",
                     )}
                   >
-                    <div className="flex w-[66px] shrink-0 items-center pl-2 pr-2 py-1">
+                    <div className="box-border flex w-[66px] min-w-[66px] max-w-[66px] shrink-0 basis-[66px] items-center justify-center py-1 pl-2 pr-2">
                       <CalendarIcon
                         month={item.month}
                         date={String(item.day)}

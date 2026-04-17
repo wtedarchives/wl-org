@@ -5,6 +5,7 @@ import Link from "next/link"
 import { MoveRight } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
 
 interface SetlistEntry {
   entry_song: string
@@ -39,34 +40,15 @@ export function SetlistDisplay({
           prevEntry && prevEntry.entry_set !== entry.entry_set
 
         const placement = entry.entry_placement
-        const isOpener =
-          placement === "Set 1 Opener" ||
-          placement === "Set 2 Opener" ||
-          placement === "Set 3 Opener" ||
-          placement === "Set 4 Opener" ||
-          placement === "Set 5 Opener" ||
-          placement === "Set 6 Opener"
-        const isCloser =
-          placement === "Set 1 Closer" ||
-          placement === "Set 2 Closer" ||
-          placement === "Set 3 Closer" ||
-          placement === "Set 4 Closer" ||
-          placement === "Set 5 Closer" ||
-          placement === "Set 6 Closer"
+        const isOpener = /^Set \d+ Opener$/.test(placement)
+        const isCloser = /^Set \d+ Closer$/.test(placement)
         const isEncore =
           placement === "Encore 1" ||
           placement === "Encore 2" ||
           placement === "Encore 3"
 
         const isSpecial = isOpener || isCloser || isEncore
-        let barColor = "transparent"
-        if (placement === "Set 1 Opener") barColor = "#047857"
-        else if (placement === "Set 1 Closer") barColor = "#1e40af"
-        else if (isOpener) barColor = "#10b981"
-        else if (isCloser) barColor = "#3b82f6"
-        else if (placement === "Encore 1") barColor = "#be123c"
-        else if (placement === "Encore 2" || placement === "Encore 3")
-          barColor = "#f43f5e"
+        const barColor = getPlacementBarColor(placement)
 
         return (
           <React.Fragment key={`${entry.entry_song}-${index}`}>

@@ -226,7 +226,7 @@ export function AppSidebarNavItems({
           </div>
         )}
         {setlistOpen && (
-          <SidebarMenuSub>
+          <SidebarMenuSub className="grid grid-cols-2 gap-x-1 gap-y-1">
             {SETLIST_ARCHIVE_SUB.map((item) => {
               const isSubmit = item.title === "Submit"
               const href = isSubmit

@@ -86,8 +86,8 @@ export const createSongOperations = (
     
     const highestSet = currentSets.length > 0 ? Math.max(...currentSets) : 0;
     
-    if (highestSet >= 5) {
-      setError('Maximum of 5 sets allowed');
+    if (highestSet >= 8) {
+      setError('Maximum of 8 sets allowed');
       return;
     }
     

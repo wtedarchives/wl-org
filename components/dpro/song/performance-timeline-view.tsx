@@ -4,7 +4,8 @@
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { PERFORMANCE_YEARS, PLACEMENT_COLORS } from "@/lib/song-performance-utils"
+import { PERFORMANCE_YEARS } from "@/lib/song-performance-utils"
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
 import { PerformanceTooltipContent } from "./performance-tooltip"
 import type { SongPerformance } from "@/types/song"
 
@@ -67,7 +68,7 @@ export function PerformanceTimelineView({
                     const bgColor =
                       isMainSet
                         ? "transparent"
-                        : PLACEMENT_COLORS[perf.entry_placement] || "transparent"
+                        : getPlacementBarColor(perf.entry_placement)
                     return (
                       <Tooltip key={`${year}-${perf.formattedDate}-${idx}`}>
                         <TooltipTrigger asChild>

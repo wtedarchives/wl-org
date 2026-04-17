@@ -15,10 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import {
-  PLACEMENT_COLORS,
-  formatPerformanceLength,
-} from "@/lib/song-performance-utils"
+import { formatPerformanceLength } from "@/lib/song-performance-utils"
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
 import {
   getJotyBadgeStyle,
   shouldShowSetlistEntryShort,
@@ -144,7 +142,9 @@ export function PerformanceTableView({
             const venueHref = getVenueHref(perf)
             const isMainSet = perf.entry_placement?.startsWith("Main Set ")
             const placementBg =
-              isMainSet ? undefined : PLACEMENT_COLORS[perf.entry_placement]
+              isMainSet
+                ? undefined
+                : getPlacementBarColor(perf.entry_placement)
 
             return (
               <TableRow

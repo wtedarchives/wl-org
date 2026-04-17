@@ -1,4 +1,5 @@
 import type { SetlistEntry } from "@/types/setlist"
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
 
 /** Rows with these entry_short values (case-insensitive) get no number in the # column. */
 export const INDEX_SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
@@ -71,27 +72,7 @@ export function getLastCountBadgeStyle(lastCount: string | null): {
 
 /** Background color for the # column based on entry placement (set opener/closer, encore). */
 export function getPlacementIndexCellBg(placement: string | null): string {
-  if (placement === "Set 1 Opener") return "#047857"
-  if (placement === "Set 1 Closer") return "#1e40af"
-  if (
-    placement === "Set 2 Opener" ||
-    placement === "Set 3 Opener" ||
-    placement === "Set 4 Opener" ||
-    placement === "Set 5 Opener" ||
-    placement === "Set 6 Opener"
-  )
-    return "#10b981"
-  if (
-    placement === "Set 2 Closer" ||
-    placement === "Set 3 Closer" ||
-    placement === "Set 4 Closer" ||
-    placement === "Set 5 Closer" ||
-    placement === "Set 6 Closer"
-  )
-    return "#3b82f6"
-  if (placement === "Encore 1") return "#be123c"
-  if (placement === "Encore 2" || placement === "Encore 3") return "#f43f5e"
-  return "transparent"
+  return getPlacementBarColor(placement)
 }
 
 export const LAST_HEADER_TOOLTIP = `Debut – first known time the song was played by Goose.

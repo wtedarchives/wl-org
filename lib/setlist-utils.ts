@@ -1,4 +1,5 @@
 import type { SetlistEntry, GuestGroup, Show, ShowDate } from "@/types/setlist"
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
 
 /** Tailwind classes for a personnel pill by guest_category (fully rounded). */
 export function getPersonnelPillClassName(
@@ -89,28 +90,7 @@ export function formatShowDateLong(dateInput: string | null | undefined): string
 
 /** Placement bar color for setlist entries (home-style). */
 export function getPlacementColor(placement: string | null | undefined): string {
-  if (!placement) return "transparent"
-  if (placement === "Set 1 Opener") return "#047857"
-  if (placement === "Set 1 Closer") return "#1e40af"
-  if (
-    placement === "Set 2 Opener" ||
-    placement === "Set 3 Opener" ||
-    placement === "Set 4 Opener" ||
-    placement === "Set 5 Opener" ||
-    placement === "Set 6 Opener"
-  )
-    return "#10b981"
-  if (
-    placement === "Set 2 Closer" ||
-    placement === "Set 3 Closer" ||
-    placement === "Set 4 Closer" ||
-    placement === "Set 5 Closer" ||
-    placement === "Set 6 Closer"
-  )
-    return "#3b82f6"
-  if (placement === "Encore 1") return "#be123c"
-  if (placement === "Encore 2" || placement === "Encore 3") return "#f43f5e"
-  return "transparent"
+  return getPlacementBarColor(placement)
 }
 
 /**

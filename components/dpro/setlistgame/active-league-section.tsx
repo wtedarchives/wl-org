@@ -10,6 +10,8 @@ interface ActiveLeagueSectionProps {
   user: { id: string } | null
   onSelectSongs: (show: GameShow) => void
   onViewSubmission: (show: GameShow) => void
+  isAdminUser?: boolean
+  onShowTimeSaved?: () => void | Promise<void>
 }
 
 export function ActiveLeagueSection({
@@ -18,6 +20,8 @@ export function ActiveLeagueSection({
   user,
   onSelectSongs,
   onViewSubmission,
+  isAdminUser = false,
+  onShowTimeSaved,
 }: ActiveLeagueSectionProps) {
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 py-0">
@@ -33,6 +37,8 @@ export function ActiveLeagueSection({
           user={user}
           onSelectSongs={onSelectSongs}
           onViewSubmission={onViewSubmission}
+          isAdminUser={isAdminUser}
+          onShowTimeSaved={onShowTimeSaved}
         />
       </CardContent>
     </Card>

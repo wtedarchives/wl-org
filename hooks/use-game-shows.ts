@@ -66,22 +66,29 @@ function calculateTimeRemaining(showTime: string): {
   return { timeRemaining, isSelectionClosed, isLessThan24Hours }
 }
 
+function applyTimeDerivedFields(show: GameShow): GameShow {
+  const { timeRemaining, isSelectionClosed, isLessThan24Hours } =
+    calculateTimeRemaining(show.show_time ?? "")
+  return { ...show, timeRemaining, isSelectionClosed, isLessThan24Hours }
+}
+
 export function useGameShows(
   activeLeague: string,
   user: User | null
 ): {
   loading: boolean
   gameShows: GameShow[]
-  fetchGameShows: () => Promise<void>
+  fetchGameShows: (options?: { silent?: boolean }) => Promise<void>
 } {
   const [loading, setLoading] = useState(true)
   const [gameShows, setGameShows] = useState<GameShow[]>([])
 
-  const fetchGameShows = useCallback(async () => {
+  const fetchGameShows = useCallback(async (options?: { silent?: boolean }) => {
+    const silent = options?.silent === true
     if (!supabase) return
 
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
 
       const { data, error } = await supabase
         .from("shows")
@@ -98,19 +105,13 @@ export function useGameShows(
       }
 
       if (data) {
-        const processedShows = data.map((show) => {
-          const { timeRemaining, isSelectionClosed, isLessThan24Hours } =
-            calculateTimeRemaining(show.show_time)
-
-          return {
+        const processedShows = data.map((show) =>
+          applyTimeDerivedFields({
             ...show,
             show_detail: show.show_detail ?? "",
-            timeRemaining,
-            isSelectionClosed,
-            isLessThan24Hours,
             playerCount: 0,
-          }
-        })
+          } as GameShow)
+        )
 
         if (user) {
           const showIds = processedShows.map((s) => s.show_id)
@@ -170,7 +171,7 @@ export function useGameShows(
     } catch (error) {
       console.error("Error in game shows fetch:", error)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [activeLeague, user])
 
@@ -182,13 +183,7 @@ export function useGameShows(
     if (gameShows.length === 0) return
 
     const updateTimers = () => {
-      setGameShows((prev) =>
-        prev.map((show) => {
-          const { timeRemaining, isSelectionClosed } =
-            calculateTimeRemaining(show.show_time)
-          return { ...show, timeRemaining, isSelectionClosed }
-        })
-      )
+      setGameShows((prev) => prev.map(applyTimeDerivedFields))
     }
 
     updateTimers()

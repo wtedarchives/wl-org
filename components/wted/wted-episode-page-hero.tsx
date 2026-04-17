@@ -17,6 +17,20 @@ import type {
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { wtedEpisodeDescriptionHtml } from "@/lib/wted-episode-description-html"
 
+const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
+
+/** `https://community.wysterialane.org/u/{id}` where `id` is the handle without a leading `@`. */
+function discourseUserProfileUrlFromHandle(handle: string): string | null {
+  const t = handle.trim()
+  if (!t.startsWith("@")) return null
+  const id = t.slice(1).trim()
+  if (!id) return null
+  return `${COMMUNITY_ORIGIN}/u/${encodeURIComponent(id)}`
+}
+
+const hostHandlePillClassName =
+  "inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground transition-colors hover:text-primary hover:underline"
+
 export type WtedEpisodePageHeroProps = {
   episode: WtedEpisodeMeta
   showName: string
@@ -102,21 +116,36 @@ export function WtedEpisodePageHero({
               {hosts.length > 1 ? "Hosts" : "Host"}
             </h2>
             <ul className="m-0 mt-2 list-none space-y-2 p-0 font-medium text-foreground">
-              {hosts.map((h, i) => (
-                <li
-                  key={`${h.name}-${h.handle}-${i}`}
-                  className="flex flex-wrap items-center gap-2"
-                >
-                  {h.name ?
-                    <span className="text-sm font-normal">{h.name}</span>
-                  : null}
-                  {h.handle ?
-                    <span className="inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
-                      {h.handle}
-                    </span>
-                  : null}
-                </li>
-              ))}
+              {hosts.map((h, i) => {
+                const profileHref =
+                  h.handle ?
+                    discourseUserProfileUrlFromHandle(h.handle)
+                  : null
+                return (
+                  <li
+                    key={`${h.name}-${h.handle}-${i}`}
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    {h.name ?
+                      <span className="text-sm font-normal">{h.name}</span>
+                    : null}
+                    {h.handle ?
+                      profileHref ?
+                        <Link
+                          href={profileHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={hostHandlePillClassName}
+                        >
+                          {h.handle}
+                        </Link>
+                      : <span className="inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
+                          {h.handle}
+                        </span>
+                    : null}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         : null}

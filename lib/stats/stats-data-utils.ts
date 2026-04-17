@@ -206,6 +206,8 @@ export const fetchSetOpenersData = (selectedYear: number | string) =>
     "Set 4 Opener",
     "Set 5 Opener",
     "Set 6 Opener",
+    "Set 7 Opener",
+    "Set 8 Opener",
   ])
 
 export const fetchSetClosersData = (selectedYear: number | string) =>
@@ -216,6 +218,8 @@ export const fetchSetClosersData = (selectedYear: number | string) =>
     "Set 4 Closer",
     "Set 5 Closer",
     "Set 6 Closer",
+    "Set 7 Closer",
+    "Set 8 Closer",
   ])
 
 export const fetchEncoresData = (selectedYear: number | string) =>

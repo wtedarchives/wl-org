@@ -14,12 +14,15 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { getSetlistGameShowArchiveUrl } from "@/lib/setlist-game-archive-url"
+import { AdminShowTimeCell } from "./admin-show-time-cell"
 
 interface SetlistGameShowTableProps {
   gameShows: GameShow[]
   user: { id: string } | null
   onSelectSongs: (show: GameShow) => void
   onViewSubmission: (show: GameShow) => void
+  isAdminUser?: boolean
+  onShowTimeSaved?: () => void | Promise<void>
 }
 
 export function SetlistGameShowTable({
@@ -27,7 +30,11 @@ export function SetlistGameShowTable({
   user,
   onSelectSongs,
   onViewSubmission,
+  isAdminUser = false,
+  onShowTimeSaved,
 }: SetlistGameShowTableProps) {
+  const showAdminShowTime = Boolean(isAdminUser && onShowTimeSaved)
+
   if (gameShows.length === 0) {
     return (
       <div className="text-center py-8">
@@ -37,7 +44,8 @@ export function SetlistGameShowTable({
   }
 
   return (
-    <Table>
+    <div className="w-full overflow-x-auto [-webkit-overflow-scrolling:touch]">
+      <Table>
       <TableHeader>
         <TableRow className="bg-muted/60">
           <TableHead className="text-center text-xs">Date</TableHead>
@@ -48,6 +56,9 @@ export function SetlistGameShowTable({
           <TableHead className="text-center text-xs">Players</TableHead>
           {user && <TableHead className="text-center text-xs">Score</TableHead>}
           <TableHead className="text-center text-xs">Picks</TableHead>
+          {showAdminShowTime && (
+            <TableHead className="text-center text-xs">Show Time (ET)</TableHead>
+          )}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -136,9 +147,15 @@ export function SetlistGameShowTable({
                   </Button>
                 )}
               </TableCell>
+              {showAdminShowTime && onShowTimeSaved && (
+                <TableCell className="px-2 py-1 text-center align-middle">
+                  <AdminShowTimeCell show={show} onSaved={onShowTimeSaved} />
+                </TableCell>
+              )}
             </TableRow>
         ))}
       </TableBody>
     </Table>
+    </div>
   )
 }

@@ -191,7 +191,7 @@ export function UserSongPerformancesSheet({
                       </TableCell>
                       <TableCell className="min-w-[400px] max-w-[400px] align-middle whitespace-normal px-2 py-1 text-[11px]">
                         {perf.entry_coachnotes && (
-                          <div className="text-[10px] leading-tight text-muted-foreground [&_a]:bg-[#844240] [&_a]:font-medium [&_a]:text-wl-white [&_a]:rounded-full [&_a]:px-1.5 [&_a]:py-0.5 [&_a]:hover:underline">
+                          <div className="text-[10px] leading-tight text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline [&_p]:my-0">
                             <span
                               dangerouslySetInnerHTML={{
                                 __html: perf.entry_coachnotes.trim(),

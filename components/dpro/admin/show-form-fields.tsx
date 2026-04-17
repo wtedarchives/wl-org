@@ -1,6 +1,5 @@
 "use client"
 
-import { convertToEasternDisplay } from "@/lib/utils/show-utils"
 import type {
   AdminShowData,
   GroupData,
@@ -255,20 +254,7 @@ export function ShowFormFields({
             Is Setlist Game?
           </label>
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Show Time (Eastern Time)
-          </label>
-          <Input
-            type="datetime-local"
-            name="show_time"
-            value={convertToEasternDisplay(editedShow?.show_time ?? null)}
-            onChange={onInputChange}
-            readOnly={!isEditing}
-            className="h-8 text-xs"
-          />
-        </div>
-        <div>
+        <div className="md:col-span-2">
           <label className="mb-0.5 block text-xs font-medium">
             WysteriaLane.org Thread Link
           </label>

@@ -65,32 +65,6 @@ export function useDiscourseFeaturedTopics() {
             typeof data.error === "string" ? data.error : `Request failed (${res.status})`,
           )
         }
-        if (isDev) {
-          const shown = Array.isArray(data.topics) ? data.topics : []
-          console.groupCollapsed("[Featured Topics] homepage data")
-          console.log("Request:", `${base}/${path}`)
-          console.log(
-            "Topics shown in UI:",
-            shown.map((t: DiscourseFeaturedTopic) => ({
-              id: t.id,
-              title: t.topic,
-              href: t.href,
-              posts: t.posts_count,
-              views: t.views,
-            })),
-          )
-          if (data.debug) {
-            console.log(
-              "Selection (Discourse latest.json → tag `featured` → require slug):",
-              data.debug,
-            )
-          } else {
-            console.log(
-              "Tip: run `npm run dev` and reload; the client requests `?debug=1` in development for counts and excluded topics.",
-            )
-          }
-          console.groupEnd()
-        }
         if (!cancelled) {
           const raw = Array.isArray(data.topics) ? data.topics : []
           setTopics(

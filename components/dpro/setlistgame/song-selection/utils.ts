@@ -1,3 +1,4 @@
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
 import type { SongPick, SetlistEntry, TimeRemainingResult } from "./types"
 
 export const calculateTimeRemaining = (
@@ -39,25 +40,7 @@ export const getSetDisplayName = (set: string): string => {
 }
 
 export const getPlacementColor = (placement: string | undefined): string => {
-  if (!placement) return "transparent"
-  const colorMap: Record<string, string> = {
-    "Set 1 Opener": "#047857",
-    "Set 1 Closer": "#1e40af",
-    "Set 2 Opener": "#10b981",
-    "Set 3 Opener": "#10b981",
-    "Set 4 Opener": "#10b981",
-    "Set 5 Opener": "#10b981",
-    "Set 6 Opener": "#10b981",
-    "Set 2 Closer": "#3b82f6",
-    "Set 3 Closer": "#3b82f6",
-    "Set 4 Closer": "#3b82f6",
-    "Set 5 Closer": "#3b82f6",
-    "Set 6 Closer": "#3b82f6",
-    "Encore 1": "#be123c",
-    "Encore 2": "#f43f5e",
-    "Encore 3": "#f43f5e",
-  }
-  return colorMap[placement] ?? "transparent"
+  return getPlacementBarColor(placement)
 }
 
 export const getPlacement = (

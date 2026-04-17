@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
-import { convertFromEasternToUTC } from "@/lib/utils/show-utils"
 import type { AdminShowData } from "@/types/admin"
 
 export function useShowActions(
@@ -79,9 +78,6 @@ export function useShowActions(
     if (!editedShow || !supabase) return
     setIsSubmitting(true)
     try {
-      const showTimeUTC = editedShow.show_time
-        ? convertFromEasternToUTC(editedShow.show_time)
-        : null
       const updateData = {
         show_date: editedShow.show_date,
         show_group: editedShow.show_group,
@@ -93,7 +89,6 @@ export function useShowActions(
         show_detail: editedShow.show_detail,
         show_alert: editedShow.show_alert,
         show_coachnotes: editedShow.show_coachnotes,
-        show_time: showTimeUTC,
         show_callbacks: editedShow.show_callbacks,
         show_wl_link: editedShow.show_wl_link,
       }

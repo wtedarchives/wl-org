@@ -53,7 +53,9 @@ export function SetlistGameContent() {
     user ?? null
   )
   const { showStatsLoading, showsWithStats } = useShowStatistics(ACTIVE_LEAGUE)
-  const { isAdmin: isAdminUser } = useAdminStatus(user ?? null)
+  const { isAdmin: isAdminUser, loading: adminLoading } = useAdminStatus(
+    user ?? null
+  )
   const { userPicks, fetchUserPicks, resetPicks, setUserPicks } = useUserPicks()
   const { loading: pastToursLoading, pastTours } = usePastTours(ACTIVE_LEAGUE)
 
@@ -135,6 +137,8 @@ export function SetlistGameContent() {
         user={user ?? null}
         onSelectSongs={handleSelectSongs}
         onViewSubmission={handleViewSubmission}
+        isAdminUser={isAdminUser && !adminLoading}
+        onShowTimeSaved={() => fetchGameShows({ silent: true })}
       />
 
       <SetlistGameStandings activeLeague={ACTIVE_LEAGUE} user={user ?? null} />

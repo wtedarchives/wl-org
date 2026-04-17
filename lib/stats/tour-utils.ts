@@ -1,3 +1,5 @@
+import { getPlacementBarColor } from "@/lib/placement-bar-color"
+
 export function timeToSeconds(timeStr: string | null): number {
   if (!timeStr) return -1
   const parts = timeStr.split(":").map(Number)
@@ -99,11 +101,15 @@ export function getColumnBackgroundColor(column: string): string {
     Set_4_Opener: "#10b981",
     Set_5_Opener: "#10b981",
     Set_6_Opener: "#10b981",
+    Set_7_Opener: "#10b981",
+    Set_8_Opener: "#10b981",
     Set_2_Closer: "#3b82f6",
     Set_3_Closer: "#3b82f6",
     Set_4_Closer: "#3b82f6",
     Set_5_Closer: "#3b82f6",
     Set_6_Closer: "#3b82f6",
+    Set_7_Closer: "#3b82f6",
+    Set_8_Closer: "#3b82f6",
     Encore_1: "#be123c",
     Encore_2: "#f43f5e",
     Encore_3: "#f43f5e",
@@ -114,23 +120,8 @@ export function getColumnBackgroundColor(column: string): string {
 /** Background color for matrix placement (e.g. "Set 1 Opener"). */
 export function getMatrixPlacementColor(placement: string | null): string {
   if (!placement) return ""
-  const colorMap: Record<string, string> = {
-    "Set 1 Opener": "#047857",
-    "Set 1 Closer": "#1e40af",
-    "Set 2 Opener": "#10b981",
-    "Set 3 Opener": "#10b981",
-    "Set 4 Opener": "#10b981",
-    "Set 5 Opener": "#10b981",
-    "Set 6 Opener": "#10b981",
-    "Set 2 Closer": "#3b82f6",
-    "Set 3 Closer": "#3b82f6",
-    "Set 4 Closer": "#3b82f6",
-    "Set 5 Closer": "#3b82f6",
-    "Set 6 Closer": "#3b82f6",
-    "Encore 1": "#be123c",
-    "Encore 2": "#f43f5e",
-    "Encore 3": "#f43f5e",
-  }
   if (placement.startsWith("Main Set")) return "#000000"
-  return colorMap[placement] ?? "#1C4482"
+  const c = getPlacementBarColor(placement)
+  if (c !== "transparent") return c
+  return "#1C4482"
 }

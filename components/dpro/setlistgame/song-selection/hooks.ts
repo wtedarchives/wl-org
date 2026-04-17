@@ -336,7 +336,7 @@ export const useSetlistOperations = (songPicks: SongPick[], setSongPicks: React.
     const sortedSets = currentSets.sort((a, b) => a - b);
     const highestSet = sortedSets.length > 0 ? sortedSets[sortedSets.length - 1] : 0;
     
-    return highestSet < 5;
+    return highestSet < 8;
   };
 
   // Check if we've reached max encores
