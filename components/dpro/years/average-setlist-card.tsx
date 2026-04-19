@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Info } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -68,9 +66,10 @@ function AverageSetlistInfoDialog({
           </h3>
           <p className="mt-1.5">
             A set is only included if it was played in more than 50% of
-            canonical shows in the slice. The number of songs per set is the
-            rounded average of distinct songs played in that set across all
-            qualifying shows.
+            canonical shows in the slice that have setlist data (same entry
+            filters as the rest of this model). The number of songs per set is
+            the rounded average of distinct songs played in that set across all
+            shows that included that set.
           </p>
 
           <h3 className="mt-4 text-sm font-semibold text-foreground">
@@ -136,16 +135,17 @@ function AverageSetlistCardHeader({
         <CardTitle className="min-w-0 flex-1 text-sm font-semibold leading-snug">
           {title}
         </CardTitle>
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="icon"
-          className="size-7 shrink-0 text-muted-foreground hover:text-foreground"
+          className={cn(
+            "shrink-0 rounded-full border border-wl-dark-grey/50 bg-wl-orange/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-wl-white",
+            "transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          )}
           aria-label="How the average setlist works"
           onClick={onInfoClick}
         >
-          <Info className="size-4" aria-hidden />
-        </Button>
+          info
+        </button>
       </div>
     </CardHeader>
   )

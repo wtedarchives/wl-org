@@ -158,7 +158,7 @@ export function AppSidebarNavItems({
             )}
             {NAV_YEARS.length > 0 && (
               <SidebarMenuSubItem className="col-span-2" aria-hidden>
-                <div className="-mx-2.5 border-t border-sidebar-border" />
+                <div className="-mx-2.5 border-t border-sidebar-border pb-1" />
               </SidebarMenuSubItem>
             )}
             {SETLIST_ARCHIVE_SUB.map((item) => {

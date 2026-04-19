@@ -40,6 +40,8 @@ interface SongSelectionDetail {
 
 interface SetlistStats {
   totalCanonicalShows: number
+  /** Canonical shows in the slice that have ≥1 qualifying setlist entry (same filters as validEntries). */
+  showsWithSetlistData: number
   totalSetlistEntries: number
   includedSets: Array<{
     set: string
@@ -236,6 +238,7 @@ export function useAverageSetlist(
           setAverageSetlist([])
           setStats({
             totalCanonicalShows: canonicalShows.length,
+            showsWithSetlistData: 0,
             totalSetlistEntries: 0,
             includedSets: [],
             totalUniqueSongs: 0,
@@ -338,8 +341,11 @@ export function useAverageSetlist(
         // STEP 4 — Determine which sets are included in the model
         //
         // A set is included if it appears in more than 50% of canonical
-        // shows in this slice. Uses showSetSongs — no entry scan needed.
+        // shows that have qualifying setlist data in this slice (not the
+        // full canonical count). Denominator = showSetSongs.size.
         // ─────────────────────────────────────────────────────────────────
+
+        const showsWithSetlistDataCount = showSetSongs.size
 
         const includedSets: string[] = []
         const includedSetsStats: SetlistStats["includedSets"] = []
@@ -354,7 +360,7 @@ export function useAverageSetlist(
             continue
           }
 
-          const percentage = showsWithSet / canonicalShows.length
+          const percentage = showsWithSet / showsWithSetlistDataCount
 
           if (percentage <= SET_INCLUSION_THRESHOLD) {
             continue
@@ -381,6 +387,7 @@ export function useAverageSetlist(
           setAverageSetlist([])
           setStats({
             totalCanonicalShows: canonicalShows.length,
+            showsWithSetlistData: showsWithSetlistDataCount,
             totalSetlistEntries: validEntries.length,
             includedSets: [],
             totalUniqueSongs: 0,
@@ -678,6 +685,7 @@ export function useAverageSetlist(
         setAverageSetlist(resultEntries)
         setStats({
           totalCanonicalShows: canonicalShows.length,
+          showsWithSetlistData: showsWithSetlistDataCount,
           totalSetlistEntries: validEntries.length,
           includedSets: includedSetsStats,
           totalUniqueSongs: songShowAppearances.size,

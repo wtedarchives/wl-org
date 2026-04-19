@@ -123,7 +123,7 @@ export function WtedEpisodePageClient() {
     )
     const showLabel = wtedShow?.show ?? episode.show
     setSetlistBreadcrumbs([
-      { label: "WTED Radio", href: "/wted" },
+      { label: "WTED Radio", href: "/wted/program-director" },
       { label: showLabel, href: "/wted/program-director" },
       { label: displayName, href: getWtedEpisodeUrl(episode.uuid) },
     ])

@@ -106,7 +106,9 @@ function pathnameToBreadcrumbs(
         ? lastSegmentLabelOverride
         : explicitLabel ??
           (isUuidLikeSegment(segment) ? "…" : segment.charAt(0).toUpperCase() + segment.slice(1))
-    items.push({ label, href })
+    const itemHref =
+      segment === "wted" ? "/wted/program-director" : href
+    items.push({ label, href: itemHref })
   }
   return items
 }
