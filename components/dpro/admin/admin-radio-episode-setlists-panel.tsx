@@ -1,19 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Image from "next/image"
 import { Check } from "lucide-react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
-import { useProgramDirectorData } from "@/hooks/use-program-director-data"
+import {
+  useProgramDirectorData,
+  type ProgramDirectorEpisode,
+} from "@/hooks/use-program-director-data"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { AdminRadioEpisodeSetlistsDialog } from "@/components/dpro/admin/admin-radio-episode-setlists-dialog"
 
 export function AdminRadioEpisodeSetlistsPanel() {
   const { shows, loading, error, reload } = useProgramDirectorData()
-  const [dialogEpisode, setDialogEpisode] = useState<
-    (typeof shows)[0]["episodes"][0] & { uuid: string } | null
-  >(null)
+  const showsWithEpisodes = useMemo(
+    () => shows.filter((s) => s.episodes.length > 0),
+    [shows],
+  )
+  const [dialogEpisode, setDialogEpisode] =
+    useState<ProgramDirectorEpisode | null>(null)
 
   if (loading) {
     return <LoadingPageCard message="Loading episodes…" />
@@ -49,19 +55,23 @@ export function AdminRadioEpisodeSetlistsPanel() {
           </code>
           ).
         </p>
-        <div className="columns-1 gap-x-4 space-y-4 md:columns-2 lg:columns-3 xl:columns-4">
-          {shows.map((showItem) => (
-            <Card
-              key={showItem.show}
-              className="break-inside-avoid overflow-hidden rounded-lg border border-border/60 bg-background/70 py-0 shadow-sm"
-            >
-              <div className="bg-muted/60 flex flex-row items-center justify-between gap-2 px-4 py-2">
-                <CardTitle className="truncate pr-2 text-sm font-medium">
-                  {showItem.show}
-                </CardTitle>
-              </div>
-              <CardContent className="p-0">
-                {showItem.episodes.length > 0 ?
+        {showsWithEpisodes.length === 0 ? (
+          <p className="text-xs italic text-muted-foreground">
+            No shows with episodes to display.
+          </p>
+        ) : (
+          <div className="columns-1 gap-x-4 space-y-4 md:columns-2 lg:columns-3 xl:columns-4">
+            {showsWithEpisodes.map((showItem) => (
+              <Card
+                key={showItem.show}
+                className="break-inside-avoid overflow-hidden rounded-lg border border-border/60 bg-background/70 py-0 shadow-sm"
+              >
+                <div className="bg-muted/60 flex flex-row items-center justify-between gap-2 px-4 py-2">
+                  <CardTitle className="truncate pr-2 text-sm font-medium">
+                    {showItem.show}
+                  </CardTitle>
+                </div>
+                <CardContent className="p-0">
                   <ul>
                     {showItem.episodes.map((ep) => {
                       const canEdit =
@@ -132,15 +142,11 @@ export function AdminRadioEpisodeSetlistsPanel() {
                       )
                     })}
                   </ul>
-                : (
-                  <p className="px-3 py-2 text-xs italic text-muted-foreground">
-                    No episodes found
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </>
   )
