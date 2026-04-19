@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -19,6 +19,10 @@ import { SHOWS_INTRO } from "@/app/(main)/wted/shows/content"
 
 export function ProgramDirectorContent() {
   const { shows, loading, error } = useProgramDirectorData()
+  const showsWithEpisodes = useMemo(
+    () => shows.filter((s) => s.episodes.length > 0),
+    [shows],
+  )
   const [showInfo, setShowInfo] = useState<{
     showTitle: string
     description: string
@@ -100,8 +104,13 @@ export function ProgramDirectorContent() {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Shows
         </h2>
-        <div className="columns-1 gap-x-4 space-y-4 md:columns-2 lg:columns-3 xl:columns-4">
-          {shows.map((showItem) => (
+        {showsWithEpisodes.length === 0 ? (
+          <p className="text-xs italic text-muted-foreground">
+            No shows with episodes to display.
+          </p>
+        ) : (
+          <div className="columns-1 gap-x-4 space-y-4 md:columns-2 lg:columns-3 xl:columns-4">
+            {showsWithEpisodes.map((showItem) => (
           <Card
             key={showItem.show}
             className="break-inside-avoid overflow-hidden rounded-lg border border-border/60 bg-background/70 py-0 shadow-sm"
@@ -132,71 +141,66 @@ export function ProgramDirectorContent() {
               : null}
             </div>
             <CardContent className="p-0">
-              {showItem.episodes.length > 0 ? (
-                <ul>
-                  {showItem.episodes.map((ep) => (
-                    <li
-                      key={ep.uuid}
-                      className="border-t border-border/40 bg-muted/40 transition-colors hover:bg-muted/20"
-                    >
-                      {ep.hasEntries ? (
-                        <Link
-                          href={getWtedEpisodeUrl(ep.uuid)}
-                          className="flex items-center gap-2 py-1 pl-3 pr-2 text-xs font-medium text-foreground hover:underline"
-                        >
-                          {ep.artwork?.trim() ? (
-                            <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border sm:size-5">
-                              <Image
-                                src={ep.artwork}
-                                alt=""
-                                width={28}
-                                height={28}
-                                className="size-5 object-cover sm:size-5"
-                                unoptimized
-                              />
-                            </span>
-                          ) : null}
-                          <span className="min-w-0 flex-1 leading-3.5">
-                            {getWtedEpisodeDisplayName(
-                              ep.episode,
-                              ep.display_name,
-                            )}
+              <ul>
+                {showItem.episodes.map((ep) => (
+                  <li
+                    key={ep.uuid}
+                    className="border-t border-border/40 bg-muted/40 transition-colors hover:bg-muted/20"
+                  >
+                    {ep.hasEntries ? (
+                      <Link
+                        href={getWtedEpisodeUrl(ep.uuid)}
+                        className="flex items-center gap-2 py-1 pl-3 pr-2 text-xs font-medium text-foreground hover:underline"
+                      >
+                        {ep.artwork?.trim() ? (
+                          <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border sm:size-5">
+                            <Image
+                              src={ep.artwork}
+                              alt=""
+                              width={28}
+                              height={28}
+                              className="size-5 object-cover sm:size-5"
+                              unoptimized
+                            />
                           </span>
-                        </Link>
-                      ) : (
-                        <div className="flex items-center gap-2 py-1 pl-3 pr-2 text-xs font-normal text-muted-foreground sm:min-h-0">
-                          {ep.artwork?.trim() ? (
-                            <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border opacity-90 sm:size-5">
-                              <Image
-                                src={ep.artwork}
-                                alt=""
-                                width={28}
-                                height={28}
-                                className="size-5 object-cover sm:size-5"
-                                unoptimized
-                              />
-                            </span>
-                          ) : null}
-                          <span className="min-w-0 flex-1 leading-3.5">
-                            {getWtedEpisodeDisplayName(
-                              ep.episode,
-                              ep.display_name,
-                            )}
+                        ) : null}
+                        <span className="min-w-0 flex-1 leading-3.5">
+                          {getWtedEpisodeDisplayName(
+                            ep.episode,
+                            ep.display_name,
+                          )}
+                        </span>
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2 py-1 pl-3 pr-2 text-xs font-normal text-muted-foreground sm:min-h-0">
+                        {ep.artwork?.trim() ? (
+                          <span className="relative size-5 shrink-0 overflow-hidden rounded border border-border opacity-90 sm:size-5">
+                            <Image
+                              src={ep.artwork}
+                              alt=""
+                              width={28}
+                              height={28}
+                              className="size-5 object-cover sm:size-5"
+                              unoptimized
+                            />
                           </span>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="px-3 py-2 text-xs italic text-muted-foreground">
-                  No episodes found
-                </p>
-              )}
+                        ) : null}
+                        <span className="min-w-0 flex-1 leading-3.5">
+                          {getWtedEpisodeDisplayName(
+                            ep.episode,
+                            ep.display_name,
+                          )}
+                        </span>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
