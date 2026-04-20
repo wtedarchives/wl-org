@@ -8,6 +8,21 @@ interface MapCenterUpdaterProps {
   venues: Array<{ venue_latitude: string; venue_longitude: string }>
 }
 
+/** Call after the map container was `display:none` (e.g. filter modal) so tiles/layout recover. */
+export function MapInvalidateOnVisible({ visible }: { visible: boolean }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!visible) return
+    const id = window.requestAnimationFrame(() => {
+      map.invalidateSize()
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [visible, map])
+
+  return null
+}
+
 export function MapCenterUpdater({ center, venues }: MapCenterUpdaterProps) {
   const map = useMap()
 

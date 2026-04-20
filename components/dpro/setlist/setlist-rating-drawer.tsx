@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import type { ReviewEntry } from "@/hooks/use-setlist-rating"
 import { cn } from "@/lib/utils"
@@ -137,10 +136,10 @@ export function SetlistRatingDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[85vh] max-w-[800px] mx-auto flex flex-col">
-        <div className="min-h-0 flex flex-col overflow-hidden">
+      <DrawerContent className="mx-auto flex max-h-[85vh] min-h-0 max-w-[800px] flex-col overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {/* Header */}
-          <DrawerHeader className="relative flex flex-col items-center justify-center border-b border-border/50 py-3 text-center">
+          <DrawerHeader className="relative flex shrink-0 flex-col items-center justify-center border-b border-border/50 py-3 text-center">
             <DrawerTitle className="text-base font-semibold">
               {title}
             </DrawerTitle>
@@ -152,7 +151,7 @@ export function SetlistRatingDrawer({
           </DrawerHeader>
 
           {/* Aggregate */}
-          <div className="flex flex-wrap items-center justify-center gap-2 border-b border-border/50 px-4 py-3">
+          <div className="flex shrink-0 flex-wrap items-center justify-center gap-2 border-b border-border/50 px-4 py-3">
             <StarRow rating={averageRating} />
             {averageRating > 0 && (
               <span className="text-sm font-medium tabular-nums">
@@ -167,9 +166,9 @@ export function SetlistRatingDrawer({
           </div>
 
           {/* User section */}
-          <div className="space-y-3 border-b border-border/50 px-4 py-3">
+          <div className="shrink-0 space-y-3 border-b border-border/50 bg-muted/30 px-4 py-3">
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:w-auto sm:justify-start">
                 <span className="text-sm text-muted-foreground">
                   {hasRating ? "Your rating:" : "Rate this show:"}
                 </span>
@@ -259,54 +258,50 @@ export function SetlistRatingDrawer({
             )}
           </div>
 
-          {/* Reviews list */}
-          <div className="min-h-0 flex-1 overflow-hidden">
-            <ScrollArea className="h-full max-h-[40vh]">
-              <div className="space-y-0 px-4 py-3">
-                {reviewsError && (
-                  <div className="flex items-center justify-center rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                    {reviewsError}
-                  </div>
-                )}
-                {isLoadingReviews && (
-                  <div className="flex items-center justify-center gap-2 py-8">
-                    <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Loading reviews…
-                    </span>
-                  </div>
-                )}
-                {!isLoadingReviews && !reviewsError && reviews.length === 0 && (
-                  <p className="py-6 text-center text-sm text-muted-foreground">
-                    No written reviews yet for this show.
-                  </p>
-                )}
-                {!isLoadingReviews &&
-                  !reviewsError &&
-                  reviews.length > 0 &&
-                  reviews.map((r, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col gap-1 border-b border-border/40 py-1 last:border-0"
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StarRow rating={r.rating} size="sm" />
-                        <span className="text-sm font-medium">{r.username}</span>
-                      </div>
-                      {r.review && (
-                        <p className="text-xs text-muted-foreground">
-                          {r.review}
-                        </p>
-                      )}
+          {/* Reviews list — flex-1 + min-h-0 so this region scrolls inside max-h drawer */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="space-y-0 px-4 py-3">
+              {reviewsError && (
+                <div className="flex items-center justify-center rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  {reviewsError}
+                </div>
+              )}
+              {isLoadingReviews && (
+                <div className="flex items-center justify-center gap-2 py-8">
+                  <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Loading reviews…
+                  </span>
+                </div>
+              )}
+              {!isLoadingReviews && !reviewsError && reviews.length === 0 && (
+                <p className="py-6 text-center text-sm text-muted-foreground">
+                  No written reviews yet for this show.
+                </p>
+              )}
+              {!isLoadingReviews &&
+                !reviewsError &&
+                reviews.length > 0 &&
+                reviews.map((r, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col gap-1 border-b border-border/40 py-1 last:border-0"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StarRow rating={r.rating} size="sm" />
+                      <span className="text-sm font-medium">{r.username}</span>
                     </div>
-                  ))}
-              </div>
-            </ScrollArea>
+                    {r.review && (
+                      <p className="text-xs text-muted-foreground">{r.review}</p>
+                    )}
+                  </div>
+                ))}
+            </div>
           </div>
 
           {/* Submit rating when no rating yet */}
           {!hasRating && (
-            <div className="border-t border-border/50 p-4">
+            <div className="shrink-0 border-t border-border/50 p-4">
               <Button
                 className="w-full"
                 onClick={handleSaveRating}

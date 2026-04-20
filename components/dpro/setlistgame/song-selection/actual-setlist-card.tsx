@@ -2,19 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { SetlistEntry } from "./types"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getPlacementColor, getSetDisplayName, getSongsForActualSet } from "./utils"
 
 interface ActualSetlistCardProps {
   actualSetlist: SetlistEntry[]
   songPicks: { set: string }[]
-}
-
-function entrySongDisplayName(entry: SetlistEntry): string | null {
-  const rel = entry.songs
-  if (!rel) return null
-  const row = Array.isArray(rel) ? rel[0] : rel
-  return row?.song_displayname ?? null
 }
 
 function getUniqueSetsFromPicksAndActual(
@@ -75,15 +67,15 @@ export function ActualSetlistCard({
                   </span>
                   <div className="flex shrink-0 justify-end" />
                 </div>
-                <div className="space-y-0.5 p-2">
+                <div className="p-2">
                   {entries.map((entry, index) => (
                     <div
                       key={entry.entry_id}
-                      className="flex items-center gap-2 rounded-md py-0.5 px-2 transition-colors hover:bg-muted/40"
+                      className="flex items-center gap-2 rounded-md px-2 transition-colors hover:bg-muted/40"
                     >
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         <span
-                          className="shrink-0 text-xs text-white px-1.5 py-0.5 rounded font-medium"
+                          className="shrink-0 text-xs text-white px-1.5 my-0.5 rounded font-medium"
                           style={{
                             backgroundColor: getPlacementColor(entry.entry_placement),
                           }}
@@ -91,10 +83,7 @@ export function ActualSetlistCard({
                           {index + 1}
                         </span>
                         <span className="min-w-0 truncate text-xs font-medium">
-                          <SongDisplayName
-                            song={entry.entry_song}
-                            songDisplayName={entrySongDisplayName(entry)}
-                          />
+                          {entry.entry_song}
                         </span>
                       </div>
                       <div

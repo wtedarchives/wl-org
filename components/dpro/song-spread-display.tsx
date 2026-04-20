@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import {
   Tooltip,
@@ -152,9 +152,9 @@ export function SongSpreadDisplay({
 
   return (
     <Card className={cardClassName}>
-      <div className="px-3 py-1.5 bg-muted/60 shrink-0">
-        <h2 className="text-sm font-semibold">Song Spread</h2>
-      </div>
+      <CardHeader className="shrink-0 bg-muted/60 py-2">
+        <CardTitle>Song Spread</CardTitle>
+      </CardHeader>
       <CardContent className={contentClassName}>
         <ul className={ulClassName}>
           {spread.map(({ category, count, songs }) => {

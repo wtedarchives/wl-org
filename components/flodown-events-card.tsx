@@ -9,14 +9,6 @@ import { cn } from "@/lib/utils"
 const FLODOWN_EVENTS = [
   {
     month: "APR",
-    day: 19,
-    name: "St. Augustine Flamingo Flodown",
-    venue: "Spinster Abbott's",
-    location: "St. Augustine, FL",
-    href: "https://www.instagram.com/p/DTBjr3WEnzU/?img_index=1",
-  },
-  {
-    month: "APR",
     day: 22,
     name: "NOLA Flodown",
     venue: "Miel Brewery and Taproom",

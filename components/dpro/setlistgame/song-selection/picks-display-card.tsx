@@ -13,10 +13,8 @@ import {
   getSongsForSet,
 } from "./utils"
 import { TooltipContainer } from "./tooltip-container"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 interface PicksDisplayCardProps {
-  songDisplayNameMap: Record<string, string | null>
   songPicks: SongPick[]
   actualSetlist: SetlistEntry[]
   viewMode: boolean
@@ -29,7 +27,6 @@ interface PicksDisplayCardProps {
 }
 
 export function PicksDisplayCard({
-  songDisplayNameMap,
   songPicks,
   actualSetlist,
   viewMode,
@@ -95,33 +92,26 @@ export function PicksDisplayCard({
                   )}
                 </div>
               )}
-              <div className="space-y-0.5 p-2">
+              <div className="p-2">
                 {getSongsForSet(songPicks, setId).map((pick, index) => (
                   <div
                     key={pick.id}
                     className={cn(
-                      "flex items-center gap-2 rounded-md py-0.5 px-2 transition-colors hover:bg-muted/40",
+                      "flex items-center gap-2 rounded-md px-2 transition-colors hover:bg-muted/40",
                       resultsGridLayout ? "" : "justify-between"
                     )}
                   >
                     <div className="flex min-w-0 flex-1 items-center gap-2">
                       <span
-                        className="shrink-0 text-xs text-white px-1.5 py-0.5 rounded font-medium"
+                        className="shrink-0 text-xs text-white px-1.5 my-0.5 rounded font-medium"
                         style={{ backgroundColor: getPlacementColor(pick.placement) }}
                       >
                         {index + 1}
                       </span>
                       <span
-                        className={`font-medium truncate min-w-0 ${viewMode ? "text-xs" : "text-sm"}`}
+                        className={`font-medium truncate min-w-0 ${viewMode ? "text-xs" : "text-xs"}`}
                       >
-                        {pick.isBreak ? (
-                          pick.song
-                        ) : (
-                          <SongDisplayName
-                            song={pick.song}
-                            songDisplayName={songDisplayNameMap[pick.song] ?? null}
-                          />
-                        )}
+                        {pick.song}
                       </span>
                       {pick.placement &&
                         (!viewMode || !isSelectionClosed) &&

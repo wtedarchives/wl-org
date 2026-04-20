@@ -21,6 +21,7 @@ import {
   RarityValue,
   GapValue,
 } from "@/components/dpro/stats/show-stat-card"
+import { TourSongSpread } from "@/components/dpro/tours/tour-song-spread"
 
 const DEFAULT_YEAR = 2026
 const YEARS = [
@@ -98,6 +99,7 @@ function DproStatsContent() {
     highestGapShows,
     highestAttendedShows,
     highestRatedShows,
+    songSpreadShows,
     isAnyStatLoading,
   } = useStatsData(selectedYear ?? DEFAULT_YEAR)
 
@@ -160,7 +162,7 @@ function DproStatsContent() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Songs
           </h2>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
             <StatCard
               title="Top Songs Played"
               headerClassName="bg-[#3C1E40] text-white py-2"
@@ -236,6 +238,10 @@ function DproStatsContent() {
               items={liberatedSongs}
               showEmptyState={showEmptyState}
             />
+            <TourSongSpread
+              shows={songSpreadShows}
+              cardMaxHeight="max-h-[325px]"
+            />
           </div>
         </section>
 
@@ -243,7 +249,7 @@ function DproStatsContent() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Shows
           </h2>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
             <ShowStatCard
               title="Longest Shows"
               headerClassName="bg-muted py-2"

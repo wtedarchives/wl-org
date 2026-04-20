@@ -14,6 +14,7 @@ import { SongSearchCard } from "./song-selection/song-search-card"
 import { ActionButtonsCard } from "./song-selection/action-buttons-card"
 import { PicksDisplayCard } from "./song-selection/picks-display-card"
 import { ActualSetlistCard } from "./song-selection/actual-setlist-card"
+import { ToggleSwitch } from "./song-selection/toggle-switch"
 import { SubmitCard } from "./song-selection/submit-card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import type { UserPick } from "@/hooks/use-user-picks"
@@ -93,7 +94,6 @@ export function SongSelectionDialog({
 
   const {
     songs,
-    songDisplayNameMap,
     loading,
     selectedSong,
     setSelectedSong,
@@ -111,6 +111,8 @@ export function SongSelectionDialog({
     setSuccess,
     rawPointsTotal,
     actualSetlist,
+    showActualSetlist,
+    setShowActualSetlist,
     showInfo,
   } = useSongSelection({
     isOpen: open,
@@ -204,32 +206,72 @@ export function SongSelectionDialog({
                   isSelectionClosed={showInfo.isSelectionClosed}
                   timeRemaining={showInfo.timeRemaining}
                 />
-                <div
-                  className={
-                    show.show_scored
-                      ? "grid grid-cols-1 md:grid-cols-2 gap-4"
-                      : "flex flex-col gap-3"
-                  }
-                >
-                  <PicksDisplayCard
-                    songDisplayNameMap={songDisplayNameMap}
-                    songPicks={songPicks}
-                    actualSetlist={actualSetlist}
-                    viewMode={true}
-                    show_scored={show.show_scored}
-                    isSelectionClosed={showInfo.isSelectionClosed}
-                    onRemoveSong={handleRemoveSong}
-                    onMoveSongUp={moveSongUp}
-                    onMoveSongDown={moveSongDown}
-                    onRemoveSet={handleRemoveSet}
-                  />
-                  {show.show_scored && (
-                    <ActualSetlistCard
-                      actualSetlist={actualSetlist}
+                {show.show_scored ? (
+                  <>
+                    <div className="flex flex-col gap-3 md:hidden">
+                      <ToggleSwitch
+                        showActualSetlist={showActualSetlist}
+                        setShowActualSetlist={setShowActualSetlist}
+                        leftLabel="Your picks"
+                        rightLabel="Actual setlist"
+                      />
+                      <div
+                        key={showActualSetlist ? "actual" : "picks"}
+                        className="animate-in fade-in duration-200"
+                      >
+                        {!showActualSetlist ? (
+                          <PicksDisplayCard
+                            songPicks={songPicks}
+                            actualSetlist={actualSetlist}
+                            viewMode={true}
+                            show_scored={show.show_scored}
+                            isSelectionClosed={showInfo.isSelectionClosed}
+                            onRemoveSong={handleRemoveSong}
+                            onMoveSongUp={moveSongUp}
+                            onMoveSongDown={moveSongDown}
+                            onRemoveSet={handleRemoveSet}
+                          />
+                        ) : (
+                          <ActualSetlistCard
+                            actualSetlist={actualSetlist}
+                            songPicks={songPicks}
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <div className="hidden md:grid md:grid-cols-2 gap-4">
+                      <PicksDisplayCard
+                        songPicks={songPicks}
+                        actualSetlist={actualSetlist}
+                        viewMode={true}
+                        show_scored={show.show_scored}
+                        isSelectionClosed={showInfo.isSelectionClosed}
+                        onRemoveSong={handleRemoveSong}
+                        onMoveSongUp={moveSongUp}
+                        onMoveSongDown={moveSongDown}
+                        onRemoveSet={handleRemoveSet}
+                      />
+                      <ActualSetlistCard
+                        actualSetlist={actualSetlist}
+                        songPicks={songPicks}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <PicksDisplayCard
                       songPicks={songPicks}
+                      actualSetlist={actualSetlist}
+                      viewMode={true}
+                      show_scored={show.show_scored}
+                      isSelectionClosed={showInfo.isSelectionClosed}
+                      onRemoveSong={handleRemoveSong}
+                      onMoveSongUp={moveSongUp}
+                      onMoveSongDown={moveSongDown}
+                      onRemoveSet={handleRemoveSet}
                     />
-                  )}
-                </div>
+                  </div>
+                )}
                 <SubmitCard
                   viewMode={viewMode}
                   show_scored={show.show_scored}
@@ -259,7 +301,6 @@ export function SongSelectionDialog({
                   />
                   <SongSearchCard
                     songs={songs}
-                    songDisplayNameMap={songDisplayNameMap}
                     selectedSong={selectedSong}
                     setSelectedSong={setSelectedSong}
                     onAddSong={() => {
@@ -279,7 +320,6 @@ export function SongSelectionDialog({
                 </div>
                 <div className="flex flex-col gap-3 order-2">
                   <PicksDisplayCard
-                    songDisplayNameMap={songDisplayNameMap}
                     songPicks={songPicks}
                     actualSetlist={actualSetlist}
                     viewMode={false}

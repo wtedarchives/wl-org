@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 import type { SongPick, Song, SetlistEntry } from "./types"
 import type { SongSelectionModalProps } from "./types"
@@ -28,6 +28,10 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
   const [rawPointsTotal, setRawPointsTotal] = useState<number>(0);
   const [actualSetlist, setActualSetlist] = useState<SetlistEntry[]>([]);
   const [showActualSetlist, setShowActualSetlist] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setShowActualSetlist(false)
+  }, [isOpen])
 
   const [showInfo, setShowInfo] = useState({
     ...show,
@@ -209,14 +213,6 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
     fetchActualSetlist();
   }, [show.show_id, viewMode, show.show_scored]);
 
-  const songDisplayNameMap = useMemo(() => {
-    const m: Record<string, string | null> = {}
-    for (const s of songs) {
-      m[s.song] = s.song_displayname ?? null
-    }
-    return m
-  }, [songs])
-
   // Set up live updating timer
   useEffect(() => {
     // Skip if no show data
@@ -297,7 +293,6 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
 
   return {
     songs,
-    songDisplayNameMap,
     loading,
     selectedSong,
     setSelectedSong,

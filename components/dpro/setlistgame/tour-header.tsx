@@ -22,7 +22,7 @@ export function TourHeader({
           {tourName ?? "Tour"}
         </h2>
       </div>
-      <div className="grid grid-cols-1 gap-3 px-3 py-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 items-center gap-3 px-3 py-3 md:grid-cols-2">
         <div className="flex gap-4 justify-center md:justify-start">
           <div>
             <span className="text-xs text-muted-foreground">Shows: </span>
@@ -33,7 +33,7 @@ export function TourHeader({
             <span className="text-xs font-medium">{totalPlayers}</span>
           </div>
         </div>
-        <div className="flex flex-col items-center md:items-end">
+        <div className="flex min-h-0 items-center justify-center md:justify-end">
           {tourWinners.length > 0 && (
             <div className="flex items-center gap-1 flex-wrap justify-center md:justify-end">
               <Trophy className="size-3.5 text-muted-foreground shrink-0" />

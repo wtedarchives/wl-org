@@ -101,6 +101,7 @@ export const CATEGORY_COMPLETE_ROTATING_IMAGES = [
   "https://f4.bcbits.com/img/a2590856745_10.jpg",
   "https://f4.bcbits.com/img/a1186995527_10.jpg",
   "https://f4.bcbits.com/img/a3562184768_10.jpg",
+  "https://f4.bcbits.com/img/a4008514666_10.jpg",
 ] as const
 
 export const CATEGORY_COMPLETE_ROTATE_MS = 1750

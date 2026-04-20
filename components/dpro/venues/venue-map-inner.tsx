@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import { MapContainer, TileLayer, Polyline } from "react-leaflet"
 import { useVenueMapFilters } from "@/hooks/use-venue-map-filters"
 import { VenueMarker } from "./venue-marker"
-import { MapCenterUpdater } from "./map-center-updater"
+import { MapCenterUpdater, MapInvalidateOnVisible } from "./map-center-updater"
+import { useIsBelowXl } from "@/hooks/use-mobile"
 import { VenueMapMobileHeader } from "./venue-map-mobile-header"
 import { VenueMapDesktopHeader } from "./venue-map-desktop-header"
 import { VenueMapFilterModal } from "./venue-map-filter-modal"
@@ -21,6 +22,7 @@ interface VenueMapInnerProps {
 
 export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
   const router = useRouter()
+  const belowXl = useIsBelowXl()
   const [mapVenues, setMapVenues] = useState<
     import("@/hooks/use-venue-map-data").MapVenue[]
   >([])
@@ -53,6 +55,9 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
   const handleVenueClick = onVenueClick ?? ((venueId: string) => {
     router.push(getVenueArchiveUrl(venueId))
   })
+
+  /** Leaflet panes sit above `z-50` dialogs; hide map while filter modal is open (same breakpoint as mobile filter UI). */
+  const hideMapForFilterModal = isFilterModalOpen && belowXl
 
   if (allVenues.length === 0) {
     return (
@@ -120,40 +125,43 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
       />
-      <MapContainer
-        center={center}
-        zoom={3}
-        style={{ width: "100%" }}
-        className="rounded-lg h-[400px] xl:h-[500px]"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution=""
-        />
-        <MapCenterUpdater center={center} venues={mapVenues} />
-        {tourPath.length > 1 && (
-          <Polyline
-            positions={tourPath}
-            pathOptions={{
-              color: "#ff6b35",
-              weight: 3,
-              opacity: 0.8,
-              dashArray: "10, 5",
-            }}
+      <div className={hideMapForFilterModal ? "hidden" : undefined}>
+        <MapContainer
+          center={center}
+          zoom={3}
+          style={{ width: "100%" }}
+          className="rounded-lg h-[400px] xl:h-[500px]"
+        >
+          <MapInvalidateOnVisible visible={!hideMapForFilterModal} />
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution=""
           />
-        )}
-        {mapVenues.map((venue) => (
-          <VenueMarker
-            key={`${venue.venue_id}-${selectedTour}`}
-            venue={venue}
-            shows={venueShows[venue.venue] ?? []}
-            selectedTour={selectedTour}
-            tourVenueOrder={tourVenueOrder}
-            tourStartEndVenues={tourStartEndVenues}
-            onVenueClick={handleVenueClick}
-          />
-        ))}
-      </MapContainer>
+          <MapCenterUpdater center={center} venues={mapVenues} />
+          {tourPath.length > 1 && (
+            <Polyline
+              positions={tourPath}
+              pathOptions={{
+                color: "#ff6b35",
+                weight: 3,
+                opacity: 0.8,
+                dashArray: "10, 5",
+              }}
+            />
+          )}
+          {mapVenues.map((venue) => (
+            <VenueMarker
+              key={`${venue.venue_id}-${selectedTour}`}
+              venue={venue}
+              shows={venueShows[venue.venue] ?? []}
+              selectedTour={selectedTour}
+              tourVenueOrder={tourVenueOrder}
+              tourStartEndVenues={tourStartEndVenues}
+              onVenueClick={handleVenueClick}
+            />
+          ))}
+        </MapContainer>
+      </div>
     </div>
   )
 }

@@ -66,11 +66,11 @@ export function TooltipContainer({
   const scoreFace = (
     <>
       {result === "not_played" ? (
-        <span className="inline-flex items-center justify-center size-5 rounded bg-red-600">
+        <span className="inline-flex items-center justify-center size-4 rounded bg-red-600">
           <X className="size-3 text-white" />
         </span>
       ) : (
-        <span className="font-medium text-xs text-white bg-green-600 rounded px-1 py-0.5">
+        <span className="font-medium text-xs text-white bg-green-600 rounded px-1">
           +{score}
         </span>
       )}

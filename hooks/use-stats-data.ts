@@ -23,6 +23,8 @@ import {
   fetchLiberatedSongsData,
 } from "@/lib/stats/stats-data-utils"
 import { fetchShowStatsData } from "@/lib/stats/show-stats-utils"
+import { fetchStatsSongSpreadShows } from "@/lib/stats/fetch-stats-song-spread-shows"
+import type { TourSongSpreadShowInput } from "@/lib/stats/tour-song-spread-compute"
 
 export function useStatsData(selectedYear: number | string) {
   const [topSongs, setTopSongs] = useState<TopSong[]>([])
@@ -38,6 +40,9 @@ export function useStatsData(selectedYear: number | string) {
   const [highestGapShows, setHighestGapShows] = useState<ShowStat[]>([])
   const [highestAttendedShows, setHighestAttendedShows] = useState<ShowStat[]>([])
   const [highestRatedShows, setHighestRatedShows] = useState<ShowStat[]>([])
+  const [songSpreadShows, setSongSpreadShows] = useState<
+    TourSongSpreadShowInput[]
+  >([])
 
   const [loadingTopSongs, setLoadingTopSongs] = useState(true)
   const [loadingShowOpeners, setLoadingShowOpeners] = useState(true)
@@ -48,6 +53,7 @@ export function useStatsData(selectedYear: number | string) {
   const [loadingLongestSongs, setLoadingLongestSongs] = useState(true)
   const [loadingLiberatedSongs, setLoadingLiberatedSongs] = useState(true)
   const [loadingShowStats, setLoadingShowStats] = useState(true)
+  const [loadingSongSpread, setLoadingSongSpread] = useState(true)
 
   useEffect(() => {
     setLoadingTopSongs(true)
@@ -61,6 +67,7 @@ export function useStatsData(selectedYear: number | string) {
     setLoadingLongestSongs(true)
     setLoadingLiberatedSongs(true)
     setLoadingShowStats(true)
+    setLoadingSongSpread(true)
 
     const fetchNotPlayed = async () => {
       if (selectedYear === "all-time") {
@@ -124,6 +131,13 @@ export function useStatsData(selectedYear: number | string) {
         setHighestRatedShows(stats.highestRated)
         setLoadingShowStats(false)
       }).catch(() => setLoadingShowStats(false)),
+      fetchStatsSongSpreadShows(selectedYear).then((shows) => {
+        setSongSpreadShows(shows)
+        setLoadingSongSpread(false)
+      }).catch(() => {
+        setSongSpreadShows([])
+        setLoadingSongSpread(false)
+      }),
     ])
   }, [selectedYear])
 
@@ -136,7 +150,8 @@ export function useStatsData(selectedYear: number | string) {
     loadingNotPlayed ||
     loadingLongestSongs ||
     loadingLiberatedSongs ||
-    loadingShowStats
+    loadingShowStats ||
+    loadingSongSpread
 
   return {
     topSongs,
@@ -152,6 +167,7 @@ export function useStatsData(selectedYear: number | string) {
     highestGapShows,
     highestAttendedShows,
     highestRatedShows,
+    songSpreadShows,
     isAnyStatLoading,
   }
 }
