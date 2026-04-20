@@ -6,13 +6,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { getPersonnelPillClassName } from "@/lib/setlist-utils"
+import {
+  getPersonnelPillClassName,
+  sortGuestsForSetlistDisplay,
+} from "@/lib/setlist-utils"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistEntryGuestsCellProps {
-  entry: SetlistEntry
+  entry: Pick<SetlistEntry, "guests">
   showTooltips?: boolean
   /** When true, keep all pills on one row (for truncation / horizontal clip). */
   nowrap?: boolean
@@ -25,9 +28,7 @@ export function SetlistEntryGuestsCell({
 }: SetlistEntryGuestsCellProps) {
   if (!entry.guests?.length) return null
 
-  const sortedGuests = [...entry.guests].sort(
-    (a, b) => a.guest_canonid - b.guest_canonid
-  )
+  const sortedGuests = sortGuestsForSetlistDisplay(entry.guests)
 
   return (
     <div

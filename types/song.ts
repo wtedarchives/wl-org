@@ -1,3 +1,5 @@
+import type { Guest } from "@/types/setlist"
+
 export interface SongData {
   song: string
   song_displayname?: string | null
@@ -32,7 +34,7 @@ export interface SongPerformance {
   joty_round?: string | null
   shows_since_debut_num?: number | null
   gap?: number | string | null
-  guests?: { guest_display_name: string }[]
+  guests?: Guest[]
 }
 
 export interface GroupCount {

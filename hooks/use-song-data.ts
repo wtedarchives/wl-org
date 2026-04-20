@@ -109,8 +109,12 @@ export function useSongData(songId: string | undefined) {
               )
             ),
             setlist_entry_guests (
+              guest_id,
               guests (
-                guest_displayname
+                guest_displayname,
+                guest_canonid,
+                guest_instrument,
+                guest_category
               )
             )
           `,
@@ -172,10 +176,20 @@ export function useSongData(songId: string | undefined) {
               guests:
                 (
                   perf.setlist_entry_guests as Array<{
-                    guests: { guest_displayname: string }
+                    guest_id: string
+                    guests: {
+                      guest_displayname: string
+                      guest_canonid: number
+                      guest_instrument: string
+                      guest_category?: string | null
+                    }
                   }>
                 )?.map((g) => ({
+                  guest_id: g.guest_id,
                   guest_display_name: g.guests.guest_displayname,
+                  guest_canonid: g.guests.guest_canonid,
+                  guest_instrument: g.guests.guest_instrument,
+                  guest_category: g.guests.guest_category ?? null,
                 })) ?? [],
             }
           },

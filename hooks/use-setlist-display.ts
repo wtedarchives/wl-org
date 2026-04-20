@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 import type { SetlistEntry, Show, ShowDate, GuestGroup } from "@/types/setlist"
-import { calculateShowPosition } from "@/lib/setlist-utils"
+import {
+  calculateShowPosition,
+  sortGuestsForSetlistDisplay,
+} from "@/lib/setlist-utils"
 
 export function useShowPosition(show: Show | null, showDates: ShowDate[]) {
   const [position, setPosition] = useState<{
@@ -68,7 +71,7 @@ export function useGuestGroups(setlist: SetlistEntry[]): GuestGroup[] {
     const result: GuestGroup[] = []
     setlist.forEach((entry) => {
       if (!entry.guests?.length) return
-      const sorted = [...entry.guests].sort((a, b) => a.guest_canonid - b.guest_canonid)
+      const sorted = sortGuestsForSetlistDisplay(entry.guests)
       const key = sorted.map((g) => g.guest_canonid).join(",")
       if (seen.has(key)) return
       seen.add(key)

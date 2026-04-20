@@ -1,4 +1,10 @@
-import type { SetlistEntry, GuestGroup, Show, ShowDate } from "@/types/setlist"
+import type {
+  SetlistEntry,
+  Guest,
+  GuestGroup,
+  Show,
+  ShowDate,
+} from "@/types/setlist"
 import { getPlacementBarColor } from "@/lib/placement-bar-color"
 
 /** Tailwind classes for a personnel pill by guest_category (fully rounded). */
@@ -9,12 +15,21 @@ export function getPersonnelPillClassName(
     "rounded-full px-1.5 py-0.5 text-[10px] font-medium"
   const cat = guestCategory?.trim()
   if (cat === "Goose (current)")
-    return `${base} bg-wl-green/60 text-white`
+    return `${base} bg-wl-green/60 !text-white`
   if (cat === "Goose (former)")
-    return `${base} bg-wl-green/30 text-white`
+    return `${base} bg-wl-green/30 !text-white`
   if (cat === "Group" || cat === "Guest")
-    return `${base} bg-wl-orange/50 text-white`
-  return `${base} bg-muted text-muted-foreground`
+    return `${base} bg-wl-orange/50 !text-white`
+  return `${base} bg-muted !text-muted-foreground`
+}
+
+/** Same ordering as setlist personnel pills: canon id, then display name. */
+export function sortGuestsForSetlistDisplay(guests: Guest[]): Guest[] {
+  return [...guests].sort((a, b) => {
+    const byCanon = a.guest_canonid - b.guest_canonid
+    if (byCanon !== 0) return byCanon
+    return a.guest_display_name.localeCompare(b.guest_display_name)
+  })
 }
 
 export function getGuestColor(
@@ -23,14 +38,11 @@ export function getGuestColor(
 ): string {
   if (!entry.guests || entry.guests.length === 0) return "transparent"
 
-  const sortedGuests = [...entry.guests].sort(
-    (a, b) => a.guest_canonid - b.guest_canonid,
-  )
+  const sortedGuests = sortGuestsForSetlistDisplay(entry.guests)
   const entryGuestKey = sortedGuests.map((g) => g.guest_canonid).join(",")
 
   const group = guestGroups.find((group) =>
-    group.guests
-      .sort((a, b) => a.guest_canonid - b.guest_canonid)
+    sortGuestsForSetlistDisplay(group.guests)
       .map((g) => g.guest_canonid)
       .join(",") === entryGuestKey
   )
