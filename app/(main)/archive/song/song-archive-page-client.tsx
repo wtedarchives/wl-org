@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { cn } from "@/lib/utils"
 import { notFound, useRouter, useSearchParams } from "next/navigation"
 import {
   useSetlistBreadcrumb,
@@ -8,9 +9,11 @@ import {
 } from "@/components/setlist-breadcrumb-context"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useSongData } from "@/hooks/use-song-data"
+import { useSongWtedAirplay } from "@/hooks/use-song-wted-airplay"
 import { SongHeader } from "@/components/dpro/song/song-header"
 import { SongInfo } from "@/components/dpro/song/song-info"
 import { SongPerformanceChart } from "@/components/dpro/song/song-performance-chart"
+import { SongWtedRadioPanel } from "@/components/dpro/song/song-wted-radio-panel"
 import { SongLyrics } from "@/components/dpro/song/song-lyrics"
 import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
@@ -39,6 +42,10 @@ function SongPageContent({ songId }: { songId: string }) {
     progress,
   } = useSongData(songId)
 
+  const wtedAirplay = useSongWtedAirplay(song?.song ?? null)
+  const showWtedColumn =
+    wtedAirplay.loading || wtedAirplay.groups.length > 0
+
   useEffect(() => {
     if (!song) {
       setSetlistBreadcrumbs(null)
@@ -64,6 +71,22 @@ function SongPageContent({ songId }: { songId: string }) {
   const handleGroupClick = (group: string) => {
     setSelectedGroup((current) => (current === group ? null : group))
   }
+
+  const songInfoCardCount = useMemo(() => {
+    if (!song) return 1
+    const hasGroupCounts = stats.groupCounts.length > 0
+    const hasSongNotes = !!song.song_coachnotes
+    const hasPlacementStats = placementStats.length > 0
+    return (
+      1 +
+      (hasGroupCounts ? 1 : 0) +
+      (hasSongNotes ? 1 : 0) +
+      (hasPlacementStats ? 1 : 0)
+    )
+  }, [song, stats.groupCounts.length, placementStats.length])
+
+  /** Match SongInfo: 3+ cards can use `lg:@[1000px]/song-main:grid-cols-3` (wide row). */
+  const performancesRowWideLayout = songInfoCardCount >= 3
 
   if (loading) {
     return (
@@ -103,17 +126,49 @@ function SongPageContent({ songId }: { songId: string }) {
             placementStats={placementStats}
           />
 
-          <SongPerformanceChart
-            performances={performances}
-            selectedGroup={selectedGroup}
-            songName={song.song}
-            songDisplayName={song.song_displayname}
-            onJOTYClick={(year, entryId) => {
-              setJotyYear(year)
-              setJotyHighlightedEntryId(entryId)
-              setJotyDrawerOpen(true)
-            }}
-          />
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-3",
+              performancesRowWideLayout &&
+                showWtedColumn &&
+                "lg:@[1000px]/song-main:grid-cols-3",
+            )}
+          >
+            <div
+              className={cn(
+                "min-w-0",
+                performancesRowWideLayout &&
+                  showWtedColumn &&
+                  "lg:@[1000px]/song-main:col-span-2",
+              )}
+            >
+              <SongPerformanceChart
+                performances={performances}
+                selectedGroup={selectedGroup}
+                songName={song.song}
+                songDisplayName={song.song_displayname}
+                onJOTYClick={(year, entryId) => {
+                  setJotyYear(year)
+                  setJotyHighlightedEntryId(entryId)
+                  setJotyDrawerOpen(true)
+                }}
+              />
+            </div>
+            {showWtedColumn ? (
+              <div
+                className={cn(
+                  "min-w-0",
+                  performancesRowWideLayout &&
+                    "lg:@[1000px]/song-main:col-span-1",
+                )}
+              >
+                <SongWtedRadioPanel
+                  groups={wtedAirplay.groups}
+                  loading={wtedAirplay.loading}
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {song.song_lyrics && (

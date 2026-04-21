@@ -1,10 +1,9 @@
 "use client"
 
-
+import { useMemo } from "react"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { PERFORMANCE_YEARS } from "@/lib/song-performance-utils"
 import { getPlacementBarColor } from "@/lib/placement-bar-color"
 import { PerformanceTooltipContent } from "./performance-tooltip"
 import type { SongPerformance } from "@/types/song"
@@ -21,24 +20,52 @@ interface PerformanceTimelineViewProps {
   selectedGroup: string | null
 }
 
+/** Every calendar year from first performance year through last (gaps included). */
+function displayYearsForTimeline(
+  performancesByYear: Record<number, TimelinePerf[]>,
+): number[] {
+  const withData = Object.entries(performancesByYear)
+    .filter(([, perfs]) => perfs && perfs.length > 0)
+    .map(([y]) => Number(y))
+  if (withData.length === 0) return []
+  const min = Math.min(...withData)
+  const max = Math.max(...withData)
+  const years: number[] = []
+  for (let y = min; y <= max; y++) years.push(y)
+  return years
+}
+
 export function PerformanceTimelineView({
   performancesByYear,
   selectedGroup,
 }: PerformanceTimelineViewProps) {
+  const displayYears = useMemo(
+    () => displayYearsForTimeline(performancesByYear),
+    [performancesByYear],
+  )
+
   const shouldHighlight = (perf: SongPerformance) => {
     if (!selectedGroup) return false
     return perf.show_group === selectedGroup
+  }
+
+  if (displayYears.length === 0) {
+    return (
+      <div className="text-muted-foreground p-2 text-center text-xs">
+        No performances match the current filter.
+      </div>
+    )
   }
 
   return (
     <div className="p-2">
       <div className="overflow-x-auto flex justify-start">
         <div className="flex flex-row min-w-max">
-          {PERFORMANCE_YEARS.map((year, index) => (
+          {displayYears.map((year, index) => (
             <div
               key={year}
               className={`w-14 px-1 ${
-                index !== PERFORMANCE_YEARS.length - 1
+                index !== displayYears.length - 1
                   ? "border-r border-border"
                   : ""
               }`}

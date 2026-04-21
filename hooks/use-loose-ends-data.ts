@@ -15,6 +15,10 @@ import {
   setLooseEndsSessionCache,
 } from "@/lib/loose-ends-cache"
 import {
+  preloadLooseEndBadgeArtworkFromGrouped,
+  preloadLooseEndBadgeArtworkFromRows,
+} from "@/lib/loose-end-badge-preload"
+import {
   buildAttendedJoined,
   buildCategoryProgress,
   countDebutsForShows,
@@ -55,6 +59,10 @@ export function useLooseEndsData(userId: string | null) {
           setLoading(false)
           setLoadingProgress(100)
           setError(null)
+          preloadLooseEndBadgeArtworkFromGrouped(
+            cached.groupedLooseEnds,
+            cached.categories,
+          )
           return
         }
       }
@@ -80,6 +88,7 @@ export function useLooseEndsData(userId: string | null) {
 
         const looseEndsData = (looseEndsRows ?? []) as LooseEndRow[]
         setLoadingProgress(12)
+        preloadLooseEndBadgeArtworkFromRows(looseEndsData)
 
         if (looseEndsData.length === 0) {
           setGroupedLooseEnds({})
