@@ -20,7 +20,7 @@ const thumbFrame =
   "relative size-9 shrink-0 overflow-hidden rounded border border-wl-dark-grey/50"
 
 /** Row min height + TanStack Virtual estimate (Request a Song catalog only). */
-const CATALOG_ROW_HEIGHT_PX = 48
+const CATALOG_ROW_HEIGHT_PX = 44
 
 /** When `wted_radio_ids.artwork` is empty; catalog is expected to use DB URLs after backfill. */
 const REQUEST_CATALOG_ARTWORK_FALLBACK = "/WTED3.png"
@@ -68,7 +68,7 @@ function CatalogTrackRow({
   return (
     <div
       className={cn(
-        "flex border-b border-wl-dark-grey/50 px-2 py-1 transition-colors hover:bg-[#3d4842] sm:px-3",
+        "flex border-b border-wl-dark-grey/50 !px-2 py-0.5 transition-colors hover:bg-[#3d4842]",
       )}
       style={{ minHeight: CATALOG_ROW_HEIGHT_PX }}
     >
@@ -82,7 +82,7 @@ function CatalogTrackRow({
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {row.track_artist?.trim() ?
             <span
-              className="inline-block max-w-[100px] truncate rounded-full border border-wl-dark-grey/50 bg-wl-orange/40 px-2 py-0.5 text-left align-middle text-[10px] font-semibold text-wl-white"
+              className="inline-block max-w-[100px] truncate rounded-full border border-wl-dark-grey/50 bg-wl-orange/40 !px-1.5 !py-0.5 text-left align-middle text-[10px] font-semibold text-wl-white"
               title={row.track_artist.trim()}
             >
               {row.track_artist.trim()}
@@ -155,10 +155,10 @@ export function WtedRequestSongCustomPanel({
         className,
       )}
     >
-      <div className="shrink-0 border-b border-wl-dark-grey/50 px-2 py-1.5">
+      <div className="shrink-0 border-b border-wl-dark-grey/50 !px-2 !py-1.5">
         <div className="relative">
           <Search
-            className="pointer-events-none absolute left-1.5 top-1/2 size-3 -translate-y-1/2 text-wl-white/55"
+            className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-wl-white/55"
             aria-hidden
           />
           <Input
@@ -169,8 +169,8 @@ export function WtedRequestSongCustomPanel({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search…"
             className={cn(
-              "h-7 border-wl-dark-grey/50 !bg-white/10 py-0 pl-7 text-[11px] leading-tight text-wl-white placeholder:text-wl-white/45",
-              query ? "pr-8" : "pr-2",
+              "h-8 border-wl-dark-grey/50 !bg-white/10 py-0 !pl-9 text-[11px] leading-tight text-wl-white placeholder:text-wl-white/45",
+              query ? "!pr-9" : "!pr-2",
             )}
             autoComplete="off"
             aria-label="Filter tracks"

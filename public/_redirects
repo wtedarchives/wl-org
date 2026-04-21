@@ -1,3 +1,6 @@
+# New homepage is at /; draft URL and bookmarks → home
+/v2  /  301
+
 # WTED Info page removed; send legacy URLs to About
 /wted/info  /wted/about  301
 

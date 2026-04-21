@@ -67,14 +67,20 @@ export function useDiscourseFeaturedTopics() {
         }
         if (!cancelled) {
           const raw = Array.isArray(data.topics) ? data.topics : []
-          setTopics(
-            raw.map((t: DiscourseFeaturedTopic) => ({
-              ...t,
-              posts_count:
-                typeof t.posts_count === "number" ? t.posts_count : 0,
-              views: typeof t.views === "number" ? t.views : 0,
-            })),
-          )
+          const normalized = raw.map((t: DiscourseFeaturedTopic) => ({
+            ...t,
+            posts_count:
+              typeof t.posts_count === "number" ? t.posts_count : 0,
+            views: typeof t.views === "number" ? t.views : 0,
+          }))
+          normalized.sort((a, b) => {
+            const byPosts = b.posts_count - a.posts_count
+            if (byPosts !== 0) return byPosts
+            const byViews = b.views - a.views
+            if (byViews !== 0) return byViews
+            return b.id - a.id
+          })
+          setTopics(normalized)
           setError(null)
         }
       } catch (e) {

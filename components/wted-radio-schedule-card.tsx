@@ -17,25 +17,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
-import { useRadioSchedule, type RadioScheduleSlot } from "@/hooks/use-radio-schedule"
+import {
+  formatRadioScheduleTimeRange,
+  useRadioSchedule,
+  type RadioScheduleSlot,
+} from "@/hooks/use-radio-schedule"
 import { WTED_SCHEDULE_EMBED_URL } from "@/lib/wted-schedule-embed"
 import { cn } from "@/lib/utils"
-
-function formatTimeRange(start: string, end: string): string {
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-  const options: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }
-  return `${startDate.toLocaleTimeString(undefined, options)} – ${endDate.toLocaleTimeString(undefined, options)}`
-}
 
 function ScheduleRow({ slot }: { slot: RadioScheduleSlot }) {
   const { event, isNowPlaying } = slot
   const { title, artwork } = event.playlist
-  const timeRange = formatTimeRange(event.start, event.end)
+  const timeRange = formatRadioScheduleTimeRange(event.start, event.end)
 
   return (
     <TableRow className="border-wl-dark-grey/50 hover:bg-[#3d4842]">

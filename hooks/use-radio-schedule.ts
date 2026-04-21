@@ -27,6 +27,24 @@ export interface RadioScheduleSlot {
   isNowPlaying: boolean
 }
 
+const SCHEDULE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+}
+
+/** Single time label (same style as schedule row times). */
+export function formatRadioScheduleTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, SCHEDULE_TIME_OPTIONS)
+}
+
+/** Time range label for Radio.co schedule rows (matches the main WTED schedule card). */
+export function formatRadioScheduleTimeRange(start: string, end: string): string {
+  const startDate = new Date(start)
+  const endDate = new Date(end)
+  return `${startDate.toLocaleTimeString(undefined, SCHEDULE_TIME_OPTIONS)} – ${endDate.toLocaleTimeString(undefined, SCHEDULE_TIME_OPTIONS)}`
+}
+
 /** Merge consecutive rows when titles match and times are back-to-back; artwork stays from the first row. */
 const BACK_TO_BACK_MS_TOLERANCE = 5000
 

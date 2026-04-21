@@ -87,6 +87,7 @@ export function useAttendanceStats(
     venuesCount: 0,
     songsCount: 0,
     tourCounts: [],
+    firstCanonicalShowYear: null,
   })
   const [loading, setLoading] = useState(true)
   const [loadingProgress, setLoadingProgress] = useState(0)
@@ -121,6 +122,7 @@ export function useAttendanceStats(
               venuesCount: 0,
               songsCount: 0,
               tourCounts: [],
+              firstCanonicalShowYear: null,
             })
             setLoadingProgress(100)
             setTimeout(() => setLoading(false), 300)
@@ -135,9 +137,10 @@ export function useAttendanceStats(
           show_id: string
           show_group: string
           show_canonid: string | null
+          show_date: string
         }>(
           "shows",
-          "show_id, show_group, show_canonid",
+          "show_id, show_group, show_canonid, show_date",
           showIds,
           "show_id"
         )
@@ -145,6 +148,14 @@ export function useAttendanceStats(
         const filteredShows = showDetails.filter(
           (s) => s.show_group === "Goose" && s.show_canonid
         )
+        let firstCanonicalShowYear: number | null = null
+        for (const s of filteredShows) {
+          const y = new Date(`${s.show_date}T00:00:00`).getFullYear()
+          if (!Number.isFinite(y)) continue
+          if (firstCanonicalShowYear == null || y < firstCanonicalShowYear) {
+            firstCanonicalShowYear = y
+          }
+        }
         const filteredIds = filteredShows.map((s) => s.show_id)
         setLoadingProgress(35)
 
@@ -223,6 +234,7 @@ export function useAttendanceStats(
             venuesCount: uniqueVenues.size,
             songsCount: uniqueSongs.size,
             tourCounts: sortedTours,
+            firstCanonicalShowYear,
           })
           setLoadingProgress(100)
           setTimeout(() => setLoading(false), 300)

@@ -10,4 +10,6 @@ export interface AttendanceStatsData {
   venuesCount: number
   songsCount: number
   tourCounts: TourCount[]
+  /** Calendar year of the earliest attended canonical Goose show, if any. */
+  firstCanonicalShowYear: number | null
 }

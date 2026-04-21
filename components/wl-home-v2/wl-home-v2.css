@@ -1,0 +1,1435 @@
+@keyframes wl-home-v2-ping {
+    0% { box-shadow: 0 0 0 0 rgba(255,122,103,0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(255,122,103,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,122,103,0); }
+  }
+
+/* Scoped for / (WlHomeV2) — generated from WTED.org 2/Homepage-source.html */
+
+  
+  .wl-home-v2 {
+    color: var(--wl-white);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-feature-settings: "tnum" 1;
+    overflow-x: hidden;
+    background:
+      linear-gradient(180deg, rgba(49,58,52,0.35) 0%, rgba(40,91,78,0.92) 80%),
+      var(--wl-deep-green);
+    background-attachment: fixed;
+    --wl-green: oklch(0.76 0.06 163);
+    --wl-dark-green: oklch(0.43 0.03 161);
+    --wl-deep-green: #285b4e;
+    --wl-light-green: oklch(0.68 0.04 160);
+    --wl-orange: oklch(0.72 0.15 25);
+    --wl-light-orange: oklch(0.82 0.10 55);
+    --wl-white: #ffffff;
+    --wl-off-white: #effefa;
+    --wl-grey: oklch(0.55 0.02 260);
+    --wl-dark-grey: #1f1f1f;
+    --panel-bg: #313a34;
+    --panel-border: rgba(31,31,31,0.55);
+  }
+  .wl-home-v2,
+  .wl-home-v2 * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  /* Page background — the gradient the tiles used to carry */
+  /* Hide native cursor globally for immersive trail feel */
+  .wl-home-v2.trail-active, .wl-home-v2.trail-active * { cursor: none !important; }
+
+  /* ---------- Top bar ---------- */
+  /* Desktop: brand | nav | user | radio — mobile: radio full width, then menu | brand | user, then drawer */
+  .wl-home-v2 header.top {
+    position: relative; z-index: 5;
+    display: grid;
+    grid-template-columns: 1fr auto auto 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "brand nav user radio";
+    align-items: center;
+    column-gap: 16px;
+    padding: 8px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .wl-home-v2 header.top .top-embed-row {
+    grid-area: radio;
+    justify-self: end;
+    min-width: 0;
+  }
+  .wl-home-v2 header.top .top-embed-row .radio-embed-wrap--header {
+    width: min(300px, 38vw);
+    min-width: 200px;
+  }
+  .wl-home-v2 header.top .top-mobile-nav-toggle {
+    display: none;
+  }
+  .wl-home-v2 header.top .brand {
+    grid-area: brand;
+    justify-self: start;
+    min-width: 0;
+  }
+  .wl-home-v2 header.top nav.top-nav {
+    grid-area: nav;
+    justify-self: center;
+  }
+  .wl-home-v2 header.top .top-user-menu {
+    grid-area: user;
+    justify-self: center;
+  }
+  .wl-home-v2 a.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 12px;
+    transform-origin: left center;
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+      outline-offset 0.15s;
+  }
+  .wl-home-v2 a.brand:hover {
+    transform: scale(1.05);
+  }
+  @media (max-width: 1023px) {
+    .wl-home-v2 a.brand {
+      transform-origin: center center;
+    }
+  }
+  .wl-home-v2 a.brand:hover .brand-mark {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+  .wl-home-v2 a.brand:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wl-home-v2 a.brand {
+      transition: outline-offset 0.15s;
+    }
+    .wl-home-v2 a.brand:hover {
+      transform: none;
+    }
+  }
+  .wl-home-v2 .brand-mark {
+    position: relative;
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    display: grid; place-items: center;
+    overflow: hidden;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .wl-home-v2 .brand-mark img{ width: 72%; height: 72%; object-fit: contain; }
+  .wl-home-v2 .brand-text{ display: flex; flex-direction: column; line-height: 1; }
+  .wl-home-v2 .brand-text .wl{ font-weight: 700; letter-spacing: -0.01em; font-size: 15px; }
+  .wl-home-v2 .brand-text .dotorg{ font-family: "Geist Mono", ui-monospace, monospace; font-size: 10px; color: rgba(255,255,255,0.55); margin-top: 3px; letter-spacing: 0.04em; }
+  .wl-home-v2 nav.top-nav{ display: flex; gap: 6px; }
+  .wl-home-v2 nav.top-nav a {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8);
+    text-decoration: none; padding: 8px 12px; border-radius: 8px;
+    transition: color .15s, background .15s;
+  }
+  .wl-home-v2 nav.top-nav a:hover{ color: #fff; background: rgba(255,255,255,0.06); }
+  .wl-home-v2 .top-nav-user-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .wl-home-v2 .top-nav-user-trigger:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .wl-home-v2 .top-nav-user-trigger[data-state="open"] {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .wl-home-v2 .top-nav-user-trigger:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+  .wl-home-v2 .top-nav-user-chevron {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.65;
+  }
+  .wl-home-v2 .top-nav-user-trigger-avatar[data-slot="avatar"] {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .wl-home-v2 .top-nav-user-trigger-avatar[data-slot="avatar"]::after {
+    border-radius: 8px;
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  .wl-home-v2 .top-nav-user-trigger-avatar [data-slot="avatar-image"] {
+    border-radius: 8px;
+  }
+  .wl-home-v2 .top-nav-user-trigger-fallback {
+    border-radius: 8px;
+    background: var(--panel-bg) !important;
+    color: var(--wl-white) !important;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  @media (max-width: 1023px) {
+    .wl-home-v2
+      .top-nav-user-trigger:has(.top-nav-user-trigger-avatar)
+      .top-nav-user-trigger-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  }
+  .wl-home-v2 .top-mobile-nav-toggle {
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .wl-home-v2 .top-mobile-nav-toggle:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .wl-home-v2 .top-mobile-nav-toggle:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+  .wl-home-v2 .top-mobile-nav-icon {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 1023px) {
+    .wl-home-v2 header.top {
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        "radio radio radio"
+        "menu brand user"
+        "drawer drawer drawer";
+      row-gap: 0;
+      column-gap: 10px;
+      padding: 8px 12px 10px;
+    }
+    .wl-home-v2 header.top .top-embed-row {
+      grid-area: radio;
+      justify-self: stretch;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .wl-home-v2 header.top .top-embed-row .radio-embed-wrap--header {
+      width: 100%;
+      min-width: 0;
+    }
+    .wl-home-v2 header.top .top-mobile-nav-toggle {
+      display: inline-flex;
+      grid-area: menu;
+      justify-self: start;
+      align-self: center;
+    }
+    .wl-home-v2 header.top .brand {
+      grid-area: brand;
+      justify-self: center;
+    }
+    .wl-home-v2 header.top .top-user-menu {
+      grid-area: user;
+      justify-self: end;
+      align-self: center;
+    }
+    .wl-home-v2 header.top nav.top-nav {
+      grid-area: drawer;
+      justify-self: stretch;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin: 0;
+      border-top: 1px solid transparent;
+      transition:
+        max-height 0.28s ease-out,
+        opacity 0.22s ease-out,
+        padding-top 0.22s ease-out,
+        padding-bottom 0.22s ease-out,
+        border-color 0.22s ease-out,
+        margin-top 0.22s ease-out;
+      pointer-events: none;
+    }
+    .wl-home-v2 header.top nav.top-nav.top-nav--mobile-open {
+      max-height: 120px;
+      opacity: 1;
+      margin-top: 10px;
+      padding-top: 10px;
+      padding-bottom: 6px;
+      border-top-color: rgba(255, 255, 255, 0.1);
+      pointer-events: auto;
+    }
+    .wl-home-v2 header.top nav.top-nav a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 44px;
+      min-width: 0;
+      padding: 10px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.15;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      transition: background 0.18s, border-color 0.18s, color 0.15s,
+        transform 0.18s;
+    }
+    .wl-home-v2 header.top nav.top-nav a:hover {
+      background: rgba(88, 200, 174, 0.18);
+      border-color: rgba(88, 200, 174, 0.5);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+  }
+  @media (max-width: 380px) {
+    .wl-home-v2 header.top nav.top-nav {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .wl-home-v2 header.top nav.top-nav.top-nav--mobile-open {
+      max-height: 200px;
+    }
+  }
+  .wl-home-v2 .live-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 11px; border-radius: 999px;
+    background: rgba(255,122,103,0.15); border: 1px solid rgba(255,122,103,0.4);
+    font-family: "Geist Mono", monospace; font-size: 11px; color: var(--wl-light-orange);
+    letter-spacing: 0.06em;
+  }
+  /* WTED tile: ON AIR block — same frosted panel as `.widget-panel` / `.stat` */
+  .wl-home-v2 .live-pill.live-pill--wted-tile {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    border-radius: 12px;
+    max-width: 100%;
+    background: rgba(0, 0, 0, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .wl-home-v2 button.live-pill.live-pill--wted-tile {
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 12px 14px;
+    transition: background 0.18s ease-out, border-color 0.18s ease-out,
+      box-shadow 0.18s ease-out, transform 0.18s ease-out;
+  }
+  .wl-home-v2 button.live-pill.live-pill--wted-tile:hover {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgba(88, 200, 174, 0.5);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2 button.live-pill.live-pill--wted-tile:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 122, 103, 0.5);
+  }
+  .wl-home-v2 .live-pill--wted-tile-inner {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+  .wl-home-v2 .live-pill-on-air-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+    padding-bottom: 3px;
+  }
+  .wl-home-v2 .live-pill--wted-tile .live-pill-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+  .wl-home-v2 .live-pill-upcoming {
+    margin-top: 4px;
+    padding-top: 6px;
+    padding-left: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+  }
+  .wl-home-v2 .live-pill-upcoming-title {
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.92);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .wl-home-v2 .live-pill-upcoming-time {
+    font-family: "Geist Mono", monospace;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.02em;
+  }
+  .wl-home-v2 .live-pill--wted-tile .live-pill-title {
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    color: var(--wl-white);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .wl-home-v2 .live-pill--wted-tile .live-pill-sub {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--wl-light-orange);
+  }
+  .wl-home-v2 .live-pill--wted-tile .live-dot {
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .wl-home-v2 .live-dot{ width: 7px; height: 7px; border-radius: 999px; background: var(--wl-orange); box-shadow: 0 0 0 0 rgba(255,122,103,0.6); animation: wl-home-v2-ping 1.6s ease-out infinite; }
+
+  /* Sticky footer: footer always after content; short pages still fill at least one viewport */
+  .wl-home-v2 .wl-home-v2__stack {
+    position: relative;
+    z-index: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+  }
+  .wl-home-v2 .wl-home-v2__stack > header.top {
+    flex-shrink: 0;
+  }
+
+  /* ---------- Main layout ---------- */
+  .wl-home-v2 main {
+    position: relative; z-index: 3;
+    display: flex; flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0;
+  }
+
+  /* 2x2 grid — grows with content; expands within main when the viewport is taller */
+  .wl-home-v2 .grid {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 0;
+    width: 100%;
+    min-height: 0;
+  }
+  /* ---------- Tile ---------- */
+  .wl-home-v2 .tile {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+    grid-template-rows: auto 1fr;
+    gap: 18px 24px;
+    min-height: 0;
+    padding: 28px 28px 26px;
+    border-radius: 0;
+    background: rgba(49,58,52,0.75);
+    backdrop-filter: blur(6px);
+    border: 0;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+    text-decoration: none; color: inherit;
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s;
+    isolation: isolate;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2 .tile{ grid-template-columns: minmax(0, 1fr) minmax(0, 240px); padding: 24px; gap: 14px 18px; }
+  }
+  /*
+   * Below Tailwind `xl` (1280px): all tiles use the same inner layout —
+   * top row: icon (left) + title/copy/CTA (top-right); second row: widget full width.
+   * (Narrower than `lg` is included: this max-width covers ≤1279px.)
+   */
+  @media (max-width: 1279px) {
+    .wl-home-v2 .tile {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      align-items: start;
+    }
+    .wl-home-v2 .tile .tile-body {
+      grid-column: 2;
+      grid-row: 1;
+      justify-content: flex-start;
+      align-items: flex-end;
+      text-align: right;
+    }
+    .wl-home-v2 .tile .tile-widget {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: flex-start;
+    }
+  }
+  .wl-home-v2 .grid > .tile {
+    min-height: 432px;
+  }
+  @media (max-width: 1023px) {
+    .wl-home-v2 .grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(4, auto);
+      align-content: start;
+      flex: 0 1 auto;
+    }
+    .wl-home-v2 .grid > .tile {
+      min-height: 0;
+    }
+  }
+
+  /* the primary CTA anchor — fills the tile body area but stays under the icon + widget */
+  .wl-home-v2 .tile-link {
+    position: absolute; inset: 0; z-index: 1;
+    text-decoration: none; color: inherit;
+    display: block;
+  }
+  .wl-home-v2 button.tile-link {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: inherit;
+    appearance: none;
+  }
+  /* things that should be clickable on their own terms, above the tile-link */
+  .wl-home-v2 .tile .icon-wrap,
+  .wl-home-v2 .tile .tile-widget,
+  .wl-home-v2 .tile .tile-body,
+  .wl-home-v2 .tile .mono-meta {
+    position: relative;
+    z-index: 2;
+  }
+  /* body text/icons don't eat clicks; cta does */
+  .wl-home-v2 .tile .tile-body{ pointer-events: none; }
+  .wl-home-v2 .tile .tile-body .cta{ pointer-events: auto; }
+  /* drop the rightmost column's right border and bottom row's bottom border — the header/footer dividers frame the edge */
+  .wl-home-v2 .grid .tile:nth-child(2n){ border-right: 0; }
+  .wl-home-v2 .grid .tile:nth-child(n+3){ border-bottom: 0; }
+  @media (max-width: 1023px) {
+    .wl-home-v2 .grid .tile{ border-right: 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .wl-home-v2 .grid .tile:last-child{ border-bottom: 0; }
+  }
+  .wl-home-v2 .tile::before {
+    content: ""; position: absolute; inset: 0; z-index: 0;
+    background-image: var(--tile-bg, none);
+    background-size: cover; background-position: center;
+    opacity: 0.55; transition: opacity .5s, transform .6s cubic-bezier(.2,.7,.2,1);
+    filter: grayscale(35%) brightness(0.8);
+  }
+  .wl-home-v2 .tile::after {
+    content: ""; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(180deg, rgba(40,91,78,0.25) 0%, rgba(40,91,78,0.78) 85%);
+    transition: opacity .4s;
+  }
+  .wl-home-v2 .tile:hover {
+    box-shadow: inset 0 0 0 1px rgba(255,122,103,0.45), 0 18px 50px -20px rgba(0,0,0,0.55);
+  }
+  .wl-home-v2 .tile:hover::before{ opacity: 0.85; transform: scale(1.05); filter: grayscale(0%) brightness(0.95); }
+  .wl-home-v2 .tile:hover::after {
+    opacity: 1;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.82) 85%);
+  }
+  .wl-home-v2 .tile > *{ position: relative; z-index: 2; }
+  /*
+   * Beat `.tile > *` so the full-bleed hit target stays `position: absolute` (otherwise
+   * an empty `button.tile-link` collapses and guest profile never receives clicks).
+   */
+  .wl-home-v2 .tile > .tile-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .wl-home-v2 .tile.tile-profile.tile-profile--guest > button.tile-link {
+    z-index: 3;
+  }
+
+  .wl-home-v2 .tile .label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: rgba(255,255,255,0.6); letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .wl-home-v2 .tile .label .num {
+    display: inline-grid; place-items: center;
+    width: 22px; height: 22px; border-radius: 6px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    font-size: 10px; color: rgba(255,255,255,0.8);
+  }
+  .wl-home-v2 .tile-body {
+    grid-column: 1; grid-row: 2;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    min-width: 0; min-height: 0;
+  }
+  .wl-home-v2 .tile h2 {
+    font-size: clamp(24px, 2.6vw, 34px);
+    font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  .wl-home-v2 .tile p {
+    margin-top: 10px; font-size: 13px;
+    color: rgba(255,255,255,0.72); max-width: 34ch; line-height: 1.5;
+  }
+  .wl-home-v2 .tile .cta {
+    margin-top: 18px; display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: 0.08em;
+    color: var(--wl-off-white); text-transform: uppercase;
+  }
+  .wl-home-v2 .tile .cta .arrow {
+    transition: transform .25s cubic-bezier(.2,.7,.2,1);
+  }
+  .wl-home-v2 .tile:hover .cta .arrow{ transform: translateX(6px); }
+
+  /* Icon — the scale-on-hover target; top-left of the tile grid */
+  .wl-home-v2 .tile .icon-wrap {
+    position: relative;
+    grid-column: 1; grid-row: 1;
+    justify-self: start;
+    align-self: start;
+    width: 110px; height: 110px;
+    display: grid; place-items: center;
+    transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    transform-origin: center center;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2 .tile .icon-wrap{ width: 88px; height: 88px; }
+  }
+  /* top-left label cell */
+  .wl-home-v2 .tile > .label{ grid-column: 1; grid-row: 1; align-self: start; }
+  .wl-home-v2 .tile:hover .icon-wrap {
+    transform: scale(1.28) rotate(-3deg);
+  }
+  .wl-home-v2 .tile .icon-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 22px rgba(0,0,0,0.45));
+  }
+  .wl-home-v2 .tile .icon-wrap img.wl-home-v2-tile-profile-photo {
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 3px rgba(0, 0, 0, 0.55),
+      0 8px 22px rgba(0, 0, 0, 0.45);
+  }
+  .wl-home-v2 .tile .icon-bg {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, rgba(255,122,103,0.35), rgba(255,122,103,0) 65%);
+    opacity: 0; transition: opacity .4s;
+  }
+  .wl-home-v2 .tile:hover .icon-bg{ opacity: 1; }
+
+  /* Tile-specific accents */
+  .wl-home-v2 .tile.tile-community:hover{ box-shadow: inset 0 0 0 1px rgba(88,200,174,0.55), 0 18px 50px -20px rgba(0,0,0,0.55); }
+  /* Guest profile tile: full-area hit target sits last in DOM; let clicks reach it */
+  .wl-home-v2 .tile.tile-profile.tile-profile--guest .icon-wrap,
+  .wl-home-v2 .tile.tile-profile.tile-profile--guest .tile-body {
+    pointer-events: none;
+  }
+
+  .wl-home-v2 .tile .mono-meta {
+    position: absolute; bottom: 20px; right: 24px; z-index: 2;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: rgba(255,255,255,0.38); letter-spacing: 0.08em; text-align: right;
+  }
+
+  /* Radio embed chrome — same frosted panel as `.widget-panel` */
+  .wl-home-v2 .radio-embed-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+    width: 100%;
+  }
+  .wl-home-v2 .radio-embed {
+    display: block; width: 100%; height: 66px; border: 0;
+  }
+
+  /* ---------- Tile widgets (in-tile interactive panels) ---------- */
+  .wl-home-v2 .tile-widget {
+    grid-column: 2; grid-row: 1 / span 2;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 10px;
+    pointer-events: auto;
+    min-width: 0; min-height: 0;
+  }
+  /* Radio tile: 2×2 action buttons (pair per row) */
+  .wl-home-v2 .tile-widget-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+  }
+  .wl-home-v2 .tile-widget-actions .wbtn {
+    width: 100%;
+    min-width: 0;
+  }
+  .wl-home-v2 .widget-panel {
+    position: relative;
+    background: rgba(0, 0, 0, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .wl-home-v2 .widget-panel--archive-setlist {
+    transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  }
+  .wl-home-v2 .widget-panel-hit-area {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: 10px;
+  }
+  .wl-home-v2 .widget-panel-hit-area:focus {
+    outline: none;
+  }
+  .wl-home-v2 .widget-panel--archive-setlist:has(.widget-panel-hit-area:hover) {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgba(88, 200, 174, 0.5);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2
+    .widget-panel--archive-setlist:has(.widget-panel-hit-area:focus-visible) {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+  .wl-home-v2 .widget-panel--archive-setlist .wp-head,
+  .wl-home-v2 .widget-panel--archive-setlist .archive-recent-venue {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .wl-home-v2 .widget-panel--archive-setlist .archive-recent-setlist {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .wl-home-v2
+    .widget-panel--archive-setlist
+    .archive-recent-setlist
+    .setlist-set-row {
+    pointer-events: none;
+  }
+  .wl-home-v2 .widget-panel--archive-setlist .archive-recent-setlist a.song {
+    pointer-events: auto;
+  }
+  .wl-home-v2 .widget-panel .wp-head {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .wl-home-v2 .widget-panel .wp-head-right {
+    display: inline-flex; align-items: center; justify-content: flex-end;
+    flex-wrap: wrap; gap: 8px;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    min-width: 0;
+  }
+  .wl-home-v2 .widget-panel .wp-head-detail {
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .wl-home-v2 .widget-panel .wp-head-date {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgba(174, 240, 221, 0.82);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .wl-home-v2 .wbtn {
+    display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #fff; text-decoration: none;
+    font-size: 12px; font-weight: 500;
+    transition: background .18s, border-color .18s, transform .18s;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  /* Match former `.wbtn-green` (Community Events) for all tile actions */
+  .wl-home-v2 .wbtn:hover{ background: rgba(88,200,174,0.18); border-color: rgba(88,200,174,0.5); transform: translateY(-1px); }
+  .wl-home-v2 .wbtn .arr{
+    font-family: "Geist Mono", monospace;
+    color: var(--wl-green);
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  /* Topics list */
+  .wl-home-v2 .topic-row {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 12px; color: rgba(255,255,255,0.85);
+  }
+  .wl-home-v2 .topic-row:last-child{ border-bottom: 0; }
+  .wl-home-v2 .topic-row .count {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: rgba(255,255,255,0.68); padding: 2px 7px;
+    border-radius: 999px; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.16);
+    white-space: nowrap;
+    transition: background 0.18s, border-color 0.18s;
+  }
+  /* Featured topic links — match .wbtn hover (teal lift) */
+  .wl-home-v2 .widget-panel > a.topic-row {
+    text-decoration: none;
+    color: inherit;
+    margin: 0 -14px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  }
+  .wl-home-v2 .widget-panel > a.topic-row:last-of-type {
+    border-bottom-color: transparent;
+  }
+  .wl-home-v2 .widget-panel > a.topic-row:hover {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgba(88, 200, 174, 0.5);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2 .widget-panel > a.topic-row:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+  .wl-home-v2 .widget-panel > a.topic-row:hover .count {
+    background: rgba(88, 200, 174, 0.12);
+    border-color: rgba(88, 200, 174, 0.4);
+  }
+
+  /* Setlist */
+  .wl-home-v2 .setlist-venue {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .wl-home-v2 .setlist-venue--solo {
+    justify-content: flex-start;
+  }
+  .wl-home-v2 .setlist-venue--stack .setlist-venue-names {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    min-width: 0;
+  }
+  .wl-home-v2 .setlist-venue .v-subvenue {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  .wl-home-v2 .setlist-venue .v-name{ font-weight: 600; font-size: 13px; color: #fff; }
+  .wl-home-v2 .setlist-venue .v-date{ font-family: "Geist Mono", monospace; font-size: 10px; color: rgba(255,255,255,0.55); }
+  .wl-home-v2 .setlist {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .wl-home-v2 .setlist.setlist--by-set {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0;
+  }
+  .wl-home-v2 .setlist-set-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .wl-home-v2 .setlist-set-row + .setlist-set-row {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .wl-home-v2 .song {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    padding: 3px 7px; border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.88);
+    letter-spacing: 0.02em;
+  }
+  .wl-home-v2 .song.s-set1{ background: rgba(88,200,174,0.14); border-color: rgba(88,200,174,0.35); color: #aef0dd; }
+  .wl-home-v2 .song.s-set2{ background: rgba(120, 190, 255, 0.14); border-color: rgba(120, 190, 255, 0.38); color: #b8dcff; }
+  .wl-home-v2 .song.s-enc{ background: rgba(255,122,103,0.18); border-color: rgba(255,122,103,0.5); color: #ffb8a6; }
+  .wl-home-v2 .setlist a.song {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    transition: background 0.18s, border-color 0.18s, transform 0.18s,
+      color 0.18s;
+  }
+  .wl-home-v2 .setlist a.song:hover {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgba(88, 200, 174, 0.5);
+    color: rgba(200, 248, 232, 0.95);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2 .setlist a.song:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+
+  /* Stat grid */
+  .wl-home-v2 .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .wl-home-v2 .stat {
+    background: rgba(0, 0, 0, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .wl-home-v2 .stat .s-label {
+    font-family: "Geist Mono", monospace; font-size: 9px;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .wl-home-v2 .stat .s-value {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .wl-home-v2 .stat .s-value.s-value--bookend {
+    font-size: 14px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .wl-home-v2 .stat .s-sub {
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: rgba(255,255,255,0.55); margin-top: 4px;
+  }
+  .wl-home-v2 .stat.s-accent .s-value{ color: var(--wl-light-orange); }
+
+  /* Request modal — backdrop below cursor trail (10002+) so ring/core stay visible when open */
+  .wl-home-v2 .modal-backdrop {
+    position: fixed; inset: 0; z-index: 10001;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease-out, visibility 0.22s ease-out;
+  }
+  .wl-home-v2 .modal-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .wl-home-v2 .modal {
+    width: 100%; max-width: 440px;
+    background: #1f2622;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.8);
+    transform: scale(0.97);
+    opacity: 0;
+    transition: transform 0.22s ease-out, opacity 0.22s ease-out;
+  }
+  .wl-home-v2 .modal-backdrop.open .modal {
+    transform: scale(1);
+    opacity: 1;
+  }
+  /* Homepage WTED catalog + sheet (replaces simple form) */
+  .wl-home-v2 .modal.modal--wted-request {
+    max-width: min(520px, 96vw);
+    max-height: min(88vh, 680px);
+    padding: 20px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Own stacking context: reduces halo/edge doubling vs. backdrop-filter on the overlay */
+    isolation: isolate;
+  }
+  .wl-home-v2 .modal.modal--wted-schedule {
+    max-width: min(1152px, calc(100vw - 2rem));
+    max-height: min(92vh, 900px);
+  }
+  .wl-home-v2 .modal.modal--wted-schedule .modal-schedule-embed-body {
+    flex: 1;
+    min-height: min(600px, 70vh);
+    display: flex;
+    flex-direction: column;
+  }
+  .wl-home-v2 .modal-schedule-iframe {
+    flex: 1;
+    width: 100%;
+    min-height: min(600px, 70vh);
+    border: 0;
+    display: block;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.35);
+  }
+  .wl-home-v2 .modal.modal--sign-in {
+    max-width: min(420px, 92vw);
+    padding: 22px 22px 20px;
+    isolation: isolate;
+  }
+  .wl-home-v2 .modal.modal--login {
+    max-width: min(440px, 92vw);
+    padding: 20px 20px 18px;
+    isolation: isolate;
+  }
+  .wl-home-v2 .modal.modal--signup {
+    max-width: min(480px, 94vw);
+  }
+  .wl-home-v2 .modal.modal--login .modal-request-head.modal-login-head,
+  .wl-home-v2 .modal.modal--signup .modal-request-head.modal-login-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 12px;
+  }
+  .wl-home-v2 .modal.modal--login .modal-login-head h3,
+  .wl-home-v2 .modal.modal--signup .modal-login-head h3 {
+    margin: 0;
+    line-height: 1.2;
+  }
+  .wl-home-v2 .modal.modal--login .modal-login-head .modal-request-close,
+  .wl-home-v2 .modal.modal--signup .modal-login-head .modal-request-close {
+    margin: 0;
+  }
+  .wl-home-v2 .modal-login-forgot-below {
+    text-align: center;
+    margin-top: 4px;
+  }
+  .wl-home-v2 .modal-auth-success {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.35;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(52, 211, 153, 0.45);
+    background: rgba(52, 211, 153, 0.12);
+    color: #a7f3d0;
+  }
+  .wl-home-v2 .modal-auth-post-submit {
+    gap: 16px;
+  }
+  .wl-home-v2 .modal-signup-hint {
+    margin: -2px 0 0 0;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .wl-home-v2 .modal-login-body {
+    margin-top: 8px;
+  }
+  .wl-home-v2 .modal-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .wl-home-v2 .modal-login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wl-home-v2 .modal-login-error {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.35;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    background: rgba(248, 113, 113, 0.12);
+    color: #fecaca;
+  }
+  .wl-home-v2 .modal-login-text-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: 11px;
+    color: var(--wl-light-orange);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .wl-home-v2 .modal-login-text-link:hover {
+    color: #fff;
+  }
+  .wl-home-v2 .modal-login-submit {
+    width: 100%;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .wl-home-v2 .modal-login-signup-hint {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .wl-home-v2 .modal.modal--sign-in .modal-actions--sign-in {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .wl-home-v2 .modal.modal--sign-in .modal-actions--sign-in .wbtn {
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .modal.modal--sign-in .modal-actions--sign-in {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .wl-home-v2 .modal.modal--sign-in .modal-actions--sign-in .wbtn {
+      width: auto;
+      min-width: 140px;
+    }
+  }
+  .wl-home-v2 .modal.modal--wted-request .modal-request-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .wl-home-v2 .modal.modal--wted-request .modal-request-head-text {
+    min-width: 0;
+    flex: 1;
+  }
+  .wl-home-v2 .modal.modal--wted-request .modal-request-head h3 {
+    margin-bottom: 0;
+  }
+  .wl-home-v2 .modal.modal--wted-request .modal-request-sub {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .wl-home-v2 .modal-request-close {
+    flex-shrink: 0;
+    margin: -4px -6px 0 0;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  .wl-home-v2 .modal-request-close:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .wl-home-v2 .modal-request-body {
+    flex: 1;
+    min-height: 0;
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    /* Inset hairline avoids a second curved stroke (border + inner bg) that reads as a “ghost” edge */
+    border: 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background-clip: padding-box;
+  }
+  .wl-home-v2 .modal h3 {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .wl-home-v2 .modal p.sub {
+    color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 20px;
+  }
+  .wl-home-v2 .modal .field{ margin-bottom: 14px; }
+  .wl-home-v2 .modal label {
+    display: block; font-family: "Geist Mono", monospace; font-size: 10px;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  /* Legacy simple modal fields only — do not override WTED catalog search (shadcn Input + icon padding). */
+  .wl-home-v2 .modal:not(.modal--wted-request) input,
+  .wl-home-v2 .modal:not(.modal--wted-request) textarea {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 8px; padding: 10px 12px; color: #fff;
+    font-family: inherit; font-size: 13px;
+  }
+  .wl-home-v2 .modal:not(.modal--wted-request) input:focus,
+  .wl-home-v2 .modal:not(.modal--wted-request) textarea:focus {
+    outline: none; border-color: var(--wl-light-orange);
+    background: rgba(255,255,255,0.08);
+  }
+  .wl-home-v2 .modal:not(.modal--wted-request) textarea{ resize: vertical; min-height: 80px; }
+  .wl-home-v2 .modal-actions {
+    display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px;
+  }
+  .wl-home-v2 .modal-actions .wbtn{ padding: 10px 18px; }
+  .wl-home-v2 .modal-actions .wbtn.primary {
+    background: var(--wl-orange); border-color: var(--wl-orange);
+  }
+  .wl-home-v2 .modal-actions .wbtn.primary:hover{ background: var(--wl-light-orange); border-color: var(--wl-light-orange); transform: translateY(-1px); }
+
+  /* Footer strip — dedicated, mirrors header */
+  .wl-home-v2 .wl-home-v2__stack > footer.foot {
+    flex-shrink: 0;
+  }
+  .wl-home-v2 footer.foot {
+    position: relative; z-index: 5;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    column-gap: 16px;
+    padding: 18px 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-family: "Geist Mono", monospace; font-size: 10px;
+    color: rgba(255,255,255,0.45); letter-spacing: 0.08em;
+  }
+  .wl-home-v2 footer.foot .foot-copy {
+    justify-self: start;
+    min-width: 0;
+  }
+  .wl-home-v2 footer.foot .foot-tagline {
+    justify-self: end;
+    min-width: 0;
+    text-align: right;
+  }
+  @media (max-width: 1023px) {
+    .wl-home-v2 footer.foot {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      row-gap: 4px;
+      column-gap: 0;
+      justify-items: center;
+      text-align: center;
+      padding: 12px 16px 14px;
+      line-height: 1.3;
+    }
+    .wl-home-v2 footer.foot .foot-copy,
+    .wl-home-v2 footer.foot .foot-tagline {
+      justify-self: center;
+      text-align: center;
+    }
+  }
+
+  /*
+   * Header profile dropdown — Radix portals to document.body, so tokens are repeated here
+   * to match .wl-home-v2 (Geist, frosted panel, orange accents).
+   */
+  .wl-home-v2-user-dropdown[data-slot="dropdown-menu-content"] {
+    --wl-light-orange: oklch(0.82 0.10 55);
+    --wl-white: #ffffff;
+    --panel-bg: #313a34;
+    width: min(17rem, calc(100vw - 24px));
+    min-width: 13.5rem;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(49, 58, 52, 0.96) !important;
+    color: var(--wl-white) !important;
+    box-shadow:
+      0 24px 64px -20px rgba(0, 0, 0, 0.85),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 8px !important;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-feature-settings: "tnum" 1;
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-label {
+    color: inherit !important;
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-label-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--wl-white);
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-label-email {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.52);
+    margin-top: 2px;
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-avatar[data-slot="avatar"] {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-avatar[data-slot="avatar"]::after {
+    border-radius: 10px;
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-avatar [data-slot="avatar-image"] {
+    border-radius: 10px;
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-avatar-fallback {
+    border-radius: 10px;
+    background: var(--panel-bg) !important;
+    color: var(--wl-white) !important;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-sep[data-slot="dropdown-menu-separator"] {
+    margin-left: 4px;
+    margin-right: 4px;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  .wl-home-v2-user-dropdown [data-slot="dropdown-menu-item"] {
+    min-height: unset !important;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.88) !important;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+  }
+  .wl-home-v2-user-dropdown [data-slot="dropdown-menu-item"][data-highlighted] {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--wl-white) !important;
+  }
+  .wl-home-v2-user-dropdown [data-slot="dropdown-menu-item"] .top-nav-dd-icon {
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .wl-home-v2-user-dropdown [data-slot="dropdown-menu-item"][data-highlighted] .top-nav-dd-icon {
+    color: var(--wl-light-orange);
+  }
+  .wl-home-v2-user-dropdown .top-nav-dd-link {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* ---------- Cursor + trail (above .modal-backdrop 10001) ---------- */
+  /* Inner: solid dot + soft glow (Homepage-source.html); fill driven in JS for trail hue */
+  .wl-home-v2 .cursor-core {
+    position: fixed; top: 0; left: 0; z-index: 10004;
+    width: 14px; height: 14px; border-radius: 50%;
+    box-sizing: border-box;
+    border: none;
+    background: var(--wl-orange);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: screen;
+    box-shadow: 0 0 14px 4px rgba(255,122,103,0.5);
+    transition: width .18s, height .18s, background .18s, box-shadow .18s;
+  }
+  /* Outer: larger lagging ring (outline only) */
+  .wl-home-v2 .cursor-ring {
+    position: fixed; top: 0; left: 0; z-index: 10003;
+    width: 38px; height: 38px; border-radius: 50%;
+    box-sizing: border-box;
+    background: transparent;
+    border: 1.5px solid rgba(255,122,103,0.55);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: width .22s, height .22s, border-color .22s, transform .05s linear;
+  }
+  .wl-home-v2 .cursor-core.hov {
+    width: 22px;
+    height: 22px;
+  }
+  .wl-home-v2 .cursor-ring.hov{ width: 64px; height: 64px; border-color: rgba(255,185,153,0.7); }
+  .wl-home-v2 .trail-canvas{ position: fixed; inset: 0; z-index: 10002; pointer-events: none; }
+
+  /* ---------- Tweaks panel ---------- */
+  .wl-home-v2 .tweaks {
+    position: fixed; right: 20px; bottom: 20px; z-index: 10000;
+    width: 280px; padding: 16px;
+    background: rgba(25,33,29,0.92); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    display: none;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7);
+    font-size: 12px;
+  }
+  .wl-home-v2 .tweaks.open{ display: block; }
+  .wl-home-v2 .tweaks h3{ font-size: 11px; font-family: "Geist Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 12px; }
+  .wl-home-v2 .tweaks label{ display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; color: rgba(255,255,255,0.85); }
+  .wl-home-v2 .tweaks input[type=range]{ width: 130px; accent-color: var(--wl-orange); }
+  .wl-home-v2 .tweaks input[type=checkbox]{ accent-color: var(--wl-orange); width: 16px; height: 16px; }
+  .wl-home-v2 .tweaks select {
+    background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px; padding: 4px 8px; font-size: 11px; font-family: "Geist Mono", monospace;
+  }
+  .wl-home-v2 .tweaks .val{ font-family: "Geist Mono", monospace; color: var(--wl-light-orange); font-size: 11px; min-width: 32px; text-align: right; }

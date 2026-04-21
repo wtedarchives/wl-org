@@ -1,0 +1,23 @@
+---
+description: Standalone pages (outside SidebarInset) — keep footer below content using a flex column shell
+alwaysApply: true
+---
+
+# Standalone pages: footer below content
+
+For full-page experiences that **do not** use `(main)` / `SidebarInset` (custom header + main + site footer), the footer must **always sit beneath the main content** in document order. When content is taller than the viewport, the page scrolls and the footer follows; when content is short, the layout still fills at least **one viewport height** with the footer at the bottom.
+
+## Pattern
+
+1. Wrap **only** `header`, `main`, and `footer` in a single column flex container (e.g. `wl-home-v2__stack`).
+2. **Do not** set `main` to a fixed `height: calc(100vh - …)` for this purpose — that caps the main region and can visually separate the footer from tall grids or stacked sections.
+3. Use:
+   - Shell: `min-height: 100vh`, `display: flex`, `flex-direction: column`
+   - Header: `flex-shrink: 0`
+   - Main: `flex: 1 1 auto`, `min-height: 0` (when main is a flex container for a child grid that should expand)
+   - Footer: `flex-shrink: 0`
+4. Keep `position: fixed` overlays (modals, cursor layers, dev panels) **outside** that shell so they do not participate in the flex column.
+
+## Reference
+
+`components/wl-home-v2/index.tsx` (`wl-home-v2__stack`) and matching rules in `wl-home-v2.css`.
