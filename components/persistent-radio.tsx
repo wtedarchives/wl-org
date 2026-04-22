@@ -209,11 +209,14 @@ function PersistentRadioPortal() {
 
   useEffect(() => setBodyReady(true), [])
 
+  /**
+   * Homepage and other `(wl-home-v2)` pages mount `RadioHomeSlot` in the header only
+   * (no `(main)` sidebar / `MobileRadioBar`). Non-`/` v2 routes must still anchor to
+   * `homeNode`, not `sidebarNode`, or the shell hides the iframe and the slot looks empty.
+   */
   const measureTarget = isBelowXl
-    ? mobileNode
-    : pathname === "/"
-      ? homeNode
-      : sidebarNode
+    ? (mobileNode ?? homeNode)
+    : (homeNode ?? sidebarNode)
 
   const pulseEmbedOnHomeBump = pathname === "/"
 

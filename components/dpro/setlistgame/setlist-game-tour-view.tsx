@@ -40,7 +40,7 @@ export function SetlistGameTourView({ tourId }: { tourId: string }) {
     }
     setSetlistBreadcrumbs([
       WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Setlist Game", href: "/archive/setlistgame" },
+      { label: "Setlist Game", href: "/old/archive/setlistgame" },
       {
         label: tourInfo.tour,
         href: getSetlistGameTourArchiveUrl(tourId),

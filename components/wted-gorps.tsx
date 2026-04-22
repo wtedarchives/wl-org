@@ -4,7 +4,7 @@ import Link from "next/link"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { GORPS_ENTRIES, GORPS_INTRO, type GorpEntry } from "@/app/(main)/wted/gorps/content"
+import { GORPS_ENTRIES, GORPS_INTRO, type GorpEntry } from "@/components/wted/wted-gorps-content"
 
 function GorpCard({ entry }: { entry: GorpEntry }) {
   const firstName = entry.name.split(/\s+/)[0] ?? entry.name

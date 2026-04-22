@@ -4,9 +4,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { useCallback, useEffect, useId, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 
 import { RadioHomeSlot, RadioMobileSlot } from "@/components/persistent-radio"
 import { useIsBelowXl } from "@/hooks/use-mobile"
+
+import { toggleOldPathPrefix } from "@/lib/toggle-old-path-prefix"
 
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import { WlHomeV2UserMenu } from "./wl-home-v2-user-menu"
@@ -19,9 +22,22 @@ export function WlHomeV2Header({
   onOpenSignup: () => void
 }) {
   const isBelowXl = useIsBelowXl()
+  const pathname = usePathname()
+  const router = useRouter()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const mobileNavId = useId()
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), [])
+
+  const onOldPathDebugToggle = useCallback(() => {
+    const nextPath = toggleOldPathPrefix(pathname)
+    const search = typeof window !== "undefined" ? window.location.search : ""
+    const hash = typeof window !== "undefined" ? window.location.hash : ""
+    router.push(`${nextPath}${search}${hash}`)
+    closeMobileNav()
+  }, [pathname, router, closeMobileNav])
+
+  const oldPathDebugActive =
+    pathname === "/old" || pathname.startsWith("/old/")
 
   useEffect(() => {
     if (!mobileNavOpen) return
@@ -73,8 +89,8 @@ export function WlHomeV2Header({
           />
         </div>
         <div className="brand-text">
-          <span className="wl">World of TED</span>
-          <span className="dotorg">WTED.ORG</span>
+          <span className="wl">WTED.org</span>
+          <span className="dotorg">The World of TED</span>
         </div>
       </Link>
 
@@ -105,6 +121,15 @@ export function WlHomeV2Header({
         <Link href="/support" onClick={closeMobileNav}>
           Support
         </Link>
+        <button
+          type="button"
+          className="top-nav-old-toggle"
+          aria-pressed={oldPathDebugActive}
+          title="Toggle /old/ in URL (compare legacy vs new)"
+          onClick={onOldPathDebugToggle}
+        >
+          OLD
+        </button>
       </nav>
 
       <div className="top-user-menu">

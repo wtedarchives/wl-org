@@ -63,7 +63,7 @@ export function WlHomeHero({
           </a>{" "}
           forum, and explore our comprehensive concert{" "}
           <a
-            href="/archive"
+            href="/old/archive"
             className={cn(
               "inline cursor-pointer text-left",
               welcomeHeroInlineLinkFocusClassName,

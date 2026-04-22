@@ -2,6 +2,7 @@
 
 import {
   AppleLogo,
+  ArrowRight,
   GooglePlayLogo,
   Info,
   ListNumbers,
@@ -11,9 +12,11 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 
 import { useAuth } from "@/components/auth-context"
+import { useBumpHomeRadioEmbedPulse } from "@/components/persistent-radio"
+import { scrollMainInsetToTopThenPulse } from "@/components/wl-home-shared"
 import { useAttendanceStats } from "@/hooks/use-attendance-stats"
 import { useDiscourseFeaturedTopics } from "@/hooks/use-discourse-featured-topics"
 import {
@@ -25,10 +28,10 @@ import {
   useWlHomeMostRecentShow,
   wlHomeSetlistPillClass,
 } from "@/hooks/use-wl-home-most-recent-show"
+import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { decodeHtmlEntitiesForDisplay } from "@/lib/decode-html-entities"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
-import { supabase } from "@/lib/supabase"
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import { WlHomeV2OnAirPill } from "./wl-home-v2-on-air-pill"
 
@@ -66,7 +69,13 @@ export function WlHomeV2Tiles({
   onOpenSchedule: () => void
 }) {
   const { user } = useAuth()
-  const profileSignedIn = Boolean(user)
+  const {
+    profileSignedIn,
+    profilePicture,
+    profilePhotoLoadFailed,
+    setProfilePhotoLoadFailed,
+    profilePhotoAlt,
+  } = useUserProfilePicture()
   const {
     show: archiveMostRecentShow,
     setlist: archiveMostRecentSetlist,
@@ -83,72 +92,23 @@ export function WlHomeV2Tiles({
     loading: featuredTopicsLoading,
     error: featuredTopicsError,
   } = useDiscourseFeaturedTopics()
-  const [profilePicture, setProfilePicture] = useState<string | null>(null)
-  const [profileDisplayName, setProfileDisplayName] = useState<string | null>(
-    null,
-  )
-  const [profilePhotoLoadFailed, setProfilePhotoLoadFailed] = useState(false)
-
-  useEffect(() => {
-    setProfilePhotoLoadFailed(false)
-    if (!user || !supabase) {
-      setProfilePicture(null)
-      setProfileDisplayName(null)
-      return
-    }
-    let cancelled = false
-    supabase
-      .from("profiles")
-      .select("username, profile_picture")
-      .eq("id", user.id)
-      .single()
-      .then(({ data, error }) => {
-        if (cancelled) return
-        if (error || !data) {
-          setProfilePicture(null)
-          setProfileDisplayName(null)
-          return
-        }
-        const row = data as {
-          username?: string | null
-          profile_picture?: string | null
-        }
-        setProfileDisplayName(row.username?.trim() || null)
-        const raw =
-          typeof row.profile_picture === "string" ?
-            row.profile_picture.trim()
-          : ""
-        const pic =
-          !raw || raw === "null" || raw === "undefined" ? "" : raw
-        setProfilePicture(pic || null)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [user?.id])
-
-  useEffect(() => {
-    setProfilePhotoLoadFailed(false)
-  }, [profilePicture])
-
-  const profilePhotoAlt =
-    profileDisplayName ?
-      `Profile photo for ${profileDisplayName}`
-    : user?.email ?
-      `Profile photo for ${user.email.split("@")[0]}`
-    : "Your profile photo"
-
   const profileStatsUserId = profileSignedIn && user?.id ? user.id : null
   const { data: attendanceData, loading: attendanceLoading } =
     useAttendanceStats(profileStatsUserId)
   const { lastShow, nextShow, loading: profileBookendsLoading } =
     useUserCanonicalBookendShows(profileStatsUserId)
 
+  const bumpHomeRadioEmbedPulse = useBumpHomeRadioEmbedPulse()
+  const onWtedRadioTileClick = useCallback(() => {
+    scrollMainInsetToTopThenPulse(bumpHomeRadioEmbedPulse)
+  }, [bumpHomeRadioEmbedPulse])
+
   return (
     <section className="grid" id="tileGrid">
       <section
         className="tile tile-radio"
         style={{ "--tile-bg": "url('/newbg.png')" } as CSSProperties}
+        onClick={onWtedRadioTileClick}
       >
         <Link
           href="/wted"
@@ -231,7 +191,13 @@ export function WlHomeV2Tiles({
             listener requests.
           </p>
           <span className="cta">
-            Tune in <span className="arrow">→</span>
+            <span className="cta-label">Tune in</span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
           </span>
         </div>
       </section>
@@ -243,7 +209,7 @@ export function WlHomeV2Tiles({
         <a
           href={WL_HOME_V2_COMMUNITY_URL}
           className="tile-link"
-          aria-label="Join the Wysteria Lane community"
+          aria-label="WTED Community — opens in a new tab"
           target="_blank"
           rel="noopener noreferrer"
         />
@@ -312,7 +278,7 @@ export function WlHomeV2Tiles({
 
         <div className="tile-body">
           <h2>
-            Wysteria Lane
+            WTED
             <br />
             Community
           </h2>
@@ -320,7 +286,13 @@ export function WlHomeV2Tiles({
             A home made for Goose fans, by Goose fans. Discuss the band and join the couch tour.
           </p>
           <span className="cta">
-            Join the community <span className="arrow">→</span>
+            <span className="cta-label">Join the community</span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
           </span>
         </div>
       </section>
@@ -445,7 +417,13 @@ export function WlHomeV2Tiles({
             this-day-in-Goose history.
           </p>
           <span className="cta">
-            Dive in <span className="arrow">→</span>
+            <span className="cta-label">Dive in</span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
           </span>
         </div>
       </section>
@@ -459,7 +437,7 @@ export function WlHomeV2Tiles({
       >
         {profileSignedIn ?
           <Link
-            href="/archive/profile/overview"
+            href="/old/archive/profile/overview"
             className="tile-link"
             aria-label="View your profile"
           />
@@ -560,8 +538,15 @@ export function WlHomeV2Tiles({
             Your Goose story.
           </p>
           <span className="cta">
-            {profileSignedIn ? "View profile" : "Sign In"}{" "}
-            <span className="arrow">→</span>
+            <span className="cta-label">
+              {profileSignedIn ? "View profile" : "Sign In"}
+            </span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
           </span>
         </div>
 

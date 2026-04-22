@@ -147,7 +147,7 @@ export function ListIndContent({ listId }: ListIndContentProps) {
     if (!list) return
     setSetlistBreadcrumbs([
       WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Lists", href: "/archive/lists" },
+      { label: "Lists", href: "/old/archive/lists" },
       { label: list.list_name, href: getListArchiveUrl(listId) },
     ])
     return () => setSetlistBreadcrumbs(null)

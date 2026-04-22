@@ -180,7 +180,7 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
     const tours = show.tours as { tour_id: string } | null | undefined
     const items = [
       WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Setlist Game", href: "/archive/setlistgame" },
+      { label: "Setlist Game", href: "/old/archive/setlistgame" },
       ...(show.show_tour && tours?.tour_id
         ? [
             {

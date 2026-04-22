@@ -129,7 +129,7 @@ export function WlHomeV2UserMenu({
           <>
             <DropdownMenuItem asChild className="top-nav-dd-item">
               <Link
-                href="/archive/profile/overview"
+                href="/old/archive/profile/overview"
                 className="top-nav-dd-link flex cursor-pointer items-center gap-2"
               >
                 <BarChart3Icon className="top-nav-dd-icon size-4 shrink-0" />

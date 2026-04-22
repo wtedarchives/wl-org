@@ -101,23 +101,31 @@ export function useProgramDirectorData() {
         byShow.set(row.show, list)
       }
 
-      setShows(
-        showsData.map((s) => {
-          const episodes = byShow.get(s.show) ?? []
-          const sorted = [...episodes].sort(
-            compareWtedEpisodesByOrderThenDisplayName,
-          )
-          return {
-            show: s.show,
-            order: s.order,
-            description:
-              s.description != null && String(s.description).trim() !== "" ?
-                String(s.description).trim()
-              : null,
-            episodes: sorted,
-          }
-        }),
-      )
+      const rows = showsData.map((s) => {
+        const episodes = byShow.get(s.show) ?? []
+        const sorted = [...episodes].sort(
+          compareWtedEpisodesByOrderThenDisplayName,
+        )
+        return {
+          show: s.show,
+          order: s.order,
+          description:
+            s.description != null && String(s.description).trim() !== "" ?
+              String(s.description).trim()
+            : null,
+          episodes: sorted,
+        }
+      })
+
+      rows.sort((a, b) => {
+        const byCount = b.episodes.length - a.episodes.length
+        if (byCount !== 0) return byCount
+        const ao = a.order ?? Number.POSITIVE_INFINITY
+        const bo = b.order ?? Number.POSITIVE_INFINITY
+        return ao - bo
+      })
+
+      setShows(rows)
     } catch (e) {
       console.error("program director: load", e)
       setError(true)

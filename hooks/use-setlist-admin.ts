@@ -75,7 +75,7 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
       localStorage.setItem("adminActiveTab", "Setlist")
     }
     router.push(
-      `/archive/admin?show_id=${encodeURIComponent(showId)}`,
+      `/old/archive/admin?show_id=${encodeURIComponent(showId)}`,
     )
   }, [showId, router])
 

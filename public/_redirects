@@ -7,38 +7,67 @@
 # Shows page retired; UI preserved in repo (components/wted-shows.tsx)
 /wted/shows  /wted/program-director  301
 
+# Archive app UI moved to /old/archive; deep links below rewrite to the new prefix.
+# /archive alone is the new static hub (Next emits /archive/index.html).
+
+# Exact legacy archive index URLs → /old/archive/…
+/archive/years  /old/archive/years  301
+/archive/tours  /old/archive/tours  301
+/archive/songs  /old/archive/songs  301
+/archive/stats  /old/archive/stats  301
+/archive/personnel  /old/archive/personnel  301
+/archive/venues  /old/archive/venues  301
+/archive/discography  /old/archive/discography  301
+/archive/lists  /old/archive/lists  301
+/archive/setlistgame  /old/archive/setlistgame  301
+/archive/setlist  /old/archive/setlist  301
+/archive/song  /old/archive/song  301
+/archive/venue  /old/archive/venue  301
+/archive/user  /old/archive/user  301
+/archive/submit  /old/archive/submit  301
+/archive/admin  /old/archive/admin  301
+/archive/admin/radio  /old/archive/admin/radio  301
+/archive/bugs  /old/archive/bugs  301
+/archive/profile  /old/archive/profile  301
+/archive/profile/overview  /old/archive/profile/overview  301
+/archive/profile/shows  /old/archive/profile/shows  301
+/archive/profile/songs  /old/archive/profile/songs  301
+/archive/profile/slots  /old/archive/profile/slots  301
+/archive/profile/personnel  /old/archive/profile/personnel  301
+/archive/profile/loose-ends  /old/archive/profile/loose-ends  301
+
 # Legacy path-based setlist URLs → query model (static export builds one HTML file)
-/archive/setlist/*  /archive/setlist?id=:splat  301
+/archive/setlist/*  /old/archive/setlist?id=:splat  301
 
 # Legacy path-based year URLs → query model
-/archive/years/*  /archive/years?id=:splat  301
+/archive/years/*  /old/archive/years?id=:splat  301
 
 # Legacy path-based tour URLs → query model
-/archive/tours/*  /archive/tours?id=:splat  301
+/archive/tours/*  /old/archive/tours?id=:splat  301
 
 # Legacy path-based song URLs → query model
-/archive/song/*  /archive/song?id=:splat  301
+/archive/song/*  /old/archive/song?id=:splat  301
 
 # Legacy path-based personnel URLs → query model
-/archive/personnel/*  /archive/personnel?id=:splat  301
+/archive/personnel/*  /old/archive/personnel?id=:splat  301
 
 # Legacy path-based discography URLs → query model
-/archive/discography/*  /archive/discography?id=:splat  301
+/archive/discography/*  /old/archive/discography?id=:splat  301
 
 # Legacy path-based list URLs → query model
-/archive/lists/*  /archive/lists?id=:splat  301
+/archive/lists/*  /old/archive/lists?id=:splat  301
 
 # Legacy path-based venue URLs → query model
-/archive/venue/*  /archive/venue?id=:splat  301
+/archive/venue/*  /old/archive/venue?id=:splat  301
 
 # Setlist Game: tour paths before generic show path
-/archive/setlistgame/tour/*  /archive/setlistgame?tour_id=:splat  301
-/archive/setlistgame/*  /archive/setlistgame?id=:splat  301
+/archive/setlistgame/tour/*  /old/archive/setlistgame?tour_id=:splat  301
+/archive/setlistgame/*  /old/archive/setlistgame?id=:splat  301
 
 # Public user stats: path tab → query (incoming ?id= preserved by Netlify)
-/archive/user/overview  /archive/user?tab=overview  301
-/archive/user/shows  /archive/user?tab=shows  301
-/archive/user/songs  /archive/user?tab=songs  301
-/archive/user/slots  /archive/user?tab=slots  301
-/archive/user/personnel  /archive/user?tab=personnel  301
-/archive/user/loose-ends  /archive/user?tab=loose-ends  301
+/archive/user/overview  /old/archive/user?tab=overview  301
+/archive/user/shows  /old/archive/user?tab=shows  301
+/archive/user/songs  /old/archive/user?tab=songs  301
+/archive/user/slots  /old/archive/user?tab=slots  301
+/archive/user/personnel  /old/archive/user?tab=personnel  301
+/archive/user/loose-ends  /old/archive/user?tab=loose-ends  301

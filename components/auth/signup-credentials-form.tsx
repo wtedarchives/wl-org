@@ -99,7 +99,7 @@ export function SignupCredentialsForm({
       if (data?.user && !data.session) {
         setMessage("Check your email for a confirmation link")
       } else if (data?.user && data.session) {
-        router.replace("/archive/profile/overview")
+        router.replace("/old/archive/profile/overview")
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to sign up"

@@ -8,11 +8,14 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
 } from "react"
+import { usePathname, useRouter } from "next/navigation"
 
 import { useWtedRadioNowPlaying } from "@/hooks/use-wted-radio-now-playing"
 
 import "./wl-home-v2.css"
+import { WlHomeV2ArchiveModal } from "./wl-home-v2-archive-modal"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
 import { WlHomeV2ForgotPasswordModal } from "./wl-home-v2-forgot-password-modal"
 import { WlHomeV2Header } from "./wl-home-v2-header"
@@ -31,7 +34,16 @@ const WELCOME_TICKER_COPY =
 
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
-export function WlHomeV2() {
+export function WlHomeV2({
+  children,
+  archiveModalInitiallyOpen = false,
+}: {
+  children?: ReactNode
+  /** When true (e.g. `/archive` route), open the archive hub modal on mount. */
+  archiveModalInitiallyOpen?: boolean
+}) {
+  const pathname = usePathname()
+  const router = useRouter()
   const rootRef = useRef<HTMLDivElement>(null)
   const coreRef = useRef<HTMLDivElement>(null)
   const ringRef = useRef<HTMLDivElement>(null)
@@ -61,7 +73,17 @@ export function WlHomeV2() {
   const [signupOpen, setSignupOpen] = useState(false)
   const signupHeadingId = useId()
 
+  const [archiveOpen, setArchiveOpen] = useState(archiveModalInitiallyOpen)
+  const archiveHeadingId = useId()
+
   const [tweaksOpen, setTweaksOpen] = useState(false)
+
+  const closeArchiveModal = useCallback(() => {
+    setArchiveOpen(false)
+    if (pathname === "/archive") {
+      router.replace("/")
+    }
+  }, [pathname, router])
 
   const { title: nowPlayingTitle, loading: nowPlayingLoading } =
     useWtedRadioNowPlaying()
@@ -122,7 +144,14 @@ export function WlHomeV2() {
   }, [])
 
   useEffect(() => {
-    if (!requestOpen && !scheduleOpen && !loginOpen && !forgotOpen && !signupOpen)
+    if (
+      !requestOpen &&
+      !scheduleOpen &&
+      !loginOpen &&
+      !forgotOpen &&
+      !signupOpen &&
+      !archiveOpen
+    )
       return
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return
@@ -131,10 +160,19 @@ export function WlHomeV2() {
       setLoginOpen(false)
       setForgotOpen(false)
       setSignupOpen(false)
+      closeArchiveModal()
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
-  }, [requestOpen, scheduleOpen, loginOpen, forgotOpen, signupOpen])
+  }, [
+    requestOpen,
+    scheduleOpen,
+    loginOpen,
+    forgotOpen,
+    signupOpen,
+    archiveOpen,
+    closeArchiveModal,
+  ])
 
   const rootClass = "wl-home-v2" + (finePointer ? " trail-active" : "")
 
@@ -150,41 +188,45 @@ export function WlHomeV2() {
         />
 
         <main>
-          <div
-            className="wl-home-v2-ticker"
-            role="button"
-            tabIndex={0}
-            aria-label={tickerButtonAriaLabel}
-            onClick={openSchedule}
-            onKeyDown={onTickerKeyDown}
-          >
-            <div className="wl-home-v2-ticker-viewport">
-              <div className="wl-home-v2-ticker-track">
-                {Array.from({ length: 4 }, (_, copyIndex) => (
-                  <span
-                    key={copyIndex}
-                    className="wl-home-v2-ticker-unit"
-                    aria-hidden="true"
-                  >
-                    <span className="wl-home-v2-ticker-segment">
-                      {WELCOME_TICKER_COPY}
-                    </span>
-                    {nowPlayingLine != null ?
-                      <span className="wl-home-v2-ticker-segment wl-home-v2-ticker-segment--now-playing">
-                        <span className="live-dot" aria-hidden />
-                        {nowPlayingLine}
+          {children == null ?
+            <>
+              <div
+                className="wl-home-v2-ticker"
+                role="button"
+                tabIndex={0}
+                aria-label={tickerButtonAriaLabel}
+                onClick={openSchedule}
+                onKeyDown={onTickerKeyDown}
+              >
+                <div className="wl-home-v2-ticker-viewport">
+                  <div className="wl-home-v2-ticker-track">
+                    {Array.from({ length: 4 }, (_, copyIndex) => (
+                      <span
+                        key={copyIndex}
+                        className="wl-home-v2-ticker-unit"
+                        aria-hidden="true"
+                      >
+                        <span className="wl-home-v2-ticker-segment">
+                          {WELCOME_TICKER_COPY}
+                        </span>
+                        {nowPlayingLine != null ?
+                          <span className="wl-home-v2-ticker-segment wl-home-v2-ticker-segment--now-playing">
+                            <span className="live-dot" aria-hidden />
+                            {nowPlayingLine}
+                          </span>
+                        : null}
                       </span>
-                    : null}
-                  </span>
-                ))}
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <WlHomeV2Tiles
-            onOpenRequest={() => setRequestOpen(true)}
-            onOpenLogin={() => setLoginOpen(true)}
-            onOpenSchedule={() => setScheduleOpen(true)}
-          />
+              <WlHomeV2Tiles
+                onOpenRequest={() => setRequestOpen(true)}
+                onOpenLogin={() => setLoginOpen(true)}
+                onOpenSchedule={() => setScheduleOpen(true)}
+              />
+            </>
+          : children}
         </main>
 
         <WlHomeV2Footer />
@@ -200,6 +242,11 @@ export function WlHomeV2() {
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
         headingId={scheduleHeadingId}
+      />
+      <WlHomeV2ArchiveModal
+        open={archiveOpen}
+        onClose={closeArchiveModal}
+        headingId={archiveHeadingId}
       />
       <WlHomeV2LoginModal
         open={loginOpen}

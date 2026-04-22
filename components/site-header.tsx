@@ -77,10 +77,19 @@ function pathnameToBreadcrumbs(
   pathname: string,
   lastSegmentLabelOverride?: string | null,
 ) {
-  if (!pathname || pathname === "/") {
+  if (pathname === "/old") {
+    return [{ label: "Welcome to Wysteria Lane", href: "/old" }]
+  }
+  let pathForCrumb = pathname
+  let oldArchiveHrefPrefix = false
+  if (pathname.startsWith("/old/archive")) {
+    oldArchiveHrefPrefix = true
+    pathForCrumb = "/archive" + pathname.slice("/old/archive".length)
+  }
+  if (!pathForCrumb || pathForCrumb === "/") {
     return [{ label: "Welcome to Wysteria Lane", href: "/" }]
   }
-  const segments = pathname.split("/").filter(Boolean)
+  const segments = pathForCrumb.split("/").filter(Boolean)
   // Standalone pages: breadcrumb is just the page name (no Home in trail).
   if (segments.length === 1 && (segments[0] === "forum" || segments[0] === "goose101")) {
     const label =
@@ -110,7 +119,12 @@ function pathnameToBreadcrumbs(
       segment === "wted" ? "/wted/program-director" : href
     items.push({ label, href: itemHref })
   }
-  return items
+  if (!oldArchiveHrefPrefix) return items
+  return items.map((item) => ({
+    ...item,
+    href:
+      item.href.startsWith("/archive") ? `/old${item.href}` : item.href,
+  }))
 }
 
 export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string } = {}) {
@@ -121,26 +135,29 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const { yearLabel, yearDetailHref } = useYearBreadcrumb()
   const { setlistBreadcrumbs } = useSetlistBreadcrumb()
   const { publicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
-  const isPublicUserProfilePath = (pathname ?? "").startsWith("/archive/user")
+  const legacyHomeHref = (pathname ?? "").startsWith("/old") ? "/old" : "/"
+  const isPublicUserProfilePath = (pathname ?? "").startsWith(
+    "/old/archive/user",
+  )
   const useYearOverride =
-    ((pathname ?? "") === "/archive/years" ||
-      (pathname ?? "").startsWith("/archive/years/")) &&
+    ((pathname ?? "") === "/old/archive/years" ||
+      (pathname ?? "").startsWith("/old/archive/years/")) &&
     yearLabel != null
-  const useProfileTrail = (pathname ?? "").startsWith("/archive/profile")
+  const useProfileTrail = (pathname ?? "").startsWith("/old/archive/profile")
   const useSetlistTrail =
-    (((pathname ?? "") === "/archive/setlist" ||
-      (pathname ?? "").startsWith("/archive/setlist/") ||
-      (pathname ?? "") === "/archive/setlistgame" ||
-      (pathname ?? "") === "/archive/tours" ||
-      (pathname ?? "").startsWith("/archive/tours/") ||
-      (pathname ?? "") === "/archive/song" ||
-      (pathname ?? "").startsWith("/archive/song/") ||
-      (pathname ?? "") === "/archive/personnel" ||
-      (pathname ?? "").startsWith("/archive/personnel/") ||
-      (pathname ?? "") === "/archive/venue" ||
-      (pathname ?? "") === "/archive/lists" ||
-      (pathname ?? "") === "/archive/discography" ||
-      (pathname ?? "").startsWith("/archive/discography/")) ||
+    (((pathname ?? "") === "/old/archive/setlist" ||
+      (pathname ?? "").startsWith("/old/archive/setlist/") ||
+      (pathname ?? "") === "/old/archive/setlistgame" ||
+      (pathname ?? "") === "/old/archive/tours" ||
+      (pathname ?? "").startsWith("/old/archive/tours/") ||
+      (pathname ?? "") === "/old/archive/song" ||
+      (pathname ?? "").startsWith("/old/archive/song/") ||
+      (pathname ?? "") === "/old/archive/personnel" ||
+      (pathname ?? "").startsWith("/old/archive/personnel/") ||
+      (pathname ?? "") === "/old/archive/venue" ||
+      (pathname ?? "") === "/old/archive/lists" ||
+      (pathname ?? "") === "/old/archive/discography" ||
+      (pathname ?? "").startsWith("/old/archive/discography/")) ||
       (pathname ?? "") === "/wted/episode") &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
@@ -155,8 +172,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
         ]
     : useProfileTrail
       ? [
-          { label: "Home", href: "/" },
-          { label: "Profile", href: "/archive/profile/overview" },
+          { label: "Home", href: legacyHomeHref },
+          { label: "Profile", href: "/old/archive/profile/overview" },
         ]
       : useSetlistTrail
       ? setlistBreadcrumbs
@@ -199,7 +216,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
             <BreadcrumbList className="flex-nowrap gap-1.5 text-muted-foreground">
               <BreadcrumbItem className="shrink-0">
                 <BreadcrumbLink asChild>
-                  <Link href="/" className="flex items-center">
+                  <Link href={legacyHomeHref} className="flex items-center">
                     <Image
                       src="/WL.png"
                       alt="Home"
