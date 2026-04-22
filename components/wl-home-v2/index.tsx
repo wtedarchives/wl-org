@@ -4,9 +4,13 @@ import {
   useCallback,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react"
+
+import { useWtedRadioNowPlaying } from "@/hooks/use-wted-radio-now-playing"
 
 import "./wl-home-v2.css"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
@@ -21,6 +25,11 @@ import {
   type WlHomeV2TrailHue,
   useWlHomeV2CursorTrail,
 } from "./use-wl-home-v2-cursor-trail"
+
+const WELCOME_TICKER_COPY =
+  "Welcome to WTED, the World of TED.  Built by Goose fans, for Goose fans."
+
+const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
 export function WlHomeV2() {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -53,6 +62,38 @@ export function WlHomeV2() {
   const signupHeadingId = useId()
 
   const [tweaksOpen, setTweaksOpen] = useState(false)
+
+  const { title: nowPlayingTitle, loading: nowPlayingLoading } =
+    useWtedRadioNowPlaying()
+
+  const nowPlayingLine = useMemo(() => {
+    if (nowPlayingLoading && !nowPlayingTitle) {
+      return `${NOW_PLAYING_TICKER_PREFIX}…`
+    }
+    if (nowPlayingTitle) {
+      return `${NOW_PLAYING_TICKER_PREFIX}${nowPlayingTitle}`
+    }
+    return null
+  }, [nowPlayingTitle, nowPlayingLoading])
+
+  const tickerAriaLabel =
+    nowPlayingLine != null ?
+      `${WELCOME_TICKER_COPY} ${nowPlayingLine}`
+    : WELCOME_TICKER_COPY
+
+  const tickerButtonAriaLabel = `${tickerAriaLabel} Opens full WTED schedule.`
+
+  const openSchedule = useCallback(() => setScheduleOpen(true), [])
+
+  const onTickerKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        openSchedule()
+      }
+    },
+    [openSchedule],
+  )
 
   useWlHomeV2CursorTrail(
     rootRef,
@@ -109,6 +150,36 @@ export function WlHomeV2() {
         />
 
         <main>
+          <div
+            className="wl-home-v2-ticker"
+            role="button"
+            tabIndex={0}
+            aria-label={tickerButtonAriaLabel}
+            onClick={openSchedule}
+            onKeyDown={onTickerKeyDown}
+          >
+            <div className="wl-home-v2-ticker-viewport">
+              <div className="wl-home-v2-ticker-track">
+                {Array.from({ length: 4 }, (_, copyIndex) => (
+                  <span
+                    key={copyIndex}
+                    className="wl-home-v2-ticker-unit"
+                    aria-hidden="true"
+                  >
+                    <span className="wl-home-v2-ticker-segment">
+                      {WELCOME_TICKER_COPY}
+                    </span>
+                    {nowPlayingLine != null ?
+                      <span className="wl-home-v2-ticker-segment wl-home-v2-ticker-segment--now-playing">
+                        <span className="live-dot" aria-hidden />
+                        {nowPlayingLine}
+                      </span>
+                    : null}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
           <WlHomeV2Tiles
             onOpenRequest={() => setRequestOpen(true)}
             onOpenLogin={() => setLoginOpen(true)}

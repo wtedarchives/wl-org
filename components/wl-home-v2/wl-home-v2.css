@@ -465,6 +465,111 @@
     padding: 0;
   }
 
+  /* Four identical units (welcome segment ± now-playing segment); -25% = one unit → seamless loop. */
+  @keyframes wl-home-v2-ticker-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-25%, 0, 0);
+    }
+  }
+  .wl-home-v2 .wl-home-v2-ticker {
+    flex-shrink: 0;
+    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    cursor: pointer;
+    transition: background 0.2s ease-out;
+  }
+  .wl-home-v2 .wl-home-v2-ticker:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  .wl-home-v2 .wl-home-v2-ticker:focus {
+    outline: none;
+  }
+  .wl-home-v2 .wl-home-v2-ticker:focus-visible {
+    outline: 2px solid rgba(255, 186, 120, 0.75);
+    outline-offset: 2px;
+  }
+  .wl-home-v2 .wl-home-v2-ticker-viewport {
+    overflow: hidden;
+    padding: 10px 0;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-ticker-viewport {
+      padding: 11px 0;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-ticker-track {
+    display: inline-flex;
+    flex-flow: row nowrap;
+    flex-shrink: 0;
+    width: max-content;
+    min-width: max-content;
+    animation-name: wl-home-v2-ticker-marquee;
+    animation-duration: 45s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  .wl-home-v2 .wl-home-v2-ticker-unit {
+    display: inline-flex;
+    flex-flow: row nowrap;
+    flex-shrink: 0;
+    align-items: baseline;
+  }
+  .wl-home-v2 .wl-home-v2-ticker-segment {
+    flex-shrink: 0;
+    padding-inline: 2.5rem;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: nowrap;
+  }
+  .wl-home-v2 .wl-home-v2-ticker-segment--now-playing {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .wl-home-v2 .wl-home-v2-ticker-segment--now-playing .live-dot {
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wl-home-v2 .wl-home-v2-ticker-track {
+      animation: none;
+      transform: none;
+      width: 100%;
+      min-width: 0;
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 4px;
+    }
+    .wl-home-v2 .wl-home-v2-ticker-unit:not(:first-child) {
+      display: none;
+    }
+    .wl-home-v2 .wl-home-v2-ticker-unit {
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      max-width: 42rem;
+    }
+    .wl-home-v2 .wl-home-v2-ticker-segment {
+      padding-inline: 0;
+      white-space: normal;
+      text-wrap: balance;
+      text-align: center;
+    }
+  }
+
   /* 2x2 grid — grows with content; expands within main when the viewport is taller */
   .wl-home-v2 .grid {
     flex: 1 1 auto;
@@ -819,13 +924,35 @@
     cursor: pointer;
     font-family: inherit;
   }
-  /* Match former `.wbtn-green` (Community Events) for all tile actions */
+  .wl-home-v2 .wbtn .wbtn-text {
+    min-width: 0;
+    text-align: left;
+  }
+  /* Tile action buttons — teal hover matches featured rows / pills */
   .wl-home-v2 .wbtn:hover{ background: rgba(88,200,174,0.18); border-color: rgba(88,200,174,0.5); transform: translateY(-1px); }
   .wl-home-v2 .wbtn .arr{
     font-family: "Geist Mono", monospace;
     color: var(--wl-green);
     font-size: 15px;
     line-height: 1;
+  }
+  .wl-home-v2 .wbtn .wbtn-icon {
+    flex-shrink: 0;
+    color: var(--wl-green);
+  }
+  /* App Store / Play — same frosted panel + hover as ON AIR (`button.live-pill--wted-tile`) */
+  .wl-home-v2 .wbtn.wbtn--app-store {
+    background: rgba(0, 0, 0, 0.38);
+    border-color: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: background 0.18s ease-out, border-color 0.18s ease-out,
+      box-shadow 0.18s ease-out, transform 0.18s ease-out;
+  }
+  .wl-home-v2 .wbtn.wbtn--app-store:hover {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgba(88, 200, 174, 0.5);
+    transform: translateY(-1px);
   }
 
   /* Topics list */

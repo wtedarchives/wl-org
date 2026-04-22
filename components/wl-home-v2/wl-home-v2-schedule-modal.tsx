@@ -42,7 +42,7 @@ export function WlHomeV2ScheduleModal({
           <div className="modal-request-head-text">
             <h3 id={headingId}>Upcoming Schedule</h3>
             <p id={subtextId} className="modal-request-sub">
-              Full WTED program schedule from Radio.co.
+              Full WTED Goose Radio program schedule.
             </p>
           </div>
           <button

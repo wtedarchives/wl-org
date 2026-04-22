@@ -4,17 +4,14 @@ import { useEffect, useRef, useState } from "react"
 import { History } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  WTED_RADIO_STATUS_POLL_MS,
+  WTED_RADIO_STATUS_URL,
+  type RadioCoStatusResponse,
+} from "@/lib/wted-radio-co-status"
 import { cn } from "@/lib/utils"
 
-const WTED_RADIO_CO_STATION_ID = "s3c11c85d6"
-const WTED_RADIO_STATUS_URL = `https://public.radio.co/stations/${WTED_RADIO_CO_STATION_ID}/status`
 const RECENTLY_PLAYED_LIMIT = 20
-/** Match Radio.co cache (max-age≈3s); avoid hammering the endpoint. */
-const STATUS_POLL_MS = 15_000
-
-type RadioCoStatusResponse = {
-  history?: { title?: string }[]
-}
 
 const cardClassName =
   "flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-wl-dark-grey/50 bg-[#313a34] py-0 text-xs shadow-sm ring-0"
@@ -65,7 +62,7 @@ export function WtedRecentlyPlayedCard({
     }
 
     void load()
-    const interval = window.setInterval(() => void load(), STATUS_POLL_MS)
+    const interval = window.setInterval(() => void load(), WTED_RADIO_STATUS_POLL_MS)
     return () => {
       cancelled = true
       window.clearInterval(interval)

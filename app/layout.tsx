@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: "WysteriaLane.org",
-    /** Child `metadata.title` values must omit " – WysteriaLane.org"; this template adds it. */
+    /**
+     * `(main)` and other segments: child titles omit the suffix; this adds it.
+     * Homepage and future peers live under `(wl-home-v2)` with `— WTED.org` (see that layout).
+     */
     template: "%s – WysteriaLane.org",
   },
   description: "WysteriaLane.org",
