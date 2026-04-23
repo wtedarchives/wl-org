@@ -8,7 +8,7 @@ import {
 } from "react"
 import Image from "next/image"
 
-import { Radio } from "lucide-react"
+import { Broadcast } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -178,7 +178,7 @@ export function WtedRadioScheduleCard({
               <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
                 Upcoming Schedule
               </CardTitle>
-              <Radio className="size-4 shrink-0 text-wl-white/80" />
+              <Broadcast className="size-4 shrink-0 text-wl-white/80" aria-hidden />
             </div>
           </CardHeader>
         ) : null}

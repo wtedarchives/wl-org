@@ -1,0 +1,11 @@
+---
+description: Consistent full-page loading UI for routes inside the wl-home-v2 shell
+globs: components/wl-home-v2/**/*.tsx, app/(wl-home-v2)/**/*.tsx, components/wted/*wl-home-v2*.tsx
+---
+
+# WL Home v2 — page loading
+
+Routes rendered under `WlHomeV2` (`app/(wl-home-v2)/…`, views that wrap `<WlHomeV2>`) must use **`WlHomeV2PageLoading`** from `components/wl-home-v2/wl-home-v2-page-loading.tsx` for the primary loading state — not `LoadingPageCard` (that’s for the legacy `(main)` archive/sidebar layout).
+
+- **Pattern**: centered column, `widget-panel` frosted strip, orange spinning `Loader2`, `text-sm text-white/80` message.
+- **Styles**: `.wl-home-v2-page-loading` in `wl-home-v2.css` — keep Program Director, Years, and future v2 pages aligned.

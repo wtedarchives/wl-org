@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  Suspense,
   useCallback,
   useEffect,
   useId,
@@ -15,7 +16,10 @@ import { usePathname, useRouter } from "next/navigation"
 import { useWtedRadioNowPlaying } from "@/hooks/use-wted-radio-now-playing"
 
 import "./wl-home-v2.css"
+import { SubmitModalHandler } from "@/components/submit-modal-handler"
+
 import { WlHomeV2ArchiveModal } from "./wl-home-v2-archive-modal"
+import { WlHomeV2ArchiveSubnav } from "./wl-home-v2-archive-subnav"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
 import { WlHomeV2ForgotPasswordModal } from "./wl-home-v2-forgot-password-modal"
 import { WlHomeV2Header } from "./wl-home-v2-header"
@@ -185,7 +189,12 @@ export function WlHomeV2({
             setLoginOpen(false)
             setSignupOpen(true)
           }}
+          onOpenArchive={() => setArchiveOpen(true)}
         />
+
+        <Suspense fallback={null}>
+          <WlHomeV2ArchiveSubnav />
+        </Suspense>
 
         <main>
           {children == null ?
@@ -248,6 +257,9 @@ export function WlHomeV2({
         onClose={closeArchiveModal}
         headingId={archiveHeadingId}
       />
+      <Suspense fallback={null}>
+        <SubmitModalHandler />
+      </Suspense>
       <WlHomeV2LoginModal
         open={loginOpen}
         onClose={() => setLoginOpen(false)}

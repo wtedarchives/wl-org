@@ -11,7 +11,7 @@
 # /archive alone is the new static hub (Next emits /archive/index.html).
 
 # Exact legacy archive index URLs → /old/archive/…
-/archive/years  /old/archive/years  301
+# /archive/years → new WTED grid page (Next static route)
 /archive/tours  /old/archive/tours  301
 /archive/songs  /old/archive/songs  301
 /archive/stats  /old/archive/stats  301
@@ -36,33 +36,9 @@
 /archive/profile/personnel  /old/archive/profile/personnel  301
 /archive/profile/loose-ends  /old/archive/profile/loose-ends  301
 
-# Legacy path-based setlist URLs → query model (static export builds one HTML file)
-/archive/setlist/*  /old/archive/setlist?id=:splat  301
-
-# Legacy path-based year URLs → query model
-/archive/years/*  /old/archive/years?id=:splat  301
-
-# Legacy path-based tour URLs → query model
-/archive/tours/*  /old/archive/tours?id=:splat  301
-
-# Legacy path-based song URLs → query model
-/archive/song/*  /old/archive/song?id=:splat  301
-
-# Legacy path-based personnel URLs → query model
-/archive/personnel/*  /old/archive/personnel?id=:splat  301
-
-# Legacy path-based discography URLs → query model
-/archive/discography/*  /old/archive/discography?id=:splat  301
-
-# Legacy path-based list URLs → query model
-/archive/lists/*  /old/archive/lists?id=:splat  301
-
-# Legacy path-based venue URLs → query model
-/archive/venue/*  /old/archive/venue?id=:splat  301
-
-# Setlist Game: tour paths before generic show path
-/archive/setlistgame/tour/*  /old/archive/setlistgame?tour_id=:splat  301
-/archive/setlistgame/*  /old/archive/setlistgame?id=:splat  301
+# No splat/wildcard rules here: `/archive/.../segment` URLs either hit a real Next
+# route when migrated or 404, so redirects to `/old/archive` are not mistaken for
+# “done” new-site pages. Re-add explicit lines (or splats) when cutting over a section.
 
 # Public user stats: path tab → query (incoming ?id= preserved by Netlify)
 /archive/user/overview  /old/archive/user?tab=overview  301

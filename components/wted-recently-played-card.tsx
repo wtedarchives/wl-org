@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { History } from "lucide-react"
+import { ClockCounterClockwise } from "@phosphor-icons/react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -77,7 +77,7 @@ export function WtedRecentlyPlayedCard({
             <CardTitle className="shrink-0 text-[13px] font-semibold text-wl-white">
               Recently Played Tracks
             </CardTitle>
-            <History className="size-4 shrink-0 text-wl-white/80" />
+            <ClockCounterClockwise className="size-4 shrink-0 text-wl-white/80" aria-hidden />
           </div>
         </CardHeader>
       ) : null}

@@ -110,10 +110,14 @@ export function WlHomeV2Tiles({
         style={{ "--tile-bg": "url('/newbg.png')" } as CSSProperties}
         onClick={onWtedRadioTileClick}
       >
-        <Link
-          href="/wted"
+        <button
+          type="button"
           className="tile-link"
-          aria-label="Tune in to WTED Goose Radio"
+          aria-label="Tune in to WTED Goose Radio — scroll to the player and highlight it"
+          onClick={(e) => {
+            e.stopPropagation()
+            onWtedRadioTileClick()
+          }}
         />
         <div className="icon-wrap">
           <div className="icon-bg" />

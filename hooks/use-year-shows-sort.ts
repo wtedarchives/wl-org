@@ -99,10 +99,5 @@ export function useYearShowsSort(
     })
   }, [shows, sortColumn, sortDirection, attendeeCounts, showRatings])
 
-  const sortIndicator = (column: SortColumn) => {
-    if (sortColumn !== column) return null
-    return sortDirection === "asc" ? "↑" : "↓"
-  }
-
-  return { sortedShows, sortColumn, sortDirection, handleSort, sortIndicator }
+  return { sortedShows, sortColumn, sortDirection, handleSort }
 }

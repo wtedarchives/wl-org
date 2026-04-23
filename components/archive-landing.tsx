@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { LineSegments } from "@phosphor-icons/react"
 import {
   BarChart3,
   Calendar,
@@ -25,6 +26,7 @@ const ARCHIVE_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   BarChart3,
   Calendar,
   Disc3,
+  LineSegments,
   ListMusic,
   MapPin,
   Music,

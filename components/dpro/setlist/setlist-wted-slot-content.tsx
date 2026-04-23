@@ -2,7 +2,7 @@
 
 import { Fragment } from "react"
 import Image from "next/image"
-import { Check, Loader2 } from "lucide-react"
+import { Check, CircleNotch } from "@phosphor-icons/react"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -93,7 +93,7 @@ export function WtedRequestSlotContent({
         className="flex shrink-0 items-center justify-center rounded-full bg-primary/20 p-1.5"
         aria-label="Requested"
       >
-        <Check className="size-4 text-primary" />
+        <Check className="size-4 text-primary" aria-hidden />
       </div>
     </>
   )
@@ -146,7 +146,7 @@ export function WtedPendingSlotContent({
     <>
       {releaseArtworkLoading ? (
         <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded border border-border bg-muted/60">
-          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+          <CircleNotch className="size-5 animate-spin text-muted-foreground" aria-hidden />
         </div>
       ) : releaseArtwork ? (
         <div className="relative size-12 shrink-0 overflow-hidden rounded border border-border">

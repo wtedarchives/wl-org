@@ -233,7 +233,6 @@ export function useAverageSetlist(
           (e) => !e.entry_short || !SKIP_SHORTS.includes(e.entry_short.toLowerCase()),
         )
 
-
         if (validEntries.length === 0) {
           setAverageSetlist([])
           setStats({
@@ -509,7 +508,6 @@ export function useAverageSetlist(
 
         }
 
-
         // ─────────────────────────────────────────────────────────────────
         // STEP 7 — Trim pool to exactly totalSongsNeeded (if required)
         //
@@ -628,7 +626,6 @@ export function useAverageSetlist(
               (e) => e.entry_song === songData.song && e.songs?.song_id,
             )
             if (!sampleEntry) {
-              console.error(`  WARNING: No sample entry found for "${songData.song}" — skipping (missing song metadata)`)
               return
             }
 
@@ -681,7 +678,6 @@ export function useAverageSetlist(
           return a.entry_setnum - b.entry_setnum
         })
 
-
         setAverageSetlist(resultEntries)
         setStats({
           totalCanonicalShows: canonicalShows.length,
@@ -698,7 +694,6 @@ export function useAverageSetlist(
         })
         setIsLoading(false)
       } catch (err) {
-        console.error("AVERAGE SETLIST — ERROR:", err)
         setError(err instanceof Error ? err.message : "Failed to calculate average setlist")
         setAverageSetlist([])
         setStats(null)

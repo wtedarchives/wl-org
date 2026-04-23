@@ -3,7 +3,11 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { History, Pencil, Radio } from "lucide-react"
+import {
+  Broadcast,
+  ClockCounterClockwise,
+  PencilSimple,
+} from "@phosphor-icons/react"
 
 import { RadioHomeSlot } from "@/components/persistent-radio"
 import {
@@ -104,7 +108,7 @@ function HomeWtedRadioCards() {
         <AccordionTrigger className="border-b border-wl-dark-grey/50 bg-black/30">
           <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
             <span className="min-w-0">Upcoming Schedule</span>
-            <Radio className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+            <Broadcast className="size-4 shrink-0 text-wl-white/80" aria-hidden />
           </span>
         </AccordionTrigger>
         <AccordionContent forceMount>
@@ -120,7 +124,7 @@ function HomeWtedRadioCards() {
         <AccordionTrigger className="border-b border-wl-dark-grey/50 bg-black/30">
           <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
             <span className="min-w-0">Recently Played Tracks</span>
-            <History className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+            <ClockCounterClockwise className="size-4 shrink-0 text-wl-white/80" aria-hidden />
           </span>
         </AccordionTrigger>
         <AccordionContent forceMount>
@@ -136,7 +140,7 @@ function HomeWtedRadioCards() {
         <AccordionTrigger className="border-b border-wl-dark-grey/50 bg-black/30">
           <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
             <span className="min-w-0">Request a Song</span>
-            <Pencil className="size-4 shrink-0 text-wl-white/80" aria-hidden />
+            <PencilSimple className="size-4 shrink-0 text-wl-white/80" aria-hidden />
           </span>
         </AccordionTrigger>
         <AccordionContent forceMount>

@@ -5,7 +5,12 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import Image from "next/image"
-import { Check, FileMusic, Star, AudioLines } from "lucide-react"
+import {
+  Broadcast,
+  Check,
+  FileAudio,
+  Star,
+} from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import {
   TableCell,
@@ -19,6 +24,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { YearShow } from "@/hooks/use-shows-data-by-year"
 import type { TourCount } from "@/hooks/use-tours-data"
+import { cn } from "@/lib/utils"
 
 export function getTourColor(tours: TourCount[], tourName: string): string {
   const tour = tours.find((t) => t.tour === tourName)
@@ -38,7 +44,8 @@ function RatingStars({ rating }: { rating: number }) {
           <Star
             key={star}
             className="size-3 text-muted-foreground/30"
-            strokeWidth={1.75}
+            weight="regular"
+            aria-hidden
           />
         ))}
       </div>
@@ -56,13 +63,18 @@ function RatingStars({ rating }: { rating: number }) {
             <div key={starNumber} className="relative size-3">
               <Star
                 className="size-3 text-yellow-400/40"
-                strokeWidth={1.75}
+                weight="regular"
+                aria-hidden
               />
               <div
                 className="absolute inset-0 overflow-hidden"
                 style={{ width: `${fillPercentage * 100}%` }}
               >
-                <Star className="size-3 text-yellow-400" fill="currentColor" />
+                <Star
+                  className="size-3 text-yellow-400"
+                  weight="fill"
+                  aria-hidden
+                />
               </div>
             </div>
           )
@@ -84,6 +96,7 @@ export interface YearShowRowProps {
   showsWithSetlists: Set<string>
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
+  wlHomeV2?: boolean
 }
 
 export function YearShowRow({
@@ -95,13 +108,22 @@ export function YearShowRow({
   showsWithSetlists,
   showsWithReleases,
   showsWithRadioIds,
+  wlHomeV2 = false,
 }: YearShowRowProps) {
   const { user } = useAuth()
   const rating = showRatings[show.show_id] ?? 0
   const attendeeCount = attendeeCounts[show.show_id] ?? 0
 
   return (
-    <TableRow className={index % 2 === 0 ? "bg-background/70" : "bg-background"}>
+    <TableRow
+      className={cn(
+        wlHomeV2 ?
+          "border-b border-white/[0.06] bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+        : index % 2 === 0 ?
+          "bg-background/70"
+        : "bg-background",
+      )}
+    >
       <TableCell className="relative w-[4px] p-0 align-middle">
         <TooltipProvider>
           <Tooltip>
@@ -121,7 +143,7 @@ export function YearShowRow({
           </Tooltip>
         </TooltipProvider>
       </TableCell>
-      <TableCell className="whitespace-nowrap px-2 py-1 text-center text-[11px] font-medium tabular-nums">
+      <TableCell className="whitespace-nowrap !px-2 !py-0.5 text-center text-[11px] font-medium tabular-nums">
         <Link
           href={getSetlistArchiveUrl(show.show_id)}
           className="hover:underline"
@@ -130,22 +152,26 @@ export function YearShowRow({
         </Link>
       </TableCell>
       {user ? (
-        <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+        <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
           <div className="inline-flex items-center justify-center">
             {show.attended ? (
-              <div className="inline-flex items-center justify-center rounded-full bg-emerald-600 p-0.5">
-                <Check className="size-3 text-white" strokeWidth={3} />
+              <div className="inline-flex size-4 items-center justify-center rounded-full bg-emerald-600">
+                <Check
+                  className="size-3 text-white"
+                  weight="bold"
+                  aria-hidden
+                />
               </div>
             ) : (
-              <span className="inline-block size-3" aria-hidden />
+              <span className="inline-block size-4" aria-hidden />
             )}
           </div>
         </TableCell>
       ) : null}
-      <TableCell className="px-2 py-1 text-[11px] font-normal text-muted-foreground">
+      <TableCell className="!px-2 !py-0.5 text-[11px] font-normal text-muted-foreground">
         {show.show_group}
       </TableCell>
-      <TableCell className="px-2 py-1 text-[11px]">
+      <TableCell className="!px-2 !py-0.5 text-[11px]">
         {show.venue_id ? (
           <Link
             href={getVenueArchiveUrl(show.venue_id)}
@@ -164,15 +190,15 @@ export function YearShowRow({
           <span>{show.show_subvenue}</span>
         )}
       </TableCell>
-      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+      <TableCell className="!px-2 !py-0.5 text-[11px] text-muted-foreground">
         {show.show_venue_location}
       </TableCell>
-      <TableCell className="group px-2 py-1 text-center align-middle leading-none">
+      <TableCell className="group !px-2 !py-0.5 text-center align-middle leading-none">
         <div className="inline-flex items-center justify-center">
           <RatingStars rating={rating} />
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
         <div className="inline-flex items-center justify-center">
           {showsWithSetlists.has(show.show_id) ? (
             <TooltipProvider>
@@ -183,7 +209,7 @@ export function YearShowRow({
                     aria-label="View setlist"
                     className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                   >
-                    <FileMusic className="size-3.5" />
+                    <FileAudio className="size-3.5" aria-hidden />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -196,7 +222,7 @@ export function YearShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
         <div className="inline-flex items-center justify-center">
           {showsWithReleases.has(show.show_id) ? (
             <TooltipProvider>
@@ -207,7 +233,7 @@ export function YearShowRow({
                     aria-label="View releases"
                     className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
                   >
-                    <AudioLines className="size-3.5" />
+                    <Broadcast className="size-3.5" aria-hidden />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -220,12 +246,12 @@ export function YearShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="w-[32px] px-1 py-1 text-center align-middle text-[11px] font-medium leading-none">
+      <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle text-[11px] font-medium leading-none">
         <div className="inline-flex items-center justify-center">
           {attendeeCount > 0 ? attendeeCount : ""}
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
         <div className="inline-flex items-center justify-center">
           {show.show_wl_link ? (
             <TooltipProvider>
@@ -259,7 +285,7 @@ export function YearShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
         <div className="inline-flex items-center justify-center">
           {showsWithRadioIds.has(show.show_id) ? (
             <TooltipProvider>
@@ -289,7 +315,7 @@ export function YearShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+      <TableCell className="!px-2 !py-0.5 text-[11px] text-muted-foreground">
         {show.show_detail}
         {show.show_detail && show.show_alert ? <>&nbsp;&nbsp;</> : null}
         {show.show_alert ? (

@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import { useVirtualizer } from "@tanstack/react-virtual"
-import { Check, Loader2, Search, X } from "lucide-react"
+import {
+  Check,
+  CircleNotch,
+  MagnifyingGlass,
+  X,
+} from "@phosphor-icons/react"
 
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -97,8 +102,14 @@ function CatalogTrackRow({
             aria-busy={busy}
           >
             {busy ?
-              <Loader2 className="size-4 animate-spin" />
-            : <Check className="size-4" strokeWidth={2.5} />}
+              <CircleNotch className="size-4 animate-spin" aria-hidden />
+            : (
+              <Check
+                className="size-4"
+                weight="bold"
+                aria-hidden
+              />
+            )}
           </button>
         </div>
       </div>
@@ -157,7 +168,7 @@ export function WtedRequestSongCustomPanel({
     >
       <div className="shrink-0 border-b border-wl-dark-grey/50 !px-2 !py-1.5">
         <div className="relative">
-          <Search
+          <MagnifyingGlass
             className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-wl-white/55"
             aria-hidden
           />
@@ -183,7 +194,8 @@ export function WtedRequestSongCustomPanel({
               aria-label="Clear search"
             >
               <X
-                className="size-3.5 shrink-0 text-white stroke-white stroke-[2.5]"
+                className="size-3.5 shrink-0 text-white"
+                weight="bold"
                 aria-hidden
               />
             </button>
@@ -197,7 +209,7 @@ export function WtedRequestSongCustomPanel({
       >
         {loading ? (
           <div className="flex min-h-[120px] items-center justify-center gap-2 py-8">
-            <Loader2 className="size-5 animate-spin text-wl-white/55" />
+            <CircleNotch className="size-5 animate-spin text-wl-white/55" aria-hidden />
             <span className="text-[11px] text-wl-white/70">
               Loading catalog…
             </span>

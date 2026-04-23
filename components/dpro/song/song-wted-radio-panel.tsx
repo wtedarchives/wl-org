@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Loader2 } from "lucide-react"
+import { CircleNotch } from "@phosphor-icons/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
@@ -32,7 +32,7 @@ export function SongWtedRadioPanel({
       <CardContent className="flex min-h-0 flex-1 flex-col px-0 pt-0">
         {loading ? (
           <div className="text-muted-foreground flex items-center justify-center gap-2 px-3 py-8 text-xs">
-            <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
+            <CircleNotch className="size-4 shrink-0 animate-spin" aria-hidden />
             Loading WTED…
           </div>
         ) : (

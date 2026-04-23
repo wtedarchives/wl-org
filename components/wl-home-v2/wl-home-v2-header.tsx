@@ -2,8 +2,15 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Menu, X } from "lucide-react"
-import { useCallback, useEffect, useId, useState } from "react"
+import { List, X } from "@phosphor-icons/react"
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  type MouseEvent,
+} from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import { RadioHomeSlot, RadioMobileSlot } from "@/components/persistent-radio"
@@ -11,15 +18,19 @@ import { useIsBelowXl } from "@/hooks/use-mobile"
 
 import { toggleOldPathPrefix } from "@/lib/toggle-old-path-prefix"
 
+import { WlHomeV2ArchiveSubnavContent } from "./wl-home-v2-archive-subnav"
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import { WlHomeV2UserMenu } from "./wl-home-v2-user-menu"
 
 export function WlHomeV2Header({
   onOpenLogin,
   onOpenSignup,
+  onOpenArchive,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
+  /** Open the archive hub modal without leaving the current route (primary click). */
+  onOpenArchive: () => void
 }) {
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
@@ -27,6 +38,24 @@ export function WlHomeV2Header({
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const mobileNavId = useId()
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), [])
+
+  const onArchivesNavClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>) => {
+      if (
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return
+      }
+      e.preventDefault()
+      onOpenArchive()
+      closeMobileNav()
+    },
+    [onOpenArchive, closeMobileNav],
+  )
 
   const onOldPathDebugToggle = useCallback(() => {
     const nextPath = toggleOldPathPrefix(pathname)
@@ -38,6 +67,9 @@ export function WlHomeV2Header({
 
   const oldPathDebugActive =
     pathname === "/old" || pathname.startsWith("/old/")
+
+  const isArchiveRoute =
+    pathname === "/archive" || pathname.startsWith("/archive/")
 
   useEffect(() => {
     if (!mobileNavOpen) return
@@ -67,7 +99,7 @@ export function WlHomeV2Header({
       >
         {mobileNavOpen ?
           <X className="top-mobile-nav-icon" aria-hidden />
-        : <Menu className="top-mobile-nav-icon" aria-hidden />}
+        : <List className="top-mobile-nav-icon" aria-hidden />}
         <span className="sr-only">
           {mobileNavOpen ? "Close site menu" : "Open site menu"}
         </span>
@@ -104,32 +136,42 @@ export function WlHomeV2Header({
           .join(" ")}
         aria-label="Primary"
       >
-        <Link href="/wted" onClick={closeMobileNav}>
-          Radio
-        </Link>
-        <a
-          href={WL_HOME_V2_COMMUNITY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={closeMobileNav}
-        >
-          Community
-        </a>
-        <Link href="/archive" onClick={closeMobileNav}>
-          Archives
-        </Link>
-        <Link href="/support" onClick={closeMobileNav}>
-          Support
-        </Link>
-        <button
-          type="button"
-          className="top-nav-old-toggle"
-          aria-pressed={oldPathDebugActive}
-          title="Toggle /old/ in URL (compare legacy vs new)"
-          onClick={onOldPathDebugToggle}
-        >
-          OLD
-        </button>
+        <div className="top-nav-primary-row">
+          <Link href="/wted" onClick={closeMobileNav}>
+            Radio
+          </Link>
+          <a
+            href={WL_HOME_V2_COMMUNITY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={closeMobileNav}
+          >
+            Community
+          </a>
+          <a href="/archive" onClick={onArchivesNavClick}>
+            Archives
+          </a>
+          <Link href="/support" onClick={closeMobileNav}>
+            Support
+          </Link>
+          <button
+            type="button"
+            className="top-nav-old-toggle"
+            aria-pressed={oldPathDebugActive}
+            title="Toggle /old/ in URL (compare legacy vs new)"
+            onClick={onOldPathDebugToggle}
+          >
+            OLD
+          </button>
+        </div>
+        {isArchiveRoute ?
+          <Suspense fallback={null}>
+            <WlHomeV2ArchiveSubnavContent
+              className="wl-home-v2-archive-subnav--drawer md:hidden"
+              onNavigate={closeMobileNav}
+            />
+          </Suspense>
+        : null}
       </nav>
 
       <div className="top-user-menu">

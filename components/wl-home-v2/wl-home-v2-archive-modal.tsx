@@ -3,6 +3,7 @@
 import {
   Calendar,
   ChartBar,
+  LineSegments,
   ListNumbers,
   MapPin,
   MusicNote,
@@ -21,14 +22,7 @@ import {
   type ArchiveEntry,
 } from "@/app/(main)/old/archive/content"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
-
-/** Hub targets `/archive/...` (future routes); content still lists `/old/archive/...` for legacy. */
-function archiveHubHref(legacyHref: string): string {
-  if (legacyHref.startsWith("/old/archive")) {
-    return `/archive${legacyHref.slice("/old/archive".length)}`
-  }
-  return legacyHref
-}
+import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
 
 type PhosphorTileIcon = ComponentType<{
   className?: string
@@ -39,6 +33,7 @@ type PhosphorTileIcon = ComponentType<{
 
 const ARCHIVE_ICONS: Record<string, PhosphorTileIcon> = {
   Calendar,
+  LineSegments,
   MapPin,
   Music: MusicNote,
   BarChart3: ChartBar,
@@ -76,7 +71,7 @@ function ArchiveModalTile({
     !myStatsProfile.profilePhotoLoadFailed
 
   return (
-    <Link href={archiveHubHref(entry.href)} className="modal-archive-tile">
+    <Link href={archiveV2NavHref(entry.href)} className="modal-archive-tile">
       <span className="modal-archive-tile-top">
         <span className="modal-archive-tile-title">{entry.title}</span>
         {isMyStats && myStatsProfile ?
@@ -166,8 +161,13 @@ export function WlHomeV2ArchiveModal({
           <div className="modal-archive-hub-submit">
             <p className="modal-archive-hub-submit-text">
               Have setlist corrections, new shows, or other archive data to
-              contribute? <br />Use the Submit form to help keep the archive accurate
-              and up to date.
+              contribute?{" "}
+              <br
+                className="modal-archive-hub-submit-text-linebreak"
+                aria-hidden
+              />
+              Use the Submit form to help keep the archive accurate and up to
+              date.
             </p>
             <Link
               href="/archive/submit"

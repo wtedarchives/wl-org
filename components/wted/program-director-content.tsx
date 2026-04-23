@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Loader2 } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import {
@@ -12,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useProgramDirectorData } from "@/hooks/use-program-director-data"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
@@ -52,17 +52,7 @@ export function ProgramDirectorContent({
   if (loading) {
     if (isV2) {
       return (
-        <div className="flex flex-1 flex-col items-center justify-center px-4 py-20">
-          <div className="widget-panel flex min-w-[240px] items-center justify-center gap-3 px-5 py-4">
-            <Loader2
-              className="size-5 shrink-0 animate-spin text-[var(--wl-light-orange)]"
-              aria-hidden
-            />
-            <p className="text-sm text-white/80">
-              Loading program director data…
-            </p>
-          </div>
-        </div>
+        <WlHomeV2PageLoading message="Loading program director data…" />
       )
     }
     return <LoadingPageCard message="Loading program director data…" />

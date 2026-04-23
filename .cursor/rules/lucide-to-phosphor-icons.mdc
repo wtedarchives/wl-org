@@ -1,0 +1,59 @@
+---
+description: When porting UI to WL Home v2 / new layout, replace Lucide icons with Phosphor using the project map or ask for new mappings.
+globs: "**/*.{tsx,ts}"
+alwaysApply: false
+---
+
+# Lucide → Phosphor (WL / new layout conversions)
+
+When editing or migrating components toward the new homepage / WL Home v2 style, **do not add new `lucide-react` imports** for feature UI. Prefer **`@phosphor-icons/react`** (already in the project).
+
+## Established mappings (use these verbatim)
+
+| Lucide (import name) | Phosphor (`@phosphor-icons/react`) |
+|----------------------|-------------------------------------|
+| `AudioLines` | **`Broadcast`** (years / show tables — not `Waveform`; same target as `Radio`) |
+| `BarChart3Icon` | `ChartBarHorizontal` |
+| `Check` | `Check` |
+| `ChevronDown` | `CaretDown` |
+| `FileMusic` | `FileAudio` |
+| `Filter` | `Funnel` |
+| `History` | `ClockCounterClockwise` |
+| `ListFilter` | `FunnelSimple` |
+| `ListMusic` | `Playlist` |
+| `Loader2` | `CircleNotch` (keep `className` including `animate-spin` where used for spinners) |
+| `LogIn` | `SignIn` |
+| `LogOutIcon` | `SignOut` |
+| `MapPin` | `MapPin` |
+| `Menu` | `List` |
+| `MoveRight` | `ArrowRight` |
+| `Pencil` | `PencilSimple` |
+| `Radio` | `Broadcast` |
+| `Search` | `MagnifyingGlass` |
+| `Star` | `Star` |
+| `User` | `User` |
+| `Users` | `Users` |
+| `X` | `X` |
+
+**Notes**
+
+- Import PascalCase Phosphor components (e.g. `FunnelSimple`, `CircleNotch`).
+- Lucide **`strokeWidth`** / **`fill`** patterns → use Phosphor **`weight`** (`"regular"` \| `"bold"` \| `"fill"`, etc.) to match intent.
+- If a Lucide **`XIcon`** / **`CheckIcon`** appears in **shared shadcn primitives** (`components/ui/*`), treat UI-wide refactors separately unless the task explicitly includes them.
+
+## Unmapped Lucide symbols
+
+If the file uses a Lucide icon **not** in the table above:
+
+1. **Do not guess** a Phosphor equivalent.
+2. **Stop and ask the user** for the intended Phosphor icon name (and weight if relevant), then apply consistently.
+
+## Workflow
+
+1. Search the target file(s) for `from "lucide-react"` / `from 'lucide-react'`.
+2. Replace each symbol using the table; update JSX (`className`, drop Lucide-only props that Phosphor does not use).
+3. For any symbol missing from the table, compile a short list and ask the user before finishing.
+
+## Scope reminder
+
+This rule supports **incremental** conversion. Legacy routes and admin may still import Lucide until migrated; when touching those files for WL v2–related work, prefer switching icons per this doc.

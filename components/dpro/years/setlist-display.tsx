@@ -2,7 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
-import { MoveRight } from "lucide-react"
+import { ArrowRight } from "@phosphor-icons/react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getPlacementBarColor } from "@/lib/placement-bar-color"
@@ -52,7 +52,7 @@ export function SetlistDisplay({
 
         return (
           <React.Fragment key={`${entry.entry_song}-${index}`}>
-            {isNewSet && <hr className="my-1 border-border/70" />}
+            {isNewSet && <hr className="!my-1 border-border/70" />}
             <div className="flex items-center px-0 py-0 text-xs text-foreground">
               <div
                 className={`w-1 rounded-sm shrink-0 ${
@@ -62,7 +62,7 @@ export function SetlistDisplay({
               >
                 {"\u00A0"}
               </div>
-              <div className="flex flex-1 items-center justify-between pl-2">
+              <div className="flex flex-1 items-center justify-between !pl-2">
                 <span className="flex items-center gap-1">
                   <Link
                     href={getSongArchiveUrl(entry.songs.song_id)}
@@ -79,7 +79,7 @@ export function SetlistDisplay({
                     </span>
                   )}
                   {entry.entry_segue && (
-                    <MoveRight className="h-3 w-3 text-destructive" />
+                    <ArrowRight className="h-3 w-3 text-destructive" aria-hidden />
                   )}
                 </span>
                 <div className="flex items-center gap-2">

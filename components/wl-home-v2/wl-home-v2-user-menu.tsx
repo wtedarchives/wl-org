@@ -19,7 +19,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { BarChart3Icon, ChevronDown, LogIn, LogOutIcon, User } from "lucide-react"
+import {
+  CaretDown,
+  ChartBarHorizontal,
+  SignIn,
+  SignOut,
+  User,
+} from "@phosphor-icons/react"
 
 /**
  * Same account actions as {@link NavUser}; menu styled for the home page (see `.wl-home-v2-user-dropdown`).
@@ -97,7 +103,7 @@ export function WlHomeV2UserMenu({
           <span className="top-nav-user-trigger-label">
             {isLoggedIn ? "Profile" : "Log in"}
           </span>
-          <ChevronDown className="top-nav-user-chevron" aria-hidden />
+          <CaretDown className="top-nav-user-chevron" aria-hidden />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -132,7 +138,7 @@ export function WlHomeV2UserMenu({
                 href="/old/archive/profile/overview"
                 className="top-nav-dd-link flex cursor-pointer items-center gap-2"
               >
-                <BarChart3Icon className="top-nav-dd-icon size-4 shrink-0" />
+                <ChartBarHorizontal className="top-nav-dd-icon size-4 shrink-0" />
                 My Stats
               </Link>
             </DropdownMenuItem>
@@ -144,7 +150,7 @@ export function WlHomeV2UserMenu({
                 router.push("/")
               }}
             >
-              <LogOutIcon className="top-nav-dd-icon size-4 shrink-0" />
+              <SignOut className="top-nav-dd-icon size-4 shrink-0" />
               Sign Out
             </DropdownMenuItem>
           </>
@@ -154,7 +160,7 @@ export function WlHomeV2UserMenu({
               className="top-nav-dd-item flex cursor-pointer items-center gap-2"
               onClick={() => onOpenLogin()}
             >
-              <LogIn className="top-nav-dd-icon size-4 shrink-0" />
+              <SignIn className="top-nav-dd-icon size-4 shrink-0" />
               Sign In
             </DropdownMenuItem>
             <DropdownMenuItem

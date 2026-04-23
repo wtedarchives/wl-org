@@ -17,6 +17,9 @@ interface ToursCardProps {
   currentYear: string
   loading: boolean
   className?: string
+  wlHomeV2?: boolean
+  /** Hide panel title when wrapped in a modal that already shows the title. */
+  embedInModal?: boolean
 }
 
 export function ToursCard({
@@ -24,7 +27,62 @@ export function ToursCard({
   currentYear,
   loading,
   className,
+  wlHomeV2 = false,
+  embedInModal = false,
 }: ToursCardProps) {
+  const title =
+    currentYear ? `${currentYear} Tours` : "Tours"
+
+  if (wlHomeV2) {
+    return (
+      <div
+        className={cn(
+          "widget-panel",
+          embedInModal && "wl-home-v2-years-tool-popup-panel--tours",
+          className,
+        )}
+      >
+        {embedInModal ? null : (
+          <div className="wp-head">
+            <span>{title}</span>
+          </div>
+        )}
+        {loading ?
+          <div className="py-3 text-center text-xs text-white/55">
+            Loading tours…
+          </div>
+        : tours.length === 0 ?
+          <div className="py-3 text-center text-xs text-white/55">
+            No tours found.
+          </div>
+        : tours.map((tour) => {
+            const [label, countPart] = tour.tour_count.split(" (")
+            const countStr = countPart ? countPart.replace(")", "") : ""
+            return (
+              <Link
+                key={tour.tour_id || tour.tour_count}
+                href={getTourArchiveUrl(tour.tour_id)}
+                className="topic-row !items-center gap-2"
+              >
+                <span
+                  className="h-4 w-1 shrink-0 rounded-full"
+                  style={{ backgroundColor: tour.color }}
+                  aria-hidden
+                />
+                <span className="min-w-0 flex-1 text-[12px] font-medium leading-3">
+                  {label}
+                </span>
+                {countStr ?
+                  <span className="count">{countStr}</span>
+                : null}
+              </Link>
+            )
+          })
+        }
+      </div>
+    )
+  }
+
   return (
     <Card
       className={cn(
@@ -33,9 +91,7 @@ export function ToursCard({
       )}
     >
       <CardHeader className="border-b border-border/50 py-2">
-        <CardTitle className="text-sm font-semibold">
-          {currentYear ? `${currentYear} Tours` : "Tours"}
-        </CardTitle>
+        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (

@@ -22,7 +22,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   {
     title: "Tours",
     href: "/old/archive/tours",
-    icon: "MapPin",
+    icon: "LineSegments",
     description:
       "View setlists, song matrices, guest appearances, notable performances, and liberated songs for each tour.",
   },
