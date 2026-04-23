@@ -2,8 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
-import { Loader2Icon } from "lucide-react"
+import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import {
+  type WtedEpisodeHostEntry,
+  parseWtedEpisodeHosts,
+} from "@/lib/wted-episode-host"
 import {
   WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW,
   type WtedEpisodeRadioSyncRow,
@@ -33,8 +37,8 @@ export type SaveNewPlaylistEpisodePayload = {
   show: string
   order: number | null
   artwork: string | null
-  host: string | null
-  host_displayname: string | null
+  /** JSONB array of { name, handle }; `null` clears hosts. */
+  host: WtedEpisodeHostEntry[] | null
   status: string | null
 }
 
@@ -55,6 +59,16 @@ function mergeShowOptions(
   return [...set].sort((a, b) =>
     a.localeCompare(b, undefined, { sensitivity: "base" }),
   )
+}
+
+function hostsToPayloadRows(hosts: WtedEpisodeHostEntry[]) {
+  const rows = hosts
+    .map((h) => ({
+      name: h.name.trim(),
+      handle: h.handle.trim(),
+    }))
+    .filter((h) => h.name.length > 0 || h.handle.length > 0)
+  return rows.length > 0 ? rows : null
 }
 
 export function NewPlaylistEditDialog({
@@ -81,8 +95,7 @@ export function NewPlaylistEditDialog({
   const [show, setShow] = useState<string>(WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW)
   const [orderStr, setOrderStr] = useState("")
   const [artwork, setArtwork] = useState("")
-  const [host, setHost] = useState("")
-  const [hostDisplayname, setHostDisplayname] = useState("")
+  const [hosts, setHosts] = useState<WtedEpisodeHostEntry[]>([])
   const [status, setStatus] = useState("NEW")
 
   const loadShows = useCallback(async () => {
@@ -115,8 +128,7 @@ export function NewPlaylistEditDialog({
     setShow(row.show?.trim() || WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW)
     setOrderStr(row.order != null ? String(row.order) : "")
     setArtwork(row.artwork ?? "")
-    setHost(row.host ?? "")
-    setHostDisplayname(row.host_displayname ?? "")
+    setHosts(parseWtedEpisodeHosts(row.host))
     setStatus(row.status?.trim() || "NEW")
   }, [row])
 
@@ -132,8 +144,7 @@ export function NewPlaylistEditDialog({
       show: show.trim() || WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW,
       order: parseOrderInput(orderStr),
       artwork: artwork.trim() || null,
-      host: host.trim() || null,
-      host_displayname: hostDisplayname.trim() || null,
+      host: hostsToPayloadRows(hosts),
       status: status.trim() || null,
     })
     if (ok) onOpenChange(false)
@@ -255,28 +266,111 @@ export function NewPlaylistEditDialog({
               ) : null}
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="playlist-host">host</Label>
-              <Input
-                id="playlist-host"
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
-                disabled={updating}
-                className="min-h-10 md:min-h-9"
-                autoComplete="off"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="playlist-host-display">host_displayname</Label>
-              <Input
-                id="playlist-host-display"
-                value={hostDisplayname}
-                onChange={(e) => setHostDisplayname(e.target.value)}
-                disabled={updating}
-                className="min-h-10 md:min-h-9"
-                autoComplete="off"
-              />
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <Label>hosts (optional)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  disabled={updating}
+                  onClick={() =>
+                    setHosts((prev) => [...prev, { name: "", handle: "" }])
+                  }
+                >
+                  <PlusIcon className="mr-1 size-3.5" />
+                  Add host
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Stored as JSON: each host has a name and a handle (e.g.{" "}
+                <code className="rounded bg-muted px-1">@handle</code>). Leave
+                empty or remove all rows for no hosts.
+              </p>
+              {hosts.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No hosts — use &quot;Add host&quot; to add one.
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {hosts.map((h, i) => (
+                    <li
+                      key={i}
+                      className="rounded-md border bg-muted/20 p-2.5 transition-colors"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          Host {i + 1}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={updating}
+                          onClick={() =>
+                            setHosts((prev) => prev.filter((_, j) => j !== i))
+                          }
+                          aria-label={`Remove host ${i + 1}`}
+                        >
+                          <Trash2Icon className="size-3.5" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor={`playlist-host-name-${i}`}
+                            className="text-xs"
+                          >
+                            name
+                          </Label>
+                          <Input
+                            id={`playlist-host-name-${i}`}
+                            value={h.name}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              setHosts((prev) =>
+                                prev.map((row, j) =>
+                                  j === i ? { ...row, name: v } : row,
+                                ),
+                              )
+                            }}
+                            disabled={updating}
+                            placeholder="Tug Martin"
+                            className="min-h-9"
+                            autoComplete="off"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor={`playlist-host-handle-${i}`}
+                            className="text-xs"
+                          >
+                            handle
+                          </Label>
+                          <Input
+                            id={`playlist-host-handle-${i}`}
+                            value={h.handle}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              setHosts((prev) =>
+                                prev.map((row, j) =>
+                                  j === i ? { ...row, handle: v } : row,
+                                ),
+                              )
+                            }}
+                            disabled={updating}
+                            placeholder="@OldMansGOAT"
+                            className="min-h-9"
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="space-y-1.5">

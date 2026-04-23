@@ -13,8 +13,8 @@ export type WtedEpisodeRadioSyncRow = {
   display_name: string | null
   show: string
   order: number | null
-  host: string | null
-  host_displayname: string | null
+  /** `wted_episodes.host` JSONB — array of { name, handle } from PostgREST. */
+  host: unknown
 }
 
 export type RadioCoStudioPlaylist = {
@@ -28,7 +28,7 @@ export type RadioCoStudioPlaylist = {
 export const WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW = "Unsorted" as const
 
 export const WTED_EPISODE_RADIO_SYNC_SELECT =
-  "uuid, radio_id, episode, artwork, status, display_name, show, order, host, host_displayname" as const
+  "uuid, radio_id, episode, artwork, status, display_name, show, order, host" as const
 
 export async function fetchRadioCoPlaylists(
   accessToken: string,

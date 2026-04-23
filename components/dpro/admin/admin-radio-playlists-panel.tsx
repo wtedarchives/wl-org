@@ -98,7 +98,6 @@ export function AdminRadioPlaylistsPanel() {
           order: payload.order,
           artwork: payload.artwork,
           host: payload.host,
-          host_displayname: payload.host_displayname,
           status: payload.status,
         })
         .eq("uuid", uuid)

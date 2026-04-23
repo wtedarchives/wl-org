@@ -45,6 +45,7 @@ export const NAV_YEARS = [
   { year: "2024", year_id: "20765f62-5610-4d2d-b03a-8ddb307577f7" },
   { year: "2025", year_id: "6b13c0c8-3fdc-41bd-996b-f598bd18696e" },
   { year: "2026", year_id: "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445" },
+  { year: "2027", year_id: "c958893a-3d94-4824-be60-79036afe82b1" },
 ] as const
 
 export type FollowUsNetwork =
