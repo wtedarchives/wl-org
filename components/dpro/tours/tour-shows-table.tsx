@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Check, FileMusic, Users, AudioLines } from "lucide-react"
+import { Broadcast, Check, FileAudio, Users } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -12,7 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { TourShow } from "@/types/tour"
-import { useTourShowsSort, type TourSortColumn } from "@/hooks/use-tour-shows-sort"
+import { useTourShowsSort } from "@/hooks/use-tour-shows-sort"
+import { cn } from "@/lib/utils"
 import { TourShowRow } from "./tour-show-row"
 
 interface TourShowsTableProps {
@@ -24,6 +25,7 @@ interface TourShowsTableProps {
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
   loading: boolean
+  wlHomeV2?: boolean
 }
 
 export function TourShowsTable({
@@ -35,6 +37,7 @@ export function TourShowsTable({
   showsWithReleases,
   showsWithRadioIds,
   loading,
+  wlHomeV2 = false,
 }: TourShowsTableProps) {
   const { user } = useAuth()
   const hasRarity = shows.some((s) => s.show_rarity != null && s.show_rarity !== "")
@@ -46,6 +49,28 @@ export function TourShowsTable({
   )
 
   if (loading) {
+    const inner = (
+      <div
+        className={cn(
+          "flex items-center justify-center px-4 py-8 text-xs",
+          wlHomeV2 ? "text-white/55" : "text-muted-foreground",
+        )}
+      >
+        Loading tour…
+      </div>
+    )
+    if (wlHomeV2) {
+      return (
+        <div className="widget-panel wl-home-v2-years-shows-panel">
+          <div className="wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head flex shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="wp-head-date min-w-0 truncate">
+              {currentTour || "Tour"}
+            </span>
+          </div>
+          {inner}
+        </div>
+      )
+    }
     return (
       <Card className="ring-0 border border-border/60 bg-card/80 py-0">
         <CardContent className="flex items-center justify-center px-4 py-8 text-xs text-muted-foreground">
@@ -56,12 +81,243 @@ export function TourShowsTable({
   }
 
   if (!loading && shows.length === 0) {
+    const emptyBody = <>No shows found for {currentTour}.</>
+    if (wlHomeV2) {
+      return (
+        <div className="widget-panel wl-home-v2-years-shows-panel">
+          <div className="wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head flex shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="wp-head-date min-w-0 truncate">{currentTour}</span>
+            <span className="shrink-0 tabular-nums">0 shows</span>
+          </div>
+          <div className="px-1 py-4 text-center text-xs text-white/65">
+            {emptyBody}
+          </div>
+        </div>
+      )
+    }
     return (
       <Card className="ring-0 border border-border/60 bg-card/80 py-0">
         <CardContent className="px-4 py-6 text-center text-xs text-muted-foreground">
-          No shows found for {currentTour}.
+          {emptyBody}
         </CardContent>
       </Card>
+    )
+  }
+
+  const headCell = wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1"
+  const headCellTight = wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1"
+
+  const table = (
+    <div
+      className={cn(wlHomeV2 && "wl-home-v2-years-table-scroll min-h-0 flex-1")}
+    >
+      <Table
+        className={cn(
+          "min-w-max text-[11px]",
+          wlHomeV2 && "wl-home-v2-years-table",
+        )}
+      >
+        <TableHeader>
+          <TableRow
+            className={cn(
+              wlHomeV2 ?
+                "border-b border-white/10 bg-black/25 hover:bg-black/25"
+              : "bg-muted/60",
+            )}
+          >
+            <TableHead
+              className={cn(
+                "w-[68px] cursor-pointer text-center text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("show_date")}
+            >
+              <span>Date</span>{" "}
+              <span className="text-[9px]">{sortIndicator("show_date")}</span>
+            </TableHead>
+            {user ? (
+              <TableHead
+                className={cn(
+                  "w-[32px] text-center text-[11px] font-medium",
+                  headCellTight,
+                )}
+              >
+                <div className="flex w-full items-center justify-center">
+                  <Check className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+                </div>
+              </TableHead>
+            ) : null}
+            <TableHead
+              className={cn(
+                "cursor-pointer text-left text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("show_group")}
+            >
+              <span>Group</span>{" "}
+              <span className="text-[9px]">{sortIndicator("show_group")}</span>
+            </TableHead>
+            <TableHead
+              className={cn(
+                "cursor-pointer text-center text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("show_length")}
+            >
+              <span>Length</span>{" "}
+              <span className="text-[9px]">{sortIndicator("show_length")}</span>
+            </TableHead>
+            {hasRarity ? (
+              <TableHead
+                className={cn(
+                  "cursor-pointer text-center text-[11px] font-medium",
+                  headCell,
+                )}
+                onClick={() => handleSort("show_rarity")}
+              >
+                <span>Rarity</span>{" "}
+                <span className="text-[9px]">{sortIndicator("show_rarity")}</span>
+              </TableHead>
+            ) : null}
+            {hasGap ? (
+              <TableHead
+                className={cn(
+                  "cursor-pointer text-center text-[11px] font-medium",
+                  headCell,
+                )}
+                onClick={() => handleSort("show_gap")}
+              >
+                <span>Gap</span>{" "}
+                <span className="text-[9px]">{sortIndicator("show_gap")}</span>
+              </TableHead>
+            ) : null}
+            <TableHead
+              className={cn(
+                "cursor-pointer text-left text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("show_subvenue")}
+            >
+              <span>Venue</span>{" "}
+              <span className="text-[9px]">{sortIndicator("show_subvenue")}</span>
+            </TableHead>
+            <TableHead
+              className={cn(
+                "cursor-pointer text-left text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("show_venue_location")}
+            >
+              <span>Location</span>{" "}
+              <span className="text-[9px]">
+                {sortIndicator("show_venue_location")}
+              </span>
+            </TableHead>
+            <TableHead
+              className={cn(
+                "cursor-pointer text-center text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("rating")}
+            >
+              <span>Rating</span>{" "}
+              <span className="text-[9px]">{sortIndicator("rating")}</span>
+            </TableHead>
+            <TableHead
+              className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
+            >
+              <div className="flex w-full items-center justify-center">
+                <FileAudio className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+              </div>
+            </TableHead>
+            <TableHead
+              className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
+            >
+              <div className="flex w-full items-center justify-center">
+                <Broadcast className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+              </div>
+            </TableHead>
+            <TableHead
+              className={cn(
+                "w-[32px] cursor-pointer text-center text-[11px] font-medium",
+                headCellTight,
+              )}
+              onClick={() => handleSort("attendee_count")}
+            >
+              <div className="flex w-full items-center justify-center">
+                <Users className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+              </div>
+            </TableHead>
+            <TableHead
+              className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
+            >
+              <div className="flex w-full items-center justify-center">
+                <Image
+                  src="/WL.png"
+                  alt="Wysteria Lane"
+                  width={12}
+                  height={12}
+                  className="h-3 w-auto shrink-0"
+                />
+              </div>
+            </TableHead>
+            <TableHead
+              className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
+            >
+              <div className="flex w-full items-center justify-center">
+                <Image
+                  src="/WTED2.png"
+                  alt="WTED Goose Radio"
+                  width={12}
+                  height={12}
+                  className="h-3 w-auto shrink-0"
+                />
+              </div>
+            </TableHead>
+            <TableHead
+              className={cn(
+                "cursor-pointer text-left text-[11px] font-medium",
+                headCell,
+              )}
+              onClick={() => handleSort("show_detail")}
+            >
+              <span>Detail</span>{" "}
+              <span className="text-[9px]">{sortIndicator("show_detail")}</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedShows.map((show, index) => (
+            <TourShowRow
+              key={show.show_id}
+              show={show}
+              index={index}
+              attendeeCounts={attendeeCounts}
+              showRatings={showRatings}
+              showsWithSetlists={showsWithSetlists}
+              showsWithReleases={showsWithReleases}
+              showsWithRadioIds={showsWithRadioIds}
+              showRarityColumn={hasRarity}
+              showGapColumn={hasGap}
+              wlHomeV2={wlHomeV2}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+
+  if (wlHomeV2) {
+    return (
+      <div className="widget-panel wl-home-v2-years-shows-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head flex shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="wp-head-date min-w-0 truncate">{currentTour}</span>
+          <span className="shrink-0 tabular-nums">
+            {shows.length} {shows.length === 1 ? "show" : "shows"}
+          </span>
+        </div>
+        {table}
+      </div>
     )
   }
 
@@ -73,137 +329,7 @@ export function TourShowsTable({
           {shows.length} {shows.length === 1 ? "Show" : "Shows"}
         </span>
       </div>
-      <CardContent className="p-0">
-        <Table className="min-w-max text-[11px]">
-          <TableHeader>
-            <TableRow className="bg-muted/60">
-              <TableHead
-                className="w-[68px] cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                onClick={() => handleSort("show_date")}
-              >
-                <span>Date</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_date")}</span>
-              </TableHead>
-              {user ? (
-                <TableHead className="w-[28px] px-1 py-1 text-center text-[11px] font-medium">
-                  <Check className="mx-auto size-3 text-muted-foreground" />
-                </TableHead>
-              ) : null}
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-left text-[11px] font-medium"
-                onClick={() => handleSort("show_group")}
-              >
-                <span>Group</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_group")}</span>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                onClick={() => handleSort("show_length")}
-              >
-                <span>Length</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_length")}</span>
-              </TableHead>
-              {hasRarity ? (
-                <TableHead
-                  className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                  onClick={() => handleSort("show_rarity")}
-                >
-                  <span>Rarity</span>{" "}
-                  <span className="text-[9px]">{sortIndicator("show_rarity")}</span>
-                </TableHead>
-              ) : null}
-              {hasGap ? (
-                <TableHead
-                  className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                  onClick={() => handleSort("show_gap")}
-                >
-                  <span>Gap</span>{" "}
-                  <span className="text-[9px]">{sortIndicator("show_gap")}</span>
-                </TableHead>
-              ) : null}
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-left text-[11px] font-medium"
-                onClick={() => handleSort("show_subvenue")}
-              >
-                <span>Venue</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_subvenue")}</span>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-left text-[11px] font-medium"
-                onClick={() => handleSort("show_venue_location")}
-              >
-                <span>Location</span>{" "}
-                <span className="text-[9px]">
-                  {sortIndicator("show_venue_location")}
-                </span>
-              </TableHead>
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-center text-[11px] font-medium"
-                onClick={() => handleSort("rating")}
-              >
-                <span>Rating</span>{" "}
-                <span className="text-[9px]">{sortIndicator("rating")}</span>
-              </TableHead>
-              <TableHead className="w-[28px] px-1 py-1 text-center text-[11px] font-medium">
-                <FileMusic className="mx-auto size-3 text-muted-foreground" />
-              </TableHead>
-              <TableHead className="w-[28px] px-1 py-1 text-center text-[11px] font-medium">
-                <AudioLines className="mx-auto size-3 text-muted-foreground" />
-              </TableHead>
-              <TableHead
-                className="w-[32px] cursor-pointer px-1 py-1 text-center text-[11px] font-medium"
-                onClick={() => handleSort("attendee_count")}
-              >
-                <Users className="mx-auto mb-0.5 size-3 text-muted-foreground" />
-                <span className="text-[9px]">
-                  {sortIndicator("attendee_count")}
-                </span>
-              </TableHead>
-              <TableHead className="w-[28px] px-1 py-1 text-center text-[11px] font-medium">
-                <Image
-                  src="/WL.png"
-                  alt="Wysteria Lane"
-                  width={12}
-                  height={12}
-                  className="mx-auto h-3 w-auto"
-                />
-              </TableHead>
-              <TableHead className="w-[28px] px-1 py-1 text-center text-[11px] font-medium">
-                <Image
-                  src="/WTED2.png"
-                  alt="WTED Goose Radio"
-                  width={12}
-                  height={12}
-                  className="mx-auto h-3 w-auto"
-                />
-              </TableHead>
-              <TableHead
-                className="cursor-pointer px-2 py-1 text-left text-[11px] font-medium"
-                onClick={() => handleSort("show_detail")}
-              >
-                <span>Detail</span>{" "}
-                <span className="text-[9px]">{sortIndicator("show_detail")}</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedShows.map((show, index) => (
-              <TourShowRow
-                key={show.show_id}
-                show={show}
-                index={index}
-                attendeeCounts={attendeeCounts}
-                showRatings={showRatings}
-                showsWithSetlists={showsWithSetlists}
-                showsWithReleases={showsWithReleases}
-                showsWithRadioIds={showsWithRadioIds}
-                showRarityColumn={hasRarity}
-                showGapColumn={hasGap}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
+      <CardContent className="p-0">{table}</CardContent>
     </Card>
   )
 }

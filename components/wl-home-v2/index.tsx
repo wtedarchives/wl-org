@@ -19,6 +19,7 @@ import "./wl-home-v2.css"
 import { SubmitModalHandler } from "@/components/submit-modal-handler"
 
 import { WlHomeV2ArchiveModal } from "./wl-home-v2-archive-modal"
+import { WlHomeV2RadioModal } from "./wl-home-v2-radio-modal"
 import { WlHomeV2ArchiveSubnav } from "./wl-home-v2-archive-subnav"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
 import { WlHomeV2ForgotPasswordModal } from "./wl-home-v2-forgot-password-modal"
@@ -79,6 +80,9 @@ export function WlHomeV2({
 
   const [archiveOpen, setArchiveOpen] = useState(archiveModalInitiallyOpen)
   const archiveHeadingId = useId()
+
+  const [radioOpen, setRadioOpen] = useState(false)
+  const radioHeadingId = useId()
 
   const [tweaksOpen, setTweaksOpen] = useState(false)
 
@@ -154,7 +158,8 @@ export function WlHomeV2({
       !loginOpen &&
       !forgotOpen &&
       !signupOpen &&
-      !archiveOpen
+      !archiveOpen &&
+      !radioOpen
     )
       return
     function onKey(e: KeyboardEvent) {
@@ -165,6 +170,7 @@ export function WlHomeV2({
       setForgotOpen(false)
       setSignupOpen(false)
       closeArchiveModal()
+      setRadioOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
@@ -175,6 +181,7 @@ export function WlHomeV2({
     forgotOpen,
     signupOpen,
     archiveOpen,
+    radioOpen,
     closeArchiveModal,
   ])
 
@@ -190,6 +197,7 @@ export function WlHomeV2({
             setSignupOpen(true)
           }}
           onOpenArchive={() => setArchiveOpen(true)}
+          onOpenRadio={() => setRadioOpen(true)}
         />
 
         <Suspense fallback={null}>
@@ -256,6 +264,12 @@ export function WlHomeV2({
         open={archiveOpen}
         onClose={closeArchiveModal}
         headingId={archiveHeadingId}
+      />
+      <WlHomeV2RadioModal
+        open={radioOpen}
+        onClose={() => setRadioOpen(false)}
+        headingId={radioHeadingId}
+        onRequestSong={() => setRequestOpen(true)}
       />
       <Suspense fallback={null}>
         <SubmitModalHandler />

@@ -12,7 +12,7 @@
 
 # Exact legacy archive index URLs → /old/archive/…
 # /archive/years → new WTED grid page (Next static route)
-/archive/tours  /old/archive/tours  301
+# /archive/tours → new WTED grid page (Next static route)
 /archive/songs  /old/archive/songs  301
 /archive/stats  /old/archive/stats  301
 /archive/personnel  /old/archive/personnel  301
@@ -35,6 +35,9 @@
 /archive/profile/slots  /old/archive/profile/slots  301
 /archive/profile/personnel  /old/archive/profile/personnel  301
 /archive/profile/loose-ends  /old/archive/profile/loose-ends  301
+
+# Legacy tours shell → canonical `/archive/tours` (query string preserved)
+/old/archive/tours  /archive/tours  301
 
 # No splat/wildcard rules here: `/archive/.../segment` URLs either hit a real Next
 # route when migrated or 404, so redirects to `/old/archive` are not mistaken for

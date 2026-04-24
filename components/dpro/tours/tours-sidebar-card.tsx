@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { CaretDown, CaretRight } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import {
   Card,
@@ -25,6 +25,7 @@ interface ToursSidebarCardProps {
   onTourSelect?: (tourId: string) => void
   loading: boolean
   className?: string
+  wlHomeV2?: boolean
 }
 
 export function ToursSidebarCard({
@@ -35,6 +36,7 @@ export function ToursSidebarCard({
   onTourSelect,
   loading,
   className,
+  wlHomeV2 = false,
 }: ToursSidebarCardProps) {
   const toursByYear = tours.reduce<Record<string, Tour[]>>((acc, tour) => {
     const year = extractYear(tour.tour)
@@ -52,6 +54,75 @@ export function ToursSidebarCard({
   sortedYears.forEach((year) => {
     toursByYear[year].sort((a, b) => a.tour_canonid - b.tour_canonid)
   })
+
+  if (wlHomeV2) {
+    return (
+      <div className={cn("widget-panel", className)}>
+        <div className="wp-head">
+          <span>Tours</span>
+        </div>
+        {loading ?
+          <div className="py-3 text-center text-xs text-white/55">
+            Loading tours…
+          </div>
+        : sortedYears.length === 0 ?
+          <div className="py-3 text-center text-xs text-white/55">
+            No tours found.
+          </div>
+        : (
+          <div className="divide-y divide-white/10">
+            {sortedYears.map((year) => {
+              const isExpanded = expandedYear === year
+              const yearTours = toursByYear[year]
+              return (
+                <div key={year}>
+                  <button
+                    type="button"
+                    onClick={() => onToggleYear(year)}
+                    className="flex w-full items-center justify-between px-2 py-1.5 text-left text-xs text-white/90 transition-colors hover:bg-white/5"
+                  >
+                    <span className="font-medium">{year}</span>
+                    {isExpanded ?
+                      <CaretDown className="size-3 shrink-0 opacity-80" aria-hidden />
+                    : <CaretRight className="size-3 shrink-0 opacity-80" aria-hidden />}
+                  </button>
+                  <div
+                    className="grid transition-[grid-template-rows] duration-200 ease-out"
+                    style={{
+                      gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                    }}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="pb-1">
+                        {yearTours.map((tour) => {
+                          const isCurrent = currentTourId === tour.tour_id
+                          return (
+                            <div key={tour.tour_id} className="pl-3">
+                              <Link
+                                href={getTourArchiveUrl(tour.tour_id)}
+                                onClick={() => onTourSelect?.(tour.tour_id)}
+                                className={cn(
+                                  "topic-row !items-center !py-1.5 text-[12px] font-medium leading-tight",
+                                  isCurrent &&
+                                    "border-[rgba(88,200,174,0.45)] bg-[rgba(88,200,174,0.12)]",
+                                )}
+                              >
+                                <span className="min-w-0 flex-1">{tour.tour}</span>
+                              </Link>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <Card
@@ -85,11 +156,9 @@ export function ToursSidebarCard({
                     className="w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-muted/50 transition-colors"
                   >
                     <span className="font-medium">{year}</span>
-                    {isExpanded ? (
-                      <ChevronDown className="size-3 shrink-0" />
-                    ) : (
-                      <ChevronRight className="size-3 shrink-0" />
-                    )}
+                    {isExpanded ?
+                      <CaretDown className="size-3 shrink-0" aria-hidden />
+                    : <CaretRight className="size-3 shrink-0" aria-hidden />}
                   </button>
                   <div
                     className="grid transition-[grid-template-rows] duration-200 ease-out"

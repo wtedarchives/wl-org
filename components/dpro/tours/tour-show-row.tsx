@@ -5,7 +5,13 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
 import Image from "next/image"
-import { Check, FileMusic, Star, AudioLines } from "lucide-react"
+import {
+  Broadcast,
+  Check,
+  FileAudio,
+  Star,
+} from "@phosphor-icons/react"
+import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-context"
 import {
   TableCell,
@@ -34,7 +40,8 @@ function RatingStars({ rating }: { rating: number }) {
           <Star
             key={star}
             className="size-3 text-muted-foreground/30"
-            strokeWidth={1.75}
+            weight="regular"
+            aria-hidden
           />
         ))}
       </div>
@@ -52,13 +59,18 @@ function RatingStars({ rating }: { rating: number }) {
             <div key={starNumber} className="relative size-3">
               <Star
                 className="size-3 text-yellow-400/40"
-                strokeWidth={1.75}
+                weight="regular"
+                aria-hidden
               />
               <div
                 className="absolute inset-0 overflow-hidden"
                 style={{ width: `${fillPercentage * 100}%` }}
               >
-                <Star className="size-3 text-yellow-400" fill="currentColor" />
+                <Star
+                  className="size-3 text-yellow-400"
+                  weight="fill"
+                  aria-hidden
+                />
               </div>
             </div>
           )
@@ -81,6 +93,7 @@ export interface TourShowRowProps {
   showsWithRadioIds: Set<string>
   showRarityColumn?: boolean
   showGapColumn?: boolean
+  wlHomeV2?: boolean
 }
 
 export function TourShowRow({
@@ -93,14 +106,28 @@ export function TourShowRow({
   showsWithRadioIds,
   showRarityColumn = true,
   showGapColumn = true,
+  wlHomeV2 = false,
 }: TourShowRowProps) {
   const { user } = useAuth()
   const rating = showRatings[show.show_id] ?? 0
   const attendeeCount = attendeeCounts[show.show_id] ?? 0
 
   return (
-    <TableRow className={index % 2 === 0 ? "bg-background/70" : "bg-background"}>
-      <TableCell className="whitespace-nowrap px-2 py-1 text-center text-[11px] font-medium tabular-nums">
+    <TableRow
+      className={cn(
+        wlHomeV2 ?
+          "border-b border-white/[0.06] bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+        : index % 2 === 0 ?
+          "bg-background/70"
+        : "bg-background",
+      )}
+    >
+      <TableCell
+        className={cn(
+          "whitespace-nowrap text-center text-[11px] font-medium tabular-nums",
+          wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
+        )}
+      >
         <Link
           href={getSetlistArchiveUrl(show.show_id)}
           className="hover:underline"
@@ -109,29 +136,58 @@ export function TourShowRow({
         </Link>
       </TableCell>
       {user ? (
-        <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+        <TableCell
+          className={cn(
+            "w-[32px] text-center align-middle leading-none",
+            wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+          )}
+        >
           <div className="inline-flex items-center justify-center">
             {show.attended ? (
-              <div className="inline-flex items-center justify-center rounded-full bg-emerald-600 p-0.5">
-                <Check className="size-3 text-white" strokeWidth={3} />
+              <div
+                className={cn(
+                  "inline-flex items-center justify-center rounded-full bg-emerald-600",
+                  wlHomeV2 ? "size-4" : "p-0.5",
+                )}
+              >
+                <Check
+                  className={cn("text-white", wlHomeV2 ? "size-3" : "size-3")}
+                  weight="bold"
+                  aria-hidden
+                />
               </div>
             ) : (
-              <span className="inline-block size-3" aria-hidden />
+              <span
+                className={cn("inline-block", wlHomeV2 ? "size-4" : "size-3")}
+                aria-hidden
+              />
             )}
           </div>
         </TableCell>
       ) : null}
-      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+      <TableCell
+        className={cn(
+          "text-[11px] text-muted-foreground",
+          wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
+        )}
+      >
         {show.show_group}
       </TableCell>
-      <TableCell className="px-2 py-1 text-center text-[11px] tabular-nums">
+      <TableCell
+        className={cn(
+          "text-center text-[11px] tabular-nums",
+          wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
+        )}
+      >
         {formatLengthAsHmmss(show.show_length ?? null) ?? ""}
       </TableCell>
       {showRarityColumn ? (
-        <TableCell className="px-2 py-1 text-center">
+        <TableCell
+          className={cn("text-center", wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1")}
+        >
           {show.show_rarity ? (
             <span
-              className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
+              className="inline-block rounded !px-1.5 !py-[1px] text-[11px] font-medium text-white"
               style={{ backgroundColor: getRarityColor(show.show_rarity) }}
             >
               {show.show_rarity}
@@ -140,10 +196,12 @@ export function TourShowRow({
         </TableCell>
       ) : null}
       {showGapColumn ? (
-        <TableCell className="px-2 py-1 text-center">
+        <TableCell
+          className={cn("text-center", wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1")}
+        >
           {show.show_gap ? (
             <span
-              className="inline-block rounded px-1.5 py-[1px] text-[11px] font-medium text-white"
+              className="inline-block rounded !px-1.5 !py-[1px] text-[11px] font-medium text-white"
               style={{ backgroundColor: getGapColor(show.show_gap) }}
             >
               {show.show_gap}
@@ -151,7 +209,9 @@ export function TourShowRow({
           ) : null}
         </TableCell>
       ) : null}
-      <TableCell className="px-2 py-1 text-[11px]">
+      <TableCell
+        className={cn("text-[11px]", wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1")}
+      >
         {show.venue_id ? (
           <Link
             href={getVenueArchiveUrl(show.venue_id)}
@@ -170,15 +230,30 @@ export function TourShowRow({
           <span>{show.show_subvenue}</span>
         )}
       </TableCell>
-      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+      <TableCell
+        className={cn(
+          "text-[11px] text-muted-foreground",
+          wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
+        )}
+      >
         {show.show_venue_location}
       </TableCell>
-      <TableCell className="group px-2 py-1 text-center align-middle leading-none">
+      <TableCell
+        className={cn(
+          "group text-center align-middle leading-none",
+          wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
+        )}
+      >
         <div className="inline-flex items-center justify-center">
           <RatingStars rating={rating} />
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell
+        className={cn(
+          "w-[32px] text-center align-middle leading-none",
+          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+        )}
+      >
         <div className="inline-flex items-center justify-center">
           {showsWithSetlists.has(show.show_id) ? (
             <TooltipProvider>
@@ -189,7 +264,7 @@ export function TourShowRow({
                     aria-label="View setlist"
                     className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                   >
-                    <FileMusic className="size-3.5" />
+                    <FileAudio className="size-3.5" aria-hidden />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -202,7 +277,12 @@ export function TourShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell
+        className={cn(
+          "w-[32px] text-center align-middle leading-none",
+          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+        )}
+      >
         <div className="inline-flex items-center justify-center">
           {showsWithReleases.has(show.show_id) ? (
             <TooltipProvider>
@@ -213,7 +293,7 @@ export function TourShowRow({
                     aria-label="View releases"
                     className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
                   >
-                    <AudioLines className="size-3.5" />
+                    <Broadcast className="size-3.5" aria-hidden />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -226,12 +306,22 @@ export function TourShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="w-[32px] px-1 py-1 text-center align-middle text-[11px] font-medium leading-none">
+      <TableCell
+        className={cn(
+          "w-[32px] text-center align-middle text-[11px] font-medium leading-none",
+          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+        )}
+      >
         <div className="inline-flex items-center justify-center">
           {attendeeCount > 0 ? attendeeCount : ""}
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell
+        className={cn(
+          "w-[32px] text-center align-middle leading-none",
+          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+        )}
+      >
         <div className="inline-flex items-center justify-center">
           {show.show_wl_link ? (
             <TooltipProvider>
@@ -265,7 +355,12 @@ export function TourShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="w-[28px] px-1 py-1 text-center align-middle leading-none">
+      <TableCell
+        className={cn(
+          "w-[32px] text-center align-middle leading-none",
+          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+        )}
+      >
         <div className="inline-flex items-center justify-center">
           {showsWithRadioIds.has(show.show_id) ? (
             <TooltipProvider>
@@ -295,7 +390,12 @@ export function TourShowRow({
           )}
         </div>
       </TableCell>
-      <TableCell className="px-2 py-1 text-[11px] text-muted-foreground">
+      <TableCell
+        className={cn(
+          "text-[11px] text-muted-foreground",
+          wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
+        )}
+      >
         {show.show_detail}
         {show.show_detail && show.show_alert ? <>&nbsp;&nbsp;</> : null}
         {show.show_alert ? (

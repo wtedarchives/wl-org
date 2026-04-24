@@ -1,8 +1,7 @@
 /**
- * Canonical Setlist Archive URL for a tour. Uses query param `id` so new tours
- * work without redeploying static export; legacy `/old/archive/tours/:tour_id` URLs
- * redirect via `public/_redirects` on Netlify.
+ * Canonical Setlist Archive URL for a tour (new site: `/archive/tours?id=`).
+ * Legacy `/old/archive/tours` remains until fully retired.
  */
 export function getTourArchiveUrl(tourId: string): string {
-  return `/old/archive/tours?id=${encodeURIComponent(tourId)}`
+  return `/archive/tours?id=${encodeURIComponent(tourId)}`
 }

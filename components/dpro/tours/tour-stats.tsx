@@ -10,6 +10,7 @@ import { GuestAppearances } from "./guest-appearances"
 import type { TourShow } from "@/types/tour"
 import type { SlotData } from "@/types/tour"
 import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
+import { cn } from "@/lib/utils"
 
 interface TourStatsProps {
   shows: TourShow[]
@@ -26,6 +27,7 @@ interface TourStatsProps {
   hasTourSetlistEntries: boolean
   onSongClick: (songName: string, songDisplayName?: string | null) => void
   notPlayedSongs?: NotPlayedSong[]
+  wlHomeV2?: boolean
 }
 
 export function TourStats({
@@ -43,16 +45,21 @@ export function TourStats({
   hasTourSetlistEntries,
   onSongClick,
   notPlayedSongs,
+  wlHomeV2 = false,
 }: TourStatsProps) {
   const showIds = shows.map((s) => s.show_id)
   const isMobile = windowWidth < 1280
 
   if (!hasTourSetlistEntries) return null
 
-  return (
+  const sep = wlHomeV2 ? "" : "mt-4"
+
+  const inner = (
     <>
       {/* Row 1: Song spread (left), Longest Songs + Top Returning (right) */}
-      <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+      <div
+        className={cn("grid grid-cols-1 xl:grid-cols-2 gap-4 items-start", sep)}
+      >
         <TourSongSpread shows={shows} />
         <div className="flex flex-col gap-4">
           <div className="self-start w-full">
@@ -76,7 +83,7 @@ export function TourStats({
 
       {/* Row 2: Tour slots carousel – all four on one line */}
       {topSlots.length > 0 && (
-        <div className="mt-4">
+        <div className={sep}>
           <TopSlotsCarousel
             slots={topSlots}
             isMobile={isMobile}
@@ -89,7 +96,7 @@ export function TourStats({
 
       {/* Row 3: Most common not played + Guest appearances */}
       {currentTourShowFields && (
-        <div className="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+        <div className={cn("grid grid-cols-1 xl:grid-cols-2 gap-4 items-start", sep)}>
           <NotPlayedInTour
             tourId={currentTourId}
             tourName={currentTour}
@@ -106,7 +113,7 @@ export function TourStats({
       )}
 
       {/* Row 4+: Remaining cards */}
-      <div className="mt-4">
+      <div className={sep}>
         <TourSongsCombined
           shows={shows}
           songIdMap={songIdMap}
@@ -118,4 +125,12 @@ export function TourStats({
       </div>
     </>
   )
+
+  if (wlHomeV2) {
+    return (
+      <div className="flex min-w-0 flex-col gap-4">{inner}</div>
+    )
+  }
+
+  return inner
 }

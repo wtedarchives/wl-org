@@ -26,11 +26,14 @@ export function WlHomeV2Header({
   onOpenLogin,
   onOpenSignup,
   onOpenArchive,
+  onOpenRadio,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
   /** Open the archive hub modal without leaving the current route (primary click). */
   onOpenArchive: () => void
+  /** Open the WTED Radio hub modal (primary click). */
+  onOpenRadio: () => void
 }) {
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
@@ -55,6 +58,24 @@ export function WlHomeV2Header({
       closeMobileNav()
     },
     [onOpenArchive, closeMobileNav],
+  )
+
+  const onRadioNavClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>) => {
+      if (
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return
+      }
+      e.preventDefault()
+      onOpenRadio()
+      closeMobileNav()
+    },
+    [onOpenRadio, closeMobileNav],
   )
 
   const onOldPathDebugToggle = useCallback(() => {
@@ -137,9 +158,9 @@ export function WlHomeV2Header({
         aria-label="Primary"
       >
         <div className="top-nav-primary-row">
-          <Link href="/wted" onClick={closeMobileNav}>
+          <a href="/wted/program-director" onClick={onRadioNavClick}>
             Radio
-          </Link>
+          </a>
           <a
             href={WL_HOME_V2_COMMUNITY_URL}
             target="_blank"
