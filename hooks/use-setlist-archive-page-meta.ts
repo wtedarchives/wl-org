@@ -11,6 +11,25 @@ import {
 } from "@/components/setlist-breadcrumb-context"
 import type { Show } from "@/types/setlist"
 
+/** Same trail as `/old/archive/setlist` header crumbs; `archivesRoot` chooses legacy vs v2 hub link. */
+export function buildSetlistArchiveBreadcrumbItems(
+  archivesRoot: BreadcrumbItem,
+  show: Show,
+  yearId: string,
+): BreadcrumbItem[] {
+  const dateLabel = formatSetlistDate(show.show_date)
+  const tourLabel = show.show_tour ?? "Tour"
+  const lastLabel = show.show_venue_location
+    ? `${dateLabel} – ${show.show_venue_location}`
+    : dateLabel
+  return [
+    archivesRoot,
+    { label: show.show_date.slice(0, 4), href: getYearArchiveUrl(yearId) },
+    { label: tourLabel, href: getTourArchiveUrl(show.tour_id) },
+    { label: lastLabel, href: getSetlistArchiveUrl(show.show_id) },
+  ]
+}
+
 export function useSetlistArchiveBreadcrumbs(
   show: Show | null | undefined,
   yearId: string | null,
@@ -21,22 +40,23 @@ export function useSetlistArchiveBreadcrumbs(
       setSetlistBreadcrumbs(null)
       return
     }
-    const dateLabel = formatSetlistDate(show.show_date)
-    const tourLabel = show.show_tour ?? "Tour"
-    const lastLabel = show.show_venue_location
-      ? `${dateLabel} – ${show.show_venue_location}`
-      : dateLabel
-    setSetlistBreadcrumbs([
-      WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: show.show_date.slice(0, 4), href: getYearArchiveUrl(yearId) },
-      { label: tourLabel, href: getTourArchiveUrl(show.tour_id) },
-      { label: lastLabel, href: getSetlistArchiveUrl(show.show_id) },
-    ])
+    setSetlistBreadcrumbs(
+      buildSetlistArchiveBreadcrumbItems(
+        WTED_ARCHIVES_BREADCRUMB_ROOT,
+        show,
+        yearId,
+      ),
+    )
     return () => setSetlistBreadcrumbs(null)
   }, [show, yearId, setSetlistBreadcrumbs])
 }
 
-export function useSetlistArchiveDocumentTitle(show: Show | null | undefined) {
+export function useSetlistArchiveDocumentTitle(
+  show: Show | null | undefined,
+  options?: { titleSuffix?: string },
+) {
+  const titleSuffix = options?.titleSuffix ?? "WysteriaLane.org"
+
   useEffect(() => {
     if (!show) return
     const datePart = formatSetlistDate(show.show_date)
@@ -50,11 +70,11 @@ export function useSetlistArchiveDocumentTitle(show: Show | null | undefined) {
           : venue
             ? ` (${venue})`
             : ""
-    document.title = `${datePart}${middle} – WysteriaLane.org`
+    document.title = `${datePart}${middle} – ${titleSuffix}`
     return () => {
       document.title = ""
     }
-  }, [show])
+  }, [show, titleSuffix])
 }
 
 export function useSetlistScanDrawerFromNavigation(

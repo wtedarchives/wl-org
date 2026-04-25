@@ -1,6 +1,5 @@
 "use client"
 
-import { MoveRight } from "lucide-react"
 import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-setlist-table.constants"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -28,12 +27,11 @@ export function SetlistEntryStatsTooltipContent({
         {shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) ? (
           <span className="ml-2 text-destructive">[{entry.entry_short}]</span>
         ) : null}
-        {entry.entry_segue ? (
-          <MoveRight
-            className="ml-2 inline size-4 shrink-0 text-destructive"
-            aria-hidden
-          />
-        ) : null}
+        {entry.entry_segue ?
+          <span className="ml-2 inline font-bold text-[oklch(0.6_0.14_12)]">
+            → {entry.entry_segue.replace(/^>\s*/, "").trim()}
+          </span>
+        : null}
       </div>
       {entry.times_played?.trim() ? (
         <div

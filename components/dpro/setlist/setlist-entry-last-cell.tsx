@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { getLastCountPillStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -15,12 +16,18 @@ interface SetlistEntryLastCellProps {
   entry: SetlistEntry
   lastBadgeStyle: { className: string } | null
   showTooltips?: boolean
+  /**
+   * When set, TD/LIB/Debut use the same compact mono pill shape as `entry_short` (see
+   * `getLastCountPillStyle` + `.last-pill` in wl-home-v2).
+   */
+  useWlHomeV2PillStyle?: boolean
 }
 
 export function SetlistEntryLastCell({
   entry,
   lastBadgeStyle,
   showTooltips = true,
+  useWlHomeV2PillStyle = false,
 }: SetlistEntryLastCellProps) {
   if (
     entry.last_count == null ||
@@ -29,11 +36,27 @@ export function SetlistEntryLastCell({
     return null
   }
 
-  const content = lastBadgeStyle ? (
-    <span className={lastBadgeStyle.className}>{entry.last_count}</span>
-  ) : (
-    entry.last_count
-  )
+  const wlPill = useWlHomeV2PillStyle
+    ? getLastCountPillStyle(entry.last_count)
+    : null
+
+  const content =
+    wlPill ? (
+      <span
+        className="last-pill"
+        style={{
+          backgroundColor: wlPill.background,
+          color: wlPill.color,
+          border: `1px solid ${wlPill.borderColor}`,
+        }}
+      >
+        {entry.last_count}
+      </span>
+    ) : lastBadgeStyle ?
+      <span className={lastBadgeStyle.className}>{entry.last_count}</span>
+    : (
+      entry.last_count
+    )
 
   if (entry.last_show_id && showTooltips) {
     return (

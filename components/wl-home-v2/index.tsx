@@ -28,6 +28,7 @@ import { WlHomeV2LoginModal } from "./wl-home-v2-login-modal"
 import { WlHomeV2RequestModal } from "./wl-home-v2-request-modal"
 import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
+import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
 import {
   type WlHomeV2TrailHue,
@@ -92,6 +93,10 @@ export function WlHomeV2({
       router.replace("/")
     }
   }, [pathname, router])
+
+  const openArchiveHub = useCallback(() => {
+    setArchiveOpen(true)
+  }, [])
 
   const { title: nowPlayingTitle, loading: nowPlayingLoading } =
     useWtedRadioNowPlaying()
@@ -188,17 +193,18 @@ export function WlHomeV2({
   const rootClass = "wl-home-v2" + (finePointer ? " trail-active" : "")
 
   return (
-    <div ref={rootRef} className={rootClass}>
-      <div className="wl-home-v2__stack">
-        <WlHomeV2Header
-          onOpenLogin={() => setLoginOpen(true)}
-          onOpenSignup={() => {
-            setLoginOpen(false)
-            setSignupOpen(true)
-          }}
-          onOpenArchive={() => setArchiveOpen(true)}
-          onOpenRadio={() => setRadioOpen(true)}
-        />
+    <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
+      <div ref={rootRef} className={rootClass}>
+        <div className="wl-home-v2__stack">
+          <WlHomeV2Header
+            onOpenLogin={() => setLoginOpen(true)}
+            onOpenSignup={() => {
+              setLoginOpen(false)
+              setSignupOpen(true)
+            }}
+            onOpenArchive={openArchiveHub}
+            onOpenRadio={() => setRadioOpen(true)}
+          />
 
         <Suspense fallback={null}>
           <WlHomeV2ArchiveSubnav />
@@ -354,5 +360,6 @@ export function WlHomeV2({
         </label>
       </div>
     </div>
+    </WlHomeV2OpenArchiveHubContext.Provider>
   )
 }

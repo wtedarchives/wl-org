@@ -16,6 +16,12 @@ export const WTED_ARCHIVES_BREADCRUMB_ROOT: BreadcrumbItem = {
   href: "/old/archive",
 }
 
+/** First segment for WL Home v2 `/archive/*` inline trails (e.g. setlist page). */
+export const WL_V2_ARCHIVES_BREADCRUMB_ROOT: BreadcrumbItem = {
+  label: "Archives",
+  href: "/archive",
+}
+
 type SetlistBreadcrumbContextValue = {
   setlistBreadcrumbs: BreadcrumbItem[] | null
   setSetlistBreadcrumbs: (items: BreadcrumbItem[] | null) => void

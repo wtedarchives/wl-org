@@ -122,8 +122,12 @@ export function formatSetlistDate(dateInput: string | number | null | undefined)
   }
   const s = String(dateInput).trim()
   if (!s) return ""
-  // Already in MM.DD.YY (or MM.DD.YYYY) format from API
-  if (/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(s)) return s
+  // Already in MM.DD.YY or MM.DD.YYYY format from API — always emit two-digit year
+  if (/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(s)) {
+    const [mo, da, yr] = s.split(".")
+    const y2 = yr.length === 4 ? yr.slice(-2) : yr.padStart(2, "0")
+    return `${mo.padStart(2, "0")}.${da.padStart(2, "0")}.${y2}`
+  }
   // Parse: use as-is if ISO (contains T), otherwise append T00:00:00Z for date-only
   const date = new Date(s.includes("T") ? s : s + "T00:00:00Z")
   const time = date.getTime()
@@ -309,6 +313,17 @@ export function getRarityColor(percentage: string | null): string {
     lowerStop.color.b + factor * (upperStop.color.b - lowerStop.color.b),
   )
   return `rgb(${r}, ${g}, ${b})`
+}
+
+/** Same rgb mix as `getRarityColor`, with alpha on the fill (default 70%). */
+export function getRarityPillBackground(percentage: string | null, alpha = 0.4): string {
+  const base = getRarityColor(percentage)
+  if (base === "transparent" || !base.startsWith("rgb(")) return base
+  const m = base.match(
+    /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i,
+  )
+  if (!m) return base
+  return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`
 }
 
 /** Gap color: 0 = blue (best), 100 = red (worst). Same stops as rarity, reversed. */

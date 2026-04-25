@@ -1,0 +1,15 @@
+---
+description: WL Home v2 — border colors must be fully opaque (no alpha on borders)
+globs: components/wl-home-v2/**/*, app/(wl-home-v2)/**/*, components/wted/*wl-home-v2*
+alwaysApply: false
+---
+
+# Opaque borders (WL Home v2 / new site)
+
+When adding or editing **borders** in `components/wl-home-v2/` (CSS, Tailwind classes, or inline styles):
+
+- Use **fully opaque** colors only: `rgb()`, hex `#rrggbb`, or `rgba(..., 1)` — **not** `rgba`/`hsla` with transparency on border properties.
+- In Tailwind, avoid `border-white/20`-style opacity modifiers on borders; use an arbitrary solid color (e.g. `border-[rgb(…)]`) or a theme token **without** a `/opacity` suffix for the border color.
+- **Backgrounds, shadows, and text** may still use transparency; this rule applies to **border** and **border-\*** **color** only (including `border`, `border-top`, `border-color`, `--panel-border`, etc.).
+
+When matching a previous translucent border on dark UI, composite onto a dark surface (e.g. ~`rgb(15, 18, 16)`) so the solid stroke keeps similar weight, or reuse an existing opaque token from `wl-home-v2.css`.

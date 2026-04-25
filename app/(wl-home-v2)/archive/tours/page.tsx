@@ -11,14 +11,10 @@ export const metadata: Metadata = {
 
 export default function ArchiveToursPage() {
   return (
-    <Suspense
-      fallback={
-        <WlHomeV2>
-          <WlHomeV2PageLoading message="Loading tour…" />
-        </WlHomeV2>
-      }
-    >
-      <WlHomeV2ToursView />
-    </Suspense>
+    <WlHomeV2>
+      <Suspense fallback={<WlHomeV2PageLoading message="Loading tour…" />}>
+        <WlHomeV2ToursView />
+      </Suspense>
+    </WlHomeV2>
   )
 }

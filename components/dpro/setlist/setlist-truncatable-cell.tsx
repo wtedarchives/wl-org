@@ -89,6 +89,10 @@ type SetlistTruncatableCellProps = {
   variant?: "pills" | "block"
   className?: string
   /**
+   * Merged with `COACH_COLLAPSED_PLAIN_TYPO` when `variant="block"` (collapsed strip + measure).
+   */
+  blockPlainClassName?: string
+  /**
    * When `variant="block"`, plain text for collapsed row + measure (HTML stripped). Expanded still uses `children`.
    */
   plainCollapsedText?: string
@@ -111,9 +115,11 @@ export function SetlistTruncatableCell({
   expandLabel,
   variant = "pills",
   className,
+  blockPlainClassName,
   plainCollapsedText = "",
   onTruncatedCollapsedChange,
 }: SetlistTruncatableCellProps) {
+  const blockPlain = cn(COACH_COLLAPSED_PLAIN_TYPO, blockPlainClassName)
   const measureRef = useRef<HTMLDivElement>(null)
   const [needsMore, setNeedsMore] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -175,7 +181,7 @@ export function SetlistTruncatableCell({
       >
         {variant === "pills" ?
           withPersonnelNowrap(children, true)
-        : <div className={COACH_COLLAPSED_PLAIN_TYPO}>{plainCollapsedText}</div>}
+        : <div className={blockPlain}>{plainCollapsedText}</div>}
       </div>
 
       {needsMore && !expanded ?
@@ -198,7 +204,7 @@ export function SetlistTruncatableCell({
                 className="max-h-[1lh] min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden"
                 style={COLLAPSED_RIGHT_FADE_MASK_STYLE}
               >
-                <div className={COACH_COLLAPSED_PLAIN_TYPO}>{plainCollapsedText}</div>
+                <div className={blockPlain}>{plainCollapsedText}</div>
               </div>}
           </div>
           <button
@@ -234,9 +240,13 @@ export function SetlistTruncatableHtmlCell({
   html,
   expandLabel,
   className,
+  htmlContentClassName,
+  blockPlainClassName,
   onTruncatedCollapsedChange,
 }: Omit<SetlistTruncatableCellProps, "children" | "variant" | "plainCollapsedText"> & {
   html: string
+  /** Merged with the coach HTML block (e.g. `!text-sm` to match 14px body). */
+  htmlContentClassName?: string
 }) {
   const plainCollapsedText = useMemo(
     () => stripCoachNotesToPlainText(html),
@@ -245,7 +255,7 @@ export function SetlistTruncatableHtmlCell({
 
   const content = (
     <div
-      className={COACH_BLOCK_TYPO}
+      className={cn(COACH_BLOCK_TYPO, htmlContentClassName)}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
@@ -258,6 +268,7 @@ export function SetlistTruncatableHtmlCell({
       expandLabel={expandLabel}
       variant="block"
       className={className}
+      blockPlainClassName={blockPlainClassName}
       plainCollapsedText={plainCollapsedText}
       onTruncatedCollapsedChange={onTruncatedCollapsedChange}
     >

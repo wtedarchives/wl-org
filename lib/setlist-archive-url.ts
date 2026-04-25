@@ -5,5 +5,5 @@
  * setlist page client.
  */
 export function getSetlistArchiveUrl(showId: string): string {
-  return `/old/archive/setlist?id=${encodeURIComponent(showId)}`
+  return `/archive/setlist?id=${encodeURIComponent(showId)}`
 }

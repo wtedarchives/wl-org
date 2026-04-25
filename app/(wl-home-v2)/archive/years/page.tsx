@@ -11,14 +11,10 @@ export const metadata: Metadata = {
 
 export default function ArchiveYearsPage() {
   return (
-    <Suspense
-      fallback={
-        <WlHomeV2>
-          <WlHomeV2PageLoading message="Loading years…" />
-        </WlHomeV2>
-      }
-    >
-      <WlHomeV2YearsView />
-    </Suspense>
+    <WlHomeV2>
+      <Suspense fallback={<WlHomeV2PageLoading message="Loading years…" />}>
+        <WlHomeV2YearsView />
+      </Suspense>
+    </WlHomeV2>
   )
 }

@@ -36,6 +36,9 @@ export function useSetlistData(showId: string | undefined) {
       setLoading(false)
       return
     }
+    setLoading(true)
+    setShow(null)
+    setSetlist([])
     const client = supabase
 
     async function fetchSetlist() {

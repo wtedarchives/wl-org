@@ -29,7 +29,6 @@ import { cn } from "@/lib/utils"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
 
 import { NAV_YEARS } from "@/components/app-sidebar.constants"
-import { WlHomeV2 } from "@/components/wl-home-v2"
 
 const DEFAULT_YEAR_ID = "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445"
 /** Must match the calendar year for {@link DEFAULT_YEAR_ID} in {@link NAV_YEARS}. */
@@ -128,7 +127,7 @@ function YearPageBody({ yearId }: { yearId: string }) {
 
   useEffect(() => {
     if (currentYear) {
-      document.title = `${currentYear} Shows – WysteriaLane.org`
+      document.title = `${currentYear} Shows – WTED.org`
     }
     return () => {
       document.title = ""
@@ -319,7 +318,7 @@ function YearPageBody({ yearId }: { yearId: string }) {
             <button
               type="button"
               onClick={clearGroupFilters}
-              className="rounded-md border border-white/18 bg-white/5 !px-2 !py-0.5 text-[11px] font-medium text-white/85 transition-colors hover:border-[rgba(88,200,174,0.5)] hover:bg-[rgba(88,200,174,0.15)]"
+              className="rounded-md border border-[rgb(58,61,59)] bg-white/5 !px-2 !py-0.5 text-[11px] font-medium text-white/85 transition-colors hover:border-[rgb(52,109,95)] hover:bg-[rgba(88,200,174,0.15)]"
             >
               Clear
             </button>
@@ -344,8 +343,8 @@ function YearPageBody({ yearId }: { yearId: string }) {
           <button
             type="button"
             className={cn(
-              "shrink-0 rounded-full border border-white/22 bg-white/8 !px-2 !py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90",
-              "transition-colors hover:border-[rgba(88,200,174,0.5)] hover:bg-[rgba(88,200,174,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wl-light-orange)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+              "shrink-0 rounded-full border border-[rgb(68,70,69)] bg-white/8 !px-2 !py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90",
+              "transition-colors hover:border-[rgb(52,109,95)] hover:bg-[rgba(88,200,174,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wl-light-orange)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
             )}
             aria-label="How the average setlist works"
             onClick={() => setAvgSetlistInfoOpen(true)}
@@ -399,18 +398,10 @@ export function WlHomeV2YearsView() {
   if (idSet.size > 1) notFound()
 
   if (!yearIdParam) {
-    return (
-      <WlHomeV2>
-        <WlHomeV2PageLoading message="Loading years…" />
-      </WlHomeV2>
-    )
+    return <WlHomeV2PageLoading message="Loading years…" />
   }
 
   if (!YEAR_ID_RE.test(yearIdParam)) notFound()
 
-  return (
-    <WlHomeV2>
-      <YearsArchiveRoutes yearId={yearIdParam} />
-    </WlHomeV2>
-  )
+  return <YearsArchiveRoutes yearId={yearIdParam} />
 }

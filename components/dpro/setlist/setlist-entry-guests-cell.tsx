@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { getPersonnelPillWlV2Style } from "@/components/dpro/setlist/display-setlist-table.constants"
 import {
   getPersonnelPillClassName,
   sortGuestsForSetlistDisplay,
@@ -19,16 +20,37 @@ interface SetlistEntryGuestsCellProps {
   showTooltips?: boolean
   /** When true, keep all pills on one row (for truncation / horizontal clip). */
   nowrap?: boolean
+  /**
+   * WL Home v2: same pill treatment as the Last column (see `getPersonnelPillWlV2Style`).
+   */
+  useWlHomeV2PillStyle?: boolean
 }
 
 export function SetlistEntryGuestsCell({
   entry,
   showTooltips = true,
   nowrap = false,
+  useWlHomeV2PillStyle = false,
 }: SetlistEntryGuestsCellProps) {
   if (!entry.guests?.length) return null
 
   const sortedGuests = sortGuestsForSetlistDisplay(entry.guests)
+
+  const linkClass = (category: string | null | undefined) => {
+    if (useWlHomeV2PillStyle)
+      return "personnel-pill no-underline hover:opacity-90"
+    return `${getPersonnelPillClassName(category)} no-underline hover:opacity-90`
+  }
+
+  const linkStyle = (category: string | null | undefined) => {
+    if (!useWlHomeV2PillStyle) return undefined
+    const s = getPersonnelPillWlV2Style(category)
+    return {
+      background: s.background,
+      color: s.color,
+      border: `1px solid ${s.borderColor}`,
+    } as const
+  }
 
   return (
     <div
@@ -45,7 +67,8 @@ export function SetlistEntryGuestsCell({
             <TooltipTrigger asChild>
               <Link
                 href={getPersonnelArchiveUrl(g.guest_id)}
-                className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
+                className={linkClass(g.guest_category)}
+                style={linkStyle(g.guest_category)}
               >
                 {g.guest_display_name}
               </Link>
@@ -56,7 +79,8 @@ export function SetlistEntryGuestsCell({
           <Link
             key={g.guest_id}
             href={getPersonnelArchiveUrl(g.guest_id)}
-            className={`${getPersonnelPillClassName(g.guest_category)} no-underline hover:opacity-90`}
+            className={linkClass(g.guest_category)}
+            style={linkStyle(g.guest_category)}
           >
             {g.guest_display_name}
           </Link>

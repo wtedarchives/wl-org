@@ -33,7 +33,6 @@ import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { supabase } from "@/lib/supabase"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 
-import { WlHomeV2 } from "@/components/wl-home-v2"
 
 /** Landing redirect when `/archive/tours` has no `id` (matches legacy). */
 const DEFAULT_LANDING_TOUR_NAME = "2026 Spring"
@@ -153,7 +152,7 @@ function TourPageBody({ tourId }: { tourId: string }) {
 
   useEffect(() => {
     if (currentTour) {
-      document.title = `${currentTour.tour} – WysteriaLane.org`
+      document.title = `${currentTour.tour} – WTED.org`
       return () => {
         document.title = ""
       }
@@ -359,7 +358,7 @@ function TourPageBody({ tourId }: { tourId: string }) {
           <button
             type="button"
             onClick={() => setToursSheetOpen(false)}
-            className="flex w-full items-center justify-center gap-2 border-b border-border/50 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+            className="flex w-full items-center justify-center gap-2 border-b border-border py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
             aria-label="Close"
           >
             <X className="size-4" />
@@ -388,8 +387,8 @@ function TourPageBody({ tourId }: { tourId: string }) {
           <button
             type="button"
             className={cn(
-              "shrink-0 rounded-full border border-white/22 bg-white/8 !px-2 !py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90",
-              "transition-colors hover:border-[rgba(88,200,174,0.5)] hover:bg-[rgba(88,200,174,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wl-light-orange)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+              "shrink-0 rounded-full border border-[rgb(68,70,69)] bg-white/8 !px-2 !py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90",
+              "transition-colors hover:border-[rgb(52,109,95)] hover:bg-[rgba(88,200,174,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wl-light-orange)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
             )}
             aria-label="How the average setlist works"
             onClick={() => setAvgSetlistInfoOpen(true)}
@@ -459,18 +458,10 @@ export function WlHomeV2ToursView() {
   if (idSet.size > 1) notFound()
 
   if (!tourIdParam) {
-    return (
-      <WlHomeV2>
-        <WlHomeV2PageLoading message="Loading tour…" />
-      </WlHomeV2>
-    )
+    return <WlHomeV2PageLoading message="Loading tour…" />
   }
 
   if (!TOUR_ID_RE.test(tourIdParam)) notFound()
 
-  return (
-    <WlHomeV2>
-      <ToursArchiveRoutes tourId={tourIdParam} />
-    </WlHomeV2>
-  )
+  return <ToursArchiveRoutes tourId={tourIdParam} />
 }
