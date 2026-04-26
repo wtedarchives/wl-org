@@ -1,6 +1,6 @@
 "use client"
 
-import { Check } from "lucide-react"
+import { Check } from "@phosphor-icons/react"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistEntryNumberCellProps {
@@ -24,7 +24,7 @@ export function SetlistEntryNumberCell({
         className="inline-flex items-center justify-center text-white"
         aria-label="Copied"
       >
-        <Check className="size-3" />
+        <Check className="size-3" weight="bold" aria-hidden />
       </span>
     ) : displayNumber !== null ? (
       <span className="inline-block cursor-default">{displayNumber}</span>

@@ -9,8 +9,16 @@ import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
 } from "react"
+import Image from "next/image"
 import Link from "next/link"
-import { CaretLeft, CaretRight } from "@phosphor-icons/react"
+import {
+  ArrowRight,
+  CaretLeft,
+  CaretRight,
+  Check,
+  UserPlus,
+  Users,
+} from "@phosphor-icons/react"
 
 import {
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
@@ -26,6 +34,7 @@ import type { Tour } from "@/hooks/use-setlist-data"
 import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import type { SetlistEntry, Show, ShowDate } from "@/types/setlist"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
+import { SetlistRatingStarsRow } from "@/components/dpro/setlist/setlist-rating-card"
 import { WlHomeV2SetlistTable } from "@/components/wl-home-v2/wl-home-v2-setlist-table"
 import type {
   ReleaseToEntriesMap,
@@ -69,6 +78,14 @@ export function WlHomeV2SetlistPlaceholderView({
   onJotyBadgeClick,
   onSongClick,
   onWtedClick,
+  averageRating,
+  reviewCount,
+  onRatingClick,
+  attendeeCount,
+  attended,
+  attendanceToggling,
+  onAttendanceToggle,
+  canMarkAttendance,
 }: {
   breadcrumbs: BreadcrumbItem[] | null
   show: Show
@@ -93,10 +110,17 @@ export function WlHomeV2SetlistPlaceholderView({
   maxShowCanonIdLoading: boolean
   releases: ShowRelease[]
   releaseToEntriesMap: ReleaseToEntriesMap
+  averageRating: number
+  reviewCount: number
+  onRatingClick: () => void
+  attendeeCount: number
+  attended: boolean
+  attendanceToggling: boolean
+  onAttendanceToggle: () => void
+  canMarkAttendance: boolean
 }) {
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const [layoutMode, setLayoutMode] = useState<SetlistLayoutMode>(null)
-  const [attended, setAttended] = useState(false)
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(
     null,
   )
@@ -104,9 +128,15 @@ export function WlHomeV2SetlistPlaceholderView({
   useEffect(() => {
     setHoveredReleaseId(null)
   }, [showId])
-  const onAttendClick = useCallback(() => {
-    setAttended((v) => !v)
-  }, [])
+
+  const hasAverageRating = averageRating > 0
+  const ratingValueDisplay = hasAverageRating ?
+      averageRating.toFixed(2)
+    : "—"
+  const reviewSummary =
+    reviewCount > 0 ?
+      `${reviewCount.toLocaleString("en-US")} ${reviewCount === 1 ? "review" : "reviews"}`
+    : "No reviews yet"
 
   useLayoutEffect(() => {
     const mq = window.matchMedia(`(min-width: ${TAILWIND_XL_MIN_PX}px)`)
@@ -348,23 +378,45 @@ export function WlHomeV2SetlistPlaceholderView({
           </div>
 
           <div className="quick-stats">
-            <div className="qs-card">
+            <button
+              type="button"
+              className="qs-card"
+              onClick={onRatingClick}
+              aria-label={
+                hasAverageRating ?
+                  `Rating: ${ratingValueDisplay} out of 5. Click to rate or review.`
+                : "Click to rate this show"
+              }
+            >
               <div className="qs-label">Rating</div>
-              <div className="stars" style={{ color: "#ffd86b" }}>
-                ★ ★ ★ ★ ☆
+              <div className="qs-stars-row">
+                <SetlistRatingStarsRow
+                  rating={averageRating}
+                  sizeClassName="size-[18px]"
+                  fillClassName="text-[#ffd86b]"
+                  emptyClassName="text-white/25"
+                />
               </div>
               <div className="qs-value">
-                4.3{" "}
+                {ratingValueDisplay}{" "}
                 <span
                   style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}
                 >
-                  · 87 reviews
+                  · {reviewSummary}
                 </span>
               </div>
-            </div>
+            </button>
             <div className="qs-card">
-              <div className="qs-label">Attended</div>
-              <div className="qs-value">1,842</div>
+              <div className="qs-label normal-case tracking-normal">
+                attendees
+              </div>
+              <div className="qs-value flex items-center gap-2">
+                {attendeeCount.toLocaleString("en-US")}
+                <Users
+                  className="size-[1.15em] shrink-0 text-white/85"
+                  aria-hidden
+                />
+              </div>
             </div>
           </div>
 
@@ -404,35 +456,90 @@ export function WlHomeV2SetlistPlaceholderView({
           >
             <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
               <div className="twin-cards">
-                <div className="side-card">
+                <button
+                  type="button"
+                  className="side-card"
+                  onClick={onRatingClick}
+                  aria-label={
+                    hasAverageRating ?
+                      `Rating: ${ratingValueDisplay} out of 5. Click to rate or review.`
+                    : "Click to rate this show"
+                  }
+                >
                   <div className="sc-label">Rating</div>
-                  <div
-                    className="stars"
-                    style={{ color: "#ffd86b", fontSize: 14 }}
-                  >
-                    ★ ★ ★ ★ ☆
+                  <div className="sc-stars-row">
+                    <SetlistRatingStarsRow
+                      rating={averageRating}
+                      sizeClassName="size-[14px]"
+                      fillClassName="text-[#ffd86b]"
+                      emptyClassName="text-white/25"
+                    />
                   </div>
-                  <div className="sc-value">4.3</div>
-                  <div className="sc-sub">87 reviews</div>
-                </div>
+                  <div className="sc-value">{ratingValueDisplay}</div>
+                  <div className="sc-sub">{reviewSummary}</div>
+                </button>
                 <div className="side-card">
-                  <div className="sc-label">Attended</div>
-                  <div className="sc-value">1,842</div>
-                  <div className="sc-sub">of 1,800 seats</div>
-                  <button
-                    type="button"
-                    className={"attend" + (attended ? " attended" : "")}
-                    id="attend-btn"
-                    onClick={onAttendClick}
-                  >
-                    {attended ? "✓ Attended" : "Mark as attended"}
-                  </button>
+                  <div className="sc-label normal-case tracking-normal">
+                    attendees
+                  </div>
+                  <div className="sc-value flex items-center gap-2">
+                    {attendeeCount.toLocaleString("en-US")}
+                    <Users
+                      className="size-[1.15em] shrink-0 text-white/85"
+                      aria-hidden
+                    />
+                  </div>
+                  {canMarkAttendance ?
+                    <button
+                      type="button"
+                      className={
+                        "attend normal-case tracking-normal inline-flex items-center justify-center gap-1.5 " +
+                        (attended ? "attended" : "")
+                      }
+                      id="attend-btn"
+                      disabled={attendanceToggling}
+                      onClick={onAttendanceToggle}
+                    >
+                      {attendanceToggling ?
+                        "…"
+                      : attended ?
+                        <>
+                          <Check
+                            className="size-4 shrink-0"
+                            weight="bold"
+                            aria-hidden
+                          />
+                          attended
+                        </>
+                      : <>
+                          <UserPlus
+                            className="size-4 shrink-0"
+                            aria-hidden
+                          />
+                          i was there
+                        </>}
+                    </button>
+                  : null}
                 </div>
               </div>
 
               <a href="#" className="wbtn green">
-                <span>Community Discussion</span>
-                <span className="arr">→</span>
+                <span className="wbtn-text inline-flex min-w-0 items-center gap-2">
+                  <Image
+                    src="/WL.png"
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="size-[22px] shrink-0 object-contain"
+                    unoptimized
+                  />
+                  <span>Chat in the WTED Community</span>
+                </span>
+                <ArrowRight
+                  className="wbtn-icon size-4 shrink-0"
+                  weight="bold"
+                  aria-hidden
+                />
               </a>
             </div>
           </section>

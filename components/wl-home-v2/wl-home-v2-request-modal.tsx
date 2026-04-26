@@ -3,6 +3,7 @@
 import { useId } from "react"
 
 import { WtedRequestSongFlow } from "@/components/wted/wted-request-song-flow"
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2RequestModalProps = {
@@ -20,46 +21,48 @@ export function WlHomeV2RequestModal({
   useWlHomeV2ScrollLock(open)
 
   return (
-    <div
-      className={"modal-backdrop" + (open ? " open" : "")}
-      id="request-modal"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+    <WlHomeV2ModalPortal open={open}>
       <div
-        className="modal modal--wted-request"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        aria-describedby={subtextId}
-        onClick={(e) => e.stopPropagation()}
+        className={"modal-backdrop" + (open ? " open" : "")}
+        id="request-modal"
+        role="presentation"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose()
+        }}
       >
-        <div className="modal-request-head">
-          <div className="modal-request-head-text">
-            <h3 id={headingId}>Request a Song</h3>
-            <p id={subtextId} className="modal-request-sub">
-              Users can request four songs every 60 minutes.
-            </p>
+        <div
+          className="modal modal--wted-request"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={headingId}
+          aria-describedby={subtextId}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-request-head">
+            <div className="modal-request-head-text">
+              <h3 id={headingId}>Request a Song</h3>
+              <p id={subtextId} className="modal-request-sub">
+                Users can request four songs every 60 minutes.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="modal-request-close"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
-          <button
-            type="button"
-            className="modal-request-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-        <div className="modal-request-body">
-          <WtedRequestSongFlow
-            catalogFetchEnabled={open}
-            panelWrapperClassName="min-h-[min(52vh,420px)]"
-            panelClassName="rounded-none"
-          />
+          <div className="modal-request-body">
+            <WtedRequestSongFlow
+              catalogFetchEnabled={open}
+              panelWrapperClassName="min-h-[min(52vh,420px)]"
+              panelClassName="rounded-none"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </WlHomeV2ModalPortal>
   )
 }

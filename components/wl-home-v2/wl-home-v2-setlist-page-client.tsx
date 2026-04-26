@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import { notFound } from "next/navigation"
 
 import { useAuth } from "@/components/auth-context"
+import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-login-required-dialog"
 import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import {
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
@@ -12,13 +13,19 @@ import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loa
 import { WlHomeV2SetlistJotyModal } from "@/components/wl-home-v2/wl-home-v2-setlist-joty-modal"
 import { WlHomeV2SetlistSongModal } from "@/components/wl-home-v2/wl-home-v2-setlist-song-modal"
 import { WlHomeV2SetlistPlaceholderView } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view"
+import { WlHomeV2SetlistRatingModal } from "@/components/wl-home-v2/wl-home-v2-setlist-rating-modal"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import {
   buildSetlistArchiveBreadcrumbItems,
   useSetlistArchiveDocumentTitle,
 } from "@/hooks/use-setlist-archive-page-meta"
 import { useMaxShowCanonId } from "@/hooks/use-max-show-canonid"
-import { useShowPosition } from "@/hooks/use-setlist-display"
+import {
+  useAttendeeCount,
+  useShowPosition,
+} from "@/hooks/use-setlist-display"
+import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
+import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import { useSetlistArchiveShowId } from "@/hooks/use-setlist-archive-show-id"
 import { useSetlistData, useShowDates, useTours } from "@/hooks/use-setlist-data"
@@ -50,6 +57,7 @@ export function WlHomeV2SetlistPageClient() {
   const songModalHeadingId = useId()
   const songModalTourId = useId()
   const wtedModalHeadingId = useId()
+  const ratingModalHeadingId = useId()
   const [jotyModalOpen, setJotyModalOpen] = useState(false)
   const [songModalOpen, setSongModalOpen] = useState(false)
   const [songModalEntry, setSongModalEntry] = useState<SetlistEntry | null>(
@@ -60,6 +68,8 @@ export function WlHomeV2SetlistPageClient() {
     null,
   )
   const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
+  const [ratingModalOpen, setRatingModalOpen] = useState(false)
+  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
   const [jotyYear, setJotyYear] = useState<number | null>(null)
   const [jotyHighlightedEntryId, setJotyHighlightedEntryId] = useState<
     string | null
@@ -68,6 +78,34 @@ export function WlHomeV2SetlistPageClient() {
 
   const { releases, releaseToEntriesMap } = useSetlistReleases(showId)
   const fallbackWtedArtwork = releases[0]?.release_artwork ?? null
+
+  const { attendeeCount, setAttendeeCount } = useAttendeeCount(
+    showId,
+    show ?? null,
+  )
+  const {
+    averageRating,
+    reviewCount,
+    userRating,
+    userReview,
+    reviews,
+    isLoadingReviews,
+    reviewsError,
+    submitting,
+    submitRating,
+    fetchReviews,
+    validateReview,
+  } = useSetlistRating(showId, user ?? null)
+  const { attended, toggling, toggle } = useSetlistAttendance(
+    showId,
+    user ?? null,
+    setAttendeeCount,
+  )
+
+  const onRatingClick = useCallback(() => {
+    if (user) setRatingModalOpen(true)
+    else setLoginRequiredOpen(true)
+  }, [user])
 
   const handleNumberClick = useCallback(async (entryId: string) => {
     try {
@@ -192,6 +230,36 @@ export function WlHomeV2SetlistPageClient() {
         maxShowCanonIdLoading={maxCanonLoading}
         releases={releases}
         releaseToEntriesMap={releaseToEntriesMap}
+        averageRating={averageRating}
+        reviewCount={reviewCount}
+        onRatingClick={onRatingClick}
+        attendeeCount={attendeeCount}
+        attended={attended}
+        attendanceToggling={toggling}
+        onAttendanceToggle={toggle}
+        canMarkAttendance={!!user}
+      />
+      <WlHomeV2SetlistRatingModal
+        open={ratingModalOpen}
+        onClose={() => setRatingModalOpen(false)}
+        headingId={ratingModalHeadingId}
+        showDate={show.show_date ?? ""}
+        showVenueLocation={show.show_venue_location ?? ""}
+        averageRating={averageRating}
+        reviewCount={reviewCount}
+        userRating={userRating}
+        userReview={userReview}
+        reviews={reviews}
+        isLoadingReviews={isLoadingReviews}
+        reviewsError={reviewsError}
+        onSubmit={submitRating}
+        submitting={submitting}
+        onFetchReviews={fetchReviews}
+        validateReview={validateReview}
+      />
+      <SetlistLoginRequiredDialog
+        open={loginRequiredOpen}
+        onOpenChange={setLoginRequiredOpen}
       />
       <WlHomeV2SetlistJotyModal
         open={jotyModalOpen}

@@ -21,6 +21,7 @@ import {
   ARCHIVE_INTRO,
   type ArchiveEntry,
 } from "@/app/(main)/old/archive/content"
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
@@ -116,71 +117,73 @@ export function WlHomeV2ArchiveModal({
   useWlHomeV2ScrollLock(open)
 
   return (
-    <div
-      className={"modal-backdrop" + (open ? " open" : "")}
-      id="archive-hub-modal"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+    <WlHomeV2ModalPortal open={open}>
       <div
-        className="modal modal--wted-request modal--archive-hub"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        aria-describedby={descId}
-        onClick={(e) => e.stopPropagation()}
+        className={"modal-backdrop" + (open ? " open" : "")}
+        id="archive-hub-modal"
+        role="presentation"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose()
+        }}
       >
-        <div className="modal-request-head">
-          <div className="modal-request-head-text">
-            <h3 id={headingId}>{ARCHIVE_INTRO.title}</h3>
-            <p id={descId} className="modal-request-sub">
-              {ARCHIVE_INTRO.description}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="modal-request-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-        <div className="modal-request-body modal-archive-hub-body">
-          <div className="modal-archive-hub-grid">
-            {ARCHIVE_ENTRIES.map((entry) => (
-              <ArchiveModalTile
-                key={entry.title}
-                entry={entry}
-                myStatsProfile={
-                  entry.title === "My Stats" ? myStatsProfile : null
-                }
-              />
-            ))}
-          </div>
-          <div className="modal-archive-hub-submit">
-            <p className="modal-archive-hub-submit-text">
-              Have setlist corrections, new shows, or other archive data to
-              contribute?{" "}
-              <br
-                className="modal-archive-hub-submit-text-linebreak"
-                aria-hidden
-              />
-              Use the Submit form to help keep the archive accurate and up to
-              date.
-            </p>
-            <Link
-              href="/archive/submit"
-              className="modal-archive-hub-submit-cta"
+        <div
+          className="modal modal--wted-request modal--archive-hub"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={headingId}
+          aria-describedby={descId}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-request-head">
+            <div className="modal-request-head-text">
+              <h3 id={headingId}>{ARCHIVE_INTRO.title}</h3>
+              <p id={descId} className="modal-request-sub">
+                {ARCHIVE_INTRO.description}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="modal-request-close"
               onClick={onClose}
+              aria-label="Close"
             >
-              Submit & contribute
-            </Link>
+              ×
+            </button>
+          </div>
+          <div className="modal-request-body modal-archive-hub-body">
+            <div className="modal-archive-hub-grid">
+              {ARCHIVE_ENTRIES.map((entry) => (
+                <ArchiveModalTile
+                  key={entry.title}
+                  entry={entry}
+                  myStatsProfile={
+                    entry.title === "My Stats" ? myStatsProfile : null
+                  }
+                />
+              ))}
+            </div>
+            <div className="modal-archive-hub-submit">
+              <p className="modal-archive-hub-submit-text">
+                Have setlist corrections, new shows, or other archive data to
+                contribute?{" "}
+                <br
+                  className="modal-archive-hub-submit-text-linebreak"
+                  aria-hidden
+                />
+                Use the Submit form to help keep the archive accurate and up to
+                date.
+              </p>
+              <Link
+                href="/archive/submit"
+                className="modal-archive-hub-submit-cta"
+                onClick={onClose}
+              >
+                Submit & contribute
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </WlHomeV2ModalPortal>
   )
 }

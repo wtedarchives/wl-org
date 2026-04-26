@@ -15,7 +15,6 @@ import {
   SpotifyLogo,
   YoutubeLogo,
 } from "@phosphor-icons/react"
-import { Loader2 } from "lucide-react"
 import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { normalizeBandcampUrl } from "@/lib/normalize-bandcamp-url"
@@ -336,7 +335,7 @@ export function SetlistMediaSection({
                     className="size-4 shrink-0 animate-spin text-white/55"
                     aria-hidden
                   />
-                : <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                : <CircleNotch className="size-4 animate-spin text-muted-foreground" aria-hidden />
                 }
               </div>
             )}
@@ -464,7 +463,7 @@ export function SetlistMediaSection({
                   className="size-6 shrink-0 animate-spin text-white/55"
                   aria-hidden
                 />
-              : <Loader2 className="size-6 animate-spin text-muted-foreground" />
+              : <CircleNotch className="size-6 animate-spin text-muted-foreground" aria-hidden />
               }
             </div>
           )}

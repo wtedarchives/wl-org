@@ -5,7 +5,7 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
 import Image from "next/image"
-import { Loader2 } from "lucide-react"
+import { CircleNotch } from "@phosphor-icons/react"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
@@ -105,11 +105,12 @@ export function SetlistJotyBracketDataBody({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12">
-        <Loader2
+        <CircleNotch
           className={cn(
             "size-6 animate-spin",
             y ? "text-white/55" : "text-muted-foreground",
           )}
+          aria-hidden
         />
         <p
           className={cn(

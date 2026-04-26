@@ -1,6 +1,6 @@
 "use client"
 
-import { Star } from "lucide-react"
+import { Star } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 
 interface SetlistRatingCardProps {
@@ -29,33 +29,7 @@ function RatingContent({
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((starNumber) => {
-          const fillPercentage = hasRating
-            ? Math.min(Math.max(rating - starNumber + 1, 0), 1)
-            : 0
-          return (
-            <div key={starNumber} className="relative size-4">
-              <Star
-                className="size-4 text-muted-foreground/30"
-                strokeWidth={1.75}
-              />
-              {fillPercentage > 0 && (
-                <div
-                  className="absolute inset-0 overflow-hidden"
-                  style={{ width: `${fillPercentage * 100}%` }}
-                >
-                  <Star
-                    className="size-4 text-yellow-500"
-                    strokeWidth={1.75}
-                    fill="currentColor"
-                  />
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+      <SetlistRatingStarsRow rating={rating} />
       {ratingNumberText != null && (
         <span className="text-xs font-medium pt-1 tabular-nums">{ratingNumberText}</span>
       )}
@@ -64,6 +38,54 @@ function RatingContent({
           {reviewCountText}
         </span>
       )}
+    </div>
+  )
+}
+
+/** Star row for setlist archive + WL Home v2 (shared fill math). */
+export function SetlistRatingStarsRow({
+  rating,
+  sizeClassName = "size-4",
+  emptyClassName = "text-muted-foreground/30",
+  fillClassName = "text-yellow-500",
+  rowClassName,
+}: {
+  rating: number
+  sizeClassName?: string
+  emptyClassName?: string
+  fillClassName?: string
+  /** Optional wrapper (e.g. v2 panel color scope). */
+  rowClassName?: string
+}) {
+  const hasRating = rating > 0
+  return (
+    <div className={cn("flex items-center justify-center gap-0.5", rowClassName)}>
+      {[1, 2, 3, 4, 5].map((starNumber) => {
+        const fillPercentage = hasRating
+          ? Math.min(Math.max(rating - starNumber + 1, 0), 1)
+          : 0
+        return (
+          <div key={starNumber} className={cn("relative shrink-0", sizeClassName)}>
+            <Star
+              className={cn(sizeClassName, emptyClassName)}
+              weight="regular"
+              aria-hidden
+            />
+            {fillPercentage > 0 && (
+              <div
+                className="pointer-events-none absolute left-0 top-0 h-full overflow-hidden"
+                style={{ width: `${fillPercentage * 100}%` }}
+              >
+                <Star
+                  className={cn(sizeClassName, fillClassName)}
+                  weight="fill"
+                  aria-hidden
+                />
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

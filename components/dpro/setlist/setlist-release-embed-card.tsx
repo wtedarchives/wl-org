@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { CircleNotch, X } from "@phosphor-icons/react"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
-import { Loader2, X as XLucide } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { ShowRelease } from "@/hooks/use-setlist-releases"
@@ -119,7 +118,7 @@ export function SetlistReleaseEmbedCard({
             className="h-6 w-6 shrink-0"
             aria-label="Close embed"
           >
-            <XLucide className="size-3.5" />
+            <X className="size-3.5" aria-hidden />
           </Button>
         }
       </div>
@@ -137,7 +136,7 @@ export function SetlistReleaseEmbedCard({
                 className="size-8 shrink-0 animate-spin text-white/45"
                 aria-hidden
               />
-            : <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            : <CircleNotch className="size-8 animate-spin text-muted-foreground" aria-hidden />
             }
           </div>
         : showContent ? (

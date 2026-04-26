@@ -1,7 +1,6 @@
 "use client"
 
-import { createPortal } from "react-dom"
-import { useEffect, useId, useLayoutEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { cn } from "@/lib/utils"
 import {
   Card,
@@ -15,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import {
   useAverageSetlist,
   type AverageSetlistResult,
@@ -117,13 +117,7 @@ function AverageSetlistInfoDialog({
   wlHomeV2?: boolean
 }) {
   const headingId = useId()
-  const [portalContainer, setPortalContainer] = useState<Element | null>(null)
   useWlHomeV2ScrollLock(open && wlHomeV2)
-
-  useLayoutEffect(() => {
-    if (!wlHomeV2) return
-    setPortalContainer(document.querySelector(".wl-home-v2"))
-  }, [wlHomeV2])
 
   useEffect(() => {
     if (!open || !wlHomeV2) return
@@ -138,47 +132,47 @@ function AverageSetlistInfoDialog({
 
   if (wlHomeV2) {
     if (!open) return null
-    if (!portalContainer) return null
 
-    return createPortal(
-      <div
-        className="modal-backdrop open"
-        role="presentation"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose()
-        }}
-      >
+    return (
+      <WlHomeV2ModalPortal open={open}>
         <div
-          className="modal modal--wted-request modal--avg-setlist-info"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={headingId}
-          onClick={(e) => e.stopPropagation()}
+          className="modal-backdrop open"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onClose()
+          }}
         >
-          <div className="modal-request-head">
-            <div className="modal-request-head-text">
-              <h3 id={headingId}>How the Average Setlist Works</h3>
+          <div
+            className="modal modal--wted-request modal--avg-setlist-info"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={headingId}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-request-head">
+              <div className="modal-request-head-text">
+                <h3 id={headingId}>How the Average Setlist Works</h3>
+              </div>
+              <button
+                type="button"
+                className="modal-request-close"
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
             </div>
-            <button
-              type="button"
-              className="modal-request-close"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </div>
-          <div className="modal-request-body">
-            <div className="modal-avg-setlist-info-scroll">
-              <AverageSetlistInfoProse
-                headingClassName="modal-avg-setlist-info-section-title"
-                bodyClassName="modal-avg-setlist-info-p"
-              />
+            <div className="modal-request-body">
+              <div className="modal-avg-setlist-info-scroll">
+                <AverageSetlistInfoProse
+                  headingClassName="modal-avg-setlist-info-section-title"
+                  bodyClassName="modal-avg-setlist-info-p"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>,
-      portalContainer,
+      </WlHomeV2ModalPortal>
     )
   }
 

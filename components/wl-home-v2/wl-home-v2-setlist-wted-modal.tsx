@@ -7,6 +7,7 @@ import {
   SetlistWtedPanel,
   type SetlistWtedShowContext,
 } from "@/components/dpro/setlist/setlist-wted-panel"
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -43,59 +44,61 @@ export function WlHomeV2SetlistWtedModal({
   }
 
   return (
-    <div
-      className={"modal-backdrop" + (open ? " open" : "")}
-      id="wl-home-v2-setlist-wted-modal"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+    <WlHomeV2ModalPortal open={open}>
       <div
-        className="modal modal--wted-request modal--setlist-wted"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        aria-describedby={subtextId}
-        onClick={(e) => e.stopPropagation()}
+        className={"modal-backdrop" + (open ? " open" : "")}
+        id="wl-home-v2-setlist-wted-modal"
+        role="presentation"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose()
+        }}
       >
-        <div className="modal-request-head">
-          <div className="modal-request-head-text">
-            <h3 id={headingId} className="modal-setlist-wted-title">
-              <Image
-                src="/WTED2.png"
-                alt=""
-                width={28}
-                height={28}
-                className="modal-setlist-wted-title-icon"
-              />
-              <span>WTED Goose Radio</span>
-            </h3>
-            <p id={subtextId} className="modal-request-sub">
-              Users can request four songs every 60 minutes.
-            </p>
+        <div
+          className="modal modal--wted-request modal--setlist-wted"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={headingId}
+          aria-describedby={subtextId}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-request-head">
+            <div className="modal-request-head-text">
+              <h3 id={headingId} className="modal-setlist-wted-title">
+                <Image
+                  src="/WTED2.png"
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="modal-setlist-wted-title-icon"
+                />
+                <span>WTED Goose Radio</span>
+              </h3>
+              <p id={subtextId} className="modal-request-sub">
+                Users can request four songs every 60 minutes.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="modal-request-close"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
-          <button
-            type="button"
-            className="modal-request-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
-        <div className="modal-request-body modal-setlist-wted-body">
-          <SetlistWtedPanel
-            open={open}
-            onOpenChange={onOpenChange}
-            entry={entry}
-            setlist={setlist}
-            show={show}
-            fallbackReleaseArtwork={fallbackReleaseArtwork}
-            variant="modal"
-          />
+          <div className="modal-request-body modal-setlist-wted-body">
+            <SetlistWtedPanel
+              open={open}
+              onOpenChange={onOpenChange}
+              entry={entry}
+              setlist={setlist}
+              show={show}
+              fallbackReleaseArtwork={fallbackReleaseArtwork}
+              variant="modal"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </WlHomeV2ModalPortal>
   )
 }

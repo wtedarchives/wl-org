@@ -1,8 +1,8 @@
 "use client"
 
-import { createPortal } from "react-dom"
-import { useId, useLayoutEffect, useState, type ReactNode } from "react"
+import { useId, type ReactNode } from "react"
 
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2YearsToolModalProps = {
@@ -26,58 +26,53 @@ export function WlHomeV2YearsToolModal({
 }: WlHomeV2YearsToolModalProps) {
   const headingId = useId()
   const descId = useId()
-  const [container, setContainer] = useState<Element | null>(null)
   useWlHomeV2ScrollLock(open)
 
-  useLayoutEffect(() => {
-    setContainer(document.querySelector(".wl-home-v2"))
-  }, [])
-
   if (!open) return null
-  if (!container) return null
 
-  return createPortal(
-    <div
-      className="modal-backdrop open"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+  return (
+    <WlHomeV2ModalPortal open={open}>
       <div
-        className="modal modal--wted-request modal--years-tools"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        aria-describedby={description ? descId : undefined}
-        onClick={(e) => e.stopPropagation()}
+        className="modal-backdrop open"
+        role="presentation"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose()
+        }}
       >
-        <div className="modal-request-head">
-          <div className="modal-request-head-text">
-            <h3 id={headingId}>{title}</h3>
-            {description ?
-              <p id={descId} className="modal-request-sub">
-                {description}
-              </p>
-            : null}
+        <div
+          className="modal modal--wted-request modal--years-tools"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={headingId}
+          aria-describedby={description ? descId : undefined}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-request-head">
+            <div className="modal-request-head-text">
+              <h3 id={headingId}>{title}</h3>
+              {description ?
+                <p id={descId} className="modal-request-sub">
+                  {description}
+                </p>
+              : null}
+            </div>
+            <div className="modal-request-head-trailing">
+              {headerActions}
+              <button
+                type="button"
+                className="modal-request-close"
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
           </div>
-          <div className="modal-request-head-trailing">
-            {headerActions}
-            <button
-              type="button"
-              className="modal-request-close"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ×
-            </button>
+          <div className="modal-request-body">
+            <div className="modal-years-tools-scroll">{children}</div>
           </div>
-        </div>
-        <div className="modal-request-body">
-          <div className="modal-years-tools-scroll">{children}</div>
         </div>
       </div>
-    </div>,
-    container,
+    </WlHomeV2ModalPortal>
   )
 }

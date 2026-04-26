@@ -255,7 +255,7 @@ export function WlHomeV2({
         <WlHomeV2Footer />
       </div>
 
-      {/* Outside main + stack shell so z-index stacks above header (header z-5 vs main z-3). */}
+      {/* Modals use WlHomeV2ModalPortal → document.body so the dimmer stacks above #__next / header. */}
       <WlHomeV2RequestModal
         open={requestOpen}
         onClose={() => setRequestOpen(false)}

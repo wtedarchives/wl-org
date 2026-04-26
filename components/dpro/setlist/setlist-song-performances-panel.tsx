@@ -5,7 +5,7 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
-import { Loader2 } from "lucide-react"
+import { CircleNotch } from "@phosphor-icons/react"
 
 import {
   Table,
@@ -137,7 +137,7 @@ export function SetlistSongPerformancesPanel({
               wlHomeV2YearsTable ? "text-white/55" : "text-muted-foreground",
             )}
           >
-            <Loader2 className="size-4 animate-spin" aria-hidden={true} />
+            <CircleNotch className="size-4 animate-spin" aria-hidden />
             <span>Loading performances…</span>
           </div>
         : error ?

@@ -41,6 +41,16 @@
   /* Hide native cursor globally for immersive trail feel */
   .wl-home-v2.trail-active, .wl-home-v2.trail-active * { cursor: none !important; }
 
+  /*
+   * Portaled modals (WlHomeV2ModalPortal) sit on document.body, not under the in-app
+   * `.wl-home-v2.trail-active` root — repeat cursor hiding so the OS cursor doesn’t show
+   * on top of the custom cursor while a popup is open.
+   */
+  body:has(.wl-home-v2.trail-active) .wl-home-v2.wl-home-v2-modal-layer,
+  body:has(.wl-home-v2.trail-active) .wl-home-v2.wl-home-v2-modal-layer * {
+    cursor: none !important;
+  }
+
   /* ---------- Top bar ---------- */
   /* Desktop: brand | nav | user | radio — mobile: radio full width, then menu | brand | user, then drawer */
   .wl-home-v2 header.top {
@@ -2037,7 +2047,22 @@
   }
   .wl-home-v2 .stat.s-accent .s-value{ color: var(--wl-light-orange); }
 
-  /* Request modal — backdrop below cursor trail (10002+) so ring/core stay visible when open */
+  /* Portaled modals (WlHomeV2ModalPortal): fixed layer on document.body above #__next / header */
+  .wl-home-v2.wl-home-v2-modal-layer {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10020 !important;
+    pointer-events: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    min-height: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  /* Request modal — backdrop below cursor trail (10030+) so ring/core stay visible when open */
   .wl-home-v2 .modal-backdrop {
     position: fixed; inset: 0; z-index: 10001;
     background: rgba(0,0,0,0.75);
@@ -2054,6 +2079,11 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+  }
+  /* Top bar inert while any v2 overlay is open (in-shell or portaled on body). */
+  .wl-home-v2:has(.modal-backdrop.open) header.top,
+  body:has(.wl-home-v2-modal-layer .modal-backdrop.open) .wl-home-v2 header.top {
+    pointer-events: none;
   }
   .wl-home-v2 .modal {
     width: 100%; max-width: 440px;
@@ -2143,6 +2173,440 @@
     width: 100%;
     max-height: min(90vh, 900px);
   }
+  /* Setlist rating / reviews — same flow as archive drawer; wide for review list */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-rating {
+    max-width: min(800px, 96vw);
+    width: 100%;
+    max-height: min(88vh, 720px);
+  }
+  .wl-home-v2 .modal.modal--setlist-rating .modal-setlist-rating-body {
+    min-height: min(40vh, 360px);
+  }
+
+  @keyframes wl-home-v2-setlist-rating-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Setlist rating panel (modal inner) — catalog-aligned surface; rules live here instead of Tailwind arbitrary values */
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 0%;
+    overflow: hidden;
+    border-radius: 0;
+    background: var(--panel-bg);
+    color: var(--wl-white);
+  }
+
+  /* Rating modal — shared divider stroke (legible on --panel-bg) */
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__section {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgb(76, 82, 78);
+    padding: 8px 12px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__section--summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__section--controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* Slightly lifted from summary + review list so “Your rating” reads as its own band */
+    background-color: rgba(255, 255, 255, 0.055);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__avg {
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--wl-white);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__count {
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__controls-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-setlist-rating-panel__controls-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-wrap {
+      width: auto;
+      justify-content: flex-start;
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__hint {
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__hint-muted {
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__stars-inline {
+    display: flex;
+    align-items: center;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-btn {
+    border: 0;
+    border-radius: 4px;
+    padding: 2px;
+    background: transparent;
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-btn:focus {
+    outline: none;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-btn:focus-visible {
+    box-shadow: 0 0 0 2px rgba(88, 200, 174, 0.5);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-btn:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-icon {
+    width: 24px;
+    height: 24px;
+    transition: color 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-icon--off {
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-icon--on {
+    color: #ffd86b;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__outline-btn {
+    flex-shrink: 0;
+    border-radius: 6px;
+    border: 1px solid rgb(53, 56, 54);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: inherit;
+    line-height: 1.3;
+    color: var(--wl-white);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__outline-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__edit {
+    animation: wl-home-v2-rating-edit-in 0.2s ease-out;
+  }
+
+  @keyframes wl-home-v2-rating-edit-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__edit-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Between “Your rating” row and write-a-review / optional review form */
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__edit.wl-home-v2-setlist-rating-panel__edit-fields {
+    border-top: 1px solid rgb(76, 82, 78);
+    padding-top: 12px;
+    margin-top: 4px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__summary-stars,
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review-stars {
+    flex-shrink: 0;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-star-empty {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-star-fill {
+    color: #ffd86b;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__field-label {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__textarea {
+    box-sizing: border-box;
+    min-height: 80px;
+    width: 100%;
+    resize: none;
+    border-radius: 6px;
+    border: 1px solid rgb(53, 56, 54);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 10px;
+    font-size: 11px;
+    line-height: 1.45;
+    font-family: inherit;
+    color: var(--wl-white);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__textarea::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__textarea:focus {
+    outline: none;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__textarea:focus-visible {
+    border-color: rgb(52, 109, 95);
+    box-shadow: 0 0 0 1px rgba(88, 200, 174, 0.35);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__field-error {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #fca5a5;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__primary-btn {
+    border: 0;
+    border-radius: 6px;
+    background: #059669;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.3;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__primary-btn:hover:not(:disabled) {
+    background: #047857;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__text-btn {
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: inherit;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__text-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--wl-white);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__scroll {
+    box-sizing: border-box;
+    min-height: 0;
+    flex: 1 1 0%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__list {
+    padding: 0;
+    margin: 0;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__error-banner {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px;
+    padding: 12px 16px;
+    text-align: center;
+    border-radius: 6px;
+    border: 1px solid rgb(185, 80, 80);
+    background: rgba(239, 68, 68, 0.1);
+    font-size: 11px;
+    line-height: 1.45;
+    color: #fca5a5;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 32px 12px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__loading-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    animation: wl-home-v2-setlist-rating-spin 0.8s linear infinite;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__loading-text {
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__empty {
+    margin: 0;
+    padding: 24px 12px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-bottom: 1px solid rgb(76, 82, 78);
+    padding: 8px 8px;
+    transition: background 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review:last-child {
+    border-bottom: 0;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review:hover {
+    background: #3d4842;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review-user {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--wl-white);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__review-body {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__footer {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    border-top: 1px solid rgb(76, 82, 78);
+    padding: 8px 12px;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__submit-wide {
+    box-sizing: border-box;
+    width: 100%;
+    border: 0;
+    border-radius: 6px;
+    background: #059669;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.3;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__submit-wide:hover:not(:disabled) {
+    background: #047857;
+  }
+
+  .wl-home-v2 .wl-home-v2-setlist-rating-panel__submit-wide:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-wted {
     max-width: min(36rem, 96vw);
     width: 100%;
@@ -2387,6 +2851,8 @@
     border: 1px solid rgba(88, 200, 174, 0.35) !important;
     border-bottom: 1px solid rgba(88, 200, 174, 0.35) !important;
     background: rgba(88, 200, 174, 0.16) !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
   .wl-home-v2 .wl-home-v2-wted-request-track-btn {
     border: 1px solid rgb(52, 109, 95) !important;
@@ -2395,6 +2861,8 @@
     font-size: 11px;
     font-weight: 600;
     box-shadow: none !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
   .wl-home-v2 .wl-home-v2-wted-request-track-btn:hover:not(:disabled) {
     background: rgba(88, 200, 174, 0.32) !important;
@@ -3231,10 +3699,10 @@
     text-decoration: none !important;
   }
 
-  /* ---------- Cursor + trail (above .modal-backdrop 10001) ---------- */
+  /* ---------- Cursor + trail (above portaled .modal-backdrop layer 10020) ---------- */
   /* Inner: solid dot + soft glow (Homepage-source.html); fill driven in JS for trail hue */
   .wl-home-v2 .cursor-core {
-    position: fixed; top: 0; left: 0; z-index: 10004;
+    position: fixed; top: 0; left: 0; z-index: 10032;
     width: 14px; height: 14px; border-radius: 50%;
     box-sizing: border-box;
     border: none;
@@ -3247,7 +3715,7 @@
   }
   /* Outer: larger lagging ring (outline only) */
   .wl-home-v2 .cursor-ring {
-    position: fixed; top: 0; left: 0; z-index: 10003;
+    position: fixed; top: 0; left: 0; z-index: 10031;
     width: 38px; height: 38px; border-radius: 50%;
     box-sizing: border-box;
     background: transparent;
@@ -3261,7 +3729,7 @@
     height: 22px;
   }
   .wl-home-v2 .cursor-ring.hov{ width: 64px; height: 64px; border-color: rgb(183, 135, 112); }
-  .wl-home-v2 .trail-canvas{ position: fixed; inset: 0; z-index: 10002; pointer-events: none; }
+  .wl-home-v2 .trail-canvas{ position: fixed; inset: 0; z-index: 10030; pointer-events: none; }
 
   /* ---------- Tweaks panel ---------- */
   .wl-home-v2 .tweaks {
@@ -3901,6 +4369,46 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
+.wl-home-v2 .wl-home-v2-setlist button.qs-card,
+.wl-home-v2 .wl-home-v2-setlist button.side-card {
+  appearance: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  /* Match `.wbtn` timing (setlist Community Discussion, etc.) */
+  transition: all 0.18s;
+}
+/* Match `.wl-home-v2-setlist .wbtn.green:hover` + lift from `.wbtn:hover` */
+.wl-home-v2 .wl-home-v2-setlist button.qs-card:hover:not(:disabled),
+.wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) {
+  /* Teal wash — stronger than `.wbtn.green:hover` (0.18) */
+  background: rgba(88, 200, 174, 0.4);
+  border-color: rgb(52, 109, 95);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.wl-home-v2 .wl-home-v2-setlist button.qs-card:hover:not(:disabled) .qs-label,
+.wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) .sc-label {
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.18s;
+}
+.wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) .sc-sub {
+  color: rgba(255, 255, 255, 0.55);
+  transition: color 0.18s;
+}
+.wl-home-v2 .wl-home-v2-setlist button.qs-card:focus-visible,
+.wl-home-v2 .wl-home-v2-setlist button.side-card:focus-visible {
+  outline: 2px solid var(--wl-orange);
+  outline-offset: 2px;
+}
+.wl-home-v2 .wl-home-v2-setlist .qs-stars-row {
+  display: flex;
+  justify-content: flex-start;
+}
 .wl-home-v2 .wl-home-v2-setlist .qs-card .qs-label {
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
@@ -4538,8 +5046,12 @@
   color: #ffd86b;
   font-size: 14px;
 }
+.wl-home-v2 .wl-home-v2-setlist .twin-cards .sc-stars-row {
+  display: flex;
+  justify-content: flex-start;
+}
 .wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend {
-  padding: 6px 10px;
+  padding: 6px 4px;
   background: rgba(255, 122, 103, 0.15);
   border: 1px solid rgb(111, 60, 51);
   border-radius: 6px;
@@ -4549,10 +5061,12 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.18s;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
   width: 100%;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend:hover {
+.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend:hover:not(:disabled) {
   background: rgba(255, 122, 103, 0.3);
 }
 .wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend.attended {
@@ -4560,12 +5074,20 @@
   border-color: rgb(44, 91, 79);
   color: var(--wl-green);
 }
+.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend.attended:hover:not(:disabled) {
+  background: rgba(88, 200, 174, 0.32);
+  border-color: rgb(62, 120, 105);
+}
+.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
 .wl-home-v2 .wl-home-v2-setlist .wbtn {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 4px 14px;
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.63);
   border: 1px solid rgb(63, 65, 64);
@@ -4594,6 +5116,9 @@
   border-color: rgb(52, 109, 95);
 }
 .wl-home-v2 .wl-home-v2-setlist .wbtn.green .arr {
+  color: var(--wl-green);
+}
+.wl-home-v2 .wl-home-v2-setlist .wbtn.green .wbtn-icon {
   color: var(--wl-green);
 }
 .wl-home-v2 .wl-home-v2-setlist .stat-row {

@@ -1,6 +1,6 @@
 "use client"
 
-import { Star } from "lucide-react"
+import { Star } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 
 interface SetlistStarRatingProps {
@@ -32,20 +32,13 @@ export function SetlistStarRating({
           : 0
         return (
           <div key={starNumber} className="relative size-4">
-            <Star
-              className="size-4 text-muted-foreground/30"
-              strokeWidth={1.75}
-            />
+            <Star className="size-4 text-muted-foreground/30" weight="regular" />
             {fillPercentage > 0 && (
               <div
                 className="absolute inset-0 overflow-hidden"
                 style={{ width: `${fillPercentage * 100}%` }}
               >
-                <Star
-                  className="size-4 text-yellow-500"
-                  strokeWidth={1.75}
-                  fill="currentColor"
-                />
+                <Star className="size-4 text-yellow-500" weight="fill" />
               </div>
             )}
           </div>

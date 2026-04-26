@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from "react"
 
-import { Plus } from "lucide-react"
+import { Plus } from "@phosphor-icons/react"
 
 import { cn } from "@/lib/utils"
 
@@ -59,7 +59,7 @@ export const SETLIST_TRUNC_COLLAPSED_ROW_PX = 24.5
 const COACH_BLOCK_TYPO =
   "block min-w-0 max-w-full whitespace-normal break-words text-[10px] leading-2.5 text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline [&_p]:my-0"
 
-/** Expand control: yellow circle + black plus (Lucide). */
+/** Expand control: yellow circle + black plus (Phosphor). */
 const EXPAND_BUTTON_CLASS =
   "inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-yellow-500 px-1 text-black shadow-sm transition-colors hover:bg-yellow-500/90 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
 
@@ -214,7 +214,7 @@ export function SetlistTruncatableCell({
             aria-expanded={false}
             aria-label={expandLabel}
           >
-            <Plus className="size-3.5 stroke-[2.5] text-black" aria-hidden />
+            <Plus className="size-3.5 text-black" weight="bold" aria-hidden />
           </button>
         </div>
       : <div
