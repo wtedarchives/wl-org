@@ -3,6 +3,7 @@
 import {
   Fragment,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useState,
   type CSSProperties,
@@ -16,12 +17,26 @@ import {
   type BreadcrumbItem,
 } from "@/components/setlist-breadcrumb-context"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
+import { SetlistShowsDropdown } from "@/components/dpro/setlist/setlist-shows-dropdown"
+import { SetlistTourDropdown } from "@/components/dpro/setlist/setlist-tour-dropdown"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { cn } from "@/lib/utils"
+import type { Tour } from "@/hooks/use-setlist-data"
 import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
-import type { SetlistEntry, Show } from "@/types/setlist"
+import type { SetlistEntry, Show, ShowDate } from "@/types/setlist"
+import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import { WlHomeV2SetlistTable } from "@/components/wl-home-v2/wl-home-v2-setlist-table"
+import type {
+  ReleaseToEntriesMap,
+  ShowRelease,
+} from "@/hooks/use-setlist-releases"
+
+const WL_HOME_V2_SETLIST_SELECT_CONTENT =
+  "wl-home-v2-setlist-select-content border-0 shadow-lg ring-1 ring-white/10"
+
+const WL_HOME_V2_SETLIST_SELECT_TRIGGER =
+  "wl-home-v2-setlist-select-trigger h-auto min-h-0 w-max max-w-full min-w-0 gap-1.5 px-2.5 py-1 text-xs shadow-none items-center"
 
 /** Match `wl-home-v2-years-view` / Tailwind `xl` — desktop two-column layout. */
 const TAILWIND_XL_MIN_PX = 1280
@@ -36,30 +51,59 @@ type SetlistLayoutMode = "mobile" | "desktop" | null
 export function WlHomeV2SetlistPlaceholderView({
   breadcrumbs,
   show,
+  showId,
   setlist,
+  showAdminUi,
+  copiedEntryIds,
+  onNumberClick,
   showPositionInTour,
   tourShowNav,
   onTourShowSelect,
+  tours,
+  showDates,
+  onTourSelect,
   maxShowCanonId,
   maxShowCanonIdLoading,
+  releases,
+  releaseToEntriesMap,
   onJotyBadgeClick,
+  onSongClick,
+  onWtedClick,
 }: {
   breadcrumbs: BreadcrumbItem[] | null
   show: Show
+  showId: string
   setlist: SetlistEntry[]
+  showAdminUi?: boolean
+  copiedEntryIds?: Set<string>
+  onNumberClick?: (entryId: string) => void
   onJotyBadgeClick: (entry: SetlistEntry) => void
+  onSongClick?: (entry: SetlistEntry) => void
+  onWtedClick?: (entry: SetlistEntry) => void
   showPositionInTour: ShowPositionInTour | null
   tourShowNav: {
     prevShowId: string | null
     nextShowId: string | null
   } | null
   onTourShowSelect: (showId: string) => void
+  tours: Tour[]
+  showDates: ShowDate[]
+  onTourSelect: (tourId: string) => void
   maxShowCanonId: number | null
   maxShowCanonIdLoading: boolean
+  releases: ShowRelease[]
+  releaseToEntriesMap: ReleaseToEntriesMap
 }) {
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const [layoutMode, setLayoutMode] = useState<SetlistLayoutMode>(null)
   const [attended, setAttended] = useState(false)
+  const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(
+    null,
+  )
+
+  useEffect(() => {
+    setHoveredReleaseId(null)
+  }, [showId])
   const onAttendClick = useCallback(() => {
     setAttended((v) => !v)
   }, [])
@@ -80,8 +124,10 @@ export function WlHomeV2SetlistPlaceholderView({
   const venueLocation = show.show_venue_location?.trim() ?? ""
   const subvenueLabel = show.show_subvenue?.trim() ?? ""
   const showDetailLabel = show.show_detail?.trim() ?? ""
-  const coachNotesText = show.show_coachnotes?.trim() ?? ""
-
+  const showAlertLabel = show.show_alert?.trim() ?? ""
+  /** Without show detail, subvenue + city read cleaner on two lines than "A · B". */
+  const venueStackSubvenueLocation =
+    !showDetailLabel && !!subvenueLabel && !!venueLocation
   const showCanonPositionPill =
     show.show_canonid != null &&
     !maxShowCanonIdLoading &&
@@ -106,30 +152,60 @@ export function WlHomeV2SetlistPlaceholderView({
 
   return (
     <div className="wl-home-v2-years-page wl-home-v2-setlist">
-      {breadcrumbs != null && breadcrumbs.length > 0 ?
-        <div className="crumbs">
-          {breadcrumbs.map((item, i) => {
-            const isArchivesHub =
-              item.href === WL_V2_ARCHIVES_BREADCRUMB_ROOT.href &&
-              item.label === WL_V2_ARCHIVES_BREADCRUMB_ROOT.label
-            const isLast = i === breadcrumbs.length - 1
-            return (
-              <Fragment key={`${i}-${item.label}`}>
-                {i > 0 ?
-                  <span className="sep">&gt;</span>
-                : null}
-                {isLast ?
-                  <span className="here">{item.label}</span>
-                : isArchivesHub && openArchiveHub ?
-                  <a href={item.href} onClick={onArchivesCrumbClick}>
-                    {item.label}
-                  </a>
-                : <a href={item.href}>{item.label}</a>}
-              </Fragment>
-            )
-          })}
+      <div className="wl-home-v2-setlist-crumbs-bar">
+        <nav
+          className="wl-home-v2-setlist-crumbs-trail"
+          aria-label="Breadcrumb"
+        >
+          {breadcrumbs != null && breadcrumbs.length > 0 ?
+            breadcrumbs.map((item, i) => {
+              const isArchivesHub =
+                item.href === WL_V2_ARCHIVES_BREADCRUMB_ROOT.href &&
+                item.label === WL_V2_ARCHIVES_BREADCRUMB_ROOT.label
+              const isLast = i === breadcrumbs.length - 1
+              return (
+                <Fragment key={`${i}-${item.label}`}>
+                  {i > 0 ?
+                    <span className="sep">&gt;</span>
+                  : null}
+                  {isLast ?
+                    <span className="here">{item.label}</span>
+                  : isArchivesHub && openArchiveHub ?
+                    <a href={item.href} onClick={onArchivesCrumbClick}>
+                      {item.label}
+                    </a>
+                  : <a href={item.href}>{item.label}</a>}
+                </Fragment>
+              )
+            })
+          : null}
+        </nav>
+        <div
+          className="wl-home-v2-setlist-crumbs-selectors"
+          aria-label="Tour and show date"
+        >
+          <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
+            <SetlistTourDropdown
+              tours={tours}
+              currentTourId={show.tour_id ?? ""}
+              currentTourName={show.show_tour}
+              onTourSelect={onTourSelect}
+              triggerClassName={WL_HOME_V2_SETLIST_SELECT_TRIGGER}
+              contentClassName={WL_HOME_V2_SETLIST_SELECT_CONTENT}
+            />
+          </div>
+          <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
+            <SetlistShowsDropdown
+              showDates={showDates}
+              currentShowId={showId}
+              currentLabel={formatSetlistDate(show.show_date)}
+              onShowSelect={onTourShowSelect}
+              triggerClassName={WL_HOME_V2_SETLIST_SELECT_TRIGGER}
+              contentClassName={WL_HOME_V2_SETLIST_SELECT_CONTENT}
+            />
+          </div>
         </div>
-      : null}
+      </div>
 
       <div className="wl-home-v2-years-body">
         <div
@@ -162,35 +238,39 @@ export function WlHomeV2SetlistPlaceholderView({
                 : null}
               </h1>
               {subvenueLabel || venueLocation ?
-                <div className="venue">
+                <div
+                  className={cn(
+                    "venue",
+                    venueStackSubvenueLocation &&
+                      "venue--stack-subvenue-location",
+                  )}
+                >
                   {subvenueLabel ?
-                    <>
-                      {show.venue_id ?
-                        <Link
-                          href={getVenueArchiveUrl(show.venue_id)}
-                          className="venue-subvenue-link"
-                        >
-                          {subvenueLabel}
-                        </Link>
-                      : show.show_subvenue_venue ?
-                        <Link
-                          href={getVenueArchiveUrl(show.show_subvenue_venue)}
-                          className="venue-subvenue-link"
-                        >
-                          {subvenueLabel}
-                        </Link>
-                      : <span className="venue-subvenue-text">{subvenueLabel}</span>}
-                      {venueLocation ?
-                        <>
-                          <span className="city" aria-hidden="true">
-                            ·
-                          </span>
-                          <span className="venue-location">{venueLocation}</span>
-                        </>
-                      : null}
-                    </>
-                  : venueLocation ?
-                    <span className="venue-location">{venueLocation}</span>
+                    show.venue_id ?
+                      <Link
+                        href={getVenueArchiveUrl(show.venue_id)}
+                        className="venue-subvenue-link"
+                      >
+                        {subvenueLabel}
+                      </Link>
+                    : show.show_subvenue_venue ?
+                      <Link
+                        href={getVenueArchiveUrl(show.show_subvenue_venue)}
+                        className="venue-subvenue-link"
+                      >
+                        {subvenueLabel}
+                      </Link>
+                    : <span className="venue-subvenue-text">{subvenueLabel}</span>
+                  : null}
+                  {venueLocation ?
+                    venueStackSubvenueLocation || !subvenueLabel ?
+                      <span className="venue-location">{venueLocation}</span>
+                    : <>
+                        <span className="city" aria-hidden="true">
+                          ·
+                        </span>
+                        <span className="venue-location">{venueLocation}</span>
+                      </>
                   : null}
                 </div>
               : null}
@@ -199,21 +279,20 @@ export function WlHomeV2SetlistPlaceholderView({
                   <span className="show-detail-pill">{showDetailLabel}</span>
                 </div>
               : null}
+              {showAlertLabel ?
+                <div className="show-header-alert" role="alert">
+                  <span className="show-alert-pill">{showAlertLabel}</span>
+                </div>
+              : null}
             </div>
             <div className="show-header-nav">
               {showCanonPositionPill ?
-                <span className="pos">
+                <span className="pos show-header-canon-pill">
                   SHOW {show.show_canonid!.toLocaleString("en-US")} OF{" "}
                   {maxShowCanonId!.toLocaleString("en-US")}
                 </span>
               : null}
-              <div
-                className={cn(
-                  "show-header-nav-footer",
-                  showCanonPositionPill &&
-                    "show-header-nav-footer--with-canon-pill",
-                )}
-              >
+              <div className="show-header-nav-tour-block">
                 {show.show_tour || showPositionInTour ?
                   <div className="meta show-header-nav-tour">
                     {show.show_tour ?
@@ -266,17 +345,6 @@ export function WlHomeV2SetlistPlaceholderView({
                 </div>
               </div>
             </div>
-            {coachNotesText ?
-              <div className="show-notes">
-                <div className="show-notes-inner">
-                  <div className="notes-label">Coach&apos;s Notes</div>
-                  <div
-                    className="show-notes-body"
-                    dangerouslySetInnerHTML={{ __html: coachNotesText }}
-                  />
-                </div>
-              </div>
-            : null}
           </div>
 
           <div className="quick-stats">
@@ -303,17 +371,22 @@ export function WlHomeV2SetlistPlaceholderView({
           <WlHomeV2SetlistTable
             show={show}
             setlist={setlist}
+            showAdminUi={showAdminUi}
+            copiedEntryIds={copiedEntryIds}
+            onNumberClick={onNumberClick}
             onJotyBadgeClick={onJotyBadgeClick}
+            onSongClick={onSongClick}
+            onWtedClick={onWtedClick}
+            hoveredReleaseId={hoveredReleaseId}
+            releaseToEntriesMap={releaseToEntriesMap}
           />
-
-          <div className="callbacks">
-            <div className="cb-label">Callbacks</div>
-            <div className="cb-list">
-              <span className="cb-pill">Arrow (tease in Hot Tea)</span>
-              <span className="cb-pill">Madhuvan (quote in Tumble jam)</span>
-              <span className="cb-pill">Echo of a Rose → Hot Tea bridge</span>
-            </div>
-          </div>
+          {releases.length > 0 ?
+            <SetlistMediaSection
+              releases={releases}
+              visualVariant="wl-home-v2"
+              onReleaseHover={setHoveredReleaseId}
+            />
+          : null}
             </div>
           </section>
 

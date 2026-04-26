@@ -3,6 +3,8 @@
 import { createPortal } from "react-dom"
 import { useId, useLayoutEffect, useState, type ReactNode } from "react"
 
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+
 type WlHomeV2YearsToolModalProps = {
   open: boolean
   onClose: () => void
@@ -25,6 +27,7 @@ export function WlHomeV2YearsToolModal({
   const headingId = useId()
   const descId = useId()
   const [container, setContainer] = useState<Element | null>(null)
+  useWlHomeV2ScrollLock(open)
 
   useLayoutEffect(() => {
     setContainer(document.querySelector(".wl-home-v2"))

@@ -1,5 +1,7 @@
 "use client"
 
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+
 type WlHomeV2SignInModalProps = {
   open: boolean
   onClose: () => void
@@ -19,6 +21,8 @@ export function WlHomeV2SignInModal({
   onOpenLogin,
   onOpenSignup,
 }: WlHomeV2SignInModalProps) {
+  useWlHomeV2ScrollLock(open)
+
   return (
     <div
       className={"modal-backdrop" + (open ? " open" : "")}

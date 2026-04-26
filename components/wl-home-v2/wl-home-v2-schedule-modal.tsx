@@ -2,6 +2,8 @@
 
 import { useId } from "react"
 
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+
 import { WTED_SCHEDULE_EMBED_URL } from "@/lib/wted-schedule-embed"
 
 type WlHomeV2ScheduleModalProps = {
@@ -20,6 +22,7 @@ export function WlHomeV2ScheduleModal({
   headingId,
 }: WlHomeV2ScheduleModalProps) {
   const subtextId = useId()
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div

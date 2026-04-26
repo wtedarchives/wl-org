@@ -13,6 +13,7 @@ import {
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useProgramDirectorData } from "@/hooks/use-program-director-data"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
 import { cn } from "@/lib/utils"
@@ -48,6 +49,8 @@ export function ProgramDirectorContent({
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
   }, [isV2, showInfo])
+
+  useWlHomeV2ScrollLock(isV2 && showInfo != null)
 
   if (loading) {
     if (isV2) {

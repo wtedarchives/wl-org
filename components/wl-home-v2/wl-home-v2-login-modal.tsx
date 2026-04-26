@@ -4,6 +4,7 @@ import { useId } from "react"
 import { usePathname } from "next/navigation"
 
 import { LoginCredentialsForm } from "@/components/auth/login-credentials-form"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2LoginModalProps = {
   open: boolean
@@ -26,6 +27,7 @@ export function WlHomeV2LoginModal({
   const pathname = usePathname()
   const formIdPrefix = useId()
   const redirectTo = pathname || "/"
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div

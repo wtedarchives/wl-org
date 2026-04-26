@@ -17,13 +17,38 @@ const PILL_CLASSES = {
   venue: "rounded-full border border-border bg-wl-green/30 px-2 py-0.5 text-[10px] font-medium text-foreground",
 } as const
 
+/** WL Home v2: styles live in `wl-home-v2.css` (`.wl-home-v2-wted-slot-pill*`). */
+const PILL_CLASSES_WL_HOME_V2 = {
+  date: "wl-home-v2-wted-slot-pill wl-home-v2-wted-slot-pill--date",
+  group: "wl-home-v2-wted-slot-pill wl-home-v2-wted-slot-pill--group",
+  venue: "wl-home-v2-wted-slot-pill wl-home-v2-wted-slot-pill--venue",
+} as const
+
+export type WtedSlotVisualVariant = "drawer" | "wlHomeV2"
+
+function pillClassesFor(
+  type: keyof typeof PILL_CLASSES,
+  visualVariant: WtedSlotVisualVariant,
+) {
+  return visualVariant === "wlHomeV2" ? PILL_CLASSES_WL_HOME_V2[type] : PILL_CLASSES[type]
+}
+
 export function WtedSegmentsTitle({
   segments,
+  visualVariant = "drawer",
 }: {
   segments: WtedRequestEnrichedSegment[]
+  visualVariant?: WtedSlotVisualVariant
 }) {
   return (
-    <span className="min-w-0 break-words text-xs font-medium leading-snug text-foreground">
+    <span
+      className={cn(
+        "min-w-0 break-words text-xs font-medium leading-snug",
+        visualVariant === "wlHomeV2" ?
+          "text-[12px] text-white/[0.88]"
+        : "text-foreground",
+      )}
+    >
       {segments.map((seg, i) => (
         <Fragment key={i}>
           {i > 0 ?
@@ -50,8 +75,10 @@ export function WtedSegmentsTitle({
 
 export function WtedRequestSlotContent({
   request,
+  visualVariant = "drawer",
 }: {
   request: WtedRequestEnriched
+  visualVariant?: WtedSlotVisualVariant
 }) {
   const pills: { label: string; type: keyof typeof PILL_CLASSES }[] = [
     request.show_date && {
@@ -68,32 +95,81 @@ export function WtedRequestSlotContent({
   return (
     <>
       {request.release_artwork && (
-        <div className="relative size-12 shrink-0 overflow-hidden rounded border border-border">
-          <Image
-            src={request.release_artwork}
-            alt=""
-            width={48}
-            height={48}
-            className="object-cover"
-            unoptimized
-          />
+        <div
+          className={cn(
+            "relative shrink-0 overflow-hidden",
+            visualVariant === "wlHomeV2" ?
+              "wl-home-v2-wted-slot-art"
+            : "size-12 rounded border border-border",
+          )}
+        >
+          {visualVariant === "wlHomeV2" ?
+            <Image
+              src={request.release_artwork}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="56px"
+              unoptimized
+            />
+          : <Image
+              src={request.release_artwork}
+              alt=""
+              width={48}
+              height={48}
+              className="object-cover"
+              unoptimized
+            />
+          }
         </div>
       )}
-      <div className="min-w-0 flex-1">
-        <WtedSegmentsTitle segments={request.segments} />
-        <div className="mt-1 flex flex-wrap gap-1">
+      <div
+        className={cn(
+          "min-w-0 flex-1",
+          visualVariant === "wlHomeV2" && "wl-home-v2-wted-slot-body",
+        )}
+      >
+        <WtedSegmentsTitle
+          segments={request.segments}
+          visualVariant={visualVariant}
+        />
+        <div
+          className={cn(
+            visualVariant === "wlHomeV2" ?
+              "wl-home-v2-wted-slot-pills"
+            : "mt-1 flex flex-wrap gap-1",
+          )}
+        >
           {pills.map(({ label, type }) => (
-            <span key={label} className={cn("inline-flex", PILL_CLASSES[type])}>
+            <span
+              key={label}
+              className={cn(
+                visualVariant !== "wlHomeV2" && "inline-flex",
+                pillClassesFor(type, visualVariant),
+              )}
+            >
               {label}
             </span>
           ))}
         </div>
       </div>
       <div
-        className="flex shrink-0 items-center justify-center rounded-full bg-primary/20 p-1.5"
+        className={cn(
+          "flex shrink-0 items-center justify-center rounded-full",
+          visualVariant === "wlHomeV2" ?
+            "wl-home-v2-wted-slot-check"
+          : "bg-primary/20 p-1.5",
+        )}
         aria-label="Requested"
       >
-        <Check className="size-4 text-primary" aria-hidden />
+        <Check
+          className={cn(
+            visualVariant === "wlHomeV2" ?
+              "wl-home-v2-wted-slot-check-icon"
+            : "size-4 text-primary",
+          )}
+          aria-hidden
+        />
       </div>
     </>
   )
@@ -108,6 +184,7 @@ export function WtedPendingSlotContent({
   submitting,
   submitError,
   waitSeconds,
+  visualVariant = "drawer",
 }: {
   groupEntries: SetlistEntry[]
   show: {
@@ -121,6 +198,7 @@ export function WtedPendingSlotContent({
   submitting: boolean
   submitError: string | null
   waitSeconds: number
+  visualVariant?: WtedSlotVisualVariant
 }) {
   const pills: { label: string; type: keyof typeof PILL_CLASSES }[] = [
     show.show_date && {
@@ -145,50 +223,128 @@ export function WtedPendingSlotContent({
   return (
     <>
       {releaseArtworkLoading ? (
-        <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded border border-border bg-muted/60">
-          <CircleNotch className="size-5 animate-spin text-muted-foreground" aria-hidden />
-        </div>
-      ) : releaseArtwork ? (
-        <div className="relative size-12 shrink-0 overflow-hidden rounded border border-border">
-          <Image
-            src={releaseArtwork}
-            alt=""
-            width={48}
-            height={48}
-            className="object-cover"
-            unoptimized
+        <div
+          className={cn(
+            "relative flex shrink-0 items-center justify-center overflow-hidden",
+            visualVariant === "wlHomeV2" ?
+              "wl-home-v2-wted-slot-art"
+            : "size-12 rounded border border-border bg-muted/60",
+          )}
+        >
+          <CircleNotch
+            className={cn(
+              "size-5 animate-spin",
+              visualVariant === "wlHomeV2" ?
+                "text-white/45"
+              : "text-muted-foreground",
+            )}
+            aria-hidden
           />
         </div>
-      ) : null}
-      <div className="min-w-0 flex-1">
-        <WtedSegmentsTitle segments={segments} />
-        <div className="mt-1 flex flex-wrap gap-1">
+      ) : releaseArtwork ?
+        <div
+          className={cn(
+            "relative shrink-0 overflow-hidden",
+            visualVariant === "wlHomeV2" ?
+              "wl-home-v2-wted-slot-art"
+            : "size-12 rounded border border-border",
+          )}
+        >
+          {visualVariant === "wlHomeV2" ?
+            <Image
+              src={releaseArtwork}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="56px"
+              unoptimized
+            />
+          : <Image
+              src={releaseArtwork}
+              alt=""
+              width={48}
+              height={48}
+              className="object-cover"
+              unoptimized
+            />
+          }
+        </div>
+      : null}
+      <div
+        className={cn(
+          "min-w-0 flex-1",
+          visualVariant === "wlHomeV2" && "wl-home-v2-wted-slot-body",
+        )}
+      >
+        <WtedSegmentsTitle segments={segments} visualVariant={visualVariant} />
+        <div
+          className={cn(
+            visualVariant === "wlHomeV2" ?
+              "wl-home-v2-wted-slot-pills"
+            : "mt-1 flex flex-wrap gap-1",
+          )}
+        >
           {pills.map(({ label, type }) => (
-            <span key={label} className={cn("inline-flex", PILL_CLASSES[type])}>
+            <span
+              key={label}
+              className={cn(
+                visualVariant !== "wlHomeV2" && "inline-flex",
+                pillClassesFor(type, visualVariant),
+              )}
+            >
               {label}
             </span>
           ))}
         </div>
         {submitError && (
-          <p className="mt-1 text-[10px] text-destructive">{submitError}</p>
+          <p
+            className={cn(
+              "mt-1 text-[10px]",
+              visualVariant === "wlHomeV2" ?
+                "text-red-300/95"
+              : "text-destructive",
+            )}
+          >
+            {submitError}
+          </p>
         )}
       </div>
-      <Button
-        size="sm"
-        className={cn(
-          "shrink-0",
-          mustWait && "text-sm",
-          !submitting && !mustWait && "animate-pulse-ring",
-        )}
-        onClick={onRequest}
-        disabled={submitting || mustWait}
-      >
-        {submitting
-          ? "Requesting…"
-          : mustWait
-            ? `Wait ${waitSeconds}s`
-            : "Request track"}
-      </Button>
+      {visualVariant === "wlHomeV2" ?
+        <div className="wl-home-v2-wted-slot-trailing">
+          <Button
+            size="sm"
+            className={cn(
+              "shrink-0",
+              mustWait && "text-sm",
+              "wl-home-v2-wted-request-track-btn",
+            )}
+            onClick={onRequest}
+            disabled={submitting || mustWait}
+          >
+            {submitting
+              ? "Requesting…"
+              : mustWait
+                ? `Wait ${waitSeconds}s`
+                : "Request track"}
+          </Button>
+        </div>
+      : <Button
+          size="sm"
+          className={cn(
+            "shrink-0",
+            mustWait && "text-sm",
+            !submitting && !mustWait && "animate-pulse-ring",
+          )}
+          onClick={onRequest}
+          disabled={submitting || mustWait}
+        >
+          {submitting
+            ? "Requesting…"
+            : mustWait
+              ? `Wait ${waitSeconds}s`
+              : "Request track"}
+        </Button>
+      }
     </>
   )
 }

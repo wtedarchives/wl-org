@@ -1,10 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { CircleNotch, X } from "@phosphor-icons/react"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
-import { Loader2, X } from "lucide-react"
+import { Loader2, X as XLucide } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import type { ShowRelease } from "@/hooks/use-setlist-releases"
+
+export type SetlistReleaseEmbedVisualVariant = "dpro" | "wl-home-v2"
 
 function getYouTubeEmbedUrl(link: string): string | null {
   try {
@@ -34,6 +38,7 @@ interface SetlistReleaseEmbedCardProps {
   onClose: () => void
   isClosing?: boolean
   fullWidth?: boolean
+  visualVariant?: SetlistReleaseEmbedVisualVariant
 }
 
 export function SetlistReleaseEmbedCard({
@@ -44,7 +49,9 @@ export function SetlistReleaseEmbedCard({
   onClose,
   isClosing = false,
   fullWidth = false,
+  visualVariant = "dpro",
 }: SetlistReleaseEmbedCardProps) {
+  const isV2 = visualVariant === "wl-home-v2"
   const isDesktop = useIsDesktopContentLayout()
   const [mounted, setMounted] = useState(false)
 
@@ -70,38 +77,70 @@ export function SetlistReleaseEmbedCard({
 
   return (
     <div
-      className={`
-        flex flex-shrink-0 flex-col rounded-lg border border-border/60 bg-card/80 overflow-hidden
-        ${fullWidth ? "w-full min-w-0" : "w-[400px] min-w-[400px]"}
-        transition-all duration-250 ease-out
-        ${mounted && !isClosing ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"}
-        ${isClosing ? "translate-x-4 opacity-0" : ""}
-      `}
+      className={cn(
+        "flex flex-shrink-0 flex-col overflow-hidden transition-all duration-250 ease-out",
+        isV2 ?
+          "wl-home-v2-setlist-embed-card"
+        : "rounded-lg border border-border/60 bg-card/80",
+        fullWidth ? "w-full min-w-0" : "w-[400px] min-w-[400px]",
+        mounted && !isClosing ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0",
+        isClosing ? "translate-x-4 opacity-0" : "",
+      )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2">
-        <p className="text-xs font-medium text-foreground truncate">
+      <div
+        className={cn(
+          "flex items-center justify-between gap-2",
+          isV2 ?
+            "wl-home-v2-setlist-embed-card-header"
+          : "border-b border-border/60 px-3 py-2",
+        )}
+      >
+        <p
+          className={cn(
+            "truncate text-xs font-medium",
+            isV2 ? "wl-home-v2-setlist-embed-card-title" : "text-foreground",
+          )}
+        >
           {release.release_displayname ?? release.release_id}
         </p>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClose}
-          className="shrink-0 h-6 w-6"
-          aria-label="Close embed"
-        >
-          <X className="size-3.5" />
-        </Button>
+        {isV2 ?
+          <button
+            type="button"
+            onClick={onClose}
+            className="wl-home-v2-setlist-embed-close"
+            aria-label="Close embed"
+          >
+            <X className="size-3.5 shrink-0" aria-hidden />
+          </button>
+        : <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            className="h-6 w-6 shrink-0"
+            aria-label="Close embed"
+          >
+            <XLucide className="size-3.5" />
+          </Button>
+        }
       </div>
       <div
-        className={`relative w-full bg-muted ${
-          type === "bandcamp" ? "min-h-[300px]" : "aspect-video"
-        }`}
+        className={cn(
+          "relative w-full",
+          isV2 ? "wl-home-v2-setlist-embed-card-body" : "bg-muted",
+          type === "bandcamp" ? "min-h-[300px]" : "aspect-video",
+        )}
       >
-        {showBandcampLoading ? (
+        {showBandcampLoading ?
           <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            {isV2 ?
+              <CircleNotch
+                className="size-8 shrink-0 animate-spin text-white/45"
+                aria-hidden
+              />
+            : <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            }
           </div>
-        ) : showContent ? (
+        : showContent ? (
           <iframe
             src={youtubeEmbedUrl ?? bandcampEmbedUrl ?? ""}
             title={isDesktop ? (release.release_displayname ?? "Embed") : undefined}

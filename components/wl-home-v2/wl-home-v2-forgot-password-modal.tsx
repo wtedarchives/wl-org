@@ -3,6 +3,7 @@
 import { useId } from "react"
 
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2ForgotPasswordModalProps = {
   open: boolean
@@ -18,6 +19,7 @@ export function WlHomeV2ForgotPasswordModal({
   onBackToLogin,
 }: WlHomeV2ForgotPasswordModalProps) {
   const formIdPrefix = useId()
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div

@@ -62,7 +62,7 @@ export function SetlistEntrySongCell({
         )}
       </div>
       {entry.joty_round && (
-        <span className="ml-auto shrink-0">
+        <span className="ml-auto ml-3 shrink-0">
           {(() => {
             const jotyStyle = getJotyBadgeStyle(entry.joty_round!)
             return onJotyClick ? (

@@ -22,6 +22,7 @@ import {
   type ArchiveEntry,
 } from "@/app/(main)/old/archive/content"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
 
 type PhosphorTileIcon = ComponentType<{
@@ -112,6 +113,7 @@ export function WlHomeV2ArchiveModal({
 }: WlHomeV2ArchiveModalProps) {
   const descId = useId()
   const myStatsProfile = useUserProfilePicture()
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div

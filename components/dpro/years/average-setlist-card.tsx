@@ -19,6 +19,7 @@ import {
   useAverageSetlist,
   type AverageSetlistResult,
 } from "@/hooks/use-average-setlist"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { SetlistDisplay } from "./setlist-display"
 
 interface ShowSlice {
@@ -117,6 +118,7 @@ function AverageSetlistInfoDialog({
 }) {
   const headingId = useId()
   const [portalContainer, setPortalContainer] = useState<Element | null>(null)
+  useWlHomeV2ScrollLock(open && wlHomeV2)
 
   useLayoutEffect(() => {
     if (!wlHomeV2) return

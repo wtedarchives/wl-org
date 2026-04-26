@@ -6,18 +6,22 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistEntryWtedCellProps {
   entry: SetlistEntry
   onWtedClick?: (entry: SetlistEntry) => void
   showTooltips?: boolean
+  /** When set (e.g. `setlist-header-tooltip` in WL v2), matches header tooltip chrome. */
+  tooltipContentClassName?: string
 }
 
 export function SetlistEntryWtedCell({
   entry,
   onWtedClick,
   showTooltips = true,
+  tooltipContentClassName,
 }: SetlistEntryWtedCellProps) {
   if (!entry.radio_id) return null
 
@@ -52,7 +56,14 @@ export function SetlistEntryWtedCell({
     return (
       <Tooltip>
         <TooltipTrigger asChild>{wtedButton}</TooltipTrigger>
-        <TooltipContent>Request this song on WTED Goose Radio.</TooltipContent>
+        <TooltipContent
+          className={cn(tooltipContentClassName)}
+          {...(tooltipContentClassName ?
+            { side: "top" as const, sideOffset: 6 }
+          : {})}
+        >
+          Request this song on WTED Goose Radio.
+        </TooltipContent>
       </Tooltip>
     )
   }

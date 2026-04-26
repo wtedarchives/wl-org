@@ -7,7 +7,6 @@ import {
   Suspense,
   useCallback,
   useEffect,
-  useId,
   useState,
   type MouseEvent,
 } from "react"
@@ -19,7 +18,10 @@ import { useIsBelowXl } from "@/hooks/use-mobile"
 import { toggleOldPathPrefix } from "@/lib/toggle-old-path-prefix"
 
 import { WlHomeV2ArchiveSubnavContent } from "./wl-home-v2-archive-subnav"
-import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
+import {
+  WL_HOME_V2_COMMUNITY_URL,
+  WL_HOME_V2_TOP_NAV_PANEL_ID,
+} from "./wl-home-v2-constants"
 import { WlHomeV2UserMenu } from "./wl-home-v2-user-menu"
 
 export function WlHomeV2Header({
@@ -39,7 +41,8 @@ export function WlHomeV2Header({
   const pathname = usePathname()
   const router = useRouter()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const mobileNavId = useId()
+  /** Stable id (not `useId`) — see `WL_HOME_V2_TOP_NAV_PANEL_ID` in constants. */
+  const mobileNavId = WL_HOME_V2_TOP_NAV_PANEL_ID
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), [])
 
   const onArchivesNavClick = useCallback(

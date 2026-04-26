@@ -24,6 +24,8 @@ interface SetlistEntryGuestsCellProps {
    * WL Home v2: same pill treatment as the Last column (see `getPersonnelPillWlV2Style`).
    */
   useWlHomeV2PillStyle?: boolean
+  /** When set (e.g. `setlist-header-tooltip` in WL v2), matches header tooltip chrome. */
+  tooltipContentClassName?: string
 }
 
 export function SetlistEntryGuestsCell({
@@ -31,6 +33,7 @@ export function SetlistEntryGuestsCell({
   showTooltips = true,
   nowrap = false,
   useWlHomeV2PillStyle = false,
+  tooltipContentClassName,
 }: SetlistEntryGuestsCellProps) {
   if (!entry.guests?.length) return null
 
@@ -73,7 +76,14 @@ export function SetlistEntryGuestsCell({
                 {g.guest_display_name}
               </Link>
             </TooltipTrigger>
-            <TooltipContent>{g.guest_instrument || "Personnel"}</TooltipContent>
+            <TooltipContent
+              className={cn(tooltipContentClassName)}
+              {...(tooltipContentClassName ?
+                { side: "top" as const, sideOffset: 6 }
+              : {})}
+            >
+              {g.guest_instrument || "Personnel"}
+            </TooltipContent>
           </Tooltip>
         ) : (
           <Link

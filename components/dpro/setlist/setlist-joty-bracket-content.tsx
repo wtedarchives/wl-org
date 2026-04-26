@@ -1,5 +1,6 @@
 "use client"
 
+import { Fragment } from "react"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
@@ -7,7 +8,10 @@ import Image from "next/image"
 import { Loader2 } from "lucide-react"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
-import { getJotyBadgeStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  getJotyBadgeStyle,
+  getJotyPillWlV2Style,
+} from "@/components/dpro/setlist/display-setlist-table.constants"
 import { useJotyData } from "@/hooks/use-joty-data"
 import type { JotyResultRow, JotyRoundWithResults } from "@/hooks/use-joty-data"
 import { cn } from "@/lib/utils"
@@ -29,14 +33,21 @@ function formatShowDate(dateStr: string | null): string {
 }
 
 /** AAT + nugs marks — used by {@link SetlistJotyDrawer} and WL Home v2 JOTY modal. */
-export function JotyBracketSponsorLogos() {
+export function JotyBracketSponsorLogos({ className }: { className?: string }) {
+  const linkClass =
+    "inline-flex shrink-0 origin-center opacity-90 transition-all duration-200 ease-out hover:scale-110 hover:opacity-100 active:scale-100"
   return (
-    <div className="flex shrink-0 items-center justify-start gap-1.5">
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-start gap-1.5",
+        className,
+      )}
+    >
       <a
         href="https://jotyoftheyear.com"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex shrink-0 opacity-90 transition-opacity hover:opacity-100"
+        className={linkClass}
         aria-label="Always Almost There – jotyoftheyear.com"
       >
         <Image
@@ -52,7 +63,7 @@ export function JotyBracketSponsorLogos() {
         href="https://nugs.net"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex shrink-0 opacity-90 transition-opacity hover:opacity-100"
+        className={linkClass}
         aria-label="nugs.net"
       >
         <Image
@@ -73,6 +84,8 @@ type SetlistJotyBracketDataBodyProps = {
   year: number | null
   highlightedEntryId: string | null
   onNavigate: () => void
+  /** WL Home v2: match {@link YearShowsTable} `wlHomeV2` table chrome (11px, row hovers). */
+  wlHomeV2YearsTable?: boolean
 }
 
 /**
@@ -84,21 +97,40 @@ export function SetlistJotyBracketDataBody({
   year,
   highlightedEntryId,
   onNavigate,
+  wlHomeV2YearsTable = false,
 }: SetlistJotyBracketDataBodyProps) {
   const { rounds, loading } = useJotyData(open, year)
+  const y = wlHomeV2YearsTable
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Loading JOTY data…</p>
+        <Loader2
+          className={cn(
+            "size-6 animate-spin",
+            y ? "text-white/55" : "text-muted-foreground",
+          )}
+        />
+        <p
+          className={cn(
+            "text-sm",
+            y ? "text-white/55" : "text-muted-foreground",
+          )}
+        >
+          Loading JOTY data…
+        </p>
       </div>
     )
   }
 
   if (year != null && rounds.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-muted-foreground">
+      <p
+        className={cn(
+          "py-6 text-center text-sm",
+          y ? "text-white/55" : "text-muted-foreground",
+        )}
+      >
         No JOTY data found for {year}.
       </p>
     )
@@ -106,55 +138,91 @@ export function SetlistJotyBracketDataBody({
 
   if (rounds.length > 0) {
     return (
-      <div className="space-y-3">
-        {rounds.map((round) => (
-          <RoundBlock
-            key={round.round_abbr}
-            round={round}
-            highlightedEntryId={highlightedEntryId}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </div>
+      <Table
+        className={cn(
+          y && "wl-home-v2-years-table min-w-max text-[11px]",
+        )}
+      >
+        <TableBody>
+          {rounds.map((round, roundIndex) => (
+            <Fragment key={round.round_abbr}>
+              <RoundSectionHeaderRow
+                round={round}
+                showTopBorder={roundIndex > 0}
+                wlHomeV2YearsTable={y}
+              />
+              {round.results.map((row) => (
+                <ResultRow
+                  key={row.entry_id}
+                  row={row}
+                  isHighlighted={row.entry_id === highlightedEntryId}
+                  onNavigate={onNavigate}
+                  wlHomeV2YearsTable={y}
+                />
+              ))}
+            </Fragment>
+          ))}
+        </TableBody>
+      </Table>
     )
   }
 
   return null
 }
 
-function RoundBlock({
+function RoundSectionHeaderRow({
   round,
-  highlightedEntryId,
-  onNavigate,
+  showTopBorder,
+  wlHomeV2YearsTable,
 }: {
   round: JotyRoundWithResults
-  highlightedEntryId: string | null
-  onNavigate: () => void
+  showTopBorder: boolean
+  wlHomeV2YearsTable: boolean
 }) {
-  const badgeStyle = getJotyBadgeStyle(round.round_abbr)
+  const y = wlHomeV2YearsTable
+  const legacyBadge = getJotyBadgeStyle(round.round_abbr)
+  const wlPill = y ? getJotyPillWlV2Style(round.round_abbr) : null
   return (
-    <section className="rounded-lg border border-border bg-muted/30 p-1">
-      <div className="mb-2 ml-1.5 flex items-center gap-4">
-        <span className="text-sm font-medium text-foreground">
-          {round.round_name}
-        </span>
-        <span className={badgeStyle.className} style={badgeStyle.style}>
-          {round.round_abbr}
-        </span>
-      </div>
-      <Table>
-        <TableBody>
-          {round.results.map((row) => (
-            <ResultRow
-              key={row.entry_id}
-              row={row}
-              isHighlighted={row.entry_id === highlightedEntryId}
-              onNavigate={onNavigate}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </section>
+    <TableRow
+      className={cn(
+        y ?
+          "border-b border-white/[0.06] bg-black/25 hover:bg-black/25"
+        : "border-border/60 bg-muted/30 hover:bg-muted/30",
+        showTopBorder &&
+          (y ? "border-t border-white/10" : "border-t-2 border-t-border/80"),
+      )}
+    >
+      <TableCell
+        colSpan={3}
+        className={cn(y ? "!px-2 !py-1.5" : "py-2 pl-3 pr-2")}
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <span
+            className={cn(
+              "font-medium",
+              y ? "text-[11px]" : "text-sm text-foreground",
+            )}
+          >
+            {round.round_name}
+          </span>
+          {wlPill ?
+            <span
+              className="joty-pill"
+              style={{
+                background: wlPill.background,
+                color: wlPill.color,
+                border: `1px solid ${wlPill.borderColor}`,
+              }}
+            >
+              {round.round_abbr}
+            </span>
+          : <span className={legacyBadge.className} style={legacyBadge.style}>
+              {round.round_abbr}
+            </span>
+          }
+        </div>
+      </TableCell>
+    </TableRow>
   )
 }
 
@@ -162,11 +230,14 @@ function ResultRow({
   row,
   isHighlighted,
   onNavigate,
+  wlHomeV2YearsTable,
 }: {
   row: JotyResultRow
   isHighlighted: boolean
   onNavigate: () => void
+  wlHomeV2YearsTable: boolean
 }) {
+  const y = wlHomeV2YearsTable
   const venueDisplay = row.show_venue_location
     ? row.show_subvenue?.trim()
       ? `${row.show_venue_location}`
@@ -176,15 +247,30 @@ function ResultRow({
   return (
     <TableRow
       className={cn(
-        "border-border/60 transition-colors",
-        isHighlighted ? "bg-primary/20" : "hover:bg-muted/50",
+        "transition-colors",
+        y ?
+          cn(
+            "border-b border-white/[0.06] bg-transparent",
+            isHighlighted ?
+              "bg-[rgba(88,200,174,0.18)] hover:bg-[rgba(88,200,174,0.24)]"
+            : "hover:bg-[rgba(88,200,174,0.11)]",
+          )
+        : cn(
+            "border-border/60",
+            isHighlighted ? "bg-primary/20 hover:bg-primary/25" : "hover:bg-muted/50",
+          ),
       )}
     >
-      <TableCell className="py-0.5 text-xs font-medium">
+      <TableCell
+        className={cn(
+          "text-left font-medium",
+          y ? "!px-2 !py-0.5 text-[11px]" : "py-0.5 text-xs",
+        )}
+      >
         {row.song_id ?
           <Link
             href={getSongArchiveUrl(row.song_id)}
-            className="text-foreground hover:underline"
+            className={cn(!y && "text-foreground", "hover:underline")}
             onClick={onNavigate}
           >
             <SongDisplayName
@@ -198,18 +284,30 @@ function ResultRow({
           />
         }
       </TableCell>
-      <TableCell className="py-0.5 text-xs text-muted-foreground">
+      <TableCell
+        className={cn(
+          "text-center text-muted-foreground",
+          y ?
+            "whitespace-nowrap !px-2 !py-0.5 text-[11px] font-medium tabular-nums"
+          : "py-0.5 text-xs",
+        )}
+      >
         {row.show_id ?
           <Link
             href={getSetlistArchiveUrl(row.show_id)}
-            className="text-foreground hover:underline"
+            className={cn(!y && "text-foreground", "hover:underline")}
             onClick={onNavigate}
           >
             {formatShowDate(row.show_date)}
           </Link>
         : formatShowDate(row.show_date)}
       </TableCell>
-      <TableCell className="py-0.5 text-xs text-muted-foreground">
+      <TableCell
+        className={cn(
+          "whitespace-normal text-right text-muted-foreground",
+          y ? "!px-2 !py-0.5 text-[11px]" : "py-0.5 text-xs",
+        )}
+      >
         {venueDisplay}
       </TableCell>
     </TableRow>

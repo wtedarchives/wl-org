@@ -7,6 +7,7 @@ import {
   JotyBracketSponsorLogos,
   SetlistJotyBracketDataBody,
 } from "@/components/dpro/setlist/setlist-joty-bracket-content"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2SetlistJotyModalProps = {
   open: boolean
@@ -25,6 +26,7 @@ export function WlHomeV2SetlistJotyModal({
 }: WlHomeV2SetlistJotyModalProps) {
   const descId = useId()
   const displayYear = year ?? 0
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div
@@ -44,20 +46,21 @@ export function WlHomeV2SetlistJotyModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-request-head modal-joty-head">
-          <div className="modal-joty-head-left">
+          <div className="modal-joty-head-spacer" aria-hidden={true} />
+          <h3 id={headingId} className="modal-joty-title modal-joty-title--center">
+            Jam of the Year {displayYear}
+          </h3>
+          <div className="modal-joty-head-trailing">
             <JotyBracketSponsorLogos />
-            <h3 id={headingId} className="modal-joty-title">
-              Jam of the Year {displayYear}
-            </h3>
+            <button
+              type="button"
+              className="modal-request-close"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
-          <button
-            type="button"
-            className="modal-request-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
         </div>
         <div
           className="modal-request-body modal-joty-scroll"
@@ -68,6 +71,7 @@ export function WlHomeV2SetlistJotyModal({
             year={year}
             highlightedEntryId={highlightedEntryId}
             onNavigate={onClose}
+            wlHomeV2YearsTable
           />
         </div>
         <p

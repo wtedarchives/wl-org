@@ -3,6 +3,7 @@
 import { useId } from "react"
 
 import { SignupCredentialsForm } from "@/components/auth/signup-credentials-form"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2SignupModalProps = {
   open: boolean
@@ -18,6 +19,7 @@ export function WlHomeV2SignupModal({
   onBackToLogin,
 }: WlHomeV2SignupModalProps) {
   const formIdPrefix = useId()
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div

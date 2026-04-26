@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip"
 import { getLastCountPillStyle } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { formatSetlistDate } from "@/lib/setlist-utils"
+import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 
 interface SetlistEntryLastCellProps {
@@ -21,6 +22,8 @@ interface SetlistEntryLastCellProps {
    * `getLastCountPillStyle` + `.last-pill` in wl-home-v2).
    */
   useWlHomeV2PillStyle?: boolean
+  /** When set (e.g. `setlist-header-tooltip` in WL v2), matches header tooltip chrome. */
+  tooltipContentClassName?: string
 }
 
 export function SetlistEntryLastCell({
@@ -28,6 +31,7 @@ export function SetlistEntryLastCell({
   lastBadgeStyle,
   showTooltips = true,
   useWlHomeV2PillStyle = false,
+  tooltipContentClassName,
 }: SetlistEntryLastCellProps) {
   if (
     entry.last_count == null ||
@@ -69,7 +73,15 @@ export function SetlistEntryLastCell({
             {content}
           </Link>
         </TooltipTrigger>
-        <TooltipContent className="max-w-[200px] text-xs">
+        <TooltipContent
+          className={cn(
+            !tooltipContentClassName && "max-w-[200px] text-xs",
+            tooltipContentClassName,
+          )}
+          {...(tooltipContentClassName ?
+            { side: "top" as const, sideOffset: 6 }
+          : {})}
+        >
           <div className="space-y-0.5">
             {entry.last_show_date && (
               <div>

@@ -3,6 +3,7 @@
 import { useId } from "react"
 
 import { WtedRequestSongFlow } from "@/components/wted/wted-request-song-flow"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 type WlHomeV2RequestModalProps = {
   open: boolean
@@ -16,6 +17,7 @@ export function WlHomeV2RequestModal({
   headingId,
 }: WlHomeV2RequestModalProps) {
   const subtextId = useId()
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div

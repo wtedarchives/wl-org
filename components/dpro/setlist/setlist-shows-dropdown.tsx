@@ -10,6 +10,24 @@ import {
 import { cn } from "@/lib/utils"
 import type { ShowDate } from "@/types/setlist"
 
+/** List row label: `mm.dd.yy (venue_location)` when location exists. */
+export function showDateDropdownOptionLabel(s: ShowDate): string {
+  const loc = s.show_venue_location?.trim()
+  return loc ? `${s.formatted_show_date} (${loc})` : s.formatted_show_date
+}
+
+function ShowDateSelectOptionLabel({ s }: { s: ShowDate }) {
+  const loc = s.show_venue_location?.trim()
+  return (
+    <>
+      <span className="font-semibold tabular-nums">{s.formatted_show_date}</span>
+      {loc ?
+        <span className="font-normal tabular-nums"> ({loc})</span>
+      : null}
+    </>
+  )
+}
+
 interface SetlistShowsDropdownProps {
   showDates: ShowDate[]
   currentShowId: string
@@ -17,6 +35,8 @@ interface SetlistShowsDropdownProps {
   onShowSelect: (showId: string) => void
   /** Merged onto SelectTrigger (e.g. mobile height) */
   triggerClassName?: string
+  /** Optional className for the portaled SelectContent */
+  contentClassName?: string
 }
 
 export function SetlistShowsDropdown({
@@ -25,6 +45,7 @@ export function SetlistShowsDropdown({
   currentLabel,
   onShowSelect,
   triggerClassName,
+  contentClassName,
 }: SetlistShowsDropdownProps) {
   if (showDates.length === 0) {
     return (
@@ -33,6 +54,9 @@ export function SetlistShowsDropdown({
       </span>
     )
   }
+
+  const current = showDates.find((s) => s.show_id === currentShowId)
+  const triggerLabel = current?.formatted_show_date ?? currentLabel
 
   return (
     <Select
@@ -46,16 +70,22 @@ export function SetlistShowsDropdown({
           triggerClassName
         )}
       >
-        <SelectValue />
+        <SelectValue placeholder={currentLabel}>
+          {currentShowId ?
+            <span className="font-semibold tabular-nums">
+              {triggerLabel || currentLabel}
+            </span>
+          : undefined}
+        </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className={contentClassName}>
         {showDates.map((s) => (
           <SelectItem
             key={s.show_id}
             value={s.show_id}
             className="text-xs tabular-nums"
           >
-            {s.formatted_show_date}
+            <ShowDateSelectOptionLabel s={s} />
           </SelectItem>
         ))}
       </SelectContent>

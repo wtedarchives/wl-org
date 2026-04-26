@@ -4,6 +4,8 @@ import { Info, ListNumbers, MusicNote, Users } from "@phosphor-icons/react"
 import Link from "next/link"
 import { useId } from "react"
 
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+
 const ICON_PROPS = {
   size: 22,
   weight: "regular" as const,
@@ -28,6 +30,7 @@ export function WlHomeV2RadioModal({
   onRequestSong,
 }: WlHomeV2RadioModalProps) {
   const descId = useId()
+  useWlHomeV2ScrollLock(open)
 
   return (
     <div
