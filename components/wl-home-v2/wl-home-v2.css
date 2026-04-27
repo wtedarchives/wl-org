@@ -334,7 +334,8 @@
       padding-top: 0;
       padding-bottom: 0;
       margin: 0;
-      border-top: 1px solid transparent;
+      /* Opaque match to open state; hidden while drawer is collapsed via opacity. */
+      border-top: 1px solid rgb(39, 42, 40);
       transition:
         max-height 0.28s ease-out,
         opacity 0.22s ease-out,
@@ -1860,12 +1861,13 @@
     margin: 0 -14px;
     padding: 4px 14px;
     border-radius: 10px;
-    border: 1px solid transparent;
+    /* Side/top strokes match frosted panel interior (~black 38% over deep green). */
+    border: 1px solid rgb(25, 56, 48);
     border-bottom: 1px solid rgb(29, 32, 30);
     transition: background 0.18s, border-color 0.18s, transform 0.18s;
   }
   .wl-home-v2 .widget-panel > a.topic-row:last-of-type {
-    border-bottom-color: transparent;
+    border-bottom-color: rgb(25, 56, 48);
   }
   .wl-home-v2 .widget-panel > a.topic-row:hover {
     background: rgba(88, 200, 174, 0.18);
@@ -1898,7 +1900,7 @@
     width: 100%;
     padding: 4px 14px;
     border-radius: 10px;
-    border: 1px solid transparent;
+    border: 1px solid rgb(25, 56, 48);
     border-bottom: 1px solid rgb(29, 32, 30);
     background: transparent;
     font: inherit;
@@ -1909,7 +1911,7 @@
     transition: background 0.18s, border-color 0.18s, transform 0.18s;
   }
   .wl-home-v2 .wl-home-v2-years-filter-list .years-filter-button:last-child {
-    border-bottom-color: transparent;
+    border-bottom-color: rgb(25, 56, 48);
   }
   .wl-home-v2 .wl-home-v2-years-filter-list .years-filter-button:hover {
     background: rgba(88, 200, 174, 0.18);
@@ -2160,7 +2162,7 @@
     margin: 0;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgb(42, 44, 43);
     font-size: 11px;
     line-height: 1.45;
     color: rgba(255, 255, 255, 0.5);
@@ -2181,6 +2183,258 @@
   }
   .wl-home-v2 .modal.modal--setlist-rating .modal-setlist-rating-body {
     min-height: min(40vh, 360px);
+  }
+  /* Setlist scan — same data as archive drawer; wide two-column body */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-scan {
+    max-width: min(800px, 96vw);
+    width: 100%;
+    max-height: min(90vh, 880px);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-scan .modal-setlist-scan-body {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    margin-top: 14px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 2px 8px;
+    box-shadow: none;
+    border: 0;
+    background: transparent;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+    min-height: min(48vh, 420px);
+  }
+  @media (min-width: 768px) {
+    .wl-home-v2 .wl-home-v2-setlist-scan-columns {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .wl-home-v2 .wl-home-v2-setlist-scan-col--image {
+      flex: 0 0 auto;
+      max-width: 100%;
+    }
+    .wl-home-v2 .wl-home-v2-setlist-scan-col--setlist {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-scan
+    .sc-label {
+    margin: 0 0 8px 0;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.58);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-image-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-image {
+    max-height: min(500px, 50vh);
+    max-width: 100%;
+    width: auto;
+    border-radius: 10px;
+    object-fit: contain;
+    border: 1px solid rgb(63, 65, 64);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-image-fallback {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-detail {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-detail-primary {
+    margin: 0;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-detail-muted {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-detail-muted-subtle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-setlist-box {
+    border-radius: 10px;
+    border: 1px solid rgb(63, 65, 64);
+    background: rgba(0, 0, 0, 0.28);
+    padding: 8px 10px;
+    margin-bottom: 16px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-set-divider {
+    margin: 6px 0;
+    border: 0;
+    border-top: 1px solid rgb(63, 65, 64);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-entry-row {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-entry-bar {
+    width: 4px;
+    flex-shrink: 0;
+    align-self: stretch;
+    min-height: 1.1em;
+    border-radius: 2px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-entry-main {
+    flex: 1;
+    min-width: 0;
+    padding-left: 8px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-entry-song {
+    display: block;
+    min-width: 0;
+    font-weight: 500;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-song-link {
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-song-link:hover {
+    text-decoration: underline;
+    color: var(--wl-light-orange);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-entry-short {
+    margin-left: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: oklch(0.72 0.14 12);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-entry-segue {
+    margin-left: 4px;
+    color: oklch(0.65 0.12 12);
+    font-weight: 600;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-changes-error {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: oklch(0.72 0.17 22);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-changes-empty {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-changes-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-changes-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.35;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-changes-list a {
+    font-weight: 600;
+    color: var(--wl-orange);
+    text-decoration: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-scan-changes-list a:hover {
+    color: var(--wl-light-orange);
+    text-decoration: underline;
+  }
+  /* Aside: show changes (matches SetlistShowChangesCard data) */
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-head .sc-label {
+    margin: 0;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-scan-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid rgb(63, 65, 64);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-scan-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgb(90, 92, 90);
+    color: #fff;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-loading,
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-empty {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.52);
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-show-changes-item
+    > span:last-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-list a {
+    font-weight: 600;
+    color: var(--wl-orange);
+    text-decoration: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-list a:hover {
+    color: var(--wl-light-orange);
+    text-decoration: underline;
   }
 
   @keyframes wl-home-v2-setlist-rating-spin {
@@ -2663,7 +2917,7 @@
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-wted .wl-home-v2-wted-status-banner {
     box-sizing: border-box;
     border-radius: 8px;
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    border: 1px solid rgb(71, 31, 29);
     background: rgba(239, 68, 68, 0.08);
     padding: 8px 12px;
     text-align: center;
@@ -2681,7 +2935,7 @@
     margin-left: 4px;
     margin-right: 4px;
     border-radius: 9999px;
-    border: 1px solid rgba(239, 68, 68, 0.35);
+    border: 1px solid rgb(93, 36, 34);
     background: rgba(239, 68, 68, 0.15);
     padding: 1px 6px;
     font-weight: 600;
@@ -2816,7 +3070,7 @@
     align-self: center;
     border-radius: 9999px;
     padding: 6px;
-    border: 1px solid rgba(88, 200, 174, 0.35);
+    border: 1px solid rgb(41, 82, 71);
     background: rgba(88, 200, 174, 0.16);
   }
   .wl-home-v2 .wl-home-v2-wted-slot-row .wl-home-v2-wted-slot-check-icon {
@@ -2848,8 +3102,8 @@
   }
   .wl-home-v2 .wl-home-v2-wted-slot-row--active {
     border-radius: 10px !important;
-    border: 1px solid rgba(88, 200, 174, 0.35) !important;
-    border-bottom: 1px solid rgba(88, 200, 174, 0.35) !important;
+    border: 1px solid rgb(41, 82, 71) !important;
+    border-bottom: 1px solid rgb(41, 82, 71) !important;
     background: rgba(88, 200, 174, 0.16) !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
@@ -3711,7 +3965,9 @@
     transform: translate(-50%, -50%);
     mix-blend-mode: screen;
     box-shadow: 0 0 14px 4px rgba(255,122,103,0.5);
-    transition: width .18s, height .18s, background .18s, box-shadow .18s;
+    /* Background is set every frame in JS; omitting it from transition avoids smearing
+       (esp. rainbow) and keeps link-hover green authoritative over CSS. */
+    transition: width .18s, height .18s, box-shadow .18s;
   }
   /* Outer: larger lagging ring (outline only) */
   .wl-home-v2 .cursor-ring {
@@ -3722,13 +3978,21 @@
     border: 1.5px solid rgb(147, 75, 64);
     pointer-events: none;
     transform: translate(-50%, -50%);
-    transition: width .22s, height .22s, border-color .22s, transform .05s linear;
+    /* Border color is set every frame in JS; omitting border-color from transition. */
+    transition: width .22s, height .22s, transform .05s linear;
   }
   .wl-home-v2 .cursor-core.hov {
     width: 22px;
     height: 22px;
+    /* Match green trail / ring on interactive hover (fill is set in JS). */
+    box-shadow: 0 0 16px 5px rgba(88, 200, 174, 0.45);
   }
-  .wl-home-v2 .cursor-ring.hov{ width: 64px; height: 64px; border-color: rgb(183, 135, 112); }
+  .wl-home-v2 .cursor-ring.hov {
+    width: 64px;
+    height: 64px;
+    /* Border color overridden each frame in JS when trail is active; kept for fallback. */
+    border-color: rgb(70, 155, 135);
+  }
   .wl-home-v2 .trail-canvas{ position: fixed; inset: 0; z-index: 10030; pointer-events: none; }
 
   /* ---------- Tweaks panel ---------- */
@@ -3965,6 +4229,10 @@
 /* ---------- /archive/setlist (years-style page → body → columns → section + aside) ---------- */
 .wl-home-v2 .wl-home-v2-setlist {
   font-feature-settings: "tnum" 1;
+  /* Section / column titles — same as song titles (inherit `var(--wl-white)` from `.wl-home-v2`) */
+  --setlist-rail-label-color: var(--wl-white);
+  /* Main stats / aside tools / show stats / song spread / media + now playing headings */
+  --setlist-promoted-section-header-size: 11px;
 }
 .wl-home-v2 .wl-home-v2-setlist a {
   color: inherit;
@@ -3973,6 +4241,54 @@
 /* Main / aside use `.wl-home-v2-years-tile` + `.wl-home-v2-years-tile-inner` (same as years). */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-aside {
   width: 316px;
+}
+/* Narrow decorative strip above tools (same bg treatment as `.wl-home-v2-years-tile`). */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-top-accent {
+  position: relative;
+  isolation: isolate;
+  height: 16px;
+  min-height: 16px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: rgba(49, 58, 52, 0.95);
+  border-bottom: 1px solid rgb(34, 37, 35);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-top-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--tile-bg, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.82;
+  filter: grayscale(35%) brightness(0.8);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-top-accent::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 91, 78, 0.48) 0%,
+    rgba(40, 91, 78, 0.93) 85%
+  );
+}
+/* Aside stack: no outer radius; no top/side strokes (keep bottom hairline between tiles). */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside > .wl-home-v2-years-tile {
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside
+  .wl-home-v2-years-tile-inner {
+  padding: 0;
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-bar {
   display: flex;
@@ -4307,7 +4623,7 @@
   padding: 5px 10px;
   border-radius: 8px;
   background: rgba(220, 38, 38, 0.16);
-  border: 1px solid rgba(248, 113, 113, 0.45);
+  border: 1px solid rgb(120, 61, 60);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset;
   color: #fecaca;
   font-family: "Geist Mono", ui-monospace, monospace;
@@ -4393,7 +4709,7 @@
 }
 .wl-home-v2 .wl-home-v2-setlist button.qs-card:hover:not(:disabled) .qs-label,
 .wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) .sc-label {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--setlist-rail-label-color);
   transition: color 0.18s;
 }
 .wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) .sc-sub {
@@ -4411,8 +4727,8 @@
 }
 .wl-home-v2 .wl-home-v2-setlist .qs-card .qs-label {
   font-family: "Geist Mono", ui-monospace, monospace;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: var(--setlist-promoted-section-header-size);
+  color: var(--setlist-rail-label-color);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4543,8 +4859,10 @@
 /* Setlist media + embed — outer chrome matches `.setlist-card` (no header glow) */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-shell {
   box-sizing: border-box;
-  width: 100%;
+  /* Hug media list until “Now playing” opens; then span the main column */
+  width: max-content;
   max-width: 100%;
+  align-self: flex-start;
   margin-bottom: 12px;
   padding: 14px 16px 16px;
   background: rgba(0, 0, 0, 0.63);
@@ -4554,6 +4872,24 @@
   -webkit-overflow-scrolling: touch;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-shell.wl-home-v2-setlist-media-shell--with-now-playing {
+  width: 100%;
+  align-self: stretch;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-media-shell:not(.wl-home-v2-setlist-media-shell--with-now-playing)
+  .wl-home-v2-setlist-media-float-root {
+  width: auto;
+  max-width: 100%;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-media-shell:not(.wl-home-v2-setlist-media-shell--with-now-playing)
+  .wl-home-v2-setlist-media-main {
+  width: auto;
+  max-width: 100%;
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-float-root {
   display: flow-root;
@@ -4607,10 +4943,11 @@
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-heading {
   margin: 0;
+  padding-bottom: 4px;
   font-family: "Geist Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: var(--setlist-promoted-section-header-size);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--setlist-rail-label-color);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4619,7 +4956,7 @@
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--setlist-rail-label-color);
   letter-spacing: 0.05em;
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-tile:focus-visible {
@@ -4698,7 +5035,7 @@
   padding: 6px 14px;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--setlist-rail-label-color);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 500;
@@ -4743,7 +5080,7 @@
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--setlist-rail-label-color);
   line-height: 1;
   white-space: nowrap;
   word-break: keep-all;
@@ -4831,6 +5168,13 @@
   bottom: 20%;
   width: 4px;
   border-radius: 0 2px 2px 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  td.num-cell.num-cell--no-placement-bar {
+  padding-left: 8px;
+  padding-right: 8px;
 }
 /* Admin copy feedback: matches archive `SetlistEntryRow` # cell */
 .wl-home-v2 .wl-home-v2-setlist .set-table td.num-cell.num-cell--copied {
@@ -5008,8 +5352,6 @@
   flex-direction: column;
   gap: 10px;
   background: rgba(0, 0, 0, 0.63);
-  border: 1px solid rgb(63, 65, 64);
-  border-radius: 10px;
   padding: 14px 16px;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -5017,40 +5359,95 @@
 .wl-home-v2 .wl-home-v2-setlist .side-card .sc-label {
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--setlist-rail-label-color);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards {
+/* Aside section titles: same as Show Stats `.sc-label` (11px + spacing below) */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside
+  .side-card
+  > .sc-label,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside
+  .side-card
+  .wl-home-v2-setlist-show-changes-head
+  .sc-label {
+  font-size: var(--setlist-promoted-section-header-size);
+  padding-bottom: 4px;
+}
+/* Aside: one shell, 2×2 grid (rating | attendees; chat full-width), internal dividers only */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 0;
+  background: rgba(0, 0, 0, 0.63);
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards .side-card {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__rating {
+  grid-column: 1;
+  grid-row: 1;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__attendees {
+  grid-column: 2;
+  grid-row: 1;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__chat {
+  grid-column: 1 / -1;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel
+  > .wl-home-v2-setlist-tools-panel__rating.side-card,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel
+  > .wl-home-v2-setlist-tools-panel__attendees.side-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   padding: 12px;
   gap: 6px;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards .sc-value {
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel
+  > .wl-home-v2-setlist-tools-panel__rating.side-card {
+  border-right: 1px solid rgb(63, 65, 64);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__rating.side-card:hover:not(:disabled) {
+  transform: none;
+  border-right-color: rgb(63, 65, 64);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel .sc-value {
   font-size: 22px;
   font-weight: 700;
   line-height: 1;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards .sc-sub {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel .sc-sub {
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
   color: rgba(255, 255, 255, 0.5);
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards .stars {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel .stars {
   display: inline-flex;
   gap: 2px;
   color: #ffd86b;
   font-size: 14px;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards .sc-stars-row {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel .sc-stars-row {
   display: flex;
   justify-content: flex-start;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel button.attend {
   padding: 6px 4px;
   background: rgba(255, 122, 103, 0.15);
   border: 1px solid rgb(111, 60, 51);
@@ -5066,19 +5463,25 @@
     border-color 0.18s ease;
   width: 100%;
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend:hover:not(:disabled) {
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel
+  button.attend:hover:not(:disabled) {
   background: rgba(255, 122, 103, 0.3);
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend.attended {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel button.attend.attended {
   background: rgba(88, 200, 174, 0.15);
   border-color: rgb(44, 91, 79);
   color: var(--wl-green);
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend.attended:hover:not(:disabled) {
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel
+  button.attend.attended:hover:not(:disabled) {
   background: rgba(88, 200, 174, 0.32);
   border-color: rgb(62, 120, 105);
 }
-.wl-home-v2 .wl-home-v2-setlist .twin-cards button.attend:disabled {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel button.attend:disabled {
   cursor: wait;
   opacity: 0.75;
 }
@@ -5121,24 +5524,263 @@
 .wl-home-v2 .wl-home-v2-setlist .wbtn.green .wbtn-icon {
   color: var(--wl-green);
 }
-.wl-home-v2 .wl-home-v2-setlist .stat-row {
+/* Flat community row inside unified tools panel (no nested pill chrome) */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__chat.wbtn {
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid rgb(63, 65, 64);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__chat.wbtn:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__chat.wbtn.green:hover {
+  background: rgba(88, 200, 174, 0.18);
+  border-top: 1px solid rgb(63, 65, 64);
+  transform: none;
+}
+.wl-home-v2 .wl-home-v2-setlist .side-card.wl-home-v2-setlist-show-stats {
+  gap: 6px;
+}
+/* Show stats rows — shell matches other aside `.side-card` blocks */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  padding: 6px 0;
-  border-bottom: 1px dashed rgb(29, 32, 30);
+  align-items: center;
+  gap: 12px;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 13px;
-}
-.wl-home-v2 .wl-home-v2-setlist .stat-row:last-child {
-  border-bottom: 0;
-}
-.wl-home-v2 .wl-home-v2-setlist .stat-row .sr-label {
-  color: rgba(255, 255, 255, 0.65);
-}
-.wl-home-v2 .wl-home-v2-setlist .stat-row .sr-val {
-  font-family: "Geist Mono", ui-monospace, monospace;
   font-weight: 500;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-show-stat-row.wl-home-v2-setlist-show-stat-row--segmented {
+  align-items: flex-start;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 500;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-label-title {
+  flex-shrink: 0;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+  width: 100%;
+  max-width: 220px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.48);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-subrow-label {
+  min-width: 0;
+  padding-left: 12px;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-values {
+  display: inline-flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-show-stat-values.wl-home-v2-setlist-show-stat-values--segmented {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 6px;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-values-pill-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-segment-times {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  padding-right: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-segment-time {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.55);
+}
+/* Pills: same label color as `.set-table td.rarity-cell .rare-pill` */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill {
+  display: inline-block;
+  box-sizing: border-box;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--rank {
+  border: 1px solid rgb(29, 78, 216);
+  background: rgb(37, 99, 235);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--rank:hover {
+  background: rgb(29, 78, 216);
+  border-color: rgb(30, 64, 175);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--length {
+  border: 1px solid rgb(52, 109, 95);
+  background: var(--wl-dark-green);
+  color: rgba(255, 255, 255, 0.8);
+}
+/* One bordered shell for all show badges; rows separated by hairlines. */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-badge-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+/* Match `.wl-home-v2-setlist-media-tile` (main column release rows) */
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link {
+  align-items: stretch;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 0;
   color: #fff;
+  text-decoration: none;
+  opacity: 1;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+/* Flush-left artwork column — same idea as media tile thumb (full row height). */
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link .wl-home-v2-setlist-badge-art {
+  position: relative;
+  width: 40px;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 40px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  border-radius: 10px 0 0 10px;
+}
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link .wl-home-v2-setlist-badge-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  a.wl-home-v2-setlist-badge-link
+  .wl-home-v2-setlist-badge-art
+  .wl-home-v2-setlist-badge-rotating-art {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none;
+  border: none !important;
+  border-radius: 0 !important;
+}
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link .wl-home-v2-setlist-badge-body {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px 6px 10px;
+  box-sizing: border-box;
+}
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link:hover {
+  position: relative;
+  z-index: 1;
+  /* Same teal wash as `.wbtn.green:hover` / community chat row */
+  background: rgba(88, 200, 174, 0.18);
+  border-color: rgb(52, 109, 95);
+  transform: scale(1.02);
+  opacity: 1;
+}
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link:focus-visible {
+  outline: 2px solid var(--wl-orange);
+  outline-offset: 2px;
+}
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link img {
+  border: none;
+}
+.wl-home-v2 .wl-home-v2-setlist a.wl-home-v2-setlist-badge-link .setlist-badge-link-title {
+  text-decoration: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  a.wl-home-v2-setlist-badge-link:hover
+  .setlist-badge-link-title {
+  color: var(--wl-green);
+}
+/* Inside stacked badges: no per-row card chrome — dividers only. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-badge-stack
+  a.wl-home-v2-setlist-badge-link {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid rgb(63, 65, 64);
+  background: transparent;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-badge-stack
+  a.wl-home-v2-setlist-badge-link:last-child {
+  border-bottom: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-badge-stack
+  a.wl-home-v2-setlist-badge-link
+  .wl-home-v2-setlist-badge-art {
+  border-radius: 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-badge-stack
+  a.wl-home-v2-setlist-badge-link:hover {
+  transform: none;
+  background: rgba(88, 200, 174, 0.18);
 }
 .wl-home-v2 .wl-home-v2-setlist .badges {
   display: flex;
@@ -5183,6 +5825,78 @@
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.55);
+}
+/* Song spread aside: same aggregation as `SetlistSongSpreadCard` / `SongSpreadDisplay` */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-row--hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-icon {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgb(63, 65, 64);
+}
+/* Segmented meter: `maxCount` equal slots across full width; fill first `count` (teal / show-stats). */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-track--segmented {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgb(49, 51, 49);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-segment {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 15px;
+  align-self: center;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgb(44, 46, 45);
+  box-sizing: border-box;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-segment--filled {
+  background: rgba(88, 200, 174, 0.4);
+  border-color: rgb(52, 109, 95);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-segment--filled-hover {
+  background: rgba(88, 200, 174, 0.55);
+  border-color: rgb(62, 120, 105);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-count {
+  font-family: "Geist Mono", ui-monospace, monospace;
+}
+/* Portaled — match `.setlist-header-tooltip` song / header tooltips */
+.setlist-header-tooltip .wl-home-v2-setlist-song-spread-tooltip-inner {
+  text-align: left;
+}
+.setlist-header-tooltip .wl-home-v2-setlist-song-spread-tooltip-title {
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.95);
+}
+.setlist-header-tooltip .wl-home-v2-setlist-song-spread-tooltip-artist-gap {
+  margin-left: 0.5rem;
+}
+.setlist-header-tooltip .wl-home-v2-setlist-song-spread-tooltip-songs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 /* Setlist table: column header help — trigger (tooltips = desktop `useIsDesktopContentLayout` only) */

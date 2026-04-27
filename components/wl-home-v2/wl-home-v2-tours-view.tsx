@@ -358,7 +358,7 @@ function TourPageBody({ tourId }: { tourId: string }) {
           <button
             type="button"
             onClick={() => setToursSheetOpen(false)}
-            className="flex w-full items-center justify-center gap-2 border-b border-border py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+            className="flex w-full items-center justify-center gap-2 border-b border-[rgb(34,37,35)] py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
             aria-label="Close"
           >
             <X className="size-4" />

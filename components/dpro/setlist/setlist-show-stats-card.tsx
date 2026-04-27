@@ -17,7 +17,8 @@ import {
 } from "@/lib/setlist-utils"
 import { getListArchiveUrl } from "@/lib/list-archive-url"
 
-const LENGTH_RANK_LIST_ID = "45a4b90e-adbe-4af5-9051-2f4d212069fc"
+export const SETLIST_SHOW_LENGTH_RANK_LIST_ID =
+  "45a4b90e-adbe-4af5-9051-2f4d212069fc"
 
 interface SetlistShowStatsCardProps {
   show: Show
@@ -68,19 +69,23 @@ export function SetlistShowStatsCard({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
-                          href={getListArchiveUrl(LENGTH_RANK_LIST_ID)}
+                          href={getListArchiveUrl(SETLIST_SHOW_LENGTH_RANK_LIST_ID)}
                           className="inline-block rounded px-1 py-[1px] text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-600/80 transition-colors"
                         >
                           #{showLengthRank}
                         </Link>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs">
+                      <TooltipContent
+                        className="setlist-header-tooltip"
+                        side="top"
+                        sideOffset={6}
+                      >
                         {getLengthRankTooltipText(showLengthRank)}
                       </TooltipContent>
                     </Tooltip>
                   ) : (
                     <Link
-                      href={getListArchiveUrl(LENGTH_RANK_LIST_ID)}
+                      href={getListArchiveUrl(SETLIST_SHOW_LENGTH_RANK_LIST_ID)}
                       className="inline-block rounded px-1 py-[1px] text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-600/80 transition-colors"
                     >
                       #{showLengthRank}

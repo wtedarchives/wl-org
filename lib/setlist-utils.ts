@@ -203,7 +203,10 @@ export function formatEntryLength(length: string | null): string {
   return length
 }
 
-/** Format a length string as h:mm:ss (e.g. 0:45:30 for under an hour). Use for show length display. */
+/**
+ * Format a length string for show-style display: omit `0` hours; under an hour, minutes are
+ * not zero-padded; with hours, minutes and seconds are two digits (e.g. `45:30`, `1:09:41`).
+ */
 export function formatLengthAsHmmss(length: string | null | undefined): string {
   if (length == null || length === "") return ""
   const parts = length.split(":").map((p) => parseInt(p, 10))
@@ -220,7 +223,11 @@ export function formatLengthAsHmmss(length: string | null | undefined): string {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+  const sec = seconds.toString().padStart(2, "0")
+  if (hours === 0) {
+    return `${minutes}:${sec}`
+  }
+  return `${hours}:${minutes.toString().padStart(2, "0")}:${sec}`
 }
 
 export function totalSetlistLength(entries: { entry_length: string | null }[]): string {
@@ -232,10 +239,11 @@ export function totalSetlistLength(entries: { entry_length: string | null }[]): 
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
+  const sec = seconds.toString().padStart(2, "0")
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${sec}`
   }
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`
+  return `${minutes}:${sec}`
 }
 
 export function calculateRarity(
@@ -275,6 +283,81 @@ export function getEncoreLabel(entrySet: string | null | undefined): string {
   if (s === "E2") return "2nd Encore"
   if (s === "E3") return "3rd Encore"
   return ""
+}
+
+export type SetlistSegmentLength = {
+  /** Raw `entry_set` key (for React keys). */
+  setKey: string
+  label: string
+  lengthHmmss: string
+}
+
+/** Sort key: main numeric sets (0), then encores E1/E2/… (1), then anything else (2). */
+function entrySetSortRank(key: string): readonly [group: number, num: number, tie: string] {
+  const s = String(key).trim()
+  const encore = /^E(\d+)$/i.exec(s)
+  if (encore) {
+    return [1, parseInt(encore[1], 10), s.toUpperCase()]
+  }
+  if (/^\d+$/.test(s)) {
+    return [0, parseInt(s, 10), s]
+  }
+  return [2, 0, s]
+}
+
+function compareEntrySetKeys(a: string, b: string): number {
+  const [ga, na, sa] = entrySetSortRank(a)
+  const [gb, nb, sb] = entrySetSortRank(b)
+  if (ga !== gb) return ga - gb
+  if (na !== nb) return na - nb
+  return sa.localeCompare(sb, undefined, { sensitivity: "base" })
+}
+
+/**
+ * Sum of `entry_length` per distinct `entry_set`. Rows are ordered by ascending `entry_set`
+ * (numeric main sets, then E1/E2/… encores, then other keys lexicographically).
+ */
+export function getSetlistSegmentLengths(
+  entries: {
+    entry_set: string
+    entry_length: string | null
+    entry_setorder: number
+  }[],
+): SetlistSegmentLength[] {
+  if (!entries.length) return []
+  const sorted = [...entries].sort((a, b) => a.entry_setorder - b.entry_setorder)
+  const secondsBySet = new Map<string, number>()
+  for (const e of sorted) {
+    const key = String(e.entry_set ?? "").trim()
+    if (!key) continue
+    if (!secondsBySet.has(key)) {
+      secondsBySet.set(key, 0)
+    }
+    secondsBySet.set(
+      key,
+      (secondsBySet.get(key) ?? 0) + parseLengthToSeconds(e.entry_length),
+    )
+  }
+  const setKeys = [...secondsBySet.keys()].sort(compareEntrySetKeys)
+  return setKeys.map((key) => {
+    const secs = secondsBySet.get(key) ?? 0
+    return {
+      setKey: key,
+      label: setlistSegmentLabel(key),
+      lengthHmmss:
+        secs > 0 ? formatLengthAsHmmss(String(secs)) : "",
+    }
+  })
+}
+
+function setlistSegmentLabel(entrySet: string): string {
+  const s = String(entrySet).trim()
+  if (s.startsWith("E")) {
+    const enc = getEncoreLabel(s)
+    return enc || s
+  }
+  if (/^\d+$/.test(s)) return `Set ${s}`
+  return s
 }
 
 export function getRarityColor(percentage: string | null): string {
@@ -364,4 +447,18 @@ export function getGapColor(value: string | number | null): string {
     lowerStop.color.b + factor * (upperStop.color.b - lowerStop.color.b),
   )
   return `rgb(${r}, ${g}, ${b})`
+}
+
+/** Translucent fill from `getGapColor`, matching `getRarityPillBackground` treatment. */
+export function getGapPillBackground(
+  value: string | number | null,
+  alpha = 0.4,
+): string {
+  const base = getGapColor(value)
+  if (base === "transparent" || !base.startsWith("rgb(")) return base
+  const m = base.match(
+    /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i,
+  )
+  if (!m) return base
+  return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`
 }

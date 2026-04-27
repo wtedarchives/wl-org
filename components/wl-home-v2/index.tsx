@@ -131,7 +131,6 @@ export function WlHomeV2({
   )
 
   useWlHomeV2CursorTrail(
-    rootRef,
     coreRef,
     ringRef,
     canvasRef,

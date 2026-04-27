@@ -29,6 +29,16 @@ export function shouldShowSetlistEntryShort(
 /** entry_song value that never receives a # (placeholder jam row). */
 export const INDEX_SKIP_SONG_IMPROV_JAM = "[Improv/Jam]"
 
+/** Song spread / tooltip: categories that append ` [artist]` to display names. */
+export const SONG_SPREAD_COVER_CATEGORIES = [
+  "Cover Songs",
+  "Miscellaneous Covers",
+] as const
+
+export function isSongSpreadCoverCategory(category: string): boolean {
+  return (SONG_SPREAD_COVER_CATEGORIES as readonly string[]).includes(category)
+}
+
 /**
  * Compute display number for each setlist row: running count 1, 2, 3, …
  * Skip (null) when entry_short is in INDEX_SKIP_SHORTS, when entry_song is
@@ -132,7 +142,7 @@ export function getPersonnelPillWlV2Style(
   return {
     background: "rgba(255, 255, 255, 0.08)",
     color: "rgba(255, 255, 255, 0.7)",
-    borderColor: "rgba(255, 255, 255, 0.22)",
+    borderColor: "rgb(68, 70, 69)",
   }
 }
 

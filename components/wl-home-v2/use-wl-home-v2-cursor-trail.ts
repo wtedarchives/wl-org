@@ -11,8 +11,30 @@ type Tweaks = {
   hue: WlHomeV2TrailHue
 }
 
+/** Interactive surfaces that switch the custom cursor to the link / CTA (green) palette. */
+export const WL_HOME_V2_CURSOR_INTERACTIVE_SELECTOR = [
+  "a[href]",
+  "button:not(:disabled)",
+  '[role="link"]',
+  '[role="button"]:not([aria-disabled="true"])',
+  'input[type="submit"]:not(:disabled)',
+  'input[type="button"]:not(:disabled)',
+  'input[type="reset"]:not(:disabled)',
+  "label[for]",
+  "summary",
+  ".tile",
+].join(",")
+
+function syncInteractiveHover(
+  clientX: number,
+  clientY: number,
+): boolean {
+  const top = document.elementFromPoint(clientX, clientY)
+  if (!top) return false
+  return top.closest(WL_HOME_V2_CURSOR_INTERACTIVE_SELECTOR) != null
+}
+
 export function useWlHomeV2CursorTrail(
-  rootRef: RefObject<HTMLElement | null>,
   coreRef: RefObject<HTMLDivElement | null>,
   ringRef: RefObject<HTMLDivElement | null>,
   canvasRef: RefObject<HTMLCanvasElement | null>,
@@ -28,8 +50,7 @@ export function useWlHomeV2CursorTrail(
     const core = coreRef.current
     const ring = ringRef.current
     const canvas = canvasRef.current
-    const root = rootRef.current
-    if (!core || !ring || !canvas || !root) return
+    if (!core || !ring || !canvas) return
 
     const coreEl = core
     const ringEl = ring
@@ -151,9 +172,20 @@ export function useWlHomeV2CursorTrail(
       return coreColor(hue)
     }
 
+    const onEnter = () => {
+      coreEl.classList.add("hov")
+      ringEl.classList.add("hov")
+    }
+    const onLeave = () => {
+      coreEl.classList.remove("hov")
+      ringEl.classList.remove("hov")
+    }
+
     const onMove = (e: MouseEvent) => {
       mx = e.clientX
       my = e.clientY
+      if (syncInteractiveHover(e.clientX, e.clientY)) onEnter()
+      else onLeave()
       const { trailEnabled: te, density: d } = tweaksRef.current
       if (te && d > 0) {
         const count = d
@@ -173,20 +205,12 @@ export function useWlHomeV2CursorTrail(
       }
     }
     window.addEventListener("mousemove", onMove, { passive: true })
-
-    const hoverTargets = root.querySelectorAll("a, button, .tile")
-    const onEnter = () => {
-      coreEl.classList.add("hov")
-      ringEl.classList.add("hov")
+    const onBlur = () => onLeave()
+    const onVis = () => {
+      if (document.visibilityState === "hidden") onLeave()
     }
-    const onLeave = () => {
-      coreEl.classList.remove("hov")
-      ringEl.classList.remove("hov")
-    }
-    hoverTargets.forEach((el) => {
-      el.addEventListener("mouseenter", onEnter)
-      el.addEventListener("mouseleave", onLeave)
-    })
+    window.addEventListener("blur", onBlur)
+    document.addEventListener("visibilitychange", onVis)
 
     let raf = 0
     function tick() {
@@ -196,9 +220,11 @@ export function useWlHomeV2CursorTrail(
       coreEl.style.transform = `translate(${mx}px, ${my}px) translate(-50%,-50%)`
       ringEl.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`
       const hovered = coreEl.classList.contains("hov")
+      /** Interactive hover: paint ring, core, and trail in brand green (any base trail hue). */
+      const paintHue: WlHomeV2TrailHue = hovered ? "green" : h
       coreEl.style.border = "none"
-      coreEl.style.background = coreFillColor(h, hovered)
-      ringEl.style.border = `1.5px solid ${ringBorderColor(h, hovered)}`
+      coreEl.style.background = coreFillColor(paintHue, hovered)
+      ringEl.style.border = `1.5px solid ${ringBorderColor(paintHue, hovered)}`
 
       ctx.clearRect(0, 0, cnv.width, cnv.height)
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -214,7 +240,7 @@ export function useWlHomeV2CursorTrail(
         const a = p.life * 0.7
         ctx.beginPath()
         const t = performance.now() - p.born
-        ctx.fillStyle = hueColor(a, t, h)
+        ctx.fillStyle = hueColor(a, t, paintHue)
         ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2)
         ctx.fill()
       }
@@ -226,11 +252,9 @@ export function useWlHomeV2CursorTrail(
       cancelAnimationFrame(raf)
       window.removeEventListener("resize", resize)
       window.removeEventListener("mousemove", onMove)
-      hoverTargets.forEach((el) => {
-        el.removeEventListener("mouseenter", onEnter)
-        el.removeEventListener("mouseleave", onLeave)
-      })
+      window.removeEventListener("blur", onBlur)
+      document.removeEventListener("visibilitychange", onVis)
       onFinePointer(false)
     }
-  }, [onFinePointer, rootRef, coreRef, ringRef, canvasRef])
+  }, [onFinePointer, coreRef, ringRef, canvasRef])
 }

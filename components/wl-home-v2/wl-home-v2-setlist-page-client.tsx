@@ -14,6 +14,7 @@ import { WlHomeV2SetlistJotyModal } from "@/components/wl-home-v2/wl-home-v2-set
 import { WlHomeV2SetlistSongModal } from "@/components/wl-home-v2/wl-home-v2-setlist-song-modal"
 import { WlHomeV2SetlistPlaceholderView } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view"
 import { WlHomeV2SetlistRatingModal } from "@/components/wl-home-v2/wl-home-v2-setlist-rating-modal"
+import { WlHomeV2SetlistScanModal } from "@/components/wl-home-v2/wl-home-v2-setlist-scan-modal"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import {
   buildSetlistArchiveBreadcrumbItems,
@@ -32,6 +33,8 @@ import { useSetlistData, useShowDates, useTours } from "@/hooks/use-setlist-data
 import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
 import { useSetlistNavigation } from "@/hooks/use-setlist-navigation"
 import { useSetlistReleases } from "@/hooks/use-setlist-releases"
+import { useSetlistScan } from "@/hooks/use-setlist-scan"
+import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -39,7 +42,7 @@ export function WlHomeV2SetlistPageClient() {
   const { user } = useAuth()
   const { showId, invalidParams } = useSetlistArchiveShowId()
   const { showAdminUi } = useSetlistAdmin(user, showId)
-  const { show, setlist, loading } = useSetlistData(showId)
+  const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
   const { tours } = useTours()
   const { showDates } = useShowDates(show ?? null, showId)
   const showPosition = useShowPosition(show ?? null, showDates)
@@ -58,6 +61,7 @@ export function WlHomeV2SetlistPageClient() {
   const songModalTourId = useId()
   const wtedModalHeadingId = useId()
   const ratingModalHeadingId = useId()
+  const scanHeadingId = useId()
   const [jotyModalOpen, setJotyModalOpen] = useState(false)
   const [songModalOpen, setSongModalOpen] = useState(false)
   const [songModalEntry, setSongModalEntry] = useState<SetlistEntry | null>(
@@ -75,7 +79,16 @@ export function WlHomeV2SetlistPageClient() {
     string | null
   >(null)
   const [copiedEntryIds, setCopiedEntryIds] = useState<Set<string>>(new Set())
+  const [setlistScanModalOpen, setSetlistScanModalOpen] = useState(false)
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
 
+  const { changes: showChanges, loading: showChangesLoading } =
+    useShowChanges(showId)
+
+  useEffect(() => {
+    setHoveredCategory(null)
+  }, [showId])
+  const { setlistUrl } = useSetlistScan(showId)
   const { releases, releaseToEntriesMap } = useSetlistReleases(showId)
   const fallbackWtedArtwork = releases[0]?.release_artwork ?? null
 
@@ -238,6 +251,14 @@ export function WlHomeV2SetlistPageClient() {
         attendanceToggling={toggling}
         onAttendanceToggle={toggle}
         canMarkAttendance={!!user}
+        showLengthRank={showLengthRank}
+        showChanges={showChanges}
+        showChangesLoading={showChangesLoading}
+        onOpenSetlistScan={
+          setlistUrl ? () => setSetlistScanModalOpen(true) : undefined
+        }
+        hoveredCategory={hoveredCategory}
+        onCategoryHover={setHoveredCategory}
       />
       <WlHomeV2SetlistRatingModal
         open={ratingModalOpen}
@@ -288,6 +309,15 @@ export function WlHomeV2SetlistPageClient() {
         show={wtedModalShow}
         fallbackReleaseArtwork={fallbackWtedArtwork}
         headingId={wtedModalHeadingId}
+      />
+      <WlHomeV2SetlistScanModal
+        open={setlistScanModalOpen}
+        onClose={() => setSetlistScanModalOpen(false)}
+        headingId={scanHeadingId}
+        setlistUrl={setlistUrl ?? ""}
+        show={show}
+        setlist={setlist}
+        changes={showChanges}
       />
     </>
   )

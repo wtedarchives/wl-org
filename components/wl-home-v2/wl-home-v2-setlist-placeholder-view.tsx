@@ -35,17 +35,71 @@ import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import type { SetlistEntry, Show, ShowDate } from "@/types/setlist"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import { SetlistRatingStarsRow } from "@/components/dpro/setlist/setlist-rating-card"
+import {
+  WlHomeV2SetlistShowBadgesTile,
+  WlHomeV2SetlistShowStatsTile,
+  isWlHomeV2SetlistShowBadgesTileVisible,
+  isWlHomeV2SetlistShowStatsTileVisible,
+} from "@/components/wl-home-v2/wl-home-v2-setlist-show-meta-tile"
 import { WlHomeV2SetlistTable } from "@/components/wl-home-v2/wl-home-v2-setlist-table"
 import type {
   ReleaseToEntriesMap,
   ShowRelease,
 } from "@/hooks/use-setlist-releases"
+import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
+import {
+  WlHomeV2SetlistShowChangesSection,
+  isWlHomeV2SetlistShowChangesSectionVisible,
+} from "@/components/wl-home-v2/wl-home-v2-setlist-show-changes-section"
+import {
+  SetlistSongSpreadCard,
+  isSetlistSongSpreadAsideVisible,
+} from "@/components/dpro/setlist/setlist-song-spread-card"
+import { HOME_BG_IMAGES } from "@/components/wl-home-shared"
 
 const WL_HOME_V2_SETLIST_SELECT_CONTENT =
-  "wl-home-v2-setlist-select-content border-0 shadow-lg ring-1 ring-white/10"
+  "wl-home-v2-setlist-select-content border-0 shadow-lg ring-1 ring-[rgb(53,55,54)]"
 
 const WL_HOME_V2_SETLIST_SELECT_TRIGGER =
   "wl-home-v2-setlist-select-trigger h-auto min-h-0 w-max max-w-full min-w-0 gap-1.5 px-2.5 py-1 text-xs shadow-none items-center"
+
+function fnv1a32Hex(input: string): number {
+  let h = 2166136261
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
+/** Pseudo-random pick per show + divider slot (stable for SSR / hydration). */
+function wlHomeV2SetlistAsideAccentTileBg(showId: string, slot: number): string {
+  const path =
+    HOME_BG_IMAGES[
+      fnv1a32Hex(`${showId}\0aside-accent-${slot}`) % HOME_BG_IMAGES.length
+    ]
+  return `url('${path}')`
+}
+
+function WlHomeV2SetlistAsideAccent({
+  showId,
+  slot,
+}: {
+  showId: string
+  slot: number
+}) {
+  return (
+    <div
+      className="wl-home-v2-setlist-aside-top-accent"
+      style={
+        {
+          "--tile-bg": wlHomeV2SetlistAsideAccentTileBg(showId, slot),
+        } as CSSProperties
+      }
+      aria-hidden
+    />
+  )
+}
 
 /** Match `wl-home-v2-years-view` / Tailwind `xl` — desktop two-column layout. */
 const TAILWIND_XL_MIN_PX = 1280
@@ -86,6 +140,12 @@ export function WlHomeV2SetlistPlaceholderView({
   attendanceToggling,
   onAttendanceToggle,
   canMarkAttendance,
+  showLengthRank,
+  showChanges,
+  showChangesLoading,
+  onOpenSetlistScan,
+  hoveredCategory,
+  onCategoryHover,
 }: {
   breadcrumbs: BreadcrumbItem[] | null
   show: Show
@@ -118,6 +178,12 @@ export function WlHomeV2SetlistPlaceholderView({
   attendanceToggling: boolean
   onAttendanceToggle: () => void
   canMarkAttendance: boolean
+  showLengthRank: number | null
+  showChanges: ShowChangeRow[]
+  showChangesLoading: boolean
+  onOpenSetlistScan?: () => void
+  hoveredCategory: string | null
+  onCategoryHover: (category: string | null) => void
 }) {
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const [layoutMode, setLayoutMode] = useState<SetlistLayoutMode>(null)
@@ -132,7 +198,9 @@ export function WlHomeV2SetlistPlaceholderView({
   const hasAverageRating = averageRating > 0
   const ratingValueDisplay = hasAverageRating ?
       averageRating.toFixed(2)
-    : "—"
+    : "0.00"
+  const wlCommunityHref = show.show_wl_link?.trim() ?? ""
+  const showWlCommunityLink = wlCommunityHref.length > 0
   const reviewSummary =
     reviewCount > 0 ?
       `${reviewCount.toLocaleString("en-US")} ${reviewCount === 1 ? "review" : "reviews"}`
@@ -149,6 +217,15 @@ export function WlHomeV2SetlistPlaceholderView({
   }, [])
 
   const useCompactTools = layoutMode !== "desktop"
+
+  const asideStatsVisible = isWlHomeV2SetlistShowStatsTileVisible(show, setlist)
+  const asideBadgesVisible = isWlHomeV2SetlistShowBadgesTileVisible(show)
+  const asideSongSpreadVisible = isSetlistSongSpreadAsideVisible(setlist)
+  const asideShowChangesVisible = isWlHomeV2SetlistShowChangesSectionVisible(
+    showChangesLoading,
+    showChanges,
+    onOpenSetlistScan,
+  )
 
   const showGroupLabel = show.show_group?.trim() ?? ""
   const venueLocation = show.show_venue_location?.trim() ?? ""
@@ -431,6 +508,7 @@ export function WlHomeV2SetlistPlaceholderView({
             onWtedClick={onWtedClick}
             hoveredReleaseId={hoveredReleaseId}
             releaseToEntriesMap={releaseToEntriesMap}
+            hoveredCategory={hoveredCategory}
           />
           {releases.length > 0 ?
             <SetlistMediaSection
@@ -446,6 +524,7 @@ export function WlHomeV2SetlistPlaceholderView({
           className="wl-home-v2-years-aside wl-home-v2-setlist-aside"
           aria-label="Show tools"
         >
+          <WlHomeV2SetlistAsideAccent showId={showId} slot={0} />
           <section
             className="wl-home-v2-years-tile"
             style={
@@ -455,10 +534,10 @@ export function WlHomeV2SetlistPlaceholderView({
             }
           >
             <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
-              <div className="twin-cards">
+              <div className="wl-home-v2-setlist-tools-panel">
                 <button
                   type="button"
-                  className="side-card"
+                  className="wl-home-v2-setlist-tools-panel__rating side-card"
                   onClick={onRatingClick}
                   aria-label={
                     hasAverageRating ?
@@ -478,7 +557,7 @@ export function WlHomeV2SetlistPlaceholderView({
                   <div className="sc-value">{ratingValueDisplay}</div>
                   <div className="sc-sub">{reviewSummary}</div>
                 </button>
-                <div className="side-card">
+                <div className="wl-home-v2-setlist-tools-panel__attendees side-card">
                   <div className="sc-label normal-case tracking-normal">
                     attendees
                   </div>
@@ -521,121 +600,67 @@ export function WlHomeV2SetlistPlaceholderView({
                     </button>
                   : null}
                 </div>
-              </div>
 
-              <a href="#" className="wbtn green">
-                <span className="wbtn-text inline-flex min-w-0 items-center gap-2">
-                  <Image
-                    src="/WL.png"
-                    alt=""
-                    width={22}
-                    height={22}
-                    className="size-[22px] shrink-0 object-contain"
-                    unoptimized
-                  />
-                  <span>Chat in the WTED Community</span>
-                </span>
-                <ArrowRight
-                  className="wbtn-icon size-4 shrink-0"
-                  weight="bold"
-                  aria-hidden
-                />
-              </a>
-            </div>
-          </section>
-
-          <section
-            className="wl-home-v2-years-tile"
-            style={
-              {
-                "--tile-bg": "url('/newbg2.jpeg')",
-              } as CSSProperties
-            }
-          >
-            <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
-              <div className="side-card">
-                <div className="sc-label">Show Stats</div>
-                <div className="stat-row">
-                  <span className="sr-label">Total length</span>
-                  <span className="sr-val">2:47:12</span>
-                </div>
-                <div className="stat-row">
-                  <span className="sr-label">Length rank</span>
-                  <span className="sr-val">87th longest</span>
-                </div>
-                <div className="stat-row">
-                  <span className="sr-label">Songs</span>
-                  <span className="sr-val">8</span>
-                </div>
-                <div className="stat-row">
-                  <span className="sr-label">Unique tours</span>
-                  <span className="sr-val">3</span>
-                </div>
-                <div className="stat-row">
-                  <span className="sr-label">Bust-outs</span>
-                  <span className="sr-val">2</span>
-                </div>
-                <div className="stat-row">
-                  <span className="sr-label">Guests</span>
-                  <span className="sr-val">1</span>
-                </div>
-              </div>
-
-              <div className="side-card">
-                <div className="sc-label">Show Badges</div>
-                <div className="badges">
-                  <span className="badge">
-                    <span className="badge-dot" />
-                    Bust-out Night
-                  </span>
-                  <span className="badge">
-                    <span
-                      className="badge-dot"
-                      style={{ background: "var(--wl-green)" }}
+                {showWlCommunityLink ?
+                  <a
+                    href={wlCommunityHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="wl-home-v2-setlist-tools-panel__chat wbtn green"
+                  >
+                    <span className="wbtn-text inline-flex min-w-0 items-center gap-2">
+                      <Image
+                        src="/WL.png"
+                        alt=""
+                        width={22}
+                        height={22}
+                        className="size-[22px] shrink-0 object-contain"
+                        unoptimized
+                      />
+                      <span>Chat in the WTED Community</span>
+                    </span>
+                    <ArrowRight
+                      className="wbtn-icon size-4 shrink-0"
+                      weight="bold"
+                      aria-hidden
                     />
-                    Guest Sit-in
-                  </span>
-                  <span className="badge">
-                    <span
-                      className="badge-dot"
-                      style={{ background: "#ffd86b" }}
-                    />
-                    Acoustic Encore
-                  </span>
-                </div>
+                  </a>
+                : null}
               </div>
             </div>
           </section>
 
-          <section
-            className="wl-home-v2-years-tile"
-            style={
-              {
-                "--tile-bg": "url('/newbg4.jpeg')",
-              } as CSSProperties
-            }
-          >
-            <div className="wl-home-v2-years-tile-inner">
-              <div className="side-card">
-                <div className="sc-label">Song Spread</div>
-                <div className="spread-row">
-                  <span className="swatch" style={{ background: "#58c8ae" }} />
-                  <span className="sp-name">Set 1</span>
-                  <span className="sp-count">3 · 43:05</span>
-                </div>
-                <div className="spread-row">
-                  <span className="swatch" style={{ background: "#ffb999" }} />
-                  <span className="sp-name">Set 2</span>
-                  <span className="sp-count">4 · 46:11</span>
-                </div>
-                <div className="spread-row">
-                  <span className="swatch" style={{ background: "#ff7a67" }} />
-                  <span className="sp-name">Encore</span>
-                  <span className="sp-count">1 · 6:31</span>
-                </div>
-              </div>
-            </div>
-          </section>
+          <WlHomeV2SetlistAsideAccent showId={showId} slot={1} />
+          <WlHomeV2SetlistShowStatsTile
+            show={show}
+            setlist={setlist}
+            showLengthRank={showLengthRank}
+          />
+          {asideStatsVisible &&
+          (asideSongSpreadVisible ||
+            asideShowChangesVisible ||
+            asideBadgesVisible) ?
+            <WlHomeV2SetlistAsideAccent showId={showId} slot={2} />
+          : null}
+          <SetlistSongSpreadCard
+            setlist={setlist}
+            hoveredCategory={hoveredCategory}
+            onCategoryHover={onCategoryHover}
+            visualVariant="wl-home-v2"
+          />
+          {asideSongSpreadVisible &&
+          (asideShowChangesVisible || asideBadgesVisible) ?
+            <WlHomeV2SetlistAsideAccent showId={showId} slot={3} />
+          : null}
+          <WlHomeV2SetlistShowChangesSection
+            changes={showChanges}
+            loading={showChangesLoading}
+            onOpenScan={onOpenSetlistScan}
+          />
+          {asideShowChangesVisible && asideBadgesVisible ?
+            <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
+          : null}
+          <WlHomeV2SetlistShowBadgesTile show={show} />
         </aside>
         </div>
       </div>

@@ -31,6 +31,8 @@ export interface Show {
   show_listcategorycomplete?: string | null
   show_jivecomplete?: boolean
   show_dripfieldcomplete?: boolean
+  /** When false, WL Home v2 setlist omits set rail, set-break dividers, and # placement bars. */
+  discography_display?: boolean | null
 }
 
 export interface SetlistEntry {

@@ -45,7 +45,12 @@ import { cn } from "@/lib/utils"
 import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
 import type { SetlistEntry, Show } from "@/types/setlist"
 
-/** When `runSpan` is 1, use a compact rail label; two or more rows in the set use the full string. */
+/**
+ * Vertical rail label for `entry_set`. Main sets: `S{n}` / `Set n`. Encores:
+ * - 1 song: `E1` / `E2` / `E3`
+ * - 2 songs: `Encore` / `Encore 2` / `Encore 3`
+ * - 3+ songs: `Encore` / `2nd Encore` / `3rd Encore` (`getEncoreLabel`)
+ */
 function railLabelForEntrySet(
   entrySet: string | null | undefined,
   runSpan: number,
@@ -53,11 +58,19 @@ function railLabelForEntrySet(
   if (!entrySet) return ""
   const single = runSpan === 1
   if (entrySet.startsWith("E")) {
-    if (!single) return getEncoreLabel(entrySet)
     const s = String(entrySet)
-    if (s === "E1") return "Enc"
-    if (s === "E2") return "E2"
-    if (s === "E3") return "E3"
+    if (runSpan === 1) {
+      if (s === "E1") return "E1"
+      if (s === "E2") return "E2"
+      if (s === "E3") return "E3"
+      return getEncoreLabel(entrySet) || s
+    }
+    if (runSpan === 2) {
+      if (s === "E1") return "Encore"
+      if (s === "E2") return "Encore 2"
+      if (s === "E3") return "Encore 3"
+      return getEncoreLabel(entrySet) || s
+    }
     return getEncoreLabel(entrySet) || s
   }
   if (single) return `S${entrySet}`
@@ -243,6 +256,8 @@ function WlHomeV2SetlistTableRow({
   onNumberClick,
   hoveredReleaseId,
   releaseToEntriesMap,
+  hoveredCategory,
+  showDiscographySetUi,
 }: {
   entry: SetlistEntry
   displayNumber: number | null
@@ -264,6 +279,9 @@ function WlHomeV2SetlistTableRow({
   onNumberClick?: (entryId: string) => void
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: ReleaseToEntriesMap
+  hoveredCategory?: string | null
+  /** Set rail, set-break rows, and # placement bar — off when `show.discography_display === false`. */
+  showDiscographySetUi: boolean
 }) {
   const [coachCollapsed, setCoachCollapsed] = useState(false)
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
@@ -298,6 +316,20 @@ function WlHomeV2SetlistTableRow({
     !!hoveredReleaseId && isEntryOnHoveredRelease
   const shouldReleaseDim =
     !!hoveredReleaseId && !isEntryOnHoveredRelease
+
+  const entryCategory =
+    entry.song_category || entry.songs?.song_category || "undefined"
+  const shouldCategoryHighlight =
+    !hoveredReleaseId &&
+    !!hoveredCategory &&
+    entryCategory === hoveredCategory
+  const shouldCategoryDim =
+    !hoveredReleaseId &&
+    !!hoveredCategory &&
+    entryCategory !== hoveredCategory
+
+  const shouldRowHighlight = shouldReleaseHighlight || shouldCategoryHighlight
+  const shouldRowDim = shouldReleaseDim || shouldCategoryDim
 
   const showSongStatsTooltip = isDesktop && entryHasSongStatsLines(entry)
   const songCellInner = (
@@ -365,11 +397,11 @@ function WlHomeV2SetlistTableRow({
       className={cn(
         "song-row",
         isRowHovered && "song-row--row-hover",
-        shouldReleaseHighlight && "song-row--release-highlight",
-        shouldReleaseDim && "song-row--release-dim",
+        shouldRowHighlight && "song-row--release-highlight",
+        shouldRowDim && "song-row--release-dim",
       )}
     >
-      {isFirstOfRun ?
+      {showDiscographySetUi && isFirstOfRun ?
         <td
           className={railClass}
           rowSpan={runSpan}
@@ -381,10 +413,16 @@ function WlHomeV2SetlistTableRow({
         </td>
       : null}
       <td
-        className={cn("num-cell", isCopied && "num-cell--copied")}
+        className={cn(
+          "num-cell",
+          isCopied && "num-cell--copied",
+          !showDiscographySetUi && "num-cell--no-placement-bar",
+        )}
         onPointerEnter={onDataCellPointerEnter}
       >
-        <span className="bar" style={{ background: barColor }} />
+        {showDiscographySetUi ?
+          <span className="bar" style={{ background: barColor }} />
+        : null}
         <SetlistEntryNumberCell
           entry={entry}
           displayNumber={displayNumber}
@@ -527,6 +565,7 @@ export function WlHomeV2SetlistTable({
   onWtedClick,
   hoveredReleaseId,
   releaseToEntriesMap,
+  hoveredCategory,
 }: {
   show: Show
   setlist: SetlistEntry[]
@@ -538,6 +577,7 @@ export function WlHomeV2SetlistTable({
   onWtedClick?: (entry: SetlistEntry) => void
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: ReleaseToEntriesMap
+  hoveredCategory?: string | null
 }) {
   const [hoveredEntryId, setHoveredEntryId] = useState<string | null>(null)
   const isDesktop = useIsDesktopContentLayout()
@@ -590,8 +630,10 @@ export function WlHomeV2SetlistTable({
   const callbacksText = show.show_callbacks?.trim() ?? ""
   const coachNotesShowText = show.show_coachnotes?.trim() ?? ""
 
+  const showDiscographySetUi = show.discography_display !== false
+
   const fullColSpan =
-    1 +
+    (showDiscographySetUi ? 1 : 0) +
     1 +
     1 +
     (showWtedColumn ? 1 : 0) +
@@ -626,11 +668,13 @@ export function WlHomeV2SetlistTable({
         >
           <thead>
             <tr>
-              <th
-                className="set-section-rail-head"
-                scope="col"
-                aria-hidden={true}
-              />
+              {showDiscographySetUi ?
+                <th
+                  className="set-section-rail-head"
+                  scope="col"
+                  aria-hidden={true}
+                />
+              : null}
               <th className="center num-col">#</th>
               <th>
                 {hasSongHeaderTooltipItems && isDesktop ?
@@ -705,6 +749,7 @@ export function WlHomeV2SetlistTable({
             {setlist.map((entry, index) => {
               const prevEntry = index > 0 ? setlist[index - 1]! : null
               const showEncoreBar =
+                showDiscographySetUi &&
                 !hasSinglePlacementType &&
                 prevEntry &&
                 entry.entry_set?.startsWith("E") &&
@@ -712,6 +757,7 @@ export function WlHomeV2SetlistTable({
                   prevEntry.entry_set !== entry.entry_set) &&
                 !!getEncoreLabel(entry.entry_set)
               const showSetBreakBar =
+                showDiscographySetUi &&
                 !hasSinglePlacementType &&
                 prevEntry &&
                 shouldShowSetBreak(prevEntry.entry_set, entry.entry_set)
@@ -765,6 +811,8 @@ export function WlHomeV2SetlistTable({
                     onNumberClick={onNumberClick}
                     hoveredReleaseId={hoveredReleaseId}
                     releaseToEntriesMap={releaseToEntriesMap}
+                    hoveredCategory={hoveredCategory}
+                    showDiscographySetUi={showDiscographySetUi}
                   />
                 </Fragment>
               )

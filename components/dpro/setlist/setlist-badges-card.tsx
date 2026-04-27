@@ -23,6 +23,7 @@ function BadgeLink({
   imageAlt,
   children,
   className,
+  asideMediaLayout = false,
 }: {
   href: string
   imageSrc?: string | null
@@ -30,37 +31,61 @@ function BadgeLink({
   imageAlt: string
   children: React.ReactNode
   className?: string
+  /** WL Home v2 aside: artwork flush left, full row height (matches media tiles). */
+  asideMediaLayout?: boolean
 }) {
+  const artwork =
+    imageSlot ??
+    (imageSrc ?
+      <Image
+        src={imageSrc}
+        alt={imageAlt}
+        width={asideMediaLayout ? 40 : 20}
+        height={asideMediaLayout ? 40 : 20}
+        className={
+          asideMediaLayout ?
+            "object-cover"
+          : "size-6 shrink-0 rounded-sm border border-neutral-700/30 object-cover"
+        }
+        unoptimized
+        onError={(e) => {
+          const el = e.target as HTMLImageElement
+          if (el) el.style.display = "none"
+        }}
+      />
+    : null)
+
   return (
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-2 rounded-md p-2 text-xs font-medium transition-colors",
-        "bg-wl-green/30 text-white hover:opacity-90",
-        className
+        "flex text-xs font-medium transition-colors",
+        asideMediaLayout ?
+          "items-stretch gap-0 p-0 text-white hover:opacity-100"
+        : cn(
+            "items-center gap-2 rounded-md p-2",
+            "bg-wl-green/30 text-white hover:opacity-90",
+          ),
+        className,
       )}
     >
-      {imageSlot ??
-        (imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            width={20}
-            height={20}
-            className="size-6 shrink-0 rounded-sm object-cover border border-neutral-700/30"
-            unoptimized
-            onError={(e) => {
-              const el = e.target as HTMLImageElement
-              if (el) el.style.display = "none"
-            }}
-          />
-        ) : null)}
-      {children}
+      {asideMediaLayout && artwork ?
+        <span className="wl-home-v2-setlist-badge-art">{artwork}</span>
+      : artwork}
+      {asideMediaLayout ?
+        <span className="wl-home-v2-setlist-badge-body">{children}</span>
+      : children}
     </Link>
   )
 }
 
-function CategoryCompleteBadge({ categoryName }: { categoryName: string | null }) {
+export function CategoryCompleteBadge({
+  categoryName,
+  linkClassName,
+}: {
+  categoryName: string | null
+  linkClassName?: string
+}) {
   const { artwork, loaded } = useCategoryArtwork(categoryName)
 
   if (!categoryName?.trim()) return null
@@ -70,10 +95,12 @@ function CategoryCompleteBadge({ categoryName }: { categoryName: string | null }
       href={getListArchiveUrl(CATEGORY_LIST_ID)}
       imageSrc={loaded ? artwork : null}
       imageAlt={categoryName}
+      className={linkClassName}
+      asideMediaLayout={linkClassName?.includes("wl-home-v2-setlist-badge-link")}
     >
       <span className="leading-3">
         This show featured a full performance of{" "}
-        <span className="underline decoration-neutral-900/50 underline-offset-1 transition-colors hover:decoration-neutral-900">
+        <span className="setlist-badge-link-title font-semibold">
           {categoryName}
         </span>
         .
@@ -82,14 +109,35 @@ function CategoryCompleteBadge({ categoryName }: { categoryName: string | null }
   )
 }
 
-function JiveCompleteBadge({ showJiveComplete }: { showJiveComplete: boolean }) {
+export function JiveCompleteBadge({
+  showJiveComplete,
+  linkClassName,
+}: {
+  showJiveComplete: boolean
+  linkClassName?: string
+}) {
   if (!showJiveComplete) return null
 
   return (
     <BadgeLink
       href={getListArchiveUrl(JIVE_LIST_ID)}
-      imageSlot={<JiveRotatingArtwork />}
+      imageSlot={
+        <JiveRotatingArtwork
+          className={
+            linkClassName?.includes("wl-home-v2-setlist-badge-link") ?
+              "wl-home-v2-setlist-badge-rotating-art"
+            : undefined
+          }
+          imageSizes={
+            linkClassName?.includes("wl-home-v2-setlist-badge-link") ?
+              "40px"
+            : undefined
+          }
+        />
+      }
       imageAlt="Jive Suite"
+      className={linkClassName}
+      asideMediaLayout={linkClassName?.includes("wl-home-v2-setlist-badge-link")}
     >
       <span className="leading-3">
         This show featured a full performance of the{" "}
@@ -102,22 +150,39 @@ function JiveCompleteBadge({ showJiveComplete }: { showJiveComplete: boolean }) 
   )
 }
 
-function DripfieldCompleteBadge({
+export function DripfieldCompleteBadge({
   showDripfieldComplete,
+  linkClassName,
 }: {
   showDripfieldComplete: boolean
+  linkClassName?: string
 }) {
   if (!showDripfieldComplete) return null
 
   return (
     <BadgeLink
       href={getListArchiveUrl(DRIPFIELD_LIST_ID)}
-      imageSlot={<DripfieldRotatingArtwork />}
+      imageSlot={
+        <DripfieldRotatingArtwork
+          className={
+            linkClassName?.includes("wl-home-v2-setlist-badge-link") ?
+              "wl-home-v2-setlist-badge-rotating-art"
+            : undefined
+          }
+          imageSizes={
+            linkClassName?.includes("wl-home-v2-setlist-badge-link") ?
+              "40px"
+            : undefined
+          }
+        />
+      }
       imageAlt="Dripfield"
+      className={linkClassName}
+      asideMediaLayout={linkClassName?.includes("wl-home-v2-setlist-badge-link")}
     >
       <span className="leading-3">
         This show featured a full performance of the{" "}
-        <span className="underline decoration-neutral-900/50 underline-offset-1 transition-colors hover:decoration-neutral-900">
+        <span className="setlist-badge-link-title font-semibold">
           Dripfield Suite
         </span>
         .
@@ -142,7 +207,9 @@ export function SetlistBadgesCard({ show }: SetlistBadgesCardProps) {
       {hasCategory && (
         <Card className="border-border/60 bg-card/80 py-0">
           <CardContent className="px-0">
-            <CategoryCompleteBadge categoryName={show.show_listcategorycomplete ?? null} />
+            <CategoryCompleteBadge
+              categoryName={show.show_listcategorycomplete ?? null}
+            />
           </CardContent>
         </Card>
       )}

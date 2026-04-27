@@ -92,14 +92,15 @@ export function WlHomeV2UserMenu({
           className="top-nav-user-trigger"
           aria-haspopup="menu"
         >
-          {isLoggedIn ? (
-            <Avatar className="top-nav-user-trigger-avatar">
-              <AvatarImage src={profilePicture ?? undefined} alt="" />
-              <AvatarFallback className="top-nav-user-trigger-fallback">
-                {displayName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          ) : null}
+          <Avatar className="top-nav-user-trigger-avatar">
+            <AvatarImage
+              src={isLoggedIn ? (profilePicture ?? undefined) : undefined}
+              alt=""
+            />
+            <AvatarFallback className="top-nav-user-trigger-fallback">
+              {displayName.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
           <span className="top-nav-user-trigger-label">
             {isLoggedIn ? "Profile" : "Log in"}
           </span>
