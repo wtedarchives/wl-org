@@ -1,0 +1,48 @@
+import { cn } from "@/lib/utils"
+
+/** Show-level coach notes + callbacks under the setlist table (hidden when both empty). */
+export function WlHomeV2SetlistCoachCallbacksFooter({
+  coachNotesHtml,
+  callbacksHtml,
+}: {
+  coachNotesHtml: string
+  callbacksHtml: string
+}) {
+  const hasCoach = coachNotesHtml.length > 0
+  const hasCallbacks = callbacksHtml.length > 0
+  if (!hasCoach && !hasCallbacks) return null
+
+  const split = hasCoach && hasCallbacks
+
+  const col = (label: string, html: string) => (
+    <div className="setlist-card-notes-col">
+      <div className="show-notes setlist-card-notes-col-inner">
+        <div className="show-notes-inner">
+          <div className="notes-label">{label}</div>
+          <div
+            className="show-notes-body"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      <div className="setlist-card-after-table-divider" aria-hidden />
+      <div
+        className={cn(
+          "setlist-card-notes-row",
+          split && "setlist-card-notes-row--split",
+        )}
+      >
+        {hasCoach ? col("Coach's Notes", coachNotesHtml) : null}
+        {split ?
+          <div className="setlist-card-notes-col-sep" aria-hidden />
+        : null}
+        {hasCallbacks ? col("Callbacks", callbacksHtml) : null}
+      </div>
+    </>
+  )
+}

@@ -5052,10 +5052,15 @@
 }
 /* Compact setlist (`< xl`): SHOW n OF m shares the title row with date · group (right-aligned). */
 @media (max-width: 1279px) {
+  /* Slightly smaller date + group than desktop (shared `h1`; matches compact tools layout). */
+  .wl-home-v2 .wl-home-v2-setlist .show-header h1.show-header-heading {
+    font-size: clamp(22px, 4vw, 32px);
+    line-height: 1.06;
+  }
   .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-title-row--with-canon {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
     width: 100%;
@@ -5072,7 +5077,6 @@
     .show-header-title-row--with-canon
     .show-header-canon-pill {
     flex: 0 0 auto;
-    margin-top: 0.22em;
     text-align: right;
   }
   /* Long tour name on compact: tour name vs show position/total on stacked lines (`< xl` only via TS). */

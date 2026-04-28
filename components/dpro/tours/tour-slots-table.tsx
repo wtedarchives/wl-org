@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table"
 import type { SlotShowData, SongEntryWithId } from "@/types/tour"
 import { getColumnBackgroundColor } from "@/lib/stats/tour-utils"
-import { formatTourShowDate } from "./tour-show-row"
+import { formatTourShowDate } from "./tour-show-format"
 import { cn } from "@/lib/utils"
 
 interface TourSlotsTableProps {

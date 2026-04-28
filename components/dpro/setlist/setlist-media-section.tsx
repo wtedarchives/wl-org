@@ -1,174 +1,23 @@
 "use client"
 
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import Image from "next/image"
-import Link from "next/link"
-import {
-  CircleNotch,
-  Parallelogram,
-  SpotifyLogo,
-  YoutubeLogo,
-} from "@phosphor-icons/react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { cn } from "@/lib/utils"
 import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { normalizeBandcampUrl } from "@/lib/normalize-bandcamp-url"
-import { cn } from "@/lib/utils"
 import {
   SetlistReleaseEmbedCard,
   type SetlistReleaseEmbedVisualVariant,
 } from "./setlist-release-embed-card"
+import {
+  groupReleasesByService,
+  OTHER_SERVICE_KEY,
+  releaseServiceSectionLabel,
+} from "@/components/dpro/setlist/setlist-media-section.model"
+import { ReleaseServiceIcon } from "@/components/dpro/setlist/setlist-media-service-icon"
+import { SetlistMediaReleaseRow } from "@/components/dpro/setlist/setlist-media-release-row"
 
-const SERVICE_COLORS: Record<string, string> = {
-  youtube: "#ff0033",
-  spotify: "#1ed760",
-  bandcamp: "#0fa2d1",
-}
-
-const MEDIA_TITLE_SEGUE_ARROW = "\u2192"
-
-/** WL v2: tighter title line-height + `→` matches setlist `.song-cell .segue`. */
-function WlHomeV2MediaReleaseTitle({
-  text,
-  className,
-}: {
-  text: string
-  className?: string
-}) {
-  if (!text.includes(MEDIA_TITLE_SEGUE_ARROW)) {
-    return <p className={className}>{text}</p>
-  }
-  const segments = text.split(MEDIA_TITLE_SEGUE_ARROW)
-  return (
-    <p className={className}>
-      {segments.map((seg, i) => (
-        <Fragment key={i}>
-          {seg}
-          {i < segments.length - 1 ?
-            <span className="wl-home-v2-setlist-media-title-segue">
-              {MEDIA_TITLE_SEGUE_ARROW}
-            </span>
-          : null}
-        </Fragment>
-      ))}
-    </p>
-  )
-}
-
-export function ReleaseServiceIcon({ service }: { service: string | null }) {
-  if (!service?.trim()) return null
-  const key = service.toLowerCase().trim()
-  if (key === "nugs") {
-    return (
-      <Image
-        src="/NugsColor.png"
-        alt=""
-        width={14}
-        height={14}
-        className="shrink-0 rounded-sm object-contain"
-      />
-    )
-  }
-  if (key === "discogs") {
-    return (
-      <Image
-        src="/discogs.png"
-        alt=""
-        width={14}
-        height={14}
-        className="shrink-0 rounded-sm object-contain"
-      />
-    )
-  }
-  if (key === "youtube") {
-    return (
-      <YoutubeLogo
-        className="shrink-0"
-        size={14}
-        weight="fill"
-        style={{ color: SERVICE_COLORS.youtube }}
-        aria-hidden
-      />
-    )
-  }
-  if (key === "spotify") {
-    return (
-      <SpotifyLogo
-        className="shrink-0"
-        size={14}
-        weight="fill"
-        style={{ color: SERVICE_COLORS.spotify }}
-        aria-hidden
-      />
-    )
-  }
-  if (key === "bandcamp") {
-    return (
-      <Parallelogram
-        className="shrink-0"
-        size={14}
-        weight="fill"
-        style={{ color: SERVICE_COLORS.bandcamp }}
-        aria-hidden
-      />
-    )
-  }
-  return null
-}
-
-function isEmbeddableService(service: string | null): boolean {
-  if (!service?.trim()) return false
-  const key = service.toLowerCase().trim()
-  return key === "bandcamp" || key === "youtube"
-}
-
-/** Lowercase key for grouping + sort; empty/missing → `other`. */
-const OTHER_SERVICE_KEY = "other"
-
-const KNOWN_SERVICE_LABELS: Record<string, string> = {
-  bandcamp: "Bandcamp",
-  discogs: "Discogs",
-  nugs: "Nugs",
-  spotify: "Spotify",
-  youtube: "YouTube",
-}
-
-function releaseServiceSortKey(release: ShowRelease): string {
-  const k = (release.release_service ?? "").trim().toLowerCase()
-  return k || OTHER_SERVICE_KEY
-}
-
-function releaseServiceSectionLabel(sortKey: string): string {
-  if (sortKey === OTHER_SERVICE_KEY) return "Other"
-  return (
-    KNOWN_SERVICE_LABELS[sortKey] ??
-    sortKey.replace(/^\w/, (c) => c.toUpperCase())
-  )
-}
-
-function groupReleasesByService(releases: ShowRelease[]): Map<string, ShowRelease[]> {
-  const map = new Map<string, ShowRelease[]>()
-  for (const r of releases) {
-    const k = releaseServiceSortKey(r)
-    const list = map.get(k)
-    if (list) list.push(r)
-    else map.set(k, [r])
-  }
-  for (const [, list] of map) {
-    list.sort((a, b) => {
-      const oa = a.release_order ?? Number.MAX_SAFE_INTEGER
-      const ob = b.release_order ?? Number.MAX_SAFE_INTEGER
-      if (oa !== ob) return oa - ob
-      return a.release_id.localeCompare(b.release_id)
-    })
-  }
-  return map
-}
+export { ReleaseServiceIcon } from "@/components/dpro/setlist/setlist-media-service-icon"
 
 interface SetlistMediaSectionProps {
   releases: ShowRelease[]
@@ -275,7 +124,7 @@ export function SetlistMediaSection({
         setActiveEmbed({ release, type: "youtube" })
       }
     },
-    [activeEmbed]
+    [activeEmbed],
   )
 
   const handleCloseEmbed = useCallback(async () => {
@@ -288,270 +137,8 @@ export function SetlistMediaSection({
 
   if (releases.length === 0) return null
 
-  const renderReleaseRow = (r: ShowRelease) => {
-    const isSelected =
-      !!activeEmbed && r.release_id === activeEmbed.release.release_id
-    const isDimmed = !!activeEmbed && !isSelected
-    const isEmbeddable =
-      isEmbeddableService(r.release_service) && r.release_link
-
-    if (isMobile && !isV2) {
-      const rowContent = (
-        <>
-          <div
-            className={cn(
-              "relative shrink-0 overflow-hidden rounded",
-              isV2 ? "size-[57px] border border-[rgb(53,56,54)] bg-black/35" : "size-10 border border-border/60 bg-muted",
-            )}
-          >
-            {r.release_artwork ? (
-              <Image
-                src={r.release_artwork}
-                alt=""
-                width={isV2 ? 57 : 40}
-                height={isV2 ? 57 : 40}
-                className="size-full object-cover"
-                unoptimized
-              />
-            ) : (
-              <div
-                className={cn(
-                  "flex size-full items-center justify-center text-[10px]",
-                  isV2 ? "text-white/45" : "text-muted-foreground",
-                )}
-              >
-                —
-              </div>
-            )}
-            {loadingReleaseId === r.release_id && (
-              <div
-                className={cn(
-                  "absolute inset-0 flex items-center justify-center",
-                  isV2 ? "bg-black/55" : "bg-muted/80",
-                )}
-              >
-                {isV2 ?
-                  <CircleNotch
-                    className="size-4 shrink-0 animate-spin text-white/55"
-                    aria-hidden
-                  />
-                : <CircleNotch className="size-4 animate-spin text-muted-foreground" aria-hidden />
-                }
-              </div>
-            )}
-          </div>
-          <div
-            className={cn(
-              "min-w-0 flex-1",
-              isV2 && "flex flex-col gap-[3px]",
-            )}
-          >
-            {isV2 ?
-              <WlHomeV2MediaReleaseTitle
-                text={r.release_displayname ?? r.release_id}
-                className={cn(
-                  "wl-home-v2-setlist-media-title min-w-0 line-clamp-2 text-xs font-medium text-white/[0.92]",
-                )}
-              />
-            : <p
-                className={cn(
-                  "truncate text-xs font-medium",
-                  "text-foreground",
-                )}
-              >
-                {r.release_displayname ?? r.release_id}
-              </p>
-            }
-            <div
-              className={cn(
-                "flex items-center gap-1.5",
-                isV2 ?
-                  "wl-home-v2-setlist-media-service-row"
-                : "text-[10px] text-muted-foreground",
-              )}
-            >
-              <ReleaseServiceIcon service={r.release_service} />
-              <span>{r.release_service ?? "—"}</span>
-            </div>
-          </div>
-        </>
-      )
-      const rowClassName = cn(
-        "flex items-center gap-2",
-        isV2 ?
-          "wl-home-v2-setlist-media-row px-[14px] py-2.5 rounded-[10px] border border-[rgb(63,65,64)] bg-[rgba(0,0,0,0.45)] transition-all duration-200 hover:scale-[1.02]"
-        : "px-2 py-2 rounded-lg border border-border/60 bg-muted/30 transition-colors",
-        isDimmed ? "opacity-30" : "hover:opacity-80",
-        isEmbeddable &&
-          (isV2 ? "hover:bg-[rgba(0,0,0,0.55)]" : "hover:bg-muted/60"),
-      )
-
-      const releaseHoverProps = {
-        onMouseEnter: () => onReleaseHover?.(r.release_id),
-        onMouseLeave: () => onReleaseHover?.(null),
-      }
-      if (isEmbeddable) {
-        return (
-          <button
-            key={r.release_id}
-            type="button"
-            onClick={(e) => handleStreamingClick(e, r)}
-            className={`${rowClassName} w-full cursor-pointer text-left`}
-            {...releaseHoverProps}
-          >
-            {rowContent}
-          </button>
-        )
-      }
-      if (r.release_link) {
-        return (
-          <Link
-            key={r.release_id}
-            href={normalizeBandcampUrl(r.release_link) ?? r.release_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={rowClassName}
-            {...releaseHoverProps}
-          >
-            {rowContent}
-          </Link>
-        )
-      }
-      return (
-        <div key={r.release_id} className={rowClassName} {...releaseHoverProps}>
-          {rowContent}
-        </div>
-      )
-    }
-
-    const content = (
-      <>
-        <div
-          className={cn(
-            "relative shrink-0",
-            isV2 ? "h-[57px] w-[57px] bg-black/35" : "aspect-square w-full bg-muted",
-          )}
-        >
-          {r.release_artwork ? (
-            <Image
-              src={r.release_artwork}
-              alt=""
-              width={isV2 ? 57 : 200}
-              height={isV2 ? 57 : 200}
-              className="h-full w-full object-cover"
-              unoptimized
-            />
-          ) : (
-            <div
-              className={cn(
-                "flex h-full w-full items-center justify-center text-xs",
-                isV2 ? "text-white/45" : "text-muted-foreground",
-              )}
-            >
-              No image
-            </div>
-          )}
-          {loadingReleaseId === r.release_id && (
-            <div
-              className={cn(
-                "absolute inset-0 flex items-center justify-center",
-                isV2 ? "bg-black/55" : "bg-muted/80",
-              )}
-            >
-              {isV2 ?
-                <CircleNotch
-                  className="size-6 shrink-0 animate-spin text-white/55"
-                  aria-hidden
-                />
-              : <CircleNotch className="size-6 animate-spin text-muted-foreground" aria-hidden />
-              }
-            </div>
-          )}
-        </div>
-        <div
-          className={cn(
-            isV2 ?
-              "wl-home-v2-setlist-media-tile-body wl-home-v2-setlist-media-tile-body--row"
-            : "space-y-0.5 p-2",
-          )}
-        >
-          {isV2 ?
-            <WlHomeV2MediaReleaseTitle
-              text={r.release_displayname ?? r.release_id}
-              className={cn(
-                "wl-home-v2-setlist-media-title min-w-0 line-clamp-2 text-xs font-medium text-white/[0.92]",
-              )}
-            />
-          : <p
-              className={cn(
-                "line-clamp-2 text-xs font-medium",
-                "text-foreground",
-              )}
-            >
-              {r.release_displayname ?? r.release_id}
-            </p>
-          }
-          <div
-            className={cn(
-              "flex items-center gap-1.5",
-              isV2 ?
-                "wl-home-v2-setlist-media-service-row"
-              : "text-[10px] text-muted-foreground",
-            )}
-          >
-            <ReleaseServiceIcon service={r.release_service} />
-            <span>{r.release_service ?? "—"}</span>
-          </div>
-        </div>
-      </>
-    )
-    const className = cn(
-      "flex shrink-0 overflow-hidden transition-all duration-200",
-      isV2 ?
-        cn(
-          "wl-home-v2-setlist-media-tile box-border max-w-full flex-row items-center rounded-[10px] border border-[rgb(63,65,64)] bg-[rgba(0,0,0,0.45)] hover:scale-[1.02] hover:bg-[rgba(0,0,0,0.55)]",
-          isMobile ? "min-w-0 w-full" : "w-[250px]",
-        )
-      : "w-[200px] flex-col rounded-lg border border-border/60 bg-muted/30 hover:scale-[1.02] hover:!bg-muted",
-      isDimmed ? "opacity-30 hover:opacity-80" : "",
-    )
-    const desktopHoverProps = {
-      onMouseEnter: () => onReleaseHover?.(r.release_id),
-      onMouseLeave: () => onReleaseHover?.(null),
-    }
-    if (isEmbeddable) {
-      return (
-        <button
-          key={r.release_id}
-          type="button"
-          onClick={(e) => handleStreamingClick(e, r)}
-          className={`${className} cursor-pointer text-left`}
-          {...desktopHoverProps}
-        >
-          {content}
-        </button>
-      )
-    }
-    if (r.release_link) {
-      return (
-        <Link
-          key={r.release_id}
-          href={normalizeBandcampUrl(r.release_link) ?? r.release_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={className}
-          {...desktopHoverProps}
-        >
-          {content}
-        </Link>
-      )
-    }
-    return (
-      <div key={r.release_id} className={className} {...desktopHoverProps}>
-        {content}
-      </div>
-    )
-  }
+  const activeEmbedReleaseId =
+    activeEmbed?.release.release_id ?? null
 
   const headingClass = isV2 ?
       "wl-home-v2-setlist-media-heading"
@@ -590,7 +177,18 @@ export function SetlistMediaSection({
               {releaseServiceSectionLabel(serviceKey)}
             </h3>
             <div className={mediaTilesWrapClass}>
-              {(grouped.get(serviceKey) ?? []).map((r) => renderReleaseRow(r))}
+              {(grouped.get(serviceKey) ?? []).map((r) => (
+                <SetlistMediaReleaseRow
+                  key={r.release_id}
+                  release={r}
+                  isV2={isV2}
+                  isMobile={isMobile}
+                  activeEmbedReleaseId={activeEmbedReleaseId}
+                  loadingReleaseId={loadingReleaseId}
+                  onStreamingClick={handleStreamingClick}
+                  onReleaseHover={onReleaseHover}
+                />
+              ))}
             </div>
           </section>
         ))}
