@@ -46,7 +46,7 @@ export interface SetlistSongPerformancesPanelProps {
   showHeader?: boolean
   /** When false, omit link + close footer (e.g. WL Home v2 modal supplies a shell footer). */
   showFooter?: boolean
-  /** WL Home v2: match {@link YearShowsTable} chrome (`wl-home-v2-years-table`). */
+  /** WL Home v2: same chrome as main setlist `.set-table` (modal-scoped CSS). */
   wlHomeV2YearsTable?: boolean
 }
 
@@ -156,61 +156,74 @@ export function SetlistSongPerformancesPanel({
               className={cn(
                 "text-[11px]",
                 wlHomeV2YearsTable ?
-                  "min-w-max wl-home-v2-years-table"
+                  "min-w-max set-table"
                 : "min-w-full border-separate border-spacing-y-0.25",
               )}
             >
               <TableHeader>
                 <TableRow
                   className={cn(
-                    wlHomeV2YearsTable ?
-                      "border-b border-white/10 bg-black/25 hover:bg-black/25"
-                    : "border-b border-border/60",
+                    !wlHomeV2YearsTable && "border-b border-border/60",
                   )}
                 >
                   <TableHead
                     className={cn(
-                      "whitespace-nowrap text-center text-[11px] font-medium",
-                      wlHomeV2YearsTable ? "!px-2 !py-0.5" : "",
+                      wlHomeV2YearsTable ?
+                        "center whitespace-nowrap"
+                      : "whitespace-nowrap text-center text-[11px] font-medium px-2 py-0.5",
                     )}
                   >
                     Date
                   </TableHead>
                   <TableHead
                     className={cn(
-                      "shrink-0 p-0",
-                      wlHomeV2YearsTable ? "w-[4px]" : "w-1",
+                      wlHomeV2YearsTable ? "set-table-perf-head" : "w-1 shrink-0 p-0",
                     )}
                     aria-hidden
                   />
                   <TableHead
-                    className={cn(
-                      "whitespace-nowrap text-[11px] font-medium",
-                      wlHomeV2YearsTable ? "!px-2 !py-0.5 text-left" : "",
-                    )}
+                    className={
+                      wlHomeV2YearsTable ?
+                        "whitespace-nowrap"
+                      : cn(
+                          "whitespace-nowrap text-left text-[11px] font-medium",
+                          "px-2 py-0.5",
+                        )
+                    }
                   >
                     Venue
                   </TableHead>
                   <TableHead
-                    className={cn(
-                      "whitespace-nowrap text-left text-[11px] font-medium",
-                      wlHomeV2YearsTable ? "!px-2 !py-0.5" : "",
-                    )}
+                    className={
+                      wlHomeV2YearsTable ?
+                        "text-left whitespace-nowrap"
+                      : cn(
+                          "whitespace-nowrap text-left text-[11px] font-medium",
+                          "px-2 py-0.5",
+                        )
+                    }
                   >
                     &nbsp;
                   </TableHead>
                   <TableHead
                     className={cn(
-                      "whitespace-nowrap text-center text-[11px] font-medium",
-                      wlHomeV2YearsTable ? "!px-2 !py-0.5" : "",
+                      wlHomeV2YearsTable ?
+                        "center whitespace-nowrap"
+                      : cn(
+                          "whitespace-nowrap text-center text-[11px] font-medium px-2 py-0.5",
+                        ),
                     )}
                   >
                     Length
                   </TableHead>
                   <TableHead
                     className={cn(
-                      "min-w-[400px] max-w-[400px] whitespace-normal text-[11px] font-medium",
-                      wlHomeV2YearsTable ? "!px-2 !py-0.5 text-left" : "",
+                      wlHomeV2YearsTable ?
+                        "max-w-[400px] min-w-0 whitespace-normal text-left"
+                      : cn(
+                          "max-w-[400px] min-w-0 whitespace-normal text-left text-[11px] font-medium",
+                          "px-2 py-0.5",
+                        ),
                     )}
                   >
                     Coach&apos;s Notes
@@ -221,17 +234,16 @@ export function SetlistSongPerformancesPanel({
                 {performances.map((perf) => (
                   <TableRow
                     key={`${perf.show_id}-${perf.entry_id}`}
-                    className={cn(
-                      "align-middle",
-                      wlHomeV2YearsTable ?
-                        "border-b border-white/[0.06] bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
-                      : "",
-                    )}
+                    className={cn("align-middle", wlHomeV2YearsTable && "song-row")}
                   >
                     <TableCell
                       className={cn(
-                        "whitespace-nowrap text-center align-middle text-[11px]",
-                        wlHomeV2YearsTable ? "!px-2 !py-0.5" : "px-2 py-1",
+                        wlHomeV2YearsTable ?
+                          "center whitespace-nowrap align-middle text-[13px]"
+                        : cn(
+                            "whitespace-nowrap text-center align-middle text-[11px]",
+                            "px-2 py-1",
+                          ),
                       )}
                     >
                       <Link
@@ -247,8 +259,9 @@ export function SetlistSongPerformancesPanel({
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "relative shrink-0 p-0 align-middle",
-                        wlHomeV2YearsTable ? "w-[4px]" : "w-2",
+                        wlHomeV2YearsTable ?
+                          "set-table-perf-rail relative shrink-0 align-middle"
+                        : "relative shrink-0 w-2 align-middle p-0",
                       )}
                       aria-hidden
                     >
@@ -266,8 +279,9 @@ export function SetlistSongPerformancesPanel({
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "align-middle text-[11px]",
-                        wlHomeV2YearsTable ? "!px-2 !py-0.5" : "px-2 py-1",
+                        wlHomeV2YearsTable ?
+                          "align-middle text-[13px]"
+                        : "align-middle px-2 py-1 text-[11px]",
                       )}
                     >
                       {perf.venue_id ?
@@ -290,8 +304,12 @@ export function SetlistSongPerformancesPanel({
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "text-left align-middle text-[11px]",
-                        wlHomeV2YearsTable ? "!px-2 !py-0.5" : "px-2 py-1",
+                        wlHomeV2YearsTable ?
+                          "align-middle text-[13px] text-left"
+                        : cn(
+                            "align-middle text-left text-[11px]",
+                            "px-2 py-1",
+                          ),
                       )}
                     >
                       <div className="inline-flex items-center gap-1">
@@ -313,20 +331,35 @@ export function SetlistSongPerformancesPanel({
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "whitespace-nowrap text-center align-middle text-[11px]",
-                        wlHomeV2YearsTable ? "!px-2 !py-0.5" : "px-2 py-1",
+                        wlHomeV2YearsTable ?
+                          "center whitespace-nowrap align-middle text-[13px]"
+                        : cn(
+                            "whitespace-nowrap text-center align-middle text-[11px]",
+                            "px-2 py-1",
+                          ),
                       )}
                     >
                       {formatEntryLength(perf.entry_length) || ""}
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "min-w-[400px] max-w-[400px] whitespace-normal align-middle text-[11px]",
-                        wlHomeV2YearsTable ? "!px-2 !py-0.5" : "px-2 py-1",
+                        wlHomeV2YearsTable ?
+                          "notes-cell max-w-[400px] min-w-0 whitespace-normal align-middle"
+                        : "max-w-[400px] min-w-0 whitespace-normal align-top px-2 py-1 text-[11px]",
                       )}
                     >
                       {perf.entry_coachnotes && (
-                        <div className="text-[10px] leading-tight text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline [&_p]:my-0">
+                        <div
+                          className={cn(
+                            "w-fit max-w-full min-w-0 break-words [&_p]:my-0",
+                            wlHomeV2YearsTable ?
+                              "leading-[1.4] [&_p]:my-0"
+                            : cn(
+                                "text-[10px] leading-tight text-muted-foreground",
+                                "[&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline [&_p]:my-0",
+                              ),
+                          )}
+                        >
                           <span
                             dangerouslySetInnerHTML={{
                               __html: perf.entry_coachnotes.trim(),

@@ -648,7 +648,7 @@ export function WlHomeV2SetlistTable({
     if (!hasCoach && !hasCallbacks) return null
 
     return (
-      <div className="setlist-card">
+      <div className="setlist-card wl-home-v2-setlist-card">
         <WlHomeV2SetlistCoachCallbacksFooter
           coachNotesHtml={coachNotesShowText}
           callbacksHtml={callbacksText}
@@ -659,11 +659,12 @@ export function WlHomeV2SetlistTable({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="setlist-card">
-        <table
-          className="set-table"
-          onPointerLeave={() => setHoveredEntryId(null)}
-        >
+      <div className="setlist-card wl-home-v2-setlist-card">
+        <div className="wl-home-v2-setlist-table-scroll">
+          <table
+            className="set-table"
+            onPointerLeave={() => setHoveredEntryId(null)}
+          >
           <thead>
             <tr>
               {showDiscographySetUi ?
@@ -816,7 +817,8 @@ export function WlHomeV2SetlistTable({
               )
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
         <WlHomeV2SetlistCoachCallbacksFooter
           coachNotesHtml={coachNotesShowText}
           callbacksHtml={callbacksText}

@@ -295,7 +295,7 @@ export function SetlistMediaSection({
     const isEmbeddable =
       isEmbeddableService(r.release_service) && r.release_link
 
-    if (isMobile) {
+    if (isMobile && !isV2) {
       const rowContent = (
         <>
           <div
@@ -508,7 +508,10 @@ export function SetlistMediaSection({
     const className = cn(
       "flex shrink-0 overflow-hidden transition-all duration-200",
       isV2 ?
-        "wl-home-v2-setlist-media-tile box-border w-[250px] max-w-full flex-row items-center rounded-[10px] border border-[rgb(63,65,64)] bg-[rgba(0,0,0,0.45)] hover:scale-[1.02] hover:bg-[rgba(0,0,0,0.55)]"
+        cn(
+          "wl-home-v2-setlist-media-tile box-border max-w-full flex-row items-center rounded-[10px] border border-[rgb(63,65,64)] bg-[rgba(0,0,0,0.45)] hover:scale-[1.02] hover:bg-[rgba(0,0,0,0.55)]",
+          isMobile ? "min-w-0 w-full" : "w-[250px]",
+        )
       : "w-[200px] flex-col rounded-lg border border-border/60 bg-muted/30 hover:scale-[1.02] hover:!bg-muted",
       isDimmed ? "opacity-30 hover:opacity-80" : "",
     )

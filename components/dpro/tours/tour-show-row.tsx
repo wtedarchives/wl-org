@@ -116,7 +116,7 @@ export function TourShowRow({
     <TableRow
       className={cn(
         wlHomeV2 ?
-          "border-b border-white/[0.06] bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+          "border-b bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
         : index % 2 === 0 ?
           "bg-background/70"
         : "bg-background",

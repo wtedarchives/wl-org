@@ -102,7 +102,7 @@ export function TourSlotsTable({
           <TableRow
             className={cn(
               wlHomeV2 ?
-                "border-b border-white/10 bg-black/25 hover:bg-black/25"
+                "border-b bg-black/25 hover:bg-black/25"
               : "bg-muted/60",
             )}
           >
@@ -139,7 +139,7 @@ export function TourSlotsTable({
               key={slot.show_id}
               className={cn(
                 wlHomeV2 ?
-                  "border-b border-white/[0.06] bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+                  "border-b bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
                 : "bg-background/70 hover:bg-muted/30",
               )}
             >

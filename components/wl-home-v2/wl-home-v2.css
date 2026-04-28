@@ -3288,6 +3288,100 @@
     color: var(--wl-white);
     background: rgba(255, 255, 255, 0.08);
   }
+
+  /*
+   * Song modal — tour performances: same `.set-table` system as WL setlist (`wl-home-v2-setlist`),
+   * without needing that wrapper. Shadcn `<Table*` defaults are overridden via `.set-table thead/tbody`.
+   */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --set-table-row-line: rgb(43, 46, 44);
+    --set-table-section-line: rgb(53, 56, 54);
+    --set-table-rail-line: rgb(59, 62, 60);
+    --set-table-encore-line: rgb(95, 60, 53);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table th {
+    text-align: left;
+    padding: 6px 14px;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 10px !important;
+    color: var(--setlist-rail-label-color);
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table th.center {
+    text-align: center;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td {
+    padding: 4px 14px;
+    border-bottom: 1px solid var(--set-table-row-line);
+    vertical-align: middle;
+    font-family: inherit;
+    font-size: 12px;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table tr:last-child td {
+    border-bottom: none;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table tbody tr.song-row {
+    transition:
+      background 0.15s ease,
+      opacity 0.15s ease;
+  }
+  /* Match main setlist `.song-row` hover (desktop row-hover), using native :hover inside modal */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table tbody tr.song-row:hover td {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td.center {
+    text-align: center;
+  }
+  /* Placement bar column: same hairlines + bg as other cells; narrow width only */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table th.set-table-perf-head,
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td.set-table-perf-rail {
+    width: 4px;
+    min-width: 4px;
+    max-width: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table th.set-table-perf-head {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td.notes-cell {
+    font-size: 13px !important;
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.4;
+    max-width: 400px;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td.notes-cell a {
+    color: var(--wl-orange);
+    font-weight: 600;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td.notes-cell a:hover {
+    color: var(--wl-light-orange);
+    text-decoration: underline;
+  }
+  /* Shadcn `<Table*>`: loosen fixed `th` height; `.set-table td` draws row lines (not `tr.border-b`). */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table thead th[data-slot="table-head"] {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table thead tr[data-slot="table-row"] {
+    border-bottom: 1px solid var(--set-table-section-line) !important;
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table tbody tr[data-slot="table-row"] {
+    border-bottom: none !important;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table tbody tr[data-slot="table-row"]:hover {
+    background-color: transparent !important;
+  }
   /* Archive years — tours / filter / average setlist (viewport < Tailwind xl) */
   .wl-home-v2 .modal.modal--years-tools {
     max-width: min(640px, calc(100vw - 2rem));
@@ -5055,12 +5149,32 @@
   color: var(--wl-light-orange);
   text-decoration: underline;
 }
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-card.setlist-card {
+  display: flex;
+  flex-direction: column;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-table-scroll {
+  flex-shrink: 0;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+/*
+ * iOS Safari: actionable controls inside horizontally scrollable tables often need two taps —
+ * disabling double-tap zoom on taps (`manipulation`) and isolating horizontal scroll to the wrapper
+ * (coach/callback strip stays outside `.wl-home-v2-setlist-table-scroll`) fixes first-tap navigation.
+ */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-table-scroll button,
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-table-scroll a {
+  touch-action: manipulation;
+}
 .wl-home-v2 .wl-home-v2-setlist .setlist-card {
   background: rgba(0, 0, 0, 0.63);
   border: 1px solid rgb(63, 65, 64);
   border-radius: 10px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
@@ -6165,7 +6279,7 @@
 .setlist-header-tooltip .wl-home-v2-setlist-song-spread-tooltip-title {
   margin: 0 0 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgb(44, 46, 45);
   font-family: "Geist Mono", ui-monospace, monospace;
   font-weight: 600;
   font-size: 12px;

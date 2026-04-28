@@ -150,7 +150,7 @@ export function YearShowsTable({
             <TableRow
               className={cn(
                 wlHomeV2 ?
-                  "border-b border-white/10 bg-black/25 hover:bg-black/25"
+                  "border-b bg-black/25 hover:bg-black/25"
                 : "bg-muted/60",
               )}
             >

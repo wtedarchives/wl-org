@@ -187,10 +187,10 @@ function RoundSectionHeaderRow({
     <TableRow
       className={cn(
         y ?
-          "border-b border-white/[0.06] bg-black/25 hover:bg-black/25"
+          "border-b bg-black/25 hover:bg-black/25"
         : "border-border/60 bg-muted/30 hover:bg-muted/30",
         showTopBorder &&
-          (y ? "border-t border-white/10" : "border-t-2 border-t-border/80"),
+          (y ? "border-t border-[rgb(49,51,49)]" : "border-t-2 border-t-border/80"),
       )}
     >
       <TableCell
@@ -251,7 +251,7 @@ function ResultRow({
         "transition-colors",
         y ?
           cn(
-            "border-b border-white/[0.06] bg-transparent",
+            "border-b bg-transparent",
             isHighlighted ?
               "bg-[rgba(88,200,174,0.18)] hover:bg-[rgba(88,200,174,0.24)]"
             : "hover:bg-[rgba(88,200,174,0.11)]",
