@@ -300,6 +300,7 @@ export function WlHomeV2SetlistPageClient() {
       <SetlistWtedLoginRequiredDialog
         open={wtedLoginRequiredOpen}
         onOpenChange={setWtedLoginRequiredOpen}
+        wlHomeV2
       />
       <WlHomeV2SetlistWtedModal
         open={wtedModalOpen}

@@ -301,7 +301,7 @@ export function WtedPendingSlotContent({
             className={cn(
               "mt-1 text-[10px]",
               visualVariant === "wlHomeV2" ?
-                "text-red-300/95"
+                "wl-home-v2-wted-slot-submit-error text-red-300/95"
               : "text-destructive",
             )}
           >

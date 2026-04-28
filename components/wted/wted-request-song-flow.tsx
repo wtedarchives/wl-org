@@ -36,11 +36,14 @@ export function WtedRequestSongFlow({
   catalogFetchEnabled = true,
   panelClassName,
   panelWrapperClassName,
+  wlHomeV2LoginDialog = false,
 }: {
   catalogFetchEnabled?: boolean
   panelClassName?: string
   /** Optional outer flex wrapper (e.g. modal body min-height). */
   panelWrapperClassName?: string
+  /** Use WL Home v2 login gate styling when opening the WTED login-required dialog. */
+  wlHomeV2LoginDialog?: boolean
 }) {
   const { user } = useAuth()
   const catalogQueryEnabled = catalogFetchEnabled
@@ -131,6 +134,7 @@ export function WtedRequestSongFlow({
       <SetlistWtedLoginRequiredDialog
         open={wtedLoginRequiredOpen}
         onOpenChange={setWtedLoginRequiredOpen}
+        wlHomeV2={wlHomeV2LoginDialog}
       />
       <SetlistWtedSheet
         open={wtedSheetOpen}

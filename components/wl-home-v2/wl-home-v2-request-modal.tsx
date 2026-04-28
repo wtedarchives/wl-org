@@ -59,6 +59,7 @@ export function WlHomeV2RequestModal({
               catalogFetchEnabled={open}
               panelWrapperClassName="min-h-[min(52vh,420px)]"
               panelClassName="rounded-none"
+              wlHomeV2LoginDialog
             />
           </div>
         </div>
