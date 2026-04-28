@@ -138,14 +138,14 @@ export function SetlistRatingPanel({
         <div
           className={cn(
             !v2 &&
-              "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between",
+              "flex flex-col gap-2 xl:flex-row xl:flex-wrap xl:items-center xl:justify-between",
             v2 && P + "__controls-row",
           )}
         >
           <div
             className={cn(
               !v2 &&
-                "flex w-full flex-wrap items-center justify-center gap-2 sm:w-auto sm:justify-start",
+                "flex w-full flex-wrap items-center justify-center gap-2 xl:w-auto xl:justify-start",
               v2 && P + "__rate-wrap",
             )}
           >

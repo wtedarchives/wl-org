@@ -154,9 +154,29 @@
   .wl-home-v2 nav.top-nav .top-nav-primary-row > a {
     display: inline-flex;
     align-items: center;
+    gap: 6px;
     font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8);
     text-decoration: none; padding: 8px 12px; border-radius: 8px;
     transition: color .15s, background .15s;
+  }
+  .wl-home-v2 nav.top-nav .top-nav-primary-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    opacity: 0.92;
+  }
+  .wl-home-v2 nav.top-nav .top-nav-primary-icon.top-nav-primary-icon--img {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    opacity: 1;
+  }
+  .wl-home-v2 nav.top-nav .top-nav-primary-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
   .wl-home-v2 nav.top-nav .top-nav-primary-row > a:hover{ color: #fff; background: rgba(255,255,255,0.06); }
   .wl-home-v2 nav.top-nav button.top-nav-old-toggle {
@@ -371,8 +391,10 @@
     }
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a {
       display: inline-flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 4px;
       text-align: center;
       min-height: 44px;
       min-width: 0;
@@ -385,6 +407,17 @@
       border: 1px solid rgb(49, 51, 49);
       transition: background 0.18s, border-color 0.18s, color 0.15s,
         transform 0.18s;
+    }
+    .wl-home-v2 header.top nav.top-nav .top-nav-primary-icon {
+      width: 16px;
+      height: 16px;
+    }
+    .wl-home-v2
+      header.top
+      nav.top-nav
+      .top-nav-primary-icon.top-nav-primary-icon--img {
+      width: 20px;
+      height: 20px;
     }
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a:hover {
       background: rgba(88, 200, 174, 0.18);
@@ -454,13 +487,22 @@
     width: 100%;
     flex-shrink: 0;
   }
+  .wl-home-v2 .wl-home-v2-archive-subnav--drawer .wl-home-v2-archive-subnav-row--years {
+    row-gap: 2px;
+  }
   .wl-home-v2 .wl-home-v2-archive-subnav--drawer .wl-home-v2-archive-subnav-row--sections {
     justify-content: center;
+    margin-top: 11px;
+    row-gap: 2px;
+    column-gap: 4px;
+  }
+  .wl-home-v2 .wl-home-v2-archive-subnav--drawer .wl-home-v2-archive-subnav-pill {
+    padding-block: 4px;
   }
   /* Hamburger (< md): keep archive years + pills looking like the bar (not primary tiles). */
   @media (max-width: 767px) {
     .wl-home-v2 header.top nav.top-nav .wl-home-v2-archive-subnav--drawer {
-      padding: 10px 0 8px;
+      padding: 10px 0 0;
       margin-top: 8px;
     }
   }
@@ -538,10 +580,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 11px;
+    padding: 5px 11px;
     border-radius: 999px;
     font-family: "Geist Mono", ui-monospace, monospace;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -1666,6 +1708,10 @@
   .wl-home-v2 .tile.tile-community .tile-body .cta {
     pointer-events: none;
   }
+  /* Archives: same as community — “Dive in” is decorative; primary click opens hub via `.tile-link`. */
+  .wl-home-v2 .tile.tile-archive .tile-body .cta {
+    pointer-events: none;
+  }
   /* Guest profile tile: full-area hit target sits last in DOM; let clicks reach it */
   .wl-home-v2 .tile.tile-profile.tile-profile--guest .icon-wrap,
   .wl-home-v2 .tile.tile-profile.tile-profile--guest .tile-body {
@@ -1861,17 +1907,18 @@
     margin: 0 -14px;
     padding: 4px 14px;
     border-radius: 10px;
-    /* Side/top strokes match frosted panel interior (~black 38% over deep green). */
-    border: 1px solid rgb(25, 56, 48);
+    /* No green chrome at rest — divider only; teal frame on hover. */
+    border: 1px solid transparent;
     border-bottom: 1px solid rgb(29, 32, 30);
     transition: background 0.18s, border-color 0.18s, transform 0.18s;
   }
   .wl-home-v2 .widget-panel > a.topic-row:last-of-type {
-    border-bottom-color: rgb(25, 56, 48);
+    border-bottom-color: transparent;
   }
   .wl-home-v2 .widget-panel > a.topic-row:hover {
     background: rgba(88, 200, 174, 0.18);
     border-color: rgb(52, 109, 95);
+    border-bottom-color: rgb(52, 109, 95);
     transform: translateY(-1px);
   }
   .wl-home-v2 .widget-panel > a.topic-row:focus-visible {
@@ -1900,7 +1947,8 @@
     width: 100%;
     padding: 4px 14px;
     border-radius: 10px;
-    border: 1px solid rgb(25, 56, 48);
+    /* Match `.widget-panel > a.topic-row`: no green chrome at rest; divider only. */
+    border: 1px solid transparent;
     border-bottom: 1px solid rgb(29, 32, 30);
     background: transparent;
     font: inherit;
@@ -1911,7 +1959,7 @@
     transition: background 0.18s, border-color 0.18s, transform 0.18s;
   }
   .wl-home-v2 .wl-home-v2-years-filter-list .years-filter-button:last-child {
-    border-bottom-color: rgb(25, 56, 48);
+    border-bottom-color: transparent;
   }
   .wl-home-v2 .wl-home-v2-years-filter-list .years-filter-button:hover {
     background: rgba(88, 200, 174, 0.18);
@@ -2209,7 +2257,7 @@
     align-items: stretch;
     min-height: min(48vh, 420px);
   }
-  @media (min-width: 768px) {
+  @media (min-width: 1280px) {
     .wl-home-v2 .wl-home-v2-setlist-scan-columns {
       flex-direction: row;
       align-items: flex-start;
@@ -2499,7 +2547,7 @@
     gap: 8px;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 1280px) {
     .wl-home-v2 .wl-home-v2-setlist-rating-panel__controls-row {
       flex-direction: row;
       flex-wrap: wrap;
@@ -2517,7 +2565,7 @@
     width: 100%;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 1280px) {
     .wl-home-v2 .wl-home-v2-setlist-rating-panel__rate-wrap {
       width: auto;
       justify-content: flex-start;
@@ -4227,6 +4275,83 @@
   }
 
 /* ---------- /archive/setlist (years-style page → body → columns → section + aside) ---------- */
+/* Main column: table + media share one flex-grow region (like years `.wl-home-v2-years-shows-panel`)
+   so the tile `--tile-bg` / ::before photo fills space below the header. */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-main-fill {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+/* Mobile `< xl`: rating|attendees tools shell between show header and setlist (same markup as aside tools). */
+/* Compact (`< xl`): optional row with show header — `useCompactTools` only; see `.wl-home-v2-setlist-compact-header-row` */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-main-tools-cards {
+  width: 100%;
+  min-width: 0;
+}
+/* Between `md` and `< xl`, place show header and tools strip on one row; stack below `md`. */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-compact-header-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-compact-header-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-compact-header-row .show-header {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-compact-header-row .wl-home-v2-setlist-main-tools-cards {
+    flex: 0 1 316px;
+    align-self: stretch;
+    width: auto;
+    max-width: min(316px, 100%);
+  }
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel.wl-home-v2-setlist-tools-panel--mobile-below-header {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.63);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+/* Same soft corner glow as `.wl-home-v2-setlist .show-header::before`. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel.wl-home-v2-setlist-tools-panel--mobile-below-header::before {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 122, 103, 0.2),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+/* Slightly lighter green wash than default `.wl-home-v2-years-tile::after` so the marbled
+   `--tile-bg` stays visible in that filler (matches years main tile feel on short pages). */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-tile--main::before {
+  opacity: 0.9;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-tile--main::after {
+  background: linear-gradient(
+    180deg,
+    rgba(40, 91, 78, 0.38) 0%,
+    rgba(40, 91, 78, 0.82) 88%
+  );
+}
 .wl-home-v2 .wl-home-v2-setlist {
   font-feature-settings: "tnum" 1;
   /* Section / column titles — same as song titles (inherit `var(--wl-white)` from `.wl-home-v2`) */
@@ -4241,6 +4366,79 @@
 /* Main / aside use `.wl-home-v2-years-tile` + `.wl-home-v2-years-tile-inner` (same as years). */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-aside {
   width: 316px;
+}
+@media (max-width: 1279px) {
+  /* Stacked `.wl-home-v2-years-columns`: fixed sidebar width leaves empty gutters on phones/tablets */
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-aside {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+/*
+ * Setlist aside: tools tile (desktop) + optional accents + `.wl-home-v2-setlist-aside-stats-tiles`
+ * bundle. When the last tile in the bundle should grow to fill the column, it uses flex below.
+ */
+.wl-home-v2
+  .wl-home-v2-setlist-aside
+  > .wl-home-v2-setlist-aside-stats-tiles
+  > section.wl-home-v2-years-tile:last-of-type {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* Bundle for Show Stats / Song Spread / Show Changes / Show Badges (compact + desktop aside). */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* `md`–`< xl`: two-column grid; inter-tile accent strips would break cell pairing, so hide for this band. */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-aside-stats-tiles
+    > .wl-home-v2-setlist-aside-top-accent {
+    display: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles > * {
+    min-width: 0;
+  }
+  /* Match card height across each row: grid stretches items; chains flex so `.side-card` fills the tile. */
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles > section.wl-home-v2-years-tile {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    align-self: stretch;
+    height: 100%;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-aside-stats-tiles
+    > section.wl-home-v2-years-tile
+    > .wl-home-v2-years-tile-inner {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-aside-stats-tiles
+    section.wl-home-v2-years-tile
+    .side-card {
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: flex-start;
+  }
 }
 /* Narrow decorative strip above tools (same bg treatment as `.wl-home-v2-years-tile`). */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-top-accent {
@@ -4278,11 +4476,33 @@
   );
 }
 /* Aside stack: no outer radius; no top/side strokes (keep bottom hairline between tiles). */
-.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside > .wl-home-v2-years-tile {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside > .wl-home-v2-years-tile,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside-stats-tiles
+  > .wl-home-v2-years-tile {
   border-radius: 0;
   border-top: none;
   border-left: none;
   border-right: none;
+}
+/* Tools tile (+ flex filler): hide bottom hairline only when another aside block follows
+   (`setlistAsideHasBlocksBelowTools` → no `wl-home-v2-setlist-tools-tile--aside-tail`).
+   When tools is the lone column block, keep default tile bottom border above footer / main. */
+.wl-home-v2
+  .wl-home-v2-setlist-aside
+  > section.wl-home-v2-years-tile:first-of-type:not(
+    .wl-home-v2-setlist-tools-tile--aside-tail
+  ) {
+  border-bottom: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist-aside
+  > section.wl-home-v2-years-tile:first-of-type:not(
+    .wl-home-v2-setlist-tools-tile--aside-tail
+  )
+  + .wl-home-v2-setlist-aside-top-accent {
+  border-bottom: none;
 }
 .wl-home-v2
   .wl-home-v2-setlist
@@ -4323,6 +4543,13 @@
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-trail .here {
   color: #fff;
 }
+@media (max-width: 1279px) {
+  /* Tighter wrapped-line spacing `< xl`; at 1280+ keep `.crumbs-trail` gap: 8px 20px. */
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-trail {
+    row-gap: 3px;
+    column-gap: 8px;
+  }
+}
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-selectors {
   display: flex;
   flex-wrap: wrap;
@@ -4331,6 +4558,14 @@
   gap: 8px;
   margin-left: auto;
   min-width: 0;
+}
+/* After base `.crumbs-selectors`: compact center row `< xl` (must follow base or cascade loses). */
+@media (max-width: 1279px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-selectors {
+    flex-basis: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-selectors-cell {
   flex: 0 1 auto;
@@ -4358,7 +4593,7 @@
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  gap: 24px;
+  gap: 10px;
   flex-wrap: wrap;
   padding: 24px 26px;
   /* Match `.wl-home-v2-years-page .widget-panel` */
@@ -4369,6 +4604,12 @@
   -webkit-backdrop-filter: blur(6px);
   position: relative;
   overflow: hidden;
+}
+/* Stacked setlist layout (`< xl`): match tools panel rating|attendees cell inset (`padding: 12px`). */
+@media (max-width: 1279px) {
+  .wl-home-v2 .wl-home-v2-setlist .show-header {
+    padding: 12px;
+  }
 }
 .wl-home-v2 .wl-home-v2-setlist .show-header::before {
   content: "";
@@ -4391,7 +4632,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 .wl-home-v2 .wl-home-v2-setlist .show-header .meta {
   font-family: "Geist Mono", ui-monospace, monospace;
@@ -4412,7 +4653,7 @@
   flex-direction: column;
   align-items: flex-end;
   align-self: stretch;
-  gap: 10px;
+  gap: 6px;
   position: relative;
   z-index: 2;
   flex-shrink: 0;
@@ -4438,7 +4679,7 @@
   display: grid;
   grid-template-columns: max-content;
   justify-items: end;
-  row-gap: 10px;
+  row-gap: 6px;
   max-width: 100%;
 }
 .wl-home-v2
@@ -4467,6 +4708,36 @@
   .nav-btns
   .nav-btn {
   min-width: 0;
+}
+/* Compact setlist (`< xl`): center canon pill, tour line, and Prev/Next under the title. */
+@media (max-width: 1279px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-tile-inner .show-header-nav {
+    margin-left: 0;
+    align-self: stretch;
+    width: 100%;
+    align-items: center;
+    gap: 6px;
+  }
+  /* Same width relationship as desktop (`max-content` column = wider of tour line vs buttons), but
+     center that column in the header instead of trailing off the flex-end stack. */
+  .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-nav-tour-block {
+    display: grid;
+    grid-template-columns: max-content;
+    justify-content: center;
+    justify-items: stretch;
+    row-gap: 6px;
+    width: 100%;
+    max-width: 100%;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header
+    .show-header-nav-tour-block
+    .meta.show-header-nav-tour {
+    justify-content: center;
+    text-align: center;
+    justify-self: center;
+  }
 }
 /* Single pill: label + chevron share one bordered container (native SelectTrigger). */
 .wl-home-v2-setlist-select-trigger {
@@ -4568,6 +4839,42 @@
   color: #fff;
   font-weight: 700;
 }
+/* Compact setlist (`< xl`): SHOW n OF m shares the title row with date · group (right-aligned). */
+@media (max-width: 1279px) {
+  .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-title-row--with-canon {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-title-row--with-canon .show-header-heading {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header
+    .show-header-title-row--with-canon
+    .show-header-canon-pill {
+    flex: 0 0 auto;
+    margin-top: 0.22em;
+    text-align: right;
+  }
+  /* Long tour name on compact: tour name vs show position/total on stacked lines (`< xl` only via TS). */
+  .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-nav-tour.show-header-nav-tour--stack-lines {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+  }
+}
 .wl-home-v2 .wl-home-v2-setlist .show-header .venue {
   font-size: 15px;
   color: rgba(255, 255, 255, 0.78);
@@ -4664,28 +4971,6 @@
   border-color: rgb(49, 51, 49);
   color: rgba(255, 255, 255, 0.85);
 }
-.wl-home-v2 .wl-home-v2-setlist .quick-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-@media (min-width: 1280px) {
-  .wl-home-v2 .wl-home-v2-setlist .quick-stats {
-    display: none;
-  }
-}
-.wl-home-v2 .wl-home-v2-setlist .qs-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.63);
-  border: 1px solid rgb(63, 65, 64);
-  border-radius: 10px;
-  padding: 14px;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.wl-home-v2 .wl-home-v2-setlist button.qs-card,
 .wl-home-v2 .wl-home-v2-setlist button.side-card {
   appearance: none;
   margin: 0;
@@ -4699,7 +4984,6 @@
   transition: all 0.18s;
 }
 /* Match `.wl-home-v2-setlist .wbtn.green:hover` + lift from `.wbtn:hover` */
-.wl-home-v2 .wl-home-v2-setlist button.qs-card:hover:not(:disabled),
 .wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) {
   /* Teal wash — stronger than `.wbtn.green:hover` (0.18) */
   background: rgba(88, 200, 174, 0.4);
@@ -4707,7 +4991,6 @@
   color: #fff;
   transform: translateY(-1px);
 }
-.wl-home-v2 .wl-home-v2-setlist button.qs-card:hover:not(:disabled) .qs-label,
 .wl-home-v2 .wl-home-v2-setlist button.side-card:hover:not(:disabled) .sc-label {
   color: var(--setlist-rail-label-color);
   transition: color 0.18s;
@@ -4716,25 +4999,9 @@
   color: rgba(255, 255, 255, 0.55);
   transition: color 0.18s;
 }
-.wl-home-v2 .wl-home-v2-setlist button.qs-card:focus-visible,
 .wl-home-v2 .wl-home-v2-setlist button.side-card:focus-visible {
   outline: 2px solid var(--wl-orange);
   outline-offset: 2px;
-}
-.wl-home-v2 .wl-home-v2-setlist .qs-stars-row {
-  display: flex;
-  justify-content: flex-start;
-}
-.wl-home-v2 .wl-home-v2-setlist .qs-card .qs-label {
-  font-family: "Geist Mono", ui-monospace, monospace;
-  font-size: var(--setlist-promoted-section-header-size);
-  color: var(--setlist-rail-label-color);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.wl-home-v2 .wl-home-v2-setlist .qs-card .qs-value {
-  font-size: 22px;
-  font-weight: 700;
 }
 .wl-home-v2 .wl-home-v2-setlist .show-notes {
   flex: 1 1 100%;
@@ -4842,7 +5109,7 @@
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-@media (max-width: 639px) {
+@media (max-width: 1279px) {
   .wl-home-v2 .wl-home-v2-setlist .setlist-card-notes-row--split {
     flex-direction: column;
   }
@@ -4876,6 +5143,16 @@
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-shell.wl-home-v2-setlist-media-shell--with-now-playing {
   width: 100%;
   align-self: stretch;
+}
+/*
+ * Phones only: stretch media shell full width (`< md`). From `md` through `< xl`,
+ * retain desktop-ish shell (`max-content` hug) until the setlist sidebar returns at xl.
+ */
+@media (max-width: 767px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-media-shell {
+    width: 100%;
+    align-self: stretch;
+  }
 }
 .wl-home-v2
   .wl-home-v2-setlist
@@ -5532,6 +5809,11 @@
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  justify-content: center;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__chat.wbtn .wbtn-text {
+  text-align: center;
+  justify-content: center;
 }
 .wl-home-v2
   .wl-home-v2-setlist

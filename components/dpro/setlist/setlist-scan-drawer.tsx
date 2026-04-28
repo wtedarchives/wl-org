@@ -47,20 +47,20 @@ export function SetlistScanDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="flex max-h-[90vh] max-w-[800px] mx-auto flex-col overflow-hidden rounded-xl data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=bottom]:min-h-[70vh] after:!h-0">
-        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col md:flex-row md:items-start min-h-[50vh]">
+        <div className="flex flex-1 min-h-0 min-h-[50vh] flex-col overflow-y-auto xl:flex-row xl:items-start">
           {/* Left column – Setlist Scan */}
-          <div className="flex w-full shrink-0 flex-col md:w-[312px]">
+          <div className="flex w-full shrink-0 flex-col xl:w-[312px]">
             <DrawerHeader className="shrink-0 border-b border-border/50 py-[2px] flex-row items-center justify-between gap-2">
               <span className="size-8 shrink-0" aria-hidden />
               <DrawerTitle className="text-sm font-semibold">
                 Setlist Scan
               </DrawerTitle>
-              <span className="size-8 shrink-0 hidden md:block" aria-hidden />
+              <span className="size-8 hidden shrink-0 xl:block" aria-hidden />
               <DrawerClose asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 shrink-0 md:hidden"
+                  className="size-8 shrink-0 xl:hidden"
                   aria-label="Close"
                 >
                   <X className="size-4" />

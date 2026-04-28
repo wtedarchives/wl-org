@@ -227,6 +227,13 @@ export function WlHomeV2SetlistPlaceholderView({
     onOpenSetlistScan,
   )
 
+  /** Strip between tools and next tile only when a block actually follows (avoids a trailing accent). */
+  const setlistAsideHasBlocksBelowTools =
+    asideStatsVisible ||
+    asideSongSpreadVisible ||
+    asideShowChangesVisible ||
+    asideBadgesVisible
+
   const showGroupLabel = show.show_group?.trim() ?? ""
   const venueLocation = show.show_venue_location?.trim() ?? ""
   const subvenueLabel = show.show_subvenue?.trim() ?? ""
@@ -256,6 +263,110 @@ export function WlHomeV2SetlistPlaceholderView({
     },
     [openArchiveHub],
   )
+
+  /** Shared rating + attendees cells (aside on desktop; main column under header on mobile). */
+  const setlistRatingAttendeesToolsCards = (
+    <>
+      <button
+        type="button"
+        className="wl-home-v2-setlist-tools-panel__rating side-card"
+        onClick={onRatingClick}
+        aria-label={
+          hasAverageRating ?
+            `Rating: ${ratingValueDisplay} out of 5. Click to rate or review.`
+          : "Click to rate this show"
+        }
+      >
+        <div className="sc-label">Rating</div>
+        <div className="sc-stars-row">
+          <SetlistRatingStarsRow
+            rating={averageRating}
+            sizeClassName="size-[14px]"
+            fillClassName="text-[#ffd86b]"
+            emptyClassName="text-white/25"
+          />
+        </div>
+        <div className="sc-value">{ratingValueDisplay}</div>
+        <div className="sc-sub">{reviewSummary}</div>
+      </button>
+      <div className="wl-home-v2-setlist-tools-panel__attendees side-card">
+        <div className="sc-label normal-case tracking-normal">attendees</div>
+        <div className="sc-value flex items-center gap-2">
+          {attendeeCount.toLocaleString("en-US")}
+          <Users
+            className="size-[1.15em] shrink-0 text-white/85"
+            aria-hidden
+          />
+        </div>
+        {canMarkAttendance ?
+          <button
+            type="button"
+            className={
+              "attend normal-case tracking-normal inline-flex items-center justify-center gap-1.5 " +
+              (attended ? "attended" : "")
+            }
+            id="attend-btn"
+            disabled={attendanceToggling}
+            onClick={onAttendanceToggle}
+          >
+            {attendanceToggling ?
+              "…"
+            : attended ?
+              <>
+                <Check className="size-4 shrink-0" weight="bold" aria-hidden />
+                attended
+              </>
+            : <>
+                <UserPlus className="size-4 shrink-0" aria-hidden />
+                i was there
+              </>
+            }
+          </button>
+        : null}
+      </div>
+    </>
+  )
+
+  const setlistToolsCommunityChatLink =
+    showWlCommunityLink ?
+      <a
+        href={wlCommunityHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="wl-home-v2-setlist-tools-panel__chat wbtn green"
+      >
+        <span className="wbtn-text inline-flex min-w-0 items-center gap-2">
+          <Image
+            src="/WL.png"
+            alt=""
+            width={22}
+            height={22}
+            className="size-[22px] shrink-0 object-contain"
+            unoptimized
+          />
+          <span>Chat in the WTED Community</span>
+        </span>
+        <ArrowRight
+          className="wbtn-icon size-4 shrink-0"
+          weight="bold"
+          aria-hidden
+        />
+      </a>
+    : null
+
+  const showHeaderCanonPillJsx =
+    showCanonPositionPill ?
+      <span className="pos show-header-canon-pill">
+        SHOW {show.show_canonid!.toLocaleString("en-US")} OF{" "}
+        {maxShowCanonId!.toLocaleString("en-US")}
+      </span>
+    : null
+
+  /** Compact layout: split long tour name from "Show n of m" (`< xl`, tour string > 24 chars). */
+  const mobileStackTourNameAndPositionLines =
+    useCompactTools &&
+    (show.show_tour?.length ?? 0) > 24 &&
+    showPositionInTour != null
 
   return (
     <div className="wl-home-v2-years-page wl-home-v2-setlist">
@@ -330,20 +441,35 @@ export function WlHomeV2SetlistPlaceholderView({
             }
           >
             <div className="wl-home-v2-years-tile-inner min-h-0 flex min-w-0 flex-1 flex-col gap-4">
+          <div
+            className={cn(
+              useCompactTools && "wl-home-v2-setlist-compact-header-row",
+            )}
+          >
           <div className="show-header">
             <div className="left">
-              <h1>
-                <span className="date">{formatSetlistDate(show.show_date)}</span>
-                {showGroupLabel ?
-                  <>
-                    <span className="show-header-title-divider" aria-hidden="true">
-                      {" "}
-                      ·{" "}
-                    </span>
-                    <span className="show-header-title-group">{showGroupLabel}</span>
-                  </>
-                : null}
-              </h1>
+              <div
+                className={cn(
+                  "show-header-title-row",
+                  useCompactTools &&
+                    showCanonPositionPill &&
+                    "show-header-title-row--with-canon",
+                )}
+              >
+                <h1 className="show-header-heading">
+                  <span className="date">{formatSetlistDate(show.show_date)}</span>
+                  {showGroupLabel ?
+                    <>
+                      <span className="show-header-title-divider" aria-hidden="true">
+                        {" "}
+                        ·{" "}
+                      </span>
+                      <span className="show-header-title-group">{showGroupLabel}</span>
+                    </>
+                  : null}
+                </h1>
+                {useCompactTools && showHeaderCanonPillJsx}
+              </div>
               {subvenueLabel || venueLocation ?
                 <div
                   className={cn(
@@ -393,19 +519,22 @@ export function WlHomeV2SetlistPlaceholderView({
               : null}
             </div>
             <div className="show-header-nav">
-              {showCanonPositionPill ?
-                <span className="pos show-header-canon-pill">
-                  SHOW {show.show_canonid!.toLocaleString("en-US")} OF{" "}
-                  {maxShowCanonId!.toLocaleString("en-US")}
-                </span>
-              : null}
+              {!useCompactTools && showHeaderCanonPillJsx}
               <div className="show-header-nav-tour-block">
                 {show.show_tour || showPositionInTour ?
-                  <div className="meta show-header-nav-tour">
+                  <div
+                    className={cn(
+                      "meta show-header-nav-tour",
+                      mobileStackTourNameAndPositionLines &&
+                        "show-header-nav-tour--stack-lines",
+                    )}
+                  >
                     {show.show_tour ?
                       <span className="meta-tour">{show.show_tour}</span>
                     : null}
-                    {show.show_tour && showPositionInTour ?
+                    {!mobileStackTourNameAndPositionLines &&
+                    show.show_tour &&
+                    showPositionInTour ?
                       <span aria-hidden="true"> · </span>
                     : null}
                     {showPositionInTour ?
@@ -454,69 +583,38 @@ export function WlHomeV2SetlistPlaceholderView({
             </div>
           </div>
 
-          <div className="quick-stats">
-            <button
-              type="button"
-              className="qs-card"
-              onClick={onRatingClick}
-              aria-label={
-                hasAverageRating ?
-                  `Rating: ${ratingValueDisplay} out of 5. Click to rate or review.`
-                : "Click to rate this show"
-              }
-            >
-              <div className="qs-label">Rating</div>
-              <div className="qs-stars-row">
-                <SetlistRatingStarsRow
-                  rating={averageRating}
-                  sizeClassName="size-[18px]"
-                  fillClassName="text-[#ffd86b]"
-                  emptyClassName="text-white/25"
-                />
-              </div>
-              <div className="qs-value">
-                {ratingValueDisplay}{" "}
-                <span
-                  style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}
-                >
-                  · {reviewSummary}
-                </span>
-              </div>
-            </button>
-            <div className="qs-card">
-              <div className="qs-label normal-case tracking-normal">
-                attendees
-              </div>
-              <div className="qs-value flex items-center gap-2">
-                {attendeeCount.toLocaleString("en-US")}
-                <Users
-                  className="size-[1.15em] shrink-0 text-white/85"
-                  aria-hidden
-                />
+          {useCompactTools ?
+            <div className="wl-home-v2-setlist-main-tools-cards">
+              <div className="wl-home-v2-setlist-tools-panel wl-home-v2-setlist-tools-panel--mobile-below-header">
+                {setlistRatingAttendeesToolsCards}
+                {setlistToolsCommunityChatLink}
               </div>
             </div>
+          : null}
           </div>
 
-          <WlHomeV2SetlistTable
-            show={show}
-            setlist={setlist}
-            showAdminUi={showAdminUi}
-            copiedEntryIds={copiedEntryIds}
-            onNumberClick={onNumberClick}
-            onJotyBadgeClick={onJotyBadgeClick}
-            onSongClick={onSongClick}
-            onWtedClick={onWtedClick}
-            hoveredReleaseId={hoveredReleaseId}
-            releaseToEntriesMap={releaseToEntriesMap}
-            hoveredCategory={hoveredCategory}
-          />
-          {releases.length > 0 ?
-            <SetlistMediaSection
-              releases={releases}
-              visualVariant="wl-home-v2"
-              onReleaseHover={setHoveredReleaseId}
+          <div className="wl-home-v2-setlist-main-fill flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+            <WlHomeV2SetlistTable
+              show={show}
+              setlist={setlist}
+              showAdminUi={showAdminUi}
+              copiedEntryIds={copiedEntryIds}
+              onNumberClick={onNumberClick}
+              onJotyBadgeClick={onJotyBadgeClick}
+              onSongClick={onSongClick}
+              onWtedClick={onWtedClick}
+              hoveredReleaseId={hoveredReleaseId}
+              releaseToEntriesMap={releaseToEntriesMap}
+              hoveredCategory={hoveredCategory}
             />
-          : null}
+            {releases.length > 0 ?
+              <SetlistMediaSection
+                releases={releases}
+                visualVariant="wl-home-v2"
+                onReleaseHover={setHoveredReleaseId}
+              />
+            : null}
+          </div>
             </div>
           </section>
 
@@ -524,143 +622,66 @@ export function WlHomeV2SetlistPlaceholderView({
           className="wl-home-v2-years-aside wl-home-v2-setlist-aside"
           aria-label="Show tools"
         >
-          <WlHomeV2SetlistAsideAccent showId={showId} slot={0} />
-          <section
-            className="wl-home-v2-years-tile"
-            style={
-              {
-                "--tile-bg": "url('/newbg.png')",
-              } as CSSProperties
-            }
-          >
-            <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
-              <div className="wl-home-v2-setlist-tools-panel">
-                <button
-                  type="button"
-                  className="wl-home-v2-setlist-tools-panel__rating side-card"
-                  onClick={onRatingClick}
-                  aria-label={
-                    hasAverageRating ?
-                      `Rating: ${ratingValueDisplay} out of 5. Click to rate or review.`
-                    : "Click to rate this show"
-                  }
-                >
-                  <div className="sc-label">Rating</div>
-                  <div className="sc-stars-row">
-                    <SetlistRatingStarsRow
-                      rating={averageRating}
-                      sizeClassName="size-[14px]"
-                      fillClassName="text-[#ffd86b]"
-                      emptyClassName="text-white/25"
-                    />
+          {!useCompactTools ?
+            <>
+              <WlHomeV2SetlistAsideAccent showId={showId} slot={0} />
+              <section
+                className={cn(
+                  "wl-home-v2-years-tile",
+                  !setlistAsideHasBlocksBelowTools &&
+                    "wl-home-v2-setlist-tools-tile--aside-tail",
+                )}
+                style={
+                  {
+                    "--tile-bg": "url('/newbg.png')",
+                  } as CSSProperties
+                }
+              >
+                <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
+                  <div className="wl-home-v2-setlist-tools-panel">
+                    {setlistRatingAttendeesToolsCards}
+                    {setlistToolsCommunityChatLink}
                   </div>
-                  <div className="sc-value">{ratingValueDisplay}</div>
-                  <div className="sc-sub">{reviewSummary}</div>
-                </button>
-                <div className="wl-home-v2-setlist-tools-panel__attendees side-card">
-                  <div className="sc-label normal-case tracking-normal">
-                    attendees
-                  </div>
-                  <div className="sc-value flex items-center gap-2">
-                    {attendeeCount.toLocaleString("en-US")}
-                    <Users
-                      className="size-[1.15em] shrink-0 text-white/85"
-                      aria-hidden
-                    />
-                  </div>
-                  {canMarkAttendance ?
-                    <button
-                      type="button"
-                      className={
-                        "attend normal-case tracking-normal inline-flex items-center justify-center gap-1.5 " +
-                        (attended ? "attended" : "")
-                      }
-                      id="attend-btn"
-                      disabled={attendanceToggling}
-                      onClick={onAttendanceToggle}
-                    >
-                      {attendanceToggling ?
-                        "…"
-                      : attended ?
-                        <>
-                          <Check
-                            className="size-4 shrink-0"
-                            weight="bold"
-                            aria-hidden
-                          />
-                          attended
-                        </>
-                      : <>
-                          <UserPlus
-                            className="size-4 shrink-0"
-                            aria-hidden
-                          />
-                          i was there
-                        </>}
-                    </button>
-                  : null}
                 </div>
+              </section>
+            </>
+          : null}
 
-                {showWlCommunityLink ?
-                  <a
-                    href={wlCommunityHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="wl-home-v2-setlist-tools-panel__chat wbtn green"
-                  >
-                    <span className="wbtn-text inline-flex min-w-0 items-center gap-2">
-                      <Image
-                        src="/WL.png"
-                        alt=""
-                        width={22}
-                        height={22}
-                        className="size-[22px] shrink-0 object-contain"
-                        unoptimized
-                      />
-                      <span>Chat in the WTED Community</span>
-                    </span>
-                    <ArrowRight
-                      className="wbtn-icon size-4 shrink-0"
-                      weight="bold"
-                      aria-hidden
-                    />
-                  </a>
-                : null}
-              </div>
-            </div>
-          </section>
-
-          <WlHomeV2SetlistAsideAccent showId={showId} slot={1} />
-          <WlHomeV2SetlistShowStatsTile
-            show={show}
-            setlist={setlist}
-            showLengthRank={showLengthRank}
-          />
-          {asideStatsVisible &&
-          (asideSongSpreadVisible ||
-            asideShowChangesVisible ||
-            asideBadgesVisible) ?
-            <WlHomeV2SetlistAsideAccent showId={showId} slot={2} />
+          {!useCompactTools && setlistAsideHasBlocksBelowTools ?
+            <WlHomeV2SetlistAsideAccent showId={showId} slot={1} />
           : null}
-          <SetlistSongSpreadCard
-            setlist={setlist}
-            hoveredCategory={hoveredCategory}
-            onCategoryHover={onCategoryHover}
-            visualVariant="wl-home-v2"
-          />
-          {asideSongSpreadVisible &&
-          (asideShowChangesVisible || asideBadgesVisible) ?
-            <WlHomeV2SetlistAsideAccent showId={showId} slot={3} />
-          : null}
-          <WlHomeV2SetlistShowChangesSection
-            changes={showChanges}
-            loading={showChangesLoading}
-            onOpenScan={onOpenSetlistScan}
-          />
-          {asideShowChangesVisible && asideBadgesVisible ?
-            <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
-          : null}
-          <WlHomeV2SetlistShowBadgesTile show={show} />
+          <div className="wl-home-v2-setlist-aside-stats-tiles">
+            <WlHomeV2SetlistShowStatsTile
+              show={show}
+              setlist={setlist}
+              showLengthRank={showLengthRank}
+            />
+            {asideStatsVisible &&
+            (asideSongSpreadVisible ||
+              asideShowChangesVisible ||
+              asideBadgesVisible) ?
+              <WlHomeV2SetlistAsideAccent showId={showId} slot={2} />
+            : null}
+            <SetlistSongSpreadCard
+              setlist={setlist}
+              hoveredCategory={hoveredCategory}
+              onCategoryHover={onCategoryHover}
+              visualVariant="wl-home-v2"
+            />
+            {asideSongSpreadVisible &&
+            (asideShowChangesVisible || asideBadgesVisible) ?
+              <WlHomeV2SetlistAsideAccent showId={showId} slot={3} />
+            : null}
+            <WlHomeV2SetlistShowChangesSection
+              changes={showChanges}
+              loading={showChangesLoading}
+              onOpenScan={onOpenSetlistScan}
+            />
+            {asideShowChangesVisible && asideBadgesVisible ?
+              <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
+            : null}
+            <WlHomeV2SetlistShowBadgesTile show={show} />
+          </div>
         </aside>
         </div>
       </div>

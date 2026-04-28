@@ -11,7 +11,7 @@ import {
 } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
-import type { CSSProperties } from "react"
+import type { CSSProperties, MouseEvent } from "react"
 import { useCallback, useMemo } from "react"
 
 import { useAuth } from "@/components/auth-context"
@@ -34,6 +34,7 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import { WlHomeV2OnAirPill } from "./wl-home-v2-on-air-pill"
+import { useWlHomeV2OpenArchiveHub } from "./wl-home-v2-open-archive-hub-context"
 
 import type { WlHomeMostRecentSetlistEntry } from "@/hooks/use-wl-home-most-recent-show"
 
@@ -102,6 +103,25 @@ export function WlHomeV2Tiles({
   const onWtedRadioTileClick = useCallback(() => {
     scrollMainInsetToTopThenPulse(bumpHomeRadioEmbedPulse)
   }, [bumpHomeRadioEmbedPulse])
+
+  const openArchiveHub = useWlHomeV2OpenArchiveHub()
+  const onArchiveTileLinkClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>) => {
+      if (!openArchiveHub) return
+      if (
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return
+      }
+      e.preventDefault()
+      openArchiveHub()
+    },
+    [openArchiveHub],
+  )
 
   return (
     <section className="grid" id="tileGrid">
@@ -309,6 +329,7 @@ export function WlHomeV2Tiles({
           href="/archive"
           className="tile-link"
           aria-label="Open WTED Archives"
+          onClick={onArchiveTileLinkClick}
         />
         <div className="icon-wrap">
           <div className="icon-bg" />

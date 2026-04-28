@@ -643,14 +643,12 @@ export function WlHomeV2SetlistTable({
     (showCoachColumn ? 1 : 0)
 
   if (setlist.length === 0) {
+    const hasCoach = coachNotesShowText.length > 0
+    const hasCallbacks = callbacksText.length > 0
+    if (!hasCoach && !hasCallbacks) return null
+
     return (
       <div className="setlist-card">
-        <p
-          className="px-4 py-6 text-center text-[12px]"
-          style={{ color: "rgba(255,255,255,0.55)" }}
-        >
-          No setlist entries for this show.
-        </p>
         <WlHomeV2SetlistCoachCallbacksFooter
           coachNotesHtml={coachNotesShowText}
           callbacksHtml={callbacksText}

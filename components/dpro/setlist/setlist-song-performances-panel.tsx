@@ -345,7 +345,7 @@ export function SetlistSongPerformancesPanel({
 
       {showFooter ?
         <div className="shrink-0 border-t border-border/60 pt-3">
-          <div className="flex flex-col items-stretch justify-end gap-2 sm:flex-row sm:items-center">
+          <div className="flex flex-col items-stretch justify-end gap-2 xl:flex-row xl:items-center">
             <div className="flex flex-wrap items-center gap-2">
               {songId ?
                 <Button type="button" size="sm" variant="outline" asChild>

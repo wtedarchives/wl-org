@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { List, X } from "@phosphor-icons/react"
+import { List, MoneyWavy, X } from "@phosphor-icons/react"
 import {
   Suspense,
   useCallback,
@@ -23,6 +23,24 @@ import {
   WL_HOME_V2_TOP_NAV_PANEL_ID,
 } from "./wl-home-v2-constants"
 import { WlHomeV2UserMenu } from "./wl-home-v2-user-menu"
+
+function TopNavPrimaryImage({ src }: { src: string }) {
+  return (
+    <span
+      className="top-nav-primary-icon top-nav-primary-icon--img"
+      aria-hidden
+    >
+      <Image
+        src={src}
+        alt=""
+        width={80}
+        height={80}
+        className="top-nav-primary-img"
+        sizes="(max-width: 1023px) 20px, 22px"
+      />
+    </span>
+  )
+}
 
 export function WlHomeV2Header({
   onOpenLogin,
@@ -162,6 +180,7 @@ export function WlHomeV2Header({
       >
         <div className="top-nav-primary-row">
           <a href="/wted/program-director" onClick={onRadioNavClick}>
+            <TopNavPrimaryImage src="/WTED2.png" />
             Radio
           </a>
           <a
@@ -170,12 +189,20 @@ export function WlHomeV2Header({
             rel="noopener noreferrer"
             onClick={closeMobileNav}
           >
+            <TopNavPrimaryImage src="/WL.png" />
             Community
           </a>
           <a href="/archive" onClick={onArchivesNavClick}>
+            <TopNavPrimaryImage src="/wted-sa-cropped-2.png" />
             Archives
           </a>
           <Link href="/support" onClick={closeMobileNav}>
+            <MoneyWavy
+              className="top-nav-primary-icon"
+              size={18}
+              weight="regular"
+              aria-hidden
+            />
             Support
           </Link>
           <button
