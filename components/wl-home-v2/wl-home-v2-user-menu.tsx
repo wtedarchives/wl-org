@@ -84,29 +84,37 @@ export function WlHomeV2UserMenu({
 
   const isLoggedIn = Boolean(user)
 
+  /** Avoid Radix ID mismatch across SSR/client (dropdown trigger id differs on hydrate). */
+  const [radixReady, setRadixReady] = useState(false)
+  useEffect(() => setRadixReady(true), [])
+
+  const trigger = (
+    <button
+      type="button"
+      className="top-nav-user-trigger"
+      aria-haspopup="menu"
+    >
+      <Avatar className="top-nav-user-trigger-avatar">
+        <AvatarImage
+          src={isLoggedIn ? (profilePicture ?? undefined) : undefined}
+          alt=""
+        />
+        <AvatarFallback className="top-nav-user-trigger-fallback">
+          {displayName.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <span className="top-nav-user-trigger-label">
+        {isLoggedIn ? "Profile" : "Log in"}
+      </span>
+      <CaretDown className="top-nav-user-chevron" aria-hidden />
+    </button>
+  )
+
+  if (!radixReady) return trigger
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="top-nav-user-trigger"
-          aria-haspopup="menu"
-        >
-          <Avatar className="top-nav-user-trigger-avatar">
-            <AvatarImage
-              src={isLoggedIn ? (profilePicture ?? undefined) : undefined}
-              alt=""
-            />
-            <AvatarFallback className="top-nav-user-trigger-fallback">
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <span className="top-nav-user-trigger-label">
-            {isLoggedIn ? "Profile" : "Log in"}
-          </span>
-          <CaretDown className="top-nav-user-chevron" aria-hidden />
-        </button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent
         className="wl-home-v2-user-dropdown"
         side="bottom"

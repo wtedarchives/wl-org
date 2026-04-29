@@ -4,11 +4,12 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useState,
   type CSSProperties,
 } from "react"
-import { LineSegments, Playlist, X } from "@phosphor-icons/react"
+import { CaretDown, LineSegments } from "@phosphor-icons/react"
 
 import {
   useSetlistBreadcrumb,
@@ -20,19 +21,17 @@ import { TourShowsTable } from "@/components/dpro/tours/tour-shows-table"
 import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
 import { TourStats } from "@/components/dpro/tours/tour-stats"
 import { ToursSidebarCard } from "@/components/dpro/tours/tours-sidebar-card"
-import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card"
-import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
+import { WlHomeV2SetlistSongModal } from "@/components/wl-home-v2/wl-home-v2-setlist-song-modal"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { WlHomeV2YearsToolModal } from "@/components/wl-home-v2/wl-home-v2-years-tool-modal"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
 import { extractYear } from "@/components/wl-home-v2/wl-home-v2-tours-view.utils"
 
-type TourToolPanel = "tours" | "setlist" | null
+type TourToolPanel = "tours" | null
 
 type YearsLayoutMode = "mobile" | "desktop" | null
 
@@ -46,9 +45,9 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
     string | null
   >(null)
   const [songSheetSongId, setSongSheetSongId] = useState<string | null>(null)
-  const [toursSheetOpen, setToursSheetOpen] = useState(false)
   const [openToolPanel, setOpenToolPanel] = useState<TourToolPanel>(null)
-  const [avgSetlistInfoOpen, setAvgSetlistInfoOpen] = useState(false)
+  const tourSongModalHeadingId = useId()
+  const tourSongModalTourLineId = useId()
 
   const {
     currentTour,
@@ -107,12 +106,6 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
   }, [openToolPanel])
 
   useEffect(() => {
-    if (openToolPanel !== "setlist") {
-      setAvgSetlistInfoOpen(false)
-    }
-  }, [openToolPanel])
-
-  useEffect(() => {
     if (!currentTour || !tourId) {
       setSetlistBreadcrumbs(null)
       return
@@ -145,6 +138,13 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
     }
   }, [currentTour])
 
+  const closeTourSongModal = useCallback(() => {
+    setSongSheetOpen(false)
+    setSongSheetSongName(null)
+    setSongSheetSongDisplayName(null)
+    setSongSheetSongId(null)
+  }, [])
+
   const handleSongClick = useCallback(
     (songName: string, songDisplayName?: string | null) => {
       setSongSheetSongName(songName)
@@ -162,8 +162,6 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
   }, [])
 
   const useCompactTools = layoutMode !== "desktop"
-  const avgTitle =
-    currentTour?.tour ? `${currentTour.tour} Average Setlist` : "Average Setlist"
 
   if (isLoading) {
     return (
@@ -180,33 +178,6 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
   return (
     <div className="wl-home-v2-years-page">
       <div className="wl-home-v2-years-body">
-        {useCompactTools ?
-          <div className="wl-home-v2-years-mobile-actions">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="wl-home-v2-years-mobile-action gap-1.5"
-              onClick={() => setToursSheetOpen(true)}
-            >
-              <LineSegments className="size-3.5" aria-hidden />
-              Tours
-            </Button>
-            {shows.length > 0 && currentTourShowFields ?
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="wl-home-v2-years-mobile-action gap-1.5"
-                onClick={() => setOpenToolPanel("setlist")}
-              >
-                <Playlist className="size-3.5" aria-hidden />
-                Average Setlist
-              </Button>
-            : null}
-          </div>
-        : null}
-
         <div
           className={cn(
             "wl-home-v2-years-columns",
@@ -233,6 +204,29 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
                   showsWithRadioIds={showsWithRadioIds}
                   loading={isLoading}
                   wlHomeV2
+                  wlCompactHideShowCount={
+                    useCompactTools && currentTourShowFields === false
+                  }
+                  wlHeaderTrailing={
+                    useCompactTools ?
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="wl-home-v2-tours-header-pill gap-1"
+                        onClick={() => setOpenToolPanel("tours")}
+                        aria-haspopup="dialog"
+                        aria-expanded={openToolPanel === "tours"}
+                      >
+                        <LineSegments className="size-3.5" aria-hidden />
+                        Tours
+                        <CaretDown
+                          className="size-3.5 shrink-0 opacity-80"
+                          aria-hidden
+                        />
+                      </Button>
+                    : undefined
+                  }
                 />
               </div>
 
@@ -261,19 +255,10 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
                   hasTourSetlistEntries={hasTourSetlistEntries}
                   onSongClick={handleSongClick}
                   notPlayedSongs={notPlayedSongs}
-                  wlHomeV2
-                />
-              </Suspense>
-
-              {useCompactTools && shows.length > 0 && currentTourShowFields ?
-                <AverageSetlistCard
-                  shows={shows}
-                  title={avgTitle}
-                  type="tour"
                   averageSetlistResult={averageSetlistResult}
                   wlHomeV2
                 />
-              : null}
+              </Suspense>
             </div>
           </section>
 
@@ -298,100 +283,41 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
                   />
                 </div>
               </section>
-              {shows.length > 0 && currentTourShowFields ?
-                <section
-                  className="wl-home-v2-years-tile"
-                  style={
-                    {
-                      "--tile-bg": "url('/newbg4.jpeg')",
-                    } as CSSProperties
-                  }
-                >
-                  <div className="wl-home-v2-years-tile-inner">
-                    <AverageSetlistCard
-                      shows={shows}
-                      title={avgTitle}
-                      type="tour"
-                      averageSetlistResult={averageSetlistResult}
-                      wlHomeV2
-                      className="wl-home-v2-years-average-setlist-panel"
-                    />
-                  </div>
-                </section>
-              : null}
             </aside>
           : null}
         </div>
       </div>
 
-      <SetlistSongPerformancesSheet
+      <WlHomeV2SetlistSongModal
         open={songSheetOpen}
-        onOpenChange={setSongSheetOpen}
+        onClose={closeTourSongModal}
         entry={null}
         tourName={currentTour.tour}
+        headingId={tourSongModalHeadingId}
+        tourLineId={tourSongModalTourLineId}
         songName={songSheetSongName}
         songDisplayName={songSheetSongDisplayName}
         songId={songSheetSongId}
       />
 
-      <Sheet open={toursSheetOpen} onOpenChange={setToursSheetOpen}>
-        <SheetContent
-          side="bottom"
-          className="max-h-[85vh] flex flex-col rounded-t-none overflow-hidden"
-          showCloseButton={false}
-        >
-          <SheetTitle className="sr-only">Tours</SheetTitle>
-          <button
-            type="button"
-            onClick={() => setToursSheetOpen(false)}
-            className="flex w-full items-center justify-center gap-2 border-b border-[rgb(34,37,35)] py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-            Close
-          </button>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <ToursSidebarCard
-              tours={tours}
-              currentTourId={currentTourId}
-              expandedYear={expandedYear}
-              onToggleYear={toggleYear}
-              onTourSelect={() => setToursSheetOpen(false)}
-              loading={isLoading}
-              className="rounded-none border-t-0 border-x-0"
-              wlHomeV2
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
       <WlHomeV2YearsToolModal
-        open={openToolPanel === "setlist"}
+        open={openToolPanel === "tours"}
         onClose={() => setOpenToolPanel(null)}
-        title={avgTitle}
-        headerActions={
-          <button
-            type="button"
-            className={cn(
-              "shrink-0 rounded-full border border-[rgb(68,70,69)] bg-white/8 !px-2 !py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90",
-              "transition-colors hover:border-[rgb(52,109,95)] hover:bg-[rgba(88,200,174,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wl-light-orange)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
-            )}
-            aria-label="How the average setlist works"
-            onClick={() => setAvgSetlistInfoOpen(true)}
-          >
-            info
-          </button>
+        title={
+          yearFromTour && yearFromTour !== "Unknown" ?
+            `${yearFromTour} Tours`
+          : "Tours"
         }
       >
-        <AverageSetlistCard
-          shows={shows}
-          title={avgTitle}
-          type="tour"
-          averageSetlistResult={averageSetlistResult}
-          wlHomeV2
+        <ToursSidebarCard
+          tours={tours}
+          currentTourId={currentTourId}
+          expandedYear={expandedYear}
+          onToggleYear={toggleYear}
+          onTourSelect={() => setOpenToolPanel(null)}
+          loading={isLoading}
           embedInModal
-          infoOpen={avgSetlistInfoOpen}
-          onInfoOpenChange={setAvgSetlistInfoOpen}
+          wlHomeV2
         />
       </WlHomeV2YearsToolModal>
     </div>

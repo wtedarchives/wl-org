@@ -57,16 +57,18 @@ export function WtedSegmentsTitle({
               →{" "}
             </span>
           : null}
-          <SongDisplayName
-            as="span"
-            song={seg.song}
-            songDisplayName={seg.song_displayname}
-          />
-          {shouldShowSetlistEntryShort(seg.song, seg.entry_short) && (
-            <span className="ml-1 text-[0.625rem] text-red-400">
-              [{seg.entry_short}]
-            </span>
-          )}
+          <span className="inline-flex min-w-0 max-w-full flex-wrap items-baseline gap-x-1">
+            <SongDisplayName
+              as="span"
+              song={seg.song}
+              songDisplayName={seg.song_displayname}
+            />
+            {shouldShowSetlistEntryShort(seg.song, seg.entry_short) && (
+              <span className="shrink-0 text-[0.625rem] text-red-400">
+                [{seg.entry_short}]
+              </span>
+            )}
+          </span>
         </Fragment>
       ))}
     </span>

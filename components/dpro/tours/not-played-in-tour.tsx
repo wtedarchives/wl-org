@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { cn } from "@/lib/utils"
 
 interface NotPlayedInTourProps {
   tourId: string
@@ -16,6 +17,8 @@ interface NotPlayedInTourProps {
   notPlayedSongs?: NotPlayedSong[]
   /** When notPlayedSongs is provided, whether the parent is still loading */
   loading?: boolean
+  /** WL Home tour stats: match `TopSlotsCarousel` widget-panel + wp-head + table chrome. */
+  wlHomeV2?: boolean
 }
 
 export function NotPlayedInTour({
@@ -24,6 +27,7 @@ export function NotPlayedInTour({
   showIds,
   notPlayedSongs: notPlayedSongsProp,
   loading: loadingProp,
+  wlHomeV2 = false,
 }: NotPlayedInTourProps) {
   const [notPlayedSongsLocal, setNotPlayedSongsLocal] = useState<
     NotPlayedSong[]
@@ -167,6 +171,109 @@ export function NotPlayedInTour({
     fetchNotPlayedSongs()
   }, [tourId, tourName, showIds, usePreFetched])
 
+  const scrollWrapperClass = cn(
+    "min-w-0 max-h-64 overflow-x-auto overflow-y-auto",
+    loading && "opacity-50 transition-opacity duration-300",
+  )
+
+  const tableBody = (
+    <table
+      className={cn(
+        "w-full min-w-max border-collapse",
+        wlHomeV2 ?
+          "text-[11px] leading-3 wl-home-v2-years-table wl-home-v2-top-slots-stats-table"
+        : "text-xs",
+      )}
+    >
+      <tbody>
+        {notPlayedSongs.map((song) => (
+          <tr
+            key={song.song_id}
+            className={cn(
+              "transition-colors",
+              wlHomeV2 ?
+                "border-b border-[rgb(34,37,35)] bg-transparent hover:bg-[rgba(88,200,174,0.11)] [&:last-child]:border-b-0"
+              : "bg-background/70 hover:bg-muted/40",
+            )}
+          >
+            <td
+              className={cn(
+                wlHomeV2 ? "wl-home-v2-top-slots-stats-cell" : "py-0.5 pl-3",
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <Link
+                  href={getSongArchiveUrl(song.song_id)}
+                  className={cn(
+                    "font-medium hover:underline",
+                    wlHomeV2 ?
+                      "text-white/88"
+                    : "text-foreground",
+                  )}
+                >
+                  <SongDisplayName
+                    song={song.song}
+                    songDisplayName={song.song_displayname}
+                  />
+                </Link>
+                {song.category_artwork && (
+                  <span
+                    className={cn(
+                      "inline-flex shrink-0 items-center",
+                      wlHomeV2 && "!pr-2",
+                    )}
+                  >
+                    <img
+                      src={song.category_artwork}
+                      alt=""
+                      className={cn(
+                        "size-5 shrink-0 rounded object-cover",
+                        wlHomeV2 ?
+                          "border border-[rgb(63,65,64)]"
+                        : "border border-border",
+                      )}
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).style.display =
+                          "none"
+                      }}
+                    />
+                  </span>
+                )}
+              </div>
+            </td>
+            <td
+              className={cn(
+                "text-center font-medium tabular-nums",
+                wlHomeV2 ?
+                  "w-[30px] wl-home-v2-top-slots-stats-cell text-white/88"
+                : "w-[40px] py-1.5 text-foreground",
+              )}
+            >
+              {song.play_count}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+
+  if (wlHomeV2) {
+    return (
+      <div className="widget-panel w-full min-w-0 shrink-0 overflow-hidden">
+        <div className="wp-head wl-home-v2-years-shows-wp-head">
+          <span className="min-w-0 truncate">Most Common Not Played</span>
+        </div>
+        <div className={scrollWrapperClass}>
+          {notPlayedSongs.length === 0 && !loading ?
+            <div className="py-3 text-center text-[11px] text-white/55">
+              No historical songs to display.
+            </div>
+          : tableBody}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
       <div className="px-3 py-1.5 bg-muted/60">
@@ -178,52 +285,11 @@ export function NotPlayedInTour({
             loading ? "opacity-50 transition-opacity duration-300" : ""
           }
         >
-          {notPlayedSongs.length === 0 && !loading ? (
+          {notPlayedSongs.length === 0 && !loading ?
             <div className="py-2 text-center text-muted-foreground text-xs">
               No historical songs to display.
             </div>
-          ) : (
-            <div>
-              <table className="w-full border-collapse text-xs">
-                <tbody>
-                  {notPlayedSongs.map((song) => (
-                    <tr
-                      key={song.song_id}
-                      className="bg-background/70 hover:bg-muted/40 transition-colors"
-                    >
-                      <td className="pl-3 py-0.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <Link
-                            href={getSongArchiveUrl(song.song_id)}
-                            className="font-medium text-foreground hover:underline"
-                          >
-                            <SongDisplayName
-                              song={song.song}
-                              songDisplayName={song.song_displayname}
-                            />
-                          </Link>
-                          {song.category_artwork && (
-                            <img
-                              src={song.category_artwork}
-                              alt=""
-                              className="size-5 shrink-0 rounded object-cover border border-border"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).style.display =
-                                  "none"
-                              }}
-                            />
-                          )}
-                        </div>
-                      </td>
-                      <td className="w-[40px] py-1.5 text-center font-medium tabular-nums text-foreground">
-                        {song.play_count}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          : <div>{tableBody}</div>}
         </div>
       </CardContent>
     </Card>

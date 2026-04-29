@@ -13,7 +13,6 @@ import { TourShowsTable } from "@/components/dpro/tours/tour-shows-table"
 import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
 import { TourStats } from "@/components/dpro/tours/tour-stats"
 import { ToursSidebarCard } from "@/components/dpro/tours/tours-sidebar-card"
-import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card"
 import { SetlistSongPerformancesSheet } from "@/components/dpro/setlist/setlist-song-performances-sheet"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { Button } from "@/components/ui/button"
@@ -218,19 +217,9 @@ function TourPageContent({ tourId }: { tourId: string }) {
               hasTourSetlistEntries={hasTourSetlistEntries}
               onSongClick={handleSongClick}
               notPlayedSongs={notPlayedSongs}
+              averageSetlistResult={averageSetlistResult}
             />
           </Suspense>
-
-          {layoutMode === "mobile" &&
-            shows.length > 0 &&
-            currentTourShowFields && (
-              <AverageSetlistCard
-                shows={shows}
-                title="Average Setlist"
-                type="tour"
-                averageSetlistResult={averageSetlistResult}
-              />
-            )}
         </div>
 
         {layoutMode === "desktop" && (
@@ -242,14 +231,6 @@ function TourPageContent({ tourId }: { tourId: string }) {
               onToggleYear={toggleYear}
               loading={isLoading}
             />
-            {shows.length > 0 && currentTourShowFields && (
-              <AverageSetlistCard
-                shows={shows}
-                title="Average Setlist"
-                type="tour"
-                averageSetlistResult={averageSetlistResult}
-              />
-            )}
           </div>
         )}
       </div>

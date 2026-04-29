@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table"
 import { useCategoryArtwork } from "@/hooks/use-category-artwork"
 import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
+import { cn } from "@/lib/utils"
 
 interface Show {
   show_id: string
@@ -49,17 +50,31 @@ interface TourSongStatsProps {
   hideTitle?: boolean
   tourId?: string
   onSongClick?: (songName: string, songDisplayName?: string | null) => void
+  wlHomeV2?: boolean
 }
 
 const SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 const EXCLUDED_DURATION = ["aborted", "fake", "tease", "reprise"]
 
-function CategoryCell({ category }: { category: string }) {
+function CategoryCell({
+  category,
+  wlHomeV2 = false,
+}: {
+  category: string
+  wlHomeV2?: boolean
+}) {
   const { artwork, loaded } = useCategoryArtwork(category)
   return (
     <div className="flex items-center gap-2">
-      <span className="shrink-0 size-5 flex py-0.5 items-center justify-center rounded-sm overflow-hidden bg-muted">
-        {loaded && artwork ? (
+      <span
+        className={cn(
+          "flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-sm py-0.5",
+          wlHomeV2 ?
+            "border border-[rgb(63,65,64)] bg-black/20"
+          : "bg-muted",
+        )}
+      >
+        {loaded && artwork ?
           <Image
             src={artwork}
             alt={category}
@@ -72,13 +87,21 @@ function CategoryCell({ category }: { category: string }) {
               if (el) el.style.display = "none"
             }}
           />
-        ) : (
-          <span className="text-[10px] text-muted-foreground truncate px-0.5">
+        : <span
+            className={cn(
+              "truncate px-0.5 text-[10px]",
+              wlHomeV2 ?
+                "text-white/46"
+              : "text-muted-foreground",
+            )}
+          >
             {category.slice(0, 2)}
           </span>
-        )}
+        }
       </span>
-      <span className="text-xs text-muted-foreground">{category}</span>
+      <span className={cn(wlHomeV2 ? "text-[11px] text-muted-foreground" : "text-xs text-muted-foreground")}>
+        {category}
+      </span>
     </div>
   )
 }
@@ -120,6 +143,7 @@ export function TourSongStats({
   uniqueSongCount,
   hideTitle = false,
   onSongClick,
+  wlHomeV2 = false,
 }: TourSongStatsProps) {
   const [sortColumn, setSortColumn] = useState<
     "song" | "count" | "category" | "longest" | "shortest" | null
@@ -244,6 +268,9 @@ export function TourSongStats({
     }
   }, [shows, songIdMap, onSongCountChange])
 
+  const headCell = wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-0.5"
+  const headCellX = wlHomeV2 ? "!px-2" : "px-2"
+
   const handleSort = (
     col: "song" | "count" | "category" | "longest" | "shortest",
   ) => {
@@ -261,10 +288,9 @@ export function TourSongStats({
     col: "song" | "count" | "category" | "longest" | "shortest"
   }) => {
     if (sortColumn !== col) return null
-    return sortDirection === "asc" ? (
-      <ArrowUp className="size-4 inline-block ml-1" />
-    ) : (
-      <ArrowDown className="size-4 inline-block ml-1" />
+    const Icon = sortDirection === "asc" ? ArrowUp : ArrowDown
+    return (
+      <Icon className={cn("ml-1 inline-block", wlHomeV2 ? "size-3.5 text-white/55" : "size-4")} />
     )
   }
 
@@ -278,11 +304,27 @@ export function TourSongStats({
         </div>
       )}
       <div className="overflow-x-auto">
-        <Table>
+        <Table
+          className={
+            wlHomeV2 ?
+              cn("wl-home-v2-years-table text-[11px] leading-3")
+            : ""
+          }
+        >
           <TableHeader>
-            <TableRow className="bg-muted/50 border-border/60">
+            <TableRow
+              className={cn(
+                wlHomeV2 ?
+                  "border-b bg-black/25 hover:bg-black/25"
+                : "bg-muted/60",
+              )}
+            >
               <TableHead
-                className="px-2 py-0.5 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className={cn(
+                  "cursor-pointer text-center font-medium",
+                  wlHomeV2 ? "text-[11px]" : "text-xs hover:bg-muted/70",
+                  headCell,
+                )}
                 onClick={() => handleSort("count")}
               >
                 <span className="flex items-center justify-center gap-1">
@@ -290,7 +332,11 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="pl-3 py-0.5 text-left text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className={cn(
+                  "cursor-pointer text-left font-medium",
+                  wlHomeV2 ? "text-[11px]" : "text-xs hover:bg-muted/70",
+                  headCell,
+                )}
                 onClick={() => handleSort("song")}
               >
                 <span className="flex items-center gap-1">
@@ -298,7 +344,11 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 py-0.5 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className={cn(
+                  "cursor-pointer text-center font-medium",
+                  wlHomeV2 ? "text-[11px]" : "text-xs hover:bg-muted/70",
+                  headCell,
+                )}
                 onClick={() => handleSort("longest")}
               >
                 <span className="flex items-center justify-center gap-1">
@@ -306,7 +356,11 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 py-0.5 text-center text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className={cn(
+                  "cursor-pointer text-center font-medium",
+                  wlHomeV2 ? "text-[11px]" : "text-xs hover:bg-muted/70",
+                  headCell,
+                )}
                 onClick={() => handleSort("shortest")}
               >
                 <span className="flex items-center justify-center gap-1">
@@ -314,7 +368,11 @@ export function TourSongStats({
                 </span>
               </TableHead>
               <TableHead
-                className="px-2 py-0.5 text-left text-xs font-medium cursor-pointer hover:bg-muted/70"
+                className={cn(
+                  "cursor-pointer text-left font-medium",
+                  wlHomeV2 ? "text-[11px]" : "text-xs hover:bg-muted/70",
+                  headCell,
+                )}
                 onClick={() => handleSort("category")}
               >
                 <span className="flex items-center gap-1">
@@ -327,30 +385,64 @@ export function TourSongStats({
             {sortedStats.map((stat) => (
               <TableRow
                 key={stat.song}
-                className="bg-background/70 hover:bg-muted/40"
+                className={cn(
+                  "transition-colors",
+                  wlHomeV2 ?
+                    "border-[rgb(34,37,35)] bg-transparent hover:!bg-[rgba(88,200,174,0.11)] [&:last-child]:border-b-0"
+                  : "bg-background/70 hover:bg-muted/40",
+                )}
               >
-                <TableCell className="py-0.5 text-center text-xs font-medium tabular-nums">
+                <TableCell
+                  className={cn(
+                    "py-0.5 text-center tabular-nums",
+                    headCellX,
+                    wlHomeV2 ?
+                      "font-medium text-[11px] text-white/88"
+                    : "text-xs",
+                  )}
+                >
                   {stat.count}
                 </TableCell>
                 <TableCell
-                  className="pl-3 py-0.5 cursor-pointer"
+                  className={cn("cursor-pointer py-0.5", headCellX)}
                   onClick={() => onSongClick?.(stat.song, stat.song_displayname)}
                 >
-                  <span className="font-medium hover:underline text-xs">
+                  <span
+                    className={cn(
+                      "font-medium hover:underline",
+                      wlHomeV2 ?
+                        "text-[11px] text-white/88"
+                      : "text-xs text-foreground",
+                    )}
+                  >
                     <SongDisplayName
                       song={stat.song}
                       songDisplayName={stat.song_displayname}
                     />
                   </span>
                 </TableCell>
-                <TableCell className="py-0.5 pl-2 text-center text-xs text-muted-foreground tabular-nums">
+                <TableCell
+                  className={cn(
+                    "py-0.5 text-center tabular-nums text-muted-foreground",
+                    headCellX,
+                    wlHomeV2 ? "text-[11px]" : "text-xs",
+                  )}
+                >
                   {stat.longest ?? ""}
                 </TableCell>
-                <TableCell className="py-0.5 pl-2 text-center text-xs text-muted-foreground tabular-nums">
+                <TableCell
+                  className={cn(
+                    "py-0.5 text-center tabular-nums text-muted-foreground",
+                    headCellX,
+                    wlHomeV2 ? "text-[11px]" : "text-xs",
+                  )}
+                >
                   {stat.shortest ?? ""}
                 </TableCell>
-                <TableCell className="py-0.5 pl-2 text-muted-foreground">
-                  <CategoryCell category={stat.category} />
+                <TableCell
+                  className={cn("py-0.5 text-muted-foreground", headCellX)}
+                >
+                  <CategoryCell category={stat.category} wlHomeV2={wlHomeV2} />
                 </TableCell>
               </TableRow>
             ))}

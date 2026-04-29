@@ -30,6 +30,7 @@ function CategorySpreadRow({
   showTooltips,
   tooltipSide = "left",
   variant = "card",
+  v2UseProportionalBar = false,
 }: {
   category: string
   count: number
@@ -41,6 +42,8 @@ function CategorySpreadRow({
   showTooltips: boolean
   tooltipSide?: "left" | "right" | "top" | "bottom"
   variant?: "card" | "wl-home-v2-setlist"
+  /** WL Home v2: one teal bar (`count/maxCount`) instead of N segments when max count is huge. */
+  v2UseProportionalBar?: boolean
 }) {
   const { artwork, loaded } = useCategoryArtwork(category)
   const barWidth = maxCount > 0 ? Math.max(4, (count / maxCount) * 100) : 0
@@ -96,24 +99,36 @@ function CategorySpreadRow({
         )}
       </span>
       {isV2 && maxCount > 0 ?
-        <div
-          className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--segmented flex-1 min-w-0 min-h-5"
-          aria-hidden
-        >
-          {Array.from({ length: maxCount }, (_, i) => (
-            <span
-              key={i}
-              className={cn(
-                "wl-home-v2-setlist-song-spread-segment",
-                i < filledSegments &&
-                  "wl-home-v2-setlist-song-spread-segment--filled",
-                isHovered &&
-                  i < filledSegments &&
-                  "wl-home-v2-setlist-song-spread-segment--filled-hover",
-              )}
+        v2UseProportionalBar ?
+          <div
+            className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--proportion flex-1 min-w-0 min-h-5 flex items-center justify-start"
+            aria-hidden
+          >
+            <div
+              className="wl-home-v2-setlist-song-spread-proportion-fill"
+              style={{
+                width: `${barWidth}%`,
+              }}
             />
-          ))}
-        </div>
+          </div>
+        : <div
+            className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--segmented flex-1 min-w-0 min-h-5"
+            aria-hidden
+          >
+            {Array.from({ length: maxCount }, (_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "wl-home-v2-setlist-song-spread-segment",
+                  i < filledSegments &&
+                    "wl-home-v2-setlist-song-spread-segment--filled",
+                  isHovered &&
+                    i < filledSegments &&
+                    "wl-home-v2-setlist-song-spread-segment--filled-hover",
+                )}
+              />
+            ))}
+          </div>
       : <div
           className={cn(
             "h-4 flex-1 min-w-0 rounded-full overflow-hidden",
@@ -196,11 +211,34 @@ interface SongSpreadDisplayProps {
    * `wl-home-v2-setlist`: no shadcn Card — list only for embedding in WL Home v2 setlist aside.
    */
   variant?: "card" | "wl-home-v2-setlist"
+  /**
+   * Tour song spread tooltips include a trailing `[n]` show count — add space before that segment only.
+   * Set by {@link TourSongSpread}; does not apply to setlist/venue spreads.
+   */
+  tooltipPadTourTrailingPlayCount?: boolean
+  /**
+   * When set (with `wl-home-v2-setlist`), rows use one proportional meter if the
+   * largest category count exceeds this value (avoid 26+ segment cells). Intended for tour spread only.
+   */
+  v2ProportionalBarWhenMaxCountExceeds?: number
 }
 
 function getSongNameForSort(s: string): string {
   const bracketIdx = s.indexOf(" [")
   return bracketIdx >= 0 ? s.slice(0, bracketIdx) : s
+}
+
+/** Tour spreads append ` [\d]` per-show counts (`computeTourSongSpreadFromShows`). */
+function stripTrailingTourPlayBracketCount(raw: string): {
+  body: string
+  count: string | null
+} {
+  const m = /\s*\[(\d+)\]$/.exec(raw)
+  if (!m) return { body: raw, count: null }
+  return {
+    body: raw.slice(0, m.index),
+    count: `[${m[1]}]`,
+  }
 }
 
 export function SongSpreadDisplay({
@@ -210,10 +248,18 @@ export function SongSpreadDisplay({
   cardMaxHeight,
   tooltipSide = "left",
   variant = "card",
+  tooltipPadTourTrailingPlayCount = false,
+  v2ProportionalBarWhenMaxCountExceeds,
 }: SongSpreadDisplayProps) {
   const isDesktop = useIsDesktopContentLayout()
   const maxCount = spread.length > 0 ? Math.max(...spread.map((s) => s.count)) : 0
   const isV2 = variant === "wl-home-v2-setlist"
+  const v2UseProportionalBar =
+    Boolean(
+      isV2 &&
+        v2ProportionalBarWhenMaxCountExceeds != null &&
+        maxCount > v2ProportionalBarWhenMaxCountExceeds,
+    )
 
   if (spread.length === 0) return null
 
@@ -255,10 +301,18 @@ export function SongSpreadDisplay({
               )}
             >
               {songsSortedByName.map((s) => {
-                const bracketIdx = s.indexOf(" [")
-                const songName = bracketIdx >= 0 ? s.slice(0, bracketIdx) : s
+                const { body: lineForTitle, count: trailingPlayCount } =
+                  tooltipPadTourTrailingPlayCount ?
+                    stripTrailingTourPlayBracketCount(s)
+                  : { body: s, count: null as string | null }
+
+                const bracketIdx = lineForTitle.indexOf(" [")
+                const songName =
+                  bracketIdx >= 0 ?
+                    lineForTitle.slice(0, bracketIdx)
+                  : lineForTitle
                 const artistPart =
-                  bracketIdx >= 0 ? s.slice(bracketIdx) : null
+                  bracketIdx >= 0 ? lineForTitle.slice(bracketIdx) : null
                 const artistGap =
                   coverCategoryTooltip && artistPart != null && artistPart !== ""
                 return (
@@ -281,6 +335,16 @@ export function SongSpreadDisplay({
                         {artistPart}
                       </span>
                     : null}
+                    {trailingPlayCount ?
+                      <span
+                        className={cn(
+                          "pl-2 font-semibold tabular-nums",
+                          isV2 ? "text-white/72" : "text-muted-foreground",
+                        )}
+                      >
+                        {trailingPlayCount}
+                      </span>
+                    : null}
                   </li>
                 )
               })}
@@ -299,6 +363,7 @@ export function SongSpreadDisplay({
             showTooltips={isDesktop}
             tooltipSide={tooltipSide}
             variant={variant}
+            v2UseProportionalBar={v2UseProportionalBar}
           />
         )
       })}

@@ -1,11 +1,9 @@
 "use client"
 
-
-import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import Link from "next/link"
 import { X } from "lucide-react"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { GuestAppearancesDetailTable } from "@/components/dpro/tours/guest-appearances-detail-table"
 import {
   Drawer,
   DrawerContent,
@@ -14,28 +12,10 @@ import {
   DrawerFooter,
   DrawerClose,
 } from "@/components/ui/drawer"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { formatEntryLength } from "@/lib/setlist-utils"
 import type { SongWithGuest } from "@/hooks/use-guest-appearances"
 
-function formatTourDate(dateStr: string): string {
-  if (!dateStr) return ""
-  const parts = dateStr.split("-")
-  if (parts.length >= 3) {
-    return `${parts[1]}.${parts[2]}.${parts[0].slice(2)}`
-  }
-  return dateStr
-}
-
-interface GuestAppearancesDrawerProps {
+export interface GuestAppearancesDrawerProps {
   modalData: {
     isOpen: boolean
     guestId: string
@@ -90,69 +70,11 @@ export function GuestAppearancesDrawer({
         </DrawerHeader>
 
         <div className="flex-1 min-h-0 overflow-auto px-4 pb-4 pt-2">
-          <Table className="min-w-full border-separate border-spacing-y-0.25 text-[11px]">
-            <TableHeader>
-              <TableRow className="border-b border-border/60 hover:bg-transparent">
-                <TableHead className="whitespace-nowrap text-left text-[11px] font-medium py-2 pr-4">
-                  Song
-                </TableHead>
-                <TableHead className="whitespace-nowrap text-center text-[11px] font-medium py-2 px-2">
-                  Show
-                </TableHead>
-                <TableHead className="whitespace-nowrap text-left text-[11px] font-medium py-2 px-2">
-                  Location
-                </TableHead>
-                <TableHead className="w-[4.5rem] shrink-0 text-left text-[11px] font-medium py-2 px-2">
-                  &nbsp;
-                </TableHead>
-                <TableHead className="whitespace-nowrap text-center text-[11px] font-medium py-2 pl-2 tabular-nums">
-                  Length
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {modalData.songs.map((song) => (
-                <TableRow
-                  key={`${song.show_id}-${song.entry_song}`}
-                  className="align-middle"
-                >
-                  <TableCell className="align-middle py-1.5 pr-4 text-[11px] font-medium">
-                    <SongDisplayName
-                      song={song.entry_song}
-                      songDisplayName={song.song_displayname}
-                    />
-                  </TableCell>
-                  <TableCell className="align-middle py-1.5 px-2 text-center text-[11px] whitespace-nowrap">
-                    <Link
-                      href={getSetlistArchiveUrl(song.show_id)}
-                      onClick={() => onOpenChange(false)}
-                      className="font-medium hover:underline"
-                    >
-                      {formatTourDate(song.show_date)}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="align-middle py-1.5 px-2 text-[11px] text-muted-foreground whitespace-nowrap">
-                    {song.show_venue_location}
-                  </TableCell>
-                  <TableCell className="align-middle py-1.5 px-2 text-left text-[11px] w-[4.5rem] shrink-0">
-                    <span className="inline-flex items-center gap-2">
-                      {song.entry_short && (
-                        <span className="text-red-400 font-medium">
-                          [{song.entry_short}]
-                        </span>
-                      )}
-                      {song.entry_segue && (
-                        <span className="text-red-400">→</span>
-                      )}
-                    </span>
-                  </TableCell>
-                  <TableCell className="align-middle py-1.5 pl-2 text-center text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
-                    {formatEntryLength(song.entry_length) || ""}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <GuestAppearancesDetailTable
+            songs={modalData.songs}
+            variant="drawer"
+            onNavigate={() => onOpenChange(false)}
+          />
         </div>
 
         <DrawerFooter className="border-t border-border/60 shrink-0 pt-3 pb-4">

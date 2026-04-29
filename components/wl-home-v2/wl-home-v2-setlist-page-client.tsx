@@ -174,20 +174,14 @@ export function WlHomeV2SetlistPageClient() {
   }, [])
 
   useEffect(() => {
-    if (!songModalOpen && !wtedModalOpen) return
+    if (!wtedModalOpen) return
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return
-      if (songModalOpen) closeSongModal()
-      if (wtedModalOpen) closeWtedModal()
+      closeWtedModal()
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
-  }, [
-    songModalOpen,
-    wtedModalOpen,
-    closeSongModal,
-    closeWtedModal,
-  ])
+  }, [wtedModalOpen, closeWtedModal])
 
   const wtedModalShow = useMemo(
     () => ({

@@ -1768,6 +1768,155 @@
     font-size: 12px;
     color: rgba(255, 255, 255, 0.85);
   }
+  /*
+   * Tours sidebar accordion: match years `ToursCard` / `topic-row` + `years-filter-button`
+   * chrome. Sheet portals render outside `.wl-home-v2`; scope with `[data-wl-v2-tours-sidebar]`.
+   */
+  [data-wl-v2-tours-sidebar].widget-panel {
+    position: relative;
+    background: rgba(0, 0, 0, 0.38);
+    border: 1px solid rgb(44, 46, 45);
+    border-radius: 10px;
+    padding: 12px 14px 4px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  [data-wl-v2-tours-sidebar].widget-panel .wp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  [data-wl-v2-tours-sidebar] .wl-home-v2-tours-sidebar-year-list {
+    margin: 0 -14px;
+    padding: 4px 0 2px;
+  }
+  /* Same row chrome as `.wl-home-v2-years-filter-list .years-filter-button` */
+  [data-wl-v2-tours-sidebar] .wl-home-v2-tours-sidebar-year-btn {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 2px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgb(29, 32, 30);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  }
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-year-group:last-child
+    .wl-home-v2-tours-sidebar-year-btn[aria-expanded="false"] {
+    border-bottom-color: transparent;
+  }
+  [data-wl-v2-tours-sidebar] .wl-home-v2-tours-sidebar-year-btn:hover {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgb(52, 109, 95);
+    border-bottom-color: rgb(52, 109, 95);
+    transform: translateY(-1px);
+  }
+  [data-wl-v2-tours-sidebar] .wl-home-v2-tours-sidebar-year-btn:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+  [data-wl-v2-tours-sidebar] .wl-home-v2-tours-sidebar-expand-clip {
+    overflow: hidden;
+    padding-bottom: 1px;
+    padding-top: 1px;
+  }
+  /* Nested tours indented vs year disclosure (no rail). */
+  [data-wl-v2-tours-sidebar] .wl-home-v2-tours-sidebar-tour-stack {
+    box-sizing: border-box;
+    margin-left: 0.5rem;
+    padding-left: 0.625rem;
+  }
+  /*
+   * Tour rows: no negative horizontal margin (unlike flat `ToursCard` topic-rows), so labels
+   * stay to the right of the year disclosure text.
+   */
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-tour-stack
+    a.topic-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    text-decoration: none;
+    color: inherit;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 4px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgb(29, 32, 30);
+    transition:
+      background 0.18s,
+      border-color 0.18s,
+      transform 0.18s,
+      box-shadow 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-tour-stack
+    a.topic-row:last-child {
+    border-bottom-color: transparent;
+  }
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-tour-stack
+    a.topic-row:hover:not([aria-current="page"]) {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgb(52, 109, 95);
+    border-bottom-color: rgb(52, 109, 95);
+    /* No translateY here: parent .expand-clip is overflow:hidden and clips the lifted edge. */
+    transform: none;
+    box-shadow: none;
+  }
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-tour-stack
+    a.topic-row[aria-current="page"] {
+    position: relative;
+    z-index: 1;
+    background-color: rgba(88, 200, 174, 0.12);
+    border-color: transparent;
+    border-bottom-color: rgb(29, 32, 30);
+    box-shadow: inset 0 0 0 1px rgb(74, 157, 139);
+    transform: none;
+    color: rgb(255, 255, 255);
+  }
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-tour-stack
+    a.topic-row[aria-current="page"]:hover {
+    background-color: rgba(88, 200, 174, 0.16);
+    border-color: rgb(52, 109, 95);
+    border-bottom-color: rgb(52, 109, 95);
+    box-shadow:
+      inset 0 0 0 1px rgb(74, 157, 139),
+      0 0 0 1px rgb(52, 109, 95);
+  }
+  [data-wl-v2-tours-sidebar]
+    .wl-home-v2-tours-sidebar-tour-stack
+    a.topic-row:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
   .wl-home-v2 .widget-panel--archive-setlist {
     transition: background 0.18s, border-color 0.18s, transform 0.18s;
     /* Base `.widget-panel` uses 4px bottom; give the recent-show pills room above the rim. */
@@ -1825,6 +1974,21 @@
     text-transform: none;
     letter-spacing: 0.02em;
     min-width: 0;
+  }
+  /* Tour “Songs played” matrix sort: wp-head sets Geist Mono — override to sans + pad each option. */
+  .wl-home-v2 .widget-panel .wp-head .wl-home-v2-tour-songs-sort {
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: 0.01em;
+  }
+  .wl-home-v2 .widget-panel .wl-home-v2-tour-songs-sort .wl-home-v2-tour-songs-sort-label {
+    display: inline-block;
+    padding-left: 6px;
+    box-sizing: border-box;
+  }
+  .wl-home-v2 .widget-panel .wp-head .wl-home-v2-tour-songs-sort [data-slot="button"] {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-family: inherit;
   }
   .wl-home-v2 .widget-panel .wp-head-detail {
     color: rgba(255, 255, 255, 0.55);
@@ -3337,6 +3501,21 @@
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgb(49, 51, 49);
   }
+  /* Same chrome as `.modal-setlist-song-tour`; instrument keeps accent fill + `--wl-orange` text. */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .modal-setlist-song-instrument {
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--wl-orange);
+    background: rgba(255, 122, 103, 0.18);
+    border: 1px solid rgb(49, 51, 49);
+  }
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .modal-setlist-song-close-btn {
     color: rgba(255, 255, 255, 0.75);
   }
@@ -4339,6 +4518,31 @@
     border-color: rgb(123, 94, 63);
     background: rgba(255, 122, 103, 0.12);
   }
+  /* Compact tour dates header: “Tours” opener — same pill chrome as mobile-actions (not nested in that row). */
+  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill {
+    box-sizing: border-box;
+    height: auto;
+    min-height: 30px;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid rgb(49, 51, 49);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.8);
+    padding-block: 5px;
+    padding-inline: 11px;
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill:hover {
+    color: #fff;
+    border-color: rgb(123, 94, 63);
+    background: rgba(255, 122, 103, 0.12);
+  }
   .wl-home-v2 .wl-home-v2-years-columns {
     display: flex;
     flex-direction: column;
@@ -4397,6 +4601,11 @@
     .wl-home-v2-years-page
     .widget-panel.wl-home-v2-years-average-setlist-panel {
     padding-bottom: 12px;
+  }
+  /* Guest appearances (tour stats): 6px under table inside scroll region. */
+  .wl-home-v2 .wl-home-v2-guest-appearances-scroll {
+    padding-bottom: 6px;
+    box-sizing: border-box;
   }
   .wl-home-v2 .wl-home-v2-years-tile--main {
     flex: 1 1 auto;
@@ -4468,6 +4677,68 @@
   }
   .wl-home-v2 .wl-home-v2-years-table .text-muted-foreground {
     color: rgba(255, 255, 255, 0.55) !important;
+  }
+  /* Tour stats (longest / top returning): plain tables with `text-muted-foreground` helpers */
+  .wl-home-v2 .widget-panel .wl-home-v2-tours-stats-table .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.55) !important;
+  }
+  /* Cell padding (no Tailwind on `<td>` in WL mode). Song: 6px right; duration: 1px vert + 6px horiz; meta/trail below. */
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-tours-stats-table
+    tbody
+    td.wl-home-v2-tours-stats-cell:not(.wl-home-v2-tours-stats-cell--duration) {
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-tours-stats-table
+    tbody
+    td.wl-home-v2-tours-stats-cell--song {
+    padding-right: 6px;
+  }
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-tours-stats-table
+    tbody
+    td.wl-home-v2-tours-stats-cell--duration {
+    padding: 1px 6px;
+  }
+  /* Meta + trail (Returned / LTP): same horizontal padding */
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-tours-stats-table
+    tbody
+    td.wl-home-v2-tours-stats-cell--meta,
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-tours-stats-table
+    tbody
+    td.wl-home-v2-tours-stats-cell--trail {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  /* Top Returning LIB badge: match setlist Last column `.last-pill` (colors via inline style). */
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-tours-stats-table
+    .last-pill {
+    display: inline-block;
+    margin-left: 0;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 12px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  /* Top slots carousel WL — table cells (Tailwind-free padding on `<td>`). */
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    td.wl-home-v2-top-slots-stats-cell {
+    padding: 1px 0;
   }
   .wl-home-v2 .wl-home-v2-years-aside {
     width: 280px;
@@ -5810,7 +6081,7 @@
   margin-left: 0;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 12px;
-  padding: 0 4px;
+  padding: 1px 4px;
   border-radius: 4px;
   font-weight: 500;
 }
@@ -6343,6 +6614,18 @@
   font-size: 11px;
   color: rgba(255, 255, 255, 0.55);
 }
+/* Tour stats row: cap song spread shell (label + list) at 464px; list fills remainder and scrolls. */
+.wl-home-v2 .wl-home-v2-tour-stats-song-spread.side-card {
+  max-height: 464px;
+  min-height: 0;
+  overflow: hidden;
+}
+.wl-home-v2 .wl-home-v2-tour-stats-song-spread .wl-home-v2-setlist-song-spread-ul {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
 /* Song spread aside: same aggregation as `SetlistSongSpreadCard` / `SongSpreadDisplay` */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-ul {
   list-style: none;
@@ -6387,6 +6670,37 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-segment--filled-hover {
+  background: rgba(88, 200, 174, 0.55);
+  border-color: rgb(62, 120, 105);
+}
+/* Tour spread only: single proportional teal bar when max category count is large (avoid 26+ segment cells). */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-track--proportion {
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgb(49, 51, 49);
+  border-radius: 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-song-spread-proportion-fill {
+  min-height: 15px;
+  min-width: 4px;
+  max-width: 100%;
+  border-radius: 4px;
+  background: rgba(88, 200, 174, 0.4);
+  border: 1px solid rgb(52, 109, 95);
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    width 0.2s ease;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-song-spread-row--hover
+  .wl-home-v2-setlist-song-spread-proportion-fill {
   background: rgba(88, 200, 174, 0.55);
   border-color: rgb(62, 120, 105);
 }

@@ -265,14 +265,7 @@ function YearPageContent({ yearId }: { yearId: string }) {
               onClearFilters={clearGroupFilters}
               loading={loading}
             />
-            <AverageSetlistCard
-              shows={shows}
-              title={
-                currentYear
-                  ? `${currentYear} Average Setlist`
-                  : "Average Setlist"
-              }
-            />
+            <AverageSetlistCard shows={shows} title="Average Setlist" />
           </div>
         )}
       </div>
@@ -317,11 +310,7 @@ function YearPageContent({ yearId }: { yearId: string }) {
             {mobileModal === "setlist" && (
               <AverageSetlistCard
                 shows={shows}
-                title={
-                  currentYear
-                    ? `${currentYear} Average Setlist`
-                    : "Average Setlist"
-                }
+                title="Average Setlist"
                 className="rounded-none border-t-0 border-x-0"
               />
             )}

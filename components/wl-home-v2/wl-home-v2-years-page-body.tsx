@@ -7,7 +7,7 @@ import {
   type CSSProperties,
 } from "react"
 import { notFound } from "next/navigation"
-import { FunnelSimple, LineSegments, Playlist } from "@phosphor-icons/react"
+import { FunnelSimple, LineSegments } from "@phosphor-icons/react"
 
 import { YearsProvider, useYears } from "@/components/years-provider"
 import { YearShowsTable } from "@/components/dpro/years/year-shows-table"
@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 import { NAV_YEARS } from "@/components/app-sidebar.constants"
 import { DEFAULT_YEAR, TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
 
-type YearsToolPanel = "tours" | "groups" | "setlist" | null
+type YearsToolPanel = "tours" | "groups" | null
 
 /** Until measured: assume compact (no right column) to match SSR + first paint. */
 type YearsLayoutMode = "mobile" | "desktop" | null
@@ -39,7 +39,6 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
 
   const [layoutMode, setLayoutMode] = useState<YearsLayoutMode>(null)
   const [openToolPanel, setOpenToolPanel] = useState<YearsToolPanel>(null)
-  const [avgSetlistInfoOpen, setAvgSetlistInfoOpen] = useState(false)
   const [currentYear, setCurrentYear] = useState<string>("")
   const [selectedGroups, setSelectedGroups] = useState<string[]>([])
   const [filteredShows, setFilteredShows] = useState<YearShow[]>([])
@@ -76,12 +75,6 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
-  }, [openToolPanel])
-
-  useEffect(() => {
-    if (openToolPanel !== "setlist") {
-      setAvgSetlistInfoOpen(false)
-    }
   }, [openToolPanel])
 
   useEffect(() => {
@@ -145,8 +138,6 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
     yearLabelFromNav ??
     (currentYear || DEFAULT_YEAR)
 
-  const avgSetlistTitle =
-    currentYear ? `${currentYear} Average Setlist` : "Average Setlist"
   const toursModalTitle =
     currentYear ? `${currentYear} Tours` : "Tours"
 
@@ -180,16 +171,6 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
             >
               <FunnelSimple className="size-3.5" aria-hidden />
               Filter by Group
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="wl-home-v2-years-mobile-action gap-1.5"
-              onClick={() => setOpenToolPanel("setlist")}
-            >
-              <Playlist className="size-3.5" aria-hidden />
-              Average Setlist
             </Button>
           </div>
         : null}
@@ -275,7 +256,7 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
                 <div className="wl-home-v2-years-tile-inner">
                   <AverageSetlistCard
                     shows={shows}
-                    title={avgSetlistTitle}
+                    title="Average Setlist"
                     averageSetlistResult={averageSetlistResult}
                     wlHomeV2
                   />
@@ -324,34 +305,6 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
           loading={loading}
           wlHomeV2
           embedInModal
-        />
-      </WlHomeV2YearsToolModal>
-      <WlHomeV2YearsToolModal
-        open={openToolPanel === "setlist"}
-        onClose={() => setOpenToolPanel(null)}
-        title={avgSetlistTitle}
-        headerActions={
-          <button
-            type="button"
-            className={cn(
-              "shrink-0 rounded-full border border-[rgb(68,70,69)] bg-white/8 !px-2 !py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90",
-              "transition-colors hover:border-[rgb(52,109,95)] hover:bg-[rgba(88,200,174,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--wl-light-orange)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
-            )}
-            aria-label="How the average setlist works"
-            onClick={() => setAvgSetlistInfoOpen(true)}
-          >
-            info
-          </button>
-        }
-      >
-        <AverageSetlistCard
-          shows={shows}
-          title={avgSetlistTitle}
-          averageSetlistResult={averageSetlistResult}
-          wlHomeV2
-          embedInModal
-          infoOpen={avgSetlistInfoOpen}
-          onInfoOpenChange={setAvgSetlistInfoOpen}
         />
       </WlHomeV2YearsToolModal>
     </div>

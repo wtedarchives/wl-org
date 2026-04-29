@@ -23,7 +23,6 @@ export type WlHomeV2SetlistPlaceholderMainHeaderProps = {
   venueLocation: string
   showDetailLabel: string
   showAlertLabel: string
-  venueStackSubvenueLocation: boolean
   showCanonPositionPill: boolean
   maxShowCanonId: number | null
   mobileStackTourNameAndPositionLines: boolean
@@ -44,7 +43,6 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
   venueLocation,
   showDetailLabel,
   showAlertLabel,
-  venueStackSubvenueLocation,
   showCanonPositionPill,
   maxShowCanonId,
   mobileStackTourNameAndPositionLines,
@@ -53,6 +51,12 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
   onTourShowSelect,
   toolsProps,
 }: WlHomeV2SetlistPlaceholderMainHeaderProps) {
+  /** Mobile: two lines whenever both subvenue and city exist (ignore show_detail). Desktop: stacked only when there's no show_detail. */
+  const stackSubvenueLocation =
+    useCompactTools ?
+      Boolean(subvenueLabel && venueLocation)
+    : Boolean(!showDetailLabel && subvenueLabel && venueLocation)
+
   const showHeaderCanonPillJsx =
     showCanonPositionPill ?
       <span className="pos show-header-canon-pill">
@@ -95,7 +99,7 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
             <div
               className={cn(
                 "venue",
-                venueStackSubvenueLocation &&
+                stackSubvenueLocation &&
                   "venue--stack-subvenue-location",
               )}
             >
@@ -117,7 +121,7 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
                 : <span className="venue-subvenue-text">{subvenueLabel}</span>
               : null}
               {venueLocation ?
-                venueStackSubvenueLocation || !subvenueLabel ?
+                stackSubvenueLocation || !subvenueLabel ?
                   <span className="venue-location">{venueLocation}</span>
                 : <>
                     <span className="city" aria-hidden="true">

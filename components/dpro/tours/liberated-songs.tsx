@@ -2,14 +2,25 @@
 
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
-import { useEffect, useState, useRef } from "react"
-import { createPortal } from "react-dom"
+import { type ReactNode, useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { formatVenueLocationWithBrackets } from "@/lib/format-venue-location-brackets"
 import { formatEntryLength } from "@/lib/setlist-utils"
-import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  getLastCountBadgeStyle,
+  getLastCountPillStyle,
+  INDEX_SKIP_SONG_IMPROV_JAM,
+} from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { cn } from "@/lib/utils"
+
+import { toursStatsDurationTdClassnames } from "./tours-stats-table-classes"
 
 interface LiberatedSong {
   entry_song: string
@@ -30,6 +41,8 @@ interface LiberatedSongsProps {
   tourId?: string
   onDataLoaded?: (hasData: boolean) => void
   onSongClick?: (songName: string, songDisplayName?: string | null) => void
+  /** WL Home archive tour stats: chrome matches slots (`widget-panel` + `wp-head`). */
+  wlHomeV2?: boolean
 }
 
 function formatTourDate(dateStr?: string): string {
@@ -48,19 +61,43 @@ function extractShowCount(lastCount: string): string {
   return match ? match[1] : ""
 }
 
+/** Same Radix chrome + `.setlist-header-tooltip` as song spread WL tooltips (`song-spread-display.tsx`). */
+function LiberatedSongLibTooltip({
+  children,
+}: {
+  children: ReactNode
+}) {
+  return (
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent
+        side="right"
+        align="start"
+        sideOffset={6}
+        className="max-w-xs p-0 setlist-header-tooltip setlist-header-tooltip--tight"
+      >
+        <div className="wl-home-v2-setlist-song-spread-tooltip-inner text-left">
+          <p className="wl-home-v2-setlist-song-spread-tooltip-title">
+            LIB{" "}
+            <span className="font-normal text-white/80">(Song Liberation)</span>
+          </p>
+          <p className="mb-0 leading-snug">
+            Song returned after a full calendar year of not being played.
+          </p>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 export function LiberatedSongs({
   showIds,
   onDataLoaded,
   onSongClick,
+  wlHomeV2 = false,
 }: LiberatedSongsProps) {
   const [liberatedSongs, setLiberatedSongs] = useState<LiberatedSong[]>([])
   const [loading, setLoading] = useState(true)
-  const [hoveredLibBadge, setHoveredLibBadge] = useState<string | null>(null)
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    x: number
-    y: number
-  } | null>(null)
-  const badgeRefs = useRef<Record<string, HTMLSpanElement | null>>({})
 
   useEffect(() => {
     if (!showIds?.length) {
@@ -152,175 +189,238 @@ export function LiberatedSongs({
     fetchLiberatedSongs()
   }, [showIds, onDataLoaded])
 
-  useEffect(() => {
-    if (!hoveredLibBadge || !tooltipPosition) return
-    const update = () => {
-      const badge = badgeRefs.current[hoveredLibBadge]
-      if (badge) {
-        const rect = badge.getBoundingClientRect()
-        setTooltipPosition({ x: rect.right + 4, y: rect.top })
-      }
-    }
-    window.addEventListener("scroll", update, true)
-    window.addEventListener("resize", update)
-    return () => {
-      window.removeEventListener("scroll", update, true)
-      window.removeEventListener("resize", update)
-    }
-  }, [hoveredLibBadge, tooltipPosition])
-
   if (!loading && liberatedSongs.length === 0) return null
 
   const showDurationColumn = liberatedSongs.some(
     (s) => formatEntryLength(s.entry_length ?? null) !== "",
   )
 
-  return (
-    <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
-      <div className="px-3 py-1.5 flex justify-between items-center bg-muted/60">
-        <h2 className="text-sm font-semibold">Top Returning Songs</h2>
-      </div>
-      <CardContent className="p-0">
-        {loading ? (
-          <div className="py-2 text-center text-muted-foreground text-xs">
-            Loading…
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-max text-xs">
-              <tbody>
-                {liberatedSongs.map((song, i) => (
-                  <tr
-                    key={`${song.entry_song}-${i}`}
-                    className="bg-background/70 hover:bg-muted/40 transition-colors"
-                  >
-                    <td className="pl-3 py-0.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onSongClick?.(song.entry_song, song.song_displayname)
-                          }
-                          className="font-medium text-foreground text-left cursor-pointer"
-                        >
-                          <SongDisplayName
-                            song={song.entry_song}
-                            songDisplayName={song.song_displayname}
-                          />
-                        </button>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {song.last_count?.toUpperCase().includes("LIB") && (
-                            <span
-                              ref={(el) => {
-                                badgeRefs.current[song.entry_song] = el
-                              }}
-                              className="inline-flex items-center justify-center font-medium rounded-full text-[10px] px-1.5 py-0.5 shadow-sm bg-yellow-600 text-white cursor-help"
-                              onMouseEnter={(e) => {
-                                const rect = e.currentTarget.getBoundingClientRect()
-                                setTooltipPosition({
-                                  x: rect.right + 4,
-                                  y: rect.top,
-                                })
-                                setHoveredLibBadge(song.entry_song)
-                              }}
-                              onMouseLeave={() => {
-                                setHoveredLibBadge(null)
-                                setTooltipPosition(null)
-                              }}
-                            >
-                              LIB
-                            </span>
-                          )}
-                          {song.category_artwork && (
-                            <img
-                              src={song.category_artwork}
-                              alt=""
-                              className="size-5 shrink-0 rounded object-cover border border-border"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).style.display =
-                                  "none"
-                              }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    {showDurationColumn ?
-                      <td className="w-[50px] py-1.5 text-center font-medium tabular-nums text-foreground">
-                        {formatEntryLength(song.entry_length ?? null)}
-                      </td>
-                    : null}
-                    <td className="py-1.5 pl-2 text-muted-foreground text-xs">
-                      {song.show_date && (
-                        <>
-                          <span className="text-muted-foreground">Returned </span>
-                          {song.show_id ? (
-                            <Link
-                              href={getSetlistArchiveUrl(song.show_id)}
-                              className="font-medium hover:underline text-white/80"
-                            >
-                              {formatTourDate(song.show_date)}
-                            </Link>
-                          ) : (
-                            <span>{formatTourDate(song.show_date)}</span>
-                          )}
-                          {song.venue_location && (
-                            <span className="text-muted-foreground/70">
-                              {" "}
-                              {formatVenueLocationWithBrackets(song.venue_location)}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </td>
-                    <td className="py-1.5 px-2 text-muted-foreground text-xs whitespace-nowrap">
-                      {song.last_show_date && (
-                        <>
-                          <span className="text-muted-foreground">LTP </span>
-                          {song.last_show_id ? (
-                            <Link
-                              href={getSetlistArchiveUrl(song.last_show_id)}
-                              className="font-medium hover:underline text-white/80"
-                            >
-                              {formatTourDate(song.last_show_date)}
-                            </Link>
-                          ) : (
-                            <span>{formatTourDate(song.last_show_date)}</span>
-                          )}
-                          {extractShowCount(song.last_count) && (
-                            <span className="text-muted-foreground/70">
-                              {" "}
-                              ({extractShowCount(song.last_count)} shows)
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </CardContent>
+  const mutedRow = wlHomeV2 ? "text-white/88" : "text-foreground"
 
-      {hoveredLibBadge && tooltipPosition &&
-        createPortal(
-          <div
-            className="fixed text-xs leading-tight font-medium bg-card text-foreground px-1.5 py-1 rounded border border-border shadow-lg whitespace-normal pointer-events-none max-w-[150px] z-[99999]"
-            style={{
-              left: `${tooltipPosition.x}px`,
-              top: `${tooltipPosition.y}px`,
-            }}
-          >
-            LIB <span className="font-normal">(Song Liberation)</span>
-            <br />
-            <span className="font-light">
-              Song returned after a full calendar year of not being played.
-            </span>
-          </div>,
-          document.body,
+  const liberatedTable = (
+    <div className="min-w-0 overflow-x-auto">
+      <table
+        className={cn(
+          "w-full border-collapse min-w-max text-[11px] leading-3",
+          wlHomeV2 && "wl-home-v2-tours-stats-table",
         )}
-    </Card>
+      >
+        <tbody>
+          {liberatedSongs.map((song, i) => {
+            const showLibBadge =
+              !!song.last_count?.toUpperCase().includes("LIB")
+            /* Chip label is always LIB; palette matches setlist Last-column LIB pill. */
+            const wlLibPillStyles =
+              wlHomeV2 && showLibBadge ?
+                getLastCountPillStyle("LIB")
+              : null
+            const legacyLibBadgeStyles =
+              !wlHomeV2 && showLibBadge ?
+                getLastCountBadgeStyle("LIB")
+              : null
+            return (
+              <tr
+              key={`${song.entry_song}-${i}`}
+              className={cn(
+                "transition-colors",
+                wlHomeV2 ?
+                  "border-b border-[rgb(34,37,35)] bg-transparent hover:bg-[rgba(88,200,174,0.11)] [&:last-child]:border-b-0"
+                : "bg-background/70 hover:bg-muted/40",
+              )}
+            >
+              <td
+                className={cn(
+                  wlHomeV2 ?
+                    "wl-home-v2-tours-stats-cell wl-home-v2-tours-stats-cell--song"
+                  : "py-0.5 pr-1.5 pl-3",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onSongClick?.(song.entry_song, song.song_displayname)}
+                    className={cn(
+                      "text-left font-medium",
+                      wlHomeV2 ?
+                        "cursor-pointer text-white/88 hover:underline"
+                      : "cursor-pointer text-foreground hover:underline",
+                    )}
+                  >
+                    <SongDisplayName
+                      song={song.entry_song}
+                      songDisplayName={song.song_displayname}
+                    />
+                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {wlHomeV2 &&
+                    showLibBadge &&
+                    wlLibPillStyles ?
+                      <LiberatedSongLibTooltip>
+                        <span
+                          className="last-pill cursor-help"
+                          style={{
+                            backgroundColor: wlLibPillStyles.background,
+                            color: wlLibPillStyles.color,
+                            border: `1px solid ${wlLibPillStyles.borderColor}`,
+                          }}
+                        >
+                          LIB
+                        </span>
+                      </LiberatedSongLibTooltip>
+                    : null}
+                    {!wlHomeV2 && showLibBadge && legacyLibBadgeStyles ?
+                      <LiberatedSongLibTooltip>
+                        <span
+                          className={cn(
+                            legacyLibBadgeStyles.className,
+                            "cursor-help",
+                          )}
+                        >
+                          LIB
+                        </span>
+                      </LiberatedSongLibTooltip>
+                    : null}
+                    {song.category_artwork && (
+                      <img
+                        src={song.category_artwork}
+                        alt=""
+                        className={cn(
+                          "size-5 shrink-0 rounded object-cover",
+                          wlHomeV2 ?
+                            "border border-[rgb(63,65,64)]"
+                          : "border border-border",
+                        )}
+                        onError={(e) => {
+                          ;(e.target as HTMLImageElement).style.display =
+                            "none"
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </td>
+              {showDurationColumn ?
+                <td
+                  className={toursStatsDurationTdClassnames(
+                    wlHomeV2,
+                    mutedRow,
+                  )}
+                >
+                  {formatEntryLength(song.entry_length ?? null)}
+                </td>
+              : null}
+              <td
+                className={cn(
+                  "text-muted-foreground",
+                  wlHomeV2 ?
+                    "wl-home-v2-tours-stats-cell wl-home-v2-tours-stats-cell--meta"
+                  : "px-2 py-1.5",
+                )}
+              >
+                {song.show_date && (
+                  <>
+                    <span className="text-muted-foreground">Returned </span>
+                    {song.show_id ?
+                      <Link
+                        href={getSetlistArchiveUrl(song.show_id)}
+                        className="font-medium hover:underline text-white/80"
+                      >
+                        {formatTourDate(song.show_date)}
+                      </Link>
+                    : <span className={wlHomeV2 ? "text-white/88" : ""}>
+                        {formatTourDate(song.show_date)}
+                      </span>
+                    }
+                    {song.venue_location && (
+                      <span
+                        className={cn(
+                          wlHomeV2 ?
+                            "text-white/46"
+                          : "text-muted-foreground/70",
+                        )}
+                      >
+                        {" "}
+                        {formatVenueLocationWithBrackets(song.venue_location)}
+                      </span>
+                    )}
+                  </>
+                )}
+              </td>
+              <td
+                className={cn(
+                  "whitespace-nowrap text-muted-foreground",
+                  wlHomeV2 ?
+                    "wl-home-v2-tours-stats-cell wl-home-v2-tours-stats-cell--trail"
+                  : "px-2 py-1.5",
+                )}
+              >
+                {song.last_show_date && (
+                  <>
+                    <span className="text-muted-foreground">LTP </span>
+                    {song.last_show_id ?
+                      <Link
+                        href={getSetlistArchiveUrl(song.last_show_id)}
+                        className="font-medium hover:underline text-white/80"
+                      >
+                        {formatTourDate(song.last_show_date)}
+                      </Link>
+                    : <span className={wlHomeV2 ? "text-white/88" : ""}>
+                        {formatTourDate(song.last_show_date)}
+                      </span>
+                    }
+                    {extractShowCount(song.last_count) && (
+                      <span
+                        className={cn(
+                          wlHomeV2 ?
+                            "text-white/46"
+                          : "text-muted-foreground/70",
+                        )}
+                      >
+                        {" "}
+                        ({extractShowCount(song.last_count)} shows)
+                      </span>
+                    )}
+                  </>
+                )}
+              </td>
+            </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+
+  if (wlHomeV2) {
+    return (
+      <>
+        <div className="widget-panel w-full min-w-0 shrink-0">
+          <div className="wp-head wl-home-v2-years-shows-wp-head">
+            <span>Top Returning Songs</span>
+          </div>
+          {loading ?
+            <div className="py-2 text-center text-xs text-white/55">Loading…</div>
+          : liberatedTable}
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
+        <div className="flex items-center justify-between bg-muted/60 px-3 py-1.5">
+          <h2 className="text-sm font-semibold">Top Returning Songs</h2>
+        </div>
+        <CardContent className="p-0">
+          {loading ?
+            <div className="py-2 text-center text-xs text-muted-foreground">
+              Loading…
+            </div>
+          : liberatedTable}
+        </CardContent>
+      </Card>
+    </>
   )
 }

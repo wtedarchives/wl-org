@@ -1,5 +1,6 @@
 "use client"
 
+import { useId } from "react"
 import Link from "next/link"
 import { CaretDown, CaretRight } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
@@ -26,6 +27,8 @@ interface ToursSidebarCardProps {
   loading: boolean
   className?: string
   wlHomeV2?: boolean
+  /** Hide panel title when wrapped in {@link WlHomeV2YearsToolModal}. */
+  embedInModal?: boolean
 }
 
 export function ToursSidebarCard({
@@ -37,7 +40,9 @@ export function ToursSidebarCard({
   loading,
   className,
   wlHomeV2 = false,
+  embedInModal = false,
 }: ToursSidebarCardProps) {
+  const toursSidebarIdPrefix = useId()
   const toursByYear = tours.reduce<Record<string, Tour[]>>((acc, tour) => {
     const year = extractYear(tour.tour)
     if (!acc[year]) acc[year] = []
@@ -57,70 +62,97 @@ export function ToursSidebarCard({
 
   if (wlHomeV2) {
     return (
-      <div className={cn("widget-panel", className)}>
-        <div className="wp-head">
-          <span>Tours</span>
-        </div>
+      <section
+        className={cn(
+          "widget-panel",
+          embedInModal && "wl-home-v2-years-tool-popup-panel--tours",
+          className,
+        )}
+        aria-label={embedInModal ? "Browse tours by year" : undefined}
+        aria-labelledby={embedInModal ? undefined : `${toursSidebarIdPrefix}-heading`}
+        data-wl-v2-tours-sidebar=""
+      >
+        {embedInModal ? null : (
+          <h2 className="wp-head" id={`${toursSidebarIdPrefix}-heading`}>
+            <span>Tours</span>
+          </h2>
+        )}
         {loading ?
-          <div className="py-3 text-center text-xs text-white/55">
-            Loading tours…
-          </div>
+          <p className="py-3 text-center text-xs text-white/55">Loading tours…</p>
         : sortedYears.length === 0 ?
-          <div className="py-3 text-center text-xs text-white/55">
-            No tours found.
-          </div>
+          <p className="py-3 text-center text-xs text-white/55">No tours found.</p>
         : (
-          <div className="divide-y divide-white/10">
-            {sortedYears.map((year) => {
-              const isExpanded = expandedYear === year
-              const yearTours = toursByYear[year]
-              return (
-                <div key={year}>
-                  <button
-                    type="button"
-                    onClick={() => onToggleYear(year)}
-                    className="flex w-full items-center justify-between px-2 py-1.5 text-left text-xs text-white/90 transition-colors hover:bg-white/5"
-                  >
-                    <span className="font-medium">{year}</span>
-                    {isExpanded ?
-                      <CaretDown className="size-3 shrink-0 opacity-80" aria-hidden />
-                    : <CaretRight className="size-3 shrink-0 opacity-80" aria-hidden />}
-                  </button>
+          <nav aria-label="Browse tours by year">
+            <div className="wl-home-v2-tours-sidebar-year-list">
+              {sortedYears.map((year) => {
+                const isExpanded = expandedYear === year
+                const yearTours = toursByYear[year]
+                const yearSlug = year.replace(/[^a-zA-Z0-9_-]/g, "-")
+                const regionId = `${toursSidebarIdPrefix}-year-${yearSlug}`
+                const triggerId = `${toursSidebarIdPrefix}-toggle-${yearSlug}`
+                return (
                   <div
-                    className="grid transition-[grid-template-rows] duration-200 ease-out"
-                    style={{
-                      gridTemplateRows: isExpanded ? "1fr" : "0fr",
-                    }}
+                    key={year}
+                    className="wl-home-v2-tours-sidebar-year-group"
                   >
-                    <div className="overflow-hidden">
-                      <div className="pb-1">
-                        {yearTours.map((tour) => {
-                          const isCurrent = currentTourId === tour.tour_id
-                          return (
-                            <div key={tour.tour_id} className="pl-3">
-                              <Link
-                                href={getTourArchiveUrl(tour.tour_id)}
-                                onClick={() => onTourSelect?.(tour.tour_id)}
-                                className={cn(
-                                  "topic-row !items-center !py-1.5 text-[12px] font-medium leading-tight",
-                                  isCurrent &&
-                                    "border-[rgba(88,200,174,0.45)] bg-[rgba(88,200,174,0.12)]",
-                                )}
-                              >
-                                <span className="min-w-0 flex-1">{tour.tour}</span>
-                              </Link>
-                            </div>
-                          )
-                        })}
+                    <button
+                      type="button"
+                      id={triggerId}
+                      aria-expanded={isExpanded}
+                      aria-controls={regionId}
+                      onClick={() => onToggleYear(year)}
+                      className="wl-home-v2-tours-sidebar-year-btn"
+                    >
+                      <span className="min-w-0 font-medium">{year}</span>
+                      <span aria-hidden className="shrink-0 opacity-90">
+                        {isExpanded ?
+                          <CaretDown className="size-3" />
+                        : <CaretRight className="size-3" />}
+                      </span>
+                    </button>
+                    <div
+                      className="transition-[grid-template-rows] duration-200 ease-out"
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "minmax(0, 1fr)",
+                        gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                      }}
+                    >
+                      <div className="wl-home-v2-tours-sidebar-expand-clip overflow-hidden">
+                        <div
+                          role="region"
+                          id={regionId}
+                          aria-labelledby={triggerId}
+                          hidden={!isExpanded}
+                        >
+                          <div className="wl-home-v2-tours-sidebar-tour-stack">
+                            {yearTours.map((tour) => {
+                              const isCurrent = currentTourId === tour.tour_id
+                              return (
+                                <Link
+                                  key={tour.tour_id}
+                                  href={getTourArchiveUrl(tour.tour_id)}
+                                  onClick={() => onTourSelect?.(tour.tour_id)}
+                                  aria-current={isCurrent ? "page" : undefined}
+                                  className="topic-row !items-center gap-2"
+                                >
+                                  <span className="min-w-0 flex-1 text-[12px] font-medium leading-3">
+                                    {tour.tour}
+                                  </span>
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          </nav>
         )}
-      </div>
+      </section>
     )
   }
 

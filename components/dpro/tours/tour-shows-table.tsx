@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import type { ReactNode } from "react"
 import { Broadcast, Check, FileAudio, Users } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
@@ -26,6 +27,13 @@ interface TourShowsTableProps {
   showsWithRadioIds: Set<string>
   loading: boolean
   wlHomeV2?: boolean
+  /** WL tour: optional right-aligned control (e.g. compact “Tours” selector). */
+  wlHeaderTrailing?: ReactNode
+  /**
+   * WL tour: on compact view (&lt; xl), omit “▪ N shows” in the header when the tour has
+   * no show-field data (`tour_showfields` false).
+   */
+  wlCompactHideShowCount?: boolean
 }
 
 export function TourShowsTable({
@@ -38,6 +46,8 @@ export function TourShowsTable({
   showsWithRadioIds,
   loading,
   wlHomeV2 = false,
+  wlHeaderTrailing,
+  wlCompactHideShowCount = false,
 }: TourShowsTableProps) {
   const { user } = useAuth()
   const hasRarity = shows.some((s) => s.show_rarity != null && s.show_rarity !== "")
@@ -46,6 +56,39 @@ export function TourShowsTable({
     shows,
     attendeeCounts,
     showRatings,
+  )
+
+  const wlTourShowsHead = (showCount: number | "loading") => (
+    <div
+      className={cn(
+        "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
+        "flex w-full min-w-0 shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1",
+      )}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-x-2">
+        <span className="wp-head-date min-w-0 truncate">
+          {currentTour || "Tour"}
+        </span>
+        {!wlCompactHideShowCount ?
+          <>
+            <span
+              className="shrink-0 text-[10px] leading-none text-white/40"
+              aria-hidden
+            >
+              ▪
+            </span>
+            <span className="shrink-0 tabular-nums">
+              {showCount === "loading" ?
+                "…"
+              : `${showCount} ${showCount === 1 ? "show" : "shows"}`}
+            </span>
+          </>
+        : null}
+      </div>
+      {wlHeaderTrailing ?
+        <div className="shrink-0">{wlHeaderTrailing}</div>
+      : null}
+    </div>
   )
 
   if (loading) {
@@ -62,11 +105,7 @@ export function TourShowsTable({
     if (wlHomeV2) {
       return (
         <div className="widget-panel wl-home-v2-years-shows-panel">
-          <div className="wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head flex shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="wp-head-date min-w-0 truncate">
-              {currentTour || "Tour"}
-            </span>
-          </div>
+          {wlTourShowsHead("loading")}
           {inner}
         </div>
       )
@@ -85,10 +124,7 @@ export function TourShowsTable({
     if (wlHomeV2) {
       return (
         <div className="widget-panel wl-home-v2-years-shows-panel">
-          <div className="wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head flex shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="wp-head-date min-w-0 truncate">{currentTour}</span>
-            <span className="shrink-0 tabular-nums">0 shows</span>
-          </div>
+          {wlTourShowsHead(0)}
           <div className="px-1 py-4 text-center text-xs text-white/65">
             {emptyBody}
           </div>
@@ -310,12 +346,7 @@ export function TourShowsTable({
   if (wlHomeV2) {
     return (
       <div className="widget-panel wl-home-v2-years-shows-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head flex shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="wp-head-date min-w-0 truncate">{currentTour}</span>
-          <span className="shrink-0 tabular-nums">
-            {shows.length} {shows.length === 1 ? "show" : "shows"}
-          </span>
-        </div>
+        {wlTourShowsHead(shows.length)}
         {table}
       </div>
     )

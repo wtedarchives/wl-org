@@ -178,9 +178,7 @@ export function WlHomeV2SetlistPlaceholderView({
   const subvenueLabel = show.show_subvenue?.trim() ?? ""
   const showDetailLabel = show.show_detail?.trim() ?? ""
   const showAlertLabel = show.show_alert?.trim() ?? ""
-  /** Without show detail, subvenue + city read cleaner on two lines than "A · B". */
-  const venueStackSubvenueLocation =
-    !showDetailLabel && !!subvenueLabel && !!venueLocation
+
   const showCanonPositionPill =
     show.show_canonid != null &&
     !maxShowCanonIdLoading &&
@@ -244,7 +242,6 @@ export function WlHomeV2SetlistPlaceholderView({
                 venueLocation={venueLocation}
                 showDetailLabel={showDetailLabel}
                 showAlertLabel={showAlertLabel}
-                venueStackSubvenueLocation={venueStackSubvenueLocation}
                 showCanonPositionPill={showCanonPositionPill}
                 maxShowCanonId={maxShowCanonId}
                 mobileStackTourNameAndPositionLines={

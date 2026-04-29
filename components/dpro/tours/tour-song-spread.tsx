@@ -7,6 +7,8 @@ import { computeTourSongSpreadFromShows } from "@/lib/stats/tour-song-spread-com
 interface TourSongSpreadProps {
   /** When set, caps overall card height and scrolls the list (e.g. `max-h-[325px]` for stats grid). */
   cardMaxHeight?: string
+  /** Matches `SongSpreadDisplay`; WL Home tour stats use segmented setlist styling. */
+  variant?: "card" | "wl-home-v2-setlist"
   shows: Array<{
     show_id: string
     setlist_entries?: Array<{
@@ -22,7 +24,11 @@ interface TourSongSpreadProps {
   }>
 }
 
-export function TourSongSpread({ shows, cardMaxHeight }: TourSongSpreadProps) {
+export function TourSongSpread({
+  shows,
+  cardMaxHeight,
+  variant = "card",
+}: TourSongSpreadProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
 
   const spread = useMemo(
@@ -36,6 +42,11 @@ export function TourSongSpread({ shows, cardMaxHeight }: TourSongSpreadProps) {
       hoveredCategory={hoveredCategory}
       onCategoryHover={setHoveredCategory}
       cardMaxHeight={cardMaxHeight}
+      variant={variant}
+      tooltipPadTourTrailingPlayCount
+      {...(variant === "wl-home-v2-setlist" ?
+        { v2ProportionalBarWhenMaxCountExceeds: 25 as const }
+      : {})}
     />
   )
 }

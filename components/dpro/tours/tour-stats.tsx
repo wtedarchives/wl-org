@@ -7,6 +7,8 @@ import { TourSongsCombined } from "./tour-songs-combined"
 import { NotPlayedInTour } from "./not-played-in-tour"
 import { LiberatedSongs } from "./liberated-songs"
 import { GuestAppearances } from "./guest-appearances"
+import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card"
+import type { AverageSetlistResult } from "@/hooks/use-average-setlist"
 import type { TourShow } from "@/types/tour"
 import type { SlotData } from "@/types/tour"
 import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
@@ -27,6 +29,7 @@ interface TourStatsProps {
   hasTourSetlistEntries: boolean
   onSongClick: (songName: string, songDisplayName?: string | null) => void
   notPlayedSongs?: NotPlayedSong[]
+  averageSetlistResult?: AverageSetlistResult
   wlHomeV2?: boolean
 }
 
@@ -45,6 +48,7 @@ export function TourStats({
   hasTourSetlistEntries,
   onSongClick,
   notPlayedSongs,
+  averageSetlistResult,
   wlHomeV2 = false,
 }: TourStatsProps) {
   const showIds = shows.map((s) => s.show_id)
@@ -54,20 +58,83 @@ export function TourStats({
 
   const sep = wlHomeV2 ? "" : "mt-4"
 
+  const songsPlayedCombined = (
+    <TourSongsCombined
+      shows={shows}
+      songIdMap={songIdMap}
+      onSongCountChange={setUniqueSongCount}
+      uniqueSongCount={uniqueSongCount}
+      tourId={currentTourId}
+      onSongClick={onSongClick}
+      wlHomeV2={wlHomeV2}
+    />
+  )
+
+  const notPlayedBlock = (
+    <NotPlayedInTour
+      tourId={currentTourId}
+      tourName={currentTour}
+      showIds={showIds}
+      songIdMap={songIdMap}
+      notPlayedSongs={notPlayedSongs}
+      wlHomeV2={wlHomeV2}
+    />
+  )
+
+  const guestAppearancesBlock = (
+    <GuestAppearances
+      showIds={showIds}
+      tourId={currentTourId}
+      onDataLoaded={setHasGuestAppearances}
+      wlHomeV2={wlHomeV2}
+    />
+  )
+
+  const showAverageSetlist =
+    currentTourShowFields === true && shows.length > 0
+
+  const averageSetlistBlock =
+    showAverageSetlist ?
+      <AverageSetlistCard
+        shows={shows}
+        title="Average Setlist"
+        type="tour"
+        averageSetlistResult={averageSetlistResult}
+        wlHomeV2={wlHomeV2}
+        className={
+          wlHomeV2 ? "wl-home-v2-years-average-setlist-panel" : undefined
+        }
+      />
+    : null
+
   const inner = (
     <>
       {/* Row 1: Song spread (left), Longest Songs + Top Returning (right) */}
       <div
-        className={cn("grid grid-cols-1 xl:grid-cols-2 gap-4 items-start", sep)}
+        className={cn(
+          "items-start gap-4",
+          wlHomeV2 ?
+            "flex min-w-0 flex-col xl:flex-row"
+          : "grid grid-cols-1 xl:grid-cols-2",
+          sep,
+        )}
       >
-        <TourSongSpread shows={shows} />
-        <div className="flex flex-col gap-4">
+        {wlHomeV2 ?
+          <div className="wl-home-v2-setlist min-w-0 w-full xl:min-w-0 xl:flex-1">
+            <div className="side-card wl-home-v2-setlist-song-spread-side-card wl-home-v2-tour-stats-song-spread overflow-hidden rounded-[10px] border border-[rgb(44,46,45)]">
+              <div className="sc-label">Song Spread</div>
+              <TourSongSpread shows={shows} variant="wl-home-v2-setlist" />
+            </div>
+          </div>
+        : <TourSongSpread shows={shows} />}
+        <div className="flex min-w-0 w-full flex-col gap-4 xl:flex-1">
           <div className="self-start w-full">
             <LongestSongs
             showIds={showIds}
             songIdMap={songIdMap}
             tourId={currentTourId}
             onSongClick={onSongClick}
+            wlHomeV2={wlHomeV2}
           />
           </div>
           {currentTourShowFields && (
@@ -76,6 +143,7 @@ export function TourStats({
               songIdMap={songIdMap}
               tourId={currentTourId}
               onSongClick={onSongClick}
+              wlHomeV2={wlHomeV2}
             />
           )}
         </div>
@@ -90,39 +158,47 @@ export function TourStats({
             songIdMap={songIdMap}
             onSongClick={onSongClick}
             tourId={currentTourId}
+            wlHomeV2={wlHomeV2}
           />
         </div>
       )}
 
-      {/* Row 3: Most common not played + Guest appearances */}
-      {currentTourShowFields && (
-        <div className={cn("grid grid-cols-1 xl:grid-cols-2 gap-4 items-start", sep)}>
-          <NotPlayedInTour
-            tourId={currentTourId}
-            tourName={currentTour}
-            showIds={showIds}
-            songIdMap={songIdMap}
-            notPlayedSongs={notPlayedSongs}
-          />
-          <GuestAppearances
-            showIds={showIds}
-            tourId={currentTourId}
-            onDataLoaded={setHasGuestAppearances}
-          />
+      {/* Non-WL: Average setlist, then most common not played + Guest appearances. */}
+      {!wlHomeV2 && currentTourShowFields && (
+        <div className={cn("flex flex-col gap-4", sep)}>
+          {averageSetlistBlock}
+          <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
+            {notPlayedBlock}
+            {guestAppearancesBlock}
+          </div>
         </div>
       )}
 
-      {/* Row 4+: Remaining cards */}
-      <div className={sep}>
-        <TourSongsCombined
-          shows={shows}
-          songIdMap={songIdMap}
-          onSongCountChange={setUniqueSongCount}
-          uniqueSongCount={uniqueSongCount}
-          tourId={currentTourId}
-          onSongClick={onSongClick}
-        />
-      </div>
+      {/* Songs Played: WL uses 75%–25% split (3:1 tracks); sidebar stacks not played + guests */}
+      {!wlHomeV2 ?
+        <div className={sep}>{songsPlayedCombined}</div>
+      : <div className={sep}>
+          <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-stretch xl:gap-4">
+            <div
+              className={cn(
+                "min-w-0 w-full",
+                currentTourShowFields ?
+                  "xl:flex-[3] xl:basis-0 xl:min-w-0"
+                : "xl:w-full",
+              )}
+            >
+              {songsPlayedCombined}
+            </div>
+            {currentTourShowFields ?
+              <aside className="flex min-w-0 w-full shrink-0 flex-col gap-4 xl:flex-[1] xl:basis-0 xl:min-w-0">
+                {averageSetlistBlock}
+                {notPlayedBlock}
+                {guestAppearancesBlock}
+              </aside>
+            : null}
+          </div>
+        </div>
+      }
     </>
   )
 
