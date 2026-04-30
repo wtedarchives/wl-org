@@ -119,7 +119,9 @@ export function AppSidebarNavItems({
         <SidebarMenuButton
           tooltip="WTED Archives"
           isActive={
-            pathname.startsWith("/old/archive") || pathname === "/goose101"
+            pathname.startsWith("/old/archive") ||
+            pathname === "/goose101" ||
+            pathname === "/old/goose101"
           }
           asChild
         >

@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { LineSegments } from "@phosphor-icons/react"
+import { LineSegments, PencilSimple } from "@phosphor-icons/react"
 import {
   BarChart3,
+  BookOpen,
   Calendar,
   Disc3,
   ListMusic,
@@ -24,12 +25,14 @@ import {
 
 const ARCHIVE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BarChart3,
+  BookOpen,
   Calendar,
   Disc3,
   LineSegments,
   ListMusic,
   MapPin,
   Music,
+  PencilSimple,
   Trophy,
   UserCircle,
   Users,

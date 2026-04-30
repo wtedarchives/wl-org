@@ -1,12 +1,14 @@
 "use client"
 
 import {
+  BookOpen,
   Calendar,
   ChartBar,
   LineSegments,
   ListNumbers,
   MapPin,
   MusicNote,
+  PencilSimple,
   Trophy,
   UserCircle,
   Users,
@@ -44,6 +46,8 @@ const ARCHIVE_ICONS: Record<string, PhosphorTileIcon> = {
   ListMusic: ListNumbers,
   Trophy,
   UserCircle,
+  BookOpen,
+  PencilSimple,
 }
 
 const ICON_PROPS = {

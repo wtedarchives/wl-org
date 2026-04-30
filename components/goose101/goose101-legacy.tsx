@@ -5,7 +5,7 @@ import {
   GOOSE101_INTRO,
   GOOSE101_SECTIONS,
   type Goose101Section,
-} from "@/app/(main)/goose101/content"
+} from "@/app/(main)/old/goose101/content"
 
 function SectionBlock({ section }: { section: Goose101Section }) {
   return (
@@ -37,7 +37,11 @@ function SectionBlock({ section }: { section: Goose101Section }) {
       </h2>
       <div className="space-y-4 text-sm font-normal leading-[1.125rem] text-wl-white">
         {section.paragraphs.map((p, i) => (
-          <p key={i} className={i === 1 && section.paragraphs.length > 1 ? "mb-2" : ""} dangerouslySetInnerHTML={{ __html: p }} />
+          <p
+            key={i}
+            className={i === 1 && section.paragraphs.length > 1 ? "mb-2" : ""}
+            dangerouslySetInnerHTML={{ __html: p }}
+          />
         ))}
         {section.links?.length ? (
           <p className="mt-2">
@@ -77,7 +81,7 @@ function SectionBlock({ section }: { section: Goose101Section }) {
   )
 }
 
-export function Goose101() {
+export function Goose101Legacy() {
   return (
     <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl">
       <main className="relative flex-1">

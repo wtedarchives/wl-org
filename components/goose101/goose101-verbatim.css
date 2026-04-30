@@ -1,0 +1,442 @@
+/* Ported from Goose101.html — main-content styles only; header/footer/cursor omitted. */
+.wl-goose101 {
+    --wl-green: oklch(0.76 0.06 163);
+    --wl-dark-green: oklch(0.43 0.03 161);
+    --wl-deep-green: #285b4e;
+    --wl-light-green: oklch(0.68 0.04 160);
+    --wl-orange: oklch(0.72 0.15 25);
+    --wl-light-orange: oklch(0.82 0.10 55);
+    --wl-white: #ffffff;
+    --wl-off-white: #effefa;
+    --wl-grey: oklch(0.55 0.02 260);
+    --panel-bg: #313a34;
+    --panel-border: rgba(31,31,31,0.55);
+  }
+  .wl-goose101-shell {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    color: var(--wl-white);
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    /* `hidden` ties overflow-y to `auto`, which defeats viewport `position: sticky` for TOC. */
+    overflow-x: clip;
+    overflow-y: visible;
+    box-sizing: border-box;
+    background:
+      linear-gradient(180deg, rgba(49,58,52,0.35) 0%, rgba(40,91,78,0.92) 80%),
+      var(--wl-deep-green);
+    background-attachment: fixed;
+  }
+  .wl-goose101-shell *,
+  .wl-goose101-shell *::before,
+  .wl-goose101-shell *::after {
+    box-sizing: border-box;
+  }
+  .wl-goose101-shell a { color: inherit; text-decoration: none; }
+/* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    padding: 60px 28px 48px;
+    max-width: 1280px; margin: 0 auto;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; right: -80px; top: -80px;
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(255,122,103,0.18), transparent 65%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: ""; position: absolute; left: -100px; bottom: -120px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(88,200,174,0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-family: var(--font-goose101-serif), "Fraunces", Georgia, serif;
+    font-size: clamp(40px, 6.5vw, 88px);
+    font-weight: 600; letter-spacing: -0.025em; line-height: 0.95;
+    margin-bottom: 0;
+    position: relative; z-index: 2;
+    max-width: 980px;
+  }
+  .hero h1 .accent {
+    color: var(--wl-light-orange);
+    font-style: italic; font-weight: 500;
+  }
+
+  /* ---------- Layout: TOC + article ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2.5rem 28px 80px;
+  }
+  @media (max-width: 1023px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+    .toc-wrap {
+      display: none !important;
+    }
+  }
+
+  .toc-wrap {
+    position: sticky;
+    top: 8px;
+    align-self: start;
+    z-index: 4;
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+  }
+  .toc-wrap::-webkit-scrollbar { width: 4px; }
+  .toc-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .toc-card {
+    background: rgba(49,58,52,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px 14px 16px;
+    backdrop-filter: blur(8px);
+  }
+  .toc-label {
+    font-family: var(--font-geist-mono), monospace; font-size: 10px;
+    color: rgba(255,255,255,0.5); letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .toc-list { display: flex; flex-direction: column; gap: 1px; }
+  .toc-list a {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 5px 6px; border-radius: 6px;
+    font-size: 12px; line-height: 1.3;
+    color: rgba(255,255,255,0.65);
+    transition: all .15s;
+    border-left: 2px solid transparent;
+  }
+  .toc-list a:hover { color: #fff; background: rgba(255,255,255,0.04); }
+  .toc-list a.active {
+    color: var(--wl-light-orange);
+    border-left-color: var(--wl-orange);
+    background: rgba(255,122,103,0.08);
+    padding-left: 8px;
+  }
+  .toc-list .num {
+    font-family: var(--font-geist-mono), monospace; font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    flex-shrink: 0;
+    min-width: 18px;
+  }
+  .toc-list a.active .num { color: var(--wl-light-orange); }
+
+  /* ---------- Article ---------- */
+
+  /* Intro */
+  .intro p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.92);
+    margin-bottom: 18px;
+    text-wrap: pretty;
+  }
+  .intro p:first-child::first-letter {
+    font-family: var(--font-goose101-serif), "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 64px;
+    float: left;
+    line-height: 0.85;
+    margin: 4px 10px 0 0;
+    color: var(--wl-light-orange);
+  }
+  .intro p.note {
+    font-size: 13px;
+    font-style: italic;
+    color: rgba(255,255,255,0.55);
+    padding: 14px 18px;
+    background: rgba(0,0,0,0.18);
+    border-left: 3px solid var(--wl-orange);
+    border-radius: 0 8px 8px 0;
+    margin-top: 28px;
+  }
+  .intro p.note::first-letter {
+    font-family: inherit; font-size: inherit;
+    float: none; margin: 0; color: inherit;
+    font-weight: inherit; font-style: inherit;
+  }
+
+  /* Section divider */
+  .section-divider {
+    margin: 48px 0 36px;
+    display: flex; align-items: center; gap: 14px;
+    color: rgba(255,255,255,0.25);
+  }
+  .section-divider::before, .section-divider::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,122,103,0.5), transparent);
+  }
+  .section-divider .glyph {
+    font-family: var(--font-geist-mono), monospace; font-size: 12px;
+    color: var(--wl-light-orange); letter-spacing: 0.2em;
+  }
+
+  /* Section */
+  .sec { margin-bottom: 56px; scroll-margin-top: 88px; }
+  .sec-head {
+    display: flex; align-items: center; gap: 18px;
+    margin-bottom: 22px;
+  }
+  .sec-num {
+    flex-shrink: 0;
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,122,103,0.3);
+    display: grid; place-items: center;
+    font-family: var(--font-goose101-serif), "Fraunces", Georgia, serif;
+    font-size: 28px; font-weight: 600;
+    color: var(--wl-light-orange);
+    position: relative;
+  }
+  .sec-num::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,122,103,0.15);
+    pointer-events: none;
+    box-shadow: 0 0 24px rgba(255,122,103,0.15);
+  }
+  .sec-title-wrap { flex: 1; min-width: 0; }
+  .sec-title {
+    font-family: var(--font-goose101-serif), "Fraunces", Georgia, serif;
+    font-size: clamp(24px, 3.2vw, 34px);
+    font-weight: 600; letter-spacing: -0.015em; line-height: 1.1;
+    color: #fff;
+    text-wrap: balance;
+  }
+  .sec-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 28px;
+    align-items: start;
+  }
+  .sec-body.no-image { grid-template-columns: 1fr; }
+  @media (max-width: 720px) {
+    .sec-body { grid-template-columns: 1fr; }
+    .sec-num { width: 52px; height: 52px; font-size: 22px; }
+  }
+  .sec-text p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 14px;
+    text-wrap: pretty;
+  }
+  .sec-text p a {
+    color: var(--wl-light-orange);
+    border-bottom: 1px dotted rgba(255,185,153,0.5);
+    transition: all .15s;
+  }
+  .sec-text p a:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+    background: rgba(255,122,103,0.1);
+  }
+
+  /* Album art column */
+  .sec-art {
+    display: flex; flex-direction: column; gap: 14px;
+    width: 200px;
+    flex-shrink: 0;
+  }
+  .album {
+    display: block;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all .25s;
+    aspect-ratio: 1;
+  }
+  .album:hover {
+    border-color: rgba(255,122,103,0.5);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,122,103,0.2);
+  }
+  .album-img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .album-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: flex-end; justify-content: flex-start;
+    padding: 8px;
+    opacity: 0; transition: opacity .2s;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 40%);
+    pointer-events: none;
+  }
+  .album:hover .album-overlay { opacity: 1; }
+  .album-overlay .listen {
+    font-family: var(--font-geist-mono), monospace; font-size: 10px;
+    color: var(--wl-light-orange); letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Spotify/streaming pill */
+  .stream-pills {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .stream-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 9px; border-radius: 999px;
+    font-family: var(--font-geist-mono), monospace; font-size: 10px;
+    color: rgba(255,255,255,0.85); letter-spacing: 0.04em;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: all .15s;
+  }
+  .stream-pill:hover {
+    color: var(--wl-light-orange);
+    border-color: rgba(255,122,103,0.5);
+    background: rgba(255,122,103,0.1);
+  }
+
+  /* Bandcamp link list */
+  .bc-links {
+    display: flex; flex-direction: column;
+    gap: 6px;
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+  }
+  .bc-links-label {
+    font-family: var(--font-geist-mono), monospace; font-size: 10px;
+    color: rgba(255,255,255,0.5); letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .bc-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    transition: color .15s;
+  }
+  .bc-link:hover { color: var(--wl-light-orange); }
+  .bc-link .lab {
+    font-weight: 600;
+    background: rgba(255,122,103,0.18);
+    color: var(--wl-light-orange);
+    padding: 1px 6px; border-radius: 4px;
+    font-family: var(--font-geist-mono), monospace; font-size: 10px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .bc-link .url { font-size: 11px; opacity: 0.65; word-break: break-all; }
+
+  /* YouTube embeds */
+  .yt-stack { display: flex; flex-direction: column; gap: 14px; margin-top: 22px; }
+  .yt-embed {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all .2s;
+  }
+  .yt-embed:hover {
+    border-color: rgba(255,122,103,0.4);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .yt-embed iframe {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: 0;
+  }
+  /* Click-to-load thumbnail */
+  .yt-thumb {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .yt-thumb::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5));
+  }
+  .yt-thumb .play {
+    position: relative;
+    width: 64px; height: 44px;
+    border-radius: 12px;
+    background: rgba(206,17,38,0.92);
+    display: grid; place-items: center;
+    transition: all .2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  .yt-thumb:hover .play {
+    background: rgba(206,17,38,1);
+    transform: scale(1.08);
+  }
+  .yt-thumb .play::after {
+    content: "";
+    width: 0; height: 0;
+    border-left: 14px solid #fff;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    margin-left: 4px;
+  }
+
+  /* End / outro */
+  .outro {
+    margin-top: 60px;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(255,122,103,0.12), rgba(40,91,78,0.5));
+    border: 1px solid rgba(255,122,103,0.3);
+    border-radius: 14px;
+    text-align: center;
+  }
+  .outro .stay {
+    font-family: var(--font-goose101-serif), "Fraunces", Georgia, serif;
+    font-size: 32px; font-weight: 600; font-style: italic;
+    color: var(--wl-light-orange);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .outro p {
+    font-size: 14px; color: rgba(255,255,255,0.78);
+    max-width: 580px; margin: 0 auto;
+  }
+
+  .wl-goose101-shell p {
+    line-height: 1.5;
+  }
+
+  /* WlHomeV2 roots use overflow-x:hidden, which collapses sticky to the wrong scrollport.
+     Scope the same clip/visible pairing so TOC tracks window scroll on wide layouts. */
+  @media (min-width: 1024px) {
+    .wl-home-v2:has(.goose101-verbatim-shell) {
+      overflow-x: clip;
+      overflow-y: visible;
+    }
+  }
+
+  /* Reading progress bar */
+  .wl-goose101 .progress-bar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--wl-orange), var(--wl-light-orange));
+    z-index: 20;
+    width: 0;
+    transition: width .12s ease-out;
+    box-shadow: 0 0 14px var(--wl-orange);
+    margin: 0;
+  }

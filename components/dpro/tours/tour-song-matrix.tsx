@@ -328,14 +328,7 @@ export function TourSongMatrix({
           {songMatrix.songs.length} Songs Played
         </h2>
       )}
-      {wlHomeV2 ?
-        <div className="pb-[6px]">
-          <div className="overflow-x-auto overflow-y-auto">{songMatrixTable}</div>
-        </div>
-      : <div className="overflow-x-auto overflow-y-auto">
-          {songMatrixTable}
-        </div>
-      }
+      <div className="overflow-x-auto overflow-y-auto">{songMatrixTable}</div>
     </div>
   )
 }

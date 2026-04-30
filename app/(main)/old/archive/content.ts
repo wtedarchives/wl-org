@@ -76,6 +76,20 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
       "Predict the setlist before the show. See how you stack up when the band hits the stage.",
   },
   {
+    title: "Goose 101",
+    href: "/goose101",
+    icon: "BookOpen",
+    description:
+      "A chronological guide to Goose, featuring audio and video links to various releases and performances.",
+  },
+  {
+    title: "Submit",
+    href: "/archive/submit",
+    icon: "PencilSimple",
+    description:
+      "Send setlist fixes, missing shows, and other archive contributions so the WTED hub stays sharp for everyone.",
+  },
+  {
     title: "My Stats",
     href: "/old/archive/profile/overview",
     icon: "UserCircle",
