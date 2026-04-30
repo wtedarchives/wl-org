@@ -69,7 +69,7 @@ export function YearShowsTable({
     )
     if (wlHomeV2) {
       return (
-        <div className="widget-panel wl-home-v2-years-shows-panel">
+        <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural">
           <div className="wp-head wl-home-v2-years-shows-wp-head">
             <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5">
               {currentYear ?
@@ -112,7 +112,7 @@ export function YearShowsTable({
       )
     if (wlHomeV2) {
       return (
-        <div className="widget-panel wl-home-v2-years-shows-panel">
+        <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural">
           <div className="wp-head wl-home-v2-years-shows-wp-head">
             <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5">
               {currentYear ?
@@ -138,7 +138,7 @@ export function YearShowsTable({
 
   const table = (
     <div
-      className={cn(wlHomeV2 && "wl-home-v2-years-table-scroll min-h-0 flex-1")}
+      className={cn(wlHomeV2 && "wl-home-v2-years-table-scroll min-h-0")}
     >
       <Table
         className={cn(
@@ -274,7 +274,7 @@ export function YearShowsTable({
 
   if (wlHomeV2) {
     return (
-      <div className="widget-panel wl-home-v2-years-shows-panel flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-col">
         <div className="wp-head wl-home-v2-years-shows-wp-head shrink-0">
           <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-1.5">
             {currentYear ?

@@ -53,7 +53,7 @@ function SongPageContent({ songId }: { songId: string }) {
     }
     setSetlistBreadcrumbs([
       WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Songs", href: "/old/archive/songs" },
+      { label: "Songs", href: "/archive/songs" },
       { label: song.song, href: getSongArchiveUrl(songId) },
     ])
     return () => setSetlistBreadcrumbs(null)
@@ -204,7 +204,7 @@ export default function SongArchivePageClient() {
 
   useEffect(() => {
     if (songIdParam) return
-    router.replace("/old/archive/songs")
+    router.replace("/archive/songs")
   }, [songIdParam, router])
 
   if (idSet.size > 1) notFound()

@@ -104,7 +104,7 @@ export function TourShowsTable({
     )
     if (wlHomeV2) {
       return (
-        <div className="widget-panel wl-home-v2-years-shows-panel">
+        <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural">
           {wlTourShowsHead("loading")}
           {inner}
         </div>
@@ -123,7 +123,7 @@ export function TourShowsTable({
     const emptyBody = <>No shows found for {currentTour}.</>
     if (wlHomeV2) {
       return (
-        <div className="widget-panel wl-home-v2-years-shows-panel">
+        <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural">
           {wlTourShowsHead(0)}
           <div className="px-1 py-4 text-center text-xs text-white/65">
             {emptyBody}
@@ -145,7 +145,7 @@ export function TourShowsTable({
 
   const table = (
     <div
-      className={cn(wlHomeV2 && "wl-home-v2-years-table-scroll min-h-0 flex-1")}
+      className={cn(wlHomeV2 && "wl-home-v2-years-table-scroll min-h-0")}
     >
       <Table
         className={cn(
@@ -345,7 +345,7 @@ export function TourShowsTable({
 
   if (wlHomeV2) {
     return (
-      <div className="widget-panel wl-home-v2-years-shows-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-col overflow-hidden">
         {wlTourShowsHead(shows.length)}
         {table}
       </div>

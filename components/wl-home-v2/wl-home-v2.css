@@ -4520,7 +4520,7 @@
     border-color: rgb(123, 94, 63);
     background: rgba(255, 122, 103, 0.12);
   }
-  /* Compact tour dates header: “Tours” opener — same pill chrome as mobile-actions (not nested in that row). */
+  /* Compact tour dates header: “Tours” opener — match stats `.wp-head` / `.sc-label` typography */
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill {
     box-sizing: border-box;
     height: auto;
@@ -4529,12 +4529,14 @@
     border-radius: 999px;
     border: 1px solid rgb(49, 51, 49);
     background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--wl-white);
     padding-block: 5px;
     padding-inline: 11px;
-    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-    font-size: 11px;
-    font-weight: 500;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     transition:
       background 0.15s ease,
       border-color 0.15s ease,
@@ -4598,6 +4600,528 @@
     background: rgba(0, 0, 0, 0.63);
     border-color: rgb(63, 65, 64);
   }
+  /* ---------- Songs archive (`/archive/songs`) ---------- */
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page {
+    background: none !important;
+    min-height: 0;
+    background-attachment: initial !important;
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    padding-block: 8px;
+    padding-inline: 36px;
+    margin-left: -16px;
+    margin-right: -16px;
+    border-bottom: 1px solid rgb(27, 30, 28);
+    box-sizing: border-box;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-bar {
+      margin-left: -20px;
+      margin-right: -20px;
+      padding-inline: 42px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-bar {
+      margin-left: -18px;
+      margin-right: -18px;
+      padding-inline: 48px;
+    }
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-trail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.04em;
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-trail a {
+    color: rgba(255, 255, 255, 0.75);
+    transition: color 0.15s;
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-trail a:hover {
+    color: var(--wl-light-orange);
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-trail .sep {
+    opacity: 0.4;
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-trail .here {
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  @media (max-width: 1279px) {
+    .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-trail {
+      row-gap: 3px;
+      column-gap: 8px;
+    }
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-selectors {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+    min-width: 0;
+  }
+  @media (max-width: 1279px) {
+    .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .wl-home-v2-setlist-crumbs-selectors {
+      flex-basis: 100%;
+      justify-content: center;
+      margin-left: 0;
+    }
+  }
+  .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .list-card {
+    background: rgba(0, 0, 0, 0.63);
+    border: 1px solid rgb(63, 65, 64);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  /*
+   * Songs archive section titles — padded rail strip, mono caps, vertically centered.
+   */
+  .wl-home-v2 .wl-home-v2-songs-archive-section-heading.sc-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 16px;
+    background: rgb(8, 12, 10);
+    border: 1px solid rgba(0, 0, 0, 0.62);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.085em;
+    text-transform: uppercase;
+    color: var(--wl-white);
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-songs-archive-section-heading.sc-label {
+      padding-inline: 20px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .wl-home-v2 .wl-home-v2-songs-archive-section-heading.sc-label {
+      padding-inline: 18px;
+    }
+  }
+  /*
+   * Category grid: flush mosaic; column count matches `tilesColumnCountForViewportWidth` (strict `>` thresholds).
+   */
+  .wl-home-v2 .songs-archive-category-tiles-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1px;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgb(34, 37, 35);
+  }
+  @media (min-width: 795px) {
+    .wl-home-v2 .songs-archive-category-tiles-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1192px) {
+    .wl-home-v2 .songs-archive-category-tiles-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1590px) {
+    .wl-home-v2 .songs-archive-category-tiles-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1987px) {
+    .wl-home-v2 .songs-archive-category-tiles-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  /*
+   * Studio, Live-only, Ted Tapes, Side Projects — responsive 1–5 equal flex columns
+   * (`tilesColumnCountForViewportWidth`: ≤794→1, >794→2, >1191→3, >1589→4, >1986→5); each
+   * column stacks tiles. Each tile uses `flex: 1 1 auto` so extra row height is
+   * shared evenly among categories in that column (not only the last tile).
+   */
+  .wl-home-v2 .songs-archive-category-tiles-multicol {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1px;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgb(34, 37, 35);
+  }
+  .wl-home-v2 .songs-archive-category-tiles-multicol__col {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  /* Canon 299 & 300: full-width tile (span all columns at any breakpoint). */
+  .wl-home-v2 .songs-archive-category-tiles-grid > .songs-archive-category-tile--covers-span-full-row {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  /*
+   * One category per tile — same photo treatment as homepage `.tile`;
+   * panel grows with the full song list (no max-height clamp); sheet aligns to tile top.
+   */
+  .wl-home-v2 article.songs-archive-category-tile {
+    position: relative;
+    isolation: isolate;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-height: 200px;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    background: rgba(49, 58, 52, 0.78);
+    transition:
+      transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 0.25s,
+      background 0.25s;
+  }
+  /* Flow-column sections: equal flex-grow so free vertical space splits across all tiles in the column. */
+  .wl-home-v2 article.songs-archive-category-tile.songs-archive-category-tile--multicol {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin-bottom: 0;
+    flex: 1 1 auto;
+  }
+  .wl-home-v2
+    article.songs-archive-category-tile.songs-archive-category-tile--multicol
+    .songs-archive-category-tile-widget {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .wl-home-v2 article.songs-archive-category-tile::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(
+      --tile-bg,
+      linear-gradient(
+        148deg,
+        color-mix(
+            in srgb,
+            var(--song-tile-accent, #285b4e) 78%,
+            rgb(14, 16, 15)
+          )
+          0%,
+        rgba(12, 16, 15, 0.96) 100%
+      )
+    );
+    background-size: cover;
+    background-position: center;
+    opacity: 0.3;
+    transition:
+      opacity 0.45s,
+      transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+      filter 0.35s;
+    filter: grayscale(22%) brightness(0.85);
+  }
+  .wl-home-v2 article.songs-archive-category-tile--has-art::before {
+    opacity: 0.26;
+    filter: grayscale(100%) brightness(0.82);
+  }
+  .wl-home-v2 article.songs-archive-category-tile:not(.songs-archive-category-tile--has-art)::before {
+    filter: none;
+    opacity: 0.56;
+  }
+  .wl-home-v2 article.songs-archive-category-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(40, 91, 78, 0.12) 0%,
+      rgba(40, 91, 78, 0.5) 78%,
+      rgba(14, 16, 15, 0.78) 100%
+    );
+    transition:
+      opacity 0.35s,
+      background 0.35s;
+  }
+  .wl-home-v2 article.songs-archive-category-tile:hover {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 122, 103, 0.38),
+      0 16px 40px -18px rgba(0, 0, 0, 0.55);
+  }
+  .wl-home-v2 article.songs-archive-category-tile:hover::before {
+    opacity: 0.86;
+    transform: scale(1.05);
+    filter: grayscale(0%) brightness(0.93);
+  }
+  .wl-home-v2 article.songs-archive-category-tile:hover:not(.songs-archive-category-tile--has-art)::before {
+    opacity: 0.94;
+    filter: brightness(1.06);
+    transform: scale(1.02);
+  }
+  .wl-home-v2 article.songs-archive-category-tile:hover::after {
+    opacity: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.38) 0%,
+      rgba(0, 0, 0, 0.78) 88%,
+      rgba(12, 12, 12, 0.9) 100%
+    );
+  }
+  /* Decorative fillers: HOME_BG_* mosaic — grayscale + softer than category art tiles. */
+  .wl-home-v2 article.songs-archive-category-tile--grid-filler::before {
+    filter: grayscale(100%) brightness(0.9);
+    opacity: 0.26;
+    transform: none;
+  }
+  .wl-home-v2 article.songs-archive-category-tile--grid-filler::after {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.22) 0%,
+      rgba(0, 0, 0, 0.52) 78%,
+      rgba(14, 16, 15, 0.8) 100%
+    );
+  }
+  .wl-home-v2 article.songs-archive-category-tile--grid-filler {
+    pointer-events: none;
+  }
+  .wl-home-v2 article.songs-archive-category-tile--grid-filler:hover {
+    box-shadow: none;
+  }
+  .wl-home-v2 article.songs-archive-category-tile--grid-filler:hover::before {
+    opacity: 0.3;
+    transform: none;
+    filter: grayscale(100%) brightness(0.92);
+  }
+  .wl-home-v2 article.songs-archive-category-tile--grid-filler:hover::after {
+    opacity: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.72) 88%,
+      rgba(12, 12, 12, 0.9) 100%
+    );
+  }
+  .wl-home-v2 .songs-archive-category-tile__sheet {
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    min-height: 0;
+    width: 100%;
+    padding: 10px;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .songs-archive-category-tile__sheet {
+      padding: 12px;
+    }
+  }
+  .wl-home-v2 .songs-archive-category-tile-widget {
+    flex: 0 0 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    background: rgba(0, 0, 0, 0.55) !important;
+    border-color: rgb(56, 59, 57) !important;
+    padding: 10px 10px 5px !important;
+  }
+  .wl-home-v2
+    .widget-panel.songs-archive-category-tile-widget
+    .wp-head.songs-archive-category-tile__wp-head {
+    flex-shrink: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 6px !important;
+    padding-bottom: 2px;
+    box-sizing: border-box;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--wl-white);
+  }
+  .wl-home-v2
+    .widget-panel.songs-archive-category-tile-widget
+    .wp-head.songs-archive-category-tile__wp-head
+    .songs-archive-category-tile__wp-title {
+    text-align: left;
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-left: 8px;
+    padding-right: 2px;
+  }
+  .wl-home-v2
+    .widget-panel.songs-archive-category-tile-widget
+    .wp-head.songs-archive-category-tile__wp-head
+    .songs-archive-category-tile__wp-art {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+  }
+  .wl-home-v2
+    .widget-panel.songs-archive-category-tile-widget
+    .wp-head.songs-archive-category-tile__wp-head
+    .songs-archive-category-tile__wp-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .wl-home-v2 .songs-archive-category-tile-song-scroll {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+    margin: 0 -2px;
+    padding: 0 2px;
+  }
+  /*
+   * Two outer columns split in TS (first ⌈n/2⌉ songs left, remainder right)
+   * so rows read | 1 6 |
+   *              | 2 7 |
+   * not row-major grid auto-flow.
+   */
+  .wl-home-v2 .songs-archive-category-tile-songs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    align-content: start;
+    align-items: start;
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-grid--single-col {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1px;
+  }
+  /* Canon 299 & 300: responsive 1–8 balanced flex columns (`coversSongGridColumnCountForViewport`);
+   * each column lays out independently so wrapping titles don't force blank row space in neighbors.
+   */
+  .wl-home-v2 .songs-archive-cover-eight-col-stack {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 1px 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  @media (min-width: 768px) {
+    .wl-home-v2 .songs-archive-cover-eight-col-stack {
+      gap: 1px 8px;
+    }
+  }
+  .wl-home-v2 .songs-archive-cover-eight-column {
+    flex: 1 1 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-col {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  /*
+   * Homepage-style row chrome scoped to tile song grid (not `.widget-panel > a`).
+   */
+  .wl-home-v2 .songs-archive-category-tile-songs-grid a.topic-row {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 3px 6px;
+    min-height: auto;
+    border-radius: 6px;
+    border: 0;
+    background: rgba(22, 24, 23, 0.85);
+    transition:
+      background 0.18s,
+      transform 0.18s,
+      box-shadow 0.18s;
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-grid a.topic-row:hover {
+    background: rgba(88, 200, 174, 0.18);
+    box-shadow: inset 0 0 0 1px rgb(52, 109, 95);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-grid a.topic-row:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-grid .songs-archive-category-tile-covers-cell,
+  .wl-home-v2 .songs-archive-cover-eight-col-stack .songs-archive-category-tile-covers-cell {
+    box-sizing: border-box;
+    display: block;
+    margin: 0;
+    padding: 3px 6px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: inherit;
+    text-decoration: none;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(22, 24, 23, 0.85);
+    transition:
+      background 0.18s,
+      transform 0.18s,
+      box-shadow 0.18s;
+    min-height: auto;
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-grid .songs-archive-category-tile-covers-cell:hover,
+  .wl-home-v2 .songs-archive-cover-eight-col-stack .songs-archive-category-tile-covers-cell:hover {
+    background: rgba(88, 200, 174, 0.18);
+    box-shadow: inset 0 0 0 1px rgb(52, 109, 95);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2 .songs-archive-category-tile-songs-grid .songs-archive-category-tile-covers-cell:focus-visible,
+  .wl-home-v2 .songs-archive-cover-eight-col-stack .songs-archive-category-tile-covers-cell:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
   /* Aside average setlist: base `.widget-panel` is 4px bottom — match breathing room to top (12px). Popups use `--setlist` inside `.modal--years-tools` only. */
   .wl-home-v2
     .wl-home-v2-years-page
@@ -4650,6 +5174,18 @@
     flex-direction: column;
     overflow: hidden;
   }
+  /* Years + tours archive: hug content height; page/tile scroll handles long lists. */
+  .wl-home-v2 .wl-home-v2-years-shows-panel.wl-home-v2-years-shows-panel--natural {
+    flex: 0 1 auto;
+    align-self: stretch;
+  }
+  .wl-home-v2
+    .wl-home-v2-years-shows-panel.wl-home-v2-years-shows-panel--natural
+    .wl-home-v2-years-table-scroll {
+    flex: 0 1 auto;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
   /* Single left-aligned title: "YYYY SHOWS" (not split across the row). */
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-years-shows-wp-head {
     justify-content: flex-start;
@@ -4660,6 +5196,39 @@
     .wl-home-v2-years-shows-wp-head.wl-home-v2-tours-shows-wp-head {
     justify-content: space-between;
     width: 100%;
+  }
+  /*
+   * Tour main column: panel titles match Song Spread `.sc-label` (full white, normal weight).
+   * Skip `.wl-home-v2-years-shows-panel` so the tour dates block keeps default `.wp-head` /
+   * teal `.wp-head-date`.
+   */
+  .wl-home-v2
+    .wl-home-v2-tour-page-main
+    .widget-panel:not(.wl-home-v2-years-shows-panel)
+    > .wp-head {
+    color: var(--wl-white);
+    font-weight: 400;
+  }
+  .wl-home-v2
+    .wl-home-v2-tour-page-main
+    .widget-panel:not(.wl-home-v2-years-shows-panel)
+    > .wp-head
+    .wp-head-date {
+    color: var(--wl-white);
+    font-weight: 400;
+  }
+  /* Tours sidebar + tools modal: same label treatment as other stats panels */
+  .wl-home-v2 .widget-panel[data-wl-v2-tours-sidebar] > .wp-head {
+    color: var(--wl-white);
+    font-weight: 400;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--years-tools .modal-request-head h3 {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--wl-white);
   }
   .wl-home-v2 .wl-home-v2-years-table-scroll {
     flex: 1 1 auto;

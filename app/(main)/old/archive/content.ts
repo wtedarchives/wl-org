@@ -28,7 +28,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Songs",
-    href: "/old/archive/songs",
+    href: "/archive/songs",
     icon: "Music",
     description:
       "Find performance history, last-played dates, and stats for every song in the Goose ecosphere.",

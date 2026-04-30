@@ -13,7 +13,7 @@
 # Exact legacy archive index URLs → /old/archive/…
 # /archive/years → new WTED grid page (Next static route)
 # /archive/tours → new WTED grid page (Next static route)
-/archive/songs  /old/archive/songs  301
+
 /archive/stats  /old/archive/stats  301
 /archive/personnel  /old/archive/personnel  301
 /archive/venues  /old/archive/venues  301

@@ -12,6 +12,10 @@ export const HOME_BG_IMAGES = [
   "/newbg4.jpeg",
 ] as const
 
+/** Songs archive: Cover Songs (299) & Miscellaneous Covers (300) tile backdrops */
+export const SONGS_ARCHIVE_COVER_DUAL_HOME_BG = HOME_BG_IMAGES[0]
+export const SONGS_ARCHIVE_COVER_WIDE_HOME_BG = HOME_BG_IMAGES[1]
+
 /** Hero blurb: label + hover underline (focus ring added on interactive root). */
 export const welcomeHeroInlineLinkTextClassName = cn(
   "font-bold text-wl-orange underline-offset-2 transition-colors",

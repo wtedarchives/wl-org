@@ -192,8 +192,8 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
               } as CSSProperties
             }
           >
-            <div className="wl-home-v2-years-tile-inner min-h-0 flex flex-1 flex-col gap-4">
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="wl-home-v2-years-tile-inner wl-home-v2-tour-page-main min-h-0 flex flex-1 flex-col gap-4">
+              <div className="flex min-h-0 min-w-0 shrink-0 flex-col">
                 <TourShowsTable
                   shows={shows}
                   currentTour={currentTour.tour}
