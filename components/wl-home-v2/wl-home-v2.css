@@ -5249,6 +5249,420 @@
   .wl-home-v2 .wl-home-v2-years-table .text-muted-foreground {
     color: rgba(255, 255, 255, 0.55) !important;
   }
+  /*
+   * Songs archive — list search / filter dialogs (same portal + shell as Request a Song).
+   */
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search {
+    max-width: min(520px, 96vw);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter {
+    max-width: min(480px, 96vw);
+  }
+  .wl-home-v2 .songs-archive-modal-kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    margin: 0 2px;
+    border-radius: 6px;
+    border: 1px solid rgb(55, 58, 56);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+    vertical-align: baseline;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-body {
+    gap: 12px;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-field-wrap {
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-field-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 42px;
+    padding: 8px 12px 8px 40px;
+    border-radius: 10px;
+    border: 1px solid rgb(49, 51, 49);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-input:focus-visible {
+    border-color: rgb(82, 109, 97);
+    background: rgba(255, 255, 255, 0.09);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-search-results {
+    flex: 1 1 auto;
+    min-height: min(48vh, 400px);
+    max-height: min(52vh, 440px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 4px 6px;
+    margin: 0 -4px;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-empty {
+    padding: 16px 12px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-result-row {
+    box-sizing: border-box;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 12px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.92);
+    border: 1px solid transparent;
+    transition:
+      background 0.14s ease,
+      border-color 0.14s ease;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-result-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgb(55, 58, 56);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-result-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-search .songs-archive-modal-result-meta {
+    flex: 0 0 auto;
+    max-width: 46%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: right;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-modal-filter-body {
+    gap: 0;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-modal-scroll {
+    flex: 1 1 auto;
+    min-height: min(36vh, 320px);
+    max-height: min(52vh, 440px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 4px 8px;
+    margin: 0 -4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-option {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition:
+      background 0.14s ease,
+      border-color 0.14s ease;
+  }
+  /* `<label>` rows — override global `.wl-home-v2 .modal label` (mono, caps, 10px). */
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter label.songs-archive-filter-option {
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    letter-spacing: normal;
+    text-transform: none;
+    color: inherit;
+    margin-bottom: 0;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-option:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgb(55, 58, 56);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-option input {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: rgb(88, 200, 174);
+    cursor: pointer;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-option-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-modal-footer {
+    flex-shrink: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-clear-btn {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgb(49, 51, 49);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.14s ease,
+      border-color 0.14s ease,
+      color 0.14s ease;
+  }
+  .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-filter-clear-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgb(82, 109, 97);
+    color: #fff;
+  }
+  /*
+   * Songs archive — list view shell (layout + 16px inset; no Tailwind padding on wrappers).
+   */
+  .wl-home-v2 #listView.wl-home-v2-songs-archive-list-view {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-inset {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    padding: 16px;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-panel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+  }
+  /*
+   * Songs archive list table — years-adjacent chrome; spacing only via these rules.
+   */
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table[data-slot="table"] {
+    min-width: max-content;
+    font-size: 11px;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table :is(td, th) {
+    vertical-align: middle !important;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table thead th {
+    box-sizing: border-box;
+    position: relative;
+    height: auto !important;
+    min-height: 2rem;
+    padding: 4px 8px !important;
+    text-align: left;
+    white-space: normal;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table thead tr {
+    border-bottom: 1px solid rgb(42, 46, 44);
+    background-color: rgba(0, 0, 0, 0.25) !important;
+    transition: background-color 0.15s ease;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table thead tr:hover {
+    background-color: rgba(0, 0, 0, 0.25) !important;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table tbody td {
+    box-sizing: border-box;
+    padding: 2px 8px !important;
+    font-size: 11px;
+    line-height: 1.375;
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table tbody tr {
+    border-bottom: 1px solid rgb(42, 46, 44);
+    background-color: transparent;
+    transition: background-color 0.15s ease;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table tbody tr:hover {
+    background-color: rgba(88, 200, 174, 0.11) !important;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-song-cell {
+    font-weight: 500;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-song-cell a {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    color: inherit;
+    text-decoration: none;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-song-cell a:hover {
+    text-decoration: underline;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-cat-cell-inner {
+    box-sizing: border-box;
+    display: inline-flex;
+    min-width: 0;
+    max-width: 220px;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-cat-cell-inner {
+      max-width: 280px;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-cat-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-artist-cell {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-perf-cell {
+    white-space: normal;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table thead .songs-archive-list-hdr-col {
+    position: relative;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-btn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      background 0.14s,
+      color 0.14s;
+    min-height: 44px;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-btn {
+      min-height: 36px;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-btn--icononly {
+    min-width: 44px;
+    padding-inline: 8px;
+    justify-content: center;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-btn--icononly {
+      min-width: 36px;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-btn:hover {
+    background: rgb(38, 42, 40);
+    color: #fff;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-btn--active {
+    color: var(--wl-light-orange);
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-hdr-label {
+    padding: 4px 6px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-cat-thumb-fallback {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: middle;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    background: rgb(38, 44, 41);
+    border: 1px solid rgb(48, 52, 50);
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-perf-cell-inner {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    vertical-align: middle;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-list-cat-thumb {
+    box-sizing: border-box;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    border: 1px solid rgb(48, 52, 50);
+    object-fit: cover;
+  }
+  .wl-home-v2 .wl-home-v2-songs-archive-list-table .songs-archive-perf-pill {
+    display: inline-block;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgb(55, 58, 56);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 10px;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    letter-spacing: 0.03em;
+  }
   /* Tour stats (longest / top returning): plain tables with `text-muted-foreground` helpers */
   .wl-home-v2 .widget-panel .wl-home-v2-tours-stats-table .text-muted-foreground {
     color: rgba(255, 255, 255, 0.55) !important;

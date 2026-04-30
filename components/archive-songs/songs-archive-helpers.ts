@@ -80,16 +80,6 @@ export function groupCategoriesBySection(
   return bySection
 }
 
-export function performerPillClass(group: string): string {
-  const map: Record<string, string> = {
-    Goose: "goose",
-    Orebolo: "orebolo",
-    "Peter Anspach": "anspach",
-    Vasudo: "vasudo",
-  }
-  return map[group] ?? ""
-}
-
 export function performerOptions(
   performerBySong: Record<string, string[]>,
 ): string[] {

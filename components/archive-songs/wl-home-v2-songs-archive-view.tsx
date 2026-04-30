@@ -1,9 +1,8 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import {
-  type Dispatch,
-  type SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -11,15 +10,28 @@ import {
   useState,
 } from "react"
 
+import {
+  SongsArchiveListFilterModal,
+  SongsArchiveListSearchModal,
+} from "@/components/archive-songs/wl-home-v2-songs-archive-list-modals"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { SongsArchiveCategoriesGrid } from "@/components/archive-songs/songs-archive-categories-grid"
 import {
   buildSongsByCategory,
   groupCategoriesBySection,
   performerOptions,
-  performerPillClass,
 } from "@/components/archive-songs/songs-archive-helpers"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import {
   type SongsArchiveSong,
   useSongsArchiveData,
@@ -31,11 +43,25 @@ import "./songs-archive-verbatim.css"
 type SortKey = "song" | "song_category" | "song_originalartist"
 type FilterKind = "cat" | "artist" | "perf"
 
-function toggleInSet(copy: Set<string>, value: string, on: boolean) {
-  const n = new Set(copy)
-  if (on) n.add(value)
-  else n.delete(value)
-  return n
+const FILTER_MODAL_META: Record<
+  FilterKind,
+  { title: string; description: string }
+> = {
+  cat: {
+    title: "Filter by category",
+    description:
+      "Show songs from the categories you pick. Clear the filter to include every category again.",
+  },
+  artist: {
+    title: "Filter by original artist",
+    description:
+      "Show songs credited to any artist you pick. Clear the filter to include all artists.",
+  },
+  perf: {
+    title: "Filter by performer",
+    description:
+      "Show songs that appear under the selected performers in the archive. Clear the filter to include all.",
+  },
 }
 
 function replaceUrlViewParam(view: "categories" | "list") {
@@ -44,56 +70,6 @@ function replaceUrlViewParam(view: "categories" | "list") {
   if (view === "list") url.searchParams.set("view", "list")
   else url.searchParams.delete("view")
   window.history.replaceState(null, "", url)
-}
-
-function SongsArchiveFilterPopover({
-  kind,
-  id,
-  options,
-  selected,
-  setSelected,
-  openFilter,
-  setOpenFilter,
-}: {
-  kind: FilterKind
-  id: string
-  options: readonly string[]
-  selected: Set<string>
-  setSelected: Dispatch<SetStateAction<Set<string>>>
-  openFilter: FilterKind | null
-  setOpenFilter: Dispatch<SetStateAction<FilterKind | null>>
-}) {
-  return (
-    <div
-      className={`filter-pop ${openFilter === kind ? "open" : ""}`}
-      id={id}
-    >
-      {options.map((opt) => (
-        <label key={opt} className="fopt">
-          <input
-            type="checkbox"
-            checked={selected.has(opt)}
-            onChange={(e) => {
-              setSelected((prev) => toggleInSet(prev, opt, e.target.checked))
-            }}
-            value={opt}
-          />
-          <span>{opt}</span>
-        </label>
-      ))}
-      <button
-        type="button"
-        className="clear"
-        onClick={(e) => {
-          e.stopPropagation()
-          setSelected(new Set())
-          setOpenFilter(null)
-        }}
-      >
-        Clear filter
-      </button>
-    </div>
-  )
 }
 
 export function WlHomeV2SongsArchiveView() {
@@ -157,6 +133,8 @@ export function WlHomeV2SongsArchiveView() {
   const [searchQuery, setSearchQuery] = useState("")
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  useWlHomeV2ScrollLock(searchOpen || openFilter !== null)
+
   const setView = useCallback((v: "categories" | "list") => {
     setActiveView(v)
     replaceUrlViewParam(v)
@@ -212,20 +190,34 @@ export function WlHomeV2SongsArchiveView() {
           (s.song_originalartist || "").toLowerCase().includes(q),
       )
     }
+    list.sort((a, b) => a.song.localeCompare(b.song))
     return list.slice(0, 60)
   }, [searchQuery, songs])
 
-  const catColorByName = useMemo(() => {
+  const catArtworkByName = useMemo(() => {
     const m: Record<string, string> = {}
     for (const c of categories) {
-      m[c.category] = c.category_color1
+      const url = c.category_artwork?.trim()
+      if (url) m[c.category] = url
     }
     return m
   }, [categories])
 
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false)
+    setSearchQuery("")
+  }, [])
+
   const openSearch = useCallback(() => {
+    setOpenFilter(null)
     setSearchOpen(true)
     setSearchQuery("")
+  }, [])
+
+  const toggleFilterSheet = useCallback((kind: FilterKind) => {
+    setSearchOpen(false)
+    setSearchQuery("")
+    setOpenFilter((prev) => (prev === kind ? null : kind))
   }, [])
 
   function onSort(key: SortKey) {
@@ -237,31 +229,27 @@ export function WlHomeV2SongsArchiveView() {
   }
 
   useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      const t = e.target
-      if (!(t instanceof Element)) return
-      if (!t.closest(".filter-pop") && !t.closest(".filter-btn"))
-        setOpenFilter(null)
-    }
-    document.addEventListener("click", onDocClick)
-    return () => document.removeEventListener("click", onDocClick)
-  }, [])
-
-  useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && searchOpen) {
-        setSearchOpen(false)
-        setSearchQuery("")
+      if (e.key === "Escape") {
+        if (searchOpen) {
+          setSearchOpen(false)
+          setSearchQuery("")
+        } else if (openFilter !== null) {
+          setOpenFilter(null)
+        }
+        return
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault()
+        setOpenFilter(null)
         setSearchOpen(true)
+        setSearchQuery("")
         setTimeout(() => searchInputRef.current?.focus(), 40)
       }
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
-  }, [searchOpen])
+  }, [searchOpen, openFilter])
 
   useEffect(() => {
     if (!searchOpen) return
@@ -394,362 +382,260 @@ export function WlHomeV2SongsArchiveView() {
         />
       </div>
 
-      <div id="listView" className="min-w-0 flex-1" hidden={activeView !== "list"}>
-        <div className="list-card">
-            <div style={{ position: "relative" }}>
-              <table className="list-table">
-                <thead>
-                  <tr>
-                    <th>
-                      <div className="col">
-                        <button
-                          type="button"
-                          className={
-                            sortKey === "song" ? "sort-btn active" : "sort-btn"
-                          }
-                          data-sort="song"
-                          onClick={() => onSort("song")}
+      <div
+        id="listView"
+        className="wl-home-v2-songs-archive-list-view"
+        hidden={activeView !== "list"}
+      >
+        <div className="wl-home-v2-songs-archive-list-inset">
+          <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-songs-archive-list-panel">
+            <div className="wl-home-v2-years-table-scroll wl-home-v2-songs-archive-list-scroll">
+              <Table className="wl-home-v2-years-table wl-home-v2-songs-archive-list-table">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <div className="songs-archive-list-hdr-col">
+                      <button
+                        type="button"
+                        className={cn(
+                          "songs-archive-list-hdr-btn",
+                          sortKey === "song" &&
+                            "songs-archive-list-hdr-btn--active",
+                        )}
+                        data-sort="song"
+                        onClick={() => onSort("song")}
+                      >
+                        Song
+                      </button>
+                      <button
+                        type="button"
+                        className="songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly"
+                        id="openSearchInTable"
+                        aria-label="Search"
+                        onClick={openSearch}
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
                         >
-                          Song
-                          <svg
-                            id="sortIconSong"
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <polyline points="6 9 12 15 18 9" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          className="search-btn"
-                          style={{ width: 28, height: 28 }}
-                          id="openSearchInTable"
-                          aria-label="Search"
-                          onClick={openSearch}
+                          <circle cx="11" cy="11" r="7" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                      </button>
+                    </div>
+                  </TableHead>
+                  <TableHead>
+                    <div className="songs-archive-list-hdr-col">
+                      <button
+                        type="button"
+                        className={cn(
+                          "songs-archive-list-hdr-btn",
+                          sortKey === "song_category" &&
+                            "songs-archive-list-hdr-btn--active",
+                        )}
+                        data-sort="song_category"
+                        onClick={() => onSort("song_category")}
+                      >
+                        Category
+                      </button>
+                      <button
+                        type="button"
+                        className={cn(
+                          "songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly",
+                          selectedCats.size > 0 &&
+                            "songs-archive-list-hdr-btn--active",
+                        )}
+                        data-filter="cat"
+                        aria-label="Filter category"
+                        onClick={() => toggleFilterSheet("cat")}
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
                         >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <circle cx="11" cy="11" r="7" />
-                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th>
-                      <div className="col">
-                        <button
-                          type="button"
-                          data-sort="song_category"
-                          className={
-                            sortKey === "song_category" ?
-                              "sort-btn active"
-                            : "sort-btn"
-                          }
-                          onClick={() => onSort("song_category")}
+                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                      </button>
+                    </div>
+                  </TableHead>
+                  <TableHead>
+                    <div className="songs-archive-list-hdr-col">
+                      <button
+                        type="button"
+                        className={cn(
+                          "songs-archive-list-hdr-btn",
+                          sortKey === "song_originalartist" &&
+                            "songs-archive-list-hdr-btn--active",
+                        )}
+                        data-sort="song_originalartist"
+                        onClick={() => onSort("song_originalartist")}
+                      >
+                        Original artist
+                      </button>
+                      <button
+                        type="button"
+                        className={cn(
+                          "songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly",
+                          selectedArtists.size > 0 &&
+                            "songs-archive-list-hdr-btn--active",
+                        )}
+                        data-filter="artist"
+                        aria-label="Filter artist"
+                        onClick={() => toggleFilterSheet("artist")}
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
                         >
-                          Category{" "}
-                          <svg
-                            id="sortIconCat"
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <polyline points="8 12 16 12" opacity=".4" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          className={
-                            selectedCats.size > 0 ?
-                              "filter-btn active"
-                            : "filter-btn"
-                          }
-                          data-filter="cat"
-                          aria-label="Filter category"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenFilter((k) =>
-                              k === "cat" ? null : "cat",
-                            )
-                          }}
+                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                      </button>
+                    </div>
+                  </TableHead>
+                  <TableHead>
+                    <div className="songs-archive-list-hdr-col">
+                      <span className="songs-archive-list-hdr-label">
+                        Performed by
+                      </span>
+                      <button
+                        type="button"
+                        className={cn(
+                          "songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly",
+                          selectedPerfs.size > 0 &&
+                            "songs-archive-list-hdr-btn--active",
+                        )}
+                        data-filter="perf"
+                        aria-label="Filter performer"
+                        onClick={() => toggleFilterSheet("perf")}
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
                         >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                          </svg>
-                        </button>
-                        <SongsArchiveFilterPopover
-                          kind="cat"
-                          id="filterCat"
-                          options={categoryOptions}
-                          selected={selectedCats}
-                          setSelected={setSelectedCats}
-                          openFilter={openFilter}
-                          setOpenFilter={setOpenFilter}
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      <div className="col">
-                        <button
-                          type="button"
-                          data-sort="song_originalartist"
-                          className={
-                            sortKey === "song_originalartist" ?
-                              "sort-btn active"
-                            : "sort-btn"
-                          }
-                          onClick={() => onSort("song_originalartist")}
+                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                      </button>
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody id="listBody">
+                {filteredSortedList.map((s) => {
+                  const perfs = performerBySong[s.song] ?? []
+                  const catArt = catArtworkByName[s.song_category]
+                  return (
+                    <TableRow key={s.song_id}>
+                      <TableCell className="songs-archive-list-song-cell">
+                        <Link
+                          href={getSongArchiveUrl(s.song_id)}
+                          data-song={s.song}
                         >
-                          Original artist{" "}
-                          <svg
-                            id="sortIconArtist"
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <polyline points="8 12 16 12" opacity=".4" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          className={
-                            selectedArtists.size > 0 ?
-                              "filter-btn active"
-                            : "filter-btn"
-                          }
-                          data-filter="artist"
-                          aria-label="Filter artist"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenFilter((k) =>
-                              k === "artist" ? null : "artist",
-                            )
-                          }}
-                        >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                          </svg>
-                        </button>
-                        <SongsArchiveFilterPopover
-                          kind="artist"
-                          id="filterArtist"
-                          options={artistOptions}
-                          selected={selectedArtists}
-                          setSelected={setSelectedArtists}
-                          openFilter={openFilter}
-                          setOpenFilter={setOpenFilter}
-                        />
-                      </div>
-                    </th>
-                    <th>
-                      <div className="col">
-                        <span style={{ padding: "4px 6px" }}>
-                          Performed by
-                        </span>
-                        <button
-                          type="button"
-                          className={
-                            selectedPerfs.size > 0 ?
-                              "filter-btn active"
-                            : "filter-btn"
-                          }
-                          data-filter="perf"
-                          aria-label="Filter performer"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setOpenFilter((k) =>
-                              k === "perf" ? null : "perf",
-                            )
-                          }}
-                        >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden
-                          >
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                          </svg>
-                        </button>
-                        <SongsArchiveFilterPopover
-                          kind="perf"
-                          id="filterPerf"
-                          options={perfOpts}
-                          selected={selectedPerfs}
-                          setSelected={setSelectedPerfs}
-                          openFilter={openFilter}
-                          setOpenFilter={setOpenFilter}
-                        />
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="listBody">
-                  {filteredSortedList.map((s) => {
-                    const perfs = performerBySong[s.song] ?? []
-                    const catColor =
-                      catColorByName[s.song_category] ?? "#888"
-                    return (
-                      <tr key={s.song_id}>
-                        <td className="song-cell">
-                          <Link
-                            href={getSongArchiveUrl(s.song_id)}
-                            data-song={s.song}
-                          >
-                            <SongDisplayName
-                              song={s.song}
-                              songDisplayName={s.song_displayname}
-                            />
-                          </Link>
-                        </td>
-                        <td className="cat-cell">
-                          <span
-                            className="dot"
-                            style={{ background: catColor }}
+                          <SongDisplayName
+                            song={s.song}
+                            songDisplayName={s.song_displayname}
                           />
-                          {s.song_category}
-                        </td>
-                        <td className="artist-cell">
-                          {s.song_originalartist || "—"}
-                        </td>
-                        <td className="pill-cell">
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <span className="songs-archive-list-cat-cell-inner">
+                          {catArt ?
+                            <Image
+                              src={catArt}
+                              alt=""
+                              width={22}
+                              height={22}
+                              className="songs-archive-list-cat-thumb"
+                              unoptimized
+                            />
+                          : <span
+                              className="songs-archive-list-cat-thumb-fallback"
+                              aria-hidden
+                            />}
+                          <span className="songs-archive-list-cat-name">
+                            {s.song_category}
+                          </span>
+                        </span>
+                      </TableCell>
+                      <TableCell className="songs-archive-list-artist-cell">
+                        {s.song_originalartist || "—"}
+                      </TableCell>
+                      <TableCell className="songs-archive-list-perf-cell">
+                        <span className="songs-archive-list-perf-cell-inner">
                           {perfs.map((p) => (
-                            <span key={p} className={`pill ${performerPillClass(p)}`}>
+                            <span key={p} className="songs-archive-perf-pill">
                               {p}
                             </span>
                           ))}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+              </Table>
             </div>
           </div>
         </div>
-
-      <div
-        className={`modal-overlay ${searchOpen ? "open" : ""}`}
-        id="searchModal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Search songs"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            setSearchOpen(false)
-            setSearchQuery("")
-          }
-        }}
-      >
-        <div className="modal">
-          <div className="modal-search">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgba(255,255,255,0.5)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <circle cx="11" cy="11" r="7" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="search"
-              id="searchInput"
-              placeholder="Search songs…"
-              autoComplete="off"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <span className="kbd">ESC</span>
-          </div>
-          <div className="modal-list" id="searchResults">
-            {searchQuery.trim().length > 0 && searchHits.length === 0 ?
-              <div className="modal-empty">
-                No songs match &quot;{searchQuery}&quot;.
-              </div>
-            : searchHits.map((s) => (
-                <Link
-                  key={s.song_id}
-                  href={getSongArchiveUrl(s.song_id)}
-                  className="modal-row"
-                  data-song={s.song}
-                  onClick={() => {
-                    setSearchOpen(false)
-                    setSearchQuery("")
-                  }}
-                >
-                  <span className="mr-title">
-                    <SongDisplayName
-                      song={s.song}
-                      songDisplayName={s.song_displayname}
-                    />
-                  </span>
-                  <span className="mr-cat">{s.song_category}</span>
-                </Link>
-              ))
-            }
-          </div>
-        </div>
       </div>
+
+      <SongsArchiveListSearchModal
+        open={searchOpen}
+        onClose={closeSearch}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchHits={searchHits}
+        searchInputRef={searchInputRef}
+      />
+      {openFilter !== null ?
+        <SongsArchiveListFilterModal
+          title={FILTER_MODAL_META[openFilter].title}
+          description={FILTER_MODAL_META[openFilter].description}
+          options={
+            openFilter === "cat" ? categoryOptions
+            : openFilter === "artist" ? artistOptions
+            : perfOpts
+          }
+          selected={
+            openFilter === "cat" ? selectedCats
+            : openFilter === "artist" ? selectedArtists
+            : selectedPerfs
+          }
+          setSelected={
+            openFilter === "cat" ? setSelectedCats
+            : openFilter === "artist" ? setSelectedArtists
+            : setSelectedPerfs
+          }
+          onClose={() => setOpenFilter(null)}
+        />
+      : null}
     </div>
   )
 }

@@ -8,7 +8,6 @@ import {
   ListNumbers,
   MapPin,
   MusicNote,
-  PencilSimple,
   Trophy,
   UserCircle,
   Users,
@@ -47,7 +46,6 @@ const ARCHIVE_ICONS: Record<string, PhosphorTileIcon> = {
   Trophy,
   UserCircle,
   BookOpen,
-  PencilSimple,
 }
 
 const ICON_PROPS = {
@@ -156,15 +154,17 @@ export function WlHomeV2ArchiveModal({
           </div>
           <div className="modal-request-body modal-archive-hub-body">
             <div className="modal-archive-hub-grid">
-              {ARCHIVE_ENTRIES.map((entry) => (
-                <ArchiveModalTile
-                  key={entry.title}
-                  entry={entry}
-                  myStatsProfile={
-                    entry.title === "My Stats" ? myStatsProfile : null
-                  }
-                />
-              ))}
+              {ARCHIVE_ENTRIES.filter((entry) => entry.title !== "Submit").map(
+                (entry) => (
+                  <ArchiveModalTile
+                    key={entry.title}
+                    entry={entry}
+                    myStatsProfile={
+                      entry.title === "My Stats" ? myStatsProfile : null
+                    }
+                  />
+                ),
+              )}
             </div>
             <div className="modal-archive-hub-submit">
               <p className="modal-archive-hub-submit-text">
