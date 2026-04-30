@@ -1,6 +1,10 @@
 import type { SetlistEntry } from "@/types/setlist"
 import { getPlacementBarColor } from "@/lib/placement-bar-color"
 
+/** Shadcn `TableCell` / `TableHead`: overrides default `p-2` when merged with `cn()`. */
+export const DISPLAY_SETLIST_TABLE_CELL_PAD =
+  "px-2 py-[2px] align-middle" as const
+
 /** Rows with these entry_short values (case-insensitive) get no number in the # column. */
 export const INDEX_SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 
@@ -177,6 +181,13 @@ export const JOTY_EXPLANATIONS: Record<string, string> = {
   R64: "Round of 64",
 }
 export const JOTY_ROUND_ORDER = ["JOTY", "2nd", "F4", "E8", "S16", "R32", "R64"]
+
+const JOTY_ROUND_ATTR = new Set<string>(JOTY_ROUND_ORDER)
+
+/** `data-joty-round` value for CSS (unknown rounds → `other`). */
+export function jotyRoundDataAttr(round: string): string {
+  return JOTY_ROUND_ATTR.has(round) ? round : "other"
+}
 
 /**
  * WL Home v2: JOTY chips match Last-column pill treatment (translucent fill, oklch text, solid border).

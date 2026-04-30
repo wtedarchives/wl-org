@@ -1,8 +1,7 @@
 import {
-  getJotyPillWlV2Style,
-  getLastCountPillStyle,
   JOTY_EXPLANATIONS,
   SHORT_EXPLANATIONS,
+  jotyRoundDataAttr,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 
 /** Last column header: same pill shapes as `last-pill` + copy (portaled tooltip). */
@@ -24,17 +23,17 @@ export function WlHomeV2LastHeaderTooltipBody() {
   return (
     <div className="setlist-header-last-tooltip">
       {rows.map(({ sample, rest }) => {
-        const pill = getLastCountPillStyle(sample)
-        if (!pill) return null
+        const lastVariant =
+          sample === "Debut" ? "debut"
+          : sample === "TD" ? "td"
+          : sample === "LIB" ? "lib"
+          : null
+        if (!lastVariant) return null
         return (
           <div key={sample} className="setlist-header-last-tooltip-row">
             <span
               className="setlist-legend-last-pill"
-              style={{
-                background: pill.background,
-                color: pill.color,
-                border: `1px solid ${pill.borderColor}`,
-              }}
+              data-last-variant={lastVariant}
             >
               {sample}
             </span>
@@ -80,26 +79,19 @@ export function WlHomeV2SetlistSongHeaderTooltipBody({
           </span>
         </div>
       ))}
-      {jotyRoundsInOrder.map((round) => {
-        const pill = getJotyPillWlV2Style(round)
-        return (
-          <div key={round} className="setlist-header-song-tooltip-row setlist-header-song-tooltip-row--joty">
-            <span
-              className="setlist-header-song-tooltip-joty-pill"
-              style={{
-                background: pill.background,
-                color: pill.color,
-                border: `1px solid ${pill.borderColor}`,
-              }}
-            >
-              {round}
-            </span>
-            <span className="setlist-header-song-tooltip-desc">
-              {JOTY_EXPLANATIONS[round] ?? round}
-            </span>
-          </div>
-        )
-      })}
+      {jotyRoundsInOrder.map((round) => (
+        <div key={round} className="setlist-header-song-tooltip-row setlist-header-song-tooltip-row--joty">
+          <span
+            data-joty-round={jotyRoundDataAttr(round)}
+            className="setlist-header-song-tooltip-joty-pill"
+          >
+            {round}
+          </span>
+          <span className="setlist-header-song-tooltip-desc">
+            {JOTY_EXPLANATIONS[round] ?? round}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }

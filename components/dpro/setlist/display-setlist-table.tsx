@@ -26,13 +26,17 @@ import { getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
 import {
   computeDisplayNumbers,
   shouldShowSetlistEntryShort,
-  getJotyBadgeStyle,
+  DISPLAY_SETLIST_TABLE_CELL_PAD,
+  jotyRoundDataAttr,
   JOTY_EXPLANATIONS,
   JOTY_ROUND_ORDER,
   LAST_HEADER_TOOLTIP,
   SHORT_EXPLANATIONS,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SetlistEntryRow } from "@/components/dpro/setlist/setlist-entry-row"
+import { cn } from "@/lib/utils"
+
+import "@/components/dpro/setlist/display-setlist-table.css"
 
 export interface DisplaySetlistTableProps {
   setlist: SetlistEntry[]
@@ -174,30 +178,37 @@ export function DisplaySetlistTable({
           {SHORT_EXPLANATIONS[short]}
         </div>
       ))}
-      {JOTY_ROUND_ORDER.filter((r) => jotyRounds.has(r)).map((round) => {
-        const jotyStyle = getJotyBadgeStyle(round)
-        return (
-          <div key={round} className="flex items-center gap-2">
-            <span style={jotyStyle.style} className={jotyStyle.className}>
-              {round}
-            </span>
-            <span>{JOTY_EXPLANATIONS[round] ?? round}</span>
-          </div>
-        )
-      })}
+      {JOTY_ROUND_ORDER.filter((r) => jotyRounds.has(r)).map((round) => (
+        <div key={round} className="flex items-center gap-2">
+          <span
+            data-joty-round={jotyRoundDataAttr(round)}
+            className="display-setlist-header-joty-sample"
+          >
+            {round}
+          </span>
+          <span>{JOTY_EXPLANATIONS[round] ?? round}</span>
+        </div>
+      ))}
     </div>
   ) : null
 
   return (
     <TooltipProvider delayDuration={0}>
       <div className="w-full overflow-x-auto">
-        <Table className="[&_th]:py-1 [&_th]:px-2 [&_th]:align-middle [&_td]:py-0.5 [&_td]:px-2 [&_td]:align-middle">
+        <Table className="display-setlist-table">
           <TableHeader>
             <TableRow className="h-8 border-border/60 hover:bg-transparent">
-              <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">
+              <TableHead
+                className={cn(
+                  "h-8 w-4 shrink-0 text-center text-muted-foreground",
+                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                )}
+              >
                 #
               </TableHead>
-              <TableHead className="h-8 text-muted-foreground">
+              <TableHead
+                className={cn("h-8 text-muted-foreground", DISPLAY_SETLIST_TABLE_CELL_PAD)}
+              >
                 {hasSongHeaderTooltipItems && isDesktop ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -212,12 +223,22 @@ export function DisplaySetlistTable({
                 )}
               </TableHead>
               {showDiscographySourceCol ? (
-                <TableHead className="h-8 min-w-[9rem] whitespace-nowrap text-left text-muted-foreground">
+                <TableHead
+                  className={cn(
+                    "h-8 min-w-[9rem] whitespace-nowrap text-left text-muted-foreground",
+                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  )}
+                >
                   Show
                 </TableHead>
               ) : null}
               {showWtedColumn && (
-                <TableHead className="h-8 text-center text-muted-foreground">
+                <TableHead
+                  className={cn(
+                    "h-8 text-center text-muted-foreground",
+                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  )}
+                >
                   {isDesktop ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -232,11 +253,21 @@ export function DisplaySetlistTable({
                   )}
                 </TableHead>
               )}
-              <TableHead className="h-8 text-center text-muted-foreground">
+              <TableHead
+                className={cn(
+                  "h-8 text-center text-muted-foreground",
+                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                )}
+              >
                 Time
               </TableHead>
               {showCanonColumns && (
-                <TableHead className="h-8 text-center text-muted-foreground">
+                <TableHead
+                  className={cn(
+                    "h-8 text-center text-muted-foreground",
+                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  )}
+                >
                   {hasLastBadges && isDesktop ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -252,19 +283,40 @@ export function DisplaySetlistTable({
                 </TableHead>
               )}
               {showCanonColumns && (
-                <TableHead className="h-8 text-center text-muted-foreground">
+                <TableHead
+                  className={cn(
+                    "h-8 text-center text-muted-foreground",
+                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  )}
+                >
                   Tour
                 </TableHead>
               )}
               {showCanonColumns && (
-                <TableHead className="h-8 text-center text-muted-foreground">
+                <TableHead
+                  className={cn(
+                    "h-8 text-center text-muted-foreground",
+                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  )}
+                >
                   Rarity
                 </TableHead>
               )}
-              <TableHead className="h-8 w-max max-w-[300px] text-muted-foreground">
+              <TableHead
+                className={cn(
+                  "h-8 w-max max-w-[300px] text-muted-foreground",
+                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                )}
+              >
                 Personnel
               </TableHead>
-              <TableHead className="h-8 w-max max-w-[400px] text-muted-foreground">
+              <TableHead
+                className={cn(
+                  "h-8 w-max max-w-[400px] text-muted-foreground",
+                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  "py-[1px]",
+                )}
+              >
                 Coach&apos;s Notes
               </TableHead>
             </TableRow>
@@ -295,7 +347,7 @@ export function DisplaySetlistTable({
                     >
                       <TableCell
                         colSpan={fullColSpan}
-                        className="border-y border-border bg-gray-700 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+                        className="border-y border-border bg-gray-700 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
                       >
                         {getEncoreLabel(entry.entry_set)}
                       </TableCell>
@@ -308,7 +360,7 @@ export function DisplaySetlistTable({
                     >
                       <TableCell
                         colSpan={fullColSpan}
-                        className="border-y border-border bg-gray-800 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+                        className="border-y border-border bg-gray-800 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
                       >
                         Set Break
                       </TableCell>

@@ -12,7 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { WtedEpisodeTableRow } from "@/types/wted-episode"
-import { getPlacementIndexCellBg } from "@/components/dpro/setlist/display-setlist-table.constants"
+import {
+  DISPLAY_SETLIST_TABLE_CELL_PAD,
+} from "@/components/dpro/setlist/display-setlist-table.constants"
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 import {
   formatEntryLength,
   formatSetlistDate,
@@ -38,6 +41,8 @@ import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { wtedEpisodeShowGroupKey } from "@/lib/wted-episode-show-group"
 import { cn } from "@/lib/utils"
+
+import "@/components/dpro/setlist/display-setlist-table.css"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 
 function WtedEpisodeSetlistTableHead({
@@ -51,16 +56,39 @@ function WtedEpisodeSetlistTableHead({
 }) {
   return (
     <TableRow className="h-8 border-border/60 hover:bg-transparent">
-      <TableHead className="h-8 w-4 shrink-0 text-center text-muted-foreground">
+      <TableHead
+        className={cn(
+          "h-8 w-4 shrink-0 text-center text-muted-foreground",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+        )}
+      >
         #
       </TableHead>
-      <TableHead className="h-8 text-muted-foreground">Song</TableHead>
-      <TableHead className="h-8 whitespace-nowrap text-center text-muted-foreground">
+      <TableHead
+        className={cn("h-8 text-muted-foreground", DISPLAY_SETLIST_TABLE_CELL_PAD)}
+      >
+        Song
+      </TableHead>
+      <TableHead
+        className={cn(
+          "h-8 whitespace-nowrap text-center text-muted-foreground",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+        )}
+      >
         Date
       </TableHead>
-      <TableHead className="h-8 text-muted-foreground">Location</TableHead>
+      <TableHead
+        className={cn("h-8 text-muted-foreground", DISPLAY_SETLIST_TABLE_CELL_PAD)}
+      >
+        Location
+      </TableHead>
       {showWtedColumn ?
-        <TableHead className="h-8 text-center text-muted-foreground">
+        <TableHead
+          className={cn(
+            "h-8 text-center text-muted-foreground",
+            DISPLAY_SETLIST_TABLE_CELL_PAD,
+          )}
+        >
           {isDesktop ?
             <Tooltip>
               <TooltipTrigger asChild>
@@ -73,18 +101,39 @@ function WtedEpisodeSetlistTableHead({
           : "WTED"}
         </TableHead>
       : null}
-      <TableHead className="h-8 text-center text-muted-foreground">
+      <TableHead
+        className={cn(
+          "h-8 text-center text-muted-foreground",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+        )}
+      >
         Time
       </TableHead>
       {showGroupColumn ?
-        <TableHead className="h-8 text-center text-muted-foreground">
+        <TableHead
+          className={cn(
+            "h-8 text-center text-muted-foreground",
+            DISPLAY_SETLIST_TABLE_CELL_PAD,
+          )}
+        >
           Group
         </TableHead>
       : null}
-      <TableHead className="h-8 w-max max-w-[300px] text-muted-foreground">
+      <TableHead
+        className={cn(
+          "h-8 w-max max-w-[300px] text-muted-foreground",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+        )}
+      >
         Personnel
       </TableHead>
-      <TableHead className="h-8 w-max max-w-[400px] text-muted-foreground">
+      <TableHead
+        className={cn(
+          "h-8 w-max max-w-[400px] text-muted-foreground",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "py-[1px]",
+        )}
+      >
         Coach&apos;s Notes
       </TableHead>
     </TableRow>
@@ -94,7 +143,7 @@ function WtedEpisodeSetlistTableHead({
 function WtedEpisodeSetlistDataRow({
   row,
   displayNum,
-  indexCellBg,
+  placementToken,
   numberUsesPlacementColor,
   shouldHighlightRow,
   shouldDimRow,
@@ -107,7 +156,7 @@ function WtedEpisodeSetlistDataRow({
 }: {
   row: WtedEpisodeTableRow
   displayNum: number
-  indexCellBg: string
+  placementToken: ReturnType<typeof getPlacementBarCssToken>
   numberUsesPlacementColor: boolean
   shouldHighlightRow: boolean
   shouldDimRow: boolean
@@ -132,23 +181,31 @@ function WtedEpisodeSetlistDataRow({
     >
       <TableCell
         className={cn(
-          "text-center tabular-nums",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "display-setlist-num-cell text-center tabular-nums",
           numberUsesPlacementColor ? "text-white" : "text-muted-foreground",
         )}
-        style={{
-          backgroundColor: numberUsesPlacementColor ? indexCellBg : undefined,
-        }}
+        data-placement-bar={
+          numberUsesPlacementColor && placementToken !== "none"
+            ? placementToken
+            : undefined
+        }
       >
         {displayNum}
       </TableCell>
-      <TableCell className="align-top">
+      <TableCell className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "align-top")}>
         <SetlistEntrySongCell
           entry={sl}
           onSongClick={(entry) => router.push(getSongArchiveUrl(entry.song_id))}
           onJotyClick={onJotyClick}
         />
       </TableCell>
-      <TableCell className="whitespace-nowrap text-center tabular-nums text-muted-foreground">
+      <TableCell
+        className={cn(
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "whitespace-nowrap text-center tabular-nums text-muted-foreground",
+        )}
+      >
         {row.showDate && row.showId ?
           <Link
             href={getSetlistArchiveUrl(row.showId)}
@@ -160,7 +217,9 @@ function WtedEpisodeSetlistDataRow({
           formatSetlistDate(row.showDate)
         : ""}
       </TableCell>
-      <TableCell className="whitespace-nowrap text-muted-foreground">
+      <TableCell
+        className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "whitespace-nowrap text-muted-foreground")}
+      >
         {row.venueLocation ?
           row.venueId ?
             <Link
@@ -173,7 +232,7 @@ function WtedEpisodeSetlistDataRow({
         : ""}
       </TableCell>
       {showWtedColumn ?
-        <TableCell className="text-center">
+        <TableCell className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}>
           <SetlistEntryWtedCell
             entry={sl}
             onWtedClick={onWtedClick}
@@ -181,17 +240,28 @@ function WtedEpisodeSetlistDataRow({
           />
         </TableCell>
       : null}
-      <TableCell className="text-center tabular-nums text-muted-foreground">
+      <TableCell
+        className={cn(
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "text-center tabular-nums text-muted-foreground",
+        )}
+      >
         {formatEntryLength(sl.entry_length) ?? ""}
       </TableCell>
       {showGroupColumn ?
-        <TableCell className="text-center text-muted-foreground">
+        <TableCell
+          className={cn(
+            DISPLAY_SETLIST_TABLE_CELL_PAD,
+            "text-center text-muted-foreground",
+          )}
+        >
           {row.showGroup ?? ""}
         </TableCell>
       : null}
       <TableCell
         className={cn(
-          "w-max max-w-[300px] !py-0",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "w-max max-w-[300px]",
           guestsTruncCollapsed ? "align-middle" : "align-top",
         )}
       >
@@ -209,7 +279,8 @@ function WtedEpisodeSetlistDataRow({
       </TableCell>
       <TableCell
         className={cn(
-          "w-max max-w-[400px] !py-0",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "w-max max-w-[400px] py-[1px]",
           coachTruncCollapsed ? "align-middle" : "align-top",
         )}
       >
@@ -284,7 +355,7 @@ export function WtedEpisodeSetlistTable({
             >
               <TableCell
                 colSpan={colSpan}
-                className="border-y border-border bg-gray-700 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+                className="border-y border-border bg-gray-700 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
               >
                 {getEncoreLabel(row.wtedSet)}
               </TableCell>
@@ -305,7 +376,7 @@ export function WtedEpisodeSetlistTable({
           >
             <TableCell
               colSpan={colSpan}
-              className="border-y border-border bg-gray-800 !px-0 !py-0.5 text-center text-[0.625rem] font-medium text-foreground"
+              className="border-y border-border bg-gray-800 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
             >
               Set Break
             </TableCell>
@@ -315,8 +386,8 @@ export function WtedEpisodeSetlistTable({
     }
 
     displayNum += 1
-    const indexCellBg = getPlacementIndexCellBg(row.wtedPlacement ?? null)
-    const numberUsesPlacementColor = indexCellBg !== "transparent"
+    const placementToken = getPlacementBarCssToken(row.wtedPlacement ?? null)
+    const numberUsesPlacementColor = placementToken !== "none"
     const entryCategory =
       sl.song_category || sl.songs?.song_category || "undefined"
     const d = row.showDate?.trim()
@@ -343,7 +414,7 @@ export function WtedEpisodeSetlistTable({
         key={row.refId}
         row={row}
         displayNum={displayNum}
-        indexCellBg={indexCellBg}
+        placementToken={placementToken}
         numberUsesPlacementColor={numberUsesPlacementColor}
         shouldHighlightRow={shouldHighlightRow}
         shouldDimRow={shouldDimRow}
@@ -360,7 +431,7 @@ export function WtedEpisodeSetlistTable({
   return (
     <TooltipProvider delayDuration={0}>
       <div className="w-full overflow-x-auto">
-        <Table className="[&_th]:py-1 [&_th]:px-2 [&_th]:align-middle [&_td]:py-0.5 [&_td]:px-2 [&_td]:align-middle">
+        <Table className="display-setlist-table">
           <TableHeader>
             <WtedEpisodeSetlistTableHead
               showGroupColumn={showGroupColumn}

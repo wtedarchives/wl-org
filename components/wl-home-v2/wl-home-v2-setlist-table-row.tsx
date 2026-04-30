@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type CSSProperties } from "react"
 
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
-  getJotyPillWlV2Style,
   getLastCountBadgeStyle,
+  jotyRoundDataAttr,
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
@@ -28,11 +28,12 @@ import {
 import {
   calculateRarity,
   formatEntryLength,
-  getPlacementColor,
   getRarityColor,
   getRarityPillBackground,
 } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
+
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 import { railLabelForEntrySet } from "@/components/wl-home-v2/wl-home-v2-setlist-table.utils"
@@ -95,7 +96,7 @@ export function WlHomeV2SetlistTableRow({
     "set-section-rail",
     entry.entry_set?.startsWith("E") && "set-section-rail--encore",
   )
-  const barColor = getPlacementColor(entry.entry_placement)
+  const barPlacementToken = getPlacementBarCssToken(entry.entry_placement)
   const isCopied = copiedEntryIds?.has(entry.entry_id) ?? false
   const canCopyNumber = !!(showAdminUi && onNumberClick)
   const rarity = calculateRarity(
@@ -109,9 +110,7 @@ export function WlHomeV2SetlistTableRow({
     entry.entry_song,
     entry.entry_short,
   )
-  const jotyPill = entry.joty_round
-    ? getJotyPillWlV2Style(entry.joty_round)
-    : null
+  const jotyAttr = entry.joty_round ? jotyRoundDataAttr(entry.joty_round) : null
 
   const entryIdsForRelease = hoveredReleaseId
     ? releaseToEntriesMap?.[hoveredReleaseId]
@@ -165,30 +164,19 @@ export function WlHomeV2SetlistTableRow({
           </span>
         : null}
       </div>
-      {jotyPill ?
+      {jotyAttr ?
         <div className="song-cell-joty">
           {onJotyBadgeClick ?
             <button
               type="button"
               className="joty-pill"
-              style={{
-                background: jotyPill.background,
-                color: jotyPill.color,
-                border: `1px solid ${jotyPill.borderColor}`,
-              }}
+              data-joty-round={jotyAttr}
               onClick={() => onJotyBadgeClick(entry)}
               aria-label={`Jam of the Year: ${entry.joty_round}`}
             >
               {entry.joty_round}
             </button>
-          : <span
-              className="joty-pill"
-              style={{
-                background: jotyPill.background,
-                color: jotyPill.color,
-                border: `1px solid ${jotyPill.borderColor}`,
-              }}
-            >
+          : <span className="joty-pill" data-joty-round={jotyAttr}>
               {entry.joty_round}
             </span>
           }
@@ -226,7 +214,10 @@ export function WlHomeV2SetlistTableRow({
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
         {showDiscographySetUi ?
-          <span className="bar" style={{ background: barColor }} />
+          <span
+            className="bar"
+            data-placement-bar={barPlacementToken}
+          />
         : null}
         <SetlistEntryNumberCell
           entry={entry}
@@ -304,10 +295,12 @@ export function WlHomeV2SetlistTableRow({
           {rarity ?
             <span
               className="rare-pill"
-              style={{
-                background: rarityPillBackground,
-                border: `1px solid ${rarityPillBorderColor}`,
-              }}
+              style={
+                {
+                  "--setlist-rare-fill": rarityPillBackground,
+                  "--setlist-rare-border": rarityPillBorderColor,
+                } as CSSProperties
+              }
             >
               {rarity}
             </span>
@@ -354,8 +347,8 @@ export function WlHomeV2SetlistTableRow({
               measureKey={`${entry.entry_id}-coach`}
               html={entry.entry_coachnotes.trim()}
               expandLabel="Show full coach notes"
-              htmlContentClassName="!text-[12px] !leading-[1.4]"
-              blockPlainClassName="!text-[12px] !leading-[1.4]"
+              htmlContentClassName="setlist-v2-notes-html"
+              blockPlainClassName="setlist-v2-notes-plain"
               onTruncatedCollapsedChange={setCoachCollapsed}
             />
           : null}

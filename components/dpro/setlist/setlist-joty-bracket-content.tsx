@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   getJotyBadgeStyle,
-  getJotyPillWlV2Style,
+  jotyRoundDataAttr,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { useJotyData } from "@/hooks/use-joty-data"
 import type { JotyResultRow, JotyRoundWithResults } from "@/hooks/use-joty-data"
@@ -182,7 +182,6 @@ function RoundSectionHeaderRow({
 }) {
   const y = wlHomeV2YearsTable
   const legacyBadge = getJotyBadgeStyle(round.round_abbr)
-  const wlPill = y ? getJotyPillWlV2Style(round.round_abbr) : null
   return (
     <TableRow
       className={cn(
@@ -206,14 +205,10 @@ function RoundSectionHeaderRow({
           >
             {round.round_name}
           </span>
-          {wlPill ?
+          {y ?
             <span
               className="joty-pill"
-              style={{
-                background: wlPill.background,
-                color: wlPill.color,
-                border: `1px solid ${wlPill.borderColor}`,
-              }}
+              data-joty-round={jotyRoundDataAttr(round.round_abbr)}
             >
               {round.round_abbr}
             </span>

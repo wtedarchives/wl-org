@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, type CSSProperties } from "react"
 import {
   TableCell,
   TableRow,
@@ -10,12 +10,13 @@ import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import {
   getLastCountBadgeStyle,
-  getPlacementIndexCellBg,
+  DISPLAY_SETLIST_TABLE_CELL_PAD,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
-import { getRarityColor } from "@/lib/setlist-utils"
 import {
   calculateRarity,
   formatEntryLength,
+  getRarityColor,
+  getRarityPillBackground,
 } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 import type {
@@ -33,6 +34,7 @@ import { SetlistEntryWtedCell } from "./setlist-entry-wted-cell"
 import { SetlistEntryLastCell } from "./setlist-entry-last-cell"
 import { SetlistEntryGuestsCell } from "./setlist-entry-guests-cell"
 import { venueLocationAlreadyBracketed } from "@/lib/format-venue-location-brackets"
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 
 function DiscographyShowVenueInner({
   cell,
@@ -112,12 +114,12 @@ export function SetlistEntryRow({
     entry.shows_since_debut_num
   )
   const rarityColor = getRarityColor(rarity || null)
-  const indexCellBg = getPlacementIndexCellBg(entry.entry_placement ?? null)
+  const placementToken = getPlacementBarCssToken(entry.entry_placement ?? null)
   const lastBadgeStyle = getLastCountBadgeStyle(entry.last_count)
   const isCopied = copiedEntryIds?.has(entry.entry_id) ?? false
   const canCopyNumber = !!(showAdminUi && onNumberClick)
   const numberUsesPlacementColor =
-    !suppressNumberPlacementColor && indexCellBg !== "transparent"
+    !suppressNumberPlacementColor && placementToken !== "none"
 
   const [guestsTruncCollapsed, setGuestsTruncCollapsed] = useState(false)
   const [coachTruncCollapsed, setCoachTruncCollapsed] = useState(false)
@@ -144,23 +146,20 @@ export function SetlistEntryRow({
       )}
     >
       <TableCell
-        className={`text-center tabular-nums ${
+        className={cn(
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "display-setlist-num-cell text-center tabular-nums",
           isCopied
             ? "bg-green-600 text-white"
             : suppressNumberPlacementColor
               ? "text-foreground"
               : numberUsesPlacementColor
                 ? "text-white"
-                : "text-muted-foreground"
-        }`}
-        style={{
-          backgroundColor:
-            isCopied || suppressNumberPlacementColor
-              ? undefined
-              : numberUsesPlacementColor
-                ? indexCellBg
-                : undefined,
-        }}
+                : "text-muted-foreground",
+        )}
+        data-placement-bar={
+          !isCopied && numberUsesPlacementColor ? placementToken : undefined
+        }
       >
         <SetlistEntryNumberCell
           entry={entry}
@@ -170,7 +169,9 @@ export function SetlistEntryRow({
           onNumberClick={onNumberClick}
         />
       </TableCell>
-      <TableCell className="align-top">
+      <TableCell
+        className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "align-top")}
+      >
         <SetlistEntrySongCell
           entry={entry}
           onSongClick={onSongClick}
@@ -179,7 +180,12 @@ export function SetlistEntryRow({
         />
       </TableCell>
       {discographySourceLabel !== undefined ? (
-        <TableCell className="min-w-[9rem] whitespace-nowrap text-left text-[11px]">
+        <TableCell
+          className={cn(
+            DISPLAY_SETLIST_TABLE_CELL_PAD,
+            "min-w-[9rem] whitespace-nowrap text-left text-[11px]",
+          )}
+        >
           {discographyShowCell !== undefined ? (
             discographyShowCell ? (
               <span className="inline-flex flex-nowrap items-baseline gap-x-1.5 text-foreground">
@@ -212,7 +218,7 @@ export function SetlistEntryRow({
         </TableCell>
       ) : null}
       {showWtedColumn && (
-        <TableCell className="text-center">
+        <TableCell className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}>
           <SetlistEntryWtedCell
             entry={entry}
             onWtedClick={onWtedClick}
@@ -220,11 +226,21 @@ export function SetlistEntryRow({
           />
         </TableCell>
       )}
-      <TableCell className="text-center tabular-nums text-muted-foreground">
+      <TableCell
+        className={cn(
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "text-center tabular-nums text-muted-foreground",
+        )}
+      >
         {formatEntryLength(entry.entry_length) ?? ""}
       </TableCell>
       {showCanonColumns && (
-        <TableCell className="text-center text-muted-foreground">
+        <TableCell
+          className={cn(
+            DISPLAY_SETLIST_TABLE_CELL_PAD,
+            "text-center text-muted-foreground",
+          )}
+        >
           <SetlistEntryLastCell
             entry={entry}
             lastBadgeStyle={lastBadgeStyle}
@@ -233,16 +249,28 @@ export function SetlistEntryRow({
         </TableCell>
       )}
       {showCanonColumns && (
-        <TableCell className="text-center tabular-nums text-muted-foreground">
+        <TableCell
+          className={cn(
+            DISPLAY_SETLIST_TABLE_CELL_PAD,
+            "text-center tabular-nums text-muted-foreground",
+          )}
+        >
           {entry.song_tour_count ?? ""}
         </TableCell>
       )}
       {showCanonColumns && (
-        <TableCell className="text-center">
+        <TableCell
+          className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}
+        >
           {rarity ? (
             <span
-              className="inline-flex justify-center rounded px-1.5 py-0.5 text-[11px] font-medium text-white"
-              style={{ backgroundColor: rarityColor }}
+              className="display-setlist-rarity-pill"
+              style={
+                {
+                  "--display-setlist-rarity-bg": getRarityPillBackground(rarity),
+                  "--display-setlist-rarity-border": rarityColor ?? "transparent",
+                } as CSSProperties
+              }
             >
               {rarity}
             </span>
@@ -251,7 +279,8 @@ export function SetlistEntryRow({
       )}
       <TableCell
         className={cn(
-          "w-max max-w-[300px] !py-0",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "w-max max-w-[300px]",
           guestsTruncCollapsed ? "align-middle" : "align-top",
         )}
       >
@@ -269,7 +298,8 @@ export function SetlistEntryRow({
       </TableCell>
       <TableCell
         className={cn(
-          "w-max max-w-[400px] !py-0",
+          DISPLAY_SETLIST_TABLE_CELL_PAD,
+          "w-max max-w-[400px] py-[1px]",
           coachTruncCollapsed ? "align-middle" : "align-top",
         )}
       >

@@ -218,7 +218,9 @@ export function WlHomeV2SetlistTable({
               : null}
               <th>Personnel</th>
               {showCoachColumn ?
-                <th>Coach&apos;s Notes</th>
+                <th className="set-table-coach-notes-head">
+                  Coach&apos;s Notes
+                </th>
               : null}
             </tr>
           </thead>

@@ -1,0 +1,90 @@
+/**
+ * Shadcn setlist tables (`DisplaySetlistTable`, WTED episode): `#` column placement fills
+ * and archive header JOTY legend samples (replaces inline colors).
+ */
+
+.display-setlist-table td.display-setlist-num-cell[data-placement-bar="set-1-opener"] {
+  background-color: #047857;
+}
+.display-setlist-table td.display-setlist-num-cell[data-placement-bar="set-1-closer"] {
+  background-color: #1e40af;
+}
+.display-setlist-table td.display-setlist-num-cell[data-placement-bar="set-opener"] {
+  background-color: #10b981;
+}
+.display-setlist-table td.display-setlist-num-cell[data-placement-bar="set-closer"] {
+  background-color: #3b82f6;
+}
+.display-setlist-table td.display-setlist-num-cell[data-placement-bar="encore-1"] {
+  background-color: #be123c;
+}
+.display-setlist-table td.display-setlist-num-cell[data-placement-bar="encore-23"] {
+  background-color: #f43f5e;
+}
+
+.display-setlist-rarity-pill {
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  background-color: var(--display-setlist-rarity-bg);
+  border: 1px solid var(--display-setlist-rarity-border);
+  box-sizing: border-box;
+}
+
+/* Song column header tooltip — legacy solid JOTY samples (matches getJotyBadgeStyle) */
+.display-setlist-header-joty-sample {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 1rem;
+  padding: 0 0.375rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.12),
+    0 1px 1px rgb(0 0 0 / 0.08);
+  border-width: 0;
+  border-style: solid;
+  box-sizing: border-box;
+}
+
+.display-setlist-header-joty-sample[data-joty-round="JOTY"] {
+  background: linear-gradient(#ffd700, #ffc700);
+  color: rgb(17 24 39);
+}
+.display-setlist-header-joty-sample[data-joty-round="2nd"] {
+  background-color: #6b7280;
+  color: #fff;
+}
+.display-setlist-header-joty-sample[data-joty-round="F4"] {
+  background-color: #cd7f32;
+  color: #fff;
+}
+.display-setlist-header-joty-sample[data-joty-round="E8"] {
+  background-color: #8b5cf6;
+  color: #fff;
+}
+.display-setlist-header-joty-sample[data-joty-round="S16"] {
+  background-color: #3b82f6;
+  color: #fff;
+}
+.display-setlist-header-joty-sample[data-joty-round="R32"] {
+  background-color: #10b981;
+  color: #fff;
+}
+.display-setlist-header-joty-sample[data-joty-round="R64"] {
+  background-color: #d1d5db;
+  color: rgb(17 24 39);
+}
+.display-setlist-header-joty-sample[data-joty-round="other"] {
+  background-color: #9ca3af;
+  color: #fff;
+}
