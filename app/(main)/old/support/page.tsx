@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Support",
 }
 
-export default function SupportPage() {
+export default function OldSupportPage() {
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
       <div className="flex flex-1 flex-col">
@@ -15,4 +15,3 @@ export default function SupportPage() {
     </div>
   )
 }
-

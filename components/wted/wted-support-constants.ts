@@ -1,0 +1,6 @@
+export const WTED_SUPPORT_STRIPE_PUBLISHABLE_KEY =
+  "pk_live_51No6yACzMQF2fsuo7ZgLtZKrvx8JM2aiGPn7v6W3oWOzS5ZehhZPc0N1ocirqEuv82BNaWIiY0xlyp8RtsfMH3G000IL1r0ZxO"
+
+export const WTED_SUPPORT_STRIPE_PRICING_TABLE_ID = "prctbl_1NugUyCzMQF2fsuobAOsUi5S"
+
+export const WTED_SUPPORT_STRIPE_BUY_BUTTON_ID = "buy_btn_1NugdqCzMQF2fsuoRp2sFoxp"

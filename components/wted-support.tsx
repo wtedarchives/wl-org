@@ -3,9 +3,11 @@
 import { createElement, useEffect } from "react"
 
 import { Separator } from "@/components/ui/separator"
-
-const STRIPE_PUBLISHABLE_KEY =
-  "pk_live_51No6yACzMQF2fsuo7ZgLtZKrvx8JM2aiGPn7v6W3oWOzS5ZehhZPc0N1ocirqEuv82BNaWIiY0xlyp8RtsfMH3G000IL1r0ZxO"
+import {
+  WTED_SUPPORT_STRIPE_BUY_BUTTON_ID,
+  WTED_SUPPORT_STRIPE_PRICING_TABLE_ID,
+  WTED_SUPPORT_STRIPE_PUBLISHABLE_KEY,
+} from "@/components/wted/wted-support-constants"
 
 export function WtedSupport() {
   useEffect(() => {
@@ -55,13 +57,13 @@ export function WtedSupport() {
 
           <div className="flex w-full flex-col items-center gap-6">
             {createElement("stripe-pricing-table" as any, {
-              "pricing-table-id": "prctbl_1NugUyCzMQF2fsuobAOsUi5S",
-              "publishable-key": STRIPE_PUBLISHABLE_KEY,
+              "pricing-table-id": WTED_SUPPORT_STRIPE_PRICING_TABLE_ID,
+              "publishable-key": WTED_SUPPORT_STRIPE_PUBLISHABLE_KEY,
               class: "w-full",
             })}
             {createElement("stripe-buy-button" as any, {
-              "buy-button-id": "buy_btn_1NugdqCzMQF2fsuoRp2sFoxp",
-              "publishable-key": STRIPE_PUBLISHABLE_KEY,
+              "buy-button-id": WTED_SUPPORT_STRIPE_BUY_BUTTON_ID,
+              "publishable-key": WTED_SUPPORT_STRIPE_PUBLISHABLE_KEY,
               class: "w-full",
             })}
           </div>
