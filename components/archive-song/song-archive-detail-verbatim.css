@@ -412,10 +412,18 @@
   margin-bottom: 8px;
 }
 
+/* Match `.wl-home-v2-setlist .set-table td.rarity-cell .rare-pill` (setlist rarity column) */
 .song-archive-detail-vx .stats-rarity .rare-pill {
-  padding: 2px 8px;
+  display: inline-block;
+  box-sizing: border-box;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  padding: 0 4px;
   border-radius: 4px;
-  font-weight: 600;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  background: var(--setlist-rare-fill);
+  border: 1px solid var(--setlist-rare-border);
 }
 
 .song-archive-detail-vx .group-count-list {
@@ -790,47 +798,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.song-archive-detail-vx .song-archive-detail-tooltip {
-  position: fixed;
-  z-index: 200;
-  background: #0f1814;
-  border: 1px solid rgb(82 88 84);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 11px;
-  line-height: 1.5;
-  max-width: 260px;
-  color: #fff;
-  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.6);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.song-archive-detail-vx .song-archive-detail-tooltip.visible {
-  opacity: 1;
-}
-
-.song-archive-detail-vx .song-archive-detail-tooltip .tt-date {
-  font-family: "Geist Mono", ui-monospace, monospace;
-  color: var(--wl-light-orange);
-  font-weight: 600;
-  margin-bottom: 3px;
-  font-size: 11px;
-}
-
-.song-archive-detail-vx .song-archive-detail-tooltip .tt-venue {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 11px;
-}
-
-.song-archive-detail-vx .song-archive-detail-tooltip .tt-row {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 10px;
-  margin-top: 4px;
-  font-family: "Geist Mono", ui-monospace, monospace;
-}
-
 .song-archive-detail-vx .perf-table-wrap {
   overflow-x: auto;
   transition: opacity 0.2s ease-out;
@@ -902,8 +869,25 @@
 }
 
 /* Show → Length: single line (personnel / coach notes may wrap). */
-.song-archive-detail-vx .perf-table thead tr th:nth-child(-n + 8),
-.song-archive-detail-vx .perf-table tbody tr td:nth-child(-n + 8) {
+.song-archive-detail-vx .perf-table[data-has-wted-col]
+  thead
+  tr
+  th:nth-child(-n + 9),
+.song-archive-detail-vx .perf-table[data-has-wted-col]
+  tbody
+  tr
+  td:nth-child(-n + 9) {
+  white-space: nowrap;
+}
+
+.song-archive-detail-vx .perf-table:not([data-has-wted-col])
+  thead
+  tr
+  th:nth-child(-n + 8),
+.song-archive-detail-vx .perf-table:not([data-has-wted-col])
+  tbody
+  tr
+  td:nth-child(-n + 8) {
   white-space: nowrap;
 }
 

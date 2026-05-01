@@ -34,23 +34,26 @@ function DproStatsContent() {
   const searchParams = useSearchParams()
   const yearParam = searchParams.get("year")
   const selectedYear =
-    yearParam === "all-time"
-      ? "all-time"
-      : yearParam
-        ? (() => {
-            const n = parseInt(yearParam, 10)
-            return Number.isNaN(n) ? DEFAULT_YEAR : n
-          })()
-        : null
+    yearParam === "all-time" ?
+      "all-time"
+    : yearParam ?
+      (() => {
+        const n = parseInt(yearParam, 10)
+        return Number.isNaN(n) ? DEFAULT_YEAR : n
+      })()
+    : null
 
   const [connectionError, setConnectionError] = useState(false)
 
   useEffect(() => {
     if (selectedYear !== null) {
-      const yearLabel = selectedYear === "all-time" ? "All-Time" : String(selectedYear)
+      const yearLabel =
+        selectedYear === "all-time" ? "All-Time" : String(selectedYear)
       document.title = `${yearLabel} Stats – WysteriaLane.org`
     }
-    return () => { document.title = "" }
+    return () => {
+      document.title = ""
+    }
   }, [selectedYear])
 
   useEffect(() => {
@@ -128,15 +131,14 @@ function DproStatsContent() {
     return <LoadingPageCard message="Loading stats data…" />
   }
 
-  const yearLabel = selectedYear === "all-time" ? "All-Time" : String(selectedYear)
+  const yearLabel =
+    selectedYear === "all-time" ? "All-Time" : String(selectedYear)
   const showEmptyState = selectedYear !== "all-time"
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-lg font-semibold">
-          {yearLabel} Stats
-        </h1>
+        <h1 className="text-lg font-semibold">{yearLabel} Stats</h1>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-1">
@@ -146,10 +148,7 @@ function DproStatsContent() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
             {YEARS.map((y) => (
-              <DropdownMenuItem
-                key={y}
-                onClick={() => setYear(y)}
-              >
+              <DropdownMenuItem key={y} onClick={() => setYear(y)}>
                 {y === "all-time" ? "All-Time" : String(y)}
               </DropdownMenuItem>
             ))}
@@ -213,10 +212,9 @@ function DproStatsContent() {
               getCount={(item) => item.times_played ?? 0}
               showEmptyState={showEmptyState}
             />
-            {selectedYear === "all-time" ? (
+            {selectedYear === "all-time" ?
               <LongestSongsCard items={longestSongs} showEmptyState={false} />
-            ) : (
-              <StatCard
+            : <StatCard
                 title="Most Common Not Played"
                 headerClassName="bg-white text-black py-2"
                 items={notPlayedSongs}
@@ -226,7 +224,7 @@ function DproStatsContent() {
                 getCount={(item) => item.play_count ?? 0}
                 showEmptyState={showEmptyState}
               />
-            )}
+            }
 
             {selectedYear !== "all-time" && (
               <LongestSongsCard

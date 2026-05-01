@@ -105,6 +105,7 @@ export function useSongData(songId: string | undefined) {
             `
             entry_id,
             entry_show,
+            radio_id,
             entry_length,
             entry_placement,
             entry_coachnotes,
@@ -161,6 +162,7 @@ export function useSongData(songId: string | undefined) {
 
             return {
               entry_id: perf.entry_id,
+              radio_id: (perf.radio_id as string | null | undefined) ?? null,
               show_id: showsRel?.show_id ?? "",
               show_date: showsRel?.show_date ?? "",
               show_group: showsRel?.show_group ?? "",

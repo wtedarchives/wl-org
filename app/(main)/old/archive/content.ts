@@ -35,7 +35,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Stats",
-    href: "/old/archive/stats",
+    href: "/archive/stats",
     icon: "BarChart3",
     description:
       "Dive into the numbers. Longest songs, liberated songs, show stats, and more—filterable by year or all-time.",

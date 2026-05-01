@@ -1,0 +1,30 @@
+/**
+ * Rarity / gap pills in `TourShowRow`.
+ * Dynamic colors from `--tours-stat-pill-fill` and `--tours-stat-pill-border`
+ * (same pattern as `.rare-pill` in wl-home-v2.css).
+ */
+.tour-shows-stat-pill {
+  display: inline-block;
+  box-sizing: border-box;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.8);
+  background: var(--tours-stat-pill-fill);
+  border: 1px solid var(--tours-stat-pill-border);
+}
+
+/*
+ * WL root uses `.wl-home-v2 * { padding: 0 }`, same specificity as `.tour-shows-stat-pill` — wins by order
+ * and strips pill padding unless we raise specificity here.
+ */
+.wl-home-v2 .tour-shows-stat-pill {
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 0;
+  padding-bottom: 0;
+}

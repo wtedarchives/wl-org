@@ -40,7 +40,8 @@ function getHeaderBgColor(title: string, index: number): string {
 }
 
 /** Same hues as legacy pill fills; mirrors `TourSlotsTable` WL header chrome + accent swatch. */
-function WlTopSlotsCategorySwatch({ color }: { color: string }) {
+/** Small rounded rectangle — matches tour `TopSlotsCarousel` WL chrome. */
+export function WlTopSlotsCategorySwatch({ color }: { color: string }) {
   return (
     <span
       className="h-4 w-[30px] shrink-0 rounded-[4px] ring-1 ring-black/25"

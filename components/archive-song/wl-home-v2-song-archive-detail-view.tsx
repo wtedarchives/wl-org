@@ -3,16 +3,28 @@
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react"
 
 import {
   placementLegendRows,
   placementStatsForVerbatimBar,
+  type SongArchivePerformanceWtedPayload,
   WlHomeV2SongArchiveDetailPerformances,
 } from "@/components/archive-song/wl-home-v2-song-archive-detail-performances"
 import { SongsArchiveListSearchModal } from "@/components/archive-songs/wl-home-v2-songs-archive-list-modals"
 import { songsArchiveSearchHits } from "@/components/archive-songs/songs-archive-helpers"
+import { useAuth } from "@/components/auth-context"
 import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
+import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { WL_V2_ARCHIVES_BREADCRUMB_ROOT } from "@/components/setlist-breadcrumb-context"
 import {
@@ -20,15 +32,21 @@ import {
   WlHomeV2ArchiveCrumbsTrail,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
+import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+import { useSetlistData } from "@/hooks/use-setlist-data"
 import { useSongData } from "@/hooks/use-song-data"
 import { useSongsArchiveData } from "@/hooks/use-songs-archive-data"
 import { useSongWtedAirplay } from "@/hooks/use-song-wted-airplay"
 import { songDetailPlacementLegendSwatch } from "@/lib/song-detail-placement-chip"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
-import { formatSetlistDate, getRarityColor } from "@/lib/setlist-utils"
+import {
+  formatSetlistDate,
+  getRarityColor,
+  getRarityPillBackground,
+} from "@/lib/setlist-utils"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
 import { CaretDown, CaretUp } from "@phosphor-icons/react"
@@ -73,6 +91,8 @@ function SongsArchiveSearchGlyph() {
 }
 
 export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
+  const { user } = useAuth()
+  const songPerfWtedModalHeadingId = useId()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const { songs: archiveSongs } = useSongsArchiveData()
 
@@ -96,6 +116,15 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
   const [jotyOpen, setJotyOpen] = useState(false)
   const [jotyYear, setJotyYear] = useState<number | null>(null)
   const [jotyEntryId, setJotyEntryId] = useState<string | null>(null)
+
+  const [songPerfWtedModal, setSongPerfWtedModal] =
+    useState<SongArchivePerformanceWtedPayload | null>(null)
+  const [perfTableWtedLoginRequiredOpen, setPerfTableWtedLoginRequiredOpen] =
+    useState(false)
+
+  const { setlist: perfTableWtedAnchorSetlist } = useSetlistData(
+    songPerfWtedModal?.entry.entry_show,
+  )
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -121,6 +150,33 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
     setSearchOpen(true)
     setSearchQuery("")
   }, [])
+
+  const songPerfWtedModalOpen = !!songPerfWtedModal
+
+  const onPerfTableWtedPayloadClick = useCallback(
+    (payload: SongArchivePerformanceWtedPayload) => {
+      if (!user) {
+        setPerfTableWtedLoginRequiredOpen(true)
+        return
+      }
+      setSongPerfWtedModal(payload)
+    },
+    [user],
+  )
+
+  const closePerfTableWtedModal = useCallback(() => {
+    setSongPerfWtedModal(null)
+  }, [])
+
+  useEffect(() => {
+    if (!songPerfWtedModalOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return
+      closePerfTableWtedModal()
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [songPerfWtedModalOpen, closePerfTableWtedModal])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -408,10 +464,14 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
                       </span>
                       <span
                         className="rare-pill"
-                        style={{
-                          backgroundColor: getRarityColor(stats.rarity),
-                          color: "#fff",
-                        }}
+                        style={
+                          {
+                            "--setlist-rare-fill":
+                              getRarityPillBackground(stats.rarity),
+                            "--setlist-rare-border":
+                              getRarityColor(stats.rarity),
+                          } as CSSProperties
+                        }
                       >
                         {stats.rarity}
                       </span>
@@ -548,6 +608,7 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
                   setJotyEntryId(entryId)
                   setJotyOpen(true)
                 }}
+                onWtedPayloadClick={onPerfTableWtedPayloadClick}
               />
             </div>
             {showWtedBesidePerformances ?
@@ -675,6 +736,32 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
         setSearchQuery={setSearchQuery}
         searchHits={searchHits}
         searchInputRef={searchInputRef}
+      />
+      <SetlistWtedLoginRequiredDialog
+        open={perfTableWtedLoginRequiredOpen}
+        onOpenChange={setPerfTableWtedLoginRequiredOpen}
+        wlHomeV2
+      />
+      <WlHomeV2SetlistWtedModal
+        open={songPerfWtedModalOpen}
+        onClose={closePerfTableWtedModal}
+        entry={songPerfWtedModal?.entry ?? null}
+        setlist={
+          perfTableWtedAnchorSetlist.length > 0 ?
+            perfTableWtedAnchorSetlist
+          : songPerfWtedModal ?
+            [songPerfWtedModal.entry]
+          : []
+        }
+        show={
+          songPerfWtedModal?.show ?? {
+            show_date: "",
+            show_venue_location: null,
+            show_group: null,
+          }
+        }
+        fallbackReleaseArtwork={null}
+        headingId={songPerfWtedModalHeadingId}
       />
       <SetlistJotyDrawer
         open={jotyOpen}

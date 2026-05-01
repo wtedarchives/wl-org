@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
+import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
+import type { SetlistWtedShowContext } from "@/components/dpro/setlist/setlist-wted-panel.lib"
 import {
   jotyRoundDataAttr,
   shouldShowSetlistEntryShort,
@@ -29,8 +31,11 @@ import {
   songDetailPlacementChipSurfaceStyle,
   songDetailPlacementLegendSwatch,
 } from "@/lib/song-detail-placement-chip"
-import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+import { SETLIST_HEADER_TOOLTIP_CONTENT, SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+import type { SetlistEntry } from "@/types/setlist"
 import type { SongPerformance } from "@/types/song"
+import { songPerformanceToWtedStubEntry } from "@/lib/song-performance-wted-stub"
+import { cn } from "@/lib/utils"
 import { Columns, Rows } from "@phosphor-icons/react"
 
 /** WL Home v2 song detail: `/archive/song?id=…&performances=table` (omit or `timeline` for timeline). */
@@ -65,17 +70,6 @@ function formatChipDate(showDate: string): string {
   return f.length >= 5 ? f.slice(0, 5) : f
 }
 
-function stripTags(html: string): string {
-  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
-}
-
-function performanceNotes(p: SongPerformance): string {
-  if (p.entry_segue?.trim()) return `→ ${stripTags(p.entry_segue)}`
-  if (p.entry_coachnotes?.trim())
-    return stripTags(p.entry_coachnotes).slice(0, 120) || "—"
-  return "—"
-}
-
 function performanceVenueHref(p: SongPerformance): string | null {
   if (p.venue_id) return getVenueArchiveUrl(p.venue_id)
   if (p.show_subvenue_venue) return getVenueArchiveUrl(p.show_subvenue_venue)
@@ -106,6 +100,12 @@ type SortColumnId =
   | "gap"
   | "entry_length"
 
+/** WTED icon column — same modal/login flow as {@link WlHomeV2SetlistTable}. */
+export type SongArchivePerformanceWtedPayload = {
+  entry: SetlistEntry
+  show: SetlistWtedShowContext
+}
+
 function PerfArchiveTableRow({
   perf,
   index,
@@ -114,6 +114,8 @@ function PerfArchiveTableRow({
   songDisplayName,
   showTooltips,
   onJotyClick,
+  showWtedColumn,
+  onWtedPayloadClick,
 }: {
   perf: SongPerformance
   index: number
@@ -122,6 +124,8 @@ function PerfArchiveTableRow({
   songDisplayName?: string | null
   showTooltips: boolean
   onJotyClick?: (year: number, entryId: string | null) => void
+  showWtedColumn: boolean
+  onWtedPayloadClick?: (payload: SongArchivePerformanceWtedPayload) => void
 }) {
   const rowKey = perf.entry_id
     ? `${perf.entry_id}-${index}`
@@ -132,6 +136,11 @@ function PerfArchiveTableRow({
   const placementBar = isMainSet ? undefined : getPlacementBarColor(perf.entry_placement)
   const venueHref = performanceVenueHref(perf)
   const jotyRound = perf.joty_round?.trim()
+  const wtedStub = songPerformanceToWtedStubEntry(
+    perf,
+    songCanonical,
+    songDisplayName,
+  )
 
   return (
     <tr
@@ -148,33 +157,48 @@ function PerfArchiveTableRow({
           boxShadow: placementBar ? `inset -4px 0 0 ${placementBar}` : "none",
         }}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href={getSetlistArchiveUrl(perf.show_id)}>
-              {formatSetlistDate(perf.show_date)}
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <PerformanceTooltipContent fullData={perf} />
-          </TooltipContent>
-        </Tooltip>
+        {showTooltips ?
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href={getSetlistArchiveUrl(perf.show_id)}>
+                {formatSetlistDate(perf.show_date)}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent {...SETLIST_V2_ROW_TOOLTIP_CONTENT}>
+              <PerformanceTooltipContent fullData={perf} />
+            </TooltipContent>
+          </Tooltip>
+        : <Link href={getSetlistArchiveUrl(perf.show_id)}>
+            {formatSetlistDate(perf.show_date)}
+          </Link>
+        }
       </td>
       <td className="dim">{perf.show_group}</td>
       <td className="venue">
         {perf.show_subvenue ?
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {venueHref ?
-                <Link href={venueHref}>{perf.show_venue_location}</Link>
-              : <span>{perf.show_venue_location}</span>}
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[250px]">
-              <div
-                className="text-xs [&_a]:text-primary [&_a]:underline"
-                dangerouslySetInnerHTML={{ __html: perf.show_subvenue }}
-              />
-            </TooltipContent>
-          </Tooltip>
+          showTooltips ?
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {venueHref ?
+                  <Link href={venueHref}>{perf.show_venue_location}</Link>
+                : <span>{perf.show_venue_location}</span>}
+              </TooltipTrigger>
+              <TooltipContent
+                {...SETLIST_V2_ROW_TOOLTIP_CONTENT}
+                className={cn(
+                  SETLIST_V2_ROW_TOOLTIP_CONTENT.className,
+                  "setlist-header-tooltip--tight",
+                )}
+              >
+                <div
+                  className="[&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: perf.show_subvenue }}
+                />
+              </TooltipContent>
+            </Tooltip>
+          : venueHref ?
+            <Link href={venueHref}>{perf.show_venue_location}</Link>
+          : perf.show_venue_location
         : venueHref ?
           <Link href={venueHref}>{perf.show_venue_location}</Link>
         : perf.show_venue_location}
@@ -207,6 +231,28 @@ function PerfArchiveTableRow({
           </Link>
         }
       </td>
+      {showWtedColumn ?
+        <td className="dim perf-table-td--center perf-table-td--wted">
+          <SetlistEntryWtedCell
+            entry={wtedStub}
+            onWtedClick={
+              onWtedPayloadClick ?
+                (entry) =>
+                  onWtedPayloadClick({
+                    entry,
+                    show: {
+                      show_date: perf.show_date,
+                      show_venue_location: perf.show_venue_location,
+                      show_group: perf.show_group,
+                    },
+                  })
+              : undefined
+            }
+            showTooltips={showTooltips}
+            tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+          />
+        </td>
+      : null}
       <td className="dim perf-table-td--center">{perf.entry_set || ""}</td>
       <td className="perf-table-td--center perf-table-td--joty">
         {jotyRound ?
@@ -279,6 +325,7 @@ export function WlHomeV2SongArchiveDetailPerformances({
   selectedPlacement,
   onClearPerformanceFilter,
   onJotyBadgeClick,
+  onWtedPayloadClick,
 }: {
   performances: SongPerformance[]
   songCanonical: string
@@ -287,6 +334,7 @@ export function WlHomeV2SongArchiveDetailPerformances({
   selectedPlacement: string | null
   onClearPerformanceFilter: () => void
   onJotyBadgeClick?: (year: number, entryId: string | null) => void
+  onWtedPayloadClick?: (payload: SongArchivePerformanceWtedPayload) => void
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -312,12 +360,14 @@ export function WlHomeV2SongArchiveDetailPerformances({
   const { sortColumn, sortDirection, handleSort, sortPerformances } =
     usePerformanceSorting()
   const showTooltips = useIsDesktopContentLayout()
-  const [tooltip, setTooltip] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    perf: SongPerformance | null
-  }>({ visible: false, x: 0, y: 0, perf: null })
+
+  const showWtedColumn = useMemo(
+    () =>
+      performances.some(
+        (p) => !!p.radio_id && String(p.radio_id).trim() !== "",
+      ),
+    [performances],
+  )
 
   const filteredPerformances = useMemo(
     () =>
@@ -368,25 +418,6 @@ export function WlHomeV2SongArchiveDetailPerformances({
     (column: SortColumnId) => () => handleSort(column),
     [handleSort],
   )
-
-  const showTooltip = useCallback((e: React.MouseEvent, perf: SongPerformance) => {
-    setTooltip({
-      visible: true,
-      x: e.clientX + 14,
-      y: e.clientY + 14,
-      perf,
-    })
-  }, [])
-
-  const moveTooltip = useCallback((e: React.MouseEvent) => {
-    setTooltip((t) =>
-      t.visible ? { ...t, x: e.clientX + 14, y: e.clientY + 14 } : t,
-    )
-  }, [])
-
-  const hideTooltip = useCallback(() => {
-    setTooltip((t) => ({ ...t, visible: false, perf: null }))
-  }, [])
 
   if (performances.length === 0) {
     return (
@@ -485,21 +516,34 @@ export function WlHomeV2SongArchiveDetailPerformances({
                       const chipClass = getSongDetailPlacementChipClass(
                         p.entry_placement,
                       )
-                      return (
+                      const chip = (
                         <Link
-                          key={`${p.entry_id ?? p.show_id}-${idx}`}
                           href={getSetlistArchiveUrl(p.show_id)}
                           className={`tl-chip ${chipClass}`}
                           style={songDetailPlacementChipSurfaceStyle(
                             p.entry_placement,
                             chipClass,
                           )}
-                          onMouseEnter={(e) => showTooltip(e, p)}
-                          onMouseMove={moveTooltip}
-                          onMouseLeave={hideTooltip}
                         >
                           {formatChipDate(p.show_date)}
                         </Link>
+                      )
+                      return (
+                        <span
+                          key={`${p.entry_id ?? p.show_id}-${idx}`}
+                          className="contents"
+                        >
+                          {showTooltips ?
+                            <Tooltip>
+                              <TooltipTrigger asChild>{chip}</TooltipTrigger>
+                              <TooltipContent
+                                {...SETLIST_V2_ROW_TOOLTIP_CONTENT}
+                              >
+                                <PerformanceTooltipContent fullData={p} />
+                              </TooltipContent>
+                            </Tooltip>
+                          : chip}
+                        </span>
                       )
                     })}
                   </div>
@@ -513,7 +557,10 @@ export function WlHomeV2SongArchiveDetailPerformances({
           hidden={performancesView !== "table"}
           style={{ opacity: performancesView === "table" ? 1 : 0 }}
         >
-          <table className="perf-table">
+          <table
+            className="perf-table"
+            {...(showWtedColumn ? { "data-has-wted-col": "" } : {})}
+          >
             <thead>
               <tr>
                 <th
@@ -544,6 +591,24 @@ export function WlHomeV2SongArchiveDetailPerformances({
                 >
                   Song
                 </th>
+                {showWtedColumn ?
+                  <th className="perf-table-th--static perf-table-th--center">
+                    {showTooltips ?
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="setlist-th-help">WTED</span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          className="setlist-header-tooltip setlist-header-tooltip--tight"
+                          {...SETLIST_HEADER_TOOLTIP_CONTENT}
+                        >
+                          Use the icons below to request songs on WTED Goose
+                          Radio.
+                        </TooltipContent>
+                      </Tooltip>
+                    : "WTED"}
+                  </th>
+                : null}
                 <th
                   className={
                     sortColumn === "entry_set" ?
@@ -600,36 +665,13 @@ export function WlHomeV2SongArchiveDetailPerformances({
                   songDisplayName={songDisplayName}
                   showTooltips={showTooltips}
                   onJotyClick={onJotyBadgeClick}
+                  showWtedColumn={showWtedColumn}
+                  onWtedPayloadClick={onWtedPayloadClick}
                 />
               ))}
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div
-        className={`song-archive-detail-tooltip${tooltip.visible ? " visible" : ""}`}
-        role="tooltip"
-        style={{
-          left: tooltip.x,
-          top: tooltip.y,
-        }}
-      >
-        {tooltip.perf ?
-          <>
-            <div className="tt-date">
-              {formatSetlistDate(tooltip.perf.show_date)}
-            </div>
-            <div className="tt-venue">{tooltip.perf.show_subvenue}</div>
-            <div className="tt-row">{tooltip.perf.show_venue_location}</div>
-            <div className="tt-row">
-              {tooltip.perf.entry_placement} · {tooltip.perf.show_group}
-            </div>
-            {performanceNotes(tooltip.perf) !== "—" ?
-              <div className="tt-row">{performanceNotes(tooltip.perf)}</div>
-            : null}
-          </>
-        : null}
       </div>
     </>
   )

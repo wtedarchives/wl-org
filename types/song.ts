@@ -33,6 +33,7 @@ export interface SongPerformance {
   entry_set: string
   entry_setnum: number | string
   entry_song?: string
+  radio_id?: string | null
   joty_round?: string | null
   shows_since_debut_num?: number | null
   gap?: number | string | null

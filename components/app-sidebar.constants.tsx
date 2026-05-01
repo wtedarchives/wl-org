@@ -18,7 +18,7 @@ export const WTED_RADIO_SUB = [
 export const SETLIST_ARCHIVE_SUB = [
   { title: "Tours", url: "/old/archive/tours" },
   { title: "Songs", url: "/archive/songs" },
-  { title: "Stats", url: "/old/archive/stats" },
+  { title: "Stats", url: "/archive/stats" },
   { title: "Personnel", url: "/old/archive/personnel" },
   { title: "Venues", url: "/old/archive/venues" },
   { title: "Discography", url: "/old/archive/discography" },

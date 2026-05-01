@@ -62,7 +62,7 @@ function extractShowCount(lastCount: string): string {
 }
 
 /** Same Radix chrome + `.setlist-header-tooltip` as song spread WL tooltips (`song-spread-display.tsx`). */
-function LiberatedSongLibTooltip({
+export function LiberatedSongLibTooltip({
   children,
 }: {
   children: ReactNode

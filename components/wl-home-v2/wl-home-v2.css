@@ -1412,6 +1412,224 @@
     }
   }
 
+  /*
+   * Stats archive: 1 col (narrow) → 2 @768 → 3 @1280 → 4 @1540.
+   */
+  .wl-home-v2 .grid.grid--stats-4 {
+    position: relative;
+    isolation: isolate;
+    /* Fills implicit empty cells; matches `.tile.tile-stats` base + photo stack */
+    background: rgba(49, 58, 52, 0.95);
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(min-content, auto);
+    align-content: start;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .wl-home-v2 .grid.grid--stats-4::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: url("/newbg.png");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.26;
+    filter: grayscale(100%) brightness(0.72);
+  }
+  .wl-home-v2 .grid.grid--stats-4::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.78) 88%
+    );
+  }
+  .wl-home-v2 .grid.grid--stats-4 > .tile {
+    position: relative;
+    z-index: 2;
+    min-height: 0;
+    border: 0;
+    border-right: 0;
+    border-bottom: 1px solid rgb(34, 37, 35);
+  }
+  @media (max-width: 767px) {
+    .wl-home-v2 .grid.grid--stats-4 > .tile:last-child {
+      border-bottom: 0;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .wl-home-v2 .grid.grid--stats-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile {
+      border-right: 1px solid rgb(34, 37, 35);
+      border-bottom: 1px solid rgb(34, 37, 35);
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile:nth-child(2n) {
+      border-right: 0;
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile:last-child:not(:nth-child(2n)) {
+      border-right: 0;
+    }
+  }
+  @media (min-width: 1280px) and (max-width: 1539px) {
+    .wl-home-v2 .grid.grid--stats-4 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile {
+      border-right: 1px solid rgb(34, 37, 35);
+      border-bottom: 1px solid rgb(34, 37, 35);
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile:nth-child(3n) {
+      border-right: 0;
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile:last-child:not(:nth-child(3n)) {
+      border-right: 0;
+    }
+  }
+  @media (min-width: 1540px) {
+    .wl-home-v2 .grid.grid--stats-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile {
+      border-right: 1px solid rgb(34, 37, 35);
+      border-bottom: 1px solid rgb(34, 37, 35);
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile:nth-child(4n) {
+      border-right: 0;
+    }
+    .wl-home-v2 .grid.grid--stats-4 > .tile:last-child:not(:nth-child(4n)) {
+      border-right: 0;
+    }
+  }
+
+  .wl-home-v2 .tile.tile-stats {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+    text-align: left;
+    padding: 18px 20px 20px;
+    min-height: 0;
+    overflow: hidden;
+    cursor: default;
+    /* Same base as `.wl-home-v2-years-tile` (tour main column) — darker than default `.tile` */
+    background: rgba(49, 58, 52, 0.95);
+  }
+  .wl-home-v2 .tile.tile-stats::before {
+    opacity: 0.26;
+    filter: grayscale(100%) brightness(0.72);
+  }
+  /* Neutral wash behind translucent panel (#000000a1); teal would read as green tint */
+  .wl-home-v2 .tile.tile-stats::after {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.78) 88%
+    );
+  }
+  .wl-home-v2 .tile.tile-stats[data-wl-stats-tile-bg="0"] {
+    --tile-bg: url("/newbg.png");
+  }
+  .wl-home-v2 .tile.tile-stats[data-wl-stats-tile-bg="1"] {
+    --tile-bg: url("/newbg2.jpeg");
+  }
+  .wl-home-v2 .tile.tile-stats[data-wl-stats-tile-bg="2"] {
+    --tile-bg: url("/newbg3.jpeg");
+  }
+  .wl-home-v2 .tile.tile-stats[data-wl-stats-tile-bg="3"] {
+    --tile-bg: url("/newbg4.jpeg");
+  }
+  @media (max-width: 1279px) {
+    .wl-home-v2 .tile.tile-stats {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+  }
+  .wl-home-v2 .tile.tile-stats .tile-stats-inner {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+  }
+  .wl-home-v2 .wl-home-v2-stats-archive-widget-panel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+  }
+  .wl-home-v2 .wl-home-v2-stats-archive-widget-panel .wp-head {
+    flex-shrink: 0;
+  }
+  .wl-home-v2 .wl-home-v2-stats-archive-widget-panel__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    max-height: 16rem;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0;
+    padding: 0;
+  }
+  /* Shows section: let each tile body grow with the full table (no 16rem clamp). */
+  .wl-home-v2
+    .wl-home-v2-stats-archive-shows-section
+    .wl-home-v2-stats-archive-widget-panel__body {
+    max-height: none;
+  }
+  .wl-home-v2
+    .wl-home-v2-stats-archive-widget-panel__body
+    [data-slot="card-header"] {
+    display: none !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-stats-archive-widget-panel__body
+    > [data-slot="card"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    --tw-ring-shadow: 0 0 #0000;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2
+    .wl-home-v2-stats-archive-widget-panel__body
+    [data-slot="card-content"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: visible;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+  }
+  .wl-home-v2
+    .wl-home-v2-stats-archive-widget-panel__body
+    [data-slot="card-title"] {
+    color: inherit;
+  }
+  .wl-home-v2
+    .wl-home-v2-stats-archive-widget-panel__body
+    .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.55);
+  }
   .wl-home-v2 .tile.tile-gorp {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, auto);
@@ -1589,6 +1807,23 @@
   .wl-home-v2 .tile:hover::after {
     opacity: 1;
     background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.82) 85%);
+  }
+  /* Stats archive: tiles are not links; keep chrome identical on hover */
+  .wl-home-v2 .tile.tile-stats:hover {
+    box-shadow: none;
+  }
+  .wl-home-v2 .tile.tile-stats:hover::before {
+    opacity: 0.26;
+    transform: none;
+    filter: grayscale(100%) brightness(0.72);
+  }
+  .wl-home-v2 .tile.tile-stats:hover::after {
+    opacity: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.78) 88%
+    );
   }
   .wl-home-v2 .tile > *{ position: relative; z-index: 2; }
   /*
@@ -1769,6 +2004,8 @@
     color: rgba(255, 255, 255, 0.85);
   }
   /*
+   * Stats archive: inner `widget-panel` matches tour `TopSlotsCarousel` (default `.widget-panel`).
+   *
    * Tours sidebar accordion: match years `ToursCard` / `topic-row` + `years-filter-button`
    * chrome. Sheet portals render outside `.wl-home-v2`; scope with `[data-wl-v2-tours-sidebar]`.
    */
@@ -1789,7 +2026,8 @@
     align-items: center;
     gap: 10px;
     font-family: "Geist Mono", monospace;
-    font-size: 10px;
+    font-size: 11px;
+    font-weight: 500;
     color: rgba(255, 255, 255, 0.55);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1967,6 +2205,14 @@
     font-family: "Geist Mono", monospace; font-size: 10px;
     color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase;
     margin-bottom: 8px;
+  }
+  /* Stats archive: same panel title color as tour main-column `.widget-panel > .wp-head`. */
+  .wl-home-v2
+    .widget-panel.wl-home-v2-stats-archive-widget-panel
+    > .wp-head {
+    color: var(--wl-white);
+    font-size: 11px;
+    font-weight: 500;
   }
   .wl-home-v2 .widget-panel .wp-head-right {
     display: inline-flex; align-items: center; justify-content: flex-end;
@@ -2200,6 +2446,37 @@
     padding-top: 8px;
     border-top: 1px solid rgb(44, 46, 45);
   }
+
+  /*
+   * Homepage tile grid only (#tileGrid): row dividers read better on frosted panels.
+   * Archive/year/tour views reuse `.wl-home-v2` but do not render `#tileGrid`.
+   */
+  .wl-home-v2 #tileGrid .tile.tile-radio .live-pill-upcoming {
+    border-top-color: rgb(92, 96, 94);
+  }
+  .wl-home-v2
+    #tileGrid
+    .tile.tile-community
+    .widget-panel
+    > .topic-row:not(:last-child),
+  .wl-home-v2
+    #tileGrid
+    .tile.tile-community
+    .widget-panel
+    > a.topic-row:not(:last-of-type) {
+    border-bottom-color: rgb(92, 96, 94);
+  }
+  .wl-home-v2 #tileGrid .tile.tile-archive .setlist-set-row + .setlist-set-row {
+    border-top-color: rgb(92, 96, 94);
+  }
+  .wl-home-v2
+    #tileGrid
+    .tile.tile-community
+    .widget-panel
+    > a.topic-row:not(:last-of-type):hover {
+    border-bottom-color: rgb(52, 109, 95);
+  }
+
   .wl-home-v2 .song {
     font-family: "Geist Mono", monospace; font-size: 10px;
     padding: 3px 7px; border-radius: 4px;
@@ -4823,13 +5100,6 @@
     border-bottom: none;
   }
 
-  .wl-home-v2 .song-archive-detail-vx.wl-home-v2-song-archive-page .song-archive-detail-tooltip {
-    background: rgba(0, 0, 0, 0.63);
-    border: 1px solid rgb(63, 65, 64);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-
   .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .list-card {
     background: rgba(0, 0, 0, 0.63);
     border: 1px solid rgb(63, 65, 64);
@@ -5347,7 +5617,7 @@
     width: 100%;
   }
   /*
-   * Tour main column: panel titles match Song Spread `.sc-label` (full white, normal weight).
+   * Tour main column: panel titles match stats archive `.wp-head` (11px / 500, full white).
    * Skip `.wl-home-v2-years-shows-panel` so the tour dates block keeps default `.wp-head` /
    * teal `.wp-head-date`.
    */
@@ -5356,7 +5626,8 @@
     .widget-panel:not(.wl-home-v2-years-shows-panel)
     > .wp-head {
     color: var(--wl-white);
-    font-weight: 400;
+    font-size: 11px;
+    font-weight: 500;
   }
   .wl-home-v2
     .wl-home-v2-tour-page-main
@@ -5364,12 +5635,14 @@
     > .wp-head
     .wp-head-date {
     color: var(--wl-white);
-    font-weight: 400;
+    font-size: 11px;
+    font-weight: 500;
   }
   /* Tours sidebar + tools modal: same label treatment as other stats panels */
   .wl-home-v2 .widget-panel[data-wl-v2-tours-sidebar] > .wp-head {
     color: var(--wl-white);
-    font-weight: 400;
+    font-size: 11px;
+    font-weight: 500;
   }
   .wl-home-v2 .modal.modal--wted-request.modal--years-tools .modal-request-head h3 {
     font-family: "Geist Mono", ui-monospace, monospace;
@@ -5881,6 +6154,76 @@
     tbody
     td.wl-home-v2-top-slots-stats-cell {
     padding: 1px 0;
+  }
+  /* Stats archive Shows (5 tiles): vertically center all columns when venue wraps etc. */
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-show-stats-table.wl-home-v2-top-slots-stats-table
+    tbody
+    td.wl-home-v2-top-slots-stats-cell {
+    vertical-align: middle;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+  /* Stats archive Shows: 21.34px rows (ShowStatCard wlHomeV2FixedShowStatRowHeight). */
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-show-stats-table--fixed-row-height.wl-home-v2-top-slots-stats-table
+    tbody
+    tr.wl-home-v2-top-slots-stats-row {
+    height: 21.34px;
+  }
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-show-stats-table--fixed-row-height.wl-home-v2-top-slots-stats-table
+    tbody
+    td.wl-home-v2-top-slots-stats-cell {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 21.34px;
+  }
+  .wl-home-v2
+    .widget-panel
+    .wl-home-v2-show-stats-table--fixed-row-height.wl-home-v2-top-slots-stats-table
+    .wl-home-v2-setlist-show-stat-pill--rank {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 0 3px;
+    line-height: 1.15;
+  }
+  /* Top slots + stats archive song/show tables: row chrome (centralized; was Tailwind on TableRow). */
+  .wl-home-v2
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    tr.wl-home-v2-top-slots-stats-row {
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: rgb(34, 37, 35);
+    background-color: transparent !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    tr.wl-home-v2-top-slots-stats-row:hover {
+    background-color: rgba(88, 200, 174, 0.11) !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    tr.wl-home-v2-top-slots-stats-row[data-state="selected"] {
+    background-color: transparent !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    > tr:last-child,
+  .wl-home-v2
+    .wl-home-v2-tours-stats-table
+    tbody
+    > tr:last-child {
+    border-bottom-width: 0;
+    border-bottom-style: none;
   }
   .wl-home-v2 .wl-home-v2-years-aside {
     width: 280px;
@@ -7589,7 +7932,8 @@
   color: rgba(255, 255, 255, 0.55);
 }
 /* Pills: same label color as `.set-table td.rarity-cell .rare-pill` */
-.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill,
+.wl-home-v2 .wl-home-v2-show-stats-table .wl-home-v2-setlist-show-stat-pill {
   display: inline-block;
   box-sizing: border-box;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -7600,7 +7944,8 @@
   font-variant-numeric: tabular-nums;
   color: rgba(255, 255, 255, 0.8);
 }
-.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--rank {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--rank,
+.wl-home-v2 .wl-home-v2-show-stats-table .wl-home-v2-setlist-show-stat-pill--rank {
   border: 1px solid rgb(29, 78, 216);
   background: rgb(37, 99, 235);
   color: rgba(255, 255, 255, 0.8);
@@ -7609,11 +7954,11 @@
     background 0.15s ease,
     border-color 0.15s ease;
 }
-.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--rank:hover {
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--rank:hover,
+.wl-home-v2 .wl-home-v2-show-stats-table .wl-home-v2-setlist-show-stat-pill--rank:hover {
   background: rgb(29, 78, 216);
   border-color: rgb(30, 64, 175);
-}
-.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--length {
+}.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-stat-pill--length {
   border: 1px solid rgb(52, 109, 95);
   background: var(--wl-dark-green);
   color: rgba(255, 255, 255, 0.8);
@@ -7789,6 +8134,25 @@
   max-height: 464px;
   min-height: 0;
   overflow: hidden;
+}
+/* Stats archive grid: song spread tile fills row height like Longest Songs / Top Returning siblings. */
+.wl-home-v2 .tile.tile-stats.tile-stats--tour-song-spread .tile-stats-inner {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.wl-home-v2 .tile.tile-stats.tile-stats--tour-song-spread .wl-home-v2-setlist {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+.wl-home-v2
+  .tile.tile-stats.tile-stats--tour-song-spread
+  .wl-home-v2-tour-stats-song-spread.side-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 271.5px;
 }
 .wl-home-v2 .wl-home-v2-tour-stats-song-spread .wl-home-v2-setlist-song-spread-ul {
   flex: 1 1 auto;

@@ -1,5 +1,7 @@
 "use client"
+
 import { formatTourShowDate } from "@/components/dpro/tours/tour-show-format"
+import { TourShowsStatPill } from "@/components/dpro/tours/tour-shows-stat-pill"
 import { TourShowRowRatingStars } from "@/components/dpro/tours/tour-show-row-rating-stars"
 import {
   Broadcast,
@@ -19,8 +21,13 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip"
 import type { TourShow } from "@/types/tour"
-import { getRarityColor, getGapColor } from "@/lib/stats/tour-utils"
-import { formatLengthAsHmmss } from "@/lib/setlist-utils"
+import {
+  formatLengthAsHmmss,
+  getGapColor,
+  getGapPillBackground,
+  getRarityColor,
+  getRarityPillBackground,
+} from "@/lib/setlist-utils"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Image from "next/image"
@@ -54,6 +61,21 @@ export function TourShowRow({
   const { user } = useAuth()
   const rating = showRatings[show.show_id] ?? 0
   const attendeeCount = attendeeCounts[show.show_id] ?? 0
+
+  const rarityNumeric =
+    show.show_rarity != null && String(show.show_rarity).trim() !== ""
+      ? Number.parseFloat(
+          String(show.show_rarity).replace(/%/g, "").trim(),
+        )
+      : NaN
+  const gapNumeric =
+    show.show_gap != null && String(show.show_gap).trim() !== ""
+      ? Number.parseFloat(String(show.show_gap).trim())
+      : NaN
+
+  const rarityPctStr = Number.isFinite(rarityNumeric)
+    ? `${rarityNumeric.toFixed(2)}%`
+    : null
 
   return (
     <TableRow
@@ -128,28 +150,28 @@ export function TourShowRow({
         <TableCell
           className={cn("text-center", wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1")}
         >
-          {show.show_rarity ? (
-            <span
-              className="inline-block rounded !px-1.5 !py-[1px] text-[11px] font-medium text-white"
-              style={{ backgroundColor: getRarityColor(show.show_rarity) }}
+          {rarityPctStr != null ?
+            <TourShowsStatPill
+              fill={getRarityPillBackground(rarityPctStr)}
+              border={getRarityColor(rarityPctStr)}
             >
-              {show.show_rarity}
-            </span>
-          ) : null}
+              {rarityPctStr}
+            </TourShowsStatPill>
+          : null}
         </TableCell>
       ) : null}
       {showGapColumn ? (
         <TableCell
           className={cn("text-center", wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1")}
         >
-          {show.show_gap ? (
-            <span
-              className="inline-block rounded !px-1.5 !py-[1px] text-[11px] font-medium text-white"
-              style={{ backgroundColor: getGapColor(show.show_gap) }}
+          {Number.isFinite(gapNumeric) ?
+            <TourShowsStatPill
+              fill={getGapPillBackground(gapNumeric)}
+              border={getGapColor(gapNumeric)}
             >
-              {show.show_gap}
-            </span>
-          ) : null}
+              {gapNumeric.toFixed(2)}
+            </TourShowsStatPill>
+          : null}
         </TableCell>
       ) : null}
       <TableCell
