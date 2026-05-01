@@ -1,15 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
-import {
-  FaBluesky,
-  FaFacebook,
-  FaInstagram,
-  FaXTwitter,
-} from "react-icons/fa6"
 import { ChevronRightIcon, Share2Icon } from "lucide-react"
 
+import { FollowUsLinksGrid } from "@/components/follow-us-links-grid"
 import {
   Dialog,
   DialogContent,
@@ -28,110 +22,6 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { useIsBelowLg } from "@/hooks/use-mobile"
-import {
-  FOLLOW_US_GROUPS,
-  type FollowUsLinkItem,
-  type FollowUsNetwork,
-} from "@/components/app-sidebar.constants"
-
-function FollowUsPlatformIcon({ network }: { network: FollowUsNetwork }) {
-  const iconClass = "size-4 shrink-0"
-  switch (network) {
-    case "bluesky":
-      return <FaBluesky className={iconClass} aria-hidden />
-    case "instagram":
-      return <FaInstagram className={iconClass} aria-hidden />
-    case "facebook":
-      return <FaFacebook className={iconClass} aria-hidden />
-    case "x":
-      return <FaXTwitter className={iconClass} aria-hidden />
-  }
-}
-
-const PLATFORM_ORDER: readonly FollowUsNetwork[] = [
-  "bluesky",
-  "x",
-  "instagram",
-  "facebook",
-]
-
-function sortLinksByPlatform(
-  links: readonly FollowUsLinkItem[],
-  order: readonly FollowUsNetwork[] = PLATFORM_ORDER,
-): FollowUsLinkItem[] {
-  return [...links].sort(
-    (a, b) => order.indexOf(a.network) - order.indexOf(b.network),
-  )
-}
-
-function FollowUsLinksGrid({
-  layout,
-  onSelectLink,
-}: {
-  layout: "popover" | "dialog"
-  onSelectLink?: () => void
-}) {
-  const isPopoverLayout = layout === "popover"
-  return (
-    <div
-      className={cn(
-        "grid gap-0",
-        isPopoverLayout
-          ? "grid-cols-1 sm:grid-cols-3 sm:divide-x sm:divide-border"
-          : "grid-cols-1",
-      )}
-    >
-      {FOLLOW_US_GROUPS.map((group) => (
-        <section
-          key={group.id}
-          className={cn(
-            "flex flex-col",
-            isPopoverLayout
-              ? "p-3 first:pt-3 last:pb-3 sm:p-4"
-              : "border-b border-border py-3 last:border-b-0 last:pb-0",
-          )}
-        >
-          <div className="flex items-center gap-2 pb-3">
-            <Image
-              src={group.brandSrc}
-              alt=""
-              width={24}
-              height={24}
-              className="size-6 shrink-0 object-contain"
-            />
-            <h3 className="text-sm font-semibold leading-tight text-foreground">
-              {group.title}
-            </h3>
-          </div>
-          <ul className="flex flex-col gap-0.5">
-            {sortLinksByPlatform(
-              group.links,
-              group.platformOrder ?? PLATFORM_ORDER,
-            ).map((item) => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => onSelectLink?.()}
-                  className={cn(
-                    "flex items-center gap-2 rounded-md py-2 text-xs leading-snug transition-colors",
-                    isPopoverLayout ? "px-1" : "px-6",
-                    "hover:bg-accent hover:text-accent-foreground",
-                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                  )}
-                >
-                  <FollowUsPlatformIcon network={item.network} />
-                  <span className="min-w-0 flex-1">{item.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
-  )
-}
 
 export function AppSidebarFollowUs() {
   const { state, isMobile } = useSidebar()

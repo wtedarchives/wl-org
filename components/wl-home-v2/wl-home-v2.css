@@ -104,7 +104,7 @@
   .wl-home-v2 a.brand:hover {
     transform: scale(1.05);
   }
-  @media (max-width: 1023px) {
+  @media (max-width: 1279px) {
     .wl-home-v2 a.brand {
       transform-origin: center center;
     }
@@ -263,7 +263,7 @@
     font-size: 11px;
     font-weight: 600;
   }
-  @media (max-width: 1023px) {
+  @media (max-width: 1279px) {
     .wl-home-v2
       .top-nav-user-trigger:has(.top-nav-user-trigger-avatar)
       .top-nav-user-trigger-label {
@@ -304,7 +304,8 @@
     height: 22px;
     flex-shrink: 0;
   }
-  @media (max-width: 1023px) {
+  /* Below Tailwind `xl` (1280px): stacked header + drawer nav */
+  @media (max-width: 1279px) {
     .wl-home-v2 header.top {
       grid-template-columns: auto 1fr auto;
       grid-template-rows: auto auto auto;
@@ -470,7 +471,7 @@
     -webkit-backdrop-filter: blur(4px);
     padding: 10px 28px 12px;
   }
-  @media (max-width: 1023px) {
+  @media (max-width: 1279px) {
     .wl-home-v2
       .wl-home-v2-archive-subnav:not(.wl-home-v2-archive-subnav--drawer) {
       padding-inline: 16px;
@@ -4090,6 +4091,86 @@
     box-shadow: none;
     overflow: hidden;
   }
+
+  /* Follow Us — single column, grouped sections */
+  .wl-home-v2 .modal.modal--follow-us {
+    max-width: min(480px, calc(100vw - 2rem));
+    max-height: min(92vh, 900px);
+  }
+  @media (max-width: 767px) {
+    .wl-home-v2 .modal.modal--follow-us {
+      max-height: 80vh;
+    }
+  }
+  .wl-home-v2 .modal.modal--follow-us .modal-request-body {
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+    margin-top: 0;
+  }
+  .wl-home-v2 .modal.modal--follow-us .modal-follow-us-body {
+    margin-top: 12px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+  }
+  .wl-home-v2 .modal-follow-us-stack {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 2px 6px 10px 2px;
+  }
+  .wl-home-v2 .modal-follow-us-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .wl-home-v2 .modal-follow-us-group-heading {
+    margin: 0;
+    padding: 0;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2 .modal-follow-us-group-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 0 2px;
+  }
+  .wl-home-v2 .modal-follow-us-group-logo {
+    width: 24px;
+    height: 24px;
+  }
+  .wl-home-v2 .modal-follow-us-group-tiles {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .wl-home-v2 .modal-follow-us-group-tiles .modal-archive-tile {
+    justify-content: center;
+    min-height: 52px;
+    gap: 0;
+  }
+  .wl-home-v2 .modal-follow-us-group-tiles .modal-archive-tile-top {
+    align-items: center;
+  }
+
   .wl-home-v2 .modal-archive-hub-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

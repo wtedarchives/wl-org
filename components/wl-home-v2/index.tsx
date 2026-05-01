@@ -19,6 +19,7 @@ import "./wl-home-v2.css"
 import { SubmitModalHandler } from "@/components/submit-modal-handler"
 
 import { WlHomeV2ArchiveModal } from "./wl-home-v2-archive-modal"
+import { WlHomeV2FollowUsModal } from "./wl-home-v2-follow-us-modal"
 import { WlHomeV2RadioModal } from "./wl-home-v2-radio-modal"
 import { WlHomeV2ArchiveSubnav } from "./wl-home-v2-archive-subnav"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
@@ -84,6 +85,9 @@ export function WlHomeV2({
 
   const [radioOpen, setRadioOpen] = useState(false)
   const radioHeadingId = useId()
+
+  const [followUsOpen, setFollowUsOpen] = useState(false)
+  const followUsHeadingId = useId()
 
   const [tweaksOpen, setTweaksOpen] = useState(false)
 
@@ -163,7 +167,8 @@ export function WlHomeV2({
       !forgotOpen &&
       !signupOpen &&
       !archiveOpen &&
-      !radioOpen
+      !radioOpen &&
+      !followUsOpen
     )
       return
     function onKey(e: KeyboardEvent) {
@@ -175,6 +180,7 @@ export function WlHomeV2({
       setSignupOpen(false)
       closeArchiveModal()
       setRadioOpen(false)
+      setFollowUsOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
@@ -186,6 +192,7 @@ export function WlHomeV2({
     signupOpen,
     archiveOpen,
     radioOpen,
+    followUsOpen,
     closeArchiveModal,
   ])
 
@@ -203,6 +210,7 @@ export function WlHomeV2({
             }}
             onOpenArchive={openArchiveHub}
             onOpenRadio={() => setRadioOpen(true)}
+            onOpenFollowUs={() => setFollowUsOpen(true)}
           />
 
         <Suspense fallback={null}>
@@ -275,6 +283,11 @@ export function WlHomeV2({
         onClose={() => setRadioOpen(false)}
         headingId={radioHeadingId}
         onRequestSong={() => setRequestOpen(true)}
+      />
+      <WlHomeV2FollowUsModal
+        open={followUsOpen}
+        onClose={() => setFollowUsOpen(false)}
+        headingId={followUsHeadingId}
       />
       <Suspense fallback={null}>
         <SubmitModalHandler />

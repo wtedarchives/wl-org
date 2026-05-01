@@ -95,7 +95,7 @@ export const FOLLOW_US_GROUPS = [
   },
   {
     id: "community",
-    title: "Wysteria Lane",
+    title: "WTED Community",
     brandSrc: "/WL.png",
     links: [
       {

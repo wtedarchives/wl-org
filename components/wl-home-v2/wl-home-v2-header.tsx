@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { List, MoneyWavy, X } from "@phosphor-icons/react"
+import { ArrowRight, List, MoneyWavy, X } from "@phosphor-icons/react"
 import {
   Suspense,
   useCallback,
@@ -36,7 +36,7 @@ function TopNavPrimaryImage({ src }: { src: string }) {
         width={80}
         height={80}
         className="top-nav-primary-img"
-        sizes="(max-width: 1023px) 20px, 22px"
+        sizes="(max-width: 1279px) 20px, 22px"
       />
     </span>
   )
@@ -47,6 +47,7 @@ export function WlHomeV2Header({
   onOpenSignup,
   onOpenArchive,
   onOpenRadio,
+  onOpenFollowUs,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
@@ -54,6 +55,8 @@ export function WlHomeV2Header({
   onOpenArchive: () => void
   /** Open the WTED Radio hub modal (primary click). */
   onOpenRadio: () => void
+  /** Open Follow Us (social links) modal — no route change. */
+  onOpenFollowUs: () => void
 }) {
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
@@ -79,6 +82,24 @@ export function WlHomeV2Header({
       closeMobileNav()
     },
     [onOpenArchive, closeMobileNav],
+  )
+
+  const onFollowUsNavClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>) => {
+      if (
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return
+      }
+      e.preventDefault()
+      onOpenFollowUs()
+      closeMobileNav()
+    },
+    [onOpenFollowUs, closeMobileNav],
   )
 
   const onRadioNavClick = useCallback(
@@ -205,6 +226,19 @@ export function WlHomeV2Header({
             />
             Support
           </Link>
+          <a
+            href="#"
+            aria-haspopup="dialog"
+            onClick={onFollowUsNavClick}
+          >
+            <ArrowRight
+              className="top-nav-primary-icon"
+              size={18}
+              weight="regular"
+              aria-hidden
+            />
+            Follow Us
+          </a>
           <button
             type="button"
             className="top-nav-old-toggle"
