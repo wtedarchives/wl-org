@@ -1,7 +1,5 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import {
   useCallback,
@@ -11,7 +9,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from "react"
 
 import {
@@ -20,75 +17,30 @@ import {
   type SongArchivePerformanceWtedPayload,
   WlHomeV2SongArchiveDetailPerformances,
 } from "@/components/archive-song/wl-home-v2-song-archive-detail-performances"
-import { SongsArchiveListSearchModal } from "@/components/archive-songs/wl-home-v2-songs-archive-list-modals"
+import { WlHomeV2SongArchiveDetailHeader } from "@/components/archive-song/wl-home-v2-song-archive-detail-header"
+import { WlHomeV2SongArchiveDetailInfoStrip } from "@/components/archive-song/wl-home-v2-song-archive-detail-info-strip"
+import { WlHomeV2SongArchiveDetailModals } from "@/components/archive-song/wl-home-v2-song-archive-detail-modals"
+import { WlHomeV2SongArchiveDetailWtedAside } from "@/components/archive-song/wl-home-v2-song-archive-detail-wted-aside"
+import { WlHomeV2SongArchiveDetailLyricsColumn } from "@/components/archive-song/wl-home-v2-song-archive-detail-lyrics-column"
+import { SongsArchiveSearchGlyph } from "@/components/archive-song/wl-home-v2-song-archive-search-glyph"
 import { songsArchiveSearchHits } from "@/components/archive-songs/songs-archive-helpers"
 import { useAuth } from "@/components/auth-context"
-import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
-import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { WL_V2_ARCHIVES_BREADCRUMB_ROOT } from "@/components/setlist-breadcrumb-context"
 import {
   WlHomeV2ArchiveCrumbsShell,
   WlHomeV2ArchiveCrumbsTrail,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
-import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { useSetlistData } from "@/hooks/use-setlist-data"
 import { useSongData } from "@/hooks/use-song-data"
 import { useSongsArchiveData } from "@/hooks/use-songs-archive-data"
 import { useSongWtedAirplay } from "@/hooks/use-song-wted-airplay"
-import { songDetailPlacementLegendSwatch } from "@/lib/song-detail-placement-chip"
-import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
-import {
-  formatSetlistDate,
-  getRarityColor,
-  getRarityPillBackground,
-} from "@/lib/setlist-utils"
-import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
-import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
-import { CaretDown, CaretUp } from "@phosphor-icons/react"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 
 import "./song-archive-detail-verbatim.css"
-
-function categoryInitials(category: string): string {
-  const parts = category.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return "?"
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
-
-/**
- * Matches `SongLyrics` (`components/dpro/song/song-lyrics.tsx`): wrap [labels] for
- * emphasis; any other markup in `song_lyrics` passes through via `dangerouslySetInnerHTML`.
- */
-function formatLyricsHtml(lyrics: string): string {
-  return lyrics.replace(
-    /\[(.*?)\]/g,
-    '<span class="lyrics-bracket-tag">[$1]</span>',
-  )
-}
-
-function SongsArchiveSearchGlyph() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="11" cy="11" r="7" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  )
-}
 
 export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
   const { user } = useAuth()
@@ -360,230 +312,24 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
         }
       >
         <div className="col-main">
-          <div className="song-header">
-            <div className="left">
-              <div
-                className="artwork-float"
-                style={{
-                  width: 52,
-                  height: 52,
-                  margin: 0,
-                  float: "none",
-                  flexShrink: 0,
-                }}
-                title={`${song.song_category} artwork`}
-              >
-                {song.categories?.category_artwork ?
-                  <Image
-                    src={song.categories.category_artwork}
-                    alt=""
-                    width={52}
-                    height={52}
-                    className="size-full object-cover"
-                    unoptimized
-                  />
-                : categoryInitials(song.song_category)}
-              </div>
-              <div>
-                <h1>
-                  <SongDisplayName
-                    song={song.song}
-                    songDisplayName={song.song_displayname}
-                    underlineOnHover={false}
-                  />
-                  {subtitleParts.length > 0 ?
-                    <span className="alt-name">{subtitleParts.join(" · ")}</span>
-                  : null}
-                </h1>
-              </div>
-            </div>
-          </div>
+          <WlHomeV2SongArchiveDetailHeader
+            song={song}
+            subtitleParts={subtitleParts}
+          />
 
-          <div
-            className="info-strip"
-            style={
-              {
-                "--info-strip-cards": infoStripCardCount,
-              } as React.CSSProperties
-            }
-          >
-            <div className="card">
-              <div className="card-head">
-                <h3>Song Info</h3>
-              </div>
-              <div className="card-body">
-                {song.song_originalartist?.trim() ?
-                  <div className="info-row">
-                    <div className="lbl">Original Artist</div>
-                    <div className="val">{song.song_originalartist}</div>
-                  </div>
-                : null}
-                {song.song_writer?.trim() ?
-                  <div className="info-row">
-                    <div className="lbl">Writer</div>
-                    <div className="val">{song.song_writer}</div>
-                  </div>
-                : null}
-                {lastPlayed ?
-                  <div className="info-row">
-                    <div className="lbl">Last Time Played</div>
-                    <div className="val">
-                      <Link
-                        href={getSetlistArchiveUrl(lastPlayed.show_id)}
-                        className="venue-link"
-                      >
-                        {formatSetlistDate(lastPlayed.show_date)}
-                      </Link>
-                      <span className="sub">
-                        (
-                        {lastPlayed.showsAgo === 1 ?
-                          "most recent show"
-                        : `${lastPlayed.showsAgo} shows ago`}
-                        )
-                      </span>
-                    </div>
-                  </div>
-                : null}
-              </div>
-            </div>
-
-            {stats.groupCounts.length > 0 ?
-              <div className="card">
-                <div className="card-head">
-                  <h3>Stats</h3>
-                  <span className="hd-meta">
-                    {stats.totalShows} performance
-                    {stats.totalShows === 1 ? "" : "s"}
-                  </span>
-                </div>
-                <div className="card-body">
-                  {stats.hasRarity ?
-                    <div className="stats-rarity">
-                      <span style={{ color: "rgba(255,255,255,0.7)" }}>
-                        SONG RARITY
-                      </span>
-                      <span
-                        className="rare-pill"
-                        style={
-                          {
-                            "--setlist-rare-fill":
-                              getRarityPillBackground(stats.rarity),
-                            "--setlist-rare-border":
-                              getRarityColor(stats.rarity),
-                          } as CSSProperties
-                        }
-                      >
-                        {stats.rarity}
-                      </span>
-                    </div>
-                  : null}
-                  <div
-                    className="lbl"
-                    style={{
-                      fontFamily: '"Geist Mono", monospace',
-                      fontSize: 10,
-                      color: "rgba(255,255,255,0.5)",
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                      marginBottom: 4,
-                    }}
-                  >
-                    Performances by Group
-                  </div>
-                  <ul className="group-count-list">
-                    {stats.groupCounts.map(({ group, count }) => (
-                      <li key={group}>
-                        <button
-                          type="button"
-                          className={`group-count-btn${selectedGroup === group ? " active" : ""}`}
-                          data-group={group}
-                          onClick={() => {
-                            setSelectedPlacement(null)
-                            setSelectedGroup((g) =>
-                              g === group ? null : group,
-                            )
-                          }}
-                        >
-                          <span className="gn-name">{group}</span>
-                          <span className="gn-count">{count}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            : null}
-
-            {song.song_coachnotes?.trim() ?
-              <div className="card notes-card">
-                <div className="card-head">
-                  <h3>Coach&apos;s Notes</h3>
-                </div>
-                <div
-                  className="card-body"
-                  dangerouslySetInnerHTML={{ __html: song.song_coachnotes }}
-                />
-              </div>
-            : null}
-
-            {placementStats.length > 0 ?
-              <div className="card">
-                <div className="card-head">
-                  <h3>Set Placements</h3>
-                </div>
-                <div className="card-body">
-                  <div className="placement-bar">
-                    {barSegments.map((s) => (
-                      <button
-                        key={s.placement}
-                        type="button"
-                        className={`pb-seg${selectedPlacement === s.placement ? " active" : ""}`}
-                        aria-label={`Filter performances by ${s.placement}`}
-                        aria-pressed={selectedPlacement === s.placement}
-                        style={{
-                          flex: s.flex,
-                          background: songDetailPlacementLegendSwatch(
-                            s.placement,
-                          ),
-                        }}
-                        onClick={() => {
-                          setSelectedGroup(null)
-                          setSelectedPlacement((cur) =>
-                            cur === s.placement ? null : s.placement,
-                          )
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="placement-legend">
-                    {legendRows.map((row) => (
-                      <button
-                        key={row.placement}
-                        type="button"
-                        className={`pl-row placement-legend-btn${selectedPlacement === row.placement ? " active" : ""}`}
-                        aria-label={`Filter performances by ${row.placement}`}
-                        aria-pressed={selectedPlacement === row.placement}
-                        onClick={() => {
-                          setSelectedGroup(null)
-                          setSelectedPlacement((cur) =>
-                            cur === row.placement ? null : row.placement,
-                          )
-                        }}
-                      >
-                        <span
-                          className="sw"
-                          style={{ background: row.swatch }}
-                        />
-                        <span className="nm">{row.placement}</span>
-                        <span className="ct">{row.count}</span>
-                        <span className="pct">{Math.round(row.pct)}%</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            : null}
-          </div>
+          <WlHomeV2SongArchiveDetailInfoStrip
+            song={song}
+            stats={stats}
+            lastPlayed={lastPlayed}
+            selectedGroup={selectedGroup}
+            setSelectedGroup={setSelectedGroup}
+            selectedPlacement={selectedPlacement}
+            setSelectedPlacement={setSelectedPlacement}
+            barSegments={barSegments}
+            legendRows={legendRows}
+            infoStripCardCount={infoStripCardCount}
+            hasPlacements={placementStats.length > 0}
+          />
 
           <div
             className={
@@ -612,162 +358,39 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
               />
             </div>
             {showWtedBesidePerformances ?
-              <aside
-                className="perf-wted-band__wted"
-                aria-label="WTED Radio appearances"
-              >
-                <div className="card">
-                  <div className="card-head wted-card-head">
-                    <h3>WTED Radio</h3>
-                    <p className="wted-intro">
-                      Performances that appear in episodes on WTED Radio.
-                    </p>
-                  </div>
-                  <div className="wted-list-scroll-shell">
-                    {wtedScrollUp ?
-                      <button
-                        type="button"
-                        className="wted-scroll-hint wted-scroll-hint--up"
-                        aria-label="Scroll WTED list up"
-                        onClick={() => scrollWtedListBy(-140)}
-                      >
-                        <CaretUp
-                          size={12}
-                          weight="bold"
-                          aria-hidden
-                          className="wted-scroll-hint-icon"
-                        />
-                      </button>
-                    : null}
-                    <ul ref={wtedListRef} className="wted-list">
-                      {wted.loading ?
-                        <li style={{ color: "rgba(255,255,255,0.55)", fontSize: 11 }}>
-                          Loading…
-                        </li>
-                      : wted.groups.map((g) => {
-                          const dateText =
-                            g.showDate ? formatSetlistDate(g.showDate) : null
-                          const rowKey =
-                            g.showId
-                            ?? `r:${g.showDate}:${g.venueLocation}`
-                          return (
-                            <li key={rowKey}>
-                              <div className="wted-date">
-                                {dateText && g.showId ?
-                                  <Link href={getSetlistArchiveUrl(g.showId)}>
-                                    {dateText}
-                                  </Link>
-                                : dateText}
-                                {g.venueLocation?.trim() ?
-                                  <span className="wted-venue">
-                                    {" "}
-                                    {"\u00A0"}
-                                    ·
-                                    {"\u00A0"}
-                                    {" "}
-                                    {g.venueLocation}
-                                  </span>
-                                : null}
-                              </div>
-                              <ul className="wted-eps">
-                                {g.episodes.map((ep) => (
-                                  <li key={ep.eeUuid}>
-                                    <span className="series">{ep.wtedSeries}</span>
-                                    <span className="ep">
-                                      <Link href={getWtedEpisodeUrl(ep.episodeUuid)}>
-                                        {getWtedEpisodeDisplayName(
-                                          ep.episodeCode,
-                                          ep.episodeDisplayName,
-                                        )}
-                                      </Link>
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </li>
-                          )
-                        })}
-                    </ul>
-                    {wtedScrollDown ?
-                      <button
-                        type="button"
-                        className="wted-scroll-hint wted-scroll-hint--down"
-                        aria-label="Scroll WTED list down"
-                        onClick={() => scrollWtedListBy(140)}
-                      >
-                        <CaretDown
-                          size={12}
-                          weight="bold"
-                          aria-hidden
-                          className="wted-scroll-hint-icon"
-                        />
-                      </button>
-                    : null}
-                  </div>
-                </div>
-              </aside>
+              <WlHomeV2SongArchiveDetailWtedAside
+                wtedListRef={wtedListRef}
+                wtedScrollUp={wtedScrollUp}
+                wtedScrollDown={wtedScrollDown}
+                scrollWtedListBy={scrollWtedListBy}
+                loading={wted.loading}
+                groups={wted.groups}
+              />
             : null}
           </div>
         </div>
 
-        {hasLyricsSide ?
-          <div className="col-side">
-            <div className="card lyrics-card">
-              <div className="card-head">
-                <h3>Lyrics</h3>
-              </div>
-              <div className="card-body">
-                <div
-                  className="lyrics-card__html"
-                  dangerouslySetInnerHTML={{
-                    __html: formatLyricsHtml(song.song_lyrics ?? ""),
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        : null}
+        {hasLyricsSide ? <WlHomeV2SongArchiveDetailLyricsColumn song={song} /> : null}
       </div>
 
-      <SongsArchiveListSearchModal
-        open={searchOpen}
-        onClose={closeSearch}
+      <WlHomeV2SongArchiveDetailModals
+        searchOpen={searchOpen}
+        closeSearch={closeSearch}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         searchHits={searchHits}
         searchInputRef={searchInputRef}
-      />
-      <SetlistWtedLoginRequiredDialog
-        open={perfTableWtedLoginRequiredOpen}
-        onOpenChange={setPerfTableWtedLoginRequiredOpen}
-        wlHomeV2
-      />
-      <WlHomeV2SetlistWtedModal
-        open={songPerfWtedModalOpen}
-        onClose={closePerfTableWtedModal}
-        entry={songPerfWtedModal?.entry ?? null}
-        setlist={
-          perfTableWtedAnchorSetlist.length > 0 ?
-            perfTableWtedAnchorSetlist
-          : songPerfWtedModal ?
-            [songPerfWtedModal.entry]
-          : []
-        }
-        show={
-          songPerfWtedModal?.show ?? {
-            show_date: "",
-            show_venue_location: null,
-            show_group: null,
-          }
-        }
-        fallbackReleaseArtwork={null}
-        headingId={songPerfWtedModalHeadingId}
-      />
-      <SetlistJotyDrawer
-        open={jotyOpen}
-        onOpenChange={setJotyOpen}
-        year={jotyYear}
-        highlightedEntryId={jotyEntryId}
+        perfTableWtedLoginRequiredOpen={perfTableWtedLoginRequiredOpen}
+        setPerfTableWtedLoginRequiredOpen={setPerfTableWtedLoginRequiredOpen}
+        songPerfWtedModalOpen={songPerfWtedModalOpen}
+        closePerfTableWtedModal={closePerfTableWtedModal}
+        songPerfWtedModal={songPerfWtedModal}
+        perfTableWtedAnchorSetlist={perfTableWtedAnchorSetlist}
+        songPerfWtedModalHeadingId={songPerfWtedModalHeadingId}
+        jotyOpen={jotyOpen}
+        setJotyOpen={setJotyOpen}
+        jotyYear={jotyYear}
+        jotyEntryId={jotyEntryId}
       />
     </div>
   )

@@ -1,7 +1,5 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
 import {
   useCallback,
   useEffect,
@@ -14,7 +12,14 @@ import {
   SongsArchiveListFilterModal,
   SongsArchiveListSearchModal,
 } from "@/components/archive-songs/wl-home-v2-songs-archive-list-modals"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
+import {
+  replaceSongsArchiveUrlViewParam,
+  SONGS_ARCHIVE_BREADCRUMBS,
+  SONGS_ARCHIVE_FILTER_MODAL_META,
+  type SongsArchiveFilterKind,
+  type SongsArchiveSortKey,
+} from "@/components/archive-songs/wl-home-v2-songs-archive-view-config"
+import { WlHomeV2SongsArchiveListPanel } from "@/components/archive-songs/wl-home-v2-songs-archive-list-panel"
 import { SongsArchiveCategoriesGrid } from "@/components/archive-songs/songs-archive-categories-grid"
 import {
   buildSongsByCategory,
@@ -23,10 +28,6 @@ import {
   songsArchiveSearchHits,
 } from "@/components/archive-songs/songs-archive-helpers"
 import {
-  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
-  type BreadcrumbItem,
-} from "@/components/setlist-breadcrumb-context"
-import {
   WlHomeV2ArchiveCrumbsShell,
   WlHomeV2ArchiveCrumbsTrail,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
@@ -34,58 +35,11 @@ import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-op
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { cn } from "@/lib/utils"
-import {
   type SongsArchiveSong,
   useSongsArchiveData,
 } from "@/hooks/use-songs-archive-data"
-import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 import "./songs-archive-verbatim.css"
-
-type SortKey = "song" | "song_category" | "song_originalartist"
-type FilterKind = "cat" | "artist" | "perf"
-
-const FILTER_MODAL_META: Record<
-  FilterKind,
-  { title: string; description: string }
-> = {
-  cat: {
-    title: "Filter by category",
-    description:
-      "Show songs from the categories you pick. Clear the filter to include every category again.",
-  },
-  artist: {
-    title: "Filter by original artist",
-    description:
-      "Show songs credited to any artist you pick. Clear the filter to include all artists.",
-  },
-  perf: {
-    title: "Filter by performer",
-    description:
-      "Show songs that appear under the selected performers in the archive. Clear the filter to include all.",
-  },
-}
-
-function replaceUrlViewParam(view: "categories" | "list") {
-  if (typeof window === "undefined") return
-  const url = new URL(window.location.href)
-  if (view === "list") url.searchParams.set("view", "list")
-  else url.searchParams.delete("view")
-  window.history.replaceState(null, "", url)
-}
-
-const SONGS_ARCHIVE_BREADCRUMBS: BreadcrumbItem[] = [
-  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
-  { label: "Songs", href: "/archive/songs" },
-]
 
 export function WlHomeV2SongsArchiveView() {
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
@@ -138,12 +92,14 @@ export function WlHomeV2SongsArchiveView() {
     }
   }, [])
 
-  const [sortKey, setSortKey] = useState<SortKey>("song")
+  const [sortKey, setSortKey] = useState<SongsArchiveSortKey>("song")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [selectedCats, setSelectedCats] = useState(() => new Set<string>())
   const [selectedArtists, setSelectedArtists] = useState(() => new Set<string>())
   const [selectedPerfs, setSelectedPerfs] = useState(() => new Set<string>())
-  const [openFilter, setOpenFilter] = useState<FilterKind | null>(null)
+  const [openFilter, setOpenFilter] = useState<SongsArchiveFilterKind | null>(
+    null,
+  )
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -153,7 +109,7 @@ export function WlHomeV2SongsArchiveView() {
 
   const setView = useCallback((v: "categories" | "list") => {
     setActiveView(v)
-    replaceUrlViewParam(v)
+    replaceSongsArchiveUrlViewParam(v)
   }, [])
 
   const filteredSortedList = useMemo(() => {
@@ -219,13 +175,13 @@ export function WlHomeV2SongsArchiveView() {
     setSearchQuery("")
   }, [])
 
-  const toggleFilterSheet = useCallback((kind: FilterKind) => {
+  const toggleFilterSheet = useCallback((kind: SongsArchiveFilterKind) => {
     setSearchOpen(false)
     setSearchQuery("")
     setOpenFilter((prev) => (prev === kind ? null : kind))
   }, [])
 
-  function onSort(key: SortKey) {
+  function onSort(key: SongsArchiveSortKey) {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"))
     else {
       setSortKey(key)
@@ -385,234 +341,19 @@ export function WlHomeV2SongsArchiveView() {
         />
       </div>
 
-      <div
-        id="listView"
-        className="wl-home-v2-songs-archive-list-view"
-        hidden={activeView !== "list"}
-      >
-        <div className="wl-home-v2-songs-archive-list-inset">
-          <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-songs-archive-list-panel">
-            <div className="wl-home-v2-years-table-scroll wl-home-v2-songs-archive-list-scroll">
-              <Table className="wl-home-v2-years-table wl-home-v2-songs-archive-list-table">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>
-                    <div className="songs-archive-list-hdr-col">
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn",
-                          sortKey === "song" &&
-                            "songs-archive-list-hdr-btn--active",
-                        )}
-                        data-sort="song"
-                        onClick={() => onSort("song")}
-                      >
-                        Song
-                      </button>
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn",
-                          "songs-archive-list-hdr-btn--search",
-                        )}
-                        id="openSearchInTable"
-                        title="Search songs"
-                        aria-label="Search songs"
-                        onClick={openSearch}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden
-                        >
-                          <circle cx="11" cy="11" r="7" />
-                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                        </svg>
-                        <span>Search</span>
-                      </button>
-                    </div>
-                  </TableHead>
-                  <TableHead>
-                    <div className="songs-archive-list-hdr-col">
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn",
-                          sortKey === "song_category" &&
-                            "songs-archive-list-hdr-btn--active",
-                        )}
-                        data-sort="song_category"
-                        onClick={() => onSort("song_category")}
-                      >
-                        Category
-                      </button>
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly",
-                          selectedCats.size > 0 &&
-                            "songs-archive-list-hdr-btn--active",
-                        )}
-                        data-filter="cat"
-                        aria-label="Filter category"
-                        onClick={() => toggleFilterSheet("cat")}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden
-                        >
-                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                        </svg>
-                      </button>
-                    </div>
-                  </TableHead>
-                  <TableHead>
-                    <div className="songs-archive-list-hdr-col">
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn",
-                          sortKey === "song_originalartist" &&
-                            "songs-archive-list-hdr-btn--active",
-                        )}
-                        data-sort="song_originalartist"
-                        onClick={() => onSort("song_originalartist")}
-                      >
-                        Original artist
-                      </button>
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly",
-                          selectedArtists.size > 0 &&
-                            "songs-archive-list-hdr-btn--active",
-                        )}
-                        data-filter="artist"
-                        aria-label="Filter artist"
-                        onClick={() => toggleFilterSheet("artist")}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden
-                        >
-                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                        </svg>
-                      </button>
-                    </div>
-                  </TableHead>
-                  <TableHead>
-                    <div className="songs-archive-list-hdr-col">
-                      <span className="songs-archive-list-hdr-label">
-                        Performed by
-                      </span>
-                      <button
-                        type="button"
-                        className={cn(
-                          "songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly",
-                          selectedPerfs.size > 0 &&
-                            "songs-archive-list-hdr-btn--active",
-                        )}
-                        data-filter="perf"
-                        aria-label="Filter performer"
-                        onClick={() => toggleFilterSheet("perf")}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden
-                        >
-                          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                        </svg>
-                      </button>
-                    </div>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody id="listBody">
-                {filteredSortedList.map((s) => {
-                  const perfs = performerBySong[s.song] ?? []
-                  const catArt = catArtworkByName[s.song_category]
-                  return (
-                    <TableRow key={s.song_id}>
-                      <TableCell className="songs-archive-list-song-cell">
-                        <Link
-                          href={getSongArchiveUrl(s.song_id)}
-                          data-song={s.song}
-                        >
-                          <SongDisplayName
-                            song={s.song}
-                            songDisplayName={s.song_displayname}
-                          />
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span className="songs-archive-list-cat-cell-inner">
-                          {catArt ?
-                            <Image
-                              src={catArt}
-                              alt=""
-                              width={22}
-                              height={22}
-                              className="songs-archive-list-cat-thumb"
-                              unoptimized
-                            />
-                          : <span
-                              className="songs-archive-list-cat-thumb-fallback"
-                              aria-hidden
-                            />}
-                          <span className="songs-archive-list-cat-name">
-                            {s.song_category}
-                          </span>
-                        </span>
-                      </TableCell>
-                      <TableCell className="songs-archive-list-artist-cell">
-                        {s.song_originalartist || "—"}
-                      </TableCell>
-                      <TableCell className="songs-archive-list-perf-cell">
-                        <span className="songs-archive-list-perf-cell-inner">
-                          {perfs.map((p) => (
-                            <span key={p} className="songs-archive-perf-pill">
-                              {p}
-                            </span>
-                          ))}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
-      </div>
+      <WlHomeV2SongsArchiveListPanel
+        sortKey={sortKey}
+        onSort={onSort}
+        openSearch={openSearch}
+        toggleFilterSheet={toggleFilterSheet}
+        selectedCats={selectedCats}
+        selectedArtists={selectedArtists}
+        selectedPerfs={selectedPerfs}
+        filteredSortedList={filteredSortedList}
+        performerBySong={performerBySong}
+        catArtworkByName={catArtworkByName}
+        listHidden={activeView !== "list"}
+      />
 
       <SongsArchiveListSearchModal
         open={searchOpen}
@@ -624,8 +365,8 @@ export function WlHomeV2SongsArchiveView() {
       />
       {openFilter !== null ?
         <SongsArchiveListFilterModal
-          title={FILTER_MODAL_META[openFilter].title}
-          description={FILTER_MODAL_META[openFilter].description}
+          title={SONGS_ARCHIVE_FILTER_MODAL_META[openFilter].title}
+          description={SONGS_ARCHIVE_FILTER_MODAL_META[openFilter].description}
           options={
             openFilter === "cat" ? categoryOptions
             : openFilter === "artist" ? artistOptions

@@ -1,9 +1,8 @@
 "use client"
 
-
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
-import { type ReactNode, useEffect, useState } from "react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Tooltip,
@@ -20,7 +19,14 @@ import {
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { cn } from "@/lib/utils"
 
+import {
+  extractShowCount,
+  formatTourDate,
+  LiberatedSongLibTooltip,
+} from "@/components/dpro/tours/liberated-songs-helpers"
 import { toursStatsDurationTdClassnames } from "./tours-stats-table-classes"
+
+export { LiberatedSongLibTooltip } from "@/components/dpro/tours/liberated-songs-helpers"
 
 interface LiberatedSong {
   entry_song: string
@@ -43,51 +49,6 @@ interface LiberatedSongsProps {
   onSongClick?: (songName: string, songDisplayName?: string | null) => void
   /** WL Home archive tour stats: chrome matches slots (`widget-panel` + `wp-head`). */
   wlHomeV2?: boolean
-}
-
-function formatTourDate(dateStr?: string): string {
-  if (!dateStr) return ""
-  const parts = dateStr.split("-")
-  if (parts.length >= 3) {
-    return `${parts[1]}.${parts[2]}.${parts[0].slice(2)}`
-  }
-  return dateStr
-}
-
-function extractShowCount(lastCount: string): string {
-  if (!lastCount) return ""
-  if (lastCount.trim().toLowerCase() === "debut") return ""
-  const match = lastCount.match(/^(\d+)/)
-  return match ? match[1] : ""
-}
-
-/** Same Radix chrome + `.setlist-header-tooltip` as song spread WL tooltips (`song-spread-display.tsx`). */
-export function LiberatedSongLibTooltip({
-  children,
-}: {
-  children: ReactNode
-}) {
-  return (
-    <Tooltip delayDuration={0}>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="start"
-        sideOffset={6}
-        className="max-w-xs p-0 setlist-header-tooltip setlist-header-tooltip--tight"
-      >
-        <div className="wl-home-v2-setlist-song-spread-tooltip-inner text-left">
-          <p className="wl-home-v2-setlist-song-spread-tooltip-title">
-            LIB{" "}
-            <span className="font-normal text-white/80">(Song Liberation)</span>
-          </p>
-          <p className="mb-0 leading-snug">
-            Song returned after a full calendar year of not being played.
-          </p>
-        </div>
-      </TooltipContent>
-    </Tooltip>
-  )
 }
 
 export function LiberatedSongs({

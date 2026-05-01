@@ -1,9 +1,14 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import Image from "next/image"
 import { ArrowUp, ArrowDown } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { TourSongStatsCategoryCell } from "@/components/dpro/tours/tour-song-stats-category-cell"
+import {
+  durationToSeconds,
+  formatDuration,
+  parseDuration,
+} from "@/components/dpro/tours/tour-song-stats-duration"
 import {
   Table,
   TableBody,
@@ -12,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useCategoryArtwork } from "@/hooks/use-category-artwork"
 import { INDEX_SKIP_SONG_IMPROV_JAM } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { cn } from "@/lib/utils"
 
@@ -55,86 +59,6 @@ interface TourSongStatsProps {
 
 const SKIP_SHORTS = ["fake", "tease", "reprise", "aborted"]
 const EXCLUDED_DURATION = ["aborted", "fake", "tease", "reprise"]
-
-function CategoryCell({
-  category,
-  wlHomeV2 = false,
-}: {
-  category: string
-  wlHomeV2?: boolean
-}) {
-  const { artwork, loaded } = useCategoryArtwork(category)
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className={cn(
-          "flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-sm py-0.5",
-          wlHomeV2 ?
-            "border border-[rgb(63,65,64)] bg-black/20"
-          : "bg-muted",
-        )}
-      >
-        {loaded && artwork ?
-          <Image
-            src={artwork}
-            alt={category}
-            width={20}
-            height={20}
-            className="size-5 object-cover"
-            unoptimized
-            onError={(e) => {
-              const el = e.target as HTMLImageElement
-              if (el) el.style.display = "none"
-            }}
-          />
-        : <span
-            className={cn(
-              "truncate px-0.5 text-[10px]",
-              wlHomeV2 ?
-                "text-white/46"
-              : "text-muted-foreground",
-            )}
-          >
-            {category.slice(0, 2)}
-          </span>
-        }
-      </span>
-      <span className={cn(wlHomeV2 ? "text-[11px] text-muted-foreground" : "text-xs text-muted-foreground")}>
-        {category}
-      </span>
-    </div>
-  )
-}
-
-function parseDuration(interval: string | undefined | null): number | null {
-  if (!interval) return null
-  const m = interval.match(/^(?:(\d+):)?(\d+):(\d+)$/)
-  if (m) {
-    const h = parseInt(m[1] || "0", 10)
-    const min = parseInt(m[2], 10)
-    const sec = parseInt(m[3], 10)
-    return h * 3600 + min * 60 + sec
-  }
-  return null
-}
-
-function formatDuration(seconds: number): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = seconds % 60
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
-  }
-  return `${m}:${s.toString().padStart(2, "0")}`
-}
-
-function durationToSeconds(d: string | null): number {
-  if (!d) return 0
-  const parts = d.split(":").map(Number)
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
-  if (parts.length === 2) return parts[0] * 60 + parts[1]
-  return 0
-}
 
 export function TourSongStats({
   shows,
@@ -442,7 +366,7 @@ export function TourSongStats({
                 <TableCell
                   className={cn("py-0.5 text-muted-foreground", headCellX)}
                 >
-                  <CategoryCell category={stat.category} wlHomeV2={wlHomeV2} />
+                  <TourSongStatsCategoryCell category={stat.category} wlHomeV2={wlHomeV2} />
                 </TableCell>
               </TableRow>
             ))}

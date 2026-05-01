@@ -14,7 +14,7 @@ const ICON_PROPS = {
 
 const RADIO_HUB_TITLE = "WTED Radio"
 const RADIO_HUB_INTRO =
-  "Stream Goose radio, explore the program director, and connect with the team."
+  ""
 
 type WlHomeV2RadioModalProps = {
   open: boolean
