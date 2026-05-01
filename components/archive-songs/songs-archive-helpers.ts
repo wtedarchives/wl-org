@@ -89,3 +89,23 @@ export function performerOptions(
   }
   return [...set].sort()
 }
+
+/** Same filtering/sort/limit as `/archive/songs` list search modal. */
+export function songsArchiveSearchHits(
+  songs: SongsArchiveSong[],
+  searchQuery: string,
+): SongsArchiveSong[] {
+  const q = searchQuery.trim().toLowerCase()
+  let list = [...songs]
+  if (q) {
+    list = songs.filter(
+      (s) =>
+        (s.song_displayname || s.song).toLowerCase().includes(q) ||
+        s.song.toLowerCase().includes(q) ||
+        s.song_category.toLowerCase().includes(q) ||
+        (s.song_originalartist || "").toLowerCase().includes(q),
+    )
+  }
+  list.sort((a, b) => a.song.localeCompare(b.song))
+  return list.slice(0, 60)
+}

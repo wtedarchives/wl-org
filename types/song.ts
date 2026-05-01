@@ -5,6 +5,7 @@ export interface SongData {
   song_displayname?: string | null
   song_category: string
   song_originalartist: string | null
+  song_writer?: string | null
   song_coachnotes: string | null
   song_lyrics: string | null
   categories?: {
@@ -23,6 +24,7 @@ export interface SongPerformance {
   show_subvenue_venue?: string | null
   venue_id?: string | null
   show_tour: string | null
+  show_canonid: number | null
   entry_length: string | null
   entry_placement: string
   entry_short: string | null

@@ -89,7 +89,7 @@
 /* Inactive segments show the wrapper fill; active paints on top */
 .songs-archive-verbatim .view-toggle button {
   box-sizing: border-box;
-  padding-block: 7px;
+  padding-block: 4px;
   padding-inline: 14px;
   background: transparent;
   border: 0;
@@ -136,8 +136,13 @@
   border: 1px solid rgb(49, 51, 49);
   color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
@@ -146,10 +151,11 @@
 
 .songs-archive-verbatim .head-controls .search-btn {
   box-sizing: border-box;
-  width: 32px;
-  height: 32px;
+  width: auto;
+  height: auto;
   flex-shrink: 0;
-  padding: 0;
+  padding-block: 4px;
+  padding-inline: 12px;
 }
 
 .songs-archive-verbatim .search-btn:hover {

@@ -28,7 +28,14 @@ function isSectionLinkActive(
 ) {
   const p = pathname ?? ""
   const base = p.split("?")[0] ?? ""
-  return base === v2Href || base === legacyHref
+  if (base === v2Href || base === legacyHref) return true
+  if (
+    v2Href === "/archive/songs" &&
+    (base === "/archive/song" || base === "/old/archive/song")
+  ) {
+    return true
+  }
+  return false
 }
 
 export type WlHomeV2ArchiveSubnavContentProps = {

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
+import type { ReactNode } from "react"
 import {
   CommandDialog,
   CommandEmpty,
@@ -27,10 +28,15 @@ export function SongSearch({
   className = "",
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
+  triggerVariant = "default",
+  triggerClassName,
 }: {
   className?: string
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** `icon` — square icon button (song detail verbatim UI). */
+  triggerVariant?: "default" | "icon"
+  triggerClassName?: string
 }) {
   const router = useRouter()
   const listRef = useRef<HTMLDivElement>(null)
@@ -99,9 +105,31 @@ export function SongSearch({
     router.push(getSongArchiveUrl(songId))
   }
 
-  return (
-    <div className={className}>
-      <Button
+  const trigger: ReactNode =
+    triggerVariant === "icon" ?
+      <button
+        type="button"
+        className={triggerClassName}
+        title="Search songs"
+        aria-label="Search songs"
+        onClick={() => setOpen(true)}
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </button>
+    : <Button
         type="button"
         variant="outline"
         size="sm"
@@ -113,6 +141,10 @@ export function SongSearch({
         </span>
         <Search className="size-3 shrink-0" />
       </Button>
+
+  return (
+    <div className={className}>
+      {trigger}
       <CommandDialog open={open} onOpenChange={setOpen} label="Search songs">
         <CommandInput
           placeholder="Search songs..."

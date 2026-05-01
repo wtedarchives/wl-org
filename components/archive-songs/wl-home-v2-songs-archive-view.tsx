@@ -20,7 +20,17 @@ import {
   buildSongsByCategory,
   groupCategoriesBySection,
   performerOptions,
+  songsArchiveSearchHits,
 } from "@/components/archive-songs/songs-archive-helpers"
+import {
+  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
+  type BreadcrumbItem,
+} from "@/components/setlist-breadcrumb-context"
+import {
+  WlHomeV2ArchiveCrumbsShell,
+  WlHomeV2ArchiveCrumbsTrail,
+} from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
+import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import {
@@ -72,7 +82,13 @@ function replaceUrlViewParam(view: "categories" | "list") {
   window.history.replaceState(null, "", url)
 }
 
+const SONGS_ARCHIVE_BREADCRUMBS: BreadcrumbItem[] = [
+  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
+  { label: "Songs", href: "/archive/songs" },
+]
+
 export function WlHomeV2SongsArchiveView() {
+  const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const { categories, songs, performerBySong, loading, error } =
     useSongsArchiveData()
 
@@ -178,21 +194,10 @@ export function WlHomeV2SongsArchiveView() {
     sortKey,
   ])
 
-  const searchHits = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
-    let list = [...songs]
-    if (q) {
-      list = songs.filter(
-        (s) =>
-          (s.song_displayname || s.song).toLowerCase().includes(q) ||
-          s.song.toLowerCase().includes(q) ||
-          s.song_category.toLowerCase().includes(q) ||
-          (s.song_originalartist || "").toLowerCase().includes(q),
-      )
-    }
-    list.sort((a, b) => a.song.localeCompare(b.song))
-    return list.slice(0, 60)
-  }, [searchQuery, songs])
+  const searchHits = useMemo(
+    () => songsArchiveSearchHits(songs, searchQuery),
+    [searchQuery, songs],
+  )
 
   const catArtworkByName = useMemo(() => {
     const m: Record<string, string> = {}
@@ -280,19 +285,16 @@ export function WlHomeV2SongsArchiveView() {
     <div
       className="songs-archive-verbatim wl-home-v2-songs-archive-page box-border flex min-h-0 min-w-0 w-full flex-1 flex-col px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6"
     >
-      <div className="wl-home-v2-setlist-crumbs-bar mb-6 md:mb-8">
-        <nav
-          className="wl-home-v2-setlist-crumbs-trail"
-          aria-label="Page"
-        >
-          <span className="here" aria-current="page">
-            Songs
-          </span>
-        </nav>
-        <div
-          className="wl-home-v2-setlist-crumbs-selectors"
-          aria-label="Songs view"
-        >
+      <WlHomeV2ArchiveCrumbsShell
+        variant="page-gutter"
+        selectorsAriaLabel="Songs view"
+        trail={
+          <WlHomeV2ArchiveCrumbsTrail
+            items={SONGS_ARCHIVE_BREADCRUMBS}
+            openArchiveHub={openArchiveHub ?? undefined}
+          />
+        }
+        selectors={
           <div className="head-controls">
             <div className="view-toggle">
               <button
@@ -370,10 +372,11 @@ export function WlHomeV2SongsArchiveView() {
                 <circle cx="11" cy="11" r="7" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
+              <span>Search</span>
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div id="categoriesView" className="min-w-0" hidden={activeView !== "categories"}>
         <SongsArchiveCategoriesGrid
@@ -409,9 +412,13 @@ export function WlHomeV2SongsArchiveView() {
                       </button>
                       <button
                         type="button"
-                        className="songs-archive-list-hdr-btn songs-archive-list-hdr-btn--icononly"
+                        className={cn(
+                          "songs-archive-list-hdr-btn",
+                          "songs-archive-list-hdr-btn--search",
+                        )}
                         id="openSearchInTable"
-                        aria-label="Search"
+                        title="Search songs"
+                        aria-label="Search songs"
                         onClick={openSearch}
                       >
                         <svg
@@ -428,6 +435,7 @@ export function WlHomeV2SongsArchiveView() {
                           <circle cx="11" cy="11" r="7" />
                           <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
+                        <span>Search</span>
                       </button>
                     </div>
                   </TableHead>

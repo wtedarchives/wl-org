@@ -17,6 +17,26 @@ import type {
 
 const SONG_LOAD_STEPS = 5 // song, performances, stats, placement, lastPlayed
 
+/** PostgREST may embed `shows` as one object or a single-element array. */
+type SongEmbedShow = {
+  show_id: string
+  show_date: string
+  show_group: string
+  show_subvenue: string
+  show_venue_location: string
+  show_tour: string | null
+  show_canonid?: number | null
+  show_subvenue_venue?: string | null
+  subvenues?: unknown
+}
+
+function normalizeSongEmbedShow(
+  raw: SongEmbedShow | SongEmbedShow[] | null | undefined,
+): SongEmbedShow | undefined {
+  if (raw == null) return undefined
+  return Array.isArray(raw) ? raw[0] : raw
+}
+
 export function useSongData(songId: string | undefined) {
   const [song, setSong] = useState<SongData | null>(null)
   const [performances, setPerformances] = useState<SongPerformance[]>([])
@@ -53,6 +73,7 @@ export function useSongData(songId: string | undefined) {
             song_displayname,
             song_category,
             song_originalartist,
+            song_writer,
             song_coachnotes,
             song_lyrics,
             categories (
@@ -102,6 +123,7 @@ export function useSongData(songId: string | undefined) {
               show_venue_location,
               show_tour,
               show_id,
+              show_canonid,
               subvenues:show_subvenue(
                 venues:subvenue_venue(
                   venue_id
@@ -126,17 +148,9 @@ export function useSongData(songId: string | undefined) {
 
         const processedPerformances = (performanceData ?? []).map(
           (perf: Record<string, unknown>) => {
-            const showsRel = perf.shows as
-              | {
-                  show_id: string
-                  show_date: string
-                  show_group: string
-                  show_subvenue: string
-                  show_venue_location: string
-                  show_tour: string | null
-                  subvenues?: { venues?: { venue_id: string } } | null
-                }
-              | undefined
+            const showsRel = normalizeSongEmbedShow(
+              perf.shows as SongEmbedShow | SongEmbedShow[] | undefined,
+            )
 
             const subvenuesVal = showsRel?.subvenues
             const venueId =
@@ -147,18 +161,15 @@ export function useSongData(songId: string | undefined) {
 
             return {
               entry_id: perf.entry_id,
-              show_id: (showsRel as { show_id: string })?.show_id ?? "",
-              show_date: (showsRel as { show_date: string })?.show_date ?? "",
-              show_group: (showsRel as { show_group: string })?.show_group ?? "",
-              show_subvenue:
-                (showsRel as { show_subvenue: string })?.show_subvenue ?? "",
-              show_venue_location:
-                (showsRel as { show_venue_location: string })
-                  ?.show_venue_location ?? "",
-              show_subvenue_venue: (showsRel as { show_subvenue_venue?: string })
-                ?.show_subvenue_venue ?? null,
+              show_id: showsRel?.show_id ?? "",
+              show_date: showsRel?.show_date ?? "",
+              show_group: showsRel?.show_group ?? "",
+              show_subvenue: showsRel?.show_subvenue ?? "",
+              show_venue_location: showsRel?.show_venue_location ?? "",
+              show_subvenue_venue: showsRel?.show_subvenue_venue ?? null,
               venue_id: venueId,
-              show_tour: (showsRel as { show_tour: string | null })?.show_tour ?? null,
+              show_tour: showsRel?.show_tour ?? null,
+              show_canonid: showsRel?.show_canonid ?? null,
               entry_length: (perf.entry_length as string | null) ?? null,
               entry_placement: (perf.entry_placement as string) ?? "",
               entry_coachnotes: (perf.entry_coachnotes as string | null) ?? null,
