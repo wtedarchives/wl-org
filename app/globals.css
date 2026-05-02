@@ -173,6 +173,30 @@
   animation: home-radio-embed-pulse 0.9s ease-out forwards;
 }
 
+/**
+ * Full-page dim when focusing the home radio embed (tile click).
+ * Duration matches `.animate-home-radio-embed-pulse` (0.9s).
+ */
+@keyframes home-radio-page-dim {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-home-radio-page-dim {
+  animation: home-radio-page-dim 0.9s ease-in-out forwards;
+  background-color: rgb(0 0 0 / 0.88);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

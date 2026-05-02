@@ -23,12 +23,18 @@ export function WlHomeV2Tiles({
   onOpenRequest,
   onOpenLogin,
   onOpenSchedule,
+  onOpenTourSchedule,
+  onOpenThisDayInHistory,
 }: {
   onOpenRequest: () => void
   /** Same as nav “Sign In” — opens the home login modal (credentials form). */
   onOpenLogin: () => void
   /** Full Radio.co schedule embed (same as old homepage schedule card). */
   onOpenSchedule: () => void
+  /** Goose past + upcoming shows (archive widget). */
+  onOpenTourSchedule: () => void
+  /** Same-day calendar shows across years (matches legacy homepage). */
+  onOpenThisDayInHistory: () => void
 }) {
   const { user } = useAuth()
   const {
@@ -98,6 +104,8 @@ export function WlHomeV2Tiles({
       />
       <WlHomeV2TileArchive
         onArchiveTileLinkClick={onArchiveTileLinkClick}
+        onOpenTourSchedule={onOpenTourSchedule}
+        onOpenThisDayInHistory={onOpenThisDayInHistory}
         archiveMostRecentShow={archiveMostRecentShow}
         archiveMostRecentLoading={archiveMostRecentLoading}
         archiveSetlistPanelActive={archiveSetlistPanelActive}

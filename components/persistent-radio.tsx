@@ -196,6 +196,27 @@ function PersistentRadioBodyShell({
   )
 }
 
+function HomeRadioPulseDimOverlay({
+  pulseGen,
+  onAnimationComplete,
+}: {
+  pulseGen: number
+  onAnimationComplete: (pulseGen: number) => void
+}) {
+  return createPortal(
+    <div
+      className="pointer-events-auto fixed inset-0 z-[39] animate-home-radio-page-dim"
+      aria-hidden
+      onAnimationEnd={(e) => {
+        if (e.animationName === "home-radio-page-dim") {
+          onAnimationComplete(pulseGen)
+        }
+      }}
+    />,
+    document.body,
+  )
+}
+
 function PersistentRadioPortal() {
   const pathname = usePathname()
   const isBelowXl = useIsBelowXl()
@@ -206,6 +227,8 @@ function PersistentRadioPortal() {
     homeEmbedPulseGen,
   } = usePersistentRadio()
   const [bodyReady, setBodyReady] = useState(false)
+  const [pulseDimVisible, setPulseDimVisible] = useState(false)
+  const latestPulseGenForDimRef = useRef(0)
 
   useEffect(() => setBodyReady(true), [])
 
@@ -220,15 +243,43 @@ function PersistentRadioPortal() {
 
   const pulseEmbedOnHomeBump = pathname === "/"
 
+  useEffect(() => {
+    if (!pulseEmbedOnHomeBump || homeEmbedPulseGen === 0) return
+    latestPulseGenForDimRef.current = homeEmbedPulseGen
+    setPulseDimVisible(true)
+  }, [homeEmbedPulseGen, pulseEmbedOnHomeBump])
+
+  const onRadioDimAnimationComplete = useCallback((completedGen: number) => {
+    if (completedGen === latestPulseGenForDimRef.current) {
+      setPulseDimVisible(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (pulseEmbedOnHomeBump) return
+    setPulseDimVisible(false)
+  }, [pulseEmbedOnHomeBump])
+
   if (!bodyReady || typeof document === "undefined") return null
 
-  return createPortal(
-    <PersistentRadioBodyShell
-      measureTarget={measureTarget}
-      homeEmbedPulseGen={homeEmbedPulseGen}
-      pulseEmbedOnHomeBump={pulseEmbedOnHomeBump}
-    />,
-    document.body,
+  return (
+    <>
+      {pulseDimVisible && pulseEmbedOnHomeBump ?
+        <HomeRadioPulseDimOverlay
+          key={homeEmbedPulseGen}
+          pulseGen={homeEmbedPulseGen}
+          onAnimationComplete={onRadioDimAnimationComplete}
+        />
+      : null}
+      {createPortal(
+        <PersistentRadioBodyShell
+          measureTarget={measureTarget}
+          homeEmbedPulseGen={homeEmbedPulseGen}
+          pulseEmbedOnHomeBump={pulseEmbedOnHomeBump}
+        />,
+        document.body,
+      )}
+    </>
   )
 }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight } from "@phosphor-icons/react"
+import { ArrowRight, CalendarBlank, ClockCounterClockwise } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties, MouseEvent } from "react"
@@ -16,12 +16,16 @@ import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 export function WlHomeV2TileArchive({
   onArchiveTileLinkClick,
+  onOpenTourSchedule,
+  onOpenThisDayInHistory,
   archiveMostRecentShow,
   archiveMostRecentLoading,
   archiveSetlistPanelActive,
   archiveSetlistBySet,
 }: {
   onArchiveTileLinkClick: (e: MouseEvent<HTMLAnchorElement>) => void
+  onOpenTourSchedule: () => void
+  onOpenThisDayInHistory: () => void
   archiveMostRecentShow: WlHomeMostRecentShow | null
   archiveMostRecentLoading: boolean
   archiveSetlistPanelActive: boolean
@@ -135,6 +139,34 @@ export function WlHomeV2TileArchive({
               No recent canonical show with a setlist.
             </p>
           }
+        </div>
+        <div className="tile-widget-actions">
+          <button
+            type="button"
+            className="wbtn wbtn--app-store"
+            onClick={onOpenTourSchedule}
+          >
+            <span className="wbtn-text">Tour Schedule</span>
+            <CalendarBlank
+              className="wbtn-icon"
+              size={18}
+              weight="regular"
+              aria-hidden
+            />
+          </button>
+          <button
+            type="button"
+            className="wbtn wbtn--app-store"
+            onClick={onOpenThisDayInHistory}
+          >
+            <span className="wbtn-text">Today in History</span>
+            <ClockCounterClockwise
+              className="wbtn-icon"
+              size={18}
+              weight="regular"
+              aria-hidden
+            />
+          </button>
         </div>
       </div>
 

@@ -154,7 +154,7 @@ export function TopSlotsCarousel({
       return (
         <div
           key={slot.title}
-          className="widget-panel w-full min-w-0 shrink-0 overflow-hidden"
+          className="widget-panel w-full min-w-0 flex-1 overflow-hidden"
         >
           <div className="wp-head wl-home-v2-years-shows-wp-head">
             <span className="min-w-0 truncate">{`Top ${slot.title}`}</span>
@@ -182,7 +182,7 @@ export function TopSlotsCarousel({
     return (
       <Card
         key={slot.title}
-        className="ring-0 border border-border/60 bg-background/70 overflow-hidden py-0"
+        className="flex-1 min-w-0 ring-0 border border-border/60 bg-background/70 overflow-hidden py-0"
       >
         <div
           className="px-3 py-1.5 text-white"
@@ -321,9 +321,7 @@ export function TopSlotsCarousel({
       </div>
 
       <div
-        className={
-          !isMobile ? "hidden xl:grid xl:grid-cols-4 gap-4" : "hidden"
-        }
+        className={!isMobile ? "hidden xl:flex xl:flex-row gap-4" : "hidden"}
       >
         {slotsWithData.map((slot, i) => renderSlotTable(slot, i))}
       </div>

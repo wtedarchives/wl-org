@@ -30,23 +30,37 @@ export const welcomeHeroInlineLinkClassName = cn(
   welcomeHeroInlineLinkFocusClassName,
 )
 
-/** Smooth-scroll main column to top, then run `pulse` (for browsers without `scrollend`, uses a short delay). */
+/** Smooth-scroll document and/or main inset to top, then run `pulse`. */
 export function scrollMainInsetToTopThenPulse(pulse: () => void) {
-  const el = document.getElementById(MAIN_INSET_SCROLL_ID)
-  if (!el || el.scrollTop <= 0) {
+  const inset = document.getElementById(MAIN_INSET_SCROLL_ID)
+  const winY = window.scrollY
+  const insetNeedsScroll = inset != null && inset.scrollTop > 0
+  const windowNeedsScroll = winY > 0
+
+  if (!insetNeedsScroll && !windowNeedsScroll) {
     pulse()
     return
   }
+
   let done = false
   const fire = () => {
     if (done) return
     done = true
     pulse()
   }
-  el.scrollTo({ top: 0, behavior: "smooth" })
-  const useScrollEnd = "onscrollend" in window
-  if (useScrollEnd) {
-    el.addEventListener("scrollend", fire, { once: true })
+
+  if (insetNeedsScroll) {
+    inset.scrollTo({ top: 0, behavior: "smooth" })
   }
-  globalThis.setTimeout(fire, useScrollEnd ? 900 : 480)
+  if (windowNeedsScroll) {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const useScrollEnd = "onscrollend" in window
+  if (insetNeedsScroll && useScrollEnd) {
+    inset.addEventListener("scrollend", fire, { once: true })
+    globalThis.setTimeout(fire, 900)
+  } else {
+    globalThis.setTimeout(fire, windowNeedsScroll ? 600 : 480)
+  }
 }

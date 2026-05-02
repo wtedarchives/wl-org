@@ -28,6 +28,8 @@ import { WlHomeV2Header } from "./wl-home-v2-header"
 import { WlHomeV2LoginModal } from "./wl-home-v2-login-modal"
 import { WlHomeV2RequestModal } from "./wl-home-v2-request-modal"
 import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
+import { WlHomeV2ThisDayHistoryModal } from "./wl-home-v2-this-day-history-modal"
+import { WlHomeV2TourScheduleModal } from "./wl-home-v2-tour-schedule-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
@@ -70,6 +72,12 @@ export function WlHomeV2({
 
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const scheduleHeadingId = useId()
+
+  const [tourScheduleOpen, setTourScheduleOpen] = useState(false)
+  const tourScheduleHeadingId = useId()
+
+  const [thisDayHistoryOpen, setThisDayHistoryOpen] = useState(false)
+  const thisDayHistoryHeadingId = useId()
 
   const [loginOpen, setLoginOpen] = useState(false)
   const loginHeadingId = useId()
@@ -163,6 +171,8 @@ export function WlHomeV2({
     if (
       !requestOpen &&
       !scheduleOpen &&
+      !tourScheduleOpen &&
+      !thisDayHistoryOpen &&
       !loginOpen &&
       !forgotOpen &&
       !signupOpen &&
@@ -175,6 +185,8 @@ export function WlHomeV2({
       if (e.key !== "Escape") return
       setRequestOpen(false)
       setScheduleOpen(false)
+      setTourScheduleOpen(false)
+      setThisDayHistoryOpen(false)
       setLoginOpen(false)
       setForgotOpen(false)
       setSignupOpen(false)
@@ -187,6 +199,8 @@ export function WlHomeV2({
   }, [
     requestOpen,
     scheduleOpen,
+    tourScheduleOpen,
+    thisDayHistoryOpen,
     loginOpen,
     forgotOpen,
     signupOpen,
@@ -254,6 +268,8 @@ export function WlHomeV2({
                 onOpenRequest={() => setRequestOpen(true)}
                 onOpenLogin={() => setLoginOpen(true)}
                 onOpenSchedule={() => setScheduleOpen(true)}
+                onOpenTourSchedule={() => setTourScheduleOpen(true)}
+                onOpenThisDayInHistory={() => setThisDayHistoryOpen(true)}
               />
             </>
           : children}
@@ -272,6 +288,16 @@ export function WlHomeV2({
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
         headingId={scheduleHeadingId}
+      />
+      <WlHomeV2TourScheduleModal
+        open={tourScheduleOpen}
+        onClose={() => setTourScheduleOpen(false)}
+        headingId={tourScheduleHeadingId}
+      />
+      <WlHomeV2ThisDayHistoryModal
+        open={thisDayHistoryOpen}
+        onClose={() => setThisDayHistoryOpen(false)}
+        headingId={thisDayHistoryHeadingId}
       />
       <WlHomeV2ArchiveModal
         open={archiveOpen}
