@@ -5,6 +5,7 @@ import Image from "next/image"
 import type { CSSProperties } from "react"
 
 import { decodeHtmlEntitiesForDisplay } from "@/lib/decode-html-entities"
+import { FLODOWN_EVENTS } from "@/lib/flodown-events"
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import type { DiscourseFeaturedTopic } from "@/hooks/use-discourse-featured-topics"
 
@@ -89,6 +90,39 @@ export function WlHomeV2TileCommunity({
                 </a>
               )
             })}
+        </div>
+
+        <div className="widget-panel">
+          <div className="wp-head">
+            <span>Upcoming Community Events</span>
+          </div>
+          {FLODOWN_EVENTS.map((item) => {
+            const isInternal = item.href.startsWith("/")
+            return (
+            <a
+              key={item.id}
+              href={item.href}
+              className="community-event-row"
+              {...(isInternal ?
+                {}
+              : {
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                })}
+              title={item.name}
+            >
+              <span className="community-event-text">
+                <span className="community-event-name">{item.name}</span>
+                <span className="community-event-venue">
+                  {item.venue} – {item.location}
+                </span>
+              </span>
+              <span className="count shrink-0" aria-hidden>
+                {item.month} {item.day}
+              </span>
+            </a>
+            )
+          })}
         </div>
       </div>
 

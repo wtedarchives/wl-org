@@ -21,9 +21,10 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { ListFilter, ListMusic, MapPin, X } from "lucide-react"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
 
+import { DESKTOP_CONTENT_MIN_WIDTH } from "@/hooks/use-mobile"
+
 const DEFAULT_YEAR_ID = "4ca4a7dd-19c5-45af-ab9b-6f7e20f4b445"
 const DEFAULT_YEAR = "2025"
-const DESKTOP_MIN_WIDTH = 1280
 const YEAR_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -61,7 +62,7 @@ function YearPageContent({ yearId }: { yearId: string }) {
     const updateLayout = () => {
       const width = el.clientWidth
       setLayoutMode((prev) =>
-        width >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile",
+        width >= DESKTOP_CONTENT_MIN_WIDTH ? "desktop" : "mobile",
       )
     }
     updateLayout()

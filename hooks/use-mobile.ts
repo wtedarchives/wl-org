@@ -3,8 +3,8 @@ import * as React from "react"
 /** Tailwind `md` (px); matches `useIsMinMd` / `(min-width: 768px)`. */
 export const MOBILE_BREAKPOINT = 768
 
-/** Breakpoint (px) at which main content switches to desktop layout (e.g. setlist page sidebar). */
-export const DESKTOP_CONTENT_MIN_WIDTH = 1280
+/** Breakpoint (px) at which main content switches to desktop layout (nav bar, setlist sidebar, wl-home-v2 tiles, etc.). */
+export const DESKTOP_CONTENT_MIN_WIDTH = 1344
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
@@ -23,8 +23,8 @@ export function useIsMobile() {
 }
 
 /**
- * Tailwind `xl` (1280px): true when viewport is below that width.
- * Used for persistent radio (top bar vs home/sidebar slots). Do not use for general “mobile” UI — that stays at 768 (`useIsMobile`).
+ * True below {@link DESKTOP_CONTENT_MIN_WIDTH} (1344px).
+ * Used for persistent radio (top bar vs home/sidebar slots) and wl-home-v2 header nav. Not general “phone” UI — that stays at 768 (`useIsMobile`).
  */
 export function useIsBelowXl() {
   const [belowXl, setBelowXl] = React.useState<boolean | undefined>(undefined)
@@ -96,12 +96,12 @@ export function useIsBelowLg() {
   return !!belowLg
 }
 
-/** Tailwind `xl` (1280px) — home WTED cards: 3-column grid at/above; accordion below. */
+/** At/above {@link DESKTOP_CONTENT_MIN_WIDTH} — home WTED cards: 3-column grid; accordion below. */
 export function useIsMinXl() {
   const [match, setMatch] = React.useState(false)
 
   React.useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1280px)")
+    const mql = window.matchMedia(`(min-width: ${DESKTOP_CONTENT_MIN_WIDTH}px)`)
     const onChange = () => {
       setMatch(mql.matches)
     }

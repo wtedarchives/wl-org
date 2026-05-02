@@ -12,6 +12,7 @@ import type { AverageSetlistResult } from "@/hooks/use-average-setlist"
 import type { TourShow } from "@/types/tour"
 import type { SlotData } from "@/types/tour"
 import type { NotPlayedSong } from "@/hooks/use-not-played-in-tour"
+import { DESKTOP_CONTENT_MIN_WIDTH } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 
 interface TourStatsProps {
@@ -52,7 +53,7 @@ export function TourStats({
   wlHomeV2 = false,
 }: TourStatsProps) {
   const showIds = shows.map((s) => s.show_id)
-  const isMobile = windowWidth < 1280
+  const isMobile = windowWidth < DESKTOP_CONTENT_MIN_WIDTH
 
   if (!hasTourSetlistEntries) return null
 

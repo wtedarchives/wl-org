@@ -4,26 +4,8 @@ import Link from "next/link"
 import { Calendar1 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
+import { FLODOWN_EVENTS } from "@/lib/flodown-events"
 import { cn } from "@/lib/utils"
-
-const FLODOWN_EVENTS = [
-  {
-    month: "APR",
-    day: 22,
-    name: "NOLA Flodown",
-    venue: "Miel Brewery and Taproom",
-    location: "New Orleans, LA",
-    href: "https://www.instagram.com/p/DXIzhjpjK-g/?img_index=1",
-  },
-  {
-    month: "APR",
-    day: 25,
-    name: "Dallas Flodown",
-    venue: "Celestial Beerworks",
-    location: "Dallas, TX",
-    href: "https://www.celestialbeerworks.com/celestial-beerworks-taproom/2026/4/25/dallas-unofficial-goose-flodown",
-  },
-] as const
 
 function CalendarIcon({
   month,
@@ -80,14 +62,18 @@ export function FlodownEventsCard({
           <TableBody>
             {FLODOWN_EVENTS.map((item) => (
               <TableRow
-                key={item.href}
+                key={item.id}
                 className="group border-wl-dark-grey/40 hover:bg-[#b2655e]"
               >
                 <TableCell colSpan={2} className="p-0 align-middle">
                   <Link
                     href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    {...(item.href.startsWith("/") ?
+                      {}
+                    : {
+                        target: "_blank",
+                        rel: "noopener noreferrer",
+                      })}
                     title={item.name}
                     className={cn(
                       "flex min-h-[72px] min-w-0 flex-row items-stretch gap-0 outline-none transition-colors",

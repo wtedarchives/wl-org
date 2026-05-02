@@ -4,8 +4,8 @@ import { RadioMobileSlot } from "@/components/persistent-radio"
 import { useIsBelowXl } from "@/hooks/use-mobile"
 
 /**
- * Below Tailwind `xl` (1280px): persistent radio mount above the header (all routes, including `/`).
- * At `xl` and up: renders nothing so the mobile slot ref never attaches.
+ * Below 1344px (`DESKTOP_CONTENT_MIN_WIDTH`): persistent radio mount above the header (all routes, including `/`).
+ * At that width and up: renders nothing so the mobile slot ref never attaches.
  */
 export function MobileRadioBar() {
   const isBelowXl = useIsBelowXl()

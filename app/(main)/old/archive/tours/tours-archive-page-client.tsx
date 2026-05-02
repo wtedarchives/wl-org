@@ -21,7 +21,7 @@ import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { supabase } from "@/lib/supabase"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 
-const DESKTOP_MIN_WIDTH = 1280
+import { DESKTOP_CONTENT_MIN_WIDTH } from "@/hooks/use-mobile"
 
 /** Landing redirect when `/old/archive/tours` has no `id` (matches former server page). */
 const DEFAULT_LANDING_TOUR_NAME = "2026 Spring"
@@ -37,7 +37,7 @@ function extractYear(tourName: string): string {
 function TourPageContent({ tourId }: { tourId: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [layoutMode, setLayoutMode] = useState<"mobile" | "desktop">("desktop")
-  const [windowWidth, setWindowWidth] = useState(1280)
+  const [windowWidth, setWindowWidth] = useState(DESKTOP_CONTENT_MIN_WIDTH)
   const [expandedYear, setExpandedYear] = useState<string | null>(null)
   const [songSheetOpen, setSongSheetOpen] = useState(false)
   const [songSheetSongName, setSongSheetSongName] = useState<string | null>(null)
@@ -85,7 +85,7 @@ function TourPageContent({ tourId }: { tourId: string }) {
     const update = () => {
       const w = el.clientWidth
       setWindowWidth(w)
-      setLayoutMode(w >= DESKTOP_MIN_WIDTH ? "desktop" : "mobile")
+      setLayoutMode(w >= DESKTOP_CONTENT_MIN_WIDTH ? "desktop" : "mobile")
     }
     update()
     const ro = new ResizeObserver(update)

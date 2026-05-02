@@ -36,9 +36,29 @@ function TopNavPrimaryImage({ src }: { src: string }) {
         width={80}
         height={80}
         className="top-nav-primary-img"
-        sizes="(max-width: 1279px) 20px, 22px"
+        sizes="(max-width: 1343px) 20px, 22px"
       />
     </span>
+  )
+}
+
+function TopNavOldPathToggle({
+  oldPathDebugActive,
+  onToggle,
+}: {
+  oldPathDebugActive: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className="top-nav-old-toggle"
+      aria-pressed={oldPathDebugActive}
+      title="Toggle /old/ in URL (compare legacy vs new)"
+      onClick={onToggle}
+    >
+      OLD
+    </button>
   )
 }
 
@@ -168,26 +188,34 @@ export function WlHomeV2Header({
         </span>
       </button>
 
-      <Link
-        href="/"
-        className="brand"
-        aria-label="Wysteria Lane home"
-        onClick={closeMobileNav}
-      >
-        <div className="brand-mark">
-          <Image
-            src="/WL.png"
-            alt=""
-            width={26}
-            height={26}
-            className="h-[72%] w-[72%] object-contain"
+      <div className="top-brand-cluster">
+        <Link
+          href="/"
+          className="brand"
+          aria-label="Wysteria Lane home"
+          onClick={closeMobileNav}
+        >
+          <div className="brand-mark">
+            <Image
+              src="/WL.png"
+              alt=""
+              width={26}
+              height={26}
+              className="h-[72%] w-[72%] object-contain"
+            />
+          </div>
+          <div className="brand-text">
+            <span className="wl">WTED.org</span>
+            <span className="dotorg">The World of TED</span>
+          </div>
+        </Link>
+        {!isBelowXl ?
+          <TopNavOldPathToggle
+            oldPathDebugActive={oldPathDebugActive}
+            onToggle={onOldPathDebugToggle}
           />
-        </div>
-        <div className="brand-text">
-          <span className="wl">WTED.org</span>
-          <span className="dotorg">The World of TED</span>
-        </div>
-      </Link>
+        : null}
+      </div>
 
       <nav
         id={mobileNavId}
@@ -239,15 +267,6 @@ export function WlHomeV2Header({
             />
             Follow Us
           </a>
-          <button
-            type="button"
-            className="top-nav-old-toggle"
-            aria-pressed={oldPathDebugActive}
-            title="Toggle /old/ in URL (compare legacy vs new)"
-            onClick={onOldPathDebugToggle}
-          >
-            OLD
-          </button>
         </div>
         {isArchiveRoute ?
           <Suspense fallback={null}>
@@ -259,11 +278,19 @@ export function WlHomeV2Header({
         : null}
       </nav>
 
-      <div className="top-user-menu">
-        <WlHomeV2UserMenu
-          onOpenLogin={onOpenLogin}
-          onOpenSignup={onOpenSignup}
-        />
+      <div className="top-user-cluster">
+        {isBelowXl ?
+          <TopNavOldPathToggle
+            oldPathDebugActive={oldPathDebugActive}
+            onToggle={onOldPathDebugToggle}
+          />
+        : null}
+        <div className="top-user-menu">
+          <WlHomeV2UserMenu
+            onOpenLogin={onOpenLogin}
+            onOpenSignup={onOpenSignup}
+          />
+        </div>
       </div>
     </header>
   )

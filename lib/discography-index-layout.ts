@@ -1,13 +1,14 @@
 import { DISCOGRAPHY_PUBLIC_CATEGORIES } from "@/lib/discography-public"
+import { DESKTOP_CONTENT_MIN_WIDTH } from "@/hooks/use-mobile"
 
 /**
  * Column count for the discography index, aligned with previous Tailwind grid:
- * `min-[1024px]:2`, `min-[1280px]:3`, `min-[1440px]:4`, `min-[1860px]:5`.
+ * `min-[1024px]:2`, 3 cols at {@link DESKTOP_CONTENT_MIN_WIDTH}+, `min-[1440px]:4`, `min-[1860px]:5`.
  */
 export function discographyIndexColumnCount(viewportWidth: number): number {
   if (viewportWidth >= 1860) return 5
   if (viewportWidth >= 1440) return 4
-  if (viewportWidth >= 1280) return 3
+  if (viewportWidth >= DESKTOP_CONTENT_MIN_WIDTH) return 3
   if (viewportWidth >= 1024) return 2
   return 1
 }
