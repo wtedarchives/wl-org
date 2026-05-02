@@ -61,14 +61,17 @@ export function SetlistShowChangesCard({
               return (
                 <li
                   key={c.show_change_uuid}
-                  className="flex items-start gap-1.5 line-clamp-2"
+                  className="flex items-start gap-1.5"
                 >
                   {iconConfig && (
                     <iconConfig.Icon
                       className={`size-3.5 shrink-0 mt-[1px] ${iconConfig.colorClass}`}
                     />
                   )}
-                  <span dangerouslySetInnerHTML={{ __html: c.change }} />
+                  <span
+                    className="min-w-0"
+                    dangerouslySetInnerHTML={{ __html: c.change }}
+                  />
                 </li>
               )
             })}

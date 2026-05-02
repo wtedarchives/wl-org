@@ -243,6 +243,7 @@ export function WlHomeV2SongsArchiveView() {
     >
       <WlHomeV2ArchiveCrumbsShell
         variant="page-gutter"
+        className="wl-home-v2-archive-crumbs-shell--inline-selectors"
         selectorsAriaLabel="Songs view"
         trail={
           <WlHomeV2ArchiveCrumbsTrail
@@ -258,6 +259,7 @@ export function WlHomeV2SongsArchiveView() {
                 id="viewCategories"
                 className={activeView === "categories" ? "active" : undefined}
                 title="Categories"
+                aria-label="Categories"
                 onClick={() => setView("categories")}
               >
                 <svg
@@ -276,12 +278,13 @@ export function WlHomeV2SongsArchiveView() {
                   <rect x="3" y="14" width="7" height="7" />
                   <rect x="14" y="14" width="7" height="7" />
                 </svg>
-                <span>Categories</span>
+                <span className="hidden md:inline">Categories</span>
               </button>
               <button
                 type="button"
                 id="viewList"
                 title="List"
+                aria-label="List"
                 className={activeView === "list" ? "active" : undefined}
                 onClick={() => setView("list")}
               >
@@ -303,7 +306,7 @@ export function WlHomeV2SongsArchiveView() {
                   <circle cx="4" cy="12" r="1" />
                   <circle cx="4" cy="18" r="1" />
                 </svg>
-                <span>List</span>
+                <span className="hidden md:inline">List</span>
               </button>
             </div>
             <button

@@ -218,7 +218,9 @@ export function SetlistEntryRow({
         </TableCell>
       ) : null}
       {showWtedColumn && (
-        <TableCell className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}>
+        <TableCell
+          className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}
+        >
           <SetlistEntryWtedCell
             entry={entry}
             onWtedClick={onWtedClick}

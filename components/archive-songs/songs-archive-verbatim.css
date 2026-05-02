@@ -112,6 +112,15 @@
   border-right: 0;
 }
 
+/* Icon-only below `md`: sizing for compact segments (matches Tailwind md / 768px). */
+@media (max-width: 767px) {
+  .songs-archive-verbatim .view-toggle button {
+    min-width: 44px;
+    min-height: 28px;
+    padding-inline: 10px;
+  }
+}
+
 .songs-archive-verbatim .view-toggle button:hover:not(.active) {
   color: #fff;
   background: rgba(255, 255, 255, 0.08);

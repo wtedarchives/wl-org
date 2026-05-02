@@ -33,13 +33,23 @@ function formatShowDate(dateStr: string | null): string {
 }
 
 /** AAT + nugs marks — used by {@link SetlistJotyDrawer} and WL Home v2 JOTY modal. */
-export function JotyBracketSponsorLogos({ className }: { className?: string }) {
+export function JotyBracketSponsorLogos({
+  className,
+  stacked = false,
+}: {
+  className?: string
+  /** Vertical stack, left-aligned — for footer beside attribution copy. */
+  stacked?: boolean
+}) {
   const linkClass =
     "inline-flex shrink-0 origin-center opacity-90 transition-all duration-200 ease-out hover:scale-110 hover:opacity-100 active:scale-100"
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-start gap-1.5",
+        "flex shrink-0 justify-start",
+        stacked ?
+          "flex-col items-start gap-1"
+        : "flex-row items-center gap-1.5",
         className,
       )}
     >

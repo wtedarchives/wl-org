@@ -19,6 +19,12 @@ interface SongDisplayNameProps {
    * Set false for plain headings or body copy (e.g. song page title).
    */
   underlineOnHover?: boolean
+  /**
+   * In narrow multi-line layouts (e.g. tour Slots table), dual-layer canonical swap
+   * uses `inline-block` and behaves like its own rectangle—whole titles jump to the
+   * next line together. Dense inline + `title` for canonical avoids that.
+   */
+  compactInline?: boolean
 }
 
 /**
@@ -32,6 +38,7 @@ export function SongDisplayName({
   as: Component = "span",
   children,
   underlineOnHover = true,
+  compactInline = false,
 }: SongDisplayNameProps) {
   const [isHovered, setIsHovered] = useState(false)
   const displayName = songDisplayName?.trim() || song
@@ -45,6 +52,21 @@ export function SongDisplayName({
           underlineOnHover && "hover:underline",
           className,
         )}
+      >
+        {children ?? displayName}
+      </Component>
+    )
+  }
+
+  if (compactInline) {
+    return (
+      <Component
+        className={cn(
+          "inline min-w-0 align-baseline",
+          underlineOnHover && "hover:underline",
+          className,
+        )}
+        title={song}
       >
         {children ?? displayName}
       </Component>

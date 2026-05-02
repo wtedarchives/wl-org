@@ -52,39 +52,38 @@ export function TourSlotsTable({
   const renderSongList = (songs: SongEntryWithId[] | null) => {
     if (!songs || songs.length === 0) return null
     return (
-      <div
-        className="w-full min-w-0 text-left text-[11px] leading-3"
-        style={{
-          wordWrap: "break-word",
-          overflowWrap: "break-word",
-        }}
-      >
-        {songs.map((song, index) => (
-          <span key={`${song.song}-${index}`}>
-            {index > 0 ?
-              <span
-                className="inline !px-1 leading-none text-destructive"
-                aria-hidden
-              >
-                →
-              </span>
-            : null}
+      <div className="w-full min-w-0 whitespace-normal text-left text-[11px] leading-3 break-words">
+        {songs.flatMap((song, index) => {
+          const link = (
             <a
+              key={`${song.song}-${index}-link`}
               href="#"
               onClick={(e) => {
                 e.preventDefault()
                 onSongClick(song.song, song.song_displayname)
               }}
-              className="cursor-pointer hover:underline"
+              className="cursor-pointer break-words hover:underline"
             >
               <SongDisplayName
                 song={song.song}
                 songDisplayName={song.song_displayname}
                 underlineOnHover={false}
+                compactInline
               />
             </a>
-          </span>
-        ))}
+          )
+          if (index === 0) return [link]
+          return [
+            <span
+              key={`${song.song}-${index}-sep`}
+              aria-hidden
+              className="text-destructive"
+            >
+              {" → "}
+            </span>,
+            link,
+          ]
+        })}
       </div>
     )
   }

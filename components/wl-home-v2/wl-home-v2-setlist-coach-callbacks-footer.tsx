@@ -4,9 +4,12 @@ import { cn } from "@/lib/utils"
 export function WlHomeV2SetlistCoachCallbacksFooter({
   coachNotesHtml,
   callbacksHtml,
+  /** Orange rule above notes; omit when nothing (e.g. no song rows) sits above this block. */
+  showDividerAfterTable = true,
 }: {
   coachNotesHtml: string
   callbacksHtml: string
+  showDividerAfterTable?: boolean
 }) {
   const hasCoach = coachNotesHtml.length > 0
   const hasCallbacks = callbacksHtml.length > 0
@@ -30,7 +33,9 @@ export function WlHomeV2SetlistCoachCallbacksFooter({
 
   return (
     <>
-      <div className="setlist-card-after-table-divider" aria-hidden />
+      {showDividerAfterTable ?
+        <div className="setlist-card-after-table-divider" aria-hidden />
+      : null}
       <div
         className={cn(
           "setlist-card-notes-row",

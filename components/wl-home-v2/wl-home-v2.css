@@ -2659,11 +2659,23 @@
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid rgb(42, 44, 43);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--joty
+    .modal-joty-footer
+    .modal-joty-footer-copy {
+    margin: 0;
+    min-width: 0;
+    flex: 1 1 auto;
     font-size: 11px;
     line-height: 1.45;
     color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-    flex-shrink: 0;
+    text-align: left;
   }
   /* Setlist song — tour performances (same data as archive drawer; wide table) */
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-song {
@@ -2912,16 +2924,6 @@
     display: flex;
     align-items: flex-start;
     gap: 6px;
-  }
-  .wl-home-v2
-    .wl-home-v2-setlist
-    .wl-home-v2-setlist-show-changes-item
-    > span:last-child {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-width: 0;
   }
   .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-list a {
     font-weight: 600;
@@ -3654,11 +3656,9 @@
       > .wl-home-v2-wted-slot-art {
       grid-column: 1;
       grid-row: 1;
-      align-self: start;
+      align-self: stretch;
       width: 40px;
-      height: 40px;
       min-height: 40px;
-      max-height: 40px;
       /* Top-left only — no curve on bottom-left */
       border-radius: 10px 0 0 0;
     }
@@ -3912,6 +3912,7 @@
   }
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table td.center {
     text-align: center;
+    vertical-align: middle;
   }
   /* Placement bar column: same hairlines + bg as other cells; narrow width only */
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .set-table th.set-table-perf-head,
@@ -5037,6 +5038,15 @@
       flex-basis: 100%;
       justify-content: center;
       margin-left: 0;
+    }
+    /* Stats + Songs archive: keep toolbar on same row as crumbs, flush right (like desktop). */
+    .wl-home-v2
+      .wl-home-v2-archive-crumbs-shell.wl-home-v2-archive-crumbs-shell--inline-selectors
+      .wl-home-v2-setlist-crumbs-selectors {
+      flex-basis: auto;
+      justify-content: flex-end;
+      margin-left: auto;
+      flex-shrink: 0;
     }
   }
 
@@ -6442,6 +6452,40 @@
   min-width: 0;
   flex: 1 1 auto;
   min-height: 0;
+  position: relative;
+  isolation: isolate;
+}
+/*
+ * Same marbled `--tile-bg` + green wash as `.wl-home-v2-years-tile`: this wrapper flex-grows beneath
+ * the tools tile (`newbg.png`) while inner sections stay short → fills empty slack with continuity.
+ */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/newbg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.82;
+  filter: grayscale(35%) brightness(0.8);
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 91, 78, 0.48) 0%,
+    rgba(40, 91, 78, 0.93) 85%
+  );
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles > * {
+  position: relative;
+  z-index: 2;
 }
 /* `md`–`< xl`: two-column grid; inter-tile accent strips would break cell pairing, so hide for this band. */
 @media (min-width: 768px) and (max-width: 1279px) {
@@ -7131,9 +7175,17 @@
   .wl-home-v2 .wl-home-v2-setlist .setlist-card-notes-row--split .setlist-card-notes-col-sep {
     display: none;
   }
+  /* Stacked coach/callbacks: divider full width of frosted strip; 8px above/below line.
+   * Parent row uses `align-items: flex-start` (narrow coach block); stretch callbacks only so
+   * `border-top` spans the strip, not shrink-wrapped HTML width. */
   .wl-home-v2 .wl-home-v2-setlist .setlist-card-notes-row--split .setlist-card-notes-col:nth-child(3) {
-    padding-top: 14px;
-    margin-top: 2px;
+    align-self: stretch;
+    margin-top: 8px;
+    margin-left: -14px;
+    margin-right: -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 8px;
     border-top: 1px solid rgb(53, 56, 54);
   }
 }
@@ -7640,6 +7692,7 @@
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.center {
   text-align: center;
+  vertical-align: middle;
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.time-cell {
   font-size: 13px;

@@ -34,16 +34,14 @@ export function SetlistJotyDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="mx-auto flex max-h-[90vh] w-full max-w-[800px] flex-col rounded-t-xl outline-none ring-0 focus:ring-0 focus:outline-none focus-visible:outline-none [&:focus]:outline-none [&:focus-visible]:outline-none">
-        <DrawerHeader className="flex shrink-0 flex-row items-center justify-between gap-4 border-b border-border pb-3 pt-0">
-          <div className="flex min-w-0 shrink-0 items-center justify-start">
-            <JotyBracketSponsorLogos />
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col items-center justify-center text-center">
+        <DrawerHeader className="flex shrink-0 flex-row items-center gap-2 border-b border-border pb-3 pt-0">
+          <div className="min-w-0 flex-1" aria-hidden />
+          <div className="flex min-w-0 shrink-0 flex-col items-center justify-center px-2 text-center">
             <DrawerTitle className="text-base font-semibold">
               Jam of the Year {displayYear}
             </DrawerTitle>
           </div>
-          <div className="flex w-16 shrink-0 items-center justify-end">
+          <div className="flex min-w-0 flex-1 justify-end">
             <DrawerClose asChild>
               <Button
                 variant="ghost"
@@ -66,10 +64,13 @@ export function SetlistJotyDrawer({
           />
         </div>
 
-        <DrawerFooter className="shrink-0 border-t border-border bg-muted/30 py-2">
-          <p className="text-center text-xs text-muted-foreground">
-            {JOTY_DESCRIPTION}
-          </p>
+        <DrawerFooter className="shrink-0 border-t border-border bg-muted/30 py-3">
+          <div className="flex w-full flex-row items-center gap-3">
+            <JotyBracketSponsorLogos stacked />
+            <p className="min-w-0 flex-1 text-left text-xs leading-snug text-muted-foreground">
+              {JOTY_DESCRIPTION}
+            </p>
+          </div>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

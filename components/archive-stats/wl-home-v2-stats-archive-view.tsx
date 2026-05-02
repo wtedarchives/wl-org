@@ -159,6 +159,7 @@ export function WlHomeV2StatsArchiveView() {
     <div className="wl-home-v2-stats-archive-page box-border flex min-h-0 min-w-0 w-full flex-1 flex-col px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6">
       <WlHomeV2ArchiveCrumbsShell
         variant="page-gutter"
+        className="wl-home-v2-archive-crumbs-shell--inline-selectors"
         selectorsAriaLabel="Stats year"
         trail={
           <WlHomeV2ArchiveCrumbsTrail

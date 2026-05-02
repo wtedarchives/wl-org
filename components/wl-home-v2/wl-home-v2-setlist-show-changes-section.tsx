@@ -95,6 +95,7 @@ export function WlHomeV2SetlistShowChangesSection({
                       />
                     : null}
                     <span
+                      className="min-w-0"
                       dangerouslySetInnerHTML={{ __html: c.change }}
                     />
                   </li>

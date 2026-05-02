@@ -53,7 +53,6 @@ export function WlHomeV2SetlistJotyModal({
               Jam of the Year {displayYear}
             </h3>
             <div className="modal-joty-head-trailing">
-              <JotyBracketSponsorLogos />
               <button
                 type="button"
                 className="modal-request-close"
@@ -76,12 +75,10 @@ export function WlHomeV2SetlistJotyModal({
               wlHomeV2YearsTable
             />
           </div>
-          <p
-            id={descId}
-            className="modal-joty-footer"
-          >
-            {JOTY_DESCRIPTION}
-          </p>
+          <div id={descId} className="modal-joty-footer">
+            <JotyBracketSponsorLogos stacked />
+            <p className="modal-joty-footer-copy">{JOTY_DESCRIPTION}</p>
+          </div>
         </div>
       </div>
     </WlHomeV2ModalPortal>

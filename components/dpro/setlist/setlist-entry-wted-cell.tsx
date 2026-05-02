@@ -29,7 +29,7 @@ export function SetlistEntryWtedCell({
     <button
       type="button"
       onClick={() => onWtedClick(entry)}
-      className="rounded hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
+      className="inline-flex items-center justify-center rounded p-1.5 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
       aria-label="Request this song on WTED Goose Radio"
     >
       <Image
@@ -41,7 +41,7 @@ export function SetlistEntryWtedCell({
       />
     </button>
   ) : (
-    <span className="inline-block">
+    <span className="inline-flex items-center justify-center p-1.5">
       <Image
         src="/WTED2.png"
         alt="WTED"
@@ -52,21 +52,26 @@ export function SetlistEntryWtedCell({
     </span>
   )
 
+  const innerClass =
+    "inline-flex items-center justify-center align-middle leading-none"
+
   if (showTooltips) {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>{wtedButton}</TooltipTrigger>
-        <TooltipContent
-          className={cn(tooltipContentClassName)}
-          {...(tooltipContentClassName ?
-            { side: "top" as const, sideOffset: 6 }
-          : {})}
-        >
-          Request this song on WTED Goose Radio.
-        </TooltipContent>
-      </Tooltip>
+      <span className={innerClass}>
+        <Tooltip>
+          <TooltipTrigger asChild>{wtedButton}</TooltipTrigger>
+          <TooltipContent
+            className={cn(tooltipContentClassName)}
+            {...(tooltipContentClassName ?
+              { side: "top" as const, sideOffset: 6 }
+            : {})}
+          >
+            Request this song on WTED Goose Radio.
+          </TooltipContent>
+        </Tooltip>
+      </span>
     )
   }
 
-  return wtedButton
+  return <span className={innerClass}>{wtedButton}</span>
 }

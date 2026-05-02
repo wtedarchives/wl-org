@@ -128,6 +128,7 @@ export function WlHomeV2SetlistTable({
         <WlHomeV2SetlistCoachCallbacksFooter
           coachNotesHtml={coachNotesShowText}
           callbacksHtml={callbacksText}
+          showDividerAfterTable={false}
         />
       </div>
     )
