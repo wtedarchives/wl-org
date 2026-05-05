@@ -1,14 +1,6 @@
 "use client"
 
-import {
-  AppleLogo,
-  ArrowRight,
-  GooglePlayLogo,
-  Info,
-  ListNumbers,
-  MusicNote,
-  Users,
-} from "@phosphor-icons/react"
+import { ArrowRight, Info, ListNumbers, MusicNote, Users } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
@@ -110,27 +102,34 @@ export function WlHomeV2TileRadio({
             <span className="wbtn-text">GORPs</span>
             <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </Link>
+        </div>
+        <div className="tile-widget-store-badges">
           <a
-            className="wbtn wbtn--app-store"
+            className="tile-widget-store-badge-link tile-widget-store-badge-link--ios focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(88,200,174)]"
             href="https://apps.apple.com/us/app/wted-goose-radio/id6476207418"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Download WTED Goose Radio on the App Store"
           >
-            <span className="wbtn-text">iOS App</span>
-            <AppleLogo className="wbtn-icon" size={18} weight="regular" aria-hidden />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/iOS.svg"
+              alt=""
+              className="tile-widget-store-badge-img"
+            />
           </a>
           <a
-            className="wbtn wbtn--app-store"
+            className="tile-widget-store-badge-link tile-widget-store-badge-link--android focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(88,200,174)]"
             href="https://play.google.com/store/apps/details?id=com.m92a0e1796e8f.app"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Get WTED Goose Radio on Google Play"
           >
-            <span className="wbtn-text">Android App</span>
-            <GooglePlayLogo
-              className="wbtn-icon"
-              size={18}
-              weight="regular"
-              aria-hidden
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/Android.svg"
+              alt=""
+              className="tile-widget-store-badge-img"
             />
           </a>
         </div>

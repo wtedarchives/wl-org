@@ -42,6 +42,7 @@ import {
   WlHomeV2SetlistPlaceholderRatingAttendees,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
+import { SetlistEgnAttribution } from "@/components/dpro/setlist/setlist-egn-attribution"
 
 type SetlistLayoutMode = "mobile" | "desktop" | null
 
@@ -273,6 +274,9 @@ export function WlHomeV2SetlistPlaceholderView({
                     visualVariant="wl-home-v2"
                     onReleaseHover={setHoveredReleaseId}
                   />
+                : null}
+                {show.egn_sourced === true ?
+                  <SetlistEgnAttribution className="w-full shrink-0" />
                 : null}
               </div>
             </div>

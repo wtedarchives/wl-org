@@ -69,6 +69,7 @@ export function useSetlistData(showId: string | undefined) {
             show_jivecomplete,
             show_dripfieldcomplete,
             discography_display,
+            egn_sourced,
             subvenues:show_subvenue(
               venues:subvenue_venue(
                 venue_id

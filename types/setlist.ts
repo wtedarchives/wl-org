@@ -33,6 +33,8 @@ export interface Show {
   show_dripfieldcomplete?: boolean
   /** When false, WL Home v2 setlist omits set rail, set-break dividers, and # placement bars. */
   discography_display?: boolean | null
+  /** When true, show ElGoose.Net data attribution on the setlist page. */
+  egn_sourced?: boolean | null
 }
 
 export interface SetlistEntry {

@@ -34,6 +34,7 @@ import { SetlistAttendanceCard } from "@/components/dpro/setlist/setlist-attenda
 import { SetlistCommunityForumButton } from "@/components/dpro/setlist/setlist-community-forum-button"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import { SetlistPageDrawers } from "@/components/dpro/setlist/setlist-page-drawers"
+import { SetlistEgnAttribution } from "@/components/dpro/setlist/setlist-egn-attribution"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
 import { useSetlistArchiveShowId } from "@/hooks/use-setlist-archive-show-id"
@@ -324,6 +325,8 @@ export default function SetlistArchivePageClient() {
           </div>
         )}
       </div>
+
+      {show.egn_sourced === true ? <SetlistEgnAttribution /> : null}
 
       <SetlistPageDrawers
         show={show}

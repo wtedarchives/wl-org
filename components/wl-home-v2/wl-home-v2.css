@@ -918,7 +918,8 @@
   }
 
   /*
-   * Goose Radio tile: single ~400px card on desktop; full width below 1344px (see tile grid mq).
+   * Goose Radio tile: single ~400px card on desktop; full width below tile “stacked” breakpoints
+   * (≤1343px non-homepage / ≤1355px homepage — see `#tileGrid .tile` media queries).
    * (Persistent player still measures `.wl-home-v2-radio-tile-on-air-card__embed`.)
    */
   .wl-home-v2 #tileGrid .tile.tile-radio .wl-home-v2-radio-tile-on-air-card {
@@ -1376,10 +1377,15 @@
   }
   /*
    * Goose Radio tile desktop only: widen widget column to fit 400px on-air card (base tile cap is 320px).
-   * Below 1344px `.tile` mobile grid applies unchanged (avoid overriding stacking layout).
+   * Homepage uses 1356px; other `#tileGrid` (e.g. personnel) stays at 1344px.
    */
   @media (min-width: 1344px) {
-    .wl-home-v2 #tileGrid .tile.tile-radio {
+    .wl-home-v2 main:not(.wl-home-v2-main--homepage) #tileGrid .tile.tile-radio {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    }
+  }
+  @media (min-width: 1356px) {
+    .wl-home-v2-main--homepage #tileGrid .tile.tile-radio {
       grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
     }
   }
@@ -1387,6 +1393,7 @@
    * Below desktop content width (1344px): all tiles use the same inner layout —
    * top row: icon (left) + title/copy/CTA (top-right); second row: widget full width.
    * (Narrower than `lg` is included: this max-width covers ≤1343px.)
+   * Homepage-only: keep this stacked tile layout up through 1355px (`wl-home-v2-main--homepage`).
    */
   @media (max-width: 1343px) {
     .wl-home-v2 .tile {
@@ -1413,6 +1420,35 @@
     }
     .wl-home-v2 #tileGrid .tile.tile-radio .tile-body,
     .wl-home-v2 #tileGrid .tile.tile-archive .tile-body {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+  @media (min-width: 1344px) and (max-width: 1355px) {
+    .wl-home-v2-main--homepage .tile {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      align-items: start;
+    }
+    .wl-home-v2-main--homepage .tile .tile-body {
+      grid-column: 2;
+      grid-row: 1;
+      justify-content: flex-start;
+      align-items: flex-end;
+      text-align: right;
+    }
+    .wl-home-v2-main--homepage .tile .tile-widget {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: flex-start;
+    }
+    .wl-home-v2-main--homepage #tileGrid .tile.tile-radio .wl-home-v2-radio-tile-on-air-card {
+      width: 100%;
+      max-width: 100%;
+      align-self: stretch;
+    }
+    .wl-home-v2-main--homepage #tileGrid .tile.tile-radio .tile-body,
+    .wl-home-v2-main--homepage #tileGrid .tile.tile-archive .tile-body {
       align-items: flex-start;
       text-align: left;
     }
@@ -2586,6 +2622,48 @@
     background: rgba(88, 200, 174, 0.18);
     border-color: rgb(52, 109, 95);
     transform: translateY(-1px);
+  }
+  /*
+   * Store badges: row fills widget width, fixed 10px gap. Equal rendered heights with no fixed px:
+   * flex-grow ∝ (viewBox width / height) so slot widths match proportions at a common height H:
+   * H = (container − gap) / (ar_ios + ar_android); imgs use width 100%, height auto.
+   */
+  .wl-home-v2 .tile-widget-store-badges {
+    --store-badge-ar-ios: 2.99160175; /* iOS.svg viewBox 119.66407×40 */
+    --store-badge-ar-android: 3.37175109; /* Android.svg viewBox 238.96×70.87 */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .wl-home-v2 .tile-widget-store-badge-link {
+    box-sizing: border-box;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.18s ease-out;
+  }
+  .wl-home-v2 .tile-widget-store-badge-link--ios {
+    flex: var(--store-badge-ar-ios) 1 0;
+  }
+  .wl-home-v2 .tile-widget-store-badge-link--android {
+    flex: var(--store-badge-ar-android) 1 0;
+  }
+  .wl-home-v2 .tile-widget-store-badge-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  .wl-home-v2 .tile-widget-store-badge-link:hover {
+    opacity: 0.88;
   }
 
   /* Topics list */

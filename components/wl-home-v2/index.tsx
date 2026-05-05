@@ -14,6 +14,7 @@ import {
 import { usePathname, useRouter } from "next/navigation"
 
 import { useWtedRadioNowPlaying } from "@/hooks/use-wted-radio-now-playing"
+import { cn } from "@/lib/utils"
 
 import "./wl-home-v2.css"
 import { SubmitModalHandler } from "@/components/submit-modal-handler"
@@ -246,7 +247,9 @@ export function WlHomeV2({
           <WlHomeV2ArchiveSubnav />
         </Suspense>
 
-        <main>
+        <main
+          className={cn(children == null && "wl-home-v2-main--homepage")}
+        >
           {children == null ?
             <>
               <div
