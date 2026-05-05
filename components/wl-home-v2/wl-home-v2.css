@@ -820,7 +820,7 @@
     align-items: flex-start;
     border-radius: 12px;
     max-width: 100%;
-    background: rgba(0, 0, 0, 0.38);
+    background: rgba(0, 0, 0, 0.48);
     border: 1px solid rgb(44, 46, 45);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -2111,8 +2111,8 @@
     pointer-events: none;
     background-image: var(--tile-bg, none);
     background-size: cover; background-position: center;
-    opacity: 0.55; transition: opacity .5s, transform .6s cubic-bezier(.2,.7,.2,1);
-    filter: grayscale(35%) brightness(0.8);
+    opacity: 0.55; transition: opacity .5s, transform .6s cubic-bezier(.2,.7,.2,1), filter .5s;
+    filter: grayscale(100%) brightness(0.8);
   }
   .wl-home-v2 .tile::after {
     content: ""; position: absolute; inset: 0; z-index: 1;
@@ -2285,7 +2285,7 @@
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid rgb(44, 46, 45);
-    background: rgba(0, 0, 0, 0.38);
+    background: rgba(0, 0, 0, 0.48);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
@@ -2329,8 +2329,8 @@
     background:
       linear-gradient(
         180deg,
-        color-mix(in oklch, var(--wl-orange) 40%, transparent) 0%,
-        rgba(0, 0, 0, 0.48) 60%
+        color-mix(in oklch, var(--wl-orange) 50%, transparent) 0%,
+        rgba(0, 0, 0, 0.58) 60%
       );
     border: 1px solid color-mix(in oklch, var(--wl-orange) 38%, rgb(44, 46, 45));
   }
@@ -2611,7 +2611,7 @@
   }
   /* App Store / Play — same frosted panel + hover as ON AIR (`button.live-pill--wted-tile`) */
   .wl-home-v2 .wbtn.wbtn--app-store {
-    background: rgba(0, 0, 0, 0.38);
+    background: rgba(0, 0, 0, 0.48);
     border-color: rgb(44, 46, 45);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -2923,7 +2923,7 @@
     padding: 3px 8px;
     border-radius: 999px;
     border: 1px solid rgb(88, 91, 89);
-    background: rgba(0, 0, 0, 0.52);
+    background: rgba(0, 0, 0, 0.62);
     font-family: "Geist Mono", ui-monospace, monospace;
     font-size: 11px;
     font-weight: 500;
@@ -2966,6 +2966,16 @@
     .widget-panel
     > a.community-event-row:not(:last-of-type):hover {
     border-bottom-color: rgb(52, 109, 95);
+  }
+  /* Bump opacity on homepage tile panels (leave shared chrome elsewhere alone). */
+  .wl-home-v2 #tileGrid .widget-panel:not(.widget-panel--community-events) {
+    background: rgba(0, 0, 0, 0.48);
+  }
+  /* Homepage tile panel headers — bolder + full white. */
+  .wl-home-v2 #tileGrid .widget-panel .wp-head,
+  .wl-home-v2 #tileGrid .stat .s-label {
+    color: #fff;
+    font-weight: 600;
   }
 
   .wl-home-v2 .song {

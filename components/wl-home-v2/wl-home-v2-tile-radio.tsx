@@ -79,7 +79,7 @@ export function WlHomeV2TileRadio({
         <div className="tile-widget-actions">
           <button
             type="button"
-            className="wbtn"
+            className="wbtn wbtn--app-store"
             id="btn-request"
             onClick={(e) => {
               e.preventDefault()
@@ -90,15 +90,15 @@ export function WlHomeV2TileRadio({
             <span className="wbtn-text">Request a Song</span>
             <MusicNote className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </button>
-          <Link className="wbtn" href="/wted/program-director">
+          <Link className="wbtn wbtn--app-store" href="/wted/program-director">
             <span className="wbtn-text">Program Director</span>
             <ListNumbers className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </Link>
-          <Link className="wbtn" href="/wted/about">
+          <Link className="wbtn wbtn--app-store" href="/wted/about">
             <span className="wbtn-text">About Us</span>
             <Info className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </Link>
-          <Link className="wbtn" href="/wted/gorps">
+          <Link className="wbtn wbtn--app-store" href="/wted/gorps">
             <span className="wbtn-text">GORPs</span>
             <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </Link>
