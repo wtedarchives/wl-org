@@ -135,6 +135,13 @@ export function useAverageSetlist(
     async function calculateAverageSetlist() {
       const currentShows = showsRef.current
 
+      if (!showsKey) {
+        setAverageSetlist([])
+        setStats(null)
+        setIsLoading(false)
+        return
+      }
+
       if (!currentShows || currentShows.length === 0 || !supabase) {
         setAverageSetlist([])
         setStats(null)
@@ -152,7 +159,6 @@ export function useAverageSetlist(
         const canonicalShows = currentShows.filter(
           (s) => s.show_iscanon === true || s.show_canonid !== null,
         )
-
 
         if (canonicalShows.length === 0) {
           setAverageSetlist([])
@@ -188,7 +194,8 @@ export function useAverageSetlist(
 
         let allEntries: any[] = []
 
-        for (const chunk of showIdChunks) {
+        for (let ci = 0; ci < showIdChunks.length; ci++) {
+          const chunk = showIdChunks[ci]
           let page = 0
           let hasMore = true
           while (hasMore) {
@@ -334,7 +341,6 @@ export function useAverageSetlist(
         for (const [song, { timesPlayed, showsSinceDebut }] of songRaritySource) {
           songRarity.set(song, (timesPlayed / showsSinceDebut) * 100)
         }
-
 
         // ─────────────────────────────────────────────────────────────────
         // STEP 4 — Determine which sets are included in the model
@@ -571,7 +577,6 @@ export function useAverageSetlist(
         // ─────────────────────────────────────────────────────────────────
 
         finalPool.sort((a, b) => a.normalizedAverageScore - b.normalizedAverageScore)
-
 
         // ─────────────────────────────────────────────────────────────────
         // STEP 9 — Slice sorted pool into sets and build result entries

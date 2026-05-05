@@ -6,7 +6,6 @@ import {
   useEffect,
   useId,
   useMemo,
-  useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
@@ -33,13 +32,9 @@ import { WlHomeV2TourScheduleModal } from "./wl-home-v2-tour-schedule-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
-import {
-  type WlHomeV2TrailHue,
-  useWlHomeV2CursorTrail,
-} from "./use-wl-home-v2-cursor-trail"
 
 const WELCOME_TICKER_COPY =
-  "Welcome to WTED, the World of TED.  Built by Goose fans, for Goose fans."
+  "Welcome to Wysteria Lane, built by Goose fans, for Goose fans."
 
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
@@ -53,19 +48,6 @@ export function WlHomeV2({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const rootRef = useRef<HTMLDivElement>(null)
-  const coreRef = useRef<HTMLDivElement>(null)
-  const ringRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  const [finePointer, setFinePointer] = useState(false)
-  const onFinePointer = useCallback((v: boolean) => {
-    setFinePointer(v)
-  }, [])
-
-  const [trailEnabled, setTrailEnabled] = useState(true)
-  const [density, setDensity] = useState(3)
-  const [hue, setHue] = useState<WlHomeV2TrailHue>("orange")
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -96,8 +78,6 @@ export function WlHomeV2({
 
   const [followUsOpen, setFollowUsOpen] = useState(false)
   const followUsHeadingId = useId()
-
-  const [tweaksOpen, setTweaksOpen] = useState(false)
 
   const closeArchiveModal = useCallback(() => {
     setArchiveOpen(false)
@@ -142,31 +122,6 @@ export function WlHomeV2({
     [openSchedule],
   )
 
-  useWlHomeV2CursorTrail(
-    coreRef,
-    ringRef,
-    canvasRef,
-    trailEnabled,
-    density,
-    hue,
-    onFinePointer,
-  )
-
-  useEffect(() => {
-    function onMsg(e: MessageEvent) {
-      const d = e.data || {}
-      if (d.type === "__activate_edit_mode") setTweaksOpen(true)
-      if (d.type === "__deactivate_edit_mode") setTweaksOpen(false)
-    }
-    window.addEventListener("message", onMsg)
-    try {
-      window.parent.postMessage({ type: "__edit_mode_available" }, "*")
-    } catch {
-      /* ignore */
-    }
-    return () => window.removeEventListener("message", onMsg)
-  }, [])
-
   useEffect(() => {
     if (
       !requestOpen &&
@@ -210,11 +165,9 @@ export function WlHomeV2({
     closeArchiveModal,
   ])
 
-  const rootClass = "wl-home-v2" + (finePointer ? " trail-active" : "")
-
   return (
     <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
-      <div ref={rootRef} className={rootClass}>
+      <div className="wl-home-v2">
         <div className="wl-home-v2__stack">
           <WlHomeV2Header
             onOpenLogin={() => setLoginOpen(true)}
@@ -350,53 +303,6 @@ export function WlHomeV2({
         }}
       />
 
-      <div className="cursor-ring" ref={ringRef} id="cursorRing" />
-      <div className="cursor-core" ref={coreRef} id="cursorCore" />
-      <canvas className="trail-canvas" ref={canvasRef} id="trailCanvas" />
-
-      <div className={"tweaks" + (tweaksOpen ? " open" : "")} id="tweaks">
-        <h3>Tweaks</h3>
-        <label>
-          Cursor trail
-          <input
-            type="checkbox"
-            id="tk-trail"
-            checked={trailEnabled}
-            onChange={(e) => setTrailEnabled(e.target.checked)}
-          />
-        </label>
-        <label>
-          Trail density
-          <input
-            type="range"
-            id="tk-density"
-            min={0}
-            max={8}
-            step={1}
-            value={density}
-            onInput={(e) => {
-              const v = +(e.target as HTMLInputElement).value
-              setDensity(v)
-            }}
-          />
-          <span className="val" id="tk-density-val">
-            {density}
-          </span>
-        </label>
-        <label>
-          Trail hue
-          <select
-            id="tk-hue"
-            value={hue}
-            onChange={(e) => setHue(e.target.value as WlHomeV2TrailHue)}
-          >
-            <option value="orange">Orange</option>
-            <option value="green">Green</option>
-            <option value="white">White</option>
-            <option value="rainbow">Rainbow</option>
-          </select>
-        </label>
-      </div>
     </div>
     </WlHomeV2OpenArchiveHubContext.Provider>
   )

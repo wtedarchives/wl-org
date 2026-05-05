@@ -148,7 +148,7 @@ export function WlHomeV2UserMenu({
                 className="top-nav-dd-link flex cursor-pointer items-center gap-2"
               >
                 <ChartBarHorizontal className="top-nav-dd-icon size-4 shrink-0" />
-                My Stats
+                My Show Stats
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="top-nav-dd-sep" />

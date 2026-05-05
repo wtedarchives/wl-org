@@ -39,7 +39,7 @@ export function WlHomeV2TileArchive({
       <Link
         href="/archive"
         className="tile-link"
-        aria-label="Open WTED Archives"
+        aria-label="Open Wysteria Lane Archives"
         onClick={onArchiveTileLinkClick}
       />
       <div className="icon-wrap">
@@ -172,10 +172,13 @@ export function WlHomeV2TileArchive({
 
       <div className="tile-body">
         <h2>
-          WTED
+          Wysteria Lane
           <br />
           Archives
         </h2>
+        <span className="tile-archive-attribution-pill">
+          Powered by dripfield.pro
+        </span>
         <p>
           The comprehensive show archive — setlists, stats, tours, and
           this-day-in-Goose history.

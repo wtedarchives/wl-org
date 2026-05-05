@@ -12,6 +12,13 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
+import { useLayoutEffect } from "react"
+
+import {
+  RadioHomepageTopSlot,
+  usePersistentRadioTileScheduleGate,
+} from "@/components/persistent-radio"
+import { useRadioSchedule } from "@/hooks/use-radio-schedule"
 
 import { WlHomeV2OnAirPill } from "./wl-home-v2-on-air-pill"
 
@@ -24,11 +31,23 @@ export function WlHomeV2TileRadio({
   onOpenRequest: () => void
   onOpenSchedule: () => void
 }) {
+  const { slots, loading, error } = useRadioSchedule()
+  const setRadioTileScheduleReady = usePersistentRadioTileScheduleGate()
+
+  useLayoutEffect(() => {
+    setRadioTileScheduleReady(!loading)
+    return () => setRadioTileScheduleReady(false)
+  }, [loading, setRadioTileScheduleReady])
+
   return (
     <section
       className="tile tile-radio"
       style={{ "--tile-bg": "url('/newbg.png')" } as CSSProperties}
-      onClick={onWtedRadioTileClick}
+      onClick={(e) => {
+        const el = e.target as HTMLElement | null
+        if (el?.closest(".tile-widget")) return
+        onWtedRadioTileClick()
+      }}
     >
       <button
         type="button"
@@ -51,7 +70,20 @@ export function WlHomeV2TileRadio({
       </div>
 
       <div className="tile-widget">
-        <WlHomeV2OnAirPill onOpenSchedule={onOpenSchedule} />
+        <div
+          id="wl-home-v2-radio-tile-player-anchor"
+          className="wl-home-v2-radio-tile-on-air-card"
+        >
+          <div className="wl-home-v2-radio-tile-on-air-card__embed radio-embed-wrap">
+            <RadioHomepageTopSlot className="radio-embed min-h-[66px] w-full" />
+          </div>
+          <WlHomeV2OnAirPill
+            onOpenSchedule={onOpenSchedule}
+            slots={slots}
+            loading={loading}
+            error={error}
+          />
+        </div>
         <div className="tile-widget-actions">
           <button
             type="button"
@@ -110,6 +142,9 @@ export function WlHomeV2TileRadio({
           <br />
           Goose Radio
         </h2>
+        <span className="tile-radio-attribution-pill">
+          Powered by Wysteria Lane
+        </span>
         <p>
           Listen to Goose on demand, 24/7 — live streams, historic sets, and
           listener requests.

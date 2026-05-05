@@ -1,19 +1,24 @@
 "use client"
 
+import type { RadioScheduleSlot } from "@/hooks/use-radio-schedule"
 import {
   formatRadioScheduleTime,
   formatRadioScheduleTimeRange,
-  useRadioSchedule,
 } from "@/hooks/use-radio-schedule"
 
 /** First merged slot + next two — same `slots` ordering as {@link WtedRadioScheduleCard}. */
 export function WlHomeV2OnAirPill({
   onOpenSchedule,
+  slots,
+  loading,
+  error,
 }: {
   /** Opens the home schedule modal (full Radio.co embed), same as the old schedule card. */
   onOpenSchedule: () => void
+  slots: RadioScheduleSlot[]
+  loading: boolean
+  error: string | null
 }) {
-  const { slots, loading, error } = useRadioSchedule()
   const first = slots[0]
   const upcoming = slots.slice(1, 3)
   const title = first?.event.playlist.title?.trim()

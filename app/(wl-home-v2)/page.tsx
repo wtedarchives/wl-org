@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { WlHomeV2 } from "@/components/wl-home-v2"
 
 export const metadata: Metadata = {
-  title: { absolute: "WTED.org" },
+  title: { absolute: "WysteriaLane.org" },
 }
 
 export default function Page() {

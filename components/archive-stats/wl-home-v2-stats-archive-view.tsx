@@ -62,9 +62,9 @@ export function WlHomeV2StatsArchiveView() {
     if (selectedYear === null) return
     const yearLabel =
       selectedYear === "all-time" ? "All-Time" : String(selectedYear)
-    document.title = `${yearLabel} Stats — WTED.org`
+    document.title = `${yearLabel} Stats — WysteriaLane.org`
     return () => {
-      document.title = "WTED.org"
+      document.title = "WysteriaLane.org"
     }
   }, [selectedYear])
 

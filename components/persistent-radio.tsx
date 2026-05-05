@@ -21,9 +21,19 @@ type PersistentRadioContextValue = {
   setHomeNode: (el: HTMLDivElement | null) => void
   setSidebarNode: (el: HTMLDivElement | null) => void
   setMobileNode: (el: HTMLDivElement | null) => void
+  /** Index `/` only: measure target on the Goose Radio tile (header slots stay unmounted). */
+  setHomepageTopNode: (el: HTMLDivElement | null) => void
+  /**
+   * Index `/`: set true after the Goose Radio schedule UI has settled (!loading).
+   * Hides/skips positioning the floating iframe until layout is stable — avoids stray placement on first paint.
+   */
+  setHomepageRadioTileScheduleReady: (ready: boolean) => void
   homeNode: HTMLDivElement | null
   sidebarNode: HTMLDivElement | null
   mobileNode: HTMLDivElement | null
+  homepageTopNode: HTMLDivElement | null
+  /** `/` Goose Radio tile: true once schedule hook has settled (floating embed anchors). */
+  homepageRadioTileScheduleReady: boolean
   homeEmbedPulseGen: number
   bumpHomeEmbedPulse: () => void
 }
@@ -45,6 +55,17 @@ function usePersistentRadio() {
 export function useBumpHomeRadioEmbedPulse() {
   const ctx = useContext(PersistentRadioContext)
   return ctx?.bumpHomeEmbedPulse ?? (() => {})
+}
+
+/** Goose Radio homepage tile only: defer floating embed positioning until schedule fetch finishes. */
+export function usePersistentRadioTileScheduleGate() {
+  const ctx = useContext(PersistentRadioContext)
+  if (!ctx) {
+    throw new Error(
+      "usePersistentRadioTileScheduleGate requires PersistentRadioRoot",
+    )
+  }
+  return ctx.setHomepageRadioTileScheduleReady
 }
 
 /** Layout placeholder; player stays on `document.body` (see shell) so the iframe is never reparented. */
@@ -77,6 +98,18 @@ export function RadioMobileSlot({ className }: { className?: string }) {
       ref={setMobileNode}
       className={cn("min-h-[66px] w-full", className)}
       data-slot="radio-mobile"
+    />
+  )
+}
+
+/** Index `/`: measure target inside the Goose Radio homepage tile while the header embed is hidden. */
+export function RadioHomepageTopSlot({ className }: { className?: string }) {
+  const { setHomepageTopNode } = usePersistentRadio()
+  return (
+    <div
+      ref={setHomepageTopNode}
+      className={cn("min-h-[66px] w-full", className)}
+      data-slot="radio-homepage-top"
     />
   )
 }
@@ -137,6 +170,15 @@ function PersistentRadioBodyShell({
   useLayoutEffect(() => {
     sync()
   }, [sync])
+
+  /** Homepage defers anchoring until schedule layout settles — re-sync on first non-null measure pass. */
+  useLayoutEffect(() => {
+    if (!measureTarget) return
+    const rafId = requestAnimationFrame(() => {
+      requestAnimationFrame(() => sync())
+    })
+    return () => cancelAnimationFrame(rafId)
+  }, [measureTarget, sync])
 
   useEffect(() => {
     scheduleSync()
@@ -224,6 +266,8 @@ function PersistentRadioPortal() {
     homeNode,
     sidebarNode,
     mobileNode,
+    homepageTopNode,
+    homepageRadioTileScheduleReady,
     homeEmbedPulseGen,
   } = usePersistentRadio()
   const [bodyReady, setBodyReady] = useState(false)
@@ -233,15 +277,18 @@ function PersistentRadioPortal() {
   useEffect(() => setBodyReady(true), [])
 
   /**
-   * Homepage and other `(wl-home-v2)` pages mount `RadioHomeSlot` in the header only
-   * (no `(main)` sidebar / `MobileRadioBar`). Non-`/` v2 routes must still anchor to
-   * `homeNode`, not `sidebarNode`, or the shell hides the iframe and the slot looks empty.
+   * `/`: header hides the radio chrome; `RadioHomepageTopSlot` on the Goose Radio tile is the anchor.
+   * Other `(wl-home-v2)` routes: `RadioHomeSlot` / `RadioMobileSlot` in the header.
+   * Non-v2 `(main)` sidebar uses `RadioSidebarSlot`; `MobileRadioBar` uses `RadioMobileSlot`.
    */
-  const measureTarget = isBelowXl
-    ? (mobileNode ?? homeNode)
-    : (homeNode ?? sidebarNode)
+  const isHomeIndex = pathname === "/"
+  const measureTarget = isHomeIndex
+    ? (homepageRadioTileScheduleReady ? homepageTopNode : null)
+    : isBelowXl
+      ? (mobileNode ?? homeNode)
+      : (homeNode ?? sidebarNode)
 
-  const pulseEmbedOnHomeBump = pathname === "/"
+  const pulseEmbedOnHomeBump = isHomeIndex
 
   useEffect(() => {
     if (!pulseEmbedOnHomeBump || homeEmbedPulseGen === 0) return
@@ -291,6 +338,12 @@ export function PersistentRadioRoot({
   const [homeNode, setHomeNode] = useState<HTMLDivElement | null>(null)
   const [sidebarNode, setSidebarNode] = useState<HTMLDivElement | null>(null)
   const [mobileNode, setMobileNode] = useState<HTMLDivElement | null>(null)
+  const [homepageTopNode, setHomepageTopNode] = useState<
+    HTMLDivElement | null
+  >(null)
+  /** `/` Goose Radio tile: wait for schedule hook `loading === false` before anchoring the embed */
+  const [homepageRadioTileScheduleReady, setHomepageRadioTileScheduleReady] =
+    useState(false)
   const [homeEmbedPulseGen, setHomeEmbedPulseGen] = useState(0)
 
   const bumpHomeEmbedPulse = useCallback(() => {
@@ -306,15 +359,30 @@ export function PersistentRadioRoot({
   const setMobileNodeCb = useCallback((el: HTMLDivElement | null) => {
     setMobileNode((prev) => (prev === el ? prev : el))
   }, [])
+  const setHomepageTopNodeCb = useCallback((el: HTMLDivElement | null) => {
+    setHomepageTopNode((prev) => (prev === el ? prev : el))
+  }, [])
+  const setHomepageRadioTileScheduleReadyCb = useCallback(
+    (ready: boolean) => {
+      setHomepageRadioTileScheduleReady((prev) =>
+        prev === ready ? prev : ready,
+      )
+    },
+    [],
+  )
 
   const value = useMemo<PersistentRadioContextValue>(
     () => ({
       setHomeNode: setHomeNodeCb,
       setSidebarNode: setSidebarNodeCb,
       setMobileNode: setMobileNodeCb,
+      setHomepageTopNode: setHomepageTopNodeCb,
+      setHomepageRadioTileScheduleReady: setHomepageRadioTileScheduleReadyCb,
       homeNode,
       sidebarNode,
       mobileNode,
+      homepageTopNode,
+      homepageRadioTileScheduleReady,
       homeEmbedPulseGen,
       bumpHomeEmbedPulse,
     }),
@@ -322,9 +390,13 @@ export function PersistentRadioRoot({
       setHomeNodeCb,
       setSidebarNodeCb,
       setMobileNodeCb,
+      setHomepageTopNodeCb,
+      setHomepageRadioTileScheduleReadyCb,
       homeNode,
       sidebarNode,
       mobileNode,
+      homepageTopNode,
+      homepageRadioTileScheduleReady,
       homeEmbedPulseGen,
       bumpHomeEmbedPulse,
     ],

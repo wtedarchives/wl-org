@@ -38,19 +38,6 @@
     font-variant-numeric: tabular-nums;
   }
   /* Page background — the gradient the tiles used to carry */
-  /* Hide native cursor globally for immersive trail feel */
-  .wl-home-v2.trail-active, .wl-home-v2.trail-active * { cursor: none !important; }
-
-  /*
-   * Portaled modals (WlHomeV2ModalPortal) sit on document.body, not under the in-app
-   * `.wl-home-v2.trail-active` root — repeat cursor hiding so the OS cursor doesn’t show
-   * on top of the custom cursor while a popup is open.
-   */
-  body:has(.wl-home-v2.trail-active) .wl-home-v2.wl-home-v2-modal-layer,
-  body:has(.wl-home-v2.trail-active) .wl-home-v2.wl-home-v2-modal-layer * {
-    cursor: none !important;
-  }
-
   /* ---------- Top bar ---------- */
   /* Desktop: brand | nav | user | radio — mobile: radio full width, then menu | brand | user, then drawer */
   .wl-home-v2 header.top {
@@ -72,6 +59,11 @@
   .wl-home-v2 header.top .top-embed-row .radio-embed-wrap--header {
     width: min(300px, 38vw);
     min-width: 200px;
+  }
+  /* `/` only: embed lives under `<main>`; drop the radio column from the desktop header grid */
+  .wl-home-v2 header.top.top--home-main-radio {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "brand nav user";
   }
   .wl-home-v2 header.top .top-mobile-nav-toggle {
     display: none;
@@ -328,6 +320,12 @@
       row-gap: 0;
       column-gap: 10px;
       padding: 8px;
+    }
+    .wl-home-v2 header.top.top--home-main-radio {
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        "menu brand user"
+        "drawer drawer drawer";
     }
     .wl-home-v2 header.top .top-embed-row {
       grid-area: radio;
@@ -915,6 +913,61 @@
     margin-top: 4px;
     flex-shrink: 0;
   }
+
+  /*
+   * Goose Radio tile: single ~400px card on desktop; full width below 1344px (see tile grid mq).
+   * (Persistent player still measures `.wl-home-v2-radio-tile-on-air-card__embed`.)
+   */
+  .wl-home-v2 #tileGrid .tile.tile-radio .wl-home-v2-radio-tile-on-air-card {
+    width: 400px;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    flex-shrink: 0;
+    border-radius: 12px;
+    border: 1px solid rgb(44, 46, 45);
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+  }
+  .wl-home-v2
+    #tileGrid
+    .tile.tile-radio
+    .wl-home-v2-radio-tile-on-air-card__embed.radio-embed-wrap {
+    width: 100%;
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid rgb(44, 46, 45);
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .wl-home-v2
+    #tileGrid
+    .tile.tile-radio
+    .wl-home-v2-radio-tile-on-air-card
+    button.live-pill.live-pill--wted-tile {
+    width: 100%;
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+  .wl-home-v2
+    #tileGrid
+    .tile.tile-radio
+    .wl-home-v2-radio-tile-on-air-card
+    button.live-pill.live-pill--wted-tile:hover {
+    transform: none;
+    background: rgba(88, 200, 174, 0.14);
+    border-color: transparent;
+    box-shadow: none;
+  }
   .wl-home-v2 .live-dot{ width: 7px; height: 7px; border-radius: 999px; background: var(--wl-orange); box-shadow: 0 0 0 0 rgba(255,122,103,0.6); animation: wl-home-v2-ping 1.6s ease-out infinite; }
 
   /* Sticky footer: footer always after content; short pages still fill at least one viewport */
@@ -1308,6 +1361,15 @@
     .wl-home-v2 .tile{ grid-template-columns: minmax(0, 1fr) minmax(0, 240px); padding: 24px; gap: 14px 18px; }
   }
   /*
+   * Goose Radio tile desktop only: widen widget column to fit 400px on-air card (base tile cap is 320px).
+   * Below 1344px `.tile` mobile grid applies unchanged (avoid overriding stacking layout).
+   */
+  @media (min-width: 1344px) {
+    .wl-home-v2 #tileGrid .tile.tile-radio {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    }
+  }
+  /*
    * Below desktop content width (1344px): all tiles use the same inner layout —
    * top row: icon (left) + title/copy/CTA (top-right); second row: widget full width.
    * (Narrower than `lg` is included: this max-width covers ≤1343px.)
@@ -1329,6 +1391,16 @@
       grid-column: 1 / -1;
       grid-row: 2;
       justify-content: flex-start;
+    }
+    .wl-home-v2 #tileGrid .tile.tile-radio .wl-home-v2-radio-tile-on-air-card {
+      width: 100%;
+      max-width: 100%;
+      align-self: stretch;
+    }
+    .wl-home-v2 #tileGrid .tile.tile-radio .tile-body,
+    .wl-home-v2 #tileGrid .tile.tile-archive .tile-body {
+      align-items: flex-start;
+      text-align: left;
     }
   }
   .wl-home-v2 .grid > .tile {
@@ -2202,6 +2274,16 @@
     font-size: 12px;
     color: rgba(255, 255, 255, 0.85);
   }
+  /* Community tile — warm orange wash on upcoming events vs featured topics frost */
+  .wl-home-v2 .tile.tile-community .widget-panel.widget-panel--community-events {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--wl-orange) 40%, transparent) 0%,
+        rgba(0, 0, 0, 0.48) 60%
+      );
+    border: 1px solid color-mix(in oklch, var(--wl-orange) 38%, rgb(44, 46, 45));
+  }
   /*
    * Stats archive: inner `widget-panel` matches tour `TopSlotsCarousel` (default `.widget-panel`).
    *
@@ -2738,6 +2820,25 @@
   .wl-home-v2 #tileGrid .tile.tile-radio .live-pill-upcoming {
     border-top-color: rgb(92, 96, 94);
   }
+  .wl-home-v2 #tileGrid .tile.tile-radio .tile-radio-attribution-pill,
+  .wl-home-v2 #tileGrid .tile.tile-archive .tile-archive-attribution-pill {
+    align-self: flex-start;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgb(88, 91, 89);
+    background: rgba(0, 0, 0, 0.52);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.86);
+  }
   .wl-home-v2
     #tileGrid
     .tile.tile-community
@@ -2851,7 +2952,7 @@
     max-width: none !important;
   }
 
-  /* Request modal — backdrop below cursor trail (10030+) so ring/core stay visible when open */
+  /* Request modal — fixed backdrop stacking under portaled overlays */
   .wl-home-v2 .modal-backdrop {
     position: fixed; inset: 0; z-index: 10001;
     background: rgba(0,0,0,0.75);
@@ -4488,6 +4589,619 @@
     opacity: 0.9;
     outline: none;
   }
+  /* Personnel archive index — songs-style photo layer (::before); no ::after tint (homepage green wash removed). */
+  .wl-home-v2 .tile.tile-personnel-catalog {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
+    text-align: left;
+    background: rgba(49, 58, 52, 0.78);
+  }
+  /* B&W bg photos — very low opacity vs songs/homepage so tile reads as matte shell. */
+  .wl-home-v2 .tile.tile-personnel-catalog::before {
+    opacity: 0.1;
+    transition:
+      opacity 0.45s,
+      transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+      filter 0.35s;
+    filter: grayscale(100%) brightness(0.82);
+  }
+  /* No green/black wash (::after): photo + frosted chrome only vs other `.tile`s. */
+  .wl-home-v2 .tile.tile-personnel-catalog::after {
+    opacity: 0;
+    background: transparent;
+    transition: opacity 0.35s;
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog:hover {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 122, 103, 0.38),
+      0 16px 40px -18px rgba(0, 0, 0, 0.55);
+  }
+  /* B&W photo layer on hover — keep grayscale (no color restore like song category tiles). */
+  .wl-home-v2 .tile.tile-personnel-catalog:hover::before {
+    opacity: 0.28;
+    transform: scale(1.05);
+    filter: grayscale(100%) brightness(0.9);
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog:hover::after {
+    opacity: 0;
+    background: transparent;
+  }
+  /* Current / Former mosaic: flush with tile bottom (drops base `.tile` bottom pad). */
+  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--current,
+  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--former {
+    padding-bottom: 0;
+  }
+  @media (max-width: 1343px) {
+    .wl-home-v2 .tile.tile-personnel-catalog {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-inner {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    min-height: 0;
+    align-self: stretch;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  /*
+   * Current / Former titles bleed to tile edges (::before/backdrop-filter stay clipped on `.tile`);
+   * `overflow:hidden` here would crop negative margins / full-bleed header.
+   */
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-inner:has(
+      > .tile-personnel-catalog-songs-heading.sc-label.wl-home-v2-songs-archive-section-heading
+    ) {
+    overflow: visible;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current
+    .tile-personnel-catalog-inner,
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--former
+    .tile-personnel-catalog-inner {
+    gap: 0;
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-title {
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.25;
+    text-wrap: balance;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  /*
+   * Current / Former: songs strip flush to tile top + full width incl. lateral + top `.tile` padding
+   * (homepage `.tile`: 28×28 pad; 1180≤: 24 all sides).
+   */
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-songs-heading.sc-label.wl-home-v2-songs-archive-section-heading {
+    align-self: stretch;
+    flex-shrink: 0;
+    flex-grow: 0;
+    box-sizing: border-box;
+    width: calc(100% + 56px);
+    max-width: none;
+    margin-top: -28px;
+    margin-inline: -28px;
+    margin-bottom: 0;
+    text-wrap: balance;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-songs-heading.sc-label.wl-home-v2-songs-archive-section-heading {
+      width: calc(100% + 48px);
+      margin-top: -24px;
+      margin-inline: -24px;
+    }
+  }
+  /*
+   * Instrument line in a compact frosted “tile” (all personnel rows that show instruments).
+   */
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-instrument-chip {
+    display: inline-flex;
+    align-self: flex-start;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 6px 9px;
+    border-radius: 8px;
+    border: 1px solid rgb(52, 55, 53);
+    background: rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-instrument-chip
+    .tile-personnel-catalog-instrument {
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 10px;
+    line-height: 1.35;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.74);
+    word-break: break-word;
+    text-align: right;
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-empty {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 12px 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /*
+   * Current Goose members: 2×2-style mosaic flush with `#tileGrid` —
+   * `gap: 0`; cell borders rgb(34,37,35) + flush-right / flush-bottom (TSX) mirror `.grid > .tile`.
+   */
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--current-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(132px, auto);
+    gap: 0;
+    align-content: stretch;
+    align-self: stretch;
+    width: calc(100% + 56px);
+    margin-inline: -28px;
+    padding: 0;
+    background: transparent;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--current-mini-grid {
+      width: calc(100% + 48px);
+      margin-inline: -24px;
+    }
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-list--current-mini-grid
+    .tile-personnel-catalog-current-mini-cell {
+    border-top: none;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+    flex: 1;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    row-gap: 7px;
+    align-items: center;
+    min-height: 0;
+    width: 100%;
+    padding: 12px 30px;
+    border-radius: 0;
+    border-style: solid;
+    border-width: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-color: rgb(34, 37, 35);
+    background: rgba(49, 58, 52, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: none;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link:not(
+      :has(.tile-personnel-catalog-current-mini-icon-wrap)
+    ) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link:not(
+      :has(.tile-personnel-catalog-current-mini-icon-wrap)
+    )
+    .tile-personnel-catalog-name {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link:not(
+      :has(.tile-personnel-catalog-current-mini-icon-wrap)
+    )
+    .tile-personnel-catalog-instrument-chip {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: end;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link:not(
+      :has(.tile-personnel-catalog-instrument-chip)
+    )
+    .tile-personnel-catalog-name {
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile--flush-right.tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+    border-right-width: 0;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile--flush-bottom.tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+    border-bottom-width: 0;
+  }
+  /*
+   * Mini cell: stacked name + pill in column 2; portrait spans both rows (:has row-spans optional).
+   * Reset homepage `.tile .icon-wrap` grid cell assignment.
+   */
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current
+    .tile-personnel-catalog-current-mini-icon-wrap.icon-wrap {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+    justify-self: start;
+    position: relative;
+    width: 108px;
+    height: 108px;
+    flex-shrink: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current
+    .tile-personnel-catalog-current-mini-icon-wrap.icon-wrap
+    img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center center;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog.tile-personnel-catalog--current
+      .tile-personnel-catalog-current-mini-icon-wrap.icon-wrap {
+      width: 92px;
+      height: 92px;
+    }
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current:hover
+    .tile-personnel-catalog-current-mini-icon-wrap {
+    transform: none;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current:hover
+    .tile-personnel-catalog-current-mini-icon-wrap
+    .icon-bg {
+    opacity: 0;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current
+    .tile-personnel-catalog-current-mini-tile:hover
+    .tile-personnel-catalog-current-mini-icon-wrap,
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--current
+    .tile-personnel-catalog-current-mini-tile:focus-visible
+    .tile-personnel-catalog-current-mini-icon-wrap {
+    transform: scale(1.22) rotate(-3deg);
+  }
+  @media (hover: hover) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link:hover,
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link:focus-visible {
+      background: rgba(88, 200, 174, 0.18);
+      color: rgba(255, 255, 255, 0.98);
+      outline: none;
+    }
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile:hover
+    .tile-personnel-catalog-current-mini-icon-wrap
+    .icon-bg,
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile:focus-visible
+    .tile-personnel-catalog-current-mini-icon-wrap
+    .icon-bg {
+    opacity: 1;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile
+    .tile-personnel-catalog-name {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: end;
+    text-align: right;
+    min-width: 0;
+    font-size: clamp(17px, 4.8vw, 23px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-current-mini-tile
+    .tile-personnel-catalog-instrument-chip {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    align-self: start;
+  }
+  /*
+   * Former Goose members: 3×N mosaic (no portraits), same chrome as current mini cells.
+   */
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--former-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(96px, auto);
+    gap: 0;
+    align-content: stretch;
+    align-self: stretch;
+    width: calc(100% + 56px);
+    margin-inline: -28px;
+    padding: 0;
+    background: transparent;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--former-mini-grid {
+      width: calc(100% + 48px);
+      margin-inline: -24px;
+    }
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-list--former-mini-grid
+    .tile-personnel-catalog-former-mini-cell {
+    border-top: none;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    min-height: 0;
+    width: 100%;
+    padding: 10px 8px;
+    border-radius: 0;
+    border-style: solid;
+    border-width: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-color: rgb(34, 37, 35);
+    background: rgba(49, 58, 52, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: none;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
+    transition:
+      color 0.15s ease-out,
+      background-color 0.18s ease-out;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-former-mini-tile--flush-right.tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+    border-right-width: 0;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-former-mini-tile--flush-bottom.tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+    border-bottom-width: 0;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-former-mini-tile
+    .tile-personnel-catalog-name {
+    font-size: clamp(13px, 3.1vw, 15px);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-former-mini-tile
+    .tile-personnel-catalog-instrument-chip {
+    align-self: center;
+    max-width: 100%;
+  }
+  @media (hover: hover) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link:hover,
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link:focus-visible {
+      background: rgba(88, 200, 174, 0.18);
+      color: rgba(255, 255, 255, 0.98);
+      outline: none;
+    }
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-item {
+    border-top: 1px solid rgb(34, 37, 35);
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-item:first-child {
+    border-top: none;
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 12px;
+    padding: 7px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
+    transition:
+      color 0.15s ease-out,
+      background-color 0.18s ease-out;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-list:not(.tile-personnel-catalog-list--current-mini-grid):not(
+      .tile-personnel-catalog-list--former-mini-grid
+    )
+    > .tile-personnel-catalog-item
+    > .tile-personnel-catalog-link {
+    flex-direction: column;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  @media (hover: hover) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-link:not(.tile-personnel-catalog-current-mini-tile):not(
+        .tile-personnel-catalog-former-mini-tile
+      ):hover,
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-link:not(.tile-personnel-catalog-current-mini-tile):not(
+        .tile-personnel-catalog-former-mini-tile
+      ):focus-visible {
+      color: var(--wl-light-orange);
+      outline: none;
+    }
+  }
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-name {
+    min-width: 0;
+    word-break: break-word;
+  }
+  /* Guests / Groups: frosted widget panel + inner scroll (community “Featured Topics” pattern) */
+  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll {
+    max-height: 432px;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .widget-panel.tile-personnel-catalog-widget-panel {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    /* Match `.widget-panel.songs-archive-category-tile-widget` */
+    background: rgba(0, 0, 0, 0.55);
+    border-color: rgb(56, 59, 57);
+    padding: 10px 10px 5px;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-empty {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding: 4px 0 2px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-scroll-mount {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -10px;
+    padding: 4px 0 2px;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-topic-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  /* Same row chrome as `.widget-panel > a.topic-row` (featured topics), nested in scroll mount */
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-scroll-mount
+    a.tile-personnel-catalog-panel-topic.topic-row {
+    text-decoration: none;
+    color: inherit;
+    margin: 0 -10px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgb(29, 32, 30);
+    transition:
+      background 0.18s,
+      border-color 0.18s,
+      transform 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-scroll-mount
+    a.tile-personnel-catalog-panel-topic.topic-row:last-child {
+    border-bottom-color: transparent;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-scroll-mount
+    a.tile-personnel-catalog-panel-topic.topic-row:hover {
+    background: rgba(88, 200, 174, 0.18);
+    border-color: rgb(52, 109, 95);
+    border-bottom-color: rgb(52, 109, 95);
+    transform: translateY(-1px);
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
+    .tile-personnel-catalog-panel-scroll-mount
+    a.tile-personnel-catalog-panel-topic.topic-row:focus-visible {
+    outline: 2px solid var(--wl-light-orange);
+    outline-offset: 2px;
+  }
   /* Program Director — show “info” dialog; same shell as request/schedule */
   .wl-home-v2 .modal.modal--pd-show-info {
     max-width: min(480px, 92vw);
@@ -5207,69 +5921,6 @@
     text-decoration: none !important;
   }
 
-  /* ---------- Cursor + trail (above portaled .modal-backdrop layer 10020) ---------- */
-  /* Inner: solid dot + soft glow (Homepage-source.html); fill driven in JS for trail hue */
-  .wl-home-v2 .cursor-core {
-    position: fixed; top: 0; left: 0; z-index: 10032;
-    width: 14px; height: 14px; border-radius: 50%;
-    box-sizing: border-box;
-    border: none;
-    background: var(--wl-orange);
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    mix-blend-mode: screen;
-    box-shadow: 0 0 14px 4px rgba(255,122,103,0.5);
-    /* Background is set every frame in JS; omitting it from transition avoids smearing
-       (esp. rainbow) and keeps link-hover green authoritative over CSS. */
-    transition: width .18s, height .18s, box-shadow .18s;
-  }
-  /* Outer: larger lagging ring (outline only) */
-  .wl-home-v2 .cursor-ring {
-    position: fixed; top: 0; left: 0; z-index: 10031;
-    width: 38px; height: 38px; border-radius: 50%;
-    box-sizing: border-box;
-    background: transparent;
-    border: 1.5px solid rgb(147, 75, 64);
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    /* Border color is set every frame in JS; omitting border-color from transition. */
-    transition: width .22s, height .22s, transform .05s linear;
-  }
-  .wl-home-v2 .cursor-core.hov {
-    width: 22px;
-    height: 22px;
-    /* Match green trail / ring on interactive hover (fill is set in JS). */
-    box-shadow: 0 0 16px 5px rgba(88, 200, 174, 0.45);
-  }
-  .wl-home-v2 .cursor-ring.hov {
-    width: 64px;
-    height: 64px;
-    /* Border color overridden each frame in JS when trail is active; kept for fallback. */
-    border-color: rgb(70, 155, 135);
-  }
-  .wl-home-v2 .trail-canvas{ position: fixed; inset: 0; z-index: 10030; pointer-events: none; }
-
-  /* ---------- Tweaks panel ---------- */
-  .wl-home-v2 .tweaks {
-    position: fixed; right: 20px; bottom: 20px; z-index: 10000;
-    width: 280px; padding: 16px;
-    background: rgba(25,33,29,0.92); backdrop-filter: blur(14px);
-    border: 1px solid rgb(39, 42, 40);
-    border-radius: 14px;
-    display: none;
-    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.7);
-    font-size: 12px;
-  }
-  .wl-home-v2 .tweaks.open{ display: block; }
-  .wl-home-v2 .tweaks h3{ font-size: 11px; font-family: "Geist Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 12px; }
-  .wl-home-v2 .tweaks label{ display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; color: rgba(255,255,255,0.85); }
-  .wl-home-v2 .tweaks input[type=range]{ width: 130px; accent-color: var(--wl-orange); }
-  .wl-home-v2 .tweaks input[type=checkbox]{ accent-color: var(--wl-orange); width: 16px; height: 16px; }
-  .wl-home-v2 .tweaks select {
-    background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgb(51, 54, 52);
-    border-radius: 6px; padding: 4px 8px; font-size: 11px; font-family: "Geist Mono", monospace;
-  }
-  .wl-home-v2 .tweaks .val{ font-family: "Geist Mono", monospace; color: var(--wl-light-orange); font-size: 11px; min-width: 32px; text-align: right; }
 
   /* ---------- Shared: inner-page loading (Program Director, Years, …) ---------- */
   .wl-home-v2 .wl-home-v2-page-loading {

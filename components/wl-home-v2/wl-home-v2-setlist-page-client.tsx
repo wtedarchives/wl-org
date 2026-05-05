@@ -192,7 +192,7 @@ export function WlHomeV2SetlistPageClient() {
     [show?.show_date, show?.show_venue_location, show?.show_group],
   )
 
-  useSetlistArchiveDocumentTitle(show, { titleSuffix: "WTED.org" })
+  useSetlistArchiveDocumentTitle(show)
 
   const breadcrumbs = useMemo(
     () =>

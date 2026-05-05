@@ -111,7 +111,7 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
 
   useEffect(() => {
     if (currentYear) {
-      document.title = `${currentYear} Shows – WTED.org`
+      document.title = `${currentYear} Shows – WysteriaLane.org`
     }
     return () => {
       document.title = ""

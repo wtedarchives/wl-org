@@ -26,7 +26,7 @@ export function WlHomeV2TileCommunity({
       <a
         href={WL_HOME_V2_COMMUNITY_URL}
         className="tile-link"
-        aria-label="WTED Community — opens in a new tab"
+        aria-label="Wysteria Lane Community — opens in a new tab"
         target="_blank"
         rel="noopener noreferrer"
       />
@@ -92,7 +92,7 @@ export function WlHomeV2TileCommunity({
             })}
         </div>
 
-        <div className="widget-panel">
+        <div className="widget-panel widget-panel--community-events">
           <div className="wp-head">
             <span>Upcoming Community Events</span>
           </div>
@@ -128,7 +128,7 @@ export function WlHomeV2TileCommunity({
 
       <div className="tile-body">
         <h2>
-          WTED
+          Wysteria Lane
           <br />
           Community
         </h2>

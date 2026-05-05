@@ -49,7 +49,7 @@ export function WlHomeV2TileProfile({
         <Link
           href="/old/archive/profile/overview"
           className="tile-link"
-          aria-label="View your profile"
+          aria-label="View your show stats"
         />
       : null}
       <div className="icon-wrap">
@@ -140,7 +140,7 @@ export function WlHomeV2TileProfile({
         <h2>
           My
           <br />
-          Profile
+          Show Stats
         </h2>
         <p>
           Shows attended, badges earned, songs tracked, predictions logged.
@@ -148,7 +148,7 @@ export function WlHomeV2TileProfile({
         </p>
         <span className="cta">
           <span className="cta-label">
-            {profileSignedIn ? "View profile" : "Sign In"}
+            {profileSignedIn ? "View show stats" : "Sign In"}
           </span>
           <ArrowRight
             className="arrow"
@@ -163,7 +163,7 @@ export function WlHomeV2TileProfile({
         <button
           type="button"
           className="tile-link"
-          aria-label="Sign in to view your profile"
+          aria-label="Sign in to view your show stats"
           onClick={() => onOpenLogin()}
         />
       : null}

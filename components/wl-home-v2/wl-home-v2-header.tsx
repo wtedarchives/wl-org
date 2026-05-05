@@ -151,6 +151,8 @@ export function WlHomeV2Header({
   const oldPathDebugActive =
     pathname === "/old" || pathname.startsWith("/old/")
 
+  const isHomeIndex = pathname === "/"
+
   const isArchiveRoute =
     pathname === "/archive" || pathname.startsWith("/archive/")
 
@@ -164,14 +166,23 @@ export function WlHomeV2Header({
   }, [mobileNavOpen, closeMobileNav])
 
   return (
-    <header className="top">
-      <div className="top-embed-row">
-        <div className="radio-embed-wrap radio-embed-wrap--header">
-          {isBelowXl ?
-            <RadioMobileSlot className="radio-embed min-h-[66px] w-full" />
-          : <RadioHomeSlot className="radio-embed min-h-[66px] w-full" />}
+    <header
+      className={[
+        "top",
+        isHomeIndex ? "top--home-main-radio" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {!isHomeIndex ?
+        <div className="top-embed-row">
+          <div className="radio-embed-wrap radio-embed-wrap--header">
+            {isBelowXl ?
+              <RadioMobileSlot className="radio-embed min-h-[66px] w-full" />
+            : <RadioHomeSlot className="radio-embed min-h-[66px] w-full" />}
+          </div>
         </div>
-      </div>
+      : null}
 
       <button
         type="button"
@@ -205,8 +216,8 @@ export function WlHomeV2Header({
             />
           </div>
           <div className="brand-text">
-            <span className="wl">WTED.org</span>
-            <span className="dotorg">The World of TED</span>
+            <span className="wl">Wysteria Lane</span>
+            <span className="dotorg">Built by fans, for fans.</span>
           </div>
         </Link>
         {!isBelowXl ?

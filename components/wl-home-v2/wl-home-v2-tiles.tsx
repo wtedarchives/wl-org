@@ -29,7 +29,7 @@ export function WlHomeV2Tiles({
   onOpenRequest: () => void
   /** Same as nav “Sign In” — opens the home login modal (credentials form). */
   onOpenLogin: () => void
-  /** Full Radio.co schedule embed (same as old homepage schedule card). */
+  /** Full Radio.co schedule embed (homepage radio tile pill). */
   onOpenSchedule: () => void
   /** Goose past + upcoming shows (archive widget). */
   onOpenTourSchedule: () => void
@@ -68,7 +68,16 @@ export function WlHomeV2Tiles({
 
   const bumpHomeRadioEmbedPulse = useBumpHomeRadioEmbedPulse()
   const onWtedRadioTileClick = useCallback(() => {
-    scrollMainInsetToTopThenPulse(bumpHomeRadioEmbedPulse)
+    const bump = bumpHomeRadioEmbedPulse
+    const anchor = document.getElementById(
+      "wl-home-v2-radio-tile-player-anchor",
+    )
+    if (anchor) {
+      anchor.scrollIntoView({ behavior: "smooth", block: "center" })
+      globalThis.setTimeout(bump, 450)
+      return
+    }
+    scrollMainInsetToTopThenPulse(bump)
   }, [bumpHomeRadioEmbedPulse])
 
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
