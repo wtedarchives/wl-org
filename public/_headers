@@ -1,0 +1,5 @@
+# Allow community.wysterialane.org (and any other origin) to load the
+# embeddable header web component.
+/embed/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300, must-revalidate
