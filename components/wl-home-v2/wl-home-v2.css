@@ -311,7 +311,8 @@
   /* Below desktop content width (1344px): stacked header + drawer nav */
   @media (max-width: 1343px) {
     .wl-home-v2 header.top {
-      grid-template-columns: auto 1fr auto;
+      /* Equal side tracks so the shrink-wrapped logo+OLD column sits at true viewport center. */
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       grid-template-rows: auto auto auto;
       grid-template-areas:
         "radio radio radio"
@@ -322,6 +323,8 @@
       padding: 8px;
     }
     .wl-home-v2 header.top.top--home-main-radio {
+      /* Override desktop `1fr auto auto` (higher specificity than `header.top` alone). */
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       grid-template-rows: auto auto;
       grid-template-areas:
         "menu brand user"
@@ -435,7 +438,7 @@
       color: #fff;
       transform: translateY(-1px);
     }
-    .wl-home-v2 header.top .top-user-cluster .top-nav-old-toggle {
+    .wl-home-v2 header.top .top-brand-cluster .top-nav-old-toggle {
       flex-shrink: 0;
       box-sizing: border-box;
       min-height: 44px;
@@ -448,7 +451,7 @@
       line-height: 1.15;
       border-style: dashed;
     }
-    .wl-home-v2 header.top .top-user-cluster .top-nav-old-toggle:hover {
+    .wl-home-v2 header.top .top-brand-cluster .top-nav-old-toggle:hover {
       background: rgba(255, 122, 103, 0.15);
       border-color: rgb(123, 65, 55);
       color: #fff;
@@ -1224,13 +1227,16 @@
     text-indent: -0.6em;
   }
 
-  /* Four identical units (welcome segment ± now-playing segment); -25% = one unit → seamless loop. */
+  /*
+   * Two duplicate runs of welcome+phrase+now × four; -50% = one full run → seamless loop.
+   * Distance per iteration (~½ track vs old ¼ track) ⇒ longer duration keeps scroll pace similar.
+   */
   @keyframes wl-home-v2-ticker-marquee {
     from {
       transform: translate3d(0, 0, 0);
     }
     to {
-      transform: translate3d(-25%, 0, 0);
+      transform: translate3d(-50%, 0, 0);
     }
   }
   .wl-home-v2 .wl-home-v2-ticker {
@@ -1268,7 +1274,7 @@
     width: max-content;
     min-width: max-content;
     animation-name: wl-home-v2-ticker-marquee;
-    animation-duration: 45s;
+    animation-duration: 180s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     will-change: transform;
@@ -1290,6 +1296,14 @@
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.72);
     white-space: nowrap;
+  }
+  /* Rotating quote line — preserve author casing/punctuation vs all-caps welcome / now-playing. */
+  .wl-home-v2 .wl-home-v2-ticker-segment--random-phrase {
+    text-transform: none;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    font-style: italic;
+    color: rgba(255, 186, 120, 0.78);
   }
   .wl-home-v2 .wl-home-v2-ticker-segment--now-playing {
     display: inline-flex;

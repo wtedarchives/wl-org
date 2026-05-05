@@ -220,12 +220,10 @@ export function WlHomeV2Header({
             <span className="dotorg">Built by fans, for fans.</span>
           </div>
         </Link>
-        {!isBelowXl ?
-          <TopNavOldPathToggle
-            oldPathDebugActive={oldPathDebugActive}
-            onToggle={onOldPathDebugToggle}
-          />
-        : null}
+        <TopNavOldPathToggle
+          oldPathDebugActive={oldPathDebugActive}
+          onToggle={onOldPathDebugToggle}
+        />
       </div>
 
       <nav
@@ -290,12 +288,6 @@ export function WlHomeV2Header({
       </nav>
 
       <div className="top-user-cluster">
-        {isBelowXl ?
-          <TopNavOldPathToggle
-            oldPathDebugActive={oldPathDebugActive}
-            onToggle={onOldPathDebugToggle}
-          />
-        : null}
         <div className="top-user-menu">
           <WlHomeV2UserMenu
             onOpenLogin={onOpenLogin}

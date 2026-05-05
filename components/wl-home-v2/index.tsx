@@ -6,6 +6,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
@@ -31,12 +32,28 @@ import { WlHomeV2ThisDayHistoryModal } from "./wl-home-v2-this-day-history-modal
 import { WlHomeV2TourScheduleModal } from "./wl-home-v2-tour-schedule-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
+import {
+  pickWlHomeTickerPhraseQuad,
+  WL_HOME_V2_TICKER_RANDOM_PHRASES,
+} from "./wl-home-v2-constants"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
 
 const WELCOME_TICKER_COPY =
   "Welcome to Wysteria Lane, built by Goose fans, for Goose fans."
 
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
+
+function initialTickerPhraseQuadSeed(): readonly [string, string, string, string] {
+  const w = WL_HOME_V2_TICKER_RANDOM_PHRASES
+  const n = w.length
+  if (n === 0) return ["", "", "", ""]
+  return [
+    w[0],
+    w[Math.min(1, n - 1)],
+    w[Math.min(2, n - 1)],
+    w[Math.min(3, n - 1)],
+  ]
+}
 
 export function WlHomeV2({
   children,
@@ -93,6 +110,50 @@ export function WlHomeV2({
   const { title: nowPlayingTitle, loading: nowPlayingLoading } =
     useWtedRadioNowPlaying()
 
+  /**
+   * Four distinct random phrases per full marquee cycle (shown as welcome+phrase+now × four,
+   * then duplicated for seamless scroll). Refresh uses `animationiteration` on this track only
+   * (`live-dot` ping animations bubble iteration events otherwise).
+   */
+  const [tickerPhraseQuad, setTickerPhraseQuad] =
+    useState<readonly [string, string, string, string]>(() =>
+      initialTickerPhraseQuadSeed(),
+    )
+  const tickerTrackRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const refreshQuadFromPreviousEnd = () => {
+      setTickerPhraseQuad((prev) =>
+        pickWlHomeTickerPhraseQuad(prev[prev.length - 1]),
+      )
+    }
+
+    setTickerPhraseQuad(pickWlHomeTickerPhraseQuad(null))
+
+    const node = tickerTrackRef.current
+    if (node == null) return
+
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    if (mq.matches) {
+      const id = window.setInterval(refreshQuadFromPreviousEnd, 45_000)
+      return () => window.clearInterval(id)
+    }
+
+    function onTickerTrackAnimationIteration(e: Event) {
+      if (!(e instanceof AnimationEvent) || e.target !== node) return
+      refreshQuadFromPreviousEnd()
+    }
+
+    node.addEventListener("animationiteration", onTickerTrackAnimationIteration)
+    return () =>
+      node.removeEventListener(
+        "animationiteration",
+        onTickerTrackAnimationIteration,
+      )
+  }, [])
+
   const nowPlayingLine = useMemo(() => {
     if (nowPlayingLoading && !nowPlayingTitle) {
       return `${NOW_PLAYING_TICKER_PREFIX}…`
@@ -103,10 +164,11 @@ export function WlHomeV2({
     return null
   }, [nowPlayingTitle, nowPlayingLoading])
 
+  const tickerPhrasesAria = tickerPhraseQuad.join(" · ")
   const tickerAriaLabel =
     nowPlayingLine != null ?
-      `${WELCOME_TICKER_COPY} ${nowPlayingLine}`
-    : WELCOME_TICKER_COPY
+      `${WELCOME_TICKER_COPY} ${tickerPhrasesAria} ${nowPlayingLine}`
+    : `${WELCOME_TICKER_COPY} ${tickerPhrasesAria}`
 
   const tickerButtonAriaLabel = `${tickerAriaLabel} Opens full WTED schedule.`
 
@@ -196,24 +258,32 @@ export function WlHomeV2({
                 onKeyDown={onTickerKeyDown}
               >
                 <div className="wl-home-v2-ticker-viewport">
-                  <div className="wl-home-v2-ticker-track">
-                    {Array.from({ length: 4 }, (_, copyIndex) => (
-                      <span
-                        key={copyIndex}
-                        className="wl-home-v2-ticker-unit"
-                        aria-hidden="true"
-                      >
-                        <span className="wl-home-v2-ticker-segment">
-                          {WELCOME_TICKER_COPY}
-                        </span>
-                        {nowPlayingLine != null ?
-                          <span className="wl-home-v2-ticker-segment wl-home-v2-ticker-segment--now-playing">
-                            <span className="live-dot" aria-hidden />
-                            {nowPlayingLine}
+                  <div
+                    ref={tickerTrackRef}
+                    className="wl-home-v2-ticker-track"
+                  >
+                    {[0, 1].flatMap((duplicateHalf) =>
+                      tickerPhraseQuad.map((phrase, qi) => (
+                        <span
+                          key={`${duplicateHalf}-${qi}`}
+                          className="wl-home-v2-ticker-unit"
+                          aria-hidden="true"
+                        >
+                          <span className="wl-home-v2-ticker-segment">
+                            {WELCOME_TICKER_COPY}
                           </span>
-                        : null}
-                      </span>
-                    ))}
+                          <span className="wl-home-v2-ticker-segment wl-home-v2-ticker-segment--random-phrase">
+                            {phrase}
+                          </span>
+                          {nowPlayingLine != null ?
+                            <span className="wl-home-v2-ticker-segment wl-home-v2-ticker-segment--now-playing">
+                              <span className="live-dot" aria-hidden />
+                              {nowPlayingLine}
+                            </span>
+                          : null}
+                        </span>
+                      )),
+                    )}
                   </div>
                 </div>
               </div>
