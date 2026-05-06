@@ -216,8 +216,8 @@ export function WlHomeV2Header({
             />
           </div>
           <div className="brand-text">
-            <span className="wl">Wysteria Lane</span>
-            <span className="dotorg">Built by fans, for fans.</span>
+            <span className="wl">WTED Radio</span>
+            <span className="dotorg">Powered by Wysteria Lane</span>
           </div>
         </Link>
         <TopNavOldPathToggle

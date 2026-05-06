@@ -1,0 +1,76 @@
+// lib/sso.ts
+//
+// WYSTERIA LANE — SSO Initiation Helper
+// Constructs the WLC DiscourseConnect redirect URL for login/signup.
+// Called by the Sign In button and Sign Up button — both use the same URL.
+
+const WLC_BASE_URL = "https://community.wysterialane.org";
+const SSO_CALLBACK_URL = process.env.NEXT_PUBLIC_SSO_CALLBACK_URL ?? "https://wted-org.netlify.app/auth/callback";
+
+// ─── Generate a random nonce ──────────────────────────────────────────────────
+
+function generateNonce(): string {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// ─── HMAC-SHA256 sign the payload ─────────────────────────────────────────────
+// WLC verifies this signature to confirm the request came from us.
+
+async function signPayload(payload: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// ─── Build the SSO redirect URL ───────────────────────────────────────────────
+
+export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
+  const secret = process.env.NEXT_PUBLIC_WLC_SSO_SECRET;
+  if (!secret) {
+    throw new Error("NEXT_PUBLIC_WLC_SSO_SECRET is not set");
+  }
+
+  const nonce = generateNonce();
+
+  // Store nonce and intended destination in sessionStorage
+  // so the callback route can verify and redirect correctly
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("sso_nonce", nonce);
+    sessionStorage.setItem("sso_return_to", returnTo ?? window.location.pathname);
+  }
+
+  // Build the payload: nonce + return URL
+  const rawPayload = new URLSearchParams({
+    nonce,
+    return_sso_url: SSO_CALLBACK_URL,
+  }).toString();
+
+  // Base64 encode it
+  const ssoPayload = btoa(rawPayload);
+
+  // Sign it
+  const sig = await signPayload(ssoPayload, secret);
+
+  // Return the full WLC SSO URL
+  return `${WLC_BASE_URL}/session/sso?sso=${encodeURIComponent(ssoPayload)}&sig=${sig}`;
+}
+
+// ─── Redirect to WLC for login ────────────────────────────────────────────────
+
+export async function redirectToLogin(returnTo?: string): Promise<void> {
+  const url = await buildSSORedirectURL(returnTo);
+  window.location.href = url;
+}

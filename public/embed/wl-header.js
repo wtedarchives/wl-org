@@ -325,8 +325,8 @@
         IMG_WL +
         '" alt="" width="26" height="26"></div>',
       '<div class="brand-text">',
-      '<span class="wl">Wysteria Lane</span>',
-      '<span class="dotorg">Built by fans, for fans.</span>',
+      '<span class="wl">WTED Radio</span>',
+      '<span class="dotorg">Powered by Wysteria Lane</span>',
       "</div>",
       "</a>",
       "</div>",

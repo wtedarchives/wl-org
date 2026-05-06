@@ -1,5 +1,6 @@
 "use client"
 
+import { redirectToLogin } from "@/lib/sso"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -167,14 +168,14 @@ export function WlHomeV2UserMenu({
           <>
             <DropdownMenuItem
               className="top-nav-dd-item flex cursor-pointer items-center gap-2"
-              onClick={() => onOpenLogin()}
+              onClick={() => void redirectToLogin()}
             >
               <SignIn className="top-nav-dd-icon size-4 shrink-0" />
               Sign In
             </DropdownMenuItem>
             <DropdownMenuItem
               className="top-nav-dd-item flex cursor-pointer items-center gap-2"
-              onClick={() => onOpenSignup()}
+              onClick={() => void redirectToLogin()}
             >
               <User className="top-nav-dd-icon size-4 shrink-0" />
               Create account
