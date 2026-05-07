@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { RefreshCwIcon } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { useAuth } from "@/components/auth-context"
+import { getSession } from "@/lib/jwt"
 import {
   syncWtedEpisodesRadio,
   WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW,
@@ -22,8 +22,7 @@ import {
 } from "@/components/dpro/admin/admin-radio-playlist-tables"
 
 export function AdminRadioPlaylistsPanel() {
-  const { session } = useAuth()
-  const accessToken = session?.token ?? null
+  const authReady = Boolean(getSession()?.token)
 
   const [newRows, setNewRows] = useState<WtedEpisodeRadioSyncRow[]>([])
   const [removedRows, setRemovedRows] = useState<WtedEpisodeRadioSyncRow[]>([])
@@ -147,14 +146,15 @@ export function AdminRadioPlaylistsPanel() {
   }
 
   const handleSync = async () => {
-    if (!supabase || !accessToken) return
+    const session = getSession()
+    if (!supabase || !session?.token) return
     setSyncing(true)
     setSyncBanner(null)
     setError(null)
     try {
       const { inserted, updatedToRemoved } = await syncWtedEpisodesRadio(
         supabase,
-        accessToken,
+        session.token,
       )
       if (inserted.length === 0 && updatedToRemoved.length === 0) {
         setSyncBanner({
@@ -179,7 +179,6 @@ export function AdminRadioPlaylistsPanel() {
     }
   }
 
-  const authReady = Boolean(accessToken)
 
   return (
     <>
