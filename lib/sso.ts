@@ -75,6 +75,7 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
 
   // Use /session/sso_provider — Discourse as identity provider mode.
   // This keeps WLC native login intact for forum users.
+  console.log("[SSO] Initiating login redirect", { returnTo, callbackUrl: SSO_CALLBACK_URL })
   return `${WLC_BASE_URL}/session/sso_provider?sso=${urlEncodedPayload}&sig=${sig}`;
 }
 

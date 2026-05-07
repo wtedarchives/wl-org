@@ -9,7 +9,7 @@ export default function ProfileLooseEndsPage() {
   return (
     <ProfileStatsTabPanel
       tab="loose-ends"
-      userId={user?.id ?? null}
+      userId={session?.profileId ?? null}
       isOwnProfile
     />
   )

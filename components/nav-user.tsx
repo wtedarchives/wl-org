@@ -44,7 +44,7 @@ export function NavUser() {
     supabase
       .from("profiles")
       .select("username")
-      .eq("id", user.id)
+      .eq("id", session?.profileId)
       .single()
       .then(({ data, error }) => {
         if (cancelled) return
@@ -57,13 +57,13 @@ export function NavUser() {
     return () => {
       cancelled = true
     }
-  }, [user?.id])
+  }, [session?.profileId])
 
   const displayName =
     profileUsername ??
-    (user?.email ? user.email.split("@")[0] : "Guest")
+    (session?.email ? session?.email.split("@")[0] : "Guest")
 
-  const displayEmail = user?.email ?? "Not signed in"
+  const displayEmail = session?.email ?? "Not signed in"
 
   const handleSignOut = async () => {
     await signOut()

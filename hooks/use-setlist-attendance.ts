@@ -20,7 +20,7 @@ export function useSetlistAttendance(
       return
     }
     const client = supabase
-    const userId = user.id
+    const userId = session?.profileId
     async function check() {
       const { data, error } = await client
         .from("user_attended_shows")
@@ -32,12 +32,12 @@ export function useSetlistAttendance(
       setLoading(false)
     }
     check()
-  }, [showId, user?.id])
+  }, [showId, session?.profileId])
 
   const toggle = useCallback(async () => {
     if (!showId || !user || !supabase) return
     const client = supabase
-    const userId = user.id
+    const userId = session?.profileId
     setToggling(true)
     try {
       if (attended) {

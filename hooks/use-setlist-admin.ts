@@ -21,7 +21,7 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
       return
     }
 
-    const cacheKey = `admin_status_${user.id}`
+    const cacheKey = `admin_status_${session?.profileId}`
     const cached = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(cacheKey) : null
     if (cached !== null) {
       setIsAdmin(cached === "true")
@@ -29,7 +29,7 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
       return
     }
 
-    const userId = user.id
+    const userId = session?.profileId
     async function check() {
       if (!supabase) {
         setIsAdminLoading(false)
@@ -83,7 +83,7 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
   const handleWlMouseLeave = useCallback(() => setWlHovered(false), [])
 
   const showAdminUi =
-    !isAdminLoading && (isAdmin || user?.id === LEGACY_ADMIN_USER_ID)
+    !isAdminLoading && (isAdmin || session?.profileId === LEGACY_ADMIN_USER_ID)
 
   return {
     isAdmin,

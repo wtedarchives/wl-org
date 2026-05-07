@@ -98,7 +98,7 @@ serve(async (req) => {
   const { data: adminRow, error: adminErr } = await supabase
     .from("user_roles")
     .select("is_admin")
-    .eq("id", user.id)
+    .eq("id", session?.profileId)
     .maybeSingle()
 
   if (adminErr || !adminRow?.is_admin) {

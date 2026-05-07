@@ -1,180 +1,166 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react"
-import type { Session, User } from "@supabase/supabase-js"
+// components/auth-context.tsx
+//
+// WYSTERIA LANE — Auth Context (SSO Rewrite)
+// Replaces Supabase Auth with custom JWT session issued by the
+// sso-callback Edge Function after WLC DiscourseConnect authentication.
+//
+// BREAKING CHANGES FROM OLD VERSION:
+//   - user: User | null          → removed
+//   - session: Session | null    → replaced with session: WysteriaSession | null
+//   - signIn(email, password)    → signIn() — no params, initiates SSO redirect
+//   - signUp(email, password)    → signUp() — no params, initiates SSO redirect
+//   - resetPassword(email)       → resetPassword() — redirects to WLC forgot password
+//   - updatePassword(password)   → updatePassword() — redirects to WLC account prefs
+//
+// CALL SITE CHANGES NEEDED ACROSS CODEBASE:
+//   session?.profileId                → session?.profileId
+//   session?.email             → session?.email
+//   session?.token   → session?.token
+//   session?.profileId               → session?.profileId
+//   session?.email            → session?.email
 
+import React, { createContext, useContext, useEffect, useState } from "react"
+
+import { redirectToLogin } from "@/lib/sso"
+import {
+  getSession,
+  clearSession,
+  type WysteriaSession,
+} from "@/lib/jwt"
 import { supabase } from "@/lib/supabase"
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type AuthContextType = {
-  user: User | null
-  session: Session | null
+  session: WysteriaSession | null
   loading: boolean
+  isAdmin: boolean
+  signIn: () => void
+  signUp: () => void
+  signOut: () => void
+  resetPassword: () => void
+  updatePassword: () => void
   addAttendedShow: (showId: string) => Promise<void>
   removeAttendedShow: (showId: string) => Promise<void>
-  signIn: (
-    email: string,
-    password: string,
-  ) => Promise<{
-    error: Error | null
-    data: { user: User | null; session: Session | null } | null
-  }>
-  signUp: (
-    email: string,
-    password: string,
-  ) => Promise<{
-    error: Error | null
-    data: { user: User | null; session: Session | null } | null
-  }>
-  signOut: () => Promise<void>
-  resetPassword: (email: string) => Promise<{ error: Error | null }>
-  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>
 }
 
+// ─── Context ──────────────────────────────────────────────────────────────────
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
+  const [session, setSession] = useState<WysteriaSession | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // On mount — read JWT from localStorage
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false)
-      return
-    }
-    const client = supabase
-
-    const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await client.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    }
-
-    getInitialSession()
-
-    const {
-      data: { subscription },
-    } = client.auth.onAuthStateChange((_event, newSession) => {
-      const newUser = newSession?.user ?? null
-
-      setSession((prevSession) => {
-        if (prevSession?.access_token !== newSession?.access_token) {
-          return newSession
-        }
-        return prevSession
-      })
-
-      setUser((prevUser) => {
-        if (prevUser?.id !== newUser?.id) {
-          return newUser
-        }
-        return prevUser
-      })
-
-      setLoading((prevLoading) => {
-        if (prevLoading) {
-          return false
-        }
-        return prevLoading
-      })
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
+    const existing = getSession()
+    console.log("[Auth] Session on mount", existing ? { profileId: existing.profileId, username: existing.username, isAdmin: existing.isAdmin } : null)
+    setSession(existing)
+    setLoading(false)
   }, [])
 
-  const signIn: AuthContextType["signIn"] = async (email, password) => {
-    if (!supabase) {
-      return {
-        error: new Error("Supabase is not configured"),
-        data: null,
+  // Watch for storage events so logout in one tab propagates to others
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "wl_session") {
+        if (!e.newValue) {
+          // Token was cleared in another tab — log out here too
+          setSession(null)
+        } else {
+          // Token was set in another tab (e.g. after SSO callback)
+          const updated = getSession()
+          setSession(updated)
+        }
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return result
+    window.addEventListener("storage", handleStorage)
+    return () => window.removeEventListener("storage", handleStorage)
+  }, [])
+
+  // ─── Auth Actions ────────────────────────────────────────────────────────────
+
+  const signIn = () => {
+    console.log("[Auth] Sign in initiated")
+    void redirectToLogin(window.location.pathname)
   }
 
-  const signUp: AuthContextType["signUp"] = async (email, password) => {
-    if (!supabase) {
-      return {
-        error: new Error("Supabase is not configured"),
-        data: null,
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await supabase.auth.signUp({ email, password })
-    return result
+  const signUp = () => {
+    // Same SSO redirect as signIn — WLC handles the signup/login branching
+    void redirectToLogin(window.location.pathname)
   }
 
-  const signOut = async () => {
-    if (!supabase) return
-    await supabase.auth.signOut()
+  const signOut = () => {
+    console.log("[Auth] Sign out")
+    clearSession()
+    setSession(null)
+    // Optionally also log out of WLC to fully clear their session
+    // window.location.href = "https://community.wysterialane.org/logout"
+    window.location.href = "/"
   }
 
-  const resetPassword: AuthContextType["resetPassword"] = async (email) => {
-    if (!supabase) {
-      return { error: new Error("Supabase is not configured") }
-    }
-    const redirectTo = "https://dripfield.pro/update-password"
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo,
-    })
-    return { error }
+  const resetPassword = () => {
+    // Password reset is handled by WLC
+    window.open(
+      "https://community.wysterialane.org/session/forgot_password",
+      "_blank"
+    )
   }
 
-  const updatePassword: AuthContextType["updatePassword"] = async (
-    newPassword,
-  ) => {
-    if (!supabase) {
-      return { error: new Error("Supabase is not configured") }
-    }
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
-    return { error }
+  const updatePassword = () => {
+    // Password/profile changes handled by WLC
+    window.open(
+      "https://community.wysterialane.org/my/preferences/account",
+      "_blank"
+    )
   }
+
+  // ─── Attendance Actions ───────────────────────────────────────────────────────
+  // These write directly to DPRO using the profile UUID from the JWT.
 
   const addAttendedShow = async (showId: string) => {
-    if (!supabase || !user) throw new Error("User must be logged in")
+    if (!supabase || !session) throw new Error("User must be logged in")
     const { error } = await supabase
       .from("user_attended_shows")
-      .insert({ user_id: user.id, show_id: showId })
+      .insert({ user_id: session.profileId, show_id: showId })
     if (error) throw error
   }
 
   const removeAttendedShow = async (showId: string) => {
-    if (!supabase || !user) throw new Error("User must be logged in")
+    if (!supabase || !session) throw new Error("User must be logged in")
     const { error } = await supabase
       .from("user_attended_shows")
       .delete()
-      .eq("user_id", user.id)
+      .eq("user_id", session.profileId)
       .eq("show_id", showId)
     if (error) throw error
   }
 
+  // ─── Context Value ────────────────────────────────────────────────────────────
+
   const value: AuthContextType = {
-    user,
     session,
     loading,
-    addAttendedShow,
-    removeAttendedShow,
+    isAdmin: session?.isAdmin ?? false,
     signIn,
     signUp,
     signOut,
     resetPassword,
     updatePassword,
+    addAttendedShow,
+    removeAttendedShow,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext)
@@ -183,4 +169,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context
 }
-

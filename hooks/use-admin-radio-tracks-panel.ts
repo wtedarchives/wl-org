@@ -145,14 +145,14 @@ export function useAdminRadioTracksPanel() {
       if (!base) throw new Error("Supabase URL is not configured.")
       const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
+      if (!session?.token) {
         throw new Error("Sign in again to run this action.")
       }
 
       const res = await fetch(`${base}/wted-radio-backfill-artwork`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session?.token}`,
           "Content-Type": "application/json",
           ...(anon ? { apikey: anon } : {}),
         },

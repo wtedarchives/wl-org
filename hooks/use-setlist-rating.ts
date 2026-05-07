@@ -47,7 +47,7 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
           setReviewCount(0)
         }
         if (user) {
-          const mine = rows.find((r) => r.user_id === user.id)
+          const mine = rows.find((r) => r.user_id === session?.profileId)
           if (mine) {
             setUserRating(mine.rating)
             setUserReview(mine.review ?? null)
@@ -66,7 +66,7 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
       }
     }
     fetchRatings()
-  }, [showId, user?.id])
+  }, [showId, session?.profileId])
 
   const fetchReviews = useCallback(async () => {
     if (!showId || !supabase) return
@@ -130,18 +130,18 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
           .from("show_ratings")
           .select("uuid")
           .eq("show_id", showId)
-          .eq("user_id", user.id)
+          .eq("user_id", session?.profileId)
           .maybeSingle()
         if (existing && (existing as { uuid: string }).uuid) {
           await client
             .from("show_ratings")
             .update({ rating: r, review: rev })
             .eq("show_id", showId)
-            .eq("user_id", user.id)
+            .eq("user_id", session?.profileId)
         } else {
           await client.from("show_ratings").insert({
             show_id: showId,
-            user_id: user.id,
+            user_id: session?.profileId,
             rating: r,
             review: rev,
           })

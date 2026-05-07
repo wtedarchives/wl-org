@@ -25,7 +25,7 @@ export function useUserProfilePicture() {
     supabase
       .from("profiles")
       .select("username, profile_picture")
-      .eq("id", user.id)
+      .eq("id", session?.profileId)
       .single()
       .then(({ data, error }) => {
         if (cancelled) return
@@ -50,7 +50,7 @@ export function useUserProfilePicture() {
     return () => {
       cancelled = true
     }
-  }, [user?.id])
+  }, [session?.profileId])
 
   useEffect(() => {
     setProfilePhotoLoadFailed(false)
@@ -59,8 +59,8 @@ export function useUserProfilePicture() {
   const profilePhotoAlt =
     profileDisplayName ?
       `Profile photo for ${profileDisplayName}`
-    : user?.email ?
-      `Profile photo for ${user.email.split("@")[0]}`
+    : session?.email ?
+      `Profile photo for ${session?.email.split("@")[0]}`
     : "Your profile photo"
 
   return {

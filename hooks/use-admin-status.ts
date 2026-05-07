@@ -39,7 +39,7 @@ export function useAdminStatus(user: User | null): UseAdminStatusResult {
         const { data, error } = await supabase
           .from("user_roles")
           .select("is_admin")
-          .eq("id", user.id)
+          .eq("id", session?.profileId)
           .single()
 
         if (error) {
@@ -48,7 +48,7 @@ export function useAdminStatus(user: User | null): UseAdminStatusResult {
           return
         }
 
-        fetchedForUserId.current = user.id
+        fetchedForUserId.current = session?.profileId
         setIsAdminUser(data?.is_admin ?? false)
       } catch (error) {
         console.error("Error in admin check:", error)
@@ -64,7 +64,7 @@ export function useAdminStatus(user: User | null): UseAdminStatusResult {
   // When user exists but we haven't fetched for this user yet, we're still loading.
   // This prevents a redirect race when user transitions from null to a real user.
   const isActuallyLoading =
-    user && fetchedForUserId.current !== user.id ? true : loading
+    user && fetchedForUserId.current !== session?.profileId ? true : loading
 
   return { isAdmin: isAdminUser, loading: isActuallyLoading }
 }

@@ -28,7 +28,7 @@ export function useAttendShowData(yearFilter: string) {
     const { data, error } = await supabase
       .from("user_attended_shows")
       .select("show_id")
-      .eq("user_id", user.id)
+      .eq("user_id", session?.profileId)
     if (error) throw error
     return (data ?? []).map((r) => r.show_id)
   }, [user])

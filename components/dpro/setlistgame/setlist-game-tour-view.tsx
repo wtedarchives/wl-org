@@ -82,7 +82,7 @@ export function SetlistGameTourView({ tourId }: { tourId: string }) {
         <TourShowsTable gameShows={gameShows} />
         <TourStandingsTable
           standings={standings}
-          currentUserId={user?.id}
+          currentUserId={session?.profileId}
         />
       </div>
     </div>

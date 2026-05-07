@@ -89,7 +89,7 @@ serve(async (req) => {
   const { data: requests, error: reqError } = await client
     .from("wted_requests")
     .select("id, radio_id, requested_at")
-    .eq("user_id", user.id)
+    .eq("user_id", session?.profileId)
     .gte("requested_at", since)
     .order("requested_at", { ascending: true })
 

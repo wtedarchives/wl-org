@@ -54,7 +54,7 @@ export function useShowsDataByYear(currentYear: string) {
     }
 
     const client = supabase
-    const userId = user.id
+    const userId = session?.profileId
     async function fetchAttendedShows() {
       try {
         const { data, error } = await client

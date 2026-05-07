@@ -50,7 +50,7 @@ export const createSubmissionHandler = (
         const { data: existingSubmission, error: existingError } = await supabase
           .from('setlist_game_submissions')
           .select('submission_id')
-          .eq('user_id', user.id)
+          .eq('user_id', session?.profileId)
           .eq('show_id', show.show_id)
           .single();
 
@@ -103,7 +103,7 @@ export const createSubmissionHandler = (
           const { data: submissionData, error: submissionError } = await supabase
             .from('setlist_game_submissions')
             .insert([{
-              user_id: user.id,
+              user_id: session?.profileId,
               show_id: show.show_id,
               tour_id: show.show_tour,
               submission_status: 'open',
@@ -156,7 +156,7 @@ export const createSubmissionHandler = (
         sortedSetSongs.forEach((pick, index) => {
           picksToInsert.push({
             submission_id: submissionId,
-            user_id: user.id,
+            user_id: session?.profileId,
             show_id: show.show_id,
             song: pick.song,
             set: pick.set,

@@ -39,7 +39,7 @@ export function useListShowData(shows: ListShow[]) {
 
   useEffect(() => {
     const client = supabase
-    const uid = user?.id
+    const uid = session?.profileId
     if (!uid || !client) {
       setAttendedShowIds([])
       return

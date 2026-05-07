@@ -37,7 +37,7 @@ export function useUserPicks(): {
       const { data: submissionData, error: submissionError } = await supabase
         .from("setlist_game_submissions")
         .select("submission_id")
-        .eq("user_id", user.id)
+        .eq("user_id", session?.profileId)
         .eq("show_id", showId)
         .single()
 

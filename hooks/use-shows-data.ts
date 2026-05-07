@@ -100,7 +100,7 @@ export function useShowsData() {
         const { data, error } = await client
           .from("user_attended_shows")
           .select("show_id")
-          .eq("user_id", user.id)
+          .eq("user_id", session?.profileId)
         if (error) throw error
         setAttendedShowIds((data ?? []).map((item) => item.show_id))
       } catch (err) {

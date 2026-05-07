@@ -121,7 +121,7 @@ export function SetlistGameStandings({ activeLeague, user }: SetlistGameStanding
               <TableRow
                 key={player.userId}
                 className={`text-[11px] ${
-                  user && player.userId === user.id ? "bg-muted/60" : ""
+                  user && player.userId === session?.profileId ? "bg-muted/60" : ""
                 }`}
               >
                 <TableCell className="px-2 py-0.5 text-center font-medium">

@@ -75,7 +75,7 @@ export function ShowStandingsTable({
               <TableRow
                 key={player.userId}
                 className={
-                  user && player.userId === user.id
+                  user && player.userId === session?.profileId
                     ? "bg-muted/60"
                     : "hover:bg-muted/40"
                 }

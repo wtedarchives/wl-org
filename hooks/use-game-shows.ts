@@ -120,7 +120,7 @@ export function useGameShows(
             await supabase
               .from("setlist_game_submissions")
               .select("show_id, submission_id, score")
-              .eq("user_id", user.id)
+              .eq("user_id", session?.profileId)
               .in("show_id", showIds)
 
           if (!submissionsError && submissionsData) {

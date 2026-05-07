@@ -36,6 +36,8 @@ export default function AuthCallbackPage() {
         const sso = params.get("sso")
         const sig = params.get("sig")
 
+        console.log("[SSO Callback] Received params", { hasSso: !!sso, hasSig: !!sig })
+
         if (!sso || !sig) {
           setErrorMessage("Missing SSO parameters. Please try signing in again.")
           setStatus("error")
@@ -54,6 +56,7 @@ export default function AuthCallbackPage() {
             setStatus("error")
             return
           }
+          console.log("[SSO Callback] Nonce verified")
         }
 
         // Call the Edge Function
@@ -65,6 +68,8 @@ export default function AuthCallbackPage() {
           },
           body: JSON.stringify({ sso, sig }),
         })
+
+        console.log("[SSO Callback] Edge Function response", { status: response.status, ok: response.ok })
 
         const data = await response.json()
 
@@ -83,6 +88,8 @@ export default function AuthCallbackPage() {
         sessionStorage.removeItem("sso_nonce")
         const returnTo = sessionStorage.getItem("sso_return_to") ?? "/"
         sessionStorage.removeItem("sso_return_to")
+
+        console.log("[SSO Callback] Token stored, redirecting to", returnTo)
 
         // Redirect to intended destination
         router.replace(returnTo)

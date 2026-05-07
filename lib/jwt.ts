@@ -98,6 +98,8 @@ export function storeToken(token: string): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, token);
+    const claims = parseJWTClaims(token)
+    console.log("[JWT] Token stored, expires at", claims?.exp ? new Date(claims.exp * 1000).toISOString() : "unknown")
   } catch {
     console.error("Failed to store session token");
   }
@@ -135,12 +137,15 @@ export function getSession(): WysteriaSession | null {
     clearStoredToken();
     return null;
   }
-  return tokenToSession(token);
+  const session = tokenToSession(token)
+  console.log("[JWT] Session read from storage", session ? { profileId: session.profileId, expiresAt: new Date(session.expiresAt * 1000).toISOString() } : "null")
+  return session
 }
 
 // ─── Sign out ─────────────────────────────────────────────────────────────────
 
 export function clearSession(): void {
+  console.log("[JWT] Session cleared")
   clearStoredToken();
   // Also clear SSO-related sessionStorage items
   if (typeof window !== "undefined") {

@@ -88,7 +88,7 @@ export function SignupCredentialsForm({
         const { error: profileError } = await supabase
           .from("profiles")
           .upsert({
-            id: data.user.id,
+            id: data.session?.profileId,
             username,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),

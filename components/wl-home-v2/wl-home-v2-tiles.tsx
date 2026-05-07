@@ -60,7 +60,7 @@ export function WlHomeV2Tiles({
     loading: featuredTopicsLoading,
     error: featuredTopicsError,
   } = useDiscourseFeaturedTopics()
-  const profileStatsUserId = profileSignedIn && user?.id ? user.id : null
+  const profileStatsUserId = profileSignedIn && session?.profileId ? session?.profileId : null
   const { data: attendanceData, loading: attendanceLoading } =
     useAttendanceStats(profileStatsUserId)
   const { lastShow, nextShow, loading: profileBookendsLoading } =

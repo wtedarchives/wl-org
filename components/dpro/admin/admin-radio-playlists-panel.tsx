@@ -23,7 +23,7 @@ import {
 
 export function AdminRadioPlaylistsPanel() {
   const { session } = useAuth()
-  const accessToken = session?.access_token ?? null
+  const accessToken = session?.token ?? null
 
   const [newRows, setNewRows] = useState<WtedEpisodeRadioSyncRow[]>([])
   const [removedRows, setRemovedRows] = useState<WtedEpisodeRadioSyncRow[]>([])

@@ -58,7 +58,7 @@ export default function ArchiveUserPageClient() {
   const isOwnProfile = !!(
     user &&
     profileUserId &&
-    user.id === profileUserId
+    session?.profileId === profileUserId
   )
 
   useEffect(() => {

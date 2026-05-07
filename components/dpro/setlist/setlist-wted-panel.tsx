@@ -66,7 +66,7 @@ export function SetlistWtedPanel({
     [groupEntries],
   )
   const { session } = useAuth()
-  const accessToken = session?.access_token ?? null
+  const accessToken = session?.token ?? null
   const { requests, loading, error, refetch } = useWtedRequests(accessToken, open)
 
   const [lastRequestTime, setLastRequestTime] = useState<number>(0)

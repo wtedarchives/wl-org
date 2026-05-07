@@ -76,7 +76,7 @@ export function usePerformanceData(performances: SongPerformance[]) {
         const { data, error } = await supabase
           .from("user_attended_shows")
           .select("show_id")
-          .eq("user_id", user.id)
+          .eq("user_id", session?.profileId)
 
         if (error) throw error
 
@@ -92,7 +92,7 @@ export function usePerformanceData(performances: SongPerformance[]) {
     }
 
     fetchAttendedShows()
-  }, [user?.id])
+  }, [session?.profileId])
 
   return {
     performancesWithGaps,

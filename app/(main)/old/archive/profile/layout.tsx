@@ -33,8 +33,8 @@ export default function ProfileLayout({
     if (!user) return
     const url =
       typeof window !== "undefined"
-        ? getUserProfileUrl(user.id, window.location.origin)
-        : getUserProfileUrl(user.id)
+        ? getUserProfileUrl(session?.profileId, window.location.origin)
+        : getUserProfileUrl(session?.profileId)
     try {
       await navigator.clipboard.writeText(url)
       setShareCopied(true)

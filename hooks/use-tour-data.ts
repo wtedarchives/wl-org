@@ -191,12 +191,12 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
         const showIds = rawShows.map((s) => s.show_id)
 
         let attendedShowIds: string[] = []
-        if (user?.id) {
+        if (session?.profileId) {
           try {
             const { data: attendedData } = await client
               .from("user_attended_shows")
               .select("show_id")
-              .eq("user_id", user.id)
+              .eq("user_id", session?.profileId)
             attendedShowIds = (attendedData ?? []).map((r) => r.show_id)
           } catch {
             // ignore
@@ -377,7 +377,7 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
     }
 
     fetchTourData()
-  }, [tourId, router, user?.id])
+  }, [tourId, router, session?.profileId])
 
   const entriesByShow = useMemo(() => {
     const map = new Map<string, RawSetlistEntry[]>()

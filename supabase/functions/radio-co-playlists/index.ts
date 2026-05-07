@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     const { data: roleRow, error: roleError } = await userClient
       .from("user_roles")
       .select("is_admin")
-      .eq("id", user.id)
+      .eq("id", session?.profileId)
       .maybeSingle()
 
     if (roleError || !roleRow?.is_admin) {

@@ -107,7 +107,7 @@ serve(async (req) => {
   const { data: recentRequests, error: reqError } = await client
     .from("wted_requests")
     .select("radio_id, requested_at")
-    .eq("user_id", user.id)
+    .eq("user_id", session?.profileId)
     .gte("requested_at", since)
     .order("requested_at", { ascending: true })
 
@@ -175,7 +175,7 @@ serve(async (req) => {
   }
 
   const { error: insertError } = await client.from("wted_requests").insert({
-    user_id: user.id,
+    user_id: session?.profileId,
     radio_id: radioId,
     requested_at: new Date().toISOString(),
   })
