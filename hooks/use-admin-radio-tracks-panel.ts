@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { getSession } from "@/lib/jwt"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 import {
   syncWtedRadioIds,
@@ -144,7 +145,7 @@ export function useAdminRadioTracksPanel() {
       const base = getSupabaseFunctionsUrl()
       if (!base) throw new Error("Supabase URL is not configured.")
       const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = getSession()
       if (!session?.token) {
         throw new Error("Sign in again to run this action.")
       }
