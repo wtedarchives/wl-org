@@ -254,7 +254,7 @@ function DiscographyReleasePageContent({ id }: { id: string }) {
                       router.push(getSongArchiveUrl(entry.song_id))
                     }
                     onWtedClick={(entry) => {
-                      if (!user) {
+                      if (!session) {
                         setWtedLoginRequiredOpen(true)
                         return
                       }
