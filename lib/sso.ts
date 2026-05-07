@@ -3,6 +3,12 @@
 // WYSTERIA LANE — SSO Initiation Helper
 // Constructs the WLC DiscourseConnect redirect URL for login/signup.
 // Called by the Sign In button and Sign Up button — both use the same URL.
+//
+// Uses Discourse as an IDENTITY PROVIDER (sso_provider) — NOT DiscourseConnect
+// consumer mode. This means WLC keeps its native login form intact and forum
+// users are completely unaffected.
+//
+// Discourse docs: https://meta.discourse.org/t/32974
 
 const WLC_BASE_URL = "https://community.wysterialane.org";
 const SSO_CALLBACK_URL = process.env.NEXT_PUBLIC_SSO_CALLBACK_URL ?? "https://wted-org.netlify.app/auth/callback";
@@ -61,11 +67,15 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
   // Base64 encode it
   const ssoPayload = btoa(rawPayload);
 
+  // URL encode it
+  const urlEncodedPayload = encodeURIComponent(ssoPayload);
+
   // Sign it
   const sig = await signPayload(ssoPayload, secret);
 
-  // Return the full WLC SSO URL
-  return `${WLC_BASE_URL}/session/sso?sso=${encodeURIComponent(ssoPayload)}&sig=${sig}`;
+  // Use /session/sso_provider — Discourse as identity provider mode.
+  // This keeps WLC native login intact for forum users.
+  return `${WLC_BASE_URL}/session/sso_provider?sso=${urlEncodedPayload}&sig=${sig}`;
 }
 
 // ─── Redirect to WLC for login ────────────────────────────────────────────────

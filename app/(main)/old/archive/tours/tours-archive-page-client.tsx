@@ -24,7 +24,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { DESKTOP_CONTENT_MIN_WIDTH } from "@/hooks/use-mobile"
 
 /** Landing redirect when `/old/archive/tours` has no `id` (matches former server page). */
-const DEFAULT_LANDING_TOUR_NAME = "2026 Spring"
+const DEFAULT_LANDING_TOUR_NAME = "2026 Viva El Gonzo"
 
 const TOUR_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
