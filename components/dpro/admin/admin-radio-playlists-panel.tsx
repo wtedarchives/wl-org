@@ -2,12 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { RefreshCwIcon } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 import { getSession } from "@/lib/jwt"
+import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 import {
-  syncWtedEpisodesRadio,
   WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW,
-  WTED_EPISODE_RADIO_SYNC_SELECT,
   type WtedEpisodeRadioSyncRow,
 } from "@/lib/wted-episodes-radio-sync"
 import { Button } from "@/components/ui/button"
@@ -20,6 +18,37 @@ import {
   ClickableRadioPlaylistsTable,
   RemovedPlaylistDispositionDialog,
 } from "@/components/dpro/admin/admin-radio-playlist-tables"
+
+// ─── Edge Function helper ─────────────────────────────────────────────────────
+
+async function callAdminEpisodes(
+  action: string,
+  body: Record<string, unknown> = {},
+): Promise<unknown> {
+  const session = getSession()
+  if (!session?.token) throw new Error("Sign in again to perform this action.")
+
+  const base = getSupabaseFunctionsUrl()
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  const res = await fetch(`${base}/wted-episodes-admin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.token}`,
+      ...(anon ? { apikey: anon } : {}),
+    },
+    body: JSON.stringify({ action, ...body }),
+  })
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error((data as { error?: string }).error ?? `Edge function returned ${res.status}`)
+  }
+  return data
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function AdminRadioPlaylistsPanel() {
   const authReady = Boolean(getSession()?.token)
@@ -45,32 +74,17 @@ export function AdminRadioPlaylistsPanel() {
     updatingUuid !== null && removedDispositionRow !== null
 
   const loadNewAndRemoved = useCallback(async () => {
-    if (!supabase) return
     setError(null)
     try {
       setLoading(true)
-      const [newRes, removedRes] = await Promise.all([
-        supabase
-          .from("wted_episodes")
-          .select(WTED_EPISODE_RADIO_SYNC_SELECT)
-          .eq("status", "NEW")
-          .order("radio_id", { ascending: true }),
-        supabase
-          .from("wted_episodes")
-          .select(WTED_EPISODE_RADIO_SYNC_SELECT)
-          .eq("status", "REMOVED")
-          .order("radio_id", { ascending: true }),
-      ])
-      if (newRes.error) throw newRes.error
-      if (removedRes.error) throw removedRes.error
-      setNewRows((newRes.data ?? []) as WtedEpisodeRadioSyncRow[])
-      setRemovedRows((removedRes.data ?? []) as WtedEpisodeRadioSyncRow[])
+      const data = await callAdminEpisodes("load") as {
+        newRows: WtedEpisodeRadioSyncRow[]
+        removedRows: WtedEpisodeRadioSyncRow[]
+      }
+      setNewRows(data.newRows)
+      setRemovedRows(data.removedRows)
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load radio playlist episodes.",
-      )
+      setError(err instanceof Error ? err.message : "Failed to load radio playlist episodes.")
     } finally {
       setLoading(false)
     }
@@ -84,30 +98,14 @@ export function AdminRadioPlaylistsPanel() {
     uuid: string,
     payload: SaveNewPlaylistEpisodePayload,
   ): Promise<boolean> => {
-    if (!supabase) return false
     setUpdatingUuid(uuid)
     setError(null)
     try {
-      const { error: upErr } = await supabase
-        .from("wted_episodes")
-        .update({
-          episode: payload.episode,
-          display_name: payload.display_name,
-          show: payload.show,
-          order: payload.order,
-          artwork: payload.artwork,
-          host: payload.host,
-          status: payload.status,
-        })
-        .eq("uuid", uuid)
-        .eq("status", "NEW")
-      if (upErr) throw upErr
+      await callAdminEpisodes("update", { uuid, payload })
       await loadNewAndRemoved()
       return true
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to save episode.",
-      )
+      setError(err instanceof Error ? err.message : "Failed to save episode.")
       return false
     } finally {
       setUpdatingUuid(null)
@@ -115,24 +113,14 @@ export function AdminRadioPlaylistsPanel() {
   }
 
   const handleRemovedMarkSkipped = async (uuid: string): Promise<boolean> => {
-    if (!supabase) return false
     setUpdatingUuid(uuid)
     setError(null)
     try {
-      const { error: upErr } = await supabase
-        .from("wted_episodes")
-        .update({ status: "skipped" })
-        .eq("uuid", uuid)
-        .eq("status", "REMOVED")
-      if (upErr) throw upErr
+      await callAdminEpisodes("skip", { uuid })
       await loadNewAndRemoved()
       return true
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to mark episode as skipped.",
-      )
+      setError(err instanceof Error ? err.message : "Failed to mark episode as skipped.")
       return false
     } finally {
       setUpdatingUuid(null)
@@ -146,39 +134,34 @@ export function AdminRadioPlaylistsPanel() {
   }
 
   const handleSync = async () => {
-    const session = getSession()
-    if (!supabase || !session?.token) return
     setSyncing(true)
     setSyncBanner(null)
     setError(null)
     try {
-      const { inserted, updatedToRemoved } = await syncWtedEpisodesRadio(
-        supabase,
-        session.token,
-      )
-      if (inserted.length === 0 && updatedToRemoved.length === 0) {
+      const data = await callAdminEpisodes("sync") as {
+        inserted: WtedEpisodeRadioSyncRow[]
+        updatedToRemoved: WtedEpisodeRadioSyncRow[]
+      }
+      if (data.inserted.length === 0 && data.updatedToRemoved.length === 0) {
         setSyncBanner({
           kind: "no-change",
-          message:
-            "No changes — episodes with Radio playlist IDs already match the Studio list.",
+          message: "No changes — episodes with Radio playlist IDs already match the Studio list.",
         })
       } else {
         setSyncBanner({
           kind: "success",
-          message: `Sync complete: ${inserted.length} added as NEW, ${updatedToRemoved.length} marked REMOVED.`,
+          message: `Sync complete: ${data.inserted.length} added as NEW, ${data.updatedToRemoved.length} marked REMOVED.`,
         })
       }
       await loadNewAndRemoved()
     } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Sync failed. Try again later."
+      const msg = err instanceof Error ? err.message : "Sync failed. Try again later."
       setSyncBanner({ kind: "error", message: msg })
       setError(msg)
     } finally {
       setSyncing(false)
     }
   }
-
 
   return (
     <>
