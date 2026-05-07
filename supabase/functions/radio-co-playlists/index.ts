@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
 const STATION_ID = "s3c11c85d6"
@@ -58,14 +58,12 @@ Deno.serve(async (req) => {
       })
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")?.trim()
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")?.trim()
+    const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
     const radioEmail = Deno.env.get("RADIO_CO_EMAIL")?.trim()
     const radioPassword = Deno.env.get("RADIO_CO_PASSWORD")?.trim()
 
     const missing: string[] = []
-    if (!supabaseUrl) missing.push("SUPABASE_URL")
-    if (!supabaseAnonKey) missing.push("SUPABASE_ANON_KEY")
+    if (!jwtSecret) missing.push("WYSTERIA_JWT_SECRET")
     if (!radioEmail) missing.push("RADIO_CO_EMAIL")
     if (!radioPassword) missing.push("RADIO_CO_PASSWORD")
 
@@ -79,26 +77,18 @@ Deno.serve(async (req) => {
       )
     }
 
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    })
-
-    const { data: userData, error: userError } = await userClient.auth.getUser(token)
-    const user = userData?.user ?? null
-    if (userError || !user) {
+    let jwtPayload: Record<string, unknown>
+    try {
+      const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
+      jwtPayload = payload as Record<string, unknown>
+    } catch {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       })
     }
 
-    const { data: roleRow, error: roleError } = await userClient
-      .from("user_roles")
-      .select("is_admin")
-      .eq("id", session?.profileId)
-      .maybeSingle()
-
-    if (roleError || !roleRow?.is_admin) {
+    if (!jwtPayload.is_admin) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -106,9 +96,9 @@ Deno.serve(async (req) => {
     }
 
     // Dynamically obtain a fresh Radio.co session
-    let session: string
+    let radioSession: string
     try {
-      session = await getRadioSession()
+      radioSession = await getRadioSession()
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e)
       return new Response(
@@ -122,7 +112,7 @@ Deno.serve(async (req) => {
 
     const res = await fetch(STUDIO_PLAYLISTS_URL, {
       headers: {
-        "Cookie": `radiocosession=${session}`,
+        "Cookie": `radiocosession=${radioSession}`,
         "Accept": "application/json",
       },
     })

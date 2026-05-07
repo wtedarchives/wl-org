@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import {
   computeReleaseArtworkOnly,
@@ -70,38 +71,36 @@ serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-  if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+  if (!supabaseUrl || !supabaseServiceKey) {
     return new Response(
       JSON.stringify({ error: "Server configuration error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     )
   }
 
-  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  })
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-  const {
-    data: { user },
-    error: userError,
-  } = await userClient.auth.getUser(token)
-  if (userError || !user) {
+  const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
+  if (!jwtSecret) {
+    return new Response(
+      JSON.stringify({ error: "Server configuration error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    )
+  }
+
+  let jwtPayload: Record<string, unknown>
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
+    jwtPayload = payload as Record<string, unknown>
+  } catch {
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
       { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     )
   }
 
-  const { data: adminRow, error: adminErr } = await supabase
-    .from("user_roles")
-    .select("is_admin")
-    .eq("id", session?.profileId)
-    .maybeSingle()
-
-  if (adminErr || !adminRow?.is_admin) {
+  if (!jwtPayload.is_admin) {
     return new Response(
       JSON.stringify({ error: "Forbidden" }),
       { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },

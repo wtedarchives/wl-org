@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
@@ -59,25 +60,30 @@ serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-  if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+  const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
+  if (!supabaseUrl || !supabaseServiceKey || !jwtSecret) {
     return new Response(
       JSON.stringify({ error: "Server configuration error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }
 
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  })
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-  const {
-    data: { user },
-    error: userError,
-  } = await client.auth.getUser(token)
-  if (userError || !user) {
+  let payload: Record<string, unknown>
+  try {
+    const { payload: verified } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
+    payload = verified as Record<string, unknown>
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
+  const profileId = payload.profile_id as string | undefined
+  if (!profileId) {
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
       { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -86,10 +92,10 @@ serve(async (req) => {
 
   const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
 
-  const { data: requests, error: reqError } = await client
+  const { data: requests, error: reqError } = await supabase
     .from("wted_requests")
     .select("id, radio_id, requested_at")
-    .eq("user_id", session?.profileId)
+    .eq("user_id", profileId)
     .gte("requested_at", since)
     .order("requested_at", { ascending: true })
 
