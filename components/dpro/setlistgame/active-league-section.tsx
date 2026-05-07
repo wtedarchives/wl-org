@@ -3,11 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { GameShow } from "@/hooks/use-game-shows"
 import { SetlistGameShowTable } from "./setlist-game-show-table"
+import type { WysteriaSession } from "@/lib/jwt"
 
 interface ActiveLeagueSectionProps {
   activeLeague: string
   gameShows: GameShow[]
-  user: { id: string } | null
+  user: WysteriaSession | null
   onSelectSongs: (show: GameShow) => void
   onViewSubmission: (show: GameShow) => void
   isAdminUser?: boolean

@@ -15,10 +15,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { getSetlistGameShowArchiveUrl } from "@/lib/setlist-game-archive-url"
 import { AdminShowTimeCell } from "./admin-show-time-cell"
+import type { WysteriaSession } from "@/lib/jwt"
 
 interface SetlistGameShowTableProps {
   gameShows: GameShow[]
-  user: { id: string } | null
+  user: WysteriaSession | null
   onSelectSongs: (show: GameShow) => void
   onViewSubmission: (show: GameShow) => void
   isAdminUser?: boolean

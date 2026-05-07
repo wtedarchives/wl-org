@@ -7,6 +7,7 @@ import { SetlistAttendanceCard } from "./setlist-attendance-card"
 import { SetlistSidebar } from "./setlist-sidebar"
 import type { Show, SetlistEntry } from "@/types/setlist"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
+import type { WysteriaSession } from "@/lib/jwt"
 interface SetlistSidebarSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -19,7 +20,7 @@ interface SetlistSidebarSheetProps {
   attended: boolean
   toggling: boolean
   onToggle: () => void
-  user: { id: string } | null
+  user: WysteriaSession | null
   onRatingClick: () => void
   changes: ShowChangeRow[]
   changesLoading: boolean
