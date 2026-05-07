@@ -29,14 +29,14 @@ import {
 import { BarChart3Icon, LogIn, LogOutIcon, User } from "lucide-react"
 
 export function NavUser() {
-  const { user, signOut } = useAuth()
+  const { session, signOut } = useAuth()
   const { isMobile } = useSidebar()
   const pathname = usePathname()
   const router = useRouter()
   const [profileUsername, setProfileUsername] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user || !supabase) {
+    if (!session || !supabase) {
       setProfileUsername(null)
       return
     }
@@ -71,7 +71,7 @@ export function NavUser() {
 
   const loginHref = `/login?from=${encodeURIComponent(pathname || "/")}`
 
-  const isLoggedIn = Boolean(user)
+  const isLoggedIn = Boolean(session)
 
   // Profile avatar + name + email at bottom; clicking opens menu
   return (

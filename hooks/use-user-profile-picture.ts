@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase"
 
 /** Loads `profiles.profile_picture` + `username` for the signed-in user (wl-home tiles, archive hub, etc.). */
 export function useUserProfilePicture() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
   const [profileDisplayName, setProfileDisplayName] = useState<string | null>(
     null,
@@ -16,7 +16,7 @@ export function useUserProfilePicture() {
 
   useEffect(() => {
     setProfilePhotoLoadFailed(false)
-    if (!user || !supabase) {
+    if (!session || !supabase) {
       setProfilePicture(null)
       setProfileDisplayName(null)
       return
@@ -64,8 +64,7 @@ export function useUserProfilePicture() {
     : "Your profile photo"
 
   return {
-    user,
-    profileSignedIn: Boolean(user),
+    profileSignedIn: Boolean(session),
     profilePicture,
     profileDisplayName,
     profilePhotoLoadFailed,

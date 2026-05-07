@@ -36,7 +36,7 @@ export function WlHomeV2Tiles({
   /** Same-day calendar shows across years (matches legacy homepage). */
   onOpenThisDayInHistory: () => void
 }) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const {
     profileSignedIn,
     profilePicture,

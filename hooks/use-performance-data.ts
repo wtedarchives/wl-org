@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase"
 import type { SongPerformance } from "@/types/song"
 
 export function usePerformanceData(performances: SongPerformance[]) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [performancesWithGaps, setPerformancesWithGaps] = useState<
     SongPerformance[]
   >([])
@@ -66,7 +66,7 @@ export function usePerformanceData(performances: SongPerformance[]) {
 
   useEffect(() => {
     async function fetchAttendedShows() {
-      if (!user || !supabase) {
+      if (!session || !supabase) {
         setAttendedShowIds(new Set())
         return
       }

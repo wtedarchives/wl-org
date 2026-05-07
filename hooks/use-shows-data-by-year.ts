@@ -42,13 +42,13 @@ interface ShowResponse {
 }
 
 export function useShowsDataByYear(currentYear: string) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [shows, setShows] = useState<YearShow[]>([])
   const [loading, setLoading] = useState(true)
   const [attendedShowIds, setAttendedShowIds] = useState<string[]>([])
 
   useEffect(() => {
-    if (!supabase || !user) {
+    if (!supabase || !session) {
       setAttendedShowIds([])
       return
     }
@@ -73,7 +73,7 @@ export function useShowsDataByYear(currentYear: string) {
     }
 
     fetchAttendedShows()
-  }, [user])
+  }, [session?.profileId])
 
   useEffect(() => {
     if (!currentYear) return

@@ -38,7 +38,7 @@ export function WlHomeV2UserMenu({
   onOpenLogin: () => void
   onOpenSignup: () => void
 }) {
-  const { user, signOut } = useAuth()
+  const { session, signOut } = useAuth()
   const router = useRouter()
   const [profileUsername, setProfileUsername] = useState<string | null>(null)
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
@@ -83,7 +83,7 @@ export function WlHomeV2UserMenu({
     await signOut()
   }
 
-  const isLoggedIn = Boolean(user)
+  const isLoggedIn = Boolean(session)
 
   /** Avoid Radix ID mismatch across SSR/client (dropdown trigger id differs on hydrate). */
   const [radixReady, setRadixReady] = useState(false)

@@ -24,7 +24,7 @@ export interface ListShow {
 }
 
 export function useListShowData(shows: ListShow[]) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [attendedShowIds, setAttendedShowIds] = useState<string[]>([])
   const [showsWithSetlists, setShowsWithSetlists] = useState<Set<string>>(
     new Set(),
@@ -57,7 +57,7 @@ export function useListShowData(shows: ListShow[]) {
       }
     }
     fetch(client)
-  }, [user])
+  }, [session?.profileId])
 
   useEffect(() => {
     const client = supabase

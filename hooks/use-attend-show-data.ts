@@ -19,22 +19,22 @@ export interface AttendShow {
 }
 
 export function useAttendShowData(yearFilter: string) {
-  const { user, addAttendedShow, removeAttendedShow } = useAuth()
+  const { session, addAttendedShow, removeAttendedShow } = useAuth()
   const [shows, setShows] = useState<AttendShow[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchAttendedIds = useCallback(async (): Promise<string[]> => {
-    if (!user || !supabase) return []
+    if (!session || !supabase) return []
     const { data, error } = await supabase
       .from("user_attended_shows")
       .select("show_id")
       .eq("user_id", session?.profileId)
     if (error) throw error
     return (data ?? []).map((r) => r.show_id)
-  }, [user])
+  }, [session?.profileId])
 
   const fetchShows = useCallback(async () => {
-    if (!user || !supabase || !yearFilter) return
+    if (!session || !supabase || !yearFilter) return
 
     setLoading(true)
     try {
@@ -92,14 +92,14 @@ export function useAttendShowData(yearFilter: string) {
     } finally {
       setLoading(false)
     }
-  }, [user, yearFilter, fetchAttendedIds])
+  }, [session, yearFilter, fetchAttendedIds])
 
   useEffect(() => {
     if (yearFilter) fetchShows()
   }, [yearFilter, fetchShows])
 
   const handleAttendanceToggle = async (show: AttendShow) => {
-    if (!user) return
+    if (!session) return
     try {
       if (show.attended) {
         await removeAttendedShow(show.show_id)

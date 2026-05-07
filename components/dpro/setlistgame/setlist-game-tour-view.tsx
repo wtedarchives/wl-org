@@ -14,7 +14,7 @@ import { TourShowsTable } from "@/components/dpro/setlistgame/tour-shows-table"
 import { TourStandingsTable } from "@/components/dpro/setlistgame/tour-standings-table"
 
 export function SetlistGameTourView({ tourId }: { tourId: string }) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const {
     loading,

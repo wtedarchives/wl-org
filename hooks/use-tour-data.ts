@@ -59,7 +59,7 @@ export interface UseTourDataResult {
 
 export function useTourData(tourId: string | undefined): UseTourDataResult {
   const router = useRouter()
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [currentTour, setCurrentTour] = useState<Tour | null>(null)
   const [tours, setTours] = useState<Tour[]>([])
   const [shows, setShows] = useState<TourShow[]>([])

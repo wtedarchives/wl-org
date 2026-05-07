@@ -60,7 +60,7 @@ function localTomorrowDateString(): string {
 }
 
 export function useShowsData() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [recentShows, setRecentShows] = useState<HomeShow[]>([])
   const [upcomingShows, setUpcomingShows] = useState<HomeShow[]>([])
   const [historicalShows, setHistoricalShows] = useState<HomeShow[]>([])
@@ -90,7 +90,7 @@ export function useShowsData() {
   }, [currentDate])
 
   useEffect(() => {
-    if (!supabase || !user) {
+    if (!supabase || !session) {
       setAttendedShowIds([])
       return
     }
@@ -110,7 +110,7 @@ export function useShowsData() {
       }
     }
     fetchAttendedShows()
-  }, [user])
+  }, [session?.profileId])
 
   useEffect(() => {
     if (!supabase) {
