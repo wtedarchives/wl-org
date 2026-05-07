@@ -35,7 +35,7 @@ interface SubmissionDetails {
 }
 
 export function SetlistGameContent() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [activeSongSelectionShow, setActiveSongSelectionShow] =
     useState<GameShow | null>(null)
   const [showScoringModal, setShowScoringModal] = useState(false)
@@ -50,19 +50,19 @@ export function SetlistGameContent() {
 
   const { loading, gameShows, fetchGameShows } = useGameShows(
     ACTIVE_LEAGUE,
-    user ?? null
+    session
   )
   const { showStatsLoading, showsWithStats } = useShowStatistics(ACTIVE_LEAGUE)
   const { isAdmin: isAdminUser, loading: adminLoading } = useAdminStatus(
-    user ?? null
+    session
   )
   const { userPicks, fetchUserPicks, resetPicks, setUserPicks } = useUserPicks()
   const { loading: pastToursLoading, pastTours } = usePastTours(ACTIVE_LEAGUE)
 
   const handleSelectSongs = async (show: GameShow) => {
     setViewMode(false)
-    if (show.submission_id && user) {
-      await fetchUserPicks(show.show_id, user)
+    if (show.submission_id && session) {
+      await fetchUserPicks(show.show_id, session)
     } else {
       resetPicks()
     }
@@ -76,7 +76,7 @@ export function SetlistGameContent() {
   }
 
   const handleViewSubmission = async (show: GameShow) => {
-    if (!user || !show.submission_id || !supabase) return
+    if (!session || !show.submission_id || !supabase) return
 
     try {
       const { data: picksData, error: picksError } = await supabase
@@ -129,19 +129,19 @@ export function SetlistGameContent() {
         onShowScoring={() => setShowScoringModal(true)}
       />
 
-      {!user && <LoginPrompt />}
+      {!session && <LoginPrompt />}
 
       <ActiveLeagueSection
         activeLeague={ACTIVE_LEAGUE}
         gameShows={gameShows}
-        user={user ?? null}
+        user={session}
         onSelectSongs={handleSelectSongs}
         onViewSubmission={handleViewSubmission}
         isAdminUser={isAdminUser && !adminLoading}
         onShowTimeSaved={() => fetchGameShows({ silent: true })}
       />
 
-      <SetlistGameStandings activeLeague={ACTIVE_LEAGUE} user={user ?? null} />
+      <SetlistGameStandings activeLeague={ACTIVE_LEAGUE} user={session} />
 
       <SetlistGameShows gameShows={showsWithStats} loading={showStatsLoading} />
 

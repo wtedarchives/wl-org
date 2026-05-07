@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
 import type { GameShow } from "@/hooks/use-setlist-game-show-data"
+import type { WysteriaSession } from "@/lib/jwt"
 
 interface ShowHeaderProps {
   show: GameShow
   totalPlayers: number
   userSubmission: string | null
-  user: { id: string } | null
+  user: WysteriaSession | null
   onViewSubmission: () => void
 }
 

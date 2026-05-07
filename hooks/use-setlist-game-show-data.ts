@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 
 export interface GameShow {
   show_id: string
@@ -58,7 +58,7 @@ export interface SubmissionDetails {
 
 export function useSetlistGameShowData(
   showId: string | undefined,
-  user: User | null
+  session: WysteriaSession | null
 ) {
   const [loading, setLoading] = useState(true)
   const [show, setShow] = useState<GameShow | null>(null)
@@ -115,7 +115,7 @@ export function useSetlistGameShowData(
           else timeRemaining = `${minutes}m`
         }
 
-        if (user) {
+        if (session) {
           const { data: subData, error: subError } = await supabase
             .from("setlist_game_submissions")
             .select("submission_id")
@@ -150,7 +150,7 @@ export function useSetlistGameShowData(
     }
 
     fetchShowDetails()
-  }, [showId, user])
+  }, [showId, session])
 
   useEffect(() => {
     async function fetchPlayerCount() {

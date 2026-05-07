@@ -45,7 +45,7 @@ export function WtedRequestSongFlow({
   /** Use WL Home v2 login gate styling when opening the WTED login-required dialog. */
   wlHomeV2LoginDialog?: boolean
 }) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const catalogQueryEnabled = catalogFetchEnabled
   const { rows, loading, error } = useWtedRadioIdsCatalog(catalogQueryEnabled)
   const catalogDeferred = !catalogFetchEnabled
@@ -64,7 +64,7 @@ export function WtedRequestSongFlow({
 
   const openRequestSheet = useCallback(
     async (row: WtedRadioIdRow) => {
-      if (!user) {
+      if (!session) {
         setWtedLoginRequiredOpen(true)
         return
       }
@@ -110,7 +110,7 @@ export function WtedRequestSongFlow({
         setBusyRadioId(null)
       }
     },
-    [user],
+    [session],
   )
 
   return (

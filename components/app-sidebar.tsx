@@ -32,8 +32,8 @@ import { AppSidebarLinksMerchMedia } from "./app-sidebar-links-merch-media"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const router = useRouter()
-  const { user } = useAuth()
-  const { isAdmin } = useAdminStatus(user)
+  const { session } = useAuth()
+  const { isAdmin } = useAdminStatus(session)
   const openBugCount = useBugCount()
   const [findDialogOpen, setFindDialogOpen] = useState(false)
 

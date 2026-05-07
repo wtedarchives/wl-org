@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 
 export interface UserPick {
   song: string
@@ -18,7 +18,7 @@ export interface UserPick {
 export function useUserPicks(): {
   userPicks: UserPick[]
   loadingPicks: boolean
-  fetchUserPicks: (showId: string, user: User) => Promise<UserPick[]>
+  fetchUserPicks: (showId: string, session: WysteriaSession | null) => Promise<UserPick[]>
   resetPicks: () => void
   setUserPicks: React.Dispatch<React.SetStateAction<UserPick[]>>
 } {
@@ -27,9 +27,9 @@ export function useUserPicks(): {
 
   const fetchUserPicks = async (
     showId: string,
-    user: User
+    session: WysteriaSession | null
   ): Promise<UserPick[]> => {
-    if (!user || !supabase) return []
+    if (!session || !supabase) return []
 
     try {
       setLoadingPicks(true)

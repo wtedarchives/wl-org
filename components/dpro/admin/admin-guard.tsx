@@ -16,21 +16,21 @@ interface AdminGuardProps {
  */
 export function AdminGuard({ children }: AdminGuardProps) {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
-  const { isAdmin, loading: adminLoading } = useAdminStatus(user)
+  const { session, loading: authLoading } = useAuth()
+  const { isAdmin, loading: adminLoading } = useAdminStatus(session)
 
   const isLoading = authLoading || adminLoading
 
   useEffect(() => {
     if (isLoading) return
-    if (!user) {
+    if (!session) {
       router.replace("/")
       return
     }
     if (!isAdmin) {
       router.replace("/")
     }
-  }, [user, isAdmin, isLoading, router])
+  }, [session, isAdmin, isLoading, router])
 
   if (isLoading) {
     return (
@@ -47,7 +47,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
     )
   }
 
-  if (!user || !isAdmin) {
+  if (!session || !isAdmin) {
     return null
   }
 

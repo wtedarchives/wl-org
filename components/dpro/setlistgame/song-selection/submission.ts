@@ -1,11 +1,12 @@
 "use client"
 
 import { supabase } from "@/lib/supabase"
+import type { WysteriaSession } from "@/lib/jwt"
 import type { SongPick, SongSelectionModalProps } from "./types"
 import { calculateTimeRemaining, getPlacement } from "./utils"
 
 export const createSubmissionHandler = (
-  user: any,
+  session: WysteriaSession | null,
   show: SongSelectionModalProps["show"],
   songPicks: SongPick[],
   isEditing: boolean,
@@ -16,7 +17,7 @@ export const createSubmissionHandler = (
   onSuccess?: () => void
 ) => {
   return async () => {
-    if (!user) {
+    if (!session) {
       setError('You must be logged in to submit picks');
       return;
     }

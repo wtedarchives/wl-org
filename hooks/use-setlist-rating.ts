@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 
 export interface ReviewEntry {
   rating: number
@@ -12,7 +12,7 @@ export interface ReviewEntry {
 
 const REVIEW_VALID_REGEX = /^[a-zA-Z0-9\s.,!?'"()<>—–-]*$/
 
-export function useSetlistRating(showId: string | undefined, user: User | null) {
+export function useSetlistRating(showId: string | undefined, session: WysteriaSession | null) {
   const [averageRating, setAverageRating] = useState<number>(0)
   const [reviewCount, setReviewCount] = useState<number>(0)
   const [userRating, setUserRating] = useState<number | null>(null)
@@ -46,7 +46,7 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
           setAverageRating(0)
           setReviewCount(0)
         }
-        if (user) {
+        if (session) {
           const mine = rows.find((r) => r.user_id === session?.profileId)
           if (mine) {
             setUserRating(mine.rating)
@@ -120,7 +120,7 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
 
   const submitRating = useCallback(
     async (rating: number, review: string) => {
-      if (!showId || !user || !supabase) return
+      if (!showId || !session || !supabase) return
       const client = supabase
       const r = Math.min(5, Math.max(1, Math.round(rating)))
       const rev = review.trim() || null
@@ -167,7 +167,7 @@ export function useSetlistRating(showId: string | undefined, user: User | null) 
         setSubmitting(false)
       }
     },
-    [showId, user, fetchReviews]
+    [showId, session, fetchReviews]
   )
 
   const validateReview = useCallback((text: string): string | null => {

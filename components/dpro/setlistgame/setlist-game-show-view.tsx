@@ -55,7 +55,7 @@ async function fetchPicksBySubmissionId(
 }
 
 export function SetlistGameShowView({ showId }: { showId: string }) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [activeSongSelectionShow, setActiveSongSelectionShow] =
     useState<GameShow | null>(null)
   const [userPicks, setUserPicks] = useState<UserPick[]>([])
@@ -72,13 +72,13 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
 
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { loading, show, standings, totalPlayers, userSubmission } =
-    useSetlistGameShowData(showId ?? undefined, user ?? null)
+    useSetlistGameShowData(showId ?? undefined, session)
   const topSongs = useTopSongsData(showId ?? undefined)
   const topOpeners = useTopOpenersData(showId ?? undefined)
   const topClosers = useTopClosersData(showId ?? undefined)
 
   const handleMakePicks = async () => {
-    if (!user || !showId || !show) return
+    if (!session || !showId || !show) return
     setViewMode(false)
     if (userSubmission) {
       const picks = await fetchPicksBySubmissionId(userSubmission)
@@ -98,7 +98,7 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
   }
 
   const handleViewSubmission = async () => {
-    if (!user || !userSubmission || !show || !supabase) return
+    if (!session || !userSubmission || !show || !supabase) return
     try {
       setViewingUserId(null)
       const picks = await fetchPicksBySubmissionId(userSubmission)
@@ -126,7 +126,7 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
     username: string,
   ) => {
     if (!showId || !show || !supabase) return
-    if (!user) {
+    if (!session) {
       alert("Please log in to view user submissions")
       return
     }
@@ -220,20 +220,20 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
           show={show}
           totalPlayers={totalPlayers}
           userSubmission={userSubmission}
-          user={user}
+          user={session}
           onViewSubmission={handleViewSubmission}
         />
 
         {show.show_scored ? (
           <ShowStandingsTable
             standings={standings}
-            user={user}
+            user={session}
             onViewOtherUserSubmission={handleViewOtherUserSubmission}
           />
         ) : (
           <ShowPicksSection
             show={show}
-            user={user}
+            user={session}
             userSubmission={userSubmission}
             onMakePicks={handleMakePicks}
           />

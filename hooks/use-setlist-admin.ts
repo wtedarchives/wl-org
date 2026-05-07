@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 
 const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
 
-export function useSetlistAdmin(user: User | null, showId: string | undefined) {
+export function useSetlistAdmin(session: WysteriaSession | null, showId: string | undefined) {
   const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAdminLoading, setIsAdminLoading] = useState(true)
@@ -15,7 +15,7 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
   const [wlHovered, setWlHovered] = useState(false)
 
   useEffect(() => {
-    if (!user) {
+    if (!session) {
       setIsAdmin(false)
       setIsAdminLoading(false)
       return
@@ -55,7 +55,7 @@ export function useSetlistAdmin(user: User | null, showId: string | undefined) {
       }
     }
     check()
-  }, [user])
+  }, [session])
 
   const handleCopyLink = useCallback(async () => {
     if (!showId) return

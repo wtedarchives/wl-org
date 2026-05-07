@@ -76,7 +76,7 @@ export function SongSelectionDialog({
   submissionDetails,
   onSuccess,
 }: SongSelectionDialogProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
 
   const showForModal = {
     show_id: show.show_id,
@@ -151,7 +151,7 @@ export function SongSelectionDialog({
   )
 
   const handleSubmit = createSubmissionHandler(
-    user ?? null,
+    session,
     showForModal,
     songPicks,
     isEditing,

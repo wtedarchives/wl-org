@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 
 export function useSetlistAttendance(
   showId: string | undefined,
-  user: User | null,
+  session: WysteriaSession | null,
   onAttendChange?: (newCount: number) => void
 ) {
   const [attended, setAttended] = useState(false)
@@ -14,7 +14,7 @@ export function useSetlistAttendance(
   const [toggling, setToggling] = useState(false)
 
   useEffect(() => {
-    if (!showId || !user || !supabase) {
+    if (!showId || !session || !supabase) {
       setAttended(false)
       setLoading(false)
       return
@@ -35,7 +35,7 @@ export function useSetlistAttendance(
   }, [showId, session?.profileId])
 
   const toggle = useCallback(async () => {
-    if (!showId || !user || !supabase) return
+    if (!showId || !session || !supabase) return
     const client = supabase
     const userId = session?.profileId
     setToggling(true)
@@ -69,7 +69,7 @@ export function useSetlistAttendance(
     } finally {
       setToggling(false)
     }
-  }, [showId, user, attended, onAttendChange])
+  }, [showId, session, attended, onAttendChange])
 
   return { attended, loading, toggling, toggle }
 }

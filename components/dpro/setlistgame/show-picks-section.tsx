@@ -4,10 +4,11 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import type { GameShow } from "@/hooks/use-setlist-game-show-data"
+import type { WysteriaSession } from "@/lib/jwt"
 
 interface ShowPicksSectionProps {
   show: GameShow
-  user: { id: string } | null
+  user: WysteriaSession | null
   userSubmission: string | null
   onMakePicks: () => void
 }

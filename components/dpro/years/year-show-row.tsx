@@ -110,7 +110,7 @@ export function YearShowRow({
   showsWithRadioIds,
   wlHomeV2 = false,
 }: YearShowRowProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const rating = showRatings[show.show_id] ?? 0
   const attendeeCount = attendeeCounts[show.show_id] ?? 0
 
@@ -151,7 +151,7 @@ export function YearShowRow({
           {formatShowDate(show.show_date)}
         </Link>
       </TableCell>
-      {user ? (
+      {session ? (
         <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
           <div className="inline-flex items-center justify-center">
             {show.attended ? (

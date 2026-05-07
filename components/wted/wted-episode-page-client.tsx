@@ -23,7 +23,7 @@ import type { SetlistEntry } from "@/types/setlist"
 
 export function WtedEpisodePageClient() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [hoveredPerformanceYear, setHoveredPerformanceYear] = useState<
     string | null
@@ -85,14 +85,14 @@ export function WtedEpisodePageClient() {
 
   const handleWtedClick = useCallback(
     (entry: SetlistEntry) => {
-      if (!user) {
+      if (!session) {
         setWtedLoginRequiredOpen(true)
         return
       }
       setWtedSheetEntry(entry)
       setWtedSheetOpen(true)
     },
-    [user],
+    [session],
   )
 
   const handleJotyClick = useCallback(

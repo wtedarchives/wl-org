@@ -39,9 +39,9 @@ import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import type { SetlistEntry } from "@/types/setlist"
 
 export function WlHomeV2SetlistPageClient() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const { showId, invalidParams } = useSetlistArchiveShowId()
-  const { showAdminUi } = useSetlistAdmin(user, showId)
+  const { showAdminUi } = useSetlistAdmin(session, showId)
   const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
   const { tours } = useTours()
   const { showDates } = useShowDates(show ?? null, showId)
@@ -108,17 +108,17 @@ export function WlHomeV2SetlistPageClient() {
     submitRating,
     fetchReviews,
     validateReview,
-  } = useSetlistRating(showId, user ?? null)
+  } = useSetlistRating(showId, session)
   const { attended, toggling, toggle } = useSetlistAttendance(
     showId,
-    user ?? null,
+    session,
     setAttendeeCount,
   )
 
   const onRatingClick = useCallback(() => {
-    if (user) setRatingModalOpen(true)
+    if (session) setRatingModalOpen(true)
     else setLoginRequiredOpen(true)
-  }, [user])
+  }, [session])
 
   const handleNumberClick = useCallback(async (entryId: string) => {
     try {
@@ -153,14 +153,14 @@ export function WlHomeV2SetlistPageClient() {
 
   const onWtedClick = useCallback(
     (entry: SetlistEntry) => {
-      if (!user) {
+      if (!session) {
         setWtedLoginRequiredOpen(true)
         return
       }
       setWtedModalEntry(entry)
       setWtedModalOpen(true)
     },
-    [user],
+    [session],
   )
 
   const closeSongModal = useCallback(() => {
@@ -244,7 +244,7 @@ export function WlHomeV2SetlistPageClient() {
         attended={attended}
         attendanceToggling={toggling}
         onAttendanceToggle={toggle}
-        canMarkAttendance={!!user}
+        canMarkAttendance={!!session}
         showLengthRank={showLengthRank}
         showChanges={showChanges}
         showChangesLoading={showChangesLoading}

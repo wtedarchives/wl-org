@@ -49,7 +49,7 @@ export function TourShowsTable({
   wlHeaderTrailing,
   wlCompactHideShowCount = false,
 }: TourShowsTableProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const hasRarity = shows.some((s) => s.show_rarity != null && s.show_rarity !== "")
   const hasGap = shows.some((s) => s.show_gap != null && s.show_gap !== "")
   const { sortedShows, handleSort, sortIndicator } = useTourShowsSort(
@@ -171,7 +171,7 @@ export function TourShowsTable({
               <span>Date</span>{" "}
               <span className="text-[9px]">{sortIndicator("show_date")}</span>
             </TableHead>
-            {user ? (
+            {session ? (
               <TableHead
                 className={cn(
                   "w-[32px] text-center text-[11px] font-medium",

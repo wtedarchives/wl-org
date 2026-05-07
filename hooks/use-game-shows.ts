@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 
 export interface GameShow {
   show_id: string
@@ -74,7 +74,7 @@ function applyTimeDerivedFields(show: GameShow): GameShow {
 
 export function useGameShows(
   activeLeague: string,
-  user: User | null
+  session: WysteriaSession | null
 ): {
   loading: boolean
   gameShows: GameShow[]
@@ -113,7 +113,7 @@ export function useGameShows(
           } as GameShow)
         )
 
-        if (user) {
+        if (session) {
           const showIds = processedShows.map((s) => s.show_id)
 
           const { data: submissionsData, error: submissionsError } =
@@ -173,7 +173,7 @@ export function useGameShows(
     } finally {
       if (!silent) setLoading(false)
     }
-  }, [activeLeague, user])
+  }, [activeLeague, session])
 
   useEffect(() => {
     fetchGameShows()

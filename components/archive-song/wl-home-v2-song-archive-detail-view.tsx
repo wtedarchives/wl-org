@@ -43,7 +43,7 @@ import { SongDisplayName } from "@/components/dpro/song-display-name"
 import "./song-archive-detail-verbatim.css"
 
 export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const songPerfWtedModalHeadingId = useId()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const { songs: archiveSongs } = useSongsArchiveData()
@@ -107,13 +107,13 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
 
   const onPerfTableWtedPayloadClick = useCallback(
     (payload: SongArchivePerformanceWtedPayload) => {
-      if (!user) {
+      if (!session) {
         setPerfTableWtedLoginRequiredOpen(true)
         return
       }
       setSongPerfWtedModal(payload)
     },
-    [user],
+    [session],
   )
 
   const closePerfTableWtedModal = useCallback(() => {

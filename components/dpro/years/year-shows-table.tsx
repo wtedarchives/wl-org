@@ -47,7 +47,7 @@ export function YearShowsTable({
   loading,
   wlHomeV2 = false,
 }: YearShowsTableProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const { sortedShows, handleSort } = useYearShowsSort(
     shows,
     attendeeCounts,
@@ -161,7 +161,7 @@ export function YearShowsTable({
               >
                 <span>Date</span>
               </TableHead>
-              {user ? (
+              {session ? (
                 <TableHead className="w-[32px] !px-1 !py-0.5 text-center text-[11px] font-medium">
                   <div className="flex w-full items-center justify-center">
                     <Check

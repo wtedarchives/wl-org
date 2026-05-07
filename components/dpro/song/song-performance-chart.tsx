@@ -34,7 +34,7 @@ export function SongPerformanceChart({
   songDisplayName,
   onJOTYClick,
 }: SongPerformanceChartProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const searchParams = useSearchParams()
 
   const getViewModeFromUrl = (): "timeline" | "table" => {
@@ -71,7 +71,7 @@ export function SongPerformanceChart({
     usePerformanceSorting()
 
   const filteredPerformances =
-    showOnlyAttended && user
+    showOnlyAttended && session
       ? performancesWithGaps.filter((perf) => attendedShowIds.has(perf.show_id))
       : performancesWithGaps
 
@@ -128,7 +128,7 @@ export function SongPerformanceChart({
               <CardTitle className="text-sm font-semibold">
                 Performances
               </CardTitle>
-              {user && (
+              {session && (
                 <button
                   type="button"
                   onClick={() => setShowOnlyAttended(!showOnlyAttended)}

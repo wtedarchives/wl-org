@@ -14,10 +14,11 @@ import {
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useStandingsData } from "@/hooks/use-standings-data"
 import type { PlayerStats, SortField, SortDirection } from "./standings-types"
+import type { WysteriaSession } from "@/lib/jwt"
 
 interface SetlistGameStandingsProps {
   activeLeague: string
-  user?: { id: string } | null
+  user?: WysteriaSession | null
 }
 
 export function SetlistGameStandings({ activeLeague, user }: SetlistGameStandingsProps) {
@@ -121,7 +122,7 @@ export function SetlistGameStandings({ activeLeague, user }: SetlistGameStanding
               <TableRow
                 key={player.userId}
                 className={`text-[11px] ${
-                  user && player.userId === session?.profileId ? "bg-muted/60" : ""
+                  user && player.userId === user.profileId ? "bg-muted/60" : ""
                 }`}
               >
                 <TableCell className="px-2 py-0.5 text-center font-medium">

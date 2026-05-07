@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/tooltip"
 import { getRarityColor, getGapColor } from "@/lib/stats/tour-utils"
 import { formatLengthAsHmmss } from "@/lib/setlist-utils"
-import type { User } from "@supabase/supabase-js"
+import type { WysteriaSession } from "@/lib/jwt"
 import type { ListShow } from "@/hooks/use-list-show-data"
 import { formatListShowTableDate } from "@/components/dpro/lists/list-show-table-utils"
 import { ListShowRatingStars } from "@/components/dpro/lists/list-show-rating-stars"
@@ -34,7 +34,7 @@ export interface ListShowTableRowProps {
   categoryArtwork?: Record<string, string>
   showCategoryColumn?: boolean
   showRanking?: boolean
-  user: User | null
+  user: WysteriaSession | null
 }
 
 export function ListShowTableRow({

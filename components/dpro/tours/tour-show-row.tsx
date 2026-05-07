@@ -58,7 +58,7 @@ export function TourShowRow({
   showGapColumn = true,
   wlHomeV2 = false,
 }: TourShowRowProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const rating = showRatings[show.show_id] ?? 0
   const attendeeCount = attendeeCounts[show.show_id] ?? 0
 
@@ -100,7 +100,7 @@ export function TourShowRow({
           {formatTourShowDate(show.show_date)}
         </Link>
       </TableCell>
-      {user ? (
+      {session ? (
         <TableCell
           className={cn(
             "w-[32px] text-center align-middle leading-none",

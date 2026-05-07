@@ -37,7 +37,7 @@ export function ListShowTable({
   showCategoryColumn,
   showRanking,
 }: ListShowTableProps) {
-  const { user } = useAuth()
+  const { session } = useAuth()
 
   return (
     <div className="overflow-x-auto">
@@ -52,7 +52,7 @@ export function ListShowTable({
             <TableHead className="w-[68px] px-2 py-1 text-center text-xs font-medium">
               Date
             </TableHead>
-            {user && (
+            {session && (
               <TableHead className="w-[28px] px-1 py-1 text-center text-xs font-medium">
                 <Check className="mx-auto size-3 text-muted-foreground" />
               </TableHead>
@@ -127,7 +127,7 @@ export function ListShowTable({
               categoryArtwork={categoryArtwork}
               showCategoryColumn={showCategoryColumn}
               showRanking={showRanking}
-              user={user}
+              user={session}
             />
           ))}
         </TableBody>

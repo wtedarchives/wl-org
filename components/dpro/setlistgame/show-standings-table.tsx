@@ -11,10 +11,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X } from "lucide-react"
 import type { PlayerStats } from "@/hooks/use-setlist-game-show-data"
+import type { WysteriaSession } from "@/lib/jwt"
 
 interface ShowStandingsTableProps {
   standings: PlayerStats[]
-  user: { id: string } | null
+  user: WysteriaSession | null
   onViewOtherUserSubmission: (userId: string, username: string) => void
 }
 
@@ -75,7 +76,7 @@ export function ShowStandingsTable({
               <TableRow
                 key={player.userId}
                 className={
-                  user && player.userId === session?.profileId
+                  user && player.userId === user.profileId
                     ? "bg-muted/60"
                     : "hover:bg-muted/40"
                 }
