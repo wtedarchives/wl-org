@@ -101,13 +101,13 @@ export default function SetlistArchivePageClient() {
     openChangesModal,
   } = useSetlistNavigation(show ?? null)
   const guestGroups = useGuestGroups(setlist)
-  const { user } = useAuth()
+  const { session } = useAuth()
   const {
     showAdminUi,
     linkCopied,
     handleCopyLink,
     handleEditShow,
-  } = useSetlistAdmin(user, showId)
+  } = useSetlistAdmin(session, showId)
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { changes, loading: changesLoading } = useShowChanges(showId)
   const { setlistUrl } = useSetlistScan(showId)
@@ -129,10 +129,10 @@ export default function SetlistArchivePageClient() {
     submitRating,
     fetchReviews,
     validateReview,
-  } = useSetlistRating(showId, user ?? null)
+  } = useSetlistRating(showId, session)
   const { attended, toggling, toggle } = useSetlistAttendance(
     showId,
-    user ?? null,
+    session,
     setAttendeeCount,
   )
 
@@ -196,7 +196,7 @@ export default function SetlistArchivePageClient() {
                   averageRating={averageRating}
                   reviewCount={reviewCount}
                   onClick={() =>
-                    user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
+                    session ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
                   }
                 />
               </div>
@@ -206,7 +206,7 @@ export default function SetlistArchivePageClient() {
                   attended={attended}
                   toggling={toggling}
                   onToggle={toggle}
-                  showAttendButton={!!user}
+                  showAttendButton={!!session}
                 />
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function SetlistArchivePageClient() {
                     setJotyDrawerOpen(true)
                   }}
                   onWtedClick={(entry) => {
-                    if (!user) {
+                    if (!session) {
                       setWtedLoginRequiredOpen(true)
                       return
                     }
@@ -296,7 +296,7 @@ export default function SetlistArchivePageClient() {
                   averageRating={averageRating}
                   reviewCount={reviewCount}
                   onClick={() =>
-                    user ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
+                    session ? setRatingDrawerOpen(true) : setLoginRequiredOpen(true)
                   }
                 />
               </div>
@@ -306,7 +306,7 @@ export default function SetlistArchivePageClient() {
                   attended={attended}
                   toggling={toggling}
                   onToggle={toggle}
-                  showAttendButton={!!user}
+                  showAttendButton={!!session}
                 />
               </div>
             </div>

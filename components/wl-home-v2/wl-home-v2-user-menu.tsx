@@ -44,7 +44,7 @@ export function WlHomeV2UserMenu({
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user || !supabase) {
+    if (!session || !supabase) {
       setProfileUsername(null)
       setProfilePicture(null)
       return

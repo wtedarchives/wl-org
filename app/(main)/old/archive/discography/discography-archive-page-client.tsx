@@ -62,7 +62,7 @@ function resolveDiscographyIdFromSearchParams(
 
 function DiscographyReleasePageContent({ id }: { id: string }) {
   const router = useRouter()
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
   const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
   const [wtedSheetEntry, setWtedSheetEntry] = useState<SetlistEntry | null>(

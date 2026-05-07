@@ -15,22 +15,22 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, loading: authLoading } = useAuth()
+  const { session, loading: authLoading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const activeTab = getProfileStatsActiveTab(pathname ?? "")
 
   useEffect(() => {
     if (authLoading) return
-    if (!user) {
+    if (!session) {
       router.replace(`/login?from=${encodeURIComponent("/old/archive/profile/overview")}`)
     }
-  }, [user, authLoading, router])
+  }, [session, authLoading, router])
 
   const [shareCopied, setShareCopied] = useState(false)
 
   const handleShare = async () => {
-    if (!user) return
+    if (!session) return
     const url =
       typeof window !== "undefined"
         ? getUserProfileUrl(session?.profileId, window.location.origin)
@@ -49,7 +49,7 @@ export default function ProfileLayout({
     return <LoadingPageCard message="Loading profile…" />
   }
 
-  if (!user) {
+  if (!session) {
     return null
   }
 

@@ -45,7 +45,7 @@ function resolveUserPageParams(
 export default function ArchiveUserPageClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { session } = useAuth()
   const { setPublicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
   const [username, setUsername] = useState<string | null>(null)
   const [shareCopied, setShareCopied] = useState(false)
@@ -56,9 +56,9 @@ export default function ArchiveUserPageClient() {
   )
 
   const isOwnProfile = !!(
-    user &&
+    session &&
     profileUserId &&
-    session?.profileId === profileUserId
+    session.profileId === profileUserId
   )
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export default function ArchiveUserPageClient() {
   const tab = tabRaw as ProfileStatsTabSlug
 
   const handleShare = async () => {
-    if (!user || !profileUserId) return
+    if (!session || !profileUserId) return
     const url =
       typeof window !== "undefined"
         ? getUserProfileUrl(profileUserId, window.location.origin)

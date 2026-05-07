@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth-context"
 import { ProfileStatsTabPanel } from "@/components/dpro/profile/profile-stats-tab-panel"
 
 function ProfileSongsPageInner() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const userId = session?.profileId ?? null
 
   return (
