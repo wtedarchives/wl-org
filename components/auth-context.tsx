@@ -61,7 +61,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // On mount — read JWT from localStorage
   useEffect(() => {
     const existing = getSession()
-    console.log("[Auth] Session on mount", existing ? { profileId: existing.profileId, username: existing.username, isAdmin: existing.isAdmin } : null)
     setSession(existing)
     setLoading(false)
   }, [])
@@ -87,7 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // ─── Auth Actions ────────────────────────────────────────────────────────────
 
   const signIn = () => {
-    console.log("[Auth] Sign in initiated")
     void redirectToLogin(window.location.pathname)
   }
 
@@ -97,7 +95,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   const signOut = () => {
-    console.log("[Auth] Sign out")
     clearSession()
     setSession(null)
     // Optionally also log out of WLC to fully clear their session
@@ -105,20 +102,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     window.location.href = "/"
   }
 
+  const WLC_FORGOT_PASSWORD =
+    "https://community.wysterialane.org/session/forgot_password"
+  const WLC_ACCOUNT_PREFS =
+    "https://community.wysterialane.org/my/preferences/account"
+
   const resetPassword = () => {
-    // Password reset is handled by WLC
-    window.open(
-      "https://community.wysterialane.org/session/forgot_password",
-      "_blank"
-    )
+    // Password reset is handled by WLC (same tab so the auth flow stays one window)
+    window.location.assign(WLC_FORGOT_PASSWORD)
   }
 
   const updatePassword = () => {
     // Password/profile changes handled by WLC
-    window.open(
-      "https://community.wysterialane.org/my/preferences/account",
-      "_blank"
-    )
+    window.location.assign(WLC_ACCOUNT_PREFS)
   }
 
   // ─── Attendance Actions ───────────────────────────────────────────────────────

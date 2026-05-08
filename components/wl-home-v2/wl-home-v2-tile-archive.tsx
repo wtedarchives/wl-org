@@ -75,16 +75,9 @@ export function WlHomeV2TileArchive({
               {archiveMostRecentLoading ?
                 "…"
               : archiveMostRecentShow ?
-                <>
-                  {archiveMostRecentShow.show_detail?.trim() ?
-                    <span className="wp-head-detail">
-                      {archiveMostRecentShow.show_detail.trim()}
-                    </span>
-                  : null}
-                  <span className="wp-head-date">
-                    {formatWlHomeTileShowDate(archiveMostRecentShow.show_date)}
-                  </span>
-                </>
+                <span className="wp-head-date">
+                  {formatWlHomeTileShowDate(archiveMostRecentShow.show_date)}
+                </span>
               : null}
             </span>
           </div>
@@ -103,6 +96,11 @@ export function WlHomeV2TileArchive({
                     {archiveMostRecentShow.show_subvenue ?
                       <span className="v-subvenue">
                         {archiveMostRecentShow.show_subvenue}
+                      </span>
+                    : null}
+                    {archiveMostRecentShow.show_detail?.trim() ?
+                      <span className="v-detail">
+                        {archiveMostRecentShow.show_detail.trim()}
                       </span>
                     : null}
                   </div>

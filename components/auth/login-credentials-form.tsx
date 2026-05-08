@@ -38,9 +38,8 @@ export function LoginCredentialsForm({
             onClick={() =>
               (onForgotPassword ??
                 (() =>
-                  window.open(
+                  window.location.assign(
                     "https://community.wysterialane.org/session/forgot_password",
-                    "_blank",
                   )))()
             }
           >

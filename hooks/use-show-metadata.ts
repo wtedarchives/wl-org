@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { supabase } from "@/lib/supabase"
 
@@ -22,6 +22,23 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
   const [showsWithRadioIds, setShowsWithRadioIds] = useState<Set<string>>(
     new Set(),
   )
+
+  const showIdsKey = useMemo(
+    () =>
+      shows.length === 0 ?
+        ""
+      : [...shows.map((s) => s.show_id)].sort().join("|"),
+    [shows],
+  )
+
+  useEffect(() => {
+    hasFetchedSetlists.current = false
+    hasFetchedReleases.current = false
+    hasFetchedRadioIds.current = false
+    setShowsWithSetlists(new Set())
+    setShowsWithReleases(new Set())
+    setShowsWithRadioIds(new Set())
+  }, [showIdsKey])
 
   useEffect(() => {
     if (
@@ -51,7 +68,7 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
       }
     }
     fetchShowsWithSetlists()
-  }, [shows, currentYear])
+  }, [shows, currentYear, showIdsKey])
 
   useEffect(() => {
     if (
@@ -97,7 +114,7 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
       }
     }
     fetchShowsWithReleases()
-  }, [shows, currentYear])
+  }, [shows, currentYear, showIdsKey])
 
   useEffect(() => {
     if (
@@ -134,7 +151,7 @@ export function useShowMetadata(shows: MetaShow[], currentYear: string) {
       }
     }
     fetchShowsWithRadioIds()
-  }, [shows, currentYear])
+  }, [shows, currentYear, showIdsKey])
 
   return { showsWithSetlists, showsWithReleases, showsWithRadioIds }
 }

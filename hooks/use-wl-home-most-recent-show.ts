@@ -83,7 +83,7 @@ export function useWlHomeMostRecentShow() {
             .lt("show_date", tomorrow)
             .or(CANONICAL_SHOW_FILTER)
             .order("show_date", { ascending: false })
-            .order("show_canonid", { ascending: true, nullsFirst: true })
+            .order("show_canonid", { ascending: false, nullsFirst: true })
             .order("show_group", { ascending: true })
             .range(offset, offset + PAGE_SIZE - 1)
 

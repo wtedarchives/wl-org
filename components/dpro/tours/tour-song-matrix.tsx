@@ -13,7 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useSongMatrix } from "@/hooks/use-song-matrix"
+import {
+  compareTourMatrixShows,
+  useSongMatrix,
+  type SongMatrixShowInput,
+} from "@/hooks/use-song-matrix"
 import { getMatrixPlacementColor } from "@/lib/stats/tour-utils"
 import { cn } from "@/lib/utils"
 
@@ -26,7 +30,7 @@ export type MatrixSortMode =
   | "playcount"
 
 interface TourSongMatrixProps {
-  shows: Array<{ show_id: string; show_date: string }>
+  shows: SongMatrixShowInput[]
   hideTitle?: boolean
   sortMode?: MatrixSortMode
   tourId?: string
@@ -87,10 +91,7 @@ export function TourSongMatrix({
 
   const filteredShows = useMemo(() => {
     if (isFiltering || showsWithEntries.size === 0) return []
-    const sorted = [...shows].sort(
-      (a, b) =>
-        new Date(a.show_date).getTime() - new Date(b.show_date).getTime(),
-    )
+    const sorted = [...shows].sort(compareTourMatrixShows)
     return sorted.filter((s) => showsWithEntries.has(s.show_id))
   }, [shows, showsWithEntries, isFiltering])
 

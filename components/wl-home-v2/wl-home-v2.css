@@ -2874,7 +2874,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0;
+    gap: 4px;
     min-width: 0;
   }
   .wl-home-v2 .setlist-venue .v-subvenue {
@@ -2882,6 +2882,17 @@
     font-weight: 500;
     line-height: 1.25;
     color: rgba(255, 255, 255, 0.62);
+  }
+  .wl-home-v2 .setlist-venue .v-detail {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: normal;
+    max-width: 100%;
   }
   .wl-home-v2 .setlist-venue .v-name{ font-weight: 600; font-size: 13px; color: #fff; }
   .wl-home-v2 .setlist-venue .v-date{ font-family: "Geist Mono", monospace; font-size: 10px; color: rgba(255,255,255,0.55); }
@@ -3052,6 +3063,8 @@
     min-height: 0 !important;
     width: auto !important;
     max-width: none !important;
+    /* Same token as `.wl-home-v2-setlist`; rail labels use `var(--setlist-rail-label-color)`. */
+    --setlist-rail-label-color: var(--wl-white);
   }
 
   /* Request modal — fixed backdrop stacking under portaled overlays */
@@ -4536,7 +4549,7 @@
   /* Archive tile — Goose past + upcoming (query-param setlist URLs).
      Short content shrinks modal; max-height respects viewport body scroll below header. */
   .wl-home-v2 .modal.modal--wted-request.modal--tour-schedule {
-    max-width: min(520px, 96vw);
+    max-width: min(580px, 96vw);
   }
   .wl-home-v2 .modal.modal--tour-schedule .wl-home-v2-tour-schedule-body {
     flex: 0 1 auto;
@@ -4551,10 +4564,9 @@
     --wl-tour-schedule-scroll-inline: 12px;
     flex: 1 1 auto;
     min-height: 0;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 4px var(--wl-tour-schedule-scroll-inline);
   }
   .wl-home-v2 .wl-home-v2-tour-schedule-empty {
     margin: 0;
@@ -4571,17 +4583,26 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
-  .wl-home-v2 .wl-home-v2-tour-schedule-row {
-    margin-left: calc(-1 * var(--wl-tour-schedule-scroll-inline));
-    margin-right: calc(-1 * var(--wl-tour-schedule-scroll-inline));
+  /* Today-in-history list — same columns as tour schedule (date, venue, 4 indicators) */
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row {
+    margin: 0;
     padding: 8px var(--wl-tour-schedule-scroll-inline);
-    width: calc(100% + 2 * var(--wl-tour-schedule-scroll-inline));
+    width: 100%;
+    min-width: 0;
     max-width: none;
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) minmax(5rem, auto) 2.5rem;
-    gap: 8px 10px;
+    justify-content: start;
+    justify-items: start;
+    grid-template-columns: max-content minmax(0, 1fr) 24px 24px 24px 42px;
+    column-gap: 10px;
+    row-gap: 8px;
     align-items: center;
     font-size: 13px;
     line-height: 1.35;
@@ -4590,21 +4611,238 @@
       background-color 0.2s ease-out,
       box-shadow 0.2s ease-out;
   }
-  @media (hover: hover) {
-    .wl-home-v2 .wl-home-v2-tour-schedule-row:hover {
-      background-color: rgba(255, 255, 255, 0.04);
-    }
-    .wl-home-v2 .wl-home-v2-tour-schedule-row.wl-home-v2-tour-schedule-row--most-recent-past:hover {
-      background-color: rgba(237, 110, 40, 0.16);
-    }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row:not(:first-child) {
+    border-top: 1px solid rgb(78, 82, 80);
   }
-  .wl-home-v2 .wl-home-v2-tour-schedule-row.wl-home-v2-tour-schedule-row--most-recent-past {
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row
+    .wl-home-v2-tour-schedule-list-venue {
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: normal;
+    padding-right: 8px;
+    text-align: left;
+  }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row
+    .wl-home-v2-tour-schedule-list-venue
+    .wl-home-v2-tour-schedule-venue-link {
+    white-space: normal;
+  }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row
+    .wl-home-v2-tour-schedule-date {
+    padding-left: 0;
+  }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row
+    .wl-home-v2-tour-schedule-list-col--icon:not(.wl-home-v2-tour-schedule-list-col--goose) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+    width: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    box-sizing: border-box;
+  }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row
+    .wl-home-v2-tour-schedule-list-col--goose {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-self: center;
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    box-sizing: border-box;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row--past,
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row--upcoming {
+    margin: 0;
+  }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row--past {
     background-color: rgba(237, 110, 40, 0.12);
-    box-shadow: inset 0 0 0 1px rgb(237, 110, 40);
-    border-radius: 0;
+  }
+  .wl-home-v2
+    ul.wl-home-v2-tour-schedule-rows
+    > li.wl-home-v2-tour-schedule-row--upcoming {
+    background-color: rgba(40, 91, 78, 0.16);
+  }
+  /* Tour schedule — table fills scroll area; column widths from content */
+  .wl-home-v2 table.wl-home-v2-tour-schedule-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row
+    > td {
+    padding: 8px 5px;
+    vertical-align: middle;
+    box-sizing: border-box;
     transition:
       background-color 0.2s ease-out,
       box-shadow 0.2s ease-out;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row
+    > td:last-child {
+    padding-right: 4px;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    td.wl-home-v2-tour-schedule-td--date {
+    padding-left: var(--wl-tour-schedule-scroll-inline);
+    padding-right: 10px;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    td.wl-home-v2-tour-schedule-venue {
+    padding-right: 12px;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    td.wl-home-v2-tour-schedule-td--icon {
+    width: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    td.wl-home-v2-tour-schedule-td--goose {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row
+    > td.wl-home-v2-tour-schedule-rail {
+    /* 4px inset from the table edge on the left */
+    padding: 8px 1px 8px 4px;
+    vertical-align: middle;
+    text-align: center;
+    overflow: visible;
+    background: rgba(0, 0, 0, 0.28);
+    border-right: 1px solid rgb(59, 62, 60);
+    transition:
+      background-color 0.2s ease-out,
+      box-shadow 0.2s ease-out;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row
+    > td.wl-home-v2-tour-schedule-rail.wl-home-v2-tour-schedule-rail--upcoming {
+    background: rgba(0, 0, 0, 0.22);
+  }
+  .wl-home-v2 .wl-home-v2-tour-schedule-rail-text-vertical {
+    display: inline-block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--setlist-rail-label-color);
+    line-height: 1;
+    white-space: nowrap;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+  /* Subtle hairline between consecutive show rows (incl. past ↔ upcoming). */
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row:not(:first-child)
+    > td {
+    border-top: 1px solid rgb(78, 82, 80);
+  }
+  @media (hover: hover) {
+    .wl-home-v2
+      ul.wl-home-v2-tour-schedule-rows
+      > li.wl-home-v2-tour-schedule-row:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+    .wl-home-v2
+      ul.wl-home-v2-tour-schedule-rows
+      > li.wl-home-v2-tour-schedule-row--past:hover {
+      background-color: rgba(237, 110, 40, 0.18);
+    }
+    .wl-home-v2
+      ul.wl-home-v2-tour-schedule-rows
+      > li.wl-home-v2-tour-schedule-row--upcoming:hover {
+      background-color: rgba(40, 91, 78, 0.26);
+    }
+    .wl-home-v2
+      table.wl-home-v2-tour-schedule-table
+      tbody
+      tr.wl-home-v2-tour-schedule-row:hover
+      > td:not(.wl-home-v2-tour-schedule-rail) {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+    .wl-home-v2
+      table.wl-home-v2-tour-schedule-table
+      tbody
+      tr.wl-home-v2-tour-schedule-row--past:hover
+      > td:not(.wl-home-v2-tour-schedule-rail) {
+      background-color: rgba(237, 110, 40, 0.18);
+    }
+    .wl-home-v2
+      table.wl-home-v2-tour-schedule-table
+      tbody
+      tr.wl-home-v2-tour-schedule-row--upcoming:hover
+      > td:not(.wl-home-v2-tour-schedule-rail) {
+      background-color: rgba(40, 91, 78, 0.26);
+    }
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row--past
+    > td:not(.wl-home-v2-tour-schedule-rail) {
+    background-color: rgba(237, 110, 40, 0.12);
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    tbody
+    tr.wl-home-v2-tour-schedule-row--upcoming
+    > td:not(.wl-home-v2-tour-schedule-rail) {
+    background-color: rgba(40, 91, 78, 0.16);
   }
   .wl-home-v2 .wl-home-v2-tour-schedule-date {
     display: inline-flex;
@@ -4630,10 +4868,15 @@
       box-shadow 0.15s ease-out,
       color 0.15s ease-out;
   }
-  .wl-home-v2 .wl-home-v2-tour-schedule-row--most-recent-past .wl-home-v2-tour-schedule-date-pill {
+  .wl-home-v2 .wl-home-v2-tour-schedule-row--past .wl-home-v2-tour-schedule-date-pill {
     background-color: rgba(237, 110, 40, 0.22);
     box-shadow: inset 0 0 0 1px rgb(237, 110, 40);
     color: rgb(255, 246, 240);
+  }
+  .wl-home-v2 .wl-home-v2-tour-schedule-row--upcoming .wl-home-v2-tour-schedule-date-pill {
+    background-color: rgba(40, 91, 78, 0.28);
+    box-shadow: inset 0 0 0 1px rgb(40, 91, 78);
+    color: rgb(238, 250, 246);
   }
   .wl-home-v2 .wl-home-v2-tour-schedule-date:hover .wl-home-v2-tour-schedule-date-pill,
   .wl-home-v2 .wl-home-v2-tour-schedule-date:focus-visible .wl-home-v2-tour-schedule-date-pill {
@@ -4643,23 +4886,39 @@
     outline: none;
   }
   .wl-home-v2
-    .wl-home-v2-tour-schedule-row--most-recent-past
+    .wl-home-v2-tour-schedule-row--past
     .wl-home-v2-tour-schedule-date:hover
     .wl-home-v2-tour-schedule-date-pill,
   .wl-home-v2
-    .wl-home-v2-tour-schedule-row--most-recent-past
+    .wl-home-v2-tour-schedule-row--past
     .wl-home-v2-tour-schedule-date:focus-visible
     .wl-home-v2-tour-schedule-date-pill {
     background-color: rgba(237, 110, 40, 0.32);
+    box-shadow: inset 0 0 0 1px rgb(237, 110, 40);
+    color: rgb(255, 246, 240);
+  }
+  .wl-home-v2
+    .wl-home-v2-tour-schedule-row--upcoming
+    .wl-home-v2-tour-schedule-date:hover
+    .wl-home-v2-tour-schedule-date-pill,
+  .wl-home-v2
+    .wl-home-v2-tour-schedule-row--upcoming
+    .wl-home-v2-tour-schedule-date:focus-visible
+    .wl-home-v2-tour-schedule-date-pill {
+    background-color: rgba(40, 91, 78, 0.4);
+    box-shadow: inset 0 0 0 1px rgb(40, 91, 78);
+    color: var(--wl-off-white);
   }
   .wl-home-v2 .wl-home-v2-tour-schedule-venue {
-    min-width: 0;
-    word-break: break-word;
+    white-space: nowrap;
+    max-width: none;
+    text-align: left;
   }
   .wl-home-v2 .wl-home-v2-tour-schedule-venue-link {
     color: inherit;
     text-decoration: none;
     display: inline;
+    white-space: nowrap;
     border-radius: 4px;
     transition: color 0.15s ease-out;
   }
@@ -4670,13 +4929,52 @@
     text-underline-offset: 2px;
     outline: none;
   }
+  .wl-home-v2
+    .wl-home-v2-tour-schedule-row--upcoming
+    .wl-home-v2-tour-schedule-venue-link:hover,
+  .wl-home-v2
+    .wl-home-v2-tour-schedule-row--upcoming
+    .wl-home-v2-tour-schedule-venue-link:focus-visible {
+    color: var(--wl-green);
+  }
   .wl-home-v2 .wl-home-v2-tour-schedule-group {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.72);
   }
-  .wl-home-v2 .wl-home-v2-tour-schedule-wl {
+  .wl-home-v2 .wl-home-v2-tour-schedule-cell.wl-home-v2-tour-schedule-wl {
     display: flex;
     justify-content: center;
+  }
+  .wl-home-v2 .wl-home-v2-tour-schedule-icon-placeholder {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .wl-home-v2 .wl-home-v2-tour-schedule-icon-hit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin: -4px;
+    border-radius: 6px;
+    line-height: 0;
+    transition: opacity 0.15s ease-out;
+  }
+  @media (hover: hover) {
+    .wl-home-v2 .wl-home-v2-tour-schedule-icon-hit:hover,
+    .wl-home-v2 .wl-home-v2-tour-schedule-icon-hit:focus-visible {
+      opacity: 0.92;
+      outline: none;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-tour-schedule-goose-hit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin: -4px;
+    border-radius: 6px;
   }
   .wl-home-v2 .wl-home-v2-tour-schedule-wl-link {
     display: inline-flex;
@@ -4690,6 +4988,28 @@
   .wl-home-v2 .wl-home-v2-tour-schedule-wl-link:focus-visible {
     opacity: 0.9;
     outline: none;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    .wl-home-v2-tour-schedule-icon-hit {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    .wl-home-v2-tour-schedule-goose-hit {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .wl-home-v2
+    table.wl-home-v2-tour-schedule-table
+    .wl-home-v2-tour-schedule-wl-link {
+    padding-left: 0;
+    padding-right: 0;
   }
   /* Personnel archive index — songs-style photo layer (::before); no ::after tint (homepage green wash removed). */
   .wl-home-v2 .tile.tile-personnel-catalog {

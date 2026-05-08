@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 interface Show {
   show_id: string
   show_date: string
+  show_canonid?: number | null
   setlist_entries?: Array<{
     entry_song: string
     entry_length?: string | null

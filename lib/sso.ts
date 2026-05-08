@@ -8,10 +8,30 @@
 // consumer mode. This means WLC keeps its native login form intact and forum
 // users are completely unaffected.
 //
+// Local dev: when NEXT_PUBLIC_SSO_CALLBACK_URL is unset, localhost / 127.0.0.1
+// uses `${origin}/auth/callback` so SSO returns to your dev server. Discourse
+// must allow that return URL (forum SSO / trusted redirect settings).
+//
 // Discourse docs: https://meta.discourse.org/t/32974
 
 const WLC_BASE_URL = "https://community.wysterialane.org";
-const SSO_CALLBACK_URL = process.env.NEXT_PUBLIC_SSO_CALLBACK_URL ?? "https://wted-org.netlify.app/auth/callback";
+const DEFAULT_PROD_CALLBACK_URL =
+  "https://wted-org.netlify.app/auth/callback";
+
+/** Where Discourse redirects after login (`return_sso_url` in the SSO payload). */
+function resolveSsoCallbackUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SSO_CALLBACK_URL?.trim();
+  if (fromEnv) return fromEnv;
+
+  if (typeof window !== "undefined") {
+    const { hostname, origin } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return `${origin}/auth/callback`;
+    }
+  }
+
+  return DEFAULT_PROD_CALLBACK_URL;
+}
 
 // ─── Generate a random nonce ──────────────────────────────────────────────────
 
@@ -50,6 +70,7 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
   }
 
   const nonce = generateNonce();
+  const callbackUrl = resolveSsoCallbackUrl();
 
   // Store nonce and intended destination in sessionStorage
   // so the callback route can verify and redirect correctly
@@ -61,7 +82,7 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
   // Build the payload: nonce + return URL
   const rawPayload = new URLSearchParams({
     nonce,
-    return_sso_url: SSO_CALLBACK_URL,
+    return_sso_url: callbackUrl,
   }).toString();
 
   // Base64 encode it
@@ -75,7 +96,6 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
 
   // Use /session/sso_provider — Discourse as identity provider mode.
   // This keeps WLC native login intact for forum users.
-  console.log("[SSO] Initiating login redirect", { returnTo, callbackUrl: SSO_CALLBACK_URL })
   return `${WLC_BASE_URL}/session/sso_provider?sso=${urlEncodedPayload}&sig=${sig}`;
 }
 

@@ -10,6 +10,27 @@ function formatShowDate(dateStr: string): string {
   return `${m}.${day}`
 }
 
+export type SongMatrixShowInput = {
+  show_id: string
+  show_date: string
+  show_canonid?: number | null
+}
+
+function canonSortKey(c: number | null | undefined): number {
+  return c == null ? Number.MAX_SAFE_INTEGER : c
+}
+
+/** Same calendar date → lower `show_canonid` first; null canon after real ids. */
+export function compareTourMatrixShows(
+  a: SongMatrixShowInput,
+  b: SongMatrixShowInput,
+): number {
+  const d =
+    new Date(a.show_date).getTime() - new Date(b.show_date).getTime()
+  if (d !== 0) return d
+  return canonSortKey(a.show_canonid) - canonSortKey(b.show_canonid)
+}
+
 export interface SongMatrixData {
   songs: string[]
   songDisplayNameMap: Record<string, string | null>
@@ -26,7 +47,7 @@ export interface SongMatrixData {
 }
 
 export function useSongMatrix(
-  shows: Array<{ show_id: string; show_date: string }>,
+  shows: SongMatrixShowInput[],
   sortMode: "alphabetical" | "chronological" | "playcount" = "alphabetical",
 ) {
   const [songMatrix, setSongMatrix] = useState<SongMatrixData>({
@@ -54,6 +75,9 @@ export function useSongMatrix(
 
         const showIds = shows.map((s) => s.show_id)
         const showDateMap = new Map(shows.map((s) => [s.show_id, s.show_date]))
+        const showCanonMap = new Map(
+          shows.map((s) => [s.show_id, s.show_canonid ?? null]),
+        )
 
         const { data: entriesData, error } = await supabase
           .from("setlist_entries")
@@ -99,6 +123,9 @@ export function useSongMatrix(
           const dateA = new Date(showDateMap.get(a.entry_show) ?? 0).getTime()
           const dateB = new Date(showDateMap.get(b.entry_show) ?? 0).getTime()
           if (dateA !== dateB) return dateA - dateB
+          const canonA = canonSortKey(showCanonMap.get(a.entry_show))
+          const canonB = canonSortKey(showCanonMap.get(b.entry_show))
+          if (canonA !== canonB) return canonA - canonB
           const setA = setOrder(a.entry_set)
           const setB = setOrder(b.entry_set)
           if (setA !== setB) return setA - setB
@@ -120,10 +147,7 @@ export function useSongMatrix(
           }
         }
 
-        const sortedShows = [...shows].sort(
-          (a, b) =>
-            new Date(a.show_date).getTime() - new Date(b.show_date).getTime(),
-        )
+        const sortedShows = [...shows].sort(compareTourMatrixShows)
 
         const showDates = sortedShows.map((s) => ({
           id: s.show_id,
@@ -141,11 +165,21 @@ export function useSongMatrix(
 
         const songFirstAppearance: Record<
           string,
-          { showDate: string; entrySet: string; entrySetnum: number }
+          {
+            showDate: string
+            showCanonid: number | null
+            entrySet: string
+            entrySetnum: number
+          }
         > = {}
         const songLastAppearance: Record<
           string,
-          { showDate: string; entrySet: string; entrySetnum: number }
+          {
+            showDate: string
+            showCanonid: number | null
+            entrySet: string
+            entrySetnum: number
+          }
         > = {}
 
         for (const entry of validEntries as any[]) {
@@ -166,12 +200,14 @@ export function useSongMatrix(
           if (!songFirstAppearance[song]) {
             songFirstAppearance[song] = {
               showDate: showDateMap.get(showId) ?? "",
+              showCanonid: showCanonMap.get(showId) ?? null,
               entrySet: entry.entry_set ?? "",
               entrySetnum: entry.entry_setnum ?? 0,
             }
           }
           songLastAppearance[song] = {
             showDate: showDateMap.get(showId) ?? "",
+            showCanonid: showCanonMap.get(showId) ?? null,
             entrySet: entry.entry_set ?? "",
             entrySetnum: entry.entry_setnum ?? 0,
           }
@@ -207,6 +243,9 @@ export function useSongMatrix(
               const tA = new Date(lastA.showDate).getTime()
               const tB = new Date(lastB.showDate).getTime()
               if (tA !== tB) return tA - tB
+              const canonCmp =
+                canonSortKey(lastA.showCanonid) - canonSortKey(lastB.showCanonid)
+              if (canonCmp !== 0) return canonCmp
               const setCmp = (lastA.entrySet ?? "").localeCompare(
                 lastB.entrySet ?? "",
               )
@@ -223,6 +262,10 @@ export function useSongMatrix(
                 new Date(firstA.showDate).getTime() -
                 new Date(firstB.showDate).getTime()
               if (tCmp !== 0) return tCmp
+              const canonCmp =
+                canonSortKey(firstA.showCanonid) -
+                canonSortKey(firstB.showCanonid)
+              if (canonCmp !== 0) return canonCmp
               const setCmp = firstA.entrySet.localeCompare(firstB.entrySet)
               if (setCmp !== 0) return setCmp
               return firstA.entrySetnum - firstB.entrySetnum
