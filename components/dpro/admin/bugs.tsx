@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { AlertCircle, ExternalLink } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import {
@@ -55,6 +57,8 @@ function CopyToClipboard({ text }: { text: string }) {
 }
 
 export function Bugs() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [bugs, setBugs] = useState<Bug[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -112,15 +116,14 @@ export function Bugs() {
   }
 
   const markAsResolved = async () => {
-    if (!selectedBug || !supabase) return
+    if (!selectedBug || !token) return
     try {
       setUpdating(true)
-      const { error: err } = await supabase
-        .from("bugs")
-        .delete()
-        .eq("bug_id", selectedBug.bug_id)
-
-      if (err) throw err
+      const { error: err } = await invokeDproAdmin(token, {
+        action: "bugs_delete",
+        bug_id: selectedBug.bug_id,
+      })
+      if (err) throw new Error(err)
       setBugs((prev) => prev.filter((b) => b.bug_id !== selectedBug.bug_id))
       handleModalClose()
     } catch (err) {

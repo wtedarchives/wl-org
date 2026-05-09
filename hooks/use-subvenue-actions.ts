@@ -1,9 +1,12 @@
 "use client"
 
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { SubvenueData } from "@/types/admin"
 
 export function useSubvenueActions() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const saveSubvenue = async (
     editedSubvenue: SubvenueData,
     selectedSubvenue: SubvenueData | null,
@@ -14,7 +17,7 @@ export function useSubvenueActions() {
     setSelectedSubvenue: (subvenue: SubvenueData) => void,
     fetchAllSubvenues: () => void
   ) => {
-    if (!editedSubvenue || !supabase) return
+    if (!editedSubvenue || !token) return
     if (
       !editedSubvenue.subvenue.trim() ||
       !editedSubvenue.subvenue_venue.trim()
@@ -25,32 +28,34 @@ export function useSubvenueActions() {
     setIsSubmitting(true)
     try {
       if (isCreatingNew) {
-        const { error } = await supabase.from("subvenues").insert([
-          {
+        const { error } = await invokeDproAdmin(token, {
+          action: "subvenues_insert",
+          row: {
             subvenue: editedSubvenue.subvenue.trim(),
             subvenue_venue: editedSubvenue.subvenue_venue.trim(),
             subvenue_startdate: editedSubvenue.subvenue_startdate,
             subvenue_enddate: editedSubvenue.subvenue_enddate,
           },
-        ])
+        })
         if (error) {
-          if (error.code === "23505")
+          if (error.includes("23505") || error.toLowerCase().includes("duplicate"))
             alert("A subvenue with this name already exists.")
-          else throw error
+          else throw new Error(error)
           return
         }
         setIsCreatingNew(false)
       } else {
-        const { error } = await supabase
-          .from("subvenues")
-          .update({
+        const { error } = await invokeDproAdmin(token, {
+          action: "subvenues_update",
+          match: { subvenue: selectedSubvenue!.subvenue },
+          patch: {
             subvenue: editedSubvenue.subvenue.trim(),
             subvenue_venue: editedSubvenue.subvenue_venue.trim(),
             subvenue_startdate: editedSubvenue.subvenue_startdate,
             subvenue_enddate: editedSubvenue.subvenue_enddate,
-          })
-          .eq("subvenue", selectedSubvenue!.subvenue)
-        if (error) throw error
+          },
+        })
+        if (error) throw new Error(error)
       }
       setSelectedSubvenue(editedSubvenue)
       setIsEditing(false)

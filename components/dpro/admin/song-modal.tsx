@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { Save, X } from "lucide-react"
 import { toast } from "sonner"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { updateSong } from "@/lib/utils/song-utils"
 import type { SongDataFull } from "@/types/admin"
@@ -37,6 +39,8 @@ export function SongModal({
   onSave,
   isNewSong = false,
 }: SongModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editedSong, setEditedSong] = useState<SongDataFull | null>(null)
   const [categories, setCategories] = useState<{ category: string }[]>([])
@@ -93,7 +97,7 @@ export function SongModal({
   }
 
   const handleSaveChanges = async () => {
-    if (!editedSong || !supabase) return
+    if (!editedSong || !token) return
     setIsSubmitting(true)
     try {
       const displayName =
@@ -113,17 +117,20 @@ export function SongModal({
           editedSong.song_coachnotes === "" ? null : editedSong.song_coachnotes,
       }
       if (isNewSong) {
-        const { error } = await supabase.from("songs").insert({
-          song: songToSave.song,
-          song_displayname: songToSave.song_displayname,
-          song_category: songToSave.song_category,
-          song_originalartist: songToSave.song_originalartist,
-          song_categoryorder: songToSave.song_categoryorder,
-          song_coachnotes: songToSave.song_coachnotes,
+        const { error } = await invokeDproAdmin(token, {
+          action: "songs_insert",
+          row: {
+            song: songToSave.song,
+            song_displayname: songToSave.song_displayname,
+            song_category: songToSave.song_category,
+            song_originalartist: songToSave.song_originalartist,
+            song_categoryorder: songToSave.song_categoryorder,
+            song_coachnotes: songToSave.song_coachnotes,
+          },
         })
-        if (error) throw error
+        if (error) throw new Error(error)
       } else {
-        await updateSong(songToSave as SongDataFull)
+        await updateSong(songToSave as SongDataFull, token)
       }
       onSave()
       onClose()

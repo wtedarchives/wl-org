@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { toast } from "sonner"
+import { useAuth } from "@/components/auth-context"
 import { useSongsData } from "@/hooks/use-songs-data"
 import {
   transformSongForUpdate,
@@ -15,6 +16,8 @@ import { SongDetailsForm } from "./song-details-form"
 import { SongModal } from "./song-modal"
 
 export function AdminSong() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const { allSongs, categories, artists, refetchSongs } = useSongsData()
   const [selectedSong, setSelectedSong] = useState<SongDataFull | null>(null)
   const [editedSong, setEditedSong] = useState<SongDataFull | null>(null)
@@ -58,7 +61,7 @@ export function AdminSong() {
     setIsSubmitting(true)
     try {
       const songToUpdate = transformSongForUpdate(editedSong)
-      const updated = await updateSong(songToUpdate)
+      const updated = await updateSong(songToUpdate, token)
       setSelectedSong(updated)
       setEditedSong(updated)
       setIsEditing(false)

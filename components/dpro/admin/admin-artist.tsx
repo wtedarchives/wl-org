@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search, CheckCircle, XCircle } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +15,8 @@ interface ArtistBasic {
 }
 
 export function AdminArtist() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [allArtists, setAllArtists] = useState<ArtistBasic[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -80,6 +84,10 @@ export function AdminArtist() {
 
   const handleSubmit = async () => {
     if (!supabase) return
+    if (!token) {
+      setButtonState("error")
+      return
+    }
     setButtonState("default")
     if (!newArtistName.trim()) {
       setButtonState("error")
@@ -95,10 +103,11 @@ export function AdminArtist() {
         setButtonState("error")
         return
       }
-      const { error } = await supabase.rpc("add_artist", {
+      const { error } = await invokeDproAdmin(token, {
+        action: "rpc_add_artist",
         artist_name: newArtistName.trim(),
       })
-      if (error) throw new Error(`Failed to add artist: ${error.message}`)
+      if (error) throw new Error(`Failed to add artist: ${error}`)
       setButtonState("success")
       setNewArtistName("")
       const { data } = await supabase

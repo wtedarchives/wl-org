@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { AdminShowData } from "@/types/admin"
 
 export function useShowActions(
@@ -9,6 +10,8 @@ export function useShowActions(
   fetchAllShows: () => void,
   fetchShowReleases?: (showId: string) => void
 ) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [selectedShow, setSelectedShow] = useState<AdminShowData | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [editedShow, setEditedShow] = useState<AdminShowData | null>(null)
@@ -75,7 +78,7 @@ export function useShowActions(
   }, [])
 
   const handleSaveChanges = async () => {
-    if (!editedShow || !supabase) return
+    if (!editedShow || !token) return
     setIsSubmitting(true)
     try {
       const updateData = {
@@ -92,11 +95,12 @@ export function useShowActions(
         show_callbacks: editedShow.show_callbacks,
         show_wl_link: editedShow.show_wl_link,
       }
-      const { error } = await supabase
-        .from("shows")
-        .update(updateData)
-        .eq("show_id", editedShow.show_id)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "shows_update",
+        show_id: editedShow.show_id,
+        patch: updateData,
+      })
+      if (error) throw new Error(error)
       setSelectedShow(editedShow)
       setIsEditing(false)
       fetchAllShows()

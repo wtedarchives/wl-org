@@ -1,0 +1,618 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
+import { corsHeaders } from "../_shared/cors.ts"
+
+function httpErr(message: string, status: number) {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  })
+}
+
+function jsonOk(body: Record<string, unknown>) {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  })
+}
+
+function pick(row: Record<string, unknown>, keys: string[]) {
+  const o: Record<string, unknown> = {}
+  for (const k of keys) {
+    if (k in row && row[k] !== undefined) o[k] = row[k]
+  }
+  return o
+}
+
+async function handleAction(
+  db: SupabaseClient,
+  action: string,
+  body: Record<string, unknown>,
+): Promise<{ data?: unknown; error?: string }> {
+  switch (action) {
+    case "rpc_update_all_setlist_entries": {
+      const { error } = await db.rpc("update_all_setlist_entries")
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "setlist_entries_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row || typeof row.entry_show !== "string") return { error: "Invalid row" }
+      const allowed = pick(row, [
+        "entry_set",
+        "entry_setnum",
+        "entry_song",
+        "entry_show",
+        "entry_new",
+        "entry_short",
+        "entry_segue",
+        "entry_length",
+        "entry_placement",
+        "entry_coachnotes",
+      ])
+      const { data, error } = await db.from("setlist_entries").insert(allowed).select()
+      if (error) return { error: error.message }
+      return { data: { rows: data } }
+    }
+
+    case "setlist_entries_update": {
+      const entry_id = body.entry_id as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!entry_id || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "entry_set",
+        "entry_setnum",
+        "entry_song",
+        "entry_short",
+        "entry_segue",
+        "entry_length",
+        "entry_placement",
+        "entry_coachnotes",
+        "entry_new",
+        "radio_id",
+      ])
+      const { error } = await db.from("setlist_entries").update(allowed).eq("entry_id", entry_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "setlist_entries_delete": {
+      const entry_id = body.entry_id as string | undefined
+      if (!entry_id) return { error: "Missing entry_id" }
+      const { error } = await db.from("setlist_entries").delete().eq("entry_id", entry_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "setlist_entry_guests_select": {
+      const setlist_entry_id = body.setlist_entry_id as string | undefined
+      if (!setlist_entry_id) return { error: "Missing setlist_entry_id" }
+      const { data, error } = await db
+        .from("setlist_entry_guests")
+        .select("guest_id")
+        .eq("setlist_entry_id", setlist_entry_id)
+      if (error) return { error: error.message }
+      const guest_ids = (data ?? []).map((r: { guest_id: string }) => r.guest_id)
+      return { data: { guest_ids } }
+    }
+
+    case "setlist_entry_guests_replace": {
+      const setlist_entry_id = body.setlist_entry_id as string | undefined
+      const guest_ids = body.guest_ids as unknown
+      if (!setlist_entry_id || !Array.isArray(guest_ids)) return { error: "Invalid payload" }
+      const { error: delErr } = await db
+        .from("setlist_entry_guests")
+        .delete()
+        .eq("setlist_entry_id", setlist_entry_id)
+      if (delErr) return { error: delErr.message }
+      if (guest_ids.length > 0) {
+        const rows = (guest_ids as string[]).map((guest_id) => ({ setlist_entry_id, guest_id }))
+        const { error: insErr } = await db.from("setlist_entry_guests").insert(rows)
+        if (insErr) return { error: insErr.message }
+      }
+      return { data: true }
+    }
+
+    case "setlist_entry_media_insert": {
+      const setlist_entry_id = body.setlist_entry_id as string | undefined
+      const release_id = body.release_id as string | undefined
+      if (!setlist_entry_id || !release_id) return { error: "Invalid payload" }
+      const { error } = await db.from("setlist_entry_media").insert({ setlist_entry_id, release_id })
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "setlist_entry_media_delete": {
+      const setlist_entry_id = body.setlist_entry_id as string | undefined
+      const release_id = body.release_id as string | undefined
+      if (!setlist_entry_id || !release_id) return { error: "Invalid payload" }
+      const { error } = await db
+        .from("setlist_entry_media")
+        .delete()
+        .eq("setlist_entry_id", setlist_entry_id)
+        .eq("release_id", release_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "shows_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "show_date",
+        "show_group",
+        "show_tour",
+        "show_subvenue",
+        "show_iscanon",
+        "show_year",
+        "show_issetlistgame",
+        "show_detail",
+      ])
+      const { error } = await db.from("shows").insert([allowed])
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "shows_update": {
+      const show_id = body.show_id as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!show_id || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "show_date",
+        "show_group",
+        "show_tour",
+        "show_subvenue",
+        "show_iscanon",
+        "show_year",
+        "show_issetlistgame",
+        "show_detail",
+        "show_alert",
+        "show_coachnotes",
+        "show_callbacks",
+        "show_wl_link",
+        "show_setlistcomplete",
+        "discography_display",
+        "show_dripfieldcomplete",
+        "show_jivecomplete",
+        "show_listcategorycomplete",
+      ])
+      const { error } = await db.from("shows").update(allowed).eq("show_id", show_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "venues_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "venue",
+        "venue_location",
+        "venue_coachnotes",
+        "venue_global",
+        "venue_address",
+        "venue_latitude",
+        "venue_longitude",
+      ])
+      const { error } = await db.from("venues").insert([allowed])
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "venues_update": {
+      const match = body.match as Record<string, unknown> | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!match || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "venue",
+        "venue_location",
+        "venue_coachnotes",
+        "venue_global",
+        "venue_address",
+        "venue_latitude",
+        "venue_longitude",
+      ])
+      let q = db.from("venues").update(allowed)
+      if (typeof match.venue === "string") q = q.eq("venue", match.venue)
+      if (typeof match.venue_location === "string") q = q.eq("venue_location", match.venue_location)
+      const { error } = await q
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "subvenues_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "subvenue",
+        "subvenue_venue",
+        "subvenue_startdate",
+        "subvenue_enddate",
+      ])
+      const { error } = await db.from("subvenues").insert([allowed])
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "subvenues_update": {
+      const match = body.match as Record<string, unknown> | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!match || !patch || typeof match.subvenue !== "string") {
+        return { error: "Invalid payload" }
+      }
+      const allowed = pick(patch, [
+        "subvenue",
+        "subvenue_venue",
+        "subvenue_startdate",
+        "subvenue_enddate",
+      ])
+      const { error } = await db.from("subvenues").update(allowed).eq("subvenue", match.subvenue)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "guests_insert_new": {
+      const guest = body.guest as string | undefined
+      const guest_category = body.guest_category as string | undefined
+      if (!guest?.trim() || !guest_category?.trim()) return { error: "guest and guest_category required" }
+      const { data: highest, error: hErr } = await db
+        .from("guests")
+        .select("guest_canonid")
+        .eq("guest_category", guest_category)
+        .order("guest_canonid", { ascending: false })
+        .limit(1)
+      if (hErr) return { error: hErr.message }
+      const nextCanon =
+        highest?.length && highest[0].guest_canonid != null
+          ? Number(highest[0].guest_canonid) + 1
+          : 1
+      const ins = {
+        guest: guest.trim(),
+        guest_displayname: (body.guest_displayname as string | null) || null,
+        guest_instrument: (body.guest_instrument as string | null) || null,
+        guest_category,
+        guest_canonid: nextCanon,
+      }
+      const { error: iErr } = await db.from("guests").insert(ins)
+      if (iErr) return { error: iErr.message }
+      return { data: true }
+    }
+
+    case "guests_update": {
+      const guest_id = body.guest_id as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!guest_id || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "guest",
+        "guest_displayname",
+        "guest_instrument",
+        "guest_category",
+      ])
+      const { error } = await db.from("guests").update(allowed).eq("guest_id", guest_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "guests_max_canonid": {
+      const guest_category = body.guest_category as string | undefined
+      if (!guest_category) return { error: "Missing guest_category" }
+      const { data: highest, error } = await db
+        .from("guests")
+        .select("guest_canonid")
+        .eq("guest_category", guest_category)
+        .order("guest_canonid", { ascending: false })
+        .limit(1)
+      if (error) return { error: error.message }
+      const next =
+        highest?.length && highest[0].guest_canonid != null
+          ? Number(highest[0].guest_canonid) + 1
+          : 1
+      return { data: { next_canonid: next } }
+    }
+
+    case "guests_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "guest",
+        "guest_displayname",
+        "guest_instrument",
+        "guest_category",
+        "guest_canonid",
+      ])
+      const { error } = await db.from("guests").insert(allowed)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "songs_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "song",
+        "song_displayname",
+        "song_category",
+        "song_originalartist",
+        "song_categoryorder",
+        "song_coachnotes",
+      ])
+      const { error } = await db.from("songs").insert(allowed)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "songs_update": {
+      const song_id = body.song_id as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!song_id || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "song",
+        "song_displayname",
+        "song_category",
+        "song_originalartist",
+        "song_categoryorder",
+        "song_coachnotes",
+      ])
+      const { error } = await db.from("songs").update(allowed).eq("song_id", song_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "rpc_add_artist": {
+      const artist_name = body.artist_name as string | undefined
+      if (!artist_name?.trim()) return { error: "artist_name required" }
+      const { error } = await db.rpc("add_artist", { artist_name: artist_name.trim() })
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "discography_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "name",
+        "displayname",
+        "artist",
+        "category",
+        "artwork",
+        "canon_id",
+        "release_date",
+        "coach_notes",
+      ])
+      const { error } = await db.from("discography").insert([allowed])
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "discography_update": {
+      const uuid = body.uuid as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!uuid || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "name",
+        "displayname",
+        "artist",
+        "category",
+        "artwork",
+        "canon_id",
+        "release_date",
+        "coach_notes",
+      ])
+      const { error } = await db.from("discography").update(allowed).eq("uuid", uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "discography_delete": {
+      const uuid = body.uuid as string | undefined
+      if (!uuid) return { error: "Missing uuid" }
+      const { error } = await db.from("discography").delete().eq("uuid", uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "discography_entries_insert": {
+      const rows = body.rows as unknown
+      if (!Array.isArray(rows) || rows.length === 0) return { error: "Invalid rows" }
+      const cleaned = rows.map((r: Record<string, unknown>) =>
+        pick(r, ["setlist_entry", "discography_entry", "order"]),
+      )
+      const { error } = await db.from("discography_entries").insert(cleaned)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "discography_entries_update_order": {
+      const uuid = body.uuid as string | undefined
+      const order = body.order as number | undefined
+      if (!uuid || typeof order !== "number" || Number.isNaN(order)) {
+        return { error: "Invalid payload" }
+      }
+      const { error } = await db.from("discography_entries").update({ order }).eq("uuid", uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "discography_entries_delete": {
+      const uuid = body.uuid as string | undefined
+      if (!uuid) return { error: "Missing uuid" }
+      const { error } = await db.from("discography_entries").delete().eq("uuid", uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "releases_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "release",
+        "release_displayname",
+        "release_link",
+        "release_service",
+        "release_artwork",
+      ])
+      const { error } = await db.from("releases").insert([allowed])
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "releases_update": {
+      const release_id = body.release_id as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!release_id || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "release",
+        "release_displayname",
+        "release_link",
+        "release_service",
+        "release_artwork",
+      ])
+      const { error } = await db.from("releases").update(allowed).eq("release_id", release_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "releases_delete": {
+      const release_id = body.release_id as string | undefined
+      if (!release_id) return { error: "Missing release_id" }
+      const { error } = await db.from("releases").delete().eq("release_id", release_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "releases_shows_insert": {
+      const release_id = body.release_id as string | undefined
+      const show_id = body.show_id as string | undefined
+      const release_order = body.release_order as number | undefined
+      if (!release_id || !show_id || release_order == null) return { error: "Invalid payload" }
+      const { error } = await db.from("releases_shows").insert({
+        release_id,
+        show_id,
+        release_order,
+      })
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "releases_shows_update": {
+      const release_id = body.release_id as string | undefined
+      const show_id = body.show_id as string | undefined
+      const release_order = body.release_order as number | undefined
+      if (!release_id || !show_id || release_order == null) return { error: "Invalid payload" }
+      const { error } = await db
+        .from("releases_shows")
+        .update({ release_order })
+        .eq("release_id", release_id)
+        .eq("show_id", show_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "releases_shows_delete": {
+      const release_id = body.release_id as string | undefined
+      const show_id = body.show_id as string | undefined
+      if (!release_id || !show_id) return { error: "Invalid payload" }
+      const { error } = await db
+        .from("releases_shows")
+        .delete()
+        .eq("release_id", release_id)
+        .eq("show_id", show_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "show_changes_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, ["show_id", "change_order", "change_type", "change"])
+      const { error } = await db.from("show_changes").insert(allowed)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "show_changes_update": {
+      const show_change_uuid = body.show_change_uuid as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!show_change_uuid || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, ["change_order", "change_type", "change"])
+      const { error } = await db
+        .from("show_changes")
+        .update(allowed)
+        .eq("show_change_uuid", show_change_uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "show_changes_delete": {
+      const show_change_uuid = body.show_change_uuid as string | undefined
+      if (!show_change_uuid) return { error: "Missing show_change_uuid" }
+      const { error } = await db
+        .from("show_changes")
+        .delete()
+        .eq("show_change_uuid", show_change_uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "bugs_delete": {
+      const bug_id = body.bug_id as string | undefined
+      if (!bug_id) return { error: "Missing bug_id" }
+      const { error } = await db.from("bugs").delete().eq("bug_id", bug_id)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "profiles_count": {
+      const { count, error } = await db.from("profiles").select("*", { count: "exact", head: true })
+      if (error) return { error: error.message }
+      return { data: { count: count ?? 0 } }
+    }
+
+    default:
+      return { error: `Unknown action: ${action}` }
+  }
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders })
+  if (req.method !== "POST") return httpErr("Method not allowed", 405)
+
+  const authHeader = req.headers.get("authorization")
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  if (!token) return httpErr("Unauthorized", 401)
+
+  const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+  if (!jwtSecret || !supabaseUrl || !supabaseServiceKey) {
+    return httpErr("Server configuration error", 500)
+  }
+
+  let jwtPayload: Record<string, unknown>
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
+    jwtPayload = payload as Record<string, unknown>
+  } catch {
+    return httpErr("Unauthorized", 401)
+  }
+
+  if (jwtPayload.is_admin !== true) return httpErr("Forbidden", 403)
+
+  let body: Record<string, unknown> = {}
+  try {
+    body = await req.json()
+  } catch {
+    return httpErr("Invalid request body", 400)
+  }
+
+  const action = body.action as string | undefined
+  if (!action) return httpErr("Missing action", 400)
+
+  const db = createClient(supabaseUrl, supabaseServiceKey)
+  const result = await handleAction(db, action, body)
+  if (result.error) {
+    return jsonOk({ error: result.error })
+  }
+  return jsonOk({ data: result.data })
+})

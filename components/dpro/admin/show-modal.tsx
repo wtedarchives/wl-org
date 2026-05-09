@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Save, X } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type {
   AdminShowData,
   GroupData,
@@ -49,6 +50,8 @@ export function ShowModal({
   subvenues,
   years,
 }: ShowModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [formData, setFormData] = useState<Partial<AdminShowData>>({
     show_date: "",
     show_group: "",
@@ -104,12 +107,13 @@ export function ShowModal({
   }
 
   const handleSubmit = async () => {
-    if (!validate() || !supabase) return
+    if (!validate() || !token) return
     setIsSubmitting(true)
     try {
       if (isNewShow) {
-        const { error } = await supabase.from("shows").insert([
-          {
+        const { error } = await invokeDproAdmin(token, {
+          action: "shows_insert",
+          row: {
             show_date: formData.show_date,
             show_group: formData.show_group,
             show_tour: formData.show_tour,
@@ -119,8 +123,8 @@ export function ShowModal({
             show_issetlistgame: formData.show_issetlistgame ?? false,
             show_detail: formData.show_detail,
           },
-        ])
-        if (error) throw error
+        })
+        if (error) throw new Error(error)
       }
       onSave()
       onClose()

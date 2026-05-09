@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Save, X } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,8 @@ export function GuestModal({
   onSave,
   isNewGuest,
 }: GuestModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [formData, setFormData] = useState<Partial<GuestData>>({
     guest: "",
     guest_displayname: "",
@@ -89,42 +92,33 @@ export function GuestModal({
   }
 
   const handleSubmit = async () => {
-    if (!supabase) return
+    if (!token) return
     setIsSubmitting(true)
     setError(null)
     try {
       if (!formData.guest) throw new Error("Guest name is required")
       if (!formData.guest_category) throw new Error("Category is required")
       if (isNewGuest) {
-        const { data: highest } = await supabase
-          .from("guests")
-          .select("guest_canonid")
-          .eq("guest_category", formData.guest_category)
-          .order("guest_canonid", { ascending: false })
-          .limit(1)
-        const nextCanonId =
-          highest?.length && highest[0].guest_canonid
-            ? highest[0].guest_canonid + 1
-            : 1
-        const { error: insertError } = await supabase.from("guests").insert({
+        const { error: insertError } = await invokeDproAdmin(token, {
+          action: "guests_insert_new",
           guest: formData.guest,
           guest_displayname: formData.guest_displayname || null,
           guest_instrument: formData.guest_instrument || null,
           guest_category: formData.guest_category,
-          guest_canonid: nextCanonId,
         })
-        if (insertError) throw insertError
+        if (insertError) throw new Error(insertError)
       } else if (guest) {
-        const { error: updateError } = await supabase
-          .from("guests")
-          .update({
+        const { error: updateError } = await invokeDproAdmin(token, {
+          action: "guests_update",
+          guest_id: guest.guest_id,
+          patch: {
             guest: formData.guest,
             guest_displayname: formData.guest_displayname || null,
             guest_instrument: formData.guest_instrument || null,
             guest_category: formData.guest_category,
-          })
-          .eq("guest_id", guest.guest_id)
-        if (updateError) throw updateError
+          },
+        })
+        if (updateError) throw new Error(updateError)
       }
       onSave()
       onClose()

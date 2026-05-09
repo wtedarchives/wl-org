@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Plus } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { GuestModal } from "./guest-modal"
@@ -10,6 +12,8 @@ import { AdminGuestForm } from "./admin-guest-form"
 import type { GuestData } from "./admin-guest-dropdown"
 
 export function AdminGuest() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [allGuests, setAllGuests] = useState<GuestData[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -116,7 +120,7 @@ export function AdminGuest() {
   }
 
   const handleSaveChanges = async () => {
-    if (!editedGuest || !supabase) return
+    if (!editedGuest || !token) return
     setIsSubmitting(true)
     try {
       const guestToUpdate = {
@@ -134,26 +138,29 @@ export function AdminGuest() {
             ? null
             : editedGuest.guest_category,
       }
-      const { error } = await supabase
-        .from("guests")
-        .update({
+      const { error } = await invokeDproAdmin(token, {
+        action: "guests_update",
+        guest_id: guestToUpdate.guest_id,
+        patch: {
           guest: guestToUpdate.guest,
           guest_displayname: guestToUpdate.guest_displayname,
           guest_instrument: guestToUpdate.guest_instrument,
           guest_category: guestToUpdate.guest_category,
-        })
-        .eq("guest_id", guestToUpdate.guest_id)
-      if (error) throw error
+        },
+      })
+      if (error) throw new Error(error)
       setSelectedGuest(guestToUpdate)
       setEditedGuest(guestToUpdate)
       setIsEditing(false)
-      const { data } = await supabase
-        .from("guests")
-        .select(
-          "guest, guest_id, guest_displayname, guest_instrument, guest_category, guest_canonid"
-        )
-        .order("guest", { ascending: true })
-      if (data) setAllGuests(data)
+      if (supabase) {
+        const { data } = await supabase
+          .from("guests")
+          .select(
+            "guest, guest_id, guest_displayname, guest_instrument, guest_category, guest_canonid"
+          )
+          .order("guest", { ascending: true })
+        if (data) setAllGuests(data)
+      }
     } catch (error) {
       console.error("Error updating guest:", error)
     } finally {

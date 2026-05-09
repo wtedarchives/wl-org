@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { X, Save, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import {
   Dialog,
@@ -48,6 +50,8 @@ export function ShowReleaseModal({
   existingReleaseId,
   existingOrder,
 }: ShowReleaseModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [availableReleases, setAvailableReleases] = useState<Release[]>([])
   const [allAssociatedReleaseIds, setAllAssociatedReleaseIds] = useState<
     Set<string>
@@ -148,6 +152,10 @@ export function ShowReleaseModal({
 
   const handleSave = async () => {
     if (!supabase) return
+    if (!token) {
+      setError("You must be signed in.")
+      return
+    }
     if (!selectedReleaseId || !releaseOrder) {
       setError("Please select a release and enter an order number")
       return
@@ -156,19 +164,21 @@ export function ShowReleaseModal({
     setError(null)
     try {
       if (mode === "add") {
-        const { error: err } = await supabase.from("releases_shows").insert({
+        const { error: err } = await invokeDproAdmin(token, {
+          action: "releases_shows_insert",
           release_id: selectedReleaseId,
           show_id: showId,
           release_order: releaseOrder,
         })
-        if (err) throw err
+        if (err) throw new Error(err)
       } else {
-        const { error: err } = await supabase
-          .from("releases_shows")
-          .update({ release_order: releaseOrder })
-          .eq("release_id", existingReleaseId)
-          .eq("show_id", showId)
-        if (err) throw err
+        const { error: err } = await invokeDproAdmin(token, {
+          action: "releases_shows_update",
+          release_id: existingReleaseId,
+          show_id: showId,
+          release_order: releaseOrder,
+        })
+        if (err) throw new Error(err)
       }
       onSave()
       onClose()
@@ -180,16 +190,16 @@ export function ShowReleaseModal({
   }
 
   const handleDelete = async () => {
-    if (!existingReleaseId || !supabase) return
+    if (!existingReleaseId || !token) return
     setDeleting(true)
     setError(null)
     try {
-      const { error: err } = await supabase
-        .from("releases_shows")
-        .delete()
-        .eq("release_id", existingReleaseId)
-        .eq("show_id", showId)
-      if (err) throw err
+      const { error: err } = await invokeDproAdmin(token, {
+        action: "releases_shows_delete",
+        release_id: existingReleaseId,
+        show_id: showId,
+      })
+      if (err) throw new Error(err)
       onSave()
       onClose()
     } catch {

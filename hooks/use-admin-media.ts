@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { formatDate } from "@/lib/utils/show-utils"
 import type { AdminShowData } from "@/types/admin"
@@ -10,6 +12,8 @@ import { useShowData } from "@/hooks/use-show-data"
 import { useShowReleases } from "@/hooks/use-show-releases"
 
 export function useAdminMedia() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [searchTerm, setSearchTerm] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedShow, setSelectedShow] = useState<AdminShowData | null>(null)
@@ -189,23 +193,28 @@ export function useAdminMedia() {
     const key = `${entryId}:${releaseId}`
     const isChecked = mediaEntries.has(key)
     setTogglingEntry(key)
-    if (!supabase) return
+    if (!token) {
+      setTogglingEntry(null)
+      return
+    }
     try {
       if (isChecked) {
-        const { error } = await supabase
-          .from("setlist_entry_media")
-          .delete()
-          .eq("setlist_entry_id", entryId)
-          .eq("release_id", releaseId)
-        if (error) throw error
+        const { error } = await invokeDproAdmin(token, {
+          action: "setlist_entry_media_delete",
+          setlist_entry_id: entryId,
+          release_id: releaseId,
+        })
+        if (error) throw new Error(error)
         const next = new Set(mediaEntries)
         next.delete(key)
         setMediaEntries(next)
       } else {
-        const { error } = await supabase
-          .from("setlist_entry_media")
-          .insert({ setlist_entry_id: entryId, release_id: releaseId })
-        if (error) throw error
+        const { error } = await invokeDproAdmin(token, {
+          action: "setlist_entry_media_insert",
+          setlist_entry_id: entryId,
+          release_id: releaseId,
+        })
+        if (error) throw new Error(error)
         const next = new Set(mediaEntries)
         next.add(key)
         setMediaEntries(next)
@@ -218,42 +227,36 @@ export function useAdminMedia() {
   }
 
   const handleToggleAllForRelease = async (releaseId: string) => {
-    if (!selectedShow || setlistEntries.length === 0 || !supabase) return
+    if (!selectedShow || setlistEntries.length === 0 || !token) return
     const allChecked = setlistEntries.every((e) =>
       mediaEntries.has(`${e.entry_id}:${releaseId}`)
     )
     const shouldCheckAll = !allChecked
-    const ops: Promise<void>[] = []
+    const ops: Promise<{ error: string | null }>[] = []
     for (const entry of setlistEntries) {
       const key = `${entry.entry_id}:${releaseId}`
       const isCurrentlyChecked = mediaEntries.has(key)
       if (shouldCheckAll && !isCurrentlyChecked) {
         ops.push(
-          supabase
-            .from("setlist_entry_media")
-            .insert({
-              setlist_entry_id: entry.entry_id,
-              release_id: releaseId,
-            })
-            .then(({ error }) => {
-              if (error) throw error
-            }) as Promise<void>
+          invokeDproAdmin(token, {
+            action: "setlist_entry_media_insert",
+            setlist_entry_id: entry.entry_id,
+            release_id: releaseId,
+          }).then((r) => ({ error: r.error }))
         )
       } else if (!shouldCheckAll && isCurrentlyChecked) {
         ops.push(
-          supabase
-            .from("setlist_entry_media")
-            .delete()
-            .eq("setlist_entry_id", entry.entry_id)
-            .eq("release_id", releaseId)
-            .then(({ error }) => {
-              if (error) throw error
-            }) as Promise<void>
+          invokeDproAdmin(token, {
+            action: "setlist_entry_media_delete",
+            setlist_entry_id: entry.entry_id,
+            release_id: releaseId,
+          }).then((r) => ({ error: r.error }))
         )
       }
     }
     try {
-      await Promise.all(ops)
+      const results = await Promise.all(ops)
+      if (results.some((r) => r.error)) throw new Error("bulk media op failed")
       const next = new Set(mediaEntries)
       for (const entry of setlistEntries) {
         const key = `${entry.entry_id}:${releaseId}`

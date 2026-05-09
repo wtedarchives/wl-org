@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { AdminShowData } from "@/types/admin"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -20,6 +21,8 @@ export function ShowCompletionFlagsSection({
   onSaveSuccess,
   onRefreshShows,
 }: ShowCompletionFlagsSectionProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [showSetlistComplete, setShowSetlistComplete] = useState(false)
   const [discographyDisplay, setDiscographyDisplay] = useState(false)
   const [showDripfieldComplete, setShowDripfieldComplete] = useState(false)
@@ -44,8 +47,8 @@ export function ShowCompletionFlagsSection({
   ])
 
   const handleSave = async () => {
-    if (!supabase) {
-      toast.error("Database not configured.")
+    if (!token) {
+      toast.error("You must be signed in.")
       return
     }
     setSaving(true)
@@ -58,11 +61,12 @@ export function ShowCompletionFlagsSection({
         show_jivecomplete: showJiveComplete,
         show_listcategorycomplete: listCat === "" ? null : listCat,
       }
-      const { error } = await supabase
-        .from("shows")
-        .update(patch)
-        .eq("show_id", show.show_id)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "shows_update",
+        show_id: show.show_id,
+        patch,
+      })
+      if (error) throw new Error(error)
       onSaveSuccess(patch)
       onRefreshShows()
       toast.success("Completion flags saved.")

@@ -2,7 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react"
 import { ChevronDownIcon } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
@@ -41,6 +42,8 @@ const TABS = [
 ] as const
 
 export function AdminPanel() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [userCount, setUserCount] = useState<number | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const [updateStatus, setUpdateStatus] = useState<{
@@ -55,26 +58,28 @@ export function AdminPanel() {
   })
 
   useEffect(() => {
-    if (!supabase) return
-    supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .then(({ count, error }) => {
-        if (!error) setUserCount(count ?? 0)
+    if (!token) return
+    void (async () => {
+      const { data, error } = await invokeDproAdmin<{ count: number }>(token, {
+        action: "profiles_count",
       })
-  }, [])
+      if (!error && data) setUserCount(data.count ?? 0)
+    })()
+  }, [token])
 
   useEffect(() => {
     localStorage.setItem("adminActiveTab", activeTab)
   }, [activeTab])
 
   const handleUpdateStatistics = async () => {
-    if (!supabase) return
+    if (!token) return
     setIsUpdating(true)
     setUpdateStatus({ type: null, message: null })
     try {
-      const { error } = await supabase.rpc("update_all_setlist_entries")
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "rpc_update_all_setlist_entries",
+      })
+      if (error) throw new Error(error)
       setUpdateStatus({ type: "success", message: "Success!" })
       setTimeout(() => setUpdateStatus({ type: null, message: null }), 3000)
     } catch (err) {

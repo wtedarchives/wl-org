@@ -1,9 +1,12 @@
 "use client"
 
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { VenueData } from "@/types/admin"
 
 export function useVenueActions() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const saveVenue = async (
     editedVenue: VenueData,
     selectedVenue: VenueData | null,
@@ -14,7 +17,7 @@ export function useVenueActions() {
     setSelectedVenue: (venue: VenueData) => void,
     fetchAllVenues: () => void
   ) => {
-    if (!editedVenue || !supabase) return
+    if (!editedVenue || !token) return
     if (!editedVenue.venue.trim() || !editedVenue.venue_location.trim()) {
       alert("Venue name and location are required.")
       return
@@ -22,8 +25,9 @@ export function useVenueActions() {
     setIsSubmitting(true)
     try {
       if (isCreatingNew) {
-        const { error } = await supabase.from("venues").insert([
-          {
+        const { error } = await invokeDproAdmin(token, {
+          action: "venues_insert",
+          row: {
             venue: editedVenue.venue.trim(),
             venue_location: editedVenue.venue_location.trim(),
             venue_coachnotes: editedVenue.venue_coachnotes,
@@ -32,18 +36,22 @@ export function useVenueActions() {
             venue_latitude: editedVenue.venue_latitude?.trim() || null,
             venue_longitude: editedVenue.venue_longitude?.trim() || null,
           },
-        ])
+        })
         if (error) {
-          if (error.code === "23505")
+          if (error.includes("23505") || error.toLowerCase().includes("duplicate"))
             alert("A venue with this name and location already exists.")
-          else throw error
+          else throw new Error(error)
           return
         }
         setIsCreatingNew(false)
       } else {
-        const { error } = await supabase
-          .from("venues")
-          .update({
+        const { error } = await invokeDproAdmin(token, {
+          action: "venues_update",
+          match: {
+            venue: selectedVenue!.venue,
+            venue_location: selectedVenue!.venue_location,
+          },
+          patch: {
             venue: editedVenue.venue.trim(),
             venue_location: editedVenue.venue_location.trim(),
             venue_coachnotes: editedVenue.venue_coachnotes,
@@ -51,10 +59,9 @@ export function useVenueActions() {
             venue_address: editedVenue.venue_address,
             venue_latitude: editedVenue.venue_latitude?.trim() || null,
             venue_longitude: editedVenue.venue_longitude?.trim() || null,
-          })
-          .eq("venue", selectedVenue!.venue)
-          .eq("venue_location", selectedVenue!.venue_location)
-        if (error) throw error
+          },
+        })
+        if (error) throw new Error(error)
       }
       setSelectedVenue(editedVenue)
       setIsEditing(false)

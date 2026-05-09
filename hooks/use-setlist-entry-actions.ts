@@ -1,63 +1,41 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { parseLengthToHhMmSs } from "@/lib/utils/show-utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
 
 export function useSetlistEntryActions() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "processing" | "done" | "error"
   >("idle")
 
   const updateStatistics = async () => {
-    if (!supabase) return false
-    try {
-      const { error } = await supabase.rpc("update_all_setlist_entries")
-      if (error) {
-        setSaveStatus("error")
-        return false
-      }
-      setSaveStatus("done")
-      return true
-    } catch {
+    const { error } = await invokeDproAdmin(token, {
+      action: "rpc_update_all_setlist_entries",
+    })
+    if (error) {
       setSaveStatus("error")
       return false
     }
+    setSaveStatus("done")
+    return true
   }
 
   const saveGuestAssociations = async (
     entryId: string,
-    selectedGuestIds: string[]
+    selectedGuestIds: string[],
   ) => {
-    if (!supabase) return
-    const { data: currentAssociations, error: fetchError } = await supabase
-      .from("setlist_entry_guests")
-      .select("guest_id")
-      .eq("setlist_entry_id", entryId)
-    if (fetchError) throw fetchError
-    const currentGuestIds = currentAssociations?.map((i) => i.guest_id) || []
-    const guestsToAdd = selectedGuestIds.filter(
-      (id) => !currentGuestIds.includes(id)
-    )
-    const guestsToRemove = currentGuestIds.filter(
-      (id) => !selectedGuestIds.includes(id)
-    )
-    if (guestsToRemove.length > 0) {
-      const { error: deleteError } = await supabase
-        .from("setlist_entry_guests")
-        .delete()
-        .eq("setlist_entry_id", entryId)
-        .in("guest_id", guestsToRemove)
-      if (deleteError) throw deleteError
-    }
-    for (const guestId of guestsToAdd) {
-      const { error: insertError } = await supabase
-        .from("setlist_entry_guests")
-        .insert({ setlist_entry_id: entryId, guest_id: guestId })
-      if (insertError && insertError.code !== "23505") throw insertError
-    }
+    const { error } = await invokeDproAdmin(token, {
+      action: "setlist_entry_guests_replace",
+      setlist_entry_id: entryId,
+      guest_ids: selectedGuestIds,
+    })
+    if (error) throw new Error(error)
   }
 
   const saveEntry = async (
@@ -66,9 +44,12 @@ export function useSetlistEntryActions() {
     selectedNewSongOption: string,
     isNewEntry: boolean,
     onSave: () => void,
-    onSaveStatusUpdate: (status: "idle" | "processing" | "done" | "error") => void
+    onSaveStatusUpdate: (status: "idle" | "processing" | "done" | "error") => void,
   ) => {
-    if (!supabase) return
+    if (!token) {
+      alert("You must be signed in to save.")
+      return
+    }
     if (isNewEntry && (!editedEntry.entry_set || !editedEntry.entry_song)) {
       alert("Please fill in all required fields (Set and Song are required)")
       return
@@ -111,60 +92,66 @@ export function useSetlistEntryActions() {
         entry_new: selectedNewSongOption === "N/A" ? "FALSE" : selectedNewSongOption,
       }
 
-      let savedEntryId: string
       if (isNewEntry) {
-        const insertData: Record<string, unknown> = {
+        const insertRow: Record<string, unknown> = {
           entry_set: entryToSave.entry_set,
           entry_setnum: entryToSave.entry_setnum,
           entry_song: entryToSave.entry_song,
           entry_show: entryToSave.entry_show,
           entry_new: entryToSave.entry_new,
         }
-        if (entryToSave.entry_short) insertData.entry_short = entryToSave.entry_short
-        if (entryToSave.entry_segue) insertData.entry_segue = entryToSave.entry_segue
-        if (entryToSave.entry_length)
-          insertData.entry_length = entryToSave.entry_length
+        if (entryToSave.entry_short) insertRow.entry_short = entryToSave.entry_short
+        if (entryToSave.entry_segue) insertRow.entry_segue = entryToSave.entry_segue
+        if (entryToSave.entry_length) insertRow.entry_length = entryToSave.entry_length
         if (entryToSave.entry_placement)
-          insertData.entry_placement = entryToSave.entry_placement
+          insertRow.entry_placement = entryToSave.entry_placement
         if (entryToSave.entry_coachnotes)
-          insertData.entry_coachnotes = entryToSave.entry_coachnotes
+          insertRow.entry_coachnotes = entryToSave.entry_coachnotes
 
-        const { data, error } = await supabase
-          .from("setlist_entries")
-          .insert(insertData)
-          .select()
+        const { data, error } = await invokeDproAdmin<{ rows: { entry_id: string }[] }>(
+          token,
+          { action: "setlist_entries_insert", row: insertRow },
+        )
         if (error) {
-          alert(`Error creating entry: ${error.message}`)
+          alert(`Error creating entry: ${error}`)
           setSaveStatus("error")
           onSaveStatusUpdate("error")
-          throw error
+          throw new Error(error)
         }
-        if (data && data.length > 0) {
-          savedEntryId = data[0].entry_id
-          if (selectedGuestIds.length > 0)
-            await saveGuestAssociations(savedEntryId, selectedGuestIds)
+        const rows = data?.rows
+        if (!rows?.length) {
+          alert("Error creating entry: no row returned")
+          setSaveStatus("error")
+          onSaveStatusUpdate("error")
+          throw new Error("No row returned")
+        }
+        const savedEntryId = rows[0].entry_id
+        if (selectedGuestIds.length > 0) {
+          await saveGuestAssociations(savedEntryId, selectedGuestIds)
         }
         onSave()
       } else {
-        const { error } = await supabase
-          .from("setlist_entries")
-          .update({
-            entry_set: entryToSave.entry_set,
-            entry_setnum: entryToSave.entry_setnum,
-            entry_song: entryToSave.entry_song,
-            entry_short: entryToSave.entry_short,
-            entry_segue: entryToSave.entry_segue,
-            entry_length: entryToSave.entry_length,
-            entry_placement: entryToSave.entry_placement,
-            entry_coachnotes: entryToSave.entry_coachnotes,
-            entry_new: entryToSave.entry_new,
-          })
-          .eq("entry_id", entryToSave.entry_id)
+        const patch: Record<string, unknown> = {
+          entry_set: entryToSave.entry_set,
+          entry_setnum: entryToSave.entry_setnum,
+          entry_song: entryToSave.entry_song,
+          entry_short: entryToSave.entry_short,
+          entry_segue: entryToSave.entry_segue,
+          entry_length: entryToSave.entry_length,
+          entry_placement: entryToSave.entry_placement,
+          entry_coachnotes: entryToSave.entry_coachnotes,
+          entry_new: entryToSave.entry_new,
+        }
+        const { error } = await invokeDproAdmin(token, {
+          action: "setlist_entries_update",
+          entry_id: entryToSave.entry_id,
+          patch,
+        })
         if (error) {
-          alert(`Error updating entry: ${error.message}`)
+          alert(`Error updating entry: ${error}`)
           setSaveStatus("error")
           onSaveStatusUpdate("error")
-          throw error
+          throw new Error(error)
         }
         await saveGuestAssociations(entryToSave.entry_id, selectedGuestIds)
         onSave()
@@ -184,19 +171,22 @@ export function useSetlistEntryActions() {
     entryId: string,
     onSave: () => void,
     onClose: () => void,
-    onSaveStatusUpdate: (status: "idle" | "processing" | "done" | "error") => void
+    onSaveStatusUpdate: (status: "idle" | "processing" | "done" | "error") => void,
   ) => {
-    if (!supabase) return
+    if (!token) {
+      alert("You must be signed in.")
+      return
+    }
     setIsSubmitting(true)
     setSaveStatus("processing")
     onSaveStatusUpdate("processing")
     try {
-      const { error } = await supabase
-        .from("setlist_entries")
-        .delete()
-        .eq("entry_id", entryId)
+      const { error } = await invokeDproAdmin(token, {
+        action: "setlist_entries_delete",
+        entry_id: entryId,
+      })
       if (error) {
-        alert(`Error deleting entry: ${error.message}`)
+        alert(`Error deleting entry: ${error}`)
         setSaveStatus("error")
         onSaveStatusUpdate("error")
       } else {

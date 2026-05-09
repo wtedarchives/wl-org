@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { X, Save, Trash2 } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import type { DiscographyAdminRecord } from "@/types/admin"
 import {
@@ -36,6 +38,8 @@ export function DiscographyModal({
   record,
   isAddMode,
 }: DiscographyModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [formData, setFormData] = useState<DiscographyFormFields>(
     emptyDiscographyForm(),
   )
@@ -116,7 +120,7 @@ export function DiscographyModal({
     setSaving(true)
     setError(null)
     try {
-      if (!supabase) throw new Error("Supabase not available")
+      if (!token) throw new Error("You must be signed in")
 
       const payload = {
         name,
@@ -130,14 +134,18 @@ export function DiscographyModal({
       }
 
       if (isAddMode) {
-        const { error: insErr } = await supabase.from("discography").insert([payload])
-        if (insErr) throw insErr
+        const { error: insErr } = await invokeDproAdmin(token, {
+          action: "discography_insert",
+          row: payload,
+        })
+        if (insErr) throw new Error(insErr)
       } else if (record) {
-        const { error: updErr } = await supabase
-          .from("discography")
-          .update(payload)
-          .eq("uuid", record.uuid)
-        if (updErr) throw updErr
+        const { error: updErr } = await invokeDproAdmin(token, {
+          action: "discography_update",
+          uuid: record.uuid,
+          patch: payload,
+        })
+        if (updErr) throw new Error(updErr)
       }
       onSave()
     } catch (err: unknown) {
@@ -153,15 +161,15 @@ export function DiscographyModal({
   }
 
   const handleDelete = async () => {
-    if (!record || !supabase) return
+    if (!record || !token) return
     setDeleting(true)
     setError(null)
     try {
-      const { error: delErr } = await supabase
-        .from("discography")
-        .delete()
-        .eq("uuid", record.uuid)
-      if (delErr) throw delErr
+      const { error: delErr } = await invokeDproAdmin(token, {
+        action: "discography_delete",
+        uuid: record.uuid,
+      })
+      if (delErr) throw new Error(delErr)
       onSave()
     } catch (err: unknown) {
       console.error("Error deleting discography:", err)

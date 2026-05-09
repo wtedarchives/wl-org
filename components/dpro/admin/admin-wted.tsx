@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { formatDate } from "@/lib/utils/show-utils"
 import { getPlacementColor } from "@/components/dpro/setlistgame/song-selection/utils"
@@ -30,6 +32,8 @@ interface WtedSetlistEntry {
 }
 
 export function AdminWted() {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [searchTerm, setSearchTerm] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedShow, setSelectedShow] = useState<AdminShowData | null>(null)
@@ -167,14 +171,15 @@ export function AdminWted() {
   }
 
   const handleSaveRadioId = async (entryId: string) => {
-    if (!supabase) return
+    if (!token) return
     setSavingEntryId(entryId)
     try {
-      const { error } = await supabase
-        .from("setlist_entries")
-        .update({ radio_id: editingValue.trim() || null })
-        .eq("entry_id", entryId)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "setlist_entries_update",
+        entry_id: entryId,
+        patch: { radio_id: editingValue.trim() || null },
+      })
+      if (error) throw new Error(error)
       setSetlistEntries((prev) =>
         prev.map((e) =>
           e.entry_id === entryId

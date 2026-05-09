@@ -2,7 +2,7 @@
  * Song update utilities for AdminSong component.
  */
 
-import { supabase } from "@/lib/supabase"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { SongDataFull } from "@/types/admin"
 
 export function transformSongForUpdate(song: SongDataFull) {
@@ -20,19 +20,21 @@ export function transformSongForUpdate(song: SongDataFull) {
   }
 }
 
-export async function updateSong(songData: SongDataFull) {
-  if (!supabase) throw new Error("Supabase not configured")
-  const { error } = await supabase
-    .from("songs")
-    .update({
-      song: songData.song,
-      song_displayname: songData.song_displayname,
-      song_category: songData.song_category,
-      song_originalartist: songData.song_originalartist,
-      song_categoryorder: songData.song_categoryorder,
-      song_coachnotes: songData.song_coachnotes,
-    })
-    .eq("song_id", songData.song_id)
-  if (error) throw error
+export async function updateSong(songData: SongDataFull, accessToken: string | null) {
+  if (!accessToken) throw new Error("You must be signed in")
+  const patch = {
+    song: songData.song,
+    song_displayname: songData.song_displayname,
+    song_category: songData.song_category,
+    song_originalartist: songData.song_originalartist,
+    song_categoryorder: songData.song_categoryorder,
+    song_coachnotes: songData.song_coachnotes,
+  }
+  const { error } = await invokeDproAdmin(accessToken, {
+    action: "songs_update",
+    song_id: songData.song_id,
+    patch,
+  })
+  if (error) throw new Error(error)
   return songData
 }

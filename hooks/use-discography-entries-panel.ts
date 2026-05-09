@@ -7,6 +7,8 @@ import {
   useCallback,
   useRef,
 } from "react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import type { AdminShowData, DiscographyEntryLink } from "@/types/admin"
 import { useShowData } from "@/hooks/use-show-data"
@@ -24,6 +26,8 @@ function sortLinks(rows: DiscographyEntryLink[]): DiscographyEntryLink[] {
 }
 
 export function useDiscographyEntriesPanel(discographyUuid: string) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [links, setLinks] = useState<DiscographyEntryLink[]>([])
   const [loadingLinks, setLoadingLinks] = useState(true)
   const [songByEntryId, setSongByEntryId] = useState<Record<string, string>>(
@@ -184,18 +188,19 @@ export function useDiscographyEntriesPanel(discographyUuid: string) {
     const raw = orderDraft[linkUuid]
     const n = Number.parseInt(raw ?? "", 10)
     const prev = links.find((l) => l.uuid === linkUuid)
-    if (!prev || !supabase || Number.isNaN(n)) {
+    if (!prev || !token || Number.isNaN(n)) {
       setOrderDraft((d) => ({ ...d, [linkUuid]: String(prev?.order ?? 0) }))
       return
     }
     if (n === prev.order) return
     setPanelError(null)
     try {
-      const { error } = await supabase
-        .from("discography_entries")
-        .update({ order: n })
-        .eq("uuid", linkUuid)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "discography_entries_update_order",
+        uuid: linkUuid,
+        order: n,
+      })
+      if (error) throw new Error(error)
       await fetchLinks()
     } catch {
       setPanelError("Could not update order.")
@@ -204,15 +209,15 @@ export function useDiscographyEntriesPanel(discographyUuid: string) {
   }
 
   const handleDelete = async (uuid: string) => {
-    if (!supabase) return
+    if (!token) return
     setDeleting(true)
     setPanelError(null)
     try {
-      const { error } = await supabase
-        .from("discography_entries")
-        .delete()
-        .eq("uuid", uuid)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "discography_entries_delete",
+        uuid,
+      })
+      if (error) throw new Error(error)
       setDeleteTarget(null)
       await fetchLinks()
     } catch {
@@ -232,7 +237,7 @@ export function useDiscographyEntriesPanel(discographyUuid: string) {
   }
 
   const handleAddSelected = async () => {
-    if (!supabase || selectedIds.size === 0) return
+    if (!token || selectedIds.size === 0) return
     setAdding(true)
     setPanelError(null)
     try {
@@ -243,8 +248,11 @@ export function useDiscographyEntriesPanel(discographyUuid: string) {
         discography_entry: discographyUuid,
         order: base + i + 1,
       }))
-      const { error } = await supabase.from("discography_entries").insert(rows)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "discography_entries_insert",
+        rows,
+      })
+      if (error) throw new Error(error)
       setSelectedIds(new Set())
       await fetchLinks()
     } catch {

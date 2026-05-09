@@ -10,6 +10,8 @@ import {
   ChevronRight,
   X,
 } from "lucide-react"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import type { ShowChangeData } from "@/types/admin"
 import {
@@ -44,6 +46,8 @@ export function ShowChangeModal({
   onSave,
   isNewChange = false,
 }: ShowChangeModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editedChange, setEditedChange] = useState<ShowChangeData | null>(null)
@@ -116,29 +120,36 @@ export function ShowChangeModal({
       alert("Please fill in all required fields")
       return
     }
-    if (!supabase) return
+    if (!token) {
+      alert("You must be signed in.")
+      return
+    }
     setIsSubmitting(true)
     try {
       const err = isNewChange
         ? (
-            await supabase.from("show_changes").insert({
-              show_id: editedChange.show_id,
-              change_order: editedChange.change_order,
-              change_type: editedChange.change_type,
-              change: editedChange.change,
-            })
-          ).error
-        : (
-            await supabase
-              .from("show_changes")
-              .update({
+            await invokeDproAdmin(token, {
+              action: "show_changes_insert",
+              row: {
+                show_id: editedChange.show_id,
                 change_order: editedChange.change_order,
                 change_type: editedChange.change_type,
                 change: editedChange.change,
-              })
-              .eq("show_change_uuid", editedChange.show_change_uuid)
+              },
+            })
           ).error
-      if (err) throw err
+        : (
+            await invokeDproAdmin(token, {
+              action: "show_changes_update",
+              show_change_uuid: editedChange.show_change_uuid,
+              patch: {
+                change_order: editedChange.change_order,
+                change_type: editedChange.change_type,
+                change: editedChange.change,
+              },
+            })
+          ).error
+      if (err) throw new Error(err)
       setIsEditing(false)
       onSave()
       onClose()
@@ -153,14 +164,14 @@ export function ShowChangeModal({
   }
 
   const handleDelete = async () => {
-    if (!editedChange?.show_change_uuid || !supabase) return
+    if (!editedChange?.show_change_uuid || !token) return
     setIsSubmitting(true)
     try {
-      const { error } = await supabase
-        .from("show_changes")
-        .delete()
-        .eq("show_change_uuid", editedChange.show_change_uuid)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "show_changes_delete",
+        show_change_uuid: editedChange.show_change_uuid,
+      })
+      if (error) throw new Error(error)
       onSave()
       onClose()
     } catch (error) {

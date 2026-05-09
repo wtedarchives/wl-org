@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { X, Save } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { ReleaseData } from "@/types/admin"
 import {
   Dialog,
@@ -29,6 +30,8 @@ export function ReleaseModal({
   release,
   isAddMode,
 }: ReleaseModalProps) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [formData, setFormData] = useState<
     Omit<ReleaseData, "release_id">
   >({
@@ -78,30 +81,32 @@ export function ReleaseModal({
     setSaving(true)
     setError(null)
     try {
-      if (!supabase) throw new Error("Supabase not available")
+      if (!token) throw new Error("You must be signed in")
       if (isAddMode) {
-        const { error } = await supabase.from("releases").insert([
-          {
+        const { error } = await invokeDproAdmin(token, {
+          action: "releases_insert",
+          row: {
             release: formData.release,
             release_displayname: formData.release_displayname,
             release_link: formData.release_link || null,
             release_service: formData.release_service || null,
             release_artwork: formData.release_artwork || null,
           },
-        ])
-        if (error) throw error
+        })
+        if (error) throw new Error(error)
       } else if (release) {
-        const { error } = await supabase
-          .from("releases")
-          .update({
+        const { error } = await invokeDproAdmin(token, {
+          action: "releases_update",
+          release_id: release.release_id,
+          patch: {
             release: formData.release,
             release_displayname: formData.release_displayname,
             release_link: formData.release_link || null,
             release_service: formData.release_service || null,
             release_artwork: formData.release_artwork || null,
-          })
-          .eq("release_id", release.release_id)
-        if (error) throw error
+          },
+        })
+        if (error) throw new Error(error)
       }
       onSave()
     } catch (err) {
@@ -113,15 +118,15 @@ export function ReleaseModal({
   }
 
   const handleDelete = async () => {
-    if (!release || !supabase) return
+    if (!release || !token) return
     setDeleting(true)
     setError(null)
     try {
-      const { error } = await supabase
-        .from("releases")
-        .delete()
-        .eq("release_id", release.release_id)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "releases_delete",
+        release_id: release.release_id,
+      })
+      if (error) throw new Error(error)
       onSave()
     } catch (err) {
       console.error("Error deleting release:", err)

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { getDefaultPlacementForSet } from "@/lib/setlist-default-placement"
-import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type {
   AdminSetlistEntryData,
   GuestCategory,
@@ -10,8 +11,10 @@ import type {
 
 export function useSetlistEntryForm(
   entry: AdminSetlistEntryData | null,
-  isNewEntry: boolean
+  isNewEntry: boolean,
 ) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const [isEditing, setIsEditing] = useState(false)
   const [editedEntry, setEditedEntry] = useState<AdminSetlistEntryData | null>(
     null
@@ -59,14 +62,13 @@ export function useSetlistEntryForm(
   }, [entry, isNewEntry])
 
   const fetchEntryGuests = async (entryId: string) => {
-    if (!supabase) return
+    if (!token) return
     try {
-      const { data, error } = await supabase
-        .from("setlist_entry_guests")
-        .select("guest_id")
-        .eq("setlist_entry_id", entryId)
-      if (!error && data)
-        setSelectedGuestIds(data.map((item) => item.guest_id))
+      const { data, error } = await invokeDproAdmin<{ guest_ids: string[] }>(token, {
+        action: "setlist_entry_guests_select",
+        setlist_entry_id: entryId,
+      })
+      if (!error && data?.guest_ids) setSelectedGuestIds(data.guest_ids)
     } catch {
       // silent
     }
