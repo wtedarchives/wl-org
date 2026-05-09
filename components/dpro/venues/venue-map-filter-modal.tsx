@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ interface VenueMapFilterModalProps {
   onTourChange: (value: string) => void
   onClearFilters: () => void
   hasActiveFilters: boolean
+  wlHomeV2?: boolean
 }
 
 export function VenueMapFilterModal({
@@ -39,22 +41,41 @@ export function VenueMapFilterModal({
   onTourChange,
   onClearFilters,
   hasActiveFilters,
+  wlHomeV2 = false,
 }: VenueMapFilterModalProps) {
   const isGroupDropdownDisabled = selectedTour !== "Show All"
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className={
+          wlHomeV2 ?
+            "venues-archive-map-filter-dialog max-w-md border-0 shadow-none ring-0 sm:max-w-md"
+          : "sm:max-w-md"
+        }
+      >
         <DialogHeader>
-          <DialogTitle>Venue Map Filters</DialogTitle>
+          <DialogTitle
+            className={wlHomeV2 ? "venues-archive-map-filter-dialog-title" : ""}
+          >
+            Venue map filters
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-6 py-4">
+        <div
+          className={
+            wlHomeV2 ? "venues-archive-map-filter-dialog-body space-y-6" : "space-y-6 py-4"
+          }
+        >
           <div className="space-y-2">
             <label
               htmlFor="tour-filter-modal"
-              className="block text-sm font-medium"
+              className={
+                wlHomeV2 ?
+                  "venues-archive-map-filter-field-label"
+                : "block text-sm font-medium"
+              }
             >
-              Filter by Tour:
+              Filter by tour
             </label>
             <Select
               value={selectedTour}
@@ -63,10 +84,17 @@ export function VenueMapFilterModal({
                 onClose()
               }}
             >
-              <SelectTrigger id="tour-filter-modal">
+              <SelectTrigger
+                id="tour-filter-modal"
+                className={wlHomeV2 ? "venues-archive-map-select-trigger w-full" : ""}
+              >
                 <SelectValue placeholder="[Show All]" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                className={
+                  wlHomeV2 ? "venues-archive-map-select-content" : undefined
+                }
+              >
                 <SelectItem value="Show All">[Show All]</SelectItem>
                 {tours.map((tour) => (
                   <SelectItem key={tour.tour} value={tour.tour}>
@@ -79,9 +107,13 @@ export function VenueMapFilterModal({
           <div className="space-y-2">
             <label
               htmlFor="group-filter-modal"
-              className="block text-sm font-medium"
+              className={
+                wlHomeV2 ?
+                  "venues-archive-map-filter-field-label"
+                : "block text-sm font-medium"
+              }
             >
-              Filter by Group:
+              Filter by group
             </label>
             <Select
               value={selectedGroup}
@@ -93,11 +125,22 @@ export function VenueMapFilterModal({
             >
               <SelectTrigger
                 id="group-filter-modal"
-                className={isGroupDropdownDisabled ? "opacity-50" : ""}
+                className={
+                  wlHomeV2 ?
+                    cn(
+                      "venues-archive-map-select-trigger w-full",
+                      isGroupDropdownDisabled && "opacity-50",
+                    )
+                  : isGroupDropdownDisabled ? "opacity-50" : ""
+                }
               >
                 <SelectValue placeholder="[Show All]" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent
+                className={
+                  wlHomeV2 ? "venues-archive-map-select-content" : undefined
+                }
+              >
                 <SelectItem value="Show All">[Show All]</SelectItem>
                 {groups.map((group) => (
                   <SelectItem key={group.group} value={group.group}>
@@ -107,20 +150,38 @@ export function VenueMapFilterModal({
               </SelectContent>
             </Select>
           </div>
-          {hasActiveFilters && (
-            <div className="pt-4 border-t">
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={() => {
-                  onClearFilters()
-                  onClose()
-                }}
-              >
-                Clear All Filters
-              </Button>
+          {hasActiveFilters ?
+            <div
+              className={
+                wlHomeV2 ?
+                  "venues-archive-map-filter-actions border-t border-[rgb(53,56,54)] pt-4"
+                : "border-t pt-4"
+              }
+            >
+              {wlHomeV2 ?
+                <button
+                  type="button"
+                  className="venues-archive-map-clear-btn venues-archive-map-clear-btn--full"
+                  onClick={() => {
+                    onClearFilters()
+                    onClose()
+                  }}
+                >
+                  Clear all filters
+                </button>
+              : <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => {
+                    onClearFilters()
+                    onClose()
+                  }}
+                >
+                  Clear All Filters
+                </Button>
+              }
             </div>
-          )}
+          : null}
         </div>
       </DialogContent>
     </Dialog>

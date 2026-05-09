@@ -35,6 +35,12 @@ function isSectionLinkActive(
   ) {
     return true
   }
+  if (
+    v2Href === "/archive/venues" &&
+    (base === "/archive/venue" || base === "/old/archive/venue")
+  ) {
+    return true
+  }
   return false
 }
 

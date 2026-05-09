@@ -64,7 +64,7 @@ function VenueDetailContent({ venueKey }: { venueKey: string }) {
     }
     setSetlistBreadcrumbs([
       WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Venues", href: "/old/archive/venues" },
+      { label: "Venues", href: "/archive/venues" },
       { label: venueName, href: getVenueArchiveUrl(venue.venue_id) },
     ])
     return () => setSetlistBreadcrumbs(null)

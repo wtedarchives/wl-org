@@ -49,7 +49,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Venues",
-    href: "/old/archive/venues",
+    href: "/archive/venues",
     icon: "MapPin",
     description:
       "Browse shows by venue. Find every performance at your favorite spots, with maps and location details.",

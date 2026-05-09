@@ -20,8 +20,20 @@ interface VenueMapProps {
   onVenueClick?: (venueId: string) => void
   /** Pre-fetched map data from parent */
   mapData: Omit<UseVenueMapDataReturn, "loading">
+  /** WL Home v2 archive shell (e.g. `/archive/venues`) — map chrome matches site panels. */
+  wlHomeV2?: boolean
 }
 
-export function VenueMap({ onVenueClick, mapData }: VenueMapProps) {
-  return <VenueMapInner onVenueClick={onVenueClick} mapData={mapData} />
+export function VenueMap({
+  onVenueClick,
+  mapData,
+  wlHomeV2 = false,
+}: VenueMapProps) {
+  return (
+    <VenueMapInner
+      onVenueClick={onVenueClick}
+      mapData={mapData}
+      wlHomeV2={wlHomeV2}
+    />
+  )
 }

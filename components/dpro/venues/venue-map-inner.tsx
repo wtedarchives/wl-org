@@ -12,15 +12,21 @@ import { VenueMapDesktopHeader } from "./venue-map-desktop-header"
 import { VenueMapFilterModal } from "./venue-map-filter-modal"
 import type { UseVenueMapDataReturn } from "@/hooks/use-venue-map-data"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
+import { cn } from "@/lib/utils"
 import "leaflet/dist/leaflet.css"
 
 interface VenueMapInnerProps {
   onVenueClick?: (venueId: string) => void
   /** Pre-fetched map data from parent */
   mapData: Omit<UseVenueMapDataReturn, "loading">
+  wlHomeV2?: boolean
 }
 
-export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
+export function VenueMapInner({
+  onVenueClick,
+  mapData,
+  wlHomeV2 = false,
+}: VenueMapInnerProps) {
   const router = useRouter()
   const belowXl = useIsBelowXl()
   const [mapVenues, setMapVenues] = useState<
@@ -60,6 +66,15 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
   const hideMapForFilterModal = isFilterModalOpen && belowXl
 
   if (allVenues.length === 0) {
+    if (wlHomeV2) {
+      return (
+        <div className="card perf-card venues-archive-map-panel venues-archive-map-empty">
+          <p className="venues-archive-empty-msg px-3 py-6 text-center">
+            No venues with location data available for mapping.
+          </p>
+        </div>
+      )
+    }
     return (
       <div className="rounded-lg border border-border bg-card p-4 text-center">
         <p className="text-sm text-muted-foreground">
@@ -86,20 +101,19 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
   const center: [number, number] = [centerLat, centerLng]
 
   return (
-    <div className="rounded-lg border border-border bg-card p-2 shadow-sm">
-      <style>
-        {`
-          .numbered-marker {
-            background: transparent !important;
-            border: none !important;
-          }
-        `}
-      </style>
+    <div
+      className={cn(
+        wlHomeV2 ?
+          "card perf-card venues-archive-map-panel venues-archive-map-shell"
+        : "rounded-lg border border-border bg-card p-2 shadow-sm",
+      )}
+    >
       <VenueMapMobileHeader
         venueCount={mapVenues.length}
         hasActiveFilters={hasActiveFilters}
         onClearFilters={handleClearFilters}
         onOpenFilterModal={() => setIsFilterModalOpen(true)}
+        wlHomeV2={wlHomeV2}
       />
       <VenueMapDesktopHeader
         venueCount={mapVenues.length}
@@ -112,6 +126,7 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
         onClearFilters={handleClearFilters}
         onTourChange={handleTourChange}
         onGroupChange={handleGroupChange}
+        wlHomeV2={wlHomeV2}
       />
       <VenueMapFilterModal
         isOpen={isFilterModalOpen}
@@ -124,13 +139,17 @@ export function VenueMapInner({ onVenueClick, mapData }: VenueMapInnerProps) {
         onTourChange={handleTourChange}
         onClearFilters={handleClearFilters}
         hasActiveFilters={hasActiveFilters}
+        wlHomeV2={wlHomeV2}
       />
       <div className={hideMapForFilterModal ? "hidden" : undefined}>
         <MapContainer
           center={center}
           zoom={3}
           style={{ width: "100%" }}
-          className="rounded-lg h-[400px] xl:h-[500px]"
+          className={cn(
+            "h-[400px] rounded-lg xl:h-[500px]",
+            wlHomeV2 && "venues-archive-map-leaflet",
+          )}
         >
           <MapInvalidateOnVisible visible={!hideMapForFilterModal} />
           <TileLayer

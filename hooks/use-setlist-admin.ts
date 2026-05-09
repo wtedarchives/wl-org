@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import type { WysteriaSession } from "@/lib/jwt"
 
 const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
@@ -20,41 +19,8 @@ export function useSetlistAdmin(session: WysteriaSession | null, showId: string 
       setIsAdminLoading(false)
       return
     }
-
-    const cacheKey = `admin_status_${session?.profileId}`
-    const cached = typeof sessionStorage !== "undefined" ? sessionStorage.getItem(cacheKey) : null
-    if (cached !== null) {
-      setIsAdmin(cached === "true")
-      setIsAdminLoading(false)
-      return
-    }
-
-    const userId = session?.profileId
-    async function check() {
-      if (!supabase) {
-        setIsAdminLoading(false)
-        return
-      }
-      try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("is_admin")
-          .eq("id", userId)
-          .single()
-
-        if (!error && data?.is_admin) {
-          setIsAdmin(true)
-          if (typeof sessionStorage !== "undefined") {
-            sessionStorage.setItem(cacheKey, "true")
-          }
-        }
-      } catch (err) {
-        console.error("Error checking admin status:", err)
-      } finally {
-        setIsAdminLoading(false)
-      }
-    }
-    check()
+    setIsAdmin(session.isAdmin)
+    setIsAdminLoading(false)
   }, [session])
 
   const handleCopyLink = useCallback(async () => {

@@ -391,7 +391,7 @@
       opacity: 1;
       margin-top: 10px;
       padding-top: 10px;
-      padding-bottom: 6px;
+      padding-bottom: 0;
       border-top-color: rgb(39, 42, 40);
       pointer-events: auto;
     }
@@ -581,7 +581,6 @@
       header.top
       nav.top-nav.top-nav--mobile-open:has(.wl-home-v2-archive-subnav--drawer) {
       max-height: min(90vh, 620px);
-      padding-bottom: 6px;
     }
   }
 
@@ -655,7 +654,6 @@
       header.top
       nav.top-nav.top-nav--mobile-open:has(.wl-home-v2-archive-subnav--drawer) {
       max-height: min(90vh, 620px);
-      padding-bottom: 6px;
     }
   }
 
@@ -676,13 +674,12 @@
     }
   }
   .wl-home-v2 .wl-home-v2-archive-subnav.wl-home-v2-archive-subnav--drawer {
-    border-bottom: none;
-    background: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    padding: 8px 2px 10px;
-    margin-top: 6px;
-    border-top: 1px solid rgb(39, 42, 40);
+    /* Match desktop archive strip: bg, blur, bottom hairline. */
+    border-bottom: 1px solid rgb(34, 37, 35);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 8px 8px 18px;
     width: 100%;
     flex-shrink: 0;
   }
@@ -701,8 +698,7 @@
   /* Hamburger (< md): keep archive years + pills looking like the bar (not primary tiles). */
   @media (max-width: 767px) {
     .wl-home-v2 header.top nav.top-nav .wl-home-v2-archive-subnav--drawer {
-      padding: 10px 0 0;
-      margin-top: 8px;
+      padding: 10px 6px 8px;
     }
   }
   .wl-home-v2 .wl-home-v2-archive-subnav-row {
@@ -1399,6 +1395,233 @@
     color: #fff;
     border-color: rgb(123, 94, 63);
     background: rgba(255, 255, 255, 0.08);
+  }
+
+  /*
+   * Venues archive (`/archive/venues`) — list panel inset, table scroll region, empty state.
+   * Below `lg`, layout is stacked: same margin on all four sides for list + map.
+   * `lg+` row: list inset from top-left, map from top-right (matches desktop gutters).
+   */
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-list-panel {
+    margin: 8px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-list-panel {
+      margin: 12px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-list-panel {
+      margin: 12px 0 0 16px;
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-list-panel.card {
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1023px) {
+    .wl-home-v2
+      .wl-home-v2-venues-archive-page
+      .venues-archive-list-panel.card:has(.perf-table-wrap) {
+      padding: 10px;
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-empty-msg {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.65);
+    font-family: inherit;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-table-scroll {
+    max-height: min(480px, 55vh);
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    transition: opacity 0.2s ease-out;
+  }
+
+  @media (min-width: 1024px) {
+    .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-table-scroll {
+      max-height: none;
+    }
+  }
+
+  /* Venues archive — map column; stacked: equal margin all sides; row: top + right only. */
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-panel {
+    margin: 8px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-panel {
+      margin: 12px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-panel {
+      margin: 12px 16px 0 0;
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-shell.card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-shell.card {
+      padding: 10px 12px 12px;
+    }
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-toolbar {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgb(53, 56, 54);
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-count {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-field-label {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-pill-btn {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgb(49, 51, 49);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    padding: 5px 12px;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-pill-btn:hover {
+    color: #fff;
+    border-color: rgb(123, 94, 63);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-pill-btn--sm {
+    min-height: 28px;
+    padding-block: 4px;
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-clear-btn {
+    box-sizing: border-box;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.82);
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgb(123, 94, 63);
+    border-radius: 8px;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-clear-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgb(160, 118, 78);
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-clear-btn--icon {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-clear-btn--text {
+    min-height: 28px;
+    padding: 4px 12px;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-clear-btn--full {
+    width: 100%;
+    min-height: 40px;
+    font-size: 12px;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-select-trigger {
+    border-radius: 8px;
+    border: 1px solid rgb(49, 51, 49);
+    background: rgba(0, 0, 0, 0.22);
+    color: rgba(255, 255, 255, 0.92);
+    padding-inline: 10px;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-select-trigger:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgb(72, 74, 72);
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-select-trigger:focus-visible {
+    outline: 2px solid rgba(255, 160, 120, 0.45);
+    outline-offset: 1px;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-leaflet {
+    width: 100%;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .numbered-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-empty {
+    display: block;
+  }
+
+  .wl-home-v2 .wl-home-v2-venues-archive-page .venues-archive-map-empty .venues-archive-empty-msg {
+    margin: 0 auto;
+    max-width: 28rem;
   }
 
   /* ---------- Tile ---------- */
@@ -6763,7 +6986,7 @@
       justify-content: center;
       margin-left: 0;
     }
-    /* Stats + Songs archive: keep toolbar on same row as crumbs, flush right (like desktop). */
+    /* Stats, Songs, Personnel, Venues: keep toolbar on same row as crumbs, flush right (like desktop). */
     .wl-home-v2
       .wl-home-v2-archive-crumbs-shell.wl-home-v2-archive-crumbs-shell--inline-selectors
       .wl-home-v2-setlist-crumbs-selectors {
@@ -10422,3 +10645,107 @@
   flex: 1;
   min-width: 0;
 }
+
+/*
+ * Venues archive map — portaled Radix surfaces (Select, Dialog), class-tagged from v2 map only.
+ */
+.venues-archive-map-select-content[data-slot="select-content"] {
+  background: rgba(36, 40, 38, 0.98);
+  border: 1px solid rgb(63, 65, 64);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  /* ring from shadcn replaced */
+  --tw-ring-shadow: none;
+}
+
+.venues-archive-map-select-content[data-slot="select-content"] [data-slot="select-item"] {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.venues-archive-map-select-content[data-slot="select-content"] [data-slot="select-item"]:focus,
+.venues-archive-map-select-content[data-slot="select-content"] [data-slot="select-item"][data-highlighted] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.venues-archive-map-select-content[data-slot="select-content"] [data-slot="select-scroll-up-button"],
+.venues-archive-map-select-content[data-slot="select-content"] [data-slot="select-scroll-down-button"] {
+  background: rgba(36, 40, 38, 0.98);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.venues-archive-map-filter-dialog[data-slot="dialog-content"] {
+  background: rgba(49, 58, 52, 0.96);
+  border: 1px solid rgb(63, 65, 64);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 20px 18px 18px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.venues-archive-map-filter-dialog[data-slot="dialog-content"] [data-slot="dialog-close"] {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.venues-archive-map-filter-dialog[data-slot="dialog-content"] [data-slot="dialog-close"]:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.venues-archive-map-filter-dialog-title {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.venues-archive-map-filter-field-label {
+  display: block;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+
+.venues-archive-map-filter-dialog-body {
+  padding-top: 4px;
+}
+
+.venues-archive-map-filter-dialog .venues-archive-map-select-trigger {
+  border-radius: 8px;
+  border: 1px solid rgb(49, 51, 49);
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 255, 255, 0.92);
+  min-height: 36px;
+  padding-inline: 12px;
+}
+
+.venues-archive-map-filter-dialog .venues-archive-map-select-trigger:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgb(72, 74, 72);
+}
+
+.venues-archive-map-filter-actions .venues-archive-map-clear-btn--full {
+  border: 1px solid rgb(123, 94, 63);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.88);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.venues-archive-map-filter-actions .venues-archive-map-clear-btn--full:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgb(160, 118, 78);
+  color: #fff;
+}
+
