@@ -563,6 +563,33 @@ async function handleAction(
       return { data: true }
     }
 
+    case "wted_episode_entries_update": {
+      const ee_uuid = body.ee_uuid as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!ee_uuid || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, ["set", "order", "placement"])
+      const { error } = await db.from("wted_episode_entries").update(allowed).eq("uuid", ee_uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "wted_episode_entries_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, ["song", "episode", "set", "order", "placement"])
+      const { error } = await db.from("wted_episode_entries").insert(allowed)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "wted_episode_entries_delete": {
+      const ee_uuid = body.ee_uuid as string | undefined
+      if (!ee_uuid) return { error: "Missing ee_uuid" }
+      const { error } = await db.from("wted_episode_entries").delete().eq("uuid", ee_uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
     case "profiles_count": {
       const { count, error } = await db.from("profiles").select("*", { count: "exact", head: true })
       if (error) return { error: error.message }

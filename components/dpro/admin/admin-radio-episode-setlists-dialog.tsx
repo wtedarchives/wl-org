@@ -1,7 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useAuth } from "@/components/auth-context"
 import { supabase } from "@/lib/supabase"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { AdminShowData } from "@/types/admin"
 import { useShowData } from "@/hooks/use-show-data"
 import { useSetlistOptions } from "@/hooks/use-setlist-options"
@@ -64,6 +66,8 @@ export function AdminRadioEpisodeSetlistsDialog({
   onOpenChange: (open: boolean) => void
   episode: (ProgramDirectorEpisode & { uuid: string }) | null
 }) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
   const { allShows, loading: showsLoading, loadingProgress } = useShowData()
   const { sets, setnums, placements } = useSetlistOptions()
 
@@ -215,6 +219,10 @@ export function AdminRadioEpisodeSetlistsDialog({
 
   const handleSaveEpisodeListing = async () => {
     const client = supabase
+    if (!token) {
+      setPanelError("You must be signed in to save episode listings.")
+      return
+    }
     if (!client || !radioId) return
     const ed = listingEditorRef.current
     const updates = collectEpisodeSetlistUpdates(savedRows, ed)
@@ -227,33 +235,33 @@ export function AdminRadioEpisodeSetlistsDialog({
     setSavingAll(true)
     setPanelError(null)
     try {
-      const updateResults = await Promise.all(
-        updates.map((u) =>
-          client
-            .from("wted_episode_entries")
-            .update({
+      const merged = await Promise.all([
+        ...updates.map((u) =>
+          invokeDproAdmin(token, {
+            action: "wted_episode_entries_update",
+            ee_uuid: u.eeUuid,
+            patch: {
               set: u.set,
               order: u.order,
               placement: u.placement,
-            })
-            .eq("uuid", u.eeUuid),
-        ),
-      )
-      const insertResults = await Promise.all(
-        inserts.map((ins) =>
-          client.from("wted_episode_entries").insert({
-            song: ins.entryId,
-            episode: radioId,
-            set: ins.set,
-            order: ins.order,
-            placement: ins.placement,
+            },
           }),
         ),
-      )
-      const firstErr =
-        updateResults.find((r) => r.error)?.error ??
-        insertResults.find((r) => r.error)?.error
-      if (firstErr) throw firstErr
+        ...inserts.map((ins) =>
+          invokeDproAdmin(token, {
+            action: "wted_episode_entries_insert",
+            row: {
+              song: ins.entryId,
+              episode: radioId,
+              set: ins.set,
+              order: ins.order,
+              placement: ins.placement,
+            },
+          }),
+        ),
+      ])
+      const errMsg = merged.find((r) => r.error)?.error
+      if (errMsg) throw new Error(errMsg)
 
       setStagedRows([])
       setLoadingRows(true)
@@ -279,15 +287,19 @@ export function AdminRadioEpisodeSetlistsDialog({
       setListingEditor((ed) => removeEditorRow(ed, eeUuid))
       return
     }
+    if (!token) {
+      setPanelError("You must be signed in to delete rows.")
+      return
+    }
     if (!supabase) return
     setDeletingUuid(eeUuid)
     setPanelError(null)
     try {
-      const { error } = await supabase
-        .from("wted_episode_entries")
-        .delete()
-        .eq("uuid", eeUuid)
-      if (error) throw error
+      const { error } = await invokeDproAdmin(token, {
+        action: "wted_episode_entries_delete",
+        ee_uuid: eeUuid,
+      })
+      if (error) throw new Error(error)
       await reloadRows()
     } catch (e) {
       setPanelError(
