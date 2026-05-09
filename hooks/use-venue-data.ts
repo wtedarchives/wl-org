@@ -21,6 +21,7 @@ export interface VenueShow {
   show_tour: string | null
   tour_id: string | null
   venue_id: string | null
+  show_canonid: number | null
   show_detail: string | null
   show_alert: string | null
 }
@@ -133,6 +134,7 @@ export function useVenueData(venueId: string | undefined) {
           show_subvenue: string
           show_venue_location: string
           show_tour: string | null
+          show_canonid: number | null
           show_detail: string | null
           show_alert: string | null
           subvenues?: { venues?: { venue_id?: string } } | null
@@ -151,6 +153,7 @@ export function useVenueData(venueId: string | undefined) {
               show_subvenue,
               show_venue_location,
               show_tour,
+              show_canonid,
               show_detail,
               show_alert,
               subvenues:show_subvenue(
@@ -160,6 +163,8 @@ export function useVenueData(venueId: string | undefined) {
             )
             .in("show_subvenue", subvenueNames)
             .order("show_date", { ascending: true })
+            .order("show_canonid", { ascending: true, nullsFirst: true })
+            .order("show_group", { ascending: true })
             .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
           if (showsError) throw showsError
@@ -184,6 +189,7 @@ export function useVenueData(venueId: string | undefined) {
             show_tour: s.show_tour ?? null,
             tour_id: null,
             venue_id: ven?.venue_id ?? venueData.venue_id,
+            show_canonid: s.show_canonid ?? null,
             show_detail: s.show_detail ?? null,
             show_alert: s.show_alert ?? null,
           }

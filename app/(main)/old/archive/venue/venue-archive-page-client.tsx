@@ -32,7 +32,7 @@ function resolveVenueKeyFromSearchParams(
 function VenueIndexRedirect() {
   const router = useRouter()
   useEffect(() => {
-    router.replace("/old/archive/venues")
+    router.replace("/archive/venues")
   }, [router])
   return (
     <LoadingPageCard message="Redirecting…" page="venue" />

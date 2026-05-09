@@ -23,6 +23,7 @@ interface VenueSingleMarkerMapWrapperProps {
   venueAddress: string | null
   latitude: number
   longitude: number
+  wlHomeV2?: boolean
 }
 
 export function VenueSingleMarkerMapWrapper({
@@ -31,6 +32,7 @@ export function VenueSingleMarkerMapWrapper({
   venueAddress,
   latitude,
   longitude,
+  wlHomeV2 = false,
 }: VenueSingleMarkerMapWrapperProps) {
   return (
     <VenueSingleMarkerMap
@@ -39,6 +41,7 @@ export function VenueSingleMarkerMapWrapper({
       venueAddress={venueAddress}
       latitude={latitude}
       longitude={longitude}
+      wlHomeV2={wlHomeV2}
     />
   )
 }

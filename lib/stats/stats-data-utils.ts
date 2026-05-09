@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { SKIP_SHORTS } from "@/lib/utils/user-stats-utils"
 import type {
   TopSong,
   ShowOpener,
@@ -6,6 +7,15 @@ import type {
   LiberatedSong,
 } from "@/lib/types/stats"
 import { timeToSeconds } from "./tour-utils"
+
+function isExcludedArchiveStatsEntryShort(
+  entryShort: string | null | undefined
+): boolean {
+  if (entryShort == null || entryShort === "") return false
+  return (SKIP_SHORTS as readonly string[]).includes(
+    entryShort.toLowerCase().trim()
+  )
+}
 
 const BATCH_SIZE = 100_000
 
@@ -48,6 +58,7 @@ export async function fetchTopSongsData(
       .select(
         `
         entry_song,
+        entry_short,
         songs!inner(
           song_id,
           song_displayname,
@@ -71,7 +82,12 @@ export async function fetchTopSongsData(
     return query.range(from, from + batchSize - 1)
   })
 
-  const songShowCounts = allData.reduce(
+  const countedRows = allData.filter(
+    (row) =>
+      !isExcludedArchiveStatsEntryShort(row.entry_short as string | null)
+  )
+
+  const songShowCounts = countedRows.reduce(
     (acc: Record<string, { song: string; song_displayname?: string | null; song_id: string; shows: Set<string>; category_canonid: number; category_artwork?: string }>,
     entry: Record<string, unknown>
   ) => {
@@ -127,6 +143,7 @@ async function fetchPlacementData(
       .select(
         `
         entry_song,
+        entry_short,
         songs!inner(
           song_id,
           song_displayname,
@@ -155,7 +172,12 @@ async function fetchPlacementData(
     return query.range(from, from + batchSize - 1)
   })
 
-  const counts = allData.reduce(
+  const placementRows = allData.filter(
+    (row) =>
+      !isExcludedArchiveStatsEntryShort(row.entry_short as string | null)
+  )
+
+  const counts = placementRows.reduce(
     (acc: Record<string, { song_name: string; song_displayname?: string | null; song_id: string; times_played: number; category_canonid: number; song_categoryorder?: number | null; category_artwork?: string }>,
     entry: Record<string, unknown>
   ) => {

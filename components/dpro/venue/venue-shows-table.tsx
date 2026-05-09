@@ -69,12 +69,79 @@ function RatingStars({ rating }: { rating: number }) {
 interface VenueShowsTableProps {
   shows: VenueShow[]
   showRatings: Record<string, number>
+  /** WL Home v2 archive pages — `perf-card` / `perf-table` shell. */
+  wlHomeV2?: boolean
 }
 
 export function VenueShowsTable({
   shows,
   showRatings,
+  wlHomeV2 = false,
 }: VenueShowsTableProps) {
+  if (wlHomeV2) {
+    return (
+      <div className="card perf-card flex min-h-0 flex-col overflow-hidden">
+        <div className="card-head perf-card-head-pad">
+          <h3>Shows</h3>
+        </div>
+        <div className="perf-table-wrap venues-archive-table-scroll max-h-[min(520px,55vh)] min-h-0 flex-1 lg:max-h-none">
+          <table className="perf-table">
+            <thead>
+              <tr>
+                <th className="perf-table-th--center">Date</th>
+                <th>Group</th>
+                <th>Venue</th>
+                <th>Tour</th>
+                <th className="perf-table-th--center">Rating</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shows.map((show) => (
+                <tr key={show.show_id}>
+                  <td className="date perf-table-td--center whitespace-nowrap font-medium">
+                    <Link href={getSetlistArchiveUrl(show.show_id)}>
+                      {formatVenueShowDate(show.show_date)}
+                    </Link>
+                  </td>
+                  <td className="dim whitespace-nowrap">{show.show_group}</td>
+                  <td className="dim whitespace-nowrap">
+                    {show.show_subvenue}
+                  </td>
+                  <td className="whitespace-nowrap">
+                    {show.show_tour ?
+                      show.tour_id ?
+                        <Link href={getTourArchiveUrl(show.tour_id)} className="dim">
+                          {show.show_tour}
+                        </Link>
+                      : <span className="dim">{show.show_tour}</span>
+                    : null}
+                  </td>
+                  <td className="perf-table-td--center whitespace-nowrap">
+                    <div className="flex justify-center">
+                      <RatingStars
+                        rating={showRatings[show.show_id] ?? 0}
+                      />
+                    </div>
+                  </td>
+                  <td className="dim whitespace-nowrap">
+                    {show.show_detail}
+                    {show.show_detail && show.show_alert ? <>&nbsp;&nbsp;</> : null}
+                    {show.show_alert ?
+                      <span className="font-medium text-[rgb(248,113,113)]">
+                        [{show.show_alert}]
+                      </span>
+                    : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
       <div className="bg-muted/60 px-3 py-2 shrink-0">

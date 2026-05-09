@@ -94,9 +94,11 @@ function ThisDayHistoryRow({
     .join(" ")
 
   return (
-    <li className={rowClass}>
-      {dateBlock}
-      <span className="wl-home-v2-tour-schedule-cell wl-home-v2-tour-schedule-list-venue">
+    <tr className={rowClass}>
+      <td className="wl-home-v2-tour-schedule-td wl-home-v2-tour-schedule-td--date">
+        {dateBlock}
+      </td>
+      <td className="wl-home-v2-tour-schedule-td wl-home-v2-tour-schedule-venue">
         {show.venue_id ?
           <Link
             href={getVenueArchiveUrl(show.venue_id)}
@@ -104,9 +106,9 @@ function ThisDayHistoryRow({
           >
             {show.show_venue_location}
           </Link>
-        : show.show_venue_location}
-      </span>
-      <span className="wl-home-v2-tour-schedule-list-col wl-home-v2-tour-schedule-list-col--icon">
+        : <span>{show.show_venue_location}</span>}
+      </td>
+      <td className="wl-home-v2-tour-schedule-td wl-home-v2-tour-schedule-td--icon">
         {showsWithSetlists.has(show.show_id) ?
           <Tooltip>
             <TooltipTrigger asChild>
@@ -123,8 +125,8 @@ function ThisDayHistoryRow({
             </TooltipContent>
           </Tooltip>
         : <span className="wl-home-v2-tour-schedule-icon-placeholder" aria-hidden />}
-      </span>
-      <span className="wl-home-v2-tour-schedule-list-col wl-home-v2-tour-schedule-list-col--icon">
+      </td>
+      <td className="wl-home-v2-tour-schedule-td wl-home-v2-tour-schedule-td--icon">
         {showsWithReleases.has(show.show_id) ?
           <Tooltip>
             <TooltipTrigger asChild>
@@ -141,8 +143,8 @@ function ThisDayHistoryRow({
             </TooltipContent>
           </Tooltip>
         : <span className="wl-home-v2-tour-schedule-icon-placeholder" aria-hidden />}
-      </span>
-      <span className="wl-home-v2-tour-schedule-list-col wl-home-v2-tour-schedule-list-col--icon">
+      </td>
+      <td className="wl-home-v2-tour-schedule-td wl-home-v2-tour-schedule-td--icon wl-home-v2-tour-schedule-td--wl">
         {show.show_wl_link ?
           <Tooltip>
             <TooltipTrigger asChild>
@@ -167,8 +169,8 @@ function ThisDayHistoryRow({
             </TooltipContent>
           </Tooltip>
         : <span className="wl-home-v2-tour-schedule-icon-placeholder" aria-hidden />}
-      </span>
-      <span className="wl-home-v2-tour-schedule-list-col wl-home-v2-tour-schedule-list-col--icon wl-home-v2-tour-schedule-list-col--goose">
+      </td>
+      <td className="wl-home-v2-tour-schedule-td wl-home-v2-tour-schedule-td--icon wl-home-v2-tour-schedule-td--goose">
         {show.show_group === "Goose" ?
           <Tooltip>
             <TooltipTrigger asChild>
@@ -185,12 +187,12 @@ function ThisDayHistoryRow({
             <TooltipContent side="top">Goose show</TooltipContent>
           </Tooltip>
         : <span className="wl-home-v2-tour-schedule-icon-placeholder" aria-hidden />}
-      </span>
-    </li>
+      </td>
+    </tr>
   )
 }
 
-/** Same shell as tour schedule; list layout with matching indicators and section tint. */
+/** Same shell and table columns as the tour schedule modal (no section rail). */
 export function WlHomeV2ThisDayHistoryModal({
   open,
   onClose,
@@ -256,19 +258,22 @@ export function WlHomeV2ThisDayHistoryModal({
               </p>
             : <TooltipProvider delayDuration={300}>
                 <div className="wl-home-v2-tour-schedule-scroll">
-                  <ul
-                    className="wl-home-v2-tour-schedule-rows"
-                    aria-label="Shows on this calendar day"
-                  >
-                    {shows.map((show) => (
-                      <ThisDayHistoryRow
-                        key={`${show.show_id}-${show.show_date}`}
-                        show={show}
-                        showsWithSetlists={showsWithSetlists}
-                        showsWithReleases={showsWithReleases}
-                      />
-                    ))}
-                  </ul>
+                  <table className="wl-home-v2-tour-schedule-table wl-home-v2-this-day-history-table">
+                    <caption className="sr-only">
+                      Shows on this calendar day: date, venue, setlist, media, community,
+                      Goose indicator
+                    </caption>
+                    <tbody>
+                      {shows.map((show) => (
+                        <ThisDayHistoryRow
+                          key={`${show.show_id}-${show.show_date}`}
+                          show={show}
+                          showsWithSetlists={showsWithSetlists}
+                          showsWithReleases={showsWithReleases}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </TooltipProvider>
             }

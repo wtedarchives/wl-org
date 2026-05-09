@@ -103,11 +103,11 @@ export function VenueMarker({
     <Marker key={`${venue.venue_id}-${selectedTour}`} {...markerProps}>
       <Popup maxWidth={300}>
         <div className="text-base min-w-48 font-medium">
-          <div className="block">
+          <div className="flex flex-wrap items-baseline gap-x-2">
             {onVenueClick ? (
               <button
                 type="button"
-                className="text-muted-foreground text-sm font-medium cursor-pointer hover:underline"
+                className="cursor-pointer text-sm font-medium text-muted-foreground hover:underline"
                 onClick={() => onVenueClick(venue.venue_id)}
               >
                 {venue.venue}
@@ -115,14 +115,14 @@ export function VenueMarker({
             ) : (
               <Link
                 href={getVenueArchiveUrl(venue.venue_id)}
-                className="text-muted-foreground text-sm font-medium hover:underline"
+                className="text-sm font-medium text-muted-foreground hover:underline"
               >
                 {venue.venue}
               </Link>
             )}
             {tourStopDisplay && (
               <span
-                className="ml-2 text-sm font-medium"
+                className="shrink-0 text-sm font-medium"
                 style={{ color: tourStopDisplay.color }}
               >
                 {tourStopDisplay.text}

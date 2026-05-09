@@ -126,10 +126,14 @@ export function WlHomeV2VenuesArchiveView() {
             />
           }
         />
-        <div className="widget-panel mt-4 py-10 text-center">
-          <p className="text-sm text-white/65">
-            Trouble loading venues. Please reload the page.
-          </p>
+        <div className="song-archive-detail-vx__main song-archive-detail-vx__main--no-side flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="col-main flex min-h-0 min-w-0 flex-1 flex-col">
+            <div className="widget-panel mt-4 py-10 text-center">
+              <p className="text-sm text-white/65">
+                Trouble loading venues. Please reload the page.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -147,13 +151,17 @@ export function WlHomeV2VenuesArchiveView() {
             />
           }
         />
-        <WlHomeV2PageLoading message="Loading venues…" />
+        <div className="song-archive-detail-vx__main song-archive-detail-vx__main--no-side flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="col-main flex min-h-0 min-w-0 flex-1 flex-col">
+            <WlHomeV2PageLoading message="Loading venues…" />
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="song-archive-detail-vx wl-home-v2-song-archive-page wl-home-v2-venues-archive-page box-border flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-b-none px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6">
+    <div className="song-archive-detail-vx wl-home-v2-song-archive-page wl-home-v2-venues-archive-page box-border flex min-h-0 min-w-0 w-full flex-none flex-col overflow-visible rounded-b-none px-4 py-5 sm:px-5 lg:flex-1 lg:overflow-hidden lg:px-[18px] lg:py-6">
       <WlHomeV2ArchiveCrumbsShell
         variant="page-gutter"
         className="wl-home-v2-archive-crumbs-shell--inline-selectors"
@@ -187,15 +195,17 @@ export function WlHomeV2VenuesArchiveView() {
         searchInputRef={venuesSearchInputRef}
       />
 
-      <div className="mt-5 flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:gap-5">
-        <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col lg:order-1">
+      <div className="song-archive-detail-vx__main song-archive-detail-vx__main--no-side flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="col-main flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="venues-archive-split-row">
+            <div className="order-2 flex min-h-0 min-w-0 flex-none flex-col lg:order-1 lg:flex-1">
           {venues.length === 0 ?
             <div className="card perf-card venues-archive-list-panel">
               <div className="card-body">
                 <p className="venues-archive-empty-msg">No venues found.</p>
               </div>
             </div>
-          : <div className="card perf-card venues-archive-list-panel flex min-h-0 min-w-0 flex-1 flex-col">
+          : <div className="card perf-card venues-archive-list-panel flex min-h-0 min-w-0 flex-none flex-col lg:flex-1">
               <div className="perf-table-wrap venues-archive-table-scroll">
                 <table className="perf-table">
                   <thead>
@@ -233,7 +243,7 @@ export function WlHomeV2VenuesArchiveView() {
                             alt="Goose shows"
                             width={32}
                             height={32}
-                            className="size-6 object-contain"
+                            className="h-8 w-8 shrink-0 object-contain"
                           />
                         </span>
                       </th>
@@ -279,6 +289,8 @@ export function WlHomeV2VenuesArchiveView() {
           }
         >
           <VenueMap mapData={mapData} wlHomeV2 />
+        </div>
+          </div>
         </div>
       </div>
     </div>
