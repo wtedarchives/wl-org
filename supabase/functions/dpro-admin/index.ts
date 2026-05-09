@@ -601,12 +601,20 @@ async function handleAction(
   }
 }
 
+function bearerToken(h: string | null): string | null {
+  if (!h?.startsWith("Bearer ")) return null
+  const t = h.slice(7).trim()
+  return t !== "" ? t : null
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders })
   if (req.method !== "POST") return httpErr("Method not allowed", 405)
 
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  /** Gateway accepts project JWT in `Authorization`; Wysteria SSO lives here (see `lib/dpro-admin-edge.ts`). */
+  const token =
+    bearerToken(req.headers.get("x-wysteria-authorization")) ??
+    bearerToken(req.headers.get("authorization"))
   if (!token) return httpErr("Unauthorized", 401)
 
   const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
