@@ -73,7 +73,7 @@ export function LoginCredentialsForm({
         Don&apos;t have an account?{" "}
         <button
           type="button"
-          className="text-[0.7rem] text-primary underline-offset-4 hover:underline"
+          className="text-[0.7rem] text-primary hover:underline"
           onClick={() => signIn()}
         >
           Sign up

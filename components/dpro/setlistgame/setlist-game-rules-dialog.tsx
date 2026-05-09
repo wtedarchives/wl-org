@@ -147,7 +147,7 @@ export function SetlistGameRulesDialog({
               If you experience unforeseen errors,{" "}
               <Link
                 href="/old/archive/submit"
-                className="font-bold no-underline hover:underline underline-offset-2"
+                className="font-bold no-underline hover:underline"
               >
                 submit a bug report here
               </Link>

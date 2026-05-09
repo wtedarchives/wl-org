@@ -45,4 +45,9 @@ export interface DisplaySetlistTableProps {
   discographySourceLabels?: string[]
   /** When aligned with `setlist`, Show column uses linked setlist/venue URLs and song-matched text styles. */
   discographyShowColumnCells?: (DiscographyShowColumnCell | null)[]
+  /**
+   * WL Home v2: table uses `.set-table` under `.wl-home-v2-setlist` (frosted scroll shell is the parent).
+   * Omits redundant outer horizontal scroll wrapper.
+   */
+  wlHomeV2SetlistTableChrome?: boolean
 }

@@ -160,7 +160,7 @@ export function WtedEpisodePageHero({
                 Description
               </h2>
               <div
-                className="mt-2 min-w-0 text-sm leading-relaxed text-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:no-underline [&_a]:underline-offset-2 [&_a]:hover:underline"
+                className="mt-2 min-w-0 text-sm leading-relaxed text-foreground [&_a]:font-medium [&_a]:text-primary [&_a]:no-underline [&_a]:hover:underline"
                 dangerouslySetInnerHTML={{
                   __html: wtedEpisodeDescriptionHtml(description),
                 }}

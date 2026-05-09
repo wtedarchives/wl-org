@@ -35,6 +35,10 @@ import { SetlistEntryLastCell } from "./setlist-entry-last-cell"
 import { SetlistEntryGuestsCell } from "./setlist-entry-guests-cell"
 import { venueLocationAlreadyBracketed } from "@/lib/format-venue-location-brackets"
 import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
+import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+
+/** Verbatim stylesheet sets `a { text-decoration: none }`; WL discography restores hover underline in CSS */
+const SHOW_COL_HIT = "discography-show-col-hit"
 
 function DiscographyShowVenueInner({
   cell,
@@ -46,7 +50,10 @@ function DiscographyShowVenueInner({
     return (
       <Link
         href={getVenueArchiveUrl(cell.venueId)}
-        className="font-normal text-foreground hover:underline"
+        className={cn(
+          SHOW_COL_HIT,
+          "font-normal text-foreground hover:underline focus-visible:underline",
+        )}
       >
         {label}
       </Link>
@@ -56,7 +63,10 @@ function DiscographyShowVenueInner({
     return (
       <Link
         href={getVenueArchiveUrl(cell.venueSlug)}
-        className="font-normal text-foreground hover:underline"
+        className={cn(
+          SHOW_COL_HIT,
+          "font-normal text-foreground hover:underline focus-visible:underline",
+        )}
       >
         {label}
       </Link>
@@ -78,6 +88,8 @@ export interface SetlistEntryRowProps {
   onNumberClick?: (entryId: string) => void
   showAdminUi?: boolean
   showTooltips?: boolean
+  /** When true, row chrome matches WL v2 setlist `.song-row*` (underline `.set-table` hairlines). */
+  wlHomeV2RowChrome?: boolean
   hoveredCategory?: string | null
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: Record<string, Set<string>>
@@ -108,6 +120,7 @@ export function SetlistEntryRow({
   discographySourceLabel,
   suppressNumberPlacementColor = false,
   discographyShowCell,
+  wlHomeV2RowChrome = false,
 }: SetlistEntryRowProps) {
   const rarity = calculateRarity(
     entry.times_played_num,
@@ -137,30 +150,55 @@ export function SetlistEntryRow({
     ? !isEntryOnHoveredRelease
     : !!hoveredCategory && entryCategory !== hoveredCategory
 
+  const pxPad = DISPLAY_SETLIST_TABLE_CELL_PAD
+  const personnelMw = wlHomeV2RowChrome ? "max-w-[400px]" : "max-w-[300px]"
+  const personnelMeasure = cn("w-max", personnelMw)
+
   return (
     <TableRow
       className={cn(
-        "border-border/60 transition-opacity",
-        shouldHighlightRow && "bg-primary/20",
-        shouldDimRow && "opacity-10"
+        wlHomeV2RowChrome ?
+          cn(
+            "song-row border-0",
+            shouldHighlightRow && "song-row--release-highlight",
+            shouldDimRow && "song-row--release-dim",
+          )
+        : cn(
+            "border-border/60 transition-opacity",
+            shouldHighlightRow && "bg-primary/20",
+            shouldDimRow && "opacity-10",
+          ),
       )}
     >
       <TableCell
         className={cn(
-          DISPLAY_SETLIST_TABLE_CELL_PAD,
-          "display-setlist-num-cell text-center tabular-nums",
-          isCopied
-            ? "bg-green-600 text-white"
-            : suppressNumberPlacementColor
-              ? "text-foreground"
-              : numberUsesPlacementColor
-                ? "text-white"
-                : "text-muted-foreground",
+          pxPad,
+          wlHomeV2RowChrome ?
+            cn(
+              "num-cell text-center tabular-nums",
+              isCopied && "num-cell--copied",
+              suppressNumberPlacementColor && "num-cell--no-placement-bar",
+            )
+          : cn(
+              "display-setlist-num-cell text-center tabular-nums",
+              isCopied ?
+                "bg-green-600 text-white"
+              : suppressNumberPlacementColor ?
+                "text-foreground"
+              : numberUsesPlacementColor ?
+                "text-white"
+              : "text-muted-foreground",
+            ),
         )}
-        data-placement-bar={
-          !isCopied && numberUsesPlacementColor ? placementToken : undefined
-        }
+        {...(!wlHomeV2RowChrome &&
+        !isCopied &&
+        numberUsesPlacementColor ?
+          { "data-placement-bar": placementToken }
+        : {})}
       >
+        {wlHomeV2RowChrome && !suppressNumberPlacementColor ?
+          <span className="bar" data-placement-bar={placementToken} />
+        : null}
         <SetlistEntryNumberCell
           entry={entry}
           displayNumber={displayNumber}
@@ -170,20 +208,25 @@ export function SetlistEntryRow({
         />
       </TableCell>
       <TableCell
-        className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "align-top")}
+        className={cn(
+          pxPad,
+          wlHomeV2RowChrome ? "align-middle song-cell" : "align-top",
+        )}
       >
         <SetlistEntrySongCell
           entry={entry}
           onSongClick={onSongClick}
           onJotyClick={onJotyClick}
           showStatsTooltip={showTooltips}
+          statsTooltipWlV2Chrome={wlHomeV2RowChrome}
         />
       </TableCell>
       {discographySourceLabel !== undefined ? (
         <TableCell
           className={cn(
-            DISPLAY_SETLIST_TABLE_CELL_PAD,
-            "min-w-[9rem] whitespace-nowrap text-left text-[11px]",
+            pxPad,
+            "min-w-[9rem] whitespace-nowrap text-left",
+            !wlHomeV2RowChrome && "text-[11px]",
           )}
         >
           {discographyShowCell !== undefined ? (
@@ -191,7 +234,10 @@ export function SetlistEntryRow({
               <span className="inline-flex flex-nowrap items-baseline gap-x-1.5 text-foreground">
                 <Link
                   href={getSetlistArchiveUrl(discographyShowCell.showId)}
-                  className="font-medium text-foreground hover:underline"
+                  className={cn(
+                    SHOW_COL_HIT,
+                    "font-medium text-foreground hover:underline focus-visible:underline",
+                  )}
                 >
                   {discographyShowCell.dateLabel}
                 </Link>
@@ -219,19 +265,26 @@ export function SetlistEntryRow({
       ) : null}
       {showWtedColumn && (
         <TableCell
-          className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}
+          className={cn(pxPad, wlHomeV2RowChrome ? "center" : "text-center")}
         >
           <SetlistEntryWtedCell
             entry={entry}
             onWtedClick={onWtedClick}
             showTooltips={showTooltips}
+            tooltipContentClassName={
+              wlHomeV2RowChrome ?
+                SETLIST_V2_ROW_TOOLTIP_CONTENT.className
+              : undefined
+            }
           />
         </TableCell>
       )}
       <TableCell
         className={cn(
-          DISPLAY_SETLIST_TABLE_CELL_PAD,
-          "text-center tabular-nums text-muted-foreground",
+          pxPad,
+          wlHomeV2RowChrome ?
+            "center time-cell tabular-nums"
+          : "text-center tabular-nums text-muted-foreground",
         )}
       >
         {formatEntryLength(entry.entry_length) ?? ""}
@@ -239,22 +292,32 @@ export function SetlistEntryRow({
       {showCanonColumns && (
         <TableCell
           className={cn(
-            DISPLAY_SETLIST_TABLE_CELL_PAD,
-            "text-center text-muted-foreground",
+            pxPad,
+            wlHomeV2RowChrome ?
+              "last-cell"
+            : "text-center text-muted-foreground",
           )}
         >
           <SetlistEntryLastCell
             entry={entry}
             lastBadgeStyle={lastBadgeStyle}
             showTooltips={showTooltips}
+            useWlHomeV2PillStyle={wlHomeV2RowChrome}
+            tooltipContentClassName={
+              wlHomeV2RowChrome ?
+                SETLIST_V2_ROW_TOOLTIP_CONTENT.className
+              : undefined
+            }
           />
         </TableCell>
       )}
       {showCanonColumns && (
         <TableCell
           className={cn(
-            DISPLAY_SETLIST_TABLE_CELL_PAD,
-            "text-center tabular-nums text-muted-foreground",
+            pxPad,
+            wlHomeV2RowChrome ?
+              "tour-cell"
+            : "text-center tabular-nums text-muted-foreground",
           )}
         >
           {entry.song_tour_count ?? ""}
@@ -262,46 +325,76 @@ export function SetlistEntryRow({
       )}
       {showCanonColumns && (
         <TableCell
-          className={cn(DISPLAY_SETLIST_TABLE_CELL_PAD, "text-center")}
+          className={cn(
+            pxPad,
+            wlHomeV2RowChrome ? "rarity-cell" : "text-center",
+          )}
         >
-          {rarity ? (
-            <span
-              className="display-setlist-rarity-pill"
-              style={
-                {
-                  "--display-setlist-rarity-bg": getRarityPillBackground(rarity),
-                  "--display-setlist-rarity-border": rarityColor ?? "transparent",
-                } as CSSProperties
-              }
-            >
-              {rarity}
-            </span>
-          ) : null}
+          {rarity ?
+            wlHomeV2RowChrome ?
+              <span
+                className="rare-pill"
+                style={
+                  {
+                    "--setlist-rare-fill": getRarityPillBackground(rarity),
+                    "--setlist-rare-border": rarityColor ?? "transparent",
+                  } as CSSProperties
+                }
+              >
+                {rarity}
+              </span>
+            : (
+              <span
+                className="display-setlist-rarity-pill"
+                style={
+                  {
+                    "--display-setlist-rarity-bg": getRarityPillBackground(rarity),
+                    "--display-setlist-rarity-border": rarityColor ?? "transparent",
+                  } as CSSProperties
+                }
+              >
+                {rarity}
+              </span>
+            )
+          : null}
         </TableCell>
       )}
       <TableCell
         className={cn(
-          DISPLAY_SETLIST_TABLE_CELL_PAD,
-          "w-max max-w-[300px]",
+          pxPad,
+          wlHomeV2RowChrome ?
+            cn("personnel-cell w-max", personnelMw)
+          : cn("w-max max-w-[300px]"),
           guestsTruncCollapsed ? "align-middle" : "align-top",
         )}
       >
         {entry.guests?.length ?
           <SetlistTruncatableCell
-            maxWidthClass="max-w-[300px]"
-            measureWidthClass="w-max max-w-[300px]"
+            maxWidthClass={personnelMw}
+            measureWidthClass={personnelMeasure}
             measureKey={`${entry.entry_id}-guests`}
             expandLabel="Show all personnel"
             onTruncatedCollapsedChange={setGuestsTruncCollapsed}
           >
-            <SetlistEntryGuestsCell entry={entry} showTooltips={showTooltips} />
+            <SetlistEntryGuestsCell
+              entry={entry}
+              showTooltips={showTooltips}
+              useWlHomeV2PillStyle={wlHomeV2RowChrome}
+              tooltipContentClassName={
+                wlHomeV2RowChrome ?
+                  SETLIST_V2_ROW_TOOLTIP_CONTENT.className
+                : undefined
+              }
+            />
           </SetlistTruncatableCell>
         : null}
       </TableCell>
       <TableCell
         className={cn(
-          DISPLAY_SETLIST_TABLE_CELL_PAD,
-          "w-max max-w-[400px] py-[1px]",
+          pxPad,
+            wlHomeV2RowChrome ?
+              cn("notes-cell max-w-[400px]")
+            : cn("w-max max-w-[400px] py-[1px]"),
           coachTruncCollapsed ? "align-middle" : "align-top",
         )}
       >
@@ -312,6 +405,12 @@ export function SetlistEntryRow({
             measureKey={`${entry.entry_id}-coach`}
             html={entry.entry_coachnotes.trim()}
             expandLabel="Show full coach notes"
+            {...(wlHomeV2RowChrome ?
+              ({
+                htmlContentClassName: "setlist-v2-notes-html",
+                blockPlainClassName: "setlist-v2-notes-plain",
+              } as const)
+            : {})}
             onTruncatedCollapsedChange={setCoachTruncCollapsed}
           />
         : null}

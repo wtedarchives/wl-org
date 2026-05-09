@@ -10,6 +10,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 import {
   entryHasSongStatsLines,
@@ -22,6 +24,8 @@ interface SetlistEntrySongCellProps {
   onJotyClick?: (entry: SetlistEntry) => void
   /** Desktop layout: show per-row stats tooltip when API fields are present. */
   showStatsTooltip?: boolean
+  /** Match WL Home v2 setlist row tooltip panel (`.setlist-header-tooltip`). */
+  statsTooltipWlV2Chrome?: boolean
 }
 
 export function SetlistEntrySongCell({
@@ -29,6 +33,7 @@ export function SetlistEntrySongCell({
   onSongClick,
   onJotyClick,
   showStatsTooltip = false,
+  statsTooltipWlV2Chrome = false,
 }: SetlistEntrySongCellProps) {
   const songContent = (
     <div className="flex w-full flex-nowrap items-center gap-2">
@@ -99,7 +104,18 @@ export function SetlistEntrySongCell({
             {body}
           </div>
         </TooltipTrigger>
-        <TooltipContent className="max-w-[280px] leading-tight" side="top">
+        <TooltipContent
+          className={cn(
+            "max-w-[280px] leading-tight",
+            statsTooltipWlV2Chrome && SETLIST_V2_ROW_TOOLTIP_CONTENT.className,
+          )}
+          {...(statsTooltipWlV2Chrome ?
+            {
+              side: SETLIST_V2_ROW_TOOLTIP_CONTENT.side,
+              sideOffset: SETLIST_V2_ROW_TOOLTIP_CONTENT.sideOffset,
+            }
+          : { side: "top" as const })}
+        >
           <SetlistEntryStatsTooltipContent entry={entry} />
         </TooltipContent>
       </Tooltip>

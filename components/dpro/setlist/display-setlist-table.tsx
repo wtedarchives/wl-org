@@ -30,6 +30,7 @@ import {
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SetlistEntryRow } from "@/components/dpro/setlist/setlist-entry-row"
 import { cn } from "@/lib/utils"
+import { SETLIST_HEADER_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 
 import "@/components/dpro/setlist/display-setlist-table.css"
 
@@ -59,6 +60,7 @@ export function DisplaySetlistTable({
   showDiscographySourceColumn = false,
   discographySourceLabels = [],
   discographyShowColumnCells = [],
+  wlHomeV2SetlistTableChrome = false,
 }: DisplaySetlistTableProps) {
   if (setlist.length === 0) {
     return null
@@ -149,29 +151,52 @@ export function DisplaySetlistTable({
     </div>
   ) : null
 
-  return (
-    <TooltipProvider delayDuration={0}>
-      <div className="w-full overflow-x-auto">
-        <Table className="display-setlist-table">
+  const wlHdr = wlHomeV2SetlistTableChrome
+  const hdrPad = DISPLAY_SETLIST_TABLE_CELL_PAD
+
+  const displayTable = (
+    <Table
+      className={cn(
+        "display-setlist-table",
+        wlHomeV2SetlistTableChrome && "set-table",
+      )}
+    >
           <TableHeader>
-            <TableRow className="h-8 border-border/60 hover:bg-transparent">
+            <TableRow
+              className={cn(
+                "hover:bg-transparent",
+                wlHdr ? "border-0 !h-auto min-h-0" : "h-8 border-border/60",
+              )}
+            >
               <TableHead
                 className={cn(
-                  "h-8 w-4 shrink-0 text-center text-muted-foreground",
-                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  hdrPad,
+                  wlHdr && "center num-col shrink-0 text-center",
+                  !wlHdr &&
+                    "h-8 w-4 shrink-0 text-center text-muted-foreground",
                 )}
               >
                 #
               </TableHead>
               <TableHead
-                className={cn("h-8 text-muted-foreground", DISPLAY_SETLIST_TABLE_CELL_PAD)}
+                className={cn(hdrPad, !wlHdr && "h-8 text-muted-foreground")}
               >
                 {hasSongHeaderTooltipItems && isDesktop ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="cursor-help">Song</span>
+                      <span
+                        className={cn(!wlHdr && "cursor-help", wlHdr && "setlist-th-help")}
+                      >
+                        Song
+                      </span>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-[280px]">
+                    <TooltipContent
+                      className={cn(
+                        "max-w-[280px]",
+                        wlHdr && "setlist-header-tooltip",
+                      )}
+                      {...(wlHdr ? SETLIST_HEADER_TOOLTIP_CONTENT : {})}
+                    >
                       {songHeaderTooltipContent}
                     </TooltipContent>
                   </Tooltip>
@@ -182,8 +207,9 @@ export function DisplaySetlistTable({
               {showDiscographySourceCol ? (
                 <TableHead
                   className={cn(
-                    "h-8 min-w-[9rem] whitespace-nowrap text-left text-muted-foreground",
-                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                    hdrPad,
+                    "min-w-[9rem] whitespace-nowrap text-left",
+                    !wlHdr && "h-8 text-muted-foreground",
                   )}
                 >
                   Show
@@ -192,16 +218,30 @@ export function DisplaySetlistTable({
               {showWtedColumn && (
                 <TableHead
                   className={cn(
-                    "h-8 text-center text-muted-foreground",
-                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                    hdrPad,
+                    "text-center",
+                    wlHdr && "center",
+                    !wlHdr && "h-8 text-muted-foreground",
                   )}
                 >
                   {isDesktop ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="cursor-help">WTED</span>
+                        <span
+                          className={cn(!wlHdr && "cursor-help", wlHdr && "setlist-th-help")}
+                        >
+                          WTED
+                        </span>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent
+                        {...(wlHdr ?
+                          {
+                            ...SETLIST_HEADER_TOOLTIP_CONTENT,
+                            className:
+                              "setlist-header-tooltip setlist-header-tooltip--tight",
+                          }
+                        : {})}
+                      >
                         Use the icons below to request songs on WTED Goose Radio.
                       </TooltipContent>
                     </Tooltip>
@@ -212,8 +252,10 @@ export function DisplaySetlistTable({
               )}
               <TableHead
                 className={cn(
-                  "h-8 text-center text-muted-foreground",
-                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  hdrPad,
+                  "text-center",
+                  wlHdr && "center",
+                  !wlHdr && "h-8 text-muted-foreground",
                 )}
               >
                 Time
@@ -221,16 +263,28 @@ export function DisplaySetlistTable({
               {showCanonColumns && (
                 <TableHead
                   className={cn(
-                    "h-8 text-center text-muted-foreground",
-                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                    hdrPad,
+                    wlHdr ? "center" : "text-center",
+                    !wlHdr && "h-8 text-muted-foreground",
                   )}
                 >
                   {hasLastBadges && isDesktop ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="cursor-help">Last</span>
+                        <span
+                          className={cn(!wlHdr && "cursor-help", wlHdr && "setlist-th-help")}
+                        >
+                          Last
+                        </span>
                       </TooltipTrigger>
-                      <TooltipContent className="max-w-[240px] whitespace-pre-wrap text-xs">
+                      <TooltipContent
+                        {...(wlHdr ? SETLIST_HEADER_TOOLTIP_CONTENT : {})}
+                        className={cn(
+                          "max-w-[240px] whitespace-pre-wrap text-xs",
+                          wlHdr &&
+                            "setlist-header-tooltip setlist-header-tooltip--last",
+                        )}
+                      >
                         {LAST_HEADER_TOOLTIP}
                       </TooltipContent>
                     </Tooltip>
@@ -242,8 +296,9 @@ export function DisplaySetlistTable({
               {showCanonColumns && (
                 <TableHead
                   className={cn(
-                    "h-8 text-center text-muted-foreground",
-                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                    hdrPad,
+                    wlHdr ? "center text-center" : "text-center",
+                    !wlHdr && "h-8 text-muted-foreground",
                   )}
                 >
                   Tour
@@ -252,8 +307,9 @@ export function DisplaySetlistTable({
               {showCanonColumns && (
                 <TableHead
                   className={cn(
-                    "h-8 text-center text-muted-foreground",
-                    DISPLAY_SETLIST_TABLE_CELL_PAD,
+                    hdrPad,
+                    wlHdr ? "center text-center" : "text-center",
+                    !wlHdr && "h-8 text-muted-foreground",
                   )}
                 >
                   Rarity
@@ -261,17 +317,23 @@ export function DisplaySetlistTable({
               )}
               <TableHead
                 className={cn(
-                  "h-8 w-max max-w-[300px] text-muted-foreground",
-                  DISPLAY_SETLIST_TABLE_CELL_PAD,
+                  hdrPad,
+                  wlHdr ?
+                    cn("max-w-[400px] whitespace-normal")
+                  : cn("h-8 w-max max-w-[300px] text-muted-foreground"),
                 )}
               >
                 Personnel
               </TableHead>
               <TableHead
                 className={cn(
-                  "h-8 w-max max-w-[400px] text-muted-foreground",
-                  DISPLAY_SETLIST_TABLE_CELL_PAD,
-                  "py-[1px]",
+                  hdrPad,
+                  wlHdr ?
+                    "set-table-coach-notes-head max-w-[400px]"
+                  : cn(
+                      "h-8 w-max max-w-[400px] text-muted-foreground",
+                      "py-[1px]",
+                    ),
                 )}
               >
                 Coach&apos;s Notes
@@ -336,6 +398,7 @@ export function DisplaySetlistTable({
                     onNumberClick={onNumberClick}
                     showAdminUi={showAdminUi}
                     showTooltips={isDesktop}
+                    wlHomeV2RowChrome={wlHomeV2SetlistTableChrome}
                     hoveredCategory={hoveredCategory}
                     hoveredReleaseId={hoveredReleaseId}
                     releaseToEntriesMap={releaseToEntriesMap}
@@ -356,7 +419,13 @@ export function DisplaySetlistTable({
             })}
           </TableBody>
         </Table>
-      </div>
+  )
+
+  return (
+    <TooltipProvider delayDuration={0}>
+      {wlHomeV2SetlistTableChrome ?
+        displayTable
+      : <div className="w-full overflow-x-auto">{displayTable}</div>}
     </TooltipProvider>
   )
 }

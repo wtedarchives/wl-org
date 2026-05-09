@@ -12,11 +12,11 @@ export function LoginPrompt() {
       <CardContent className="py-0 pb-2">
         <p className="text-xs text-muted-foreground">
           You need to be logged in to participate in Setlist Game.{" "}
-          <Link href="/login" className="font-medium no-underline hover:underline underline-offset-2">
+          <Link href="/login" className="font-medium no-underline hover:underline">
             Log in
           </Link>{" "}
           or{" "}
-          <Link href="/signup" className="font-medium no-underline hover:underline underline-offset-2">
+          <Link href="/signup" className="font-medium no-underline hover:underline">
             sign up
           </Link>{" "}
           to start playing!

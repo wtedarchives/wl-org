@@ -18,7 +18,7 @@ export const SONGS_ARCHIVE_COVER_WIDE_HOME_BG = HOME_BG_IMAGES[1]
 
 /** Hero blurb: label + hover underline (focus ring added on interactive root). */
 export const welcomeHeroInlineLinkTextClassName = cn(
-  "font-bold text-wl-orange underline-offset-2 transition-colors",
+  "font-bold text-wl-orange transition-colors",
   "decoration-wl-white/45 hover:cursor-pointer hover:underline hover:decoration-wl-orange hover:text-wl-light-orange",
 )
 

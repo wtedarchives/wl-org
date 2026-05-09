@@ -1030,7 +1030,6 @@
     font-weight: 500;
     color: var(--wl-light-orange);
     text-decoration: underline;
-    text-underline-offset: 2px;
   }
   .wl-home-v2 .wl-home-v2-page-lede-body a:hover {
     color: var(--wl-orange);
@@ -5137,7 +5136,6 @@
   .wl-home-v2 .wl-home-v2-tour-schedule-venue-link:focus-visible {
     color: var(--wl-light-orange);
     text-decoration: underline;
-    text-underline-offset: 2px;
     outline: none;
   }
   .wl-home-v2
@@ -6430,7 +6428,6 @@
     color: var(--wl-light-orange);
     cursor: pointer;
     text-decoration: underline;
-    text-underline-offset: 2px;
   }
   .wl-home-v2 .modal-login-text-link:hover {
     color: #fff;
@@ -6938,6 +6935,252 @@
     min-height: 0;
     background-attachment: initial !important;
   }
+  /*
+   * Discography release (`/archive/discography?id=`) — frosted `list-card` shell + shadcn token
+   * overrides (same recipe as personnel / song detail panels).
+   */
+  .wl-home-v2 .wl-home-v2-discography-release-page {
+    --setlist-rail-label-color: var(--wl-white);
+    --setlist-promoted-section-header-size: 11px;
+  }
+  /* Match setlist main column `.wl-home-v2-setlist .wl-home-v2-years-tile--main` wash. */
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__shell.wl-home-v2-years-tile--main::before {
+    opacity: 0.9;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__shell.wl-home-v2-years-tile--main::after {
+    background: linear-gradient(
+      180deg,
+      rgba(40, 91, 78, 0.38) 0%,
+      rgba(40, 91, 78, 0.82) 88%
+    );
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__shell-body.wl-home-v2-years-tile-inner {
+    color: #fff;
+    --card-foreground: #fff;
+    --foreground: #fff;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__shell-body.wl-home-v2-years-tile-inner
+    .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__shell-body.wl-home-v2-years-tile-inner
+    .border-border {
+    border-color: rgb(53, 56, 54);
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__shell-body.wl-home-v2-years-tile-inner
+    [data-slot="separator"] {
+    background-color: rgb(53, 56, 54);
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page [data-slot="card"].list-card {
+    color: #fff;
+    --card-foreground: #fff;
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page [data-slot="card"].list-card .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  /*
+   * Hero: setlist `.show-header` frosted banner + `.side-card` Release stats (`WlHomeV2SetlistShowStatsTile` pattern).
+   */
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 24px 26px;
+    margin: 0;
+    border: 0;
+    background: rgba(0, 0, 0, 0.63);
+    outline: 1px solid rgb(63, 65, 64);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 1343px) {
+    .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header {
+      padding: 12px;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header::before {
+    content: "";
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(255, 122, 103, 0.2), transparent 65%);
+    pointer-events: none;
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header .left {
+    position: relative;
+    z-index: 2;
+    gap: 6px;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__hero
+    .show-header
+    .show-header-title-row {
+    width: 100%;
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header h1.show-header-heading {
+    font-size: clamp(22px, 4.2vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0;
+    color: #fff;
+  }
+  /*
+   * Artist line — matches setlist `.show-header .venue .venue-subvenue-text` (no link / hover).
+   */
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__artist-meta {
+    margin: 0;
+    font-family:
+      var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.15;
+    color: rgba(255, 255, 255, 0.92);
+    font-style: normal;
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta-region {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgb(53, 56, 54);
+  }
+  /* Label column width matches longest dt; values align in column 2 (reference layout). */
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-family:
+      var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta dt {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta dd {
+    margin: 0;
+    min-width: 0;
+    color: var(--wl-white);
+    font-weight: 500;
+    line-height: 1.35;
+    justify-self: start;
+    text-align: left;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .discography-release-archive__length-pill {
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgb(52, 109, 95);
+    background: rgba(30, 48, 40, 0.95);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 1px 2px rgb(0 0 0 / 0.2);
+  }
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__artwork {
+    border-radius: 10px;
+    border: 1px solid rgb(53, 56, 54);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.16),
+      0 10px 30px rgb(0 0 0 / 0.12);
+    background: rgba(0, 0, 0, 0.32);
+    position: relative;
+    z-index: 2;
+  }
+  /*
+   * Show column (`SetlistEntryRow`): verbatim sets `a { text-decoration: none }` —
+   * underline date or venue independently on hover/focus-visible only for that `<a>`.
+   */
+  .wl-home-v2
+    .wl-home-v2-discography-release-page.songs-archive-verbatim
+    a.discography-show-col-hit:hover,
+  .wl-home-v2
+    .wl-home-v2-discography-release-page.songs-archive-verbatim
+    a.discography-show-col-hit:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.82);
+    text-decoration-thickness: 1px;
+  }
+  /*
+   * Discography WL v2: `DisplaySetlistTable` with `.set-table` + shadcn slots —
+   * hairlines on `td`; neutralize duplicate `tr` borders. Scroll stays on `.wl-home-v2-setlist-table-scroll`.
+   */
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-table-scroll
+    > [data-slot="table-container"] {
+    overflow-x: visible !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .wl-home-v2-setlist
+    .set-table
+    thead
+    th[data-slot="table-head"] {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .wl-home-v2-setlist
+    .set-table
+    thead
+    tr[data-slot="table-row"] {
+    border-bottom: 1px solid var(--set-table-section-line) !important;
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .wl-home-v2-setlist
+    .set-table
+    tbody
+    tr[data-slot="table-row"] {
+    border-bottom: none !important;
+  }
+  .wl-home-v2
+    .wl-home-v2-discography-release-page
+    .wl-home-v2-setlist
+    .set-table
+    tbody
+    tr[data-slot="table-row"]:hover {
+    background-color: transparent !important;
+  }
   /* ---------- Song detail (`/archive/song`) ---------- */
   .wl-home-v2 .song-archive-detail-vx.wl-home-v2-song-archive-page {
     background: none !important;
@@ -7229,6 +7472,49 @@
     display: flex;
     flex-direction: column;
     gap: 1px;
+  }
+  /*
+   * Discography index only: columns height = sum of stacked tiles (not forced to one
+   * stretched height). Prevents `height: 100%` + flex shrink from clipping long stacks
+   * when another column has a single taller tile.
+   */
+  .wl-home-v2 .discography-archive-category-tiles-multicol {
+    align-items: flex-start;
+  }
+  .wl-home-v2 .discography-archive-category-tiles-multicol article.songs-archive-category-tile {
+    height: auto;
+    flex-shrink: 0;
+  }
+  .wl-home-v2
+    .discography-archive-category-tiles-multicol
+    .songs-archive-category-tile__sheet {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+  /*
+   * Discography multicol row: homepage photo behind tile columns only (B&W, low opacity).
+   * Host: `.songs-archive-category-tiles-multicol.discography-archive-tiles-backdrop`.
+   */
+  .wl-home-v2 .discography-archive-tiles-backdrop {
+    position: relative;
+    z-index: 0;
+  }
+  .wl-home-v2 .discography-archive-tiles-backdrop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--discography-tiles-backdrop-bg, url("/newbg.png"));
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: grayscale(100%) brightness(0.82);
+    opacity: 0.1;
+  }
+  .wl-home-v2 .discography-archive-tiles-backdrop > * {
+    position: relative;
+    z-index: 1;
   }
   /* Canon 299 & 300: full-width tile (span all columns at any breakpoint). */
   .wl-home-v2 .songs-archive-category-tiles-grid > .songs-archive-category-tile--covers-span-full-row {
@@ -10367,7 +10653,6 @@
   text-decoration: underline;
   text-decoration-style: dotted;
   text-decoration-color: rgba(255, 255, 255, 0.32);
-  text-underline-offset: 3px;
   color: inherit;
   letter-spacing: inherit;
   font: inherit;

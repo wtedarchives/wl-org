@@ -4,8 +4,7 @@ import { useMemo } from "react"
 import { notFound, useSearchParams } from "next/navigation"
 
 import { DiscographyReleaseArchiveBody } from "@/components/archive-discography/discography-release-archive-body"
-import { DiscographyContent } from "@/components/dpro/discography/discography-content"
-
+import { WlHomeV2DiscographyArchiveIndexView } from "@/components/archive-discography/wl-home-v2-discography-archive-view"
 const RELEASE_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -22,7 +21,7 @@ function resolveDiscographyIdFromSearchParams(
   return { releaseId: idList[0] ?? "", invalidParams: false }
 }
 
-export default function DiscographyArchivePageClient() {
+export function WlHomeV2DiscographyArchiveRouteClient() {
   const searchParams = useSearchParams()
   const { releaseId, invalidParams } = useMemo(
     () => resolveDiscographyIdFromSearchParams(searchParams),
@@ -33,13 +32,8 @@ export default function DiscographyArchivePageClient() {
 
   if (releaseId) {
     if (!RELEASE_ID_RE.test(releaseId)) notFound()
-    return (
-      <DiscographyReleaseArchiveBody
-        id={releaseId}
-        legacySidebarDiscographyIndexHref="/archive/discography"
-      />
-    )
+    return <DiscographyReleaseArchiveBody id={releaseId} wlHomeV2Shell />
   }
 
-  return <DiscographyContent />
+  return <WlHomeV2DiscographyArchiveIndexView />
 }

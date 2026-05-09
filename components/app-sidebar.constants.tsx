@@ -21,7 +21,7 @@ export const SETLIST_ARCHIVE_SUB = [
   { title: "Stats", url: "/archive/stats" },
   { title: "Personnel", url: "/archive/personnel" },
   { title: "Venues", url: "/archive/venues" },
-  { title: "Discography", url: "/old/archive/discography" },
+  { title: "Discography", url: "/archive/discography" },
   { title: "Lists", url: "/old/archive/lists" },
   { title: "Setlist Game", url: "/old/archive/setlistgame" },
   { title: "Goose 101", url: "/goose101" },

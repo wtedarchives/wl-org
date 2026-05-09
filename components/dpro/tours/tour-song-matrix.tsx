@@ -218,7 +218,7 @@ export function TourSongMatrix({
                 className={cn(
                   "hover:underline",
                   wlHomeV2 ?
-                    "text-white/70 underline-offset-2 hover:text-white"
+                    "text-white/70 hover:text-white"
                   : "",
                 )}
               >

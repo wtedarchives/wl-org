@@ -3,13 +3,16 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
-import { DISCOGRAPHY_PUBLIC_CATEGORIES } from "@/lib/discography-public"
+import {
+  type DiscographyArchiveIndexRow,
+  buildDiscographyRowsByCategory,
+  discographyRowLinkLabel,
+} from "@/lib/discography-archive-index"
 import {
   discographyCategoriesByColumn,
   discographyIndexColumnCount,
 } from "@/lib/discography-index-layout"
-import type { SupabaseClient } from "@supabase/supabase-js"
-import { supabase } from "@/lib/supabase"
+import { useDiscographyArchiveIndexData } from "@/hooks/use-discography-archive-index-data"
 import { getDiscographyArchiveUrl } from "@/lib/discography-archive-url"
 import {
   Card,
@@ -24,35 +27,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-type DiscographyListRow = {
-  uuid: string
-  name: string | null
-  displayname: string
-  artwork: string | null
-  canon_id: number
-  category: string
-}
-
-/** Side Projects only: hyphen surrounded by spaces → en dash (U+2013). */
-function formatSideProjectName(name: string): string {
-  return name.replace(/ - /g, " – ")
-}
-
-function sideProjectSortKey(row: DiscographyListRow): string {
-  const n = row.name?.trim()
-  if (n) return formatSideProjectName(n)
-  return row.displayname.trim()
-}
-
-function rowLinkLabel(item: DiscographyListRow, category: string): string {
-  if (category === "Side Projects") {
-    const n = item.name?.trim()
-    if (n) return formatSideProjectName(n)
-    return item.displayname
-  }
-  return item.displayname
-}
-
 const DISCOGRAPHY_INDEX_TITLE = "Discography – WysteriaLane.org"
 
 function DiscographyCategoryCard({
@@ -60,7 +34,7 @@ function DiscographyCategoryCard({
   categoryItems,
 }: {
   category: string
-  categoryItems: DiscographyListRow[]
+  categoryItems: DiscographyArchiveIndexRow[]
 }) {
   return (
     <Card className="min-w-0 overflow-hidden py-0">
@@ -85,7 +59,7 @@ function DiscographyCategoryCard({
                         href={getDiscographyArchiveUrl(item.uuid)}
                         className="min-w-0 flex-1 text-xs font-medium leading-3.5 text-foreground hover:underline break-words [overflow-wrap:anywhere]"
                       >
-                        {rowLinkLabel(item, category)}
+                        {discographyRowLinkLabel(item, category)}
                       </Link>
                       {item.artwork ? (
                         <span className="inline-block w-max max-w-5 shrink-0">
@@ -113,10 +87,8 @@ function DiscographyCategoryCard({
 }
 
 export function DiscographyContent() {
-  const [items, setItems] = useState<DiscographyListRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [fetchError, setFetchError] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const { items, loading, error: fetchError, progress } =
+    useDiscographyArchiveIndexData()
   const [columnCount, setColumnCount] = useState(1)
 
   useEffect(() => {
@@ -132,65 +104,10 @@ export function DiscographyContent() {
     return () => window.removeEventListener("resize", update)
   }, [])
 
-  useEffect(() => {
-    const client = supabase
-    if (!client) {
-      setLoading(false)
-      setFetchError(true)
-      return
-    }
-
-    let cancelled = false
-
-    async function load(sb: SupabaseClient) {
-      setLoading(true)
-      setFetchError(false)
-      setProgress(10)
-      const cats = [...DISCOGRAPHY_PUBLIC_CATEGORIES]
-      const { data, error } = await sb
-        .from("discography")
-        .select("uuid, name, displayname, artwork, canon_id, category")
-        .in("category", cats)
-        .order("canon_id", { ascending: true })
-
-      if (cancelled) return
-
-      setProgress(100)
-      if (error) {
-        console.error("Error loading discography:", error)
-        setFetchError(true)
-        setItems([])
-      } else {
-        setItems((data ?? []) as DiscographyListRow[])
-      }
-      setLoading(false)
-    }
-
-    void load(client)
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const byCategory = useMemo(() => {
-    const map = new Map<string, DiscographyListRow[]>()
-    for (const c of DISCOGRAPHY_PUBLIC_CATEGORIES) {
-      map.set(c, [])
-    }
-    for (const item of items) {
-      const list = map.get(item.category)
-      if (list) list.push(item)
-    }
-    const sideProjects = map.get("Side Projects")
-    if (sideProjects?.length) {
-      sideProjects.sort((a, b) =>
-        sideProjectSortKey(a).localeCompare(sideProjectSortKey(b), undefined, {
-          sensitivity: "base",
-        }),
-      )
-    }
-    return map
-  }, [items])
+  const byCategory = useMemo(
+    () => buildDiscographyRowsByCategory(items),
+    [items],
+  )
 
   const columns = useMemo(
     () => discographyCategoriesByColumn(columnCount),

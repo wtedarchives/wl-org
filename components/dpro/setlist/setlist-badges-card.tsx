@@ -141,7 +141,7 @@ export function JiveCompleteBadge({
     >
       <span className="leading-3">
         This show featured a full performance of the{" "}
-        <span className="underline decoration-neutral-900/50 underline-offset-1 transition-colors hover:decoration-neutral-900">
+        <span className="underline decoration-neutral-900/50 transition-colors hover:decoration-neutral-900">
           Jive Suite
         </span>
         .

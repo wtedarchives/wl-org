@@ -63,7 +63,7 @@ export function PastTours({
                 <TableCell className="px-2 py-0.5 font-medium">
                   <Link
                     href={getSetlistGameTourArchiveUrl(tour.tour_id)}
-                    className="no-underline hover:underline underline-offset-2 hover:text-foreground"
+                    className="no-underline hover:underline hover:text-foreground"
                   >
                     {tour.tour}
                   </Link>

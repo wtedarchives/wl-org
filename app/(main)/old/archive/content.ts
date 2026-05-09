@@ -56,7 +56,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Discography",
-    href: "/old/archive/discography",
+    href: "/archive/discography",
     icon: "Disc3",
     description:
       "Official releases and recordings. Studio albums, live releases, and archival recordings from the Goose catalog.",

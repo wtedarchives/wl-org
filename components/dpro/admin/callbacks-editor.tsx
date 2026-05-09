@@ -264,7 +264,7 @@ export function CallbacksEditor({
         />
       ) : (
         <div
-          className="min-h-[100px] w-full rounded-md border border-input bg-muted/30 px-2 py-1.5 text-xs [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2"
+          className="min-h-[100px] w-full rounded-md border border-input bg-muted/30 px-2 py-1.5 text-xs [&_a]:font-medium [&_a]:text-primary [&_a]:underline"
           dangerouslySetInnerHTML={{
             __html: selectedShow.show_callbacks ?? "",
           }}
