@@ -1,11 +1,25 @@
 "use client"
 
-import type { CSSProperties } from "react"
-import { useLayoutEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
+import { notFound, useSearchParams } from "next/navigation"
 
+import {
+  PersonnelCatalogTile,
+  PersonnelGuestsGroupsCombinedTile,
+  PERSONNEL_TOP_TILES,
+} from "@/components/archive-personnel/wl-home-v2-personnel-archive-catalog-tiles"
+import { SongsArchiveSearchGlyph } from "@/components/archive-song/wl-home-v2-song-archive-search-glyph"
+import {
+  personnelArchiveSearchHits,
+  type PersonnelSearchGuestRow,
+} from "@/components/archive-personnel/personnel-archive-search-helpers"
+import { WlHomeV2PersonnelArchiveSearchModal } from "@/components/archive-personnel/wl-home-v2-personnel-archive-search-modal"
 import {
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
   type BreadcrumbItem,
@@ -16,300 +30,127 @@ import {
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
+import { WlHomeV2PersonnelArchiveDetailView } from "@/components/archive-personnel/wl-home-v2-personnel-archive-detail-view"
 import {
-  type WlHomePersonnelCatalogRow,
   useWlHomePersonnelCatalog,
 } from "@/hooks/use-wl-home-personnel-catalog"
 import { isSupabaseConfigured } from "@/lib/supabase"
-import { formatInstrument } from "@/lib/personnel-utils"
-import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 
 const GUEST_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-type PersonnelTileKey = "current" | "former" | "guests" | "groups"
-
-/** Same assets / quadrant order as homepage `#tileGrid`: radio, community, archive, profile. */
-const PERSONNEL_TILE_BACKGROUNDS: Record<
-  PersonnelTileKey,
-  `/newbg.png` | `/newbg2.jpeg` | `/newbg3.jpeg` | `/newbg4.jpeg`
-> = {
-  current: "/newbg.png",
-  former: "/newbg2.jpeg",
-  guests: "/newbg3.jpeg",
-  groups: "/newbg4.jpeg",
-}
-
-const PERSONNEL_TILES: readonly {
-  key: PersonnelTileKey
-  label: string
-  showInstrument: boolean
-}[] = [
-  { key: "current", label: "Current Goose Members", showInstrument: true },
-  { key: "former", label: "Former Goose Members", showInstrument: true },
-  { key: "guests", label: "Guests", showInstrument: true },
-  { key: "groups", label: "Groups", showInstrument: false },
-]
 
 const PERSONNEL_BREADCRUMBS: BreadcrumbItem[] = [
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
   { label: "Personnel", href: "/archive/personnel" },
 ]
 
-/** Headshot assets for homepage-style mini icons (`/public/big-*.png`). */
-function getPersonnelCurrentBigPortraitSrc(guestDisplayName: string): string | null {
-  const name = guestDisplayName.trim().toLowerCase()
-  if (name.includes("cotter")) return "/big-cotter.png"
-  if (name.includes("anspach")) return "/big-peter.png"
-  if (name.includes("mitarotonda")) return "/big-rick.png"
-  if (name.includes("weeks")) return "/big-trevor.png"
-  return null
-}
+const PERSONNEL_CATALOG_KEYS = [
+  "current",
+  "former",
+  "guests",
+  "groups",
+] as const
 
-function PersonnelCatalogTile({
-  tileKey,
-  label,
-  showInstrument,
-  items,
-  scrollPanelStyle = false,
-}: {
-  tileKey: PersonnelTileKey
-  label: string
-  showInstrument: boolean
-  items: WlHomePersonnelCatalogRow[]
-  scrollPanelStyle?: boolean
-}) {
-  const tileBg = PERSONNEL_TILE_BACKGROUNDS[tileKey]
-  const tileStyle = {
-    "--tile-bg": `url(${JSON.stringify(tileBg)})`,
-  } as CSSProperties
-  const personnelCurrentRowCount =
-    tileKey === "current" ? Math.ceil(items.length / 2) : 0
-  const personnelFormerRowCount =
-    tileKey === "former" ? Math.ceil(items.length / 3) : 0
-
-  if (scrollPanelStyle) {
-    return (
-      <section
-        className="tile tile-personnel-catalog tile-personnel-catalog--panel-scroll"
-        style={tileStyle}
-      >
-        <div className="tile-personnel-catalog-inner">
-          <h2 className="sc-label wl-home-v2-songs-archive-section-heading tile-personnel-catalog-songs-heading">
-            {label}
-          </h2>
-          <div className="widget-panel tile-personnel-catalog-widget-panel">
-            {items.length === 0 ?
-              <p className="tile-personnel-catalog-panel-empty">No entries</p>
-            : <div className="tile-personnel-catalog-panel-scroll-mount">
-                {items.map((item) => (
-                  <Link
-                    key={item.guest_id}
-                    href={getPersonnelArchiveUrl(item.guest_id)}
-                    className="topic-row tile-personnel-catalog-panel-topic"
-                  >
-                    <span className="tile-personnel-catalog-panel-topic-body">
-                      <span className="tile-personnel-catalog-name">
-                        {item.guest}
-                      </span>
-                      {showInstrument && item.guest_instrument ?
-                        <span className="tile-personnel-catalog-instrument-chip">
-                          <span className="tile-personnel-catalog-instrument">
-                            {formatInstrument(item.guest_instrument, { wrapInParens: false })}
-                          </span>
-                        </span>
-                      : null}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            }
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  return (
-    <section
-      className={[
-        "tile tile-personnel-catalog",
-        tileKey === "current" ? "tile-personnel-catalog--current" : "",
-        tileKey === "former" ? "tile-personnel-catalog--former" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={tileStyle}
-    >
-      <div className="tile-personnel-catalog-inner">
-        <h2 className="sc-label wl-home-v2-songs-archive-section-heading tile-personnel-catalog-songs-heading">
-          {label}
-        </h2>
-        {items.length === 0 ?
-          <p className="tile-personnel-catalog-empty">No entries</p>
-        : tileKey === "current" ?
-          <ul
-            className="tile-personnel-catalog-list tile-personnel-catalog-list--current-mini-grid"
-            aria-label="Current Goose members"
-          >
-            {items.map((item, idx) => {
-              const row = Math.floor(idx / 2)
-              const flushRight = idx % 2 === 1
-              const flushBottom =
-                personnelCurrentRowCount > 0 && row === personnelCurrentRowCount - 1
-              const portraitSrc = getPersonnelCurrentBigPortraitSrc(item.guest)
-              return (
-                <li
-                  key={item.guest_id}
-                  className="tile-personnel-catalog-item tile-personnel-catalog-current-mini-cell"
-                >
-                  <Link
-                    href={getPersonnelArchiveUrl(item.guest_id)}
-                    className={[
-                      "tile-personnel-catalog-link",
-                      "tile-personnel-catalog-current-mini-tile",
-                      flushRight ?
-                        "tile-personnel-catalog-current-mini-tile--flush-right"
-                      : "",
-                      flushBottom ?
-                        "tile-personnel-catalog-current-mini-tile--flush-bottom"
-                      : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {portraitSrc ?
-                      <span
-                        className="icon-wrap tile-personnel-catalog-current-mini-icon-wrap"
-                        aria-hidden
-                      >
-                        <span className="icon-bg" />
-                        <Image
-                          src={portraitSrc}
-                          alt=""
-                          width={140}
-                          height={140}
-                          className="object-contain"
-                        />
-                      </span>
-                    : null}
-                    <span className="tile-personnel-catalog-name">
-                      {item.guest}
-                    </span>
-                    {showInstrument && item.guest_instrument ?
-                      <span className="tile-personnel-catalog-instrument-chip">
-                        <span className="tile-personnel-catalog-instrument">
-                          {formatInstrument(item.guest_instrument, { wrapInParens: false })}
-                        </span>
-                      </span>
-                    : null}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        : tileKey === "former" ?
-          <ul
-            className="tile-personnel-catalog-list tile-personnel-catalog-list--former-mini-grid"
-            aria-label="Former Goose members"
-          >
-            {items.map((item, idx) => {
-              const col = idx % 3
-              const row = Math.floor(idx / 3)
-              const flushRight = col === 2
-              const flushBottom =
-                personnelFormerRowCount > 0 && row === personnelFormerRowCount - 1
-              return (
-                <li
-                  key={item.guest_id}
-                  className="tile-personnel-catalog-item tile-personnel-catalog-former-mini-cell"
-                >
-                  <Link
-                    href={getPersonnelArchiveUrl(item.guest_id)}
-                    className={[
-                      "tile-personnel-catalog-link",
-                      "tile-personnel-catalog-former-mini-tile",
-                      flushRight ?
-                        "tile-personnel-catalog-former-mini-tile--flush-right"
-                      : "",
-                      flushBottom ?
-                        "tile-personnel-catalog-former-mini-tile--flush-bottom"
-                      : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    <span className="tile-personnel-catalog-name">
-                      {item.guest}
-                    </span>
-                    {showInstrument && item.guest_instrument ?
-                      <span className="tile-personnel-catalog-instrument-chip">
-                        <span className="tile-personnel-catalog-instrument">
-                          {formatInstrument(item.guest_instrument, { wrapInParens: false })}
-                        </span>
-                      </span>
-                    : null}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        : <ul className="tile-personnel-catalog-list">
-            {items.map((item) => (
-              <li key={item.guest_id} className="tile-personnel-catalog-item">
-                <Link
-                  href={getPersonnelArchiveUrl(item.guest_id)}
-                  className="tile-personnel-catalog-link"
-                >
-                  <span className="tile-personnel-catalog-name">
-                    {item.guest}
-                  </span>
-                  {showInstrument && item.guest_instrument ?
-                    <span className="tile-personnel-catalog-instrument-chip">
-                      <span className="tile-personnel-catalog-instrument">
-                        {formatInstrument(item.guest_instrument, { wrapInParens: false })}
-                      </span>
-                    </span>
-                  : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        }
-      </div>
-    </section>
-  )
-}
-
-/** Personnel index — homepage-style 2×2 tile grid; detail `?id=` redirects to legacy detail route. */
+/** Personnel index — top row Current | Former; full-width Guests & Groups below. Detail `?id=` matches legacy data (same hook/components as `/old/archive/personnel`). */
 export function WlHomeV2PersonnelArchiveView() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
 
-  const idParam =
-    [...searchParams.getAll("id")].map((s) => s.trim()).filter(Boolean)[0]
-    ?? ""
-
-  const showGrid = !idParam
-
-  useLayoutEffect(() => {
-    if (!idParam) return
-    const q = `/old/archive/personnel?id=${encodeURIComponent(idParam)}`
-    if (GUEST_ID_RE.test(idParam)) {
-      router.replace(q)
-    } else {
-      router.replace("/archive/personnel")
+  const idResolution = useMemo(() => {
+    const idList = searchParams
+      .getAll("id")
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (new Set(idList).size > 1) {
+      return { mode: "invalid" as const }
     }
-  }, [idParam, router])
+    const idParam = idList[0] ?? ""
+    if (!idParam) return { mode: "index" as const }
+    if (!GUEST_ID_RE.test(idParam)) return { mode: "invalid" as const }
+    return { mode: "detail" as const, guestId: idParam }
+  }, [searchParams])
 
-  const { byKey, loading, error } = useWlHomePersonnelCatalog(showGrid)
+  const catalogEnabled = idResolution.mode === "index"
+  const { byKey, loading, error } = useWlHomePersonnelCatalog(catalogEnabled)
 
-  if (
-    (!isSupabaseConfigured() || error) &&
-    showGrid &&
-    !loading
-  ) {
+  const [personnelIndexSearchOpen, setPersonnelIndexSearchOpen] =
+    useState(false)
+  const [personnelIndexSearchQuery, setPersonnelIndexSearchQuery] =
+    useState("")
+  const personnelIndexSearchInputRef = useRef<HTMLInputElement>(null)
+
+  const personnelIndexSearchRows = useMemo((): PersonnelSearchGuestRow[] => {
+    if (idResolution.mode !== "index") return []
+    const map = new Map<string, PersonnelSearchGuestRow>()
+    for (const key of PERSONNEL_CATALOG_KEYS) {
+      for (const row of byKey[key] ?? []) {
+        map.set(row.guest_id, {
+          guest_id: row.guest_id,
+          guest: row.guest,
+          guest_instrument: row.guest_instrument,
+        })
+      }
+    }
+    return [...map.values()]
+  }, [idResolution.mode, byKey])
+
+  const personnelIndexSearchHits = useMemo(
+    () =>
+      personnelArchiveSearchHits(
+        personnelIndexSearchRows,
+        personnelIndexSearchQuery,
+      ),
+    [personnelIndexSearchRows, personnelIndexSearchQuery],
+  )
+
+  const closePersonnelIndexSearch = useCallback(() => {
+    setPersonnelIndexSearchOpen(false)
+    setPersonnelIndexSearchQuery("")
+  }, [])
+
+  const openPersonnelIndexSearch = useCallback(() => {
+    setPersonnelIndexSearchOpen(true)
+    setPersonnelIndexSearchQuery("")
+  }, [])
+
+  useWlHomeV2ScrollLock(
+    personnelIndexSearchOpen && idResolution.mode === "index",
+  )
+
+  useEffect(() => {
+    if (idResolution.mode !== "index") return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && personnelIndexSearchOpen) {
+        setPersonnelIndexSearchOpen(false)
+        setPersonnelIndexSearchQuery("")
+        return
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        setPersonnelIndexSearchOpen(true)
+        setPersonnelIndexSearchQuery("")
+        setTimeout(() => personnelIndexSearchInputRef.current?.focus(), 40)
+      }
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [personnelIndexSearchOpen, idResolution.mode])
+
+  useEffect(() => {
+    if (!personnelIndexSearchOpen || idResolution.mode !== "index") return
+    setTimeout(() => personnelIndexSearchInputRef.current?.focus(), 40)
+  }, [personnelIndexSearchOpen, idResolution.mode])
+
+  if (idResolution.mode === "invalid") {
+    notFound()
+  }
+
+  if (idResolution.mode === "detail") {
+    return <WlHomeV2PersonnelArchiveDetailView guestId={idResolution.guestId} />
+  }
+
+  if ((!isSupabaseConfigured() || error) && !loading) {
     return (
       <div className="wl-home-v2-personnel-archive-page flex min-h-0 min-w-0 flex-1 flex-col px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6">
         <WlHomeV2ArchiveCrumbsShell
@@ -331,7 +172,7 @@ export function WlHomeV2PersonnelArchiveView() {
     )
   }
 
-  if (loading && showGrid) {
+  if (loading) {
     return (
       <div className="wl-home-v2-personnel-archive-page flex min-h-0 min-w-0 flex-1 flex-col px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6">
         <WlHomeV2ArchiveCrumbsShell
@@ -348,19 +189,23 @@ export function WlHomeV2PersonnelArchiveView() {
     )
   }
 
-  /** Redirect branch: avoid flashing grid behind legacy detail navigation. */
-  if (!showGrid) {
-    return (
-      <div className="wl-home-v2-personnel-archive-page flex min-h-0 min-w-0 flex-1 flex-col px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6">
-        <WlHomeV2PageLoading message="Opening personnel…" />
-      </div>
-    )
-  }
-
   return (
     <div className="wl-home-v2-personnel-archive-page box-border flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-b-none px-4 py-5 sm:px-5 lg:px-[18px] lg:py-6">
       <WlHomeV2ArchiveCrumbsShell
         variant="page-gutter"
+        selectorsAriaLabel="Search personnel"
+        selectors={
+          <button
+            type="button"
+            className="song-archive-detail-vx__crumbs-search-btn"
+            title="Search personnel"
+            aria-label="Search personnel"
+            onClick={openPersonnelIndexSearch}
+          >
+            <SongsArchiveSearchGlyph />
+            <span>Search</span>
+          </button>
+        }
         trail={
           <WlHomeV2ArchiveCrumbsTrail
             items={PERSONNEL_BREADCRUMBS}
@@ -368,22 +213,35 @@ export function WlHomeV2PersonnelArchiveView() {
           />
         }
       />
+
+      <WlHomeV2PersonnelArchiveSearchModal
+        open={personnelIndexSearchOpen}
+        onClose={closePersonnelIndexSearch}
+        searchQuery={personnelIndexSearchQuery}
+        setSearchQuery={setPersonnelIndexSearchQuery}
+        searchHits={personnelIndexSearchHits}
+        searchInputRef={personnelIndexSearchInputRef}
+      />
+
       <div className="mt-5 flex min-h-0 flex-1 flex-col">
         <section
           className="grid"
           id="tileGrid"
           aria-label="Personnel categories"
         >
-          {PERSONNEL_TILES.map(({ key, label, showInstrument }) => (
+          {PERSONNEL_TOP_TILES.map(({ key, label, showInstrument }) => (
             <PersonnelCatalogTile
               key={key}
               tileKey={key}
               label={label}
               showInstrument={showInstrument}
               items={byKey[key] ?? []}
-              scrollPanelStyle={key === "guests" || key === "groups"}
             />
           ))}
+          <PersonnelGuestsGroupsCombinedTile
+            guests={byKey.guests ?? []}
+            groups={byKey.groups ?? []}
+          />
         </section>
       </div>
     </div>

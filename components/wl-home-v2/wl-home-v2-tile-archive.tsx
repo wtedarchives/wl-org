@@ -170,7 +170,7 @@ export function WlHomeV2TileArchive({
 
       <div className="tile-body">
         <h2>
-          Wysteria Lane
+          WTED
           <br />
           Archives
         </h2>

@@ -44,9 +44,6 @@ export function TourSongSpread({
       cardMaxHeight={cardMaxHeight}
       variant={variant}
       tooltipPadTourTrailingPlayCount
-      {...(variant === "wl-home-v2-setlist" ?
-        { v2ProportionalBarWhenMaxCountExceeds: 25 as const }
-      : {})}
     />
   )
 }

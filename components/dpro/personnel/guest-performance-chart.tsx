@@ -1,17 +1,23 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { GuestPerformanceTimelineView } from "./guest-performance-timeline-view"
 import { GuestPerformanceTableView } from "./guest-performance-table-view"
 import type { GuestShow } from "@/hooks/use-guest-data"
-
-interface GuestTimelinePerf {
-  formattedDate: string
-  show_id: string
-  fullData: GuestShow
-}
+import { SongArchiveDetailPerfCardShell } from "@/components/archive-song/wl-home-v2-song-archive-detail-perf-views"
+import {
+  PERFORMANCES_VIEW_QUERY,
+  performancesViewFromSearchParams,
+} from "@/components/archive-song/song-archive-detail-performances-lib"
+import {
+  getLegacyPerformancesViewFromUrl,
+  sortGuestShows,
+  type GuestTimelinePerf,
+} from "@/components/dpro/personnel/guest-performance-chart.lib"
+import { PersonnelPerfHeadFilterPills } from "@/components/dpro/personnel/guest-performance-head-filter-pills"
+import { GuestPerformanceLegacyViewToggle } from "@/components/dpro/personnel/guest-performance-legacy-view-toggle"
 
 interface GuestPerformanceChartProps {
   performances: GuestShow[]
@@ -19,47 +25,11 @@ interface GuestPerformanceChartProps {
   guestName: string
   selectedGroup: string | null
   selectedSong: string | null
-}
-
-function sortGuestShows(
-  performances: GuestShow[],
-  sortColumn: string,
-  sortDirection: "asc" | "desc",
-): GuestShow[] {
-  return [...performances].sort((a, b) => {
-    let valueA: string | number
-    let valueB: string | number
-
-    switch (sortColumn) {
-      case "show_date":
-        valueA = new Date(a.show_date).getTime()
-        valueB = new Date(b.show_date).getTime()
-        return sortDirection === "asc"
-          ? (valueA as number) - (valueB as number)
-          : (valueB as number) - (valueA as number)
-      case "show_group":
-        valueA = a.show_group || ""
-        valueB = b.show_group || ""
-        break
-      case "show_venue_location":
-        valueA = a.show_venue_location || ""
-        valueB = b.show_venue_location || ""
-        break
-      default:
-        valueA = ""
-        valueB = ""
-    }
-
-    const comparison =
-      typeof valueA === "string" && typeof valueB === "string"
-        ? valueA.localeCompare(valueB)
-        : valueA < valueB
-          ? -1
-          : valueA > valueB
-            ? 1
-            : 0
-    return sortDirection === "asc" ? comparison : -comparison
-  })
+  wlHomeV2?: boolean
+  /** WL Home personnel: clear tour/group filter from performances header pill. */
+  onClearSelectedGroup?: () => void
+  /** WL Home personnel: clear song filter from performances header pill. */
+  onClearSelectedSong?: () => void
 }
 
 export function GuestPerformanceChart({
@@ -68,37 +38,53 @@ export function GuestPerformanceChart({
   guestName,
   selectedGroup,
   selectedSong,
+  wlHomeV2 = false,
+  onClearSelectedGroup,
+  onClearSelectedSong,
 }: GuestPerformanceChartProps) {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
 
-  const getViewModeFromUrl = (): "timeline" | "table" => {
-    const viewParam = searchParams?.get("view")
-    return viewParam === "table" || viewParam === "timeline"
-      ? viewParam
-      : "timeline"
-  }
-
-  const [viewMode, setViewMode] = useState<"timeline" | "table">(
-    getViewModeFromUrl,
+  const [legacyViewMode, setLegacyViewMode] = useState<"timeline" | "table">(() =>
+    getLegacyPerformancesViewFromUrl(searchParams),
   )
   const [sortColumn, setSortColumn] = useState("show_date")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
 
   useEffect(() => {
-    const urlViewMode = getViewModeFromUrl()
-    if (urlViewMode !== viewMode) setViewMode(urlViewMode)
-  }, [searchParams])
+    if (wlHomeV2) return
+    setLegacyViewMode(getLegacyPerformancesViewFromUrl(searchParams))
+  }, [searchParams, wlHomeV2])
 
-  const handleViewModeChange = (newViewMode: "timeline" | "table") => {
-    setViewMode(newViewMode)
-    const url = new URL(window.location.href)
-    if (newViewMode === "timeline") {
-      url.searchParams.delete("view")
-    } else {
-      url.searchParams.set("view", newViewMode)
-    }
-    window.history.replaceState({}, "", url.toString())
-  }
+  const performancesViewWl = useMemo(
+    () => performancesViewFromSearchParams(searchParams),
+    [searchParams],
+  )
+
+  const performancesView = wlHomeV2 ? performancesViewWl : legacyViewMode
+
+  const setPerformancesViewMode = useCallback(
+    (mode: "timeline" | "table") => {
+      if (wlHomeV2) {
+        const params = new URLSearchParams(searchParams.toString())
+        if (mode === "timeline") params.delete(PERFORMANCES_VIEW_QUERY)
+        else params.set(PERFORMANCES_VIEW_QUERY, "table")
+        const qs = params.toString()
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+      } else {
+        setLegacyViewMode(mode)
+        const url = new URL(window.location.href)
+        if (mode === "timeline") {
+          url.searchParams.delete("view")
+        } else {
+          url.searchParams.set("view", mode)
+        }
+        window.history.replaceState({}, "", url.toString())
+      }
+    },
+    [wlHomeV2, pathname, router, searchParams],
+  )
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -149,6 +135,29 @@ export function GuestPerformanceChart({
   )
 
   if (performances.length === 0) {
+    if (wlHomeV2) {
+      return (
+        <div className="card perf-card">
+          <div className="card-head perf-card-head-pad">
+            <h3>Performances</h3>
+          </div>
+          <div className="card-body">
+            <p
+              style={{
+                fontSize: 12,
+                color: "rgba(255,255,255,0.65)",
+                margin: 0,
+              }}
+            >
+              <span className="font-medium" style={{ color: "#fff" }}>
+                {guestName}
+              </span>{" "}
+              doesn&apos;t have any performance records.
+            </p>
+          </div>
+        </div>
+      )
+    }
     return (
       <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
         <CardHeader className="bg-muted/60 py-2">
@@ -161,6 +170,50 @@ export function GuestPerformanceChart({
           </p>
         </CardContent>
       </Card>
+    )
+  }
+
+  if (wlHomeV2) {
+    return (
+      <SongArchiveDetailPerfCardShell
+        selectedGroup={null}
+        selectedPlacement={null}
+        onClearPerformanceFilter={() => {}}
+        performancesView={performancesView}
+        setPerformancesView={setPerformancesViewMode}
+        headFilters={
+          <PersonnelPerfHeadFilterPills
+            selectedGroup={selectedGroup}
+            selectedSong={selectedSong}
+            onClearSelectedGroup={onClearSelectedGroup}
+            onClearSelectedSong={onClearSelectedSong}
+          />
+        }
+      >
+        <div
+          hidden={performancesView !== "timeline"}
+          style={{ opacity: performancesView === "timeline" ? 1 : 0 }}
+        >
+          <GuestPerformanceTimelineView
+            performancesByYear={performancesByYear}
+            selectedGroup={selectedGroup}
+            wlHomeV2
+          />
+        </div>
+        <div
+          hidden={performancesView !== "table"}
+          style={{ opacity: performancesView === "table" ? 1 : 0 }}
+        >
+          <GuestPerformanceTableView
+            performances={sortedPerformances}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            handleSort={handleSort}
+            selectedGroup={selectedGroup}
+            wlHomeV2
+          />
+        </div>
+      </SongArchiveDetailPerfCardShell>
     )
   }
 
@@ -185,69 +238,18 @@ export function GuestPerformanceChart({
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-pressed={viewMode === "timeline"}
-              onClick={() => handleViewModeChange("timeline")}
-              className={`p-1.5 rounded transition-colors ${
-                viewMode === "timeline"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-              aria-label="Timeline view"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M9 3v18" />
-                <path d="M15 3v18" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-pressed={viewMode === "table"}
-              onClick={() => handleViewModeChange("table")}
-              className={`p-1.5 rounded transition-colors ${
-                viewMode === "table"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-              aria-label="Table view"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M3 9h18" />
-                <path d="M3 15h18" />
-              </svg>
-            </button>
-          </div>
+          <GuestPerformanceLegacyViewToggle
+            performancesView={performancesView}
+            setPerformancesViewMode={setPerformancesViewMode}
+          />
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {viewMode === "timeline" ? (
+        {performancesView === "timeline" ? (
           <GuestPerformanceTimelineView
             performancesByYear={performancesByYear}
             selectedGroup={selectedGroup}
+            wlHomeV2={wlHomeV2}
           />
         ) : (
           <GuestPerformanceTableView
@@ -256,6 +258,7 @@ export function GuestPerformanceChart({
             sortDirection={sortDirection}
             handleSort={handleSort}
             selectedGroup={selectedGroup}
+            wlHomeV2={wlHomeV2}
           />
         )}
       </CardContent>

@@ -11,10 +11,13 @@ const COVER_CATEGORIES = ["Cover Songs", "Miscellaneous Covers"]
 
 interface PersonnelSongSpreadCardProps {
   songSpreadData: SongSpreadCategory[]
+  /** Tour/setlist shell (`side-card` + `sc-label`) provided by personnel detail page. */
+  wlHomeV2?: boolean
 }
 
 export function PersonnelSongSpreadCard({
   songSpreadData,
+  wlHomeV2 = false,
 }: PersonnelSongSpreadCardProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
 
@@ -52,7 +55,9 @@ export function PersonnelSongSpreadCard({
       spread={spread}
       hoveredCategory={hoveredCategory}
       onCategoryHover={setHoveredCategory}
-      cardMaxHeight="max-h-[400px]"
+      cardMaxHeight={wlHomeV2 ? undefined : "max-h-[400px]"}
+      variant={wlHomeV2 ? "wl-home-v2-setlist" : "card"}
+      tooltipPadTourTrailingPlayCount={wlHomeV2}
     />
   )
 }

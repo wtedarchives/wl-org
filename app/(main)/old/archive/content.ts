@@ -42,7 +42,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Personnel",
-    href: "/old/archive/personnel",
+    href: "/archive/personnel",
     icon: "Users",
     description:
       "Band members, guest performers, and collaborators. Explore their performance history across shows.",

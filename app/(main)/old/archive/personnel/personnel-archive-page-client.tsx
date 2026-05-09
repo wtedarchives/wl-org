@@ -58,7 +58,7 @@ function PersonnelDetailPageContent({ guestId }: { guestId: string }) {
     }
     setSetlistBreadcrumbs([
       WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Personnel", href: "/old/archive/personnel" },
+      { label: "Personnel", href: "/archive/personnel" },
       { label: guestName, href: getPersonnelArchiveUrl(guestId) },
     ])
     return () => setSetlistBreadcrumbs(null)

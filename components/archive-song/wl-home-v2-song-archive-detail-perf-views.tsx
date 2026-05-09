@@ -52,6 +52,7 @@ export function SongArchiveDetailPerfCardShell({
   performancesView,
   setPerformancesView,
   children,
+  headFilters,
 }: {
   selectedGroup: string | null
   selectedPlacement: string | null
@@ -59,13 +60,17 @@ export function SongArchiveDetailPerfCardShell({
   performancesView: "timeline" | "table"
   setPerformancesView: (mode: "timeline" | "table") => void
   children: ReactNode
+  /** When set, replaces the default group/placement pill (e.g. personnel: group + song pills). */
+  headFilters?: ReactNode
 }) {
   return (
     <div className="card perf-card">
       <div className="card-head perf-card-head-pad">
         <h3>Performances</h3>
         <div className="perf-head-controls">
-          {selectedGroup || selectedPlacement ?
+          {headFilters !== undefined ?
+            headFilters
+          : selectedGroup || selectedPlacement ?
             <span className="pill-filter">
               <span>{selectedGroup ?? selectedPlacement}</span>
               <span

@@ -30,7 +30,6 @@ function CategorySpreadRow({
   showTooltips,
   tooltipSide = "left",
   variant = "card",
-  v2UseProportionalBar = false,
 }: {
   category: string
   count: number
@@ -42,13 +41,10 @@ function CategorySpreadRow({
   showTooltips: boolean
   tooltipSide?: "left" | "right" | "top" | "bottom"
   variant?: "card" | "wl-home-v2-setlist"
-  /** WL Home v2: one teal bar (`count/maxCount`) instead of N segments when max count is huge. */
-  v2UseProportionalBar?: boolean
 }) {
   const { artwork, loaded } = useCategoryArtwork(category)
   const barWidth = maxCount > 0 ? Math.max(4, (count / maxCount) * 100) : 0
   const isV2 = variant === "wl-home-v2-setlist"
-  const filledSegments = Math.min(count, maxCount)
 
   const rowContent = (
     <div
@@ -99,36 +95,17 @@ function CategorySpreadRow({
         )}
       </span>
       {isV2 && maxCount > 0 ?
-        v2UseProportionalBar ?
+        <div
+          className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--proportion flex-1 min-w-0 min-h-5 flex items-center justify-start"
+          aria-hidden
+        >
           <div
-            className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--proportion flex-1 min-w-0 min-h-5 flex items-center justify-start"
-            aria-hidden
-          >
-            <div
-              className="wl-home-v2-setlist-song-spread-proportion-fill"
-              style={{
-                width: `${barWidth}%`,
-              }}
-            />
-          </div>
-        : <div
-            className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--segmented flex-1 min-w-0 min-h-5"
-            aria-hidden
-          >
-            {Array.from({ length: maxCount }, (_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "wl-home-v2-setlist-song-spread-segment",
-                  i < filledSegments &&
-                    "wl-home-v2-setlist-song-spread-segment--filled",
-                  isHovered &&
-                    i < filledSegments &&
-                    "wl-home-v2-setlist-song-spread-segment--filled-hover",
-                )}
-              />
-            ))}
-          </div>
+            className="wl-home-v2-setlist-song-spread-proportion-fill"
+            style={{
+              width: `${barWidth}%`,
+            }}
+          />
+        </div>
       : <div
           className={cn(
             "h-4 flex-1 min-w-0 rounded-full overflow-hidden",
@@ -216,11 +193,6 @@ interface SongSpreadDisplayProps {
    * Set by {@link TourSongSpread}; does not apply to setlist/venue spreads.
    */
   tooltipPadTourTrailingPlayCount?: boolean
-  /**
-   * When set (with `wl-home-v2-setlist`), rows use one proportional meter if the
-   * largest category count exceeds this value (avoid 26+ segment cells). Intended for tour spread only.
-   */
-  v2ProportionalBarWhenMaxCountExceeds?: number
 }
 
 function getSongNameForSort(s: string): string {
@@ -249,17 +221,10 @@ export function SongSpreadDisplay({
   tooltipSide = "left",
   variant = "card",
   tooltipPadTourTrailingPlayCount = false,
-  v2ProportionalBarWhenMaxCountExceeds,
 }: SongSpreadDisplayProps) {
   const isDesktop = useIsDesktopContentLayout()
   const maxCount = spread.length > 0 ? Math.max(...spread.map((s) => s.count)) : 0
   const isV2 = variant === "wl-home-v2-setlist"
-  const v2UseProportionalBar =
-    Boolean(
-      isV2 &&
-        v2ProportionalBarWhenMaxCountExceeds != null &&
-        maxCount > v2ProportionalBarWhenMaxCountExceeds,
-    )
 
   if (spread.length === 0) return null
 
@@ -363,7 +328,6 @@ export function SongSpreadDisplay({
             showTooltips={isDesktop}
             tooltipSide={tooltipSide}
             variant={variant}
-            v2UseProportionalBar={v2UseProportionalBar}
           />
         )
       })}

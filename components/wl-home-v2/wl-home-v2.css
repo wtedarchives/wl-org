@@ -1352,6 +1352,55 @@
     width: 100%;
     min-height: 0;
   }
+  /*
+   * Personnel archive index: rows size to their own content — top row (current/former)
+   * height does not stretch to match bottom row (guests/groups) or vice versa.
+   */
+  .wl-home-v2 .wl-home-v2-personnel-archive-page #tileGrid.grid {
+    grid-template-rows: auto auto;
+  }
+
+  /*
+   * Personnel archive: Guests & Groups occupy one outer row spanning both columns.
+   */
+  .wl-home-v2 .wl-home-v2-personnel-archive-page #tileGrid.grid > .tile-personnel-catalog--span-full {
+    grid-column: 1 / -1;
+  }
+
+  /*
+   * Personnel archive index breadcrumbs — same chrome as `/archive/personnel?id=` + song detail search control
+   * (scoped here because index page omits `.song-archive-detail-vx`).
+   */
+  .wl-home-v2 .wl-home-v2-personnel-archive-page .song-archive-detail-vx__crumbs-search-btn {
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgb(49, 51, 49);
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding-block: 4px;
+    padding-inline: 12px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .wl-home-v2 .wl-home-v2-personnel-archive-page .song-archive-detail-vx__crumbs-search-btn:hover {
+    color: #fff;
+    border-color: rgb(123, 94, 63);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
   /* ---------- Tile ---------- */
   .wl-home-v2 .tile {
     position: relative;
@@ -4729,19 +4778,20 @@
   }
   .wl-home-v2
     table.wl-home-v2-tour-schedule-table
-    td.wl-home-v2-tour-schedule-td--icon {
+    tbody
+    tr.wl-home-v2-tour-schedule-row
+    > td.wl-home-v2-tour-schedule-td--icon {
     width: 24px;
     min-width: 24px;
     max-width: 24px;
     text-align: center;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 8px 2px;
   }
   .wl-home-v2
     table.wl-home-v2-tour-schedule-table
-    td.wl-home-v2-tour-schedule-td--goose {
+    tbody
+    tr.wl-home-v2-tour-schedule-row
+    > td.wl-home-v2-tour-schedule-td--goose {
     width: 42px;
     min-width: 42px;
     max-width: 42px;
@@ -4751,6 +4801,9 @@
     tbody
     tr.wl-home-v2-tour-schedule-row
     > td.wl-home-v2-tour-schedule-rail {
+    /* Keep the vertical label column from growing when the table stretches */
+    width: 1%;
+    white-space: nowrap;
     /* 4px inset from the table edge on the left */
     padding: 8px 1px 8px 4px;
     vertical-align: middle;
@@ -5052,7 +5105,8 @@
   }
   /* Current / Former mosaic: flush with tile bottom (drops base `.tile` bottom pad). */
   .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--current,
-  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--former {
+  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--former,
+  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--guests-groups {
     padding-bottom: 0;
   }
   @media (max-width: 1343px) {
@@ -5087,6 +5141,9 @@
     .tile-personnel-catalog-inner,
   .wl-home-v2
     .tile.tile-personnel-catalog.tile-personnel-catalog--former
+    .tile-personnel-catalog-inner,
+  .wl-home-v2
+    .tile.tile-personnel-catalog.tile-personnel-catalog--guests-groups
     .tile-personnel-catalog-inner {
     gap: 0;
   }
@@ -5128,6 +5185,8 @@
    */
   .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-instrument-chip {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
     align-self: flex-start;
     max-width: 100%;
     box-sizing: border-box;
@@ -5151,7 +5210,7 @@
     letter-spacing: 0.01em;
     color: rgba(255, 255, 255, 0.74);
     word-break: break-word;
-    text-align: right;
+    text-align: center;
   }
   .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-empty {
     flex: 1;
@@ -5172,12 +5231,12 @@
     padding: 0;
   }
   /*
-   * Current Goose members: 2×2-style mosaic flush with `#tileGrid` —
-   * `gap: 0`; cell borders rgb(34,37,35) + flush-right / flush-bottom (TSX) mirror `.grid > .tile`.
+   * Current Goose members: mosaic flush with `#tileGrid` —
+   * `gap: 0`; 1 column below 658px viewport, 2 columns at 658px+; borders driven in CSS (:has for last row).
    */
   .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--current-mini-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: minmax(132px, auto);
     gap: 0;
     align-content: stretch;
@@ -5192,6 +5251,54 @@
     .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--current-mini-grid {
       width: calc(100% + 48px);
       margin-inline: -24px;
+    }
+  }
+  @media (min-width: 658px) {
+    .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--current-mini-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /*
+   * Current members — mosaic borders vs viewport (<658px single column).
+   */
+  @media (max-width: 657px) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--current-mini-grid
+      > li
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+      border-right-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--current-mini-grid
+      > li:last-child
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
+    }
+  }
+  @media (min-width: 658px) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--current-mini-grid
+      > li:nth-child(2n)
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+      border-right-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--current-mini-grid:has(> li:nth-child(even):last-child)
+      > li:nth-last-child(-n + 2)
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--current-mini-grid:has(> li:nth-child(odd):last-child)
+      > li:last-child
+      .tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
     }
   }
   .wl-home-v2
@@ -5264,16 +5371,6 @@
     .tile-personnel-catalog-name {
     grid-row: 1 / span 2;
     align-self: center;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog
-    .tile-personnel-catalog-current-mini-tile--flush-right.tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
-    border-right-width: 0;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog
-    .tile-personnel-catalog-current-mini-tile--flush-bottom.tile-personnel-catalog-current-mini-tile.tile-personnel-catalog-link {
-    border-bottom-width: 0;
   }
   /*
    * Mini cell: stacked name + pill in column 2; portrait spans both rows (:has row-spans optional).
@@ -5384,11 +5481,11 @@
     align-self: start;
   }
   /*
-   * Former Goose members: 3×N mosaic (no portraits), same chrome as current mini cells.
+   * Former Goose members: 2 columns below 658px viewport, 3 columns at 658px+ (:has mosaic borders).
    */
   .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--former-mini-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: minmax(96px, auto);
     gap: 0;
     align-content: stretch;
@@ -5403,6 +5500,66 @@
     .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--former-mini-grid {
       width: calc(100% + 48px);
       margin-inline: -24px;
+    }
+  }
+  @media (min-width: 658px) {
+    .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--former-mini-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* Former members — mosaic borders (2 cols vs 3 cols). */
+  @media (max-width: 657px) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid
+      > li:nth-child(2n)
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-right-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid:has(> li:nth-child(even):last-child)
+      > li:nth-last-child(-n + 2)
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid:has(> li:nth-child(odd):last-child)
+      > li:last-child
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
+    }
+  }
+  @media (min-width: 658px) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid
+      > li:nth-child(3n)
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-right-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid:has(> li:last-child:nth-child(3n))
+      > li:nth-last-child(-n + 3)
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid:has(> li:last-child:nth-child(3n + 1))
+      > li:last-child
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
+    }
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-list--former-mini-grid:has(> li:last-child:nth-child(3n + 2))
+      > li:nth-last-child(-n + 2)
+      .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
+      border-bottom-width: 0;
     }
   }
   .wl-home-v2
@@ -5450,16 +5607,6 @@
   }
   .wl-home-v2
     .tile.tile-personnel-catalog
-    .tile-personnel-catalog-former-mini-tile--flush-right.tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
-    border-right-width: 0;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog
-    .tile-personnel-catalog-former-mini-tile--flush-bottom.tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link {
-    border-bottom-width: 0;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog
     .tile-personnel-catalog-former-mini-tile
     .tile-personnel-catalog-name {
     font-size: clamp(13px, 3.1vw, 15px);
@@ -5481,6 +5628,138 @@
     .wl-home-v2
       .tile.tile-personnel-catalog
       .tile-personnel-catalog-former-mini-tile.tile-personnel-catalog-link:focus-visible {
+      background: rgba(88, 200, 174, 0.18);
+      color: rgba(255, 255, 255, 0.98);
+      outline: none;
+    }
+  }
+  /*
+   * Guests / Groups: responsive column count via --personnel-guests-groups-grid-cols (see guestsGroupsGridColumnCount); 70px rows.
+   */
+  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--guests-groups-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      var(--personnel-guests-groups-grid-cols, 10),
+      minmax(0, 1fr)
+    );
+    grid-auto-rows: 70px;
+    gap: 0;
+    align-content: stretch;
+    align-self: stretch;
+    width: calc(100% + 56px);
+    margin-inline: -28px;
+    padding: 0;
+    background: transparent;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1180px) {
+    .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-list--guests-groups-mini-grid {
+      width: calc(100% + 48px);
+      margin-inline: -24px;
+    }
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-list--guests-groups-mini-grid
+    .tile-personnel-catalog-guest-group-mini-cell {
+    border-top: none;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-guest-group-mini-tile.tile-personnel-catalog-link {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 3px;
+    min-height: 0;
+    max-height: 70px;
+    width: 100%;
+    padding: 5px 6px;
+    border-radius: 0;
+    border-style: solid;
+    border-width: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-color: rgb(34, 37, 35);
+    background: rgba(49, 58, 52, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: none;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
+    overflow: hidden;
+    transition:
+      color 0.15s ease-out,
+      background-color 0.18s ease-out;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-guest-group-mini-tile--flush-right.tile-personnel-catalog-guest-group-mini-tile.tile-personnel-catalog-link {
+    border-right-width: 0;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-guest-group-mini-tile--flush-bottom.tile-personnel-catalog-guest-group-mini-tile.tile-personnel-catalog-link {
+    border-bottom-width: 0;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-guest-group-mini-tile
+    .tile-personnel-catalog-name {
+    font-size: clamp(11px, 2.2vw, 12px);
+    font-weight: 600;
+    line-height: 1.15;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-list--guests-groups-mini-grid
+    .tile-personnel-catalog-instrument-chip {
+    flex-shrink: 0;
+    padding: 3px 6px;
+    max-width: 100%;
+    align-self: center;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-list--guests-groups-mini-grid
+    .tile-personnel-catalog-instrument-chip
+    .tile-personnel-catalog-instrument {
+    font-size: 9px;
+    line-height: 1.25;
+    text-align: center;
+    word-break: break-word;
+  }
+  .wl-home-v2
+    .tile.tile-personnel-catalog
+    .tile-personnel-catalog-guest-group-mini-tile
+    .tile-personnel-catalog-instrument-chip {
+    align-self: center;
+    max-width: 100%;
+  }
+  @media (hover: hover) {
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-guest-group-mini-tile.tile-personnel-catalog-link:hover,
+    .wl-home-v2
+      .tile.tile-personnel-catalog
+      .tile-personnel-catalog-guest-group-mini-tile.tile-personnel-catalog-link:focus-visible {
       background: rgba(88, 200, 174, 0.18);
       color: rgba(255, 255, 255, 0.98);
       outline: none;
@@ -5510,7 +5789,7 @@
     .tile.tile-personnel-catalog
     .tile-personnel-catalog-list:not(.tile-personnel-catalog-list--current-mini-grid):not(
       .tile-personnel-catalog-list--former-mini-grid
-    )
+    ):not(.tile-personnel-catalog-list--guests-groups-mini-grid)
     > .tile-personnel-catalog-item
     > .tile-personnel-catalog-link {
     flex-direction: column;
@@ -5523,106 +5802,23 @@
       .tile.tile-personnel-catalog
       .tile-personnel-catalog-link:not(.tile-personnel-catalog-current-mini-tile):not(
         .tile-personnel-catalog-former-mini-tile
-      ):hover,
+      ):not(.tile-personnel-catalog-guest-group-mini-tile):hover,
     .wl-home-v2
       .tile.tile-personnel-catalog
       .tile-personnel-catalog-link:not(.tile-personnel-catalog-current-mini-tile):not(
         .tile-personnel-catalog-former-mini-tile
-      ):focus-visible {
+      ):not(.tile-personnel-catalog-guest-group-mini-tile):focus-visible {
       color: var(--wl-light-orange);
       outline: none;
     }
   }
-  .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-name {
-    min-width: 0;
-    word-break: break-word;
-  }
-  /* Guests / Groups: frosted widget panel + inner scroll (community “Featured Topics” pattern) */
-  .wl-home-v2 .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll {
-    max-height: 432px;
-  }
   .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .widget-panel.tile-personnel-catalog-widget-panel {
-    flex: 1 1 auto;
+    .tile.tile-personnel-catalog.tile-personnel-catalog--guests-groups-wide
+    .tile-personnel-catalog-list--guests-groups-mini-grid {
+    flex: none;
+    overflow: visible;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
-    /* Match `.widget-panel.songs-archive-category-tile-widget` */
-    background: rgba(0, 0, 0, 0.55);
-    border-color: rgb(56, 59, 57);
-    padding: 10px 10px 5px;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-empty {
-    flex: 1 1 auto;
-    min-height: 0;
-    margin: 0;
-    padding: 4px 0 2px;
-    font-size: 11px;
-    line-height: 1.45;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-scroll-mount {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -10px;
-    padding: 4px 0 2px;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-topic-body {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-  /* Same row chrome as `.widget-panel > a.topic-row` (featured topics), nested in scroll mount */
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-scroll-mount
-    a.tile-personnel-catalog-panel-topic.topic-row {
-    text-decoration: none;
-    color: inherit;
-    margin: 0 -10px;
-    padding: 4px 10px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    border-bottom: 1px solid rgb(29, 32, 30);
-    transition:
-      background 0.18s,
-      border-color 0.18s,
-      transform 0.18s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-scroll-mount
-    a.tile-personnel-catalog-panel-topic.topic-row:last-child {
-    border-bottom-color: transparent;
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-scroll-mount
-    a.tile-personnel-catalog-panel-topic.topic-row:hover {
-    background: rgba(88, 200, 174, 0.18);
-    border-color: rgb(52, 109, 95);
-    border-bottom-color: rgb(52, 109, 95);
-    transform: translateY(-1px);
-  }
-  .wl-home-v2
-    .tile.tile-personnel-catalog.tile-personnel-catalog--panel-scroll
-    .tile-personnel-catalog-panel-scroll-mount
-    a.tile-personnel-catalog-panel-topic.topic-row:focus-visible {
-    outline: 2px solid var(--wl-light-orange);
-    outline-offset: 2px;
+    align-self: stretch;
   }
   /* Program Director — show “info” dialog; same shell as request/schedule */
   .wl-home-v2 .modal.modal--pd-show-info {
@@ -6719,6 +6915,70 @@
     border-bottom: none;
   }
 
+  /*
+   * Personnel detail (`/archive/personnel?id=`) — frost styling for shadcn Cards
+   * (same panel recipe as song detail `.card`).
+   */
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    [data-slot="card"] {
+    background: rgba(0, 0, 0, 0.63);
+    border: 1px solid rgb(63, 65, 64);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #fff;
+    --card: transparent;
+    --card-foreground: #fff;
+    box-shadow: none;
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    [data-slot="card-header"] {
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgb(53, 56, 54);
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    .text-muted-foreground {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    .border-border {
+    border-color: rgb(53, 56, 54);
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    .personnel-archive-strip-songs-input {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    line-height: 1.35;
+    border: 1px solid rgb(52, 58, 54);
+    background: rgba(0, 0, 0, 0.28);
+    color: #fff;
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    .personnel-archive-strip-songs-input::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    .personnel-archive-strip-songs-input:focus {
+    outline: none;
+  }
+  .wl-home-v2
+    .song-archive-detail-vx.wl-home-v2-song-archive-page.personnel-archive-detail
+    .personnel-archive-strip-songs-input:focus-visible {
+    outline: 2px solid rgb(255, 122, 103);
+    outline-offset: 1px;
+  }
+
   .wl-home-v2 .songs-archive-verbatim.wl-home-v2-songs-archive-page .list-card {
     background: rgba(0, 0, 0, 0.63);
     border: 1px solid rgb(63, 65, 64);
@@ -7402,6 +7662,23 @@
     font-size: 11px;
     color: rgba(255, 255, 255, 0.5);
     text-align: right;
+  }
+  /* Personnel search: allow long instrument lines to wrap (same modal shell as songs). */
+  .wl-home-v2
+    .modal.modal--wted-request.modal--songs-archive-search
+    .songs-archive-modal-result-row.personnel-archive-search-modal__row {
+    align-items: flex-start;
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--songs-archive-search
+    .songs-archive-modal-result-meta.personnel-archive-search-modal__meta {
+    flex: 1 1 42%;
+    min-width: min(9rem, 42%);
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-overflow: unset;
   }
   .wl-home-v2 .modal.modal--wted-request.modal--songs-archive-filter .songs-archive-modal-filter-body {
     gap: 0;
