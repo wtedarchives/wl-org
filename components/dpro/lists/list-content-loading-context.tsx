@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react"
 
@@ -37,10 +38,13 @@ export function ListContentLoadingProvider({
     setProgressState(Math.min(100, Math.max(0, value)))
   }, [])
 
+  const value = useMemo(
+    () => ({ setLoading, setProgress, loading, progress }),
+    [setLoading, setProgress, loading, progress],
+  )
+
   return (
-    <ListContentLoadingContext.Provider
-      value={{ setLoading, setProgress, loading, progress }}
-    >
+    <ListContentLoadingContext.Provider value={value}>
       {children}
     </ListContentLoadingContext.Provider>
   )

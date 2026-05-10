@@ -14,7 +14,8 @@
 # /archive/years → new WTED grid page (Next static route)
 # /archive/tours → new WTED grid page (Next static route)
 
-/archive/lists  /old/archive/lists  301
+# Lists index + detail live on `/archive/lists` (Next static route).
+/old/archive/lists  /archive/lists  301
 /archive/setlistgame  /old/archive/setlistgame  301
 /old/archive/song  /archive/song  301
 /old/archive/venue  /archive/venue  301

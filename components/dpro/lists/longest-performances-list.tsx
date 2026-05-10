@@ -1,12 +1,11 @@
 "use client"
 
-
-import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
-import { getSongArchiveUrl } from "@/lib/song-archive-url"
-import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
-import { useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useEffect, useState } from "react"
+
+import { LongestPerformancesCoachNotesCell } from "./longest-performances-list-coach-cell"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   Table,
   TableBody,
@@ -15,16 +14,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
-import { formatEntryLength } from "@/lib/setlist-utils"
 import { useLongestPerformancesList } from "@/hooks/use-longest-performances-list"
+import { cn } from "@/lib/utils"
+import { formatEntryLength } from "@/lib/setlist-utils"
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
+
 import { useListContentLoading } from "./list-content-loading-context"
 
 const COVER_SONGS_HEADER_IMAGE =
   "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
 
+function LongestPerfCategoryThumb({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  return (
+    <img
+      src={src}
+      alt=""
+      className="size-5 rounded border border-[rgb(49,51,49)] object-cover"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 interface LongestPerformancesListProps {
   listId: string
+  listName: string
+  listDescription: string | null
   isShortest?: boolean
 }
 
@@ -35,140 +53,204 @@ function formatShowDate(date: string) {
   return `${month}.${day}.${year.slice(2)}`
 }
 
+const headCell = "!px-2 !py-0.5"
+
 export function LongestPerformancesList({
-  listId,
+  listName,
+  listDescription,
   isShortest,
 }: LongestPerformancesListProps) {
-  const { rows, loading, error, progress } = useLongestPerformancesList(!!isShortest)
+  const { rows, loading, error, progress } = useLongestPerformancesList(
+    !!isShortest,
+  )
   const ctx = useListContentLoading()
+  const setListContentLoading = ctx?.setLoading
+  const setListContentProgress = ctx?.setProgress
 
   useEffect(() => {
-    ctx?.setLoading(loading)
-  }, [loading, ctx])
+    setListContentLoading?.(loading)
+  }, [loading, setListContentLoading])
   useEffect(() => {
-    ctx?.setProgress(progress)
-  }, [progress, ctx])
+    setListContentProgress?.(progress)
+  }, [progress, setListContentProgress])
 
   if (loading) return null
 
-  if (error) {
-    return (
-      <div className="py-2 px-3 text-center text-sm text-muted-foreground">
-        {error}
-      </div>
-    )
-  }
+  const desc = listDescription?.trim() ?? ""
 
-  if (rows.length === 0) {
+  const sheetBody = (() => {
+    if (error) {
+      return (
+        <div className="px-3 py-4 text-center text-xs text-white/65">
+          {error}
+        </div>
+      )
+    }
+    if (rows.length === 0) {
+      return (
+        <div className="px-3 py-4 text-center text-xs text-white/65">
+          No performances found.
+        </div>
+      )
+    }
+
     return (
-      <div className="py-2 px-3 text-center text-sm text-muted-foreground">
-        No performances found.
+      <div className="wl-home-v2-years-table-scroll min-h-0">
+        <Table className="wl-home-v2-longest-perf-table wl-home-v2-years-table min-w-max">
+          <TableHeader>
+            <TableRow className="border-b bg-black/25 hover:bg-black/25">
+              <TableHead
+                className={cn("text-left text-[10px] font-medium uppercase tracking-wider", headCell)}
+              >
+                Song
+              </TableHead>
+              <TableHead
+                className={cn(
+                  "text-center text-[10px] font-medium uppercase tracking-wider",
+                  headCell,
+                )}
+              >
+                <div className="flex justify-center">
+                  <Image
+                    src={COVER_SONGS_HEADER_IMAGE}
+                    alt="Cover Songs"
+                    width={32}
+                    height={32}
+                    className="size-8 rounded border border-[rgb(49,51,49)] object-cover"
+                    unoptimized
+                  />
+                </div>
+              </TableHead>
+              <TableHead
+                className={cn(
+                  "text-center text-[10px] font-medium uppercase tracking-wider",
+                  headCell,
+                )}
+              >
+                Length
+              </TableHead>
+              <TableHead
+                className={cn(
+                  "text-center text-[10px] font-medium uppercase tracking-wider",
+                  headCell,
+                )}
+              >
+                Show
+              </TableHead>
+              <TableHead
+                className={cn("text-left text-[10px] font-medium uppercase tracking-wider", headCell)}
+              >
+                Location
+              </TableHead>
+              <TableHead
+                className={cn(
+                  "set-table-coach-notes-head text-left text-[10px] font-medium uppercase tracking-wider",
+                  headCell,
+                )}
+              >
+                Coach&apos;s Notes
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow
+                key={row.entry_id}
+                className="border-b bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+              >
+                <TableCell className={cn("align-middle", headCell)}>
+                  <Link
+                    href={getSongArchiveUrl(row.song_id)}
+                    className="font-medium text-white/[0.92] hover:underline"
+                  >
+                    <SongDisplayName
+                      song={row.entry_song}
+                      songDisplayName={row.song_displayname}
+                    />
+                  </Link>
+                </TableCell>
+                <TableCell
+                  className={cn("text-center align-middle", headCell)}
+                >
+                  <div className="flex justify-center">
+                    {row.category_artwork ?
+                      <LongestPerfCategoryThumb src={row.category_artwork} />
+                    : null}
+                  </div>
+                </TableCell>
+                <TableCell
+                  className={cn(
+                    "text-center align-middle tabular-nums text-white/85",
+                    headCell,
+                  )}
+                >
+                  {formatEntryLength(row.entry_length)}
+                </TableCell>
+                <TableCell
+                  className={cn("text-center align-middle", headCell)}
+                >
+                  <Link
+                    href={getSetlistArchiveUrl(row.show_id)}
+                    className="hover:underline"
+                  >
+                    {formatShowDate(row.show_date)}
+                  </Link>
+                </TableCell>
+                <TableCell className={cn("align-middle text-white/70", headCell)}>
+                  {row.show_venue_location ?
+                    row.venue_id ?
+                      <Link
+                        href={getVenueArchiveUrl(row.venue_id)}
+                        className="hover:underline"
+                      >
+                        {row.show_venue_location}
+                      </Link>
+                    : row.show_subvenue_venue ?
+                      <Link
+                        href={getVenueArchiveUrl(row.show_subvenue_venue)}
+                        className="hover:underline"
+                      >
+                        {row.show_venue_location}
+                      </Link>
+                    : row.show_venue_location
+                  : ""}
+                </TableCell>
+                <LongestPerformancesCoachNotesCell
+                  entryId={row.entry_id}
+                  coachNotes={row.entry_coachnotes}
+                />
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     )
-  }
+  })()
 
   return (
-    <div className="overflow-x-auto">
-      <Table className="min-w-max text-xs">
-        <TableHeader>
-          <TableRow className="bg-muted/60">
-            <TableHead className="px-2 py-0.5 text-left text-xs font-medium">
-              Song
-            </TableHead>
-            <TableHead className="px-2 py-0.5 text-center text-xs font-medium">
-              <Image
-                src={COVER_SONGS_HEADER_IMAGE}
-                alt="Cover Songs"
-                width={32}
-                height={32}
-                className="mx-auto size-8 rounded object-cover border border-border"
-                unoptimized
-              />
-            </TableHead>
-            <TableHead className="px-2 py-0.5 text-center text-xs font-medium">
-              Length
-            </TableHead>
-            <TableHead className="px-2 py-0.5 text-left text-xs font-medium">
-              Show
-            </TableHead>
-            <TableHead className="px-2 py-0.5 text-left text-xs font-medium">
-              Location
-            </TableHead>
-            <TableHead className="px-2 py-0.5 text-left text-xs font-medium">
-              Coach&apos;s Notes
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((row, i) => (
-            <TableRow
-              key={row.entry_id}
-              className={i % 2 === 0 ? "bg-background/70" : "bg-background"}
-            >
-              <TableCell className="px-2 py-0.5">
-                <Link
-                  href={getSongArchiveUrl(row.song_id)}
-                  className="font-medium hover:underline"
-                >
-                  <SongDisplayName
-                    song={row.entry_song}
-                    songDisplayName={row.song_displayname}
-                  />
-                </Link>
-              </TableCell>
-              <TableCell className="px-2 py-0.5 text-center align-middle">
-                {row.category_artwork ? (
-                  <img
-                    src={row.category_artwork}
-                    alt=""
-                    className="mx-auto size-5 rounded object-cover border border-border"
-                    onError={(e) => {
-                      ;(e.target as HTMLImageElement).style.display = "none"
-                    }}
-                  />
-                ) : null}
-              </TableCell>
-              <TableCell className="px-2 py-0.5 text-center tabular-nums">
-                {formatEntryLength(row.entry_length)}
-              </TableCell>
-              <TableCell className="px-2 py-0.5">
-                <Link
-                  href={getSetlistArchiveUrl(row.show_id)}
-                  className="hover:underline"
-                >
-                  {formatShowDate(row.show_date)}
-                </Link>
-              </TableCell>
-              <TableCell className="px-2 py-0.5 text-muted-foreground">
-                {row.show_venue_location ? (
-                  row.venue_id ? (
-                    <Link
-                      href={getVenueArchiveUrl(row.venue_id)}
-                      className="hover:underline"
-                    >
-                      {row.show_venue_location}
-                    </Link>
-                  ) : row.show_subvenue_venue ? (
-                    <Link
-                      href={getVenueArchiveUrl(row.show_subvenue_venue)}
-                      className="hover:underline"
-                    >
-                      {row.show_venue_location}
-                    </Link>
-                  ) : (
-                    row.show_venue_location
-                  )
-                ) : (
-                  ""
-                )}
-              </TableCell>
-              <TableCell className="px-2 py-0.5 text-muted-foreground truncate">
-                {row.entry_coachnotes ?? ""}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="wl-home-v2-setlist flex min-w-0 flex-1 flex-col">
+      <section className="wl-home-v2-longest-perf-list wl-home-v2-years-tile wl-home-v2-years-tile--main flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="wl-home-v2-years-tile-inner flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+          <div className="show-header">
+            <div className="left">
+              <div className="show-header-title-row">
+                <h1 className="show-header-heading">
+                  <span className="date">{listName}</span>
+                </h1>
+              </div>
+              {desc ?
+                <div className="venue wl-home-v2-list-header-desc">
+                  <span className="venue-subvenue-text">{desc}</span>
+                </div>
+              : null}
+            </div>
+          </div>
+
+          <div className="widget-panel wl-home-v2-longest-perf-table-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            {sheetBody}
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

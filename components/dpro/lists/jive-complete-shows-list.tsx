@@ -17,12 +17,15 @@ export function JiveCompleteShowsList() {
     showRatings,
   } = useListShowData(shows)
 
+  const setListContentLoading = ctx?.setLoading
+  const setListContentProgress = ctx?.setProgress
+
   useEffect(() => {
-    ctx?.setLoading(loading)
-  }, [loading, ctx])
+    setListContentLoading?.(loading)
+  }, [loading, setListContentLoading])
   useEffect(() => {
-    ctx?.setProgress(progress)
-  }, [progress, ctx])
+    setListContentProgress?.(progress)
+  }, [progress, setListContentProgress])
 
   if (loading) return null
 

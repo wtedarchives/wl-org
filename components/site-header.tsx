@@ -159,6 +159,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
       (pathname ?? "").startsWith("/old/archive/personnel/") ||
       (pathname ?? "") === "/old/archive/venue" ||
       (pathname ?? "") === "/old/archive/lists" ||
+      (pathname ?? "") === "/archive/lists" ||
       (pathname ?? "") === "/archive/discography" ||
       (pathname ?? "") === "/old/archive/discography" ||
       (pathname ?? "").startsWith("/old/archive/discography/")) ||

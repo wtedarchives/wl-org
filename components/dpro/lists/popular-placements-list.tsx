@@ -54,13 +54,15 @@ const SECTIONS = [
 export function PopularPlacementsList({ listId }: PopularPlacementsListProps) {
   const data = usePopularPlacementsData()
   const ctx = useListContentLoading()
+  const setListContentLoading = ctx?.setLoading
+  const setListContentProgress = ctx?.setProgress
 
   useEffect(() => {
-    ctx?.setLoading(data.loading)
-  }, [data.loading, ctx])
+    setListContentLoading?.(data.loading)
+  }, [data.loading, setListContentLoading])
   useEffect(() => {
-    ctx?.setProgress(data.progress ?? 0)
-  }, [data.progress, ctx])
+    setListContentProgress?.(data.progress ?? 0)
+  }, [data.progress, setListContentProgress])
 
   if (data.loading) return null
 

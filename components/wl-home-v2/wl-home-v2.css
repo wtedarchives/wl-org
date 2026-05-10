@@ -7543,6 +7543,10 @@
       box-shadow 0.25s,
       background 0.25s;
   }
+  /* Lists archive index: compact tiles (global rule above is 200px for songs/discography). */
+  .wl-home-v2 article.songs-archive-category-tile.lists-archive-list-tile {
+    min-height: 120px;
+  }
   /* Flow-column sections: equal flex-grow so free vertical space splits across all tiles in the column. */
   .wl-home-v2 article.songs-archive-category-tile.songs-archive-category-tile--multicol {
     width: 100%;
@@ -8909,6 +8913,38 @@
   );
   pointer-events: none;
 }
+/* Longest / shortest performances: table panel matches `.show-header` frost + corner glow */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .widget-panel.wl-home-v2-longest-perf-table-panel {
+  background: rgba(0, 0, 0, 0.63);
+  border: 1px solid rgb(63, 65, 64);
+  position: relative;
+  overflow: hidden;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .widget-panel.wl-home-v2-longest-perf-table-panel::before {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 122, 103, 0.2),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .widget-panel.wl-home-v2-longest-perf-table-panel
+  > * {
+  position: relative;
+  z-index: 1;
+}
 .wl-home-v2 .wl-home-v2-setlist .show-header .left {
   position: relative;
   z-index: 2;
@@ -9195,6 +9231,17 @@
 }
 .wl-home-v2 .wl-home-v2-setlist .show-header .venue .venue-location {
   font-weight: 400;
+}
+/* Lists (longest / shortest performances): description tracks `.show-header-heading` scale */
+.wl-home-v2 .wl-home-v2-setlist .show-header .venue.wl-home-v2-list-header-desc {
+  font-size: clamp(12px, 2.04vw, 15px);
+  line-height: 1.2;
+}
+@media (max-width: 1343px) {
+  .wl-home-v2 .wl-home-v2-setlist .show-header .venue.wl-home-v2-list-header-desc {
+    font-size: clamp(10px, 2.15vw, 13px);
+    line-height: 1.18;
+  }
 }
 .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-detail {
   min-width: 0;
@@ -10023,6 +10070,82 @@
   font-weight: 600;
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.notes-cell a:hover {
+  color: var(--wl-light-orange);
+  text-decoration: underline;
+}
+/* Longest / shortest performances: table body matches `.set-table` (12px Geist) */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-longest-perf-table {
+  font-size: 12px;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-longest-perf-table thead th,
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-longest-perf-table tbody td {
+  vertical-align: middle;
+}
+/* Longest / shortest list: main column background (was inline --tile-bg on the tile). */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-list.wl-home-v2-years-tile--main {
+  --tile-bg: url("/newbg3.jpeg");
+}
+/*
+ * Body links (song / show / location): hover underline like tours —
+ * override `.wl-home-v2-setlist a` and `.songs-archive-verbatim a`.
+ */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  tbody
+  td:not(.lp-list-notes-cell)
+  a:hover {
+  text-decoration: underline;
+}
+/* Longest / shortest performances lists: coach column — setlist expand + body 12px */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  th.set-table-coach-notes-head {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  td.lp-list-notes-cell.notes-cell {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  max-width: 400px;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  td.lp-list-notes-cell
+  .setlist-v2-notes-html,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  td.lp-list-notes-cell
+  .setlist-v2-notes-plain {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.72);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  td.lp-list-notes-cell
+  .setlist-v2-notes-html
+  a {
+  color: var(--wl-orange);
+  font-weight: 600;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-perf-table
+  td.lp-list-notes-cell
+  .setlist-v2-notes-html
+  a:hover {
   color: var(--wl-light-orange);
   text-decoration: underline;
 }

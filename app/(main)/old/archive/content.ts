@@ -63,7 +63,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Lists",
-    href: "/old/archive/lists",
+    href: "/archive/lists",
     icon: "ListMusic",
     description:
       "Curated song and show lists. Longest shows, song suites, segues, and other community-created collections.",
