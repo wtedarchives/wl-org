@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type CSSProperties } from "react"
+import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,28 +24,38 @@ interface TopSlotsCarouselProps {
   wlHomeV2?: boolean
 }
 
-const SLOT_COLORS: Record<string, string> = {
-  "Show Openers": "#047857",
-  "Set Openers": "#10b981",
-  "Set Closers": "#3b82f6",
-  Encores: "#be123c",
-  "0": "#006400",
-  "1": "#019B7A",
-  "2": "#E17401",
-  "3": "#7C2128",
+const TOP_SLOTS_CATEGORY_CLASS: Record<string, string> = {
+  "Show Openers": "wl-home-v2-top-slots-cat--show-openers",
+  "Set Openers": "wl-home-v2-top-slots-cat--set-openers",
+  "Set Closers": "wl-home-v2-top-slots-cat--set-closers",
+  Encores: "wl-home-v2-top-slots-cat--encores",
 }
 
-function getHeaderBgColor(title: string, index: number): string {
-  return SLOT_COLORS[title] ?? SLOT_COLORS[index.toString()] ?? "#059669"
+/** Class names wired in wl-home-v2.css (same hues as tour slot headers). */
+export function getTopSlotsCategoryClassName(title: string, index: number): string {
+  const named = TOP_SLOTS_CATEGORY_CLASS[title]
+  if (named) return named
+  const i = index.toString()
+  if (i === "0" || i === "1" || i === "2" || i === "3") {
+    return `wl-home-v2-top-slots-cat--i${i}`
+  }
+  return "wl-home-v2-top-slots-cat--fallback"
 }
 
-/** Same hues as legacy pill fills; mirrors `TourSlotsTable` WL header chrome + accent swatch. */
 /** Small rounded rectangle — matches tour `TopSlotsCarousel` WL chrome. */
-export function WlTopSlotsCategorySwatch({ color }: { color: string }) {
+export function WlTopSlotsCategorySwatch({
+  title,
+  index,
+}: {
+  title: string
+  index: number
+}) {
   return (
     <span
-      className="h-4 w-[30px] shrink-0 rounded-[4px] ring-1 ring-black/25"
-      style={{ backgroundColor: color }}
+      className={cn(
+        "wl-home-v2-top-slots-swatch",
+        getTopSlotsCategoryClassName(title, index),
+      )}
       aria-hidden
     />
   )
@@ -143,12 +153,9 @@ export function TopSlotsCarousel({
   const safeIndex = Math.min(currentSlideIndex, slotsWithData.length - 1)
   const currentSlide = slotsWithData[safeIndex]
   const currentTitle = currentSlide.title
-  /** Mobile WL carousel: same hue as adjoining swatch (`WlTopSlotsCategorySwatch`). */
-  const mobileCategoryAccent = getHeaderBgColor(currentTitle, safeIndex)
 
   const renderSlotTable = (slot: SlotData, index: number) => {
     if (slot.data.length === 0) return null
-    const headerBg = getHeaderBgColor(slot.title, index)
 
     if (wlHomeV2) {
       return (
@@ -159,7 +166,7 @@ export function TopSlotsCarousel({
           <div className="wp-head wl-home-v2-years-shows-wp-head">
             <span className="min-w-0 truncate">{`Top ${slot.title}`}</span>
             <div className="wp-head-right">
-              <WlTopSlotsCategorySwatch color={headerBg} />
+              <WlTopSlotsCategorySwatch title={slot.title} index={index} />
             </div>
           </div>
           <div className="min-w-0 max-h-64 overflow-x-auto overflow-y-auto">
@@ -185,8 +192,10 @@ export function TopSlotsCarousel({
         className="flex-1 min-w-0 ring-0 border border-border/60 bg-background/70 overflow-hidden py-0"
       >
         <div
-          className="px-3 py-1.5 text-white"
-          style={{ backgroundColor: headerBg }}
+          className={cn(
+            "wl-home-v2-top-slots-legacy-card-head px-3 py-1.5 text-white",
+            getTopSlotsCategoryClassName(slot.title, index),
+          )}
         >
           <h3 className="text-sm font-semibold">Top {slot.title}</h3>
         </div>
@@ -221,18 +230,12 @@ export function TopSlotsCarousel({
                       <Button
                         variant="ghost"
                         className={cn(
-                          "shrink-0 gap-1 rounded-[4px] border border-black/25 !h-auto min-h-0",
+                          "wl-home-v2-top-slots-mobile-dd-trigger shrink-0 gap-1 rounded-[4px] border border-black/25 !h-auto min-h-0",
                           "!py-px !pl-2 !pr-1.5",
                           "font-mono text-[10px] !font-normal uppercase leading-normal tracking-[0.08em]",
                           "text-white/[0.90] shadow-none hover:text-white/[0.78]",
-                          "!bg-[color-mix(in_srgb,var(--wl-top-slots-cat)_50%,transparent)]",
-                          "hover:!bg-[color-mix(in_srgb,var(--wl-top-slots-cat)_70%,transparent)]",
+                          getTopSlotsCategoryClassName(currentTitle, safeIndex),
                         )}
-                        style={
-                          {
-                            ["--wl-top-slots-cat"]: mobileCategoryAccent,
-                          } as CSSProperties
-                        }
                       >
                         {currentTitle}
                         <ChevronDown
@@ -253,7 +256,10 @@ export function TopSlotsCarousel({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 : null}
-                <WlTopSlotsCategorySwatch color={mobileCategoryAccent} />
+                <WlTopSlotsCategorySwatch
+                  title={currentTitle}
+                  index={safeIndex}
+                />
               </div>
             </div>
             <div className="max-h-72 min-w-0 overflow-x-auto overflow-y-auto">
@@ -272,10 +278,10 @@ export function TopSlotsCarousel({
           </div>
         : <Card className="ring-0 border border-border/60 bg-background/70 overflow-hidden py-0">
             <div
-              className="flex items-center justify-between px-3 py-1.5 text-white"
-              style={{
-                backgroundColor: getHeaderBgColor(currentTitle, safeIndex),
-              }}
+              className={cn(
+                "wl-home-v2-top-slots-legacy-card-head flex items-center justify-between px-3 py-1.5 text-white",
+                getTopSlotsCategoryClassName(currentTitle, safeIndex),
+              )}
             >
               <h2 className="text-sm font-semibold">Top Slots</h2>
               {slotsWithData.length > 1 && (

@@ -26,6 +26,7 @@ function renderListContent(
   listId: string,
   list: NonNullable<ReturnType<typeof useListIndData>["list"]>,
   items: ReturnType<typeof useListIndData>["items"],
+  archiveV2Lists: boolean,
 ) {
   switch (listType) {
     case "longest_performances":
@@ -49,9 +50,25 @@ function renderListContent(
         />
       )
     case "popular_placements":
-      return <PopularPlacementsList key={listId} listId={listId} />
+      return (
+        <PopularPlacementsList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     case "unfinished_reprised":
-      return <UnfinishedReprisedList key={listId} listId={listId} />
+      return (
+        <UnfinishedReprisedList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     case "segues":
       return <SeguesList key={listId} listId={listId} />
     case "longest_shows":
@@ -90,6 +107,11 @@ export function ListContentWithLoading({
   const isLongestPerformancesLayout =
     listType === "longest_performances" ||
     listType === "shortest_performances"
+  const isSelfContainedV2ArchiveList =
+    listType === "longest_performances" ||
+    listType === "shortest_performances" ||
+    listType === "popular_placements" ||
+    listType === "unfinished_reprised"
 
   if (archiveV2Lists) {
     return (
@@ -98,11 +120,11 @@ export function ListContentWithLoading({
           <WlHomeV2PageLoading message="Loading list…" />
         )}
         <div
-          className={ctx?.loading ? "hidden" : "flex flex-1 flex-col gap-4 overflow-hidden"}
+          className={ctx?.loading ? "hidden" : "flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"}
           aria-hidden={!!ctx?.loading}
         >
-          {isLongestPerformancesLayout ?
-            renderListContent(listType, listId, list, items)
+          {isSelfContainedV2ArchiveList ?
+            renderListContent(listType, listId, list, items, archiveV2Lists)
           : <>
               <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
                 <div className="border-b border-border/60 bg-muted/60 px-3 py-1 space-y-2">
@@ -141,13 +163,11 @@ export function ListContentWithLoading({
                 )}
               </Card>
 
-              {listType === "popular_placements" ||
-              listType === "unfinished_reprised" ||
-              listType === "segues" ?
-                renderListContent(listType, listId, list, items)
+              {listType === "segues" ?
+                renderListContent(listType, listId, list, items, archiveV2Lists)
               : <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
                   <CardContent className="p-0">
-                    {renderListContent(listType, listId, list, items)}
+                    {renderListContent(listType, listId, list, items, archiveV2Lists)}
                   </CardContent>
                 </Card>
               }
@@ -169,7 +189,7 @@ export function ListContentWithLoading({
       >
         <div className="flex flex-1 flex-col gap-4 px-4 md:px-6 py-2 md:py-4 rounded-b-none md:rounded-b-xl overflow-hidden">
           {isLongestPerformancesLayout ?
-            renderListContent(listType, listId, list, items)
+            renderListContent(listType, listId, list, items, archiveV2Lists)
           : <>
               <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
                 <div className="border-b border-border/60 bg-muted/60 px-3 py-1 space-y-2">
@@ -209,11 +229,11 @@ export function ListContentWithLoading({
               {listType === "popular_placements" ||
               listType === "unfinished_reprised" ||
               listType === "segues" ? (
-                renderListContent(listType, listId, list, items)
+                renderListContent(listType, listId, list, items, archiveV2Lists)
               ) : (
                 <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
                   <CardContent className="p-0">
-                    {renderListContent(listType, listId, list, items)}
+                    {renderListContent(listType, listId, list, items, archiveV2Lists)}
                   </CardContent>
                 </Card>
               )}

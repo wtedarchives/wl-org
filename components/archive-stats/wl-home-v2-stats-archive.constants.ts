@@ -6,12 +6,12 @@ export const WL_HOME_V2_STATS_YEARS = [
 ] as const
 
 /**
- * Header accent swatches — tour slot tiles (openers/closers/encores) align with
- * `SLOT_COLORS` in `top-slots-carousel.tsx`.
+ * Header accent swatch classes — same hues as tour slot tiles; defined in
+ * wl-home-v2.css (`.wl-home-v2-top-slots-cat--*`).
  */
-export const WL_HOME_V2_STATS_TILE_ACCENTS = {
-  topShowOpeners: "#047857",
-  topSetOpeners: "#10b981",
-  topSetClosers: "#3b82f6",
-  topEncores: "#be123c",
+export const WL_HOME_V2_STATS_TILE_ACCENT_CLASSES = {
+  topShowOpeners: "wl-home-v2-top-slots-cat--show-openers",
+  topSetOpeners: "wl-home-v2-top-slots-cat--set-openers",
+  topSetClosers: "wl-home-v2-top-slots-cat--set-closers",
+  topEncores: "wl-home-v2-top-slots-cat--encores",
 } as const

@@ -10,7 +10,7 @@ import {
   GapValue,
 } from "@/components/dpro/stats/show-stat-card"
 import { TourSongSpread } from "@/components/dpro/tours/tour-song-spread"
-import { WL_HOME_V2_STATS_TILE_ACCENTS } from "@/components/archive-stats/wl-home-v2-stats-archive.constants"
+import { WL_HOME_V2_STATS_TILE_ACCENT_CLASSES } from "@/components/archive-stats/wl-home-v2-stats-archive.constants"
 import type {
   TopSong,
   ShowOpener,
@@ -51,7 +51,7 @@ export function WlHomeV2StatsArchiveSongGrids({
   liberatedSongs: LiberatedSong[]
   songSpreadShows: TourSongSpreadShowInput[]
 }) {
-  const accent = WL_HOME_V2_STATS_TILE_ACCENTS
+  const accent = WL_HOME_V2_STATS_TILE_ACCENT_CLASSES
 
   return (
     <section className="flex min-h-0 flex-col">
@@ -75,7 +75,7 @@ export function WlHomeV2StatsArchiveSongGrids({
         <WlHomeV2StatsArchiveTile
           panelTitle="Top Show Openers"
           bgIndex={1}
-          headerAccentColor={accent.topShowOpeners}
+          headerAccentClass={accent.topShowOpeners}
         >
           <StatCard
             title="Top Show Openers"
@@ -92,7 +92,7 @@ export function WlHomeV2StatsArchiveSongGrids({
         <WlHomeV2StatsArchiveTile
           panelTitle="Top Set Openers"
           bgIndex={2}
-          headerAccentColor={accent.topSetOpeners}
+          headerAccentClass={accent.topSetOpeners}
         >
           <StatCard
             title="Top Set Openers"
@@ -109,7 +109,7 @@ export function WlHomeV2StatsArchiveSongGrids({
         <WlHomeV2StatsArchiveTile
           panelTitle="Top Set Closers"
           bgIndex={3}
-          headerAccentColor={accent.topSetClosers}
+          headerAccentClass={accent.topSetClosers}
         >
           <StatCard
             title="Top Set Closers"
@@ -126,7 +126,7 @@ export function WlHomeV2StatsArchiveSongGrids({
         <WlHomeV2StatsArchiveTile
           panelTitle="Top Encores"
           bgIndex={4}
-          headerAccentColor={accent.topEncores}
+          headerAccentClass={accent.topEncores}
         >
           <StatCard
             title="Top Encores"

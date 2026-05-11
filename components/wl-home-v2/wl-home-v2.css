@@ -10085,8 +10085,132 @@
 /* Longest / shortest list: main column background (was inline --tile-bg on the tile). */
 .wl-home-v2
   .wl-home-v2-setlist
-  .wl-home-v2-longest-perf-list.wl-home-v2-years-tile--main {
+  .wl-home-v2-longest-perf-list.wl-home-v2-years-tile--main,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-popular-placements-archive.wl-home-v2-years-tile--main,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive.wl-home-v2-years-tile--main {
   --tile-bg: url("/newbg3.jpeg");
+}
+/* Popular placements (archive): same frosted panel + title row as tour `/archive/tours` top slots. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-popular-placements-archive
+  .widget-panel,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive
+  .widget-panel {
+  background: rgba(0, 0, 0, 0.63);
+  border-color: rgb(63, 65, 64);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-popular-placements-archive
+  .widget-panel
+  > .wp-head,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive
+  .widget-panel
+  > .wp-head {
+  color: var(--wl-white);
+  font-size: 11px;
+  font-weight: 500;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-popular-placements-archive
+  .widget-panel
+  tbody
+  td
+  a:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive
+  .widget-panel
+  tbody
+  td
+  a:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive
+  .widget-panel
+  tbody
+  td
+  button:hover {
+  text-decoration: underline;
+}
+
+/* Most Common Reprises (archive): 22.5px row height (matches show-stats fixed-row pattern). */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive
+  .wl-home-v2-unfinished-reprised-reprises-table.wl-home-v2-top-slots-stats-table
+  tbody
+  tr.wl-home-v2-unfinished-reprised-reprises-row {
+  height: 22.5px;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-unfinished-reprised-archive
+  .wl-home-v2-unfinished-reprised-reprises-table.wl-home-v2-top-slots-stats-table
+  tbody
+  tr.wl-home-v2-unfinished-reprised-reprises-row
+  td.wl-home-v2-top-slots-stats-cell {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 22.5px;
+  vertical-align: middle;
+}
+
+/* Tour / archive top-slots: category hue tokens (see top-slots-carousel category class map). */
+.wl-home-v2-top-slots-cat--show-openers {
+  --wl-top-slots-cat: #047857;
+}
+.wl-home-v2-top-slots-cat--set-openers {
+  --wl-top-slots-cat: #10b981;
+}
+.wl-home-v2-top-slots-cat--set-closers {
+  --wl-top-slots-cat: #3b82f6;
+}
+.wl-home-v2-top-slots-cat--encores {
+  --wl-top-slots-cat: #be123c;
+}
+.wl-home-v2-top-slots-cat--i0 {
+  --wl-top-slots-cat: #006400;
+}
+.wl-home-v2-top-slots-cat--i1 {
+  --wl-top-slots-cat: #019b7a;
+}
+.wl-home-v2-top-slots-cat--i2 {
+  --wl-top-slots-cat: #e17401;
+}
+.wl-home-v2-top-slots-cat--i3 {
+  --wl-top-slots-cat: #7c2128;
+}
+.wl-home-v2-top-slots-cat--fallback {
+  --wl-top-slots-cat: #059669;
+}
+.wl-home-v2-top-slots-swatch {
+  display: inline-block;
+  height: 1rem;
+  width: 30px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.25);
+  background-color: var(--wl-top-slots-cat, #059669);
+}
+.wl-home-v2-top-slots-mobile-dd-trigger {
+  background: color-mix(in srgb, var(--wl-top-slots-cat) 50%, transparent) !important;
+}
+.wl-home-v2-top-slots-mobile-dd-trigger:hover {
+  background: color-mix(in srgb, var(--wl-top-slots-cat) 70%, transparent) !important;
+}
+.wl-home-v2-top-slots-legacy-card-head {
+  background-color: var(--wl-top-slots-cat);
 }
 /*
  * Body links (song / show / location): hover underline like tours —

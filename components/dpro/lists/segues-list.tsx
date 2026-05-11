@@ -21,7 +21,22 @@ import type { SegueSourceRow, SegueDestination } from "@/hooks/use-segues-data"
 const COVER_SONGS_HEADER_IMAGE =
   "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
 
-interface SeguesListProps {
+function SeguesRowCategoryThumb({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  return (
+    <img
+      src={src}
+      alt=""
+      width={20}
+      height={20}
+      className="mx-auto size-5 shrink-0 aspect-square rounded object-cover border border-border"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+winterface SeguesListProps {
   listId: string
 }
 
@@ -142,17 +157,7 @@ export function SeguesList({ listId }: SeguesListProps) {
                         </TableCell>
                         <TableCell className="min-w-16 w-16 px-2 py-0.5 text-center align-middle">
                           {row.category_artwork ? (
-                            <img
-                              src={row.category_artwork}
-                              alt=""
-                              width={20}
-                              height={20}
-                              className="mx-auto size-5 shrink-0 aspect-square rounded object-cover border border-border"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).style.display =
-                                  "none"
-                              }}
-                            />
+                            <SeguesRowCategoryThumb src={row.category_artwork} />
                           ) : null}
                         </TableCell>
                         <TableCell className="px-2 py-0.5 text-center text-xs tabular-nums align-middle">
@@ -195,16 +200,8 @@ export function SeguesList({ listId }: SeguesListProps) {
                             </TableCell>
                             <TableCell className="min-w-16 w-16 px-2 py-0.5 text-center align-middle">
                               {dest.category_artwork ? (
-                                <img
+                                <SeguesRowCategoryThumb
                                   src={dest.category_artwork}
-                                  alt=""
-                                  width={20}
-                                  height={20}
-                                  className="mx-auto size-5 shrink-0 aspect-square rounded object-cover border border-border"
-                                  onError={(e) => {
-                                    ;(e.target as HTMLImageElement).style.display =
-                                      "none"
-                                  }}
                                 />
                               ) : null}
                             </TableCell>

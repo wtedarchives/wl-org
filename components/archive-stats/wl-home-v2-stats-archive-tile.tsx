@@ -2,25 +2,25 @@
 
 import type { ReactNode } from "react"
 
-import { WlTopSlotsCategorySwatch } from "@/components/dpro/tours/top-slots-carousel"
+import { cn } from "@/lib/utils"
 
 export function WlHomeV2StatsArchiveTile({
   panelTitle,
   panelHeadRight,
-  headerAccentColor,
+  headerAccentClass,
   bgIndex,
   children,
   embed = "standard",
 }: {
   panelTitle?: string
   panelHeadRight?: ReactNode
-  headerAccentColor?: string
+  headerAccentClass?: string
   bgIndex: number
   children: ReactNode
   /** Match tour stats: `side-card` + `.sc-label` + setlist row chrome (not `widget-panel`). */
   embed?: "standard" | "tour-song-spread"
 }) {
-  const showHeadRight = panelHeadRight != null || headerAccentColor != null
+  const showHeadRight = panelHeadRight != null || headerAccentClass != null
   const tileBgIndex = bgIndex % 4
 
   if (embed === "tour-song-spread") {
@@ -55,8 +55,14 @@ export function WlHomeV2StatsArchiveTile({
             {showHeadRight ?
               <div className="wp-head-right">
                 {panelHeadRight}
-                {headerAccentColor ?
-                  <WlTopSlotsCategorySwatch color={headerAccentColor} />
+                {headerAccentClass ?
+                  <span
+                    className={cn(
+                      "wl-home-v2-top-slots-swatch",
+                      headerAccentClass,
+                    )}
+                    aria-hidden
+                  />
                 : null}
               </div>
             : null}
