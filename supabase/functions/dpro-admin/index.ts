@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
+import { syncWtedRadioIds } from "../_shared/wted-radio-ids-sync.ts"
 
 function httpErr(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -594,6 +595,16 @@ async function handleAction(
       const { count, error } = await db.from("profiles").select("*", { count: "exact", head: true })
       if (error) return { error: error.message }
       return { data: { count: count ?? 0 } }
+    }
+
+    case "wted_radio_ids_sync": {
+      try {
+        const result = await syncWtedRadioIds(db)
+        return { data: result }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Radio track sync failed."
+        return { error: msg }
+      }
     }
 
     default:

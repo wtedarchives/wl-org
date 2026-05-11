@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { getSession } from "@/lib/jwt"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
-import {
-  syncWtedRadioIds,
-  type WtedRadioIdRow,
+import type {
+  SyncWtedRadioIdsResult,
+  WtedRadioIdRow,
 } from "@/lib/wted-radio-ids-sync"
 import type { NewDispositionStatus } from "@/components/dpro/admin/admin-radio-tables"
 
@@ -199,8 +200,16 @@ export function useAdminRadioTracksPanel() {
     setSyncBanner(null)
     setError(null)
     try {
-      const { inserted, updatedToRemoved, updatedArtwork } =
-        await syncWtedRadioIds(supabase)
+      const session = getSession()
+      if (!session?.token) {
+        throw new Error("Sign in again to run sync.")
+      }
+      const { data, error: invokeError } = await invokeDproAdmin<
+        SyncWtedRadioIdsResult
+      >(session.token, { action: "wted_radio_ids_sync" })
+      if (invokeError) throw new Error(invokeError)
+      if (!data) throw new Error("Sync returned no data.")
+      const { inserted, updatedToRemoved, updatedArtwork } = data
       if (
         inserted.length === 0 &&
         updatedToRemoved.length === 0 &&

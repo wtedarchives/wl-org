@@ -90,13 +90,21 @@ export function AdminRadioTracksPanel() {
             </code>{" "}
             differs from the stored value, then the DB is updated to match
             Radio.co.
-            The Sync button loads the public Radio.co tracks list and updates
-            Supabase from this browser session. The Artwork button calls the{" "}
+            The Sync button calls the{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              dpro-admin
+            </code>{" "}
+            Edge Function (admin session + service role): it pulls the public
+            Radio.co list server-side and updates{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              wted_radio_ids
+            </code>
+            . The Artwork button calls{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-xs">
               wted-radio-backfill-artwork
             </code>{" "}
-            Edge Function in one request; very large catalogs may hit HTTP
-            546—run again or use a capped{" "}
+            in one request; very large catalogs may hit HTTP 546—run again or
+            use a capped{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-xs">
               max_rows
             </code>{" "}
