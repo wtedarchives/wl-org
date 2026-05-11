@@ -1,0 +1,28 @@
+/* List show table — category / cover artwork column (no inline layout on `<td>`). */
+.list-show-table__art-head,
+.list-show-table__art-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.list-show-table__art-head-inner,
+.list-show-table__art-cell-inner {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Match tour dates table rows: no min-height — row height comes from cell padding + text/icons like TourShowRow. */
+.list-show-table__art-cell-inner {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.list-show-table__category-thumb {
+  display: block;
+}
+
+.list-show-table__category-thumb--failed {
+  display: none;
+}

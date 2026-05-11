@@ -70,15 +70,55 @@ function renderListContent(
         />
       )
     case "segues":
-      return <SeguesList key={listId} listId={listId} />
+      return (
+        <SeguesList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     case "longest_shows":
-      return <LongestShowsList key={listId} />
+      return (
+        <LongestShowsList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     case "category_complete":
-      return <CategoryCompleteShowsList key={listId} />
+      return (
+        <CategoryCompleteShowsList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     case "jive_complete":
-      return <JiveCompleteShowsList key={listId} />
+      return (
+        <JiveCompleteShowsList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     case "dripfield_complete":
-      return <DripfieldCompleteShowsList key={listId} />
+      return (
+        <DripfieldCompleteShowsList
+          key={listId}
+          listId={listId}
+          listName={list.list_name}
+          listDescription={list.list_description}
+          wlHomeV2={archiveV2Lists}
+        />
+      )
     default:
       return (
         <DefaultListItems
@@ -111,7 +151,12 @@ export function ListContentWithLoading({
     listType === "longest_performances" ||
     listType === "shortest_performances" ||
     listType === "popular_placements" ||
-    listType === "unfinished_reprised"
+    listType === "unfinished_reprised" ||
+    listType === "segues" ||
+    listType === "longest_shows" ||
+    listType === "category_complete" ||
+    listType === "jive_complete" ||
+    listType === "dripfield_complete"
 
   if (archiveV2Lists) {
     return (
@@ -163,14 +208,11 @@ export function ListContentWithLoading({
                 )}
               </Card>
 
-              {listType === "segues" ?
-                renderListContent(listType, listId, list, items, archiveV2Lists)
-              : <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
-                  <CardContent className="p-0">
-                    {renderListContent(listType, listId, list, items, archiveV2Lists)}
-                  </CardContent>
-                </Card>
-              }
+              <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
+                <CardContent className="p-0">
+                  {renderListContent(listType, listId, list, items, archiveV2Lists)}
+                </CardContent>
+              </Card>
             </>
           }
         </div>
@@ -228,7 +270,11 @@ export function ListContentWithLoading({
 
               {listType === "popular_placements" ||
               listType === "unfinished_reprised" ||
-              listType === "segues" ? (
+              listType === "segues" ||
+              listType === "longest_shows" ||
+              listType === "category_complete" ||
+              listType === "jive_complete" ||
+              listType === "dripfield_complete" ? (
                 renderListContent(listType, listId, list, items, archiveV2Lists)
               ) : (
                 <Card className="border-border/60 bg-card/80 overflow-hidden py-0">

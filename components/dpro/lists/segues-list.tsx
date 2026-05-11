@@ -13,15 +13,33 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import {
+  WlHomeV2SegueModal,
+  type WlHomeV2SegueModalSelection,
+} from "@/components/wl-home-v2/wl-home-v2-segue-modal"
+import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { useSeguesData } from "@/hooks/use-segues-data"
+import type { SegueDestination, SegueSourceRow } from "@/hooks/use-segues-data"
 import { SeguePerformancesDrawer } from "./segue-performances-drawer"
 import { useListContentLoading } from "./list-content-loading-context"
-import type { SegueSourceRow, SegueDestination } from "@/hooks/use-segues-data"
+import {
+  SeguesWlArchiveBody,
+  toggleSegueExpandedRow,
+} from "./segues-list-wl-archive-body"
+
+import "./segues-list.css"
 
 const COVER_SONGS_HEADER_IMAGE =
   "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
 
-function SeguesRowCategoryThumb({ src }: { src: string }) {
+interface SeguesListProps {
+  listId: string
+  listName?: string
+  listDescription?: string | null
+  wlHomeV2?: boolean
+}
+
+function SeguesLegacyListCategoryThumb({ src }: { src: string }) {
   const [failed, setFailed] = useState(false)
   if (failed) return null
   return (
@@ -36,31 +54,20 @@ function SeguesRowCategoryThumb({ src }: { src: string }) {
   )
 }
 
-interface SeguesListProps {
-  listId: string
-}
-
-export function SeguesList({ listId }: SeguesListProps) {
+export function SeguesList({
+  listId: listIdProp,
+  listName,
+  listDescription,
+  wlHomeV2 = false,
+}: SeguesListProps) {
+  void listIdProp
   const { segues, loading, error, progress } = useSeguesData()
   const ctx = useListContentLoading()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [drawerSegue, setDrawerSegue] = useState<{
-    sourceSong: string
-    sourceDisplayName: string | null
-    destSong: string
-    destDisplayName: string | null
-  } | null>(null)
-
-  const openDrawer = (source: SegueSourceRow, dest: SegueDestination) => {
-    setDrawerSegue({
-      sourceSong: source.song_name,
-      sourceDisplayName: source.song_displayname,
-      destSong: dest.song_name,
-      destDisplayName: dest.song_displayname,
-    })
-    setDrawerOpen(true)
-  }
+  const [wlModalOpen, setWlModalOpen] = useState(false)
+  const [drawerSegue, setDrawerSegue] =
+    useState<WlHomeV2SegueModalSelection | null>(null)
 
   const setListContentLoading = ctx?.setLoading
   const setListContentProgress = ctx?.setProgress
@@ -72,6 +79,37 @@ export function SeguesList({ listId }: SeguesListProps) {
     setListContentProgress?.(progress)
   }, [progress, setListContentProgress])
 
+  const openDetail = (source: SegueSourceRow, dest: SegueDestination) => {
+    const sel = {
+      sourceSong: source.song_name,
+      sourceDisplayName: source.song_displayname,
+      destSong: dest.song_name,
+      destDisplayName: dest.song_displayname,
+    }
+    setDrawerSegue(sel)
+    if (wlHomeV2) {
+      setWlModalOpen(true)
+    } else {
+      setDrawerOpen(true)
+    }
+  }
+
+  const detailUi =
+    wlHomeV2 ?
+      <WlHomeV2SegueModal
+        open={wlModalOpen}
+        onClose={() => setWlModalOpen(false)}
+        segue={drawerSegue}
+      />
+    : <SeguePerformancesDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        sourceSong={drawerSegue?.sourceSong ?? null}
+        sourceDisplayName={drawerSegue?.sourceDisplayName ?? null}
+        destSong={drawerSegue?.destSong ?? null}
+        destDisplayName={drawerSegue?.destDisplayName ?? null}
+      />
+
   if (loading) return null
 
   if (error) {
@@ -79,6 +117,22 @@ export function SeguesList({ listId }: SeguesListProps) {
       <div className="py-2 px-3 text-center text-sm text-muted-foreground">
         {error}
       </div>
+    )
+  }
+
+  if (wlHomeV2 && listName) {
+    return (
+      <>
+        <SeguesWlArchiveBody
+          listName={listName}
+          listDescription={listDescription}
+          segues={segues}
+          expandedId={expandedId}
+          setExpandedId={setExpandedId}
+          onDestinationClick={openDetail}
+        />
+        {detailUi}
+      </>
     )
   }
 
@@ -92,12 +146,9 @@ export function SeguesList({ listId }: SeguesListProps) {
 
   return (
     <>
-      <Card className="border-border/60 bg-card/80 overflow-hidden py-0">
-        <CardHeader className="bg-muted/60 px-3 py-2 text-sm font-medium space-y-1">
-          <h2 className="font-medium">Most Common Segues</h2>
-          <p className="text-xs text-muted-foreground font-normal">
-            Songs that segued into another song, ordered by frequency.
-          </p>
+      <Card className="segues-list segues-list--legacy border-border/60 bg-card/80 overflow-hidden py-0">
+        <CardHeader className="bg-muted/60 px-3 py-2 text-sm font-medium">
+          Most Common Segues
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -136,12 +187,13 @@ export function SeguesList({ listId }: SeguesListProps) {
                   return (
                     <Fragment key={row.song_id}>
                       <TableRow
-                        key={row.song_id}
                         className={`cursor-pointer ${
                           i % 2 === 0 ? "bg-background/70" : "bg-background"
                         } hover:bg-muted/40`}
                         onClick={() =>
-                          setExpandedId(isExpanded ? null : row.song_id)
+                          setExpandedId(
+                            toggleSegueExpandedRow(expandedId, row.song_id),
+                          )
                         }
                       >
                         <TableCell className="px-2 py-0.5 text-center text-xs tabular-nums align-middle">
@@ -156,38 +208,41 @@ export function SeguesList({ listId }: SeguesListProps) {
                           </span>
                         </TableCell>
                         <TableCell className="min-w-16 w-16 px-2 py-0.5 text-center align-middle">
-                          {row.category_artwork ? (
-                            <SeguesRowCategoryThumb src={row.category_artwork} />
-                          ) : null}
+                          {row.category_artwork ?
+                            <SeguesLegacyListCategoryThumb
+                              src={row.category_artwork}
+                            />
+                          : null}
                         </TableCell>
                         <TableCell className="px-2 py-0.5 text-center text-xs tabular-nums align-middle">
                           {row.count}
                         </TableCell>
                         <TableCell className="w-8 px-2 py-0.5 text-center align-middle">
-                          {isExpanded ? (
+                          {isExpanded ?
                             <ChevronDown className="size-4 text-muted-foreground inline-block" />
-                          ) : (
-                            <ChevronRight className="size-4 text-muted-foreground inline-block" />
-                          )}
+                          : <ChevronRight className="size-4 text-muted-foreground inline-block" />
+                          }
                         </TableCell>
                       </TableRow>
                       {isExpanded &&
                         row.destinations.map((dest) => (
                           <TableRow
                             key={`${row.song_id}-${dest.song_id}`}
-                            className={
-                              i % 2 === 0 ? "bg-background/70" : "bg-background"
-                            }
+                            className={`segues-list__sub-row animate-in fade-in slide-in-from-top-1 duration-200 ${
+                              i % 2 === 0 ?
+                                "bg-background/70"
+                              : "bg-background"
+                            }`}
                           >
                             <TableCell className="w-8 px-2 py-0.5 align-middle" />
-                            <TableCell className="px-2 py-0.5 align-middle">
+                            <TableCell className="segues-list__sub-song-cell align-middle">
                               <div className="flex items-center gap-1.5">
                                 <ArrowRight className="size-3.5 shrink-0 text-destructive" />
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    openDrawer(row, dest)
+                                    openDetail(row, dest)
                                   }}
                                   className="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded text-left text-xs"
                                 >
@@ -199,11 +254,11 @@ export function SeguesList({ listId }: SeguesListProps) {
                               </div>
                             </TableCell>
                             <TableCell className="min-w-16 w-16 px-2 py-0.5 text-center align-middle">
-                              {dest.category_artwork ? (
-                                <SeguesRowCategoryThumb
+                              {dest.category_artwork ?
+                                <SeguesLegacyListCategoryThumb
                                   src={dest.category_artwork}
                                 />
-                              ) : null}
+                              : null}
                             </TableCell>
                             <TableCell className="w-16 px-2 py-0.5 text-center text-xs tabular-nums align-middle">
                               {dest.count}
@@ -220,14 +275,7 @@ export function SeguesList({ listId }: SeguesListProps) {
         </CardContent>
       </Card>
 
-      <SeguePerformancesDrawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        sourceSong={drawerSegue?.sourceSong ?? null}
-        sourceDisplayName={drawerSegue?.sourceDisplayName ?? null}
-        destSong={drawerSegue?.destSong ?? null}
-        destDisplayName={drawerSegue?.destDisplayName ?? null}
-      />
+      {detailUi}
     </>
   )
 }

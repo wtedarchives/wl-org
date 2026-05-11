@@ -1,0 +1,17 @@
+/* Most Common Segues — legacy (sidebar) layout: horizontal inset for destination rows.
+   Scoped to this list’s card; padding is not inlined on `<td>` utilities. */
+.segues-list.segues-list--legacy .segues-list__sub-row .segues-list__sub-song-cell {
+  box-sizing: border-box;
+  padding-left: 1.5rem;
+  padding-right: 1rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  vertical-align: middle;
+}
+
+@media (min-width: 640px) {
+  .segues-list.segues-list--legacy .segues-list__sub-row .segues-list__sub-song-cell {
+    padding-left: 2.5rem;
+    padding-right: 1.5rem;
+  }
+}

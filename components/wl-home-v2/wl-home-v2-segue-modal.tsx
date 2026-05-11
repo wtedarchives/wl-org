@@ -15,10 +15,16 @@ import {
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
-import { useSandwichPerformances } from "@/hooks/use-sandwich-performances"
-import type { SandwichRow } from "@/hooks/use-unfinished-reprised-data"
+import { useSeguePerformances } from "@/hooks/use-segue-performances"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
+
+export type WlHomeV2SegueModalSelection = {
+  sourceSong: string
+  sourceDisplayName: string | null
+  destSong: string
+  destDisplayName: string | null
+}
 
 function formatShowDate(date: string) {
   if (!date) return ""
@@ -27,26 +33,33 @@ function formatShowDate(date: string) {
   return `${month}.${day}.${year.slice(2)}`
 }
 
-type WlHomeV2RepriseSandwichModalProps = {
+type WlHomeV2SegueModalProps = {
   open: boolean
   onClose: () => void
-  sandwich: SandwichRow | null
+  segue: WlHomeV2SegueModalSelection | null
 }
 
 /**
- * WL Home v2: reprise sandwich performances in the same centered shell as
- * {@link WlHomeV2SetlistSongModal} (tour song popup).
+ * WL Home v2: segue performances in the same centered shell as
+ * {@link WlHomeV2RepriseSandwichModal}.
  */
-export function WlHomeV2RepriseSandwichModal({
+export function WlHomeV2SegueModal({
   open,
   onClose,
-  sandwich,
-}: WlHomeV2RepriseSandwichModalProps) {
+  segue,
+}: WlHomeV2SegueModalProps) {
   useWlHomeV2ScrollLock(open)
   const headingId = useId()
   const subLineId = useId()
 
-  const { performances, loading, error } = useSandwichPerformances(open, sandwich)
+  const sourceSong = segue?.sourceSong ?? null
+  const destSong = segue?.destSong ?? null
+
+  const { performances, loading, error } = useSeguePerformances(
+    open,
+    sourceSong,
+    destSong,
+  )
 
   useEffect(() => {
     if (!open) return
@@ -62,11 +75,13 @@ export function WlHomeV2RepriseSandwichModal({
     "Loading performances…"
   : `${perfCount} performance${perfCount !== 1 ? "s" : ""}`
 
+  const hasPair = Boolean(segue && sourceSong && destSong)
+
   return (
     <WlHomeV2ModalPortal open={open}>
       <div
         className={"modal-backdrop" + (open ? " open" : "")}
-        id="wl-home-v2-reprise-sandwich-modal"
+        id="wl-home-v2-segue-modal"
         role="presentation"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose()
@@ -84,25 +99,25 @@ export function WlHomeV2RepriseSandwichModal({
             <div className="modal-setlist-song-head-spacer" aria-hidden={true} />
             <div className="modal-setlist-song-head-center">
               <h3 id={headingId} className="modal-setlist-song-title">
-                Reprise Lookup
+                Segue Lookup
               </h3>
-              {sandwich?.songs.length ?
+              {hasPair && segue ?
                 <>
                   <p id={subLineId} className="modal-setlist-song-tour">
-                    {sandwich.songs.map((s, j) => (
-                      <span key={`${s.song_id}-${j}`}>
-                        {j > 0 && <span className="text-destructive"> → </span>}
-                        <SongDisplayName
-                          song={s.song_name}
-                          songDisplayName={s.song_displayname}
-                        />
-                      </span>
-                    ))}
+                    <SongDisplayName
+                      song={segue.sourceSong}
+                      songDisplayName={segue.sourceDisplayName}
+                    />
+                    <span className="text-destructive"> → </span>
+                    <SongDisplayName
+                      song={segue.destSong}
+                      songDisplayName={segue.destDisplayName}
+                    />
                   </p>
                   <p className="modal-request-sub">{countLabel}</p>
                 </>
               : <span id={subLineId} className="sr-only">
-                  No sandwich selected.
+                  No segue selected.
                 </span>
               }
             </div>

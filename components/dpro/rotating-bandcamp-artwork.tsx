@@ -142,3 +142,29 @@ export function JiveRotatingArtwork({
     />
   )
 }
+
+/** Cover-song themed lists (segues, popular placements, unfinished/reprised archive headers). */
+export const COVER_SONGS_ROTATING_IMAGES = [
+  "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg",
+  "https://f4.bcbits.com/img/a2223100564_10.jpg",
+  "https://f4.bcbits.com/img/a1944816514_10.jpg",
+  "https://f4.bcbits.com/img/a1517447168_10.jpg",
+  "https://f4.bcbits.com/img/a0238290447_10.jpg",
+  "https://f4.bcbits.com/img/a3138437016_10.jpg",
+] as const
+
+export const COVER_SONGS_ROTATE_MS = 2000
+
+export function CoverSongsRotatingArtwork({
+  className,
+  imageSizes,
+}: Pick<RotatingBandcampArtworkProps, "className" | "imageSizes">) {
+  return (
+    <RotatingBandcampArtwork
+      images={COVER_SONGS_ROTATING_IMAGES}
+      intervalMs={COVER_SONGS_ROTATE_MS}
+      className={className}
+      imageSizes={imageSizes}
+    />
+  )
+}

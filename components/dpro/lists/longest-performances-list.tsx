@@ -22,6 +22,7 @@ import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 
 import { useListContentLoading } from "./list-content-loading-context"
+import { WlHomeV2ListArchiveShowHeader } from "./wl-home-v2-list-archive-show-header"
 
 const COVER_SONGS_HEADER_IMAGE =
   "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
@@ -75,8 +76,6 @@ export function LongestPerformancesList({
   }, [progress, setListContentProgress])
 
   if (loading) return null
-
-  const desc = listDescription?.trim() ?? ""
 
   const sheetBody = (() => {
     if (error) {
@@ -231,20 +230,10 @@ export function LongestPerformancesList({
     <div className="wl-home-v2-setlist flex min-w-0 flex-1 flex-col">
       <section className="wl-home-v2-longest-perf-list wl-home-v2-years-tile wl-home-v2-years-tile--main flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="wl-home-v2-years-tile-inner flex min-h-0 min-w-0 flex-1 flex-col gap-4">
-          <div className="show-header">
-            <div className="left">
-              <div className="show-header-title-row">
-                <h1 className="show-header-heading">
-                  <span className="date">{listName}</span>
-                </h1>
-              </div>
-              {desc ?
-                <div className="venue wl-home-v2-list-header-desc">
-                  <span className="venue-subvenue-text">{desc}</span>
-                </div>
-              : null}
-            </div>
-          </div>
+          <WlHomeV2ListArchiveShowHeader
+            listName={listName}
+            listDescription={listDescription}
+          />
 
           <div className="widget-panel wl-home-v2-longest-perf-table-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             {sheetBody}

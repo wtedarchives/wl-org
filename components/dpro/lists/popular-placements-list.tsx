@@ -33,6 +33,7 @@ import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { cn } from "@/lib/utils"
 
 import { useListContentLoading } from "./list-content-loading-context"
+import { WlHomeV2ListArchiveShowHeader } from "@/components/dpro/lists/wl-home-v2-list-archive-show-header"
 
 interface PopularPlacementsListProps {
   listId: string
@@ -211,7 +212,6 @@ function PopularPlacementsWlArchiveBody({
   listDescription?: string | null
   sectionModels: { section: Section; index: number; items: PlacementRow[] }[]
 }) {
-  const desc = listDescription?.trim() ?? ""
   const sectionsWithData = sectionModels.filter((s) => s.items.length > 0)
   const [mobileIndex, setMobileIndex] = useState(0)
   const safeMobileIndex =
@@ -225,20 +225,10 @@ function PopularPlacementsWlArchiveBody({
     <div className="wl-home-v2-setlist flex min-w-0 flex-1 flex-col">
       <section className="wl-home-v2-popular-placements-archive wl-home-v2-years-tile wl-home-v2-years-tile--main flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="wl-home-v2-years-tile-inner flex min-h-0 min-w-0 flex-1 flex-col gap-4">
-          <div className="show-header">
-            <div className="left">
-              <div className="show-header-title-row">
-                <h1 className="show-header-heading">
-                  <span className="date">{listName}</span>
-                </h1>
-              </div>
-              {desc ?
-                <div className="venue wl-home-v2-list-header-desc">
-                  <span className="venue-subvenue-text">{desc}</span>
-                </div>
-              : null}
-            </div>
-          </div>
+          <WlHomeV2ListArchiveShowHeader
+            listName={listName}
+            listDescription={listDescription}
+          />
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
             <div className="xl:hidden">

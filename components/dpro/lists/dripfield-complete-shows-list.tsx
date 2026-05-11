@@ -3,10 +3,24 @@
 import { useEffect } from "react"
 import { useDripfieldCompleteShowsList } from "@/hooks/use-complete-shows-list"
 import { useListShowData } from "@/hooks/use-list-show-data"
+import { CompleteShowsListWlShell } from "./complete-shows-list-wl-shell"
 import { ListShowTable } from "./list-show-table"
 import { useListContentLoading } from "./list-content-loading-context"
 
-export function DripfieldCompleteShowsList() {
+interface DripfieldCompleteShowsListProps {
+  listId: string
+  listName?: string
+  listDescription?: string | null
+  wlHomeV2?: boolean
+}
+
+export function DripfieldCompleteShowsList({
+  listId: listIdProp,
+  listName,
+  listDescription,
+  wlHomeV2 = false,
+}: DripfieldCompleteShowsListProps) {
+  void listIdProp
   const { shows, loading, error, progress } = useDripfieldCompleteShowsList()
   const ctx = useListContentLoading()
   const {
@@ -38,6 +52,17 @@ export function DripfieldCompleteShowsList() {
   }
 
   if (shows.length === 0) {
+    if (wlHomeV2 && listName) {
+      return (
+        <CompleteShowsListWlShell
+          listName={listName}
+          listDescription={listDescription}
+          headerArtwork="dripfield"
+        >
+          <div className="px-3 py-2 text-xs text-white/55">No shows found.</div>
+        </CompleteShowsListWlShell>
+      )
+    }
     return (
       <div className="py-2 px-3 text-center text-sm text-muted-foreground">
         No shows found.
@@ -45,7 +70,7 @@ export function DripfieldCompleteShowsList() {
     )
   }
 
-  return (
+  const table = (
     <ListShowTable
       shows={shows}
       attendedShowIds={attendedShowIds}
@@ -53,6 +78,21 @@ export function DripfieldCompleteShowsList() {
       showsWithReleases={showsWithReleases}
       attendeeCounts={attendeeCounts}
       showRatings={showRatings}
+      wlHomeV2={wlHomeV2}
     />
   )
+
+  if (wlHomeV2 && listName) {
+    return (
+      <CompleteShowsListWlShell
+        listName={listName}
+        listDescription={listDescription}
+        headerArtwork="dripfield"
+      >
+        {table}
+      </CompleteShowsListWlShell>
+    )
+  }
+
+  return table
 }

@@ -9243,6 +9243,13 @@
     line-height: 1.18;
   }
 }
+/* Song lists (segues, popular placements, unfinished/reprised): text wraps around floated rotating art */
+.wl-home-v2 .wl-home-v2-setlist .show-header .left .wl-home-v2-list-archive-header-text-wrap {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: auto;
+}
 .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-detail {
   min-width: 0;
 }
@@ -10091,7 +10098,16 @@
   .wl-home-v2-popular-placements-archive.wl-home-v2-years-tile--main,
 .wl-home-v2
   .wl-home-v2-setlist
-  .wl-home-v2-unfinished-reprised-archive.wl-home-v2-years-tile--main {
+  .wl-home-v2-unfinished-reprised-archive.wl-home-v2-years-tile--main,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-segues-archive.wl-home-v2-years-tile--main,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-shows-archive.wl-home-v2-years-tile--main,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-complete-shows-archive.wl-home-v2-years-tile--main {
   --tile-bg: url("/newbg3.jpeg");
 }
 /* Popular placements (archive): same frosted panel + title row as tour `/archive/tours` top slots. */
@@ -10102,6 +10118,18 @@
 .wl-home-v2
   .wl-home-v2-setlist
   .wl-home-v2-unfinished-reprised-archive
+  .widget-panel,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-segues-archive
+  .widget-panel,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-shows-archive
+  .widget-panel,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-complete-shows-archive
   .widget-panel {
   background: rgba(0, 0, 0, 0.63);
   border-color: rgb(63, 65, 64);
@@ -10114,6 +10142,21 @@
 .wl-home-v2
   .wl-home-v2-setlist
   .wl-home-v2-unfinished-reprised-archive
+  .widget-panel
+  > .wp-head,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-segues-archive
+  .widget-panel
+  > .wp-head,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-shows-archive
+  .widget-panel
+  > .wp-head,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-complete-shows-archive
   .widget-panel
   > .wp-head {
   color: var(--wl-white);
@@ -10136,12 +10179,110 @@
   a:hover,
 .wl-home-v2
   .wl-home-v2-setlist
+  .wl-home-v2-segues-archive
+  .widget-panel
+  tbody
+  td
+  a:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-shows-archive
+  .widget-panel
+  tbody
+  td
+  a:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-complete-shows-archive
+  .widget-panel
+  tbody
+  td
+  a:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
   .wl-home-v2-unfinished-reprised-archive
+  .widget-panel
+  tbody
+  td
+  button:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-segues-archive
+  .widget-panel
+  tbody
+  td
+  button:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-longest-shows-archive
+  .widget-panel
+  tbody
+  td
+  button:hover,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-complete-shows-archive
   .widget-panel
   tbody
   td
   button:hover {
   text-decoration: underline;
+}
+
+/* Most Common Segues (archive): expanded destination rows — override global
+   `.widget-panel .wl-home-v2-top-slots-stats-table … td { padding: 1px 0 }`
+   so horizontal inset is visible. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-segues-archive
+  .widget-panel
+  .wl-home-v2-top-slots-stats-table
+  tbody
+  tr.wl-home-v2-segues-sub-row
+  td.wl-home-v2-top-slots-stats-cell:first-child {
+  padding-left: 2rem;
+  padding-right: 1.25rem;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  vertical-align: middle;
+}
+@media (min-width: 640px) {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-segues-archive
+    .widget-panel
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    tr.wl-home-v2-segues-sub-row
+    td.wl-home-v2-top-slots-stats-cell:first-child {
+    padding-left: 3rem;
+    padding-right: 2rem;
+  }
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-segues-archive
+  .widget-panel
+  .wl-home-v2-top-slots-stats-table
+  tbody
+  tr.wl-home-v2-segues-sub-row
+  td.wl-home-v2-top-slots-stats-cell:last-child {
+  padding-right: 1rem;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  vertical-align: middle;
+}
+@media (min-width: 640px) {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-segues-archive
+    .widget-panel
+    .wl-home-v2-top-slots-stats-table
+    tbody
+    tr.wl-home-v2-segues-sub-row
+    td.wl-home-v2-top-slots-stats-cell:last-child {
+    padding-right: 1.5rem;
+  }
 }
 
 /* Most Common Reprises (archive): 22.5px row height (matches show-stats fixed-row pattern). */
