@@ -90,13 +90,17 @@ export function AdminRadioTracksPanel() {
             </code>{" "}
             differs from the stored value, then the DB is updated to match
             Radio.co.
-            Runs via a Supabase Edge Function in one request. Very large
-            catalogs may hit HTTP 546; run again to
-            finish stragglers or use a capped{" "}
+            The Sync button loads the public Radio.co tracks list and updates
+            Supabase from this browser session. The Artwork button calls the{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              wted-radio-backfill-artwork
+            </code>{" "}
+            Edge Function in one request; very large catalogs may hit HTTP
+            546—run again or use a capped{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-xs">
               max_rows
             </code>{" "}
-            from the API.
+            on that function.
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">

@@ -36,7 +36,7 @@ function SeguesRowCategoryThumb({ src }: { src: string }) {
   )
 }
 
-winterface SeguesListProps {
+interface SeguesListProps {
   listId: string
 }
 
