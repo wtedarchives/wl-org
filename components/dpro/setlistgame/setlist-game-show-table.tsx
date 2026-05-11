@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
 import { getSetlistGameShowArchiveUrl } from "@/lib/setlist-game-archive-url"
 import { AdminShowTimeCell } from "./admin-show-time-cell"
 import type { WysteriaSession } from "@/lib/jwt"
@@ -34,6 +35,7 @@ export function SetlistGameShowTable({
   isAdminUser = false,
   onShowTimeSaved,
 }: SetlistGameShowTableProps) {
+  const urlShell = useSetlistGameArchiveUrlShell()
   const showAdminShowTime = Boolean(isAdminUser && onShowTimeSaved)
 
   if (gameShows.length === 0) {
@@ -67,7 +69,7 @@ export function SetlistGameShowTable({
             <TableRow key={show.show_id} className="text-[11px]">
               <TableCell className="px-2 py-0.5 text-center font-medium">
                 <Link
-                  href={getSetlistGameShowArchiveUrl(show.show_id)}
+                  href={getSetlistGameShowArchiveUrl(show.show_id, urlShell)}
                   className="no-underline hover:underline hover:text-foreground"
                 >
                   {formatSetlistDate(show.show_date)}

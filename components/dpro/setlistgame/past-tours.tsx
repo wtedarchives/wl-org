@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import type { TourStats } from "@/hooks/use-past-tours"
+import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
 import { getSetlistGameTourArchiveUrl } from "@/lib/setlist-game-archive-url"
 
 interface PastToursProps {
@@ -25,6 +26,8 @@ export function PastTours({
   loading,
   pastTours,
 }: PastToursProps) {
+  const urlShell = useSetlistGameArchiveUrlShell()
+
   if (loading) {
     return <LoadingPageCard message="Loading past tours…" />
   }
@@ -62,7 +65,7 @@ export function PastTours({
               <TableRow key={tour.tour} className="text-[11px]">
                 <TableCell className="px-2 py-0.5 font-medium">
                   <Link
-                    href={getSetlistGameTourArchiveUrl(tour.tour_id)}
+                    href={getSetlistGameTourArchiveUrl(tour.tour_id, urlShell)}
                     className="no-underline hover:underline hover:text-foreground"
                   >
                     {tour.tour}

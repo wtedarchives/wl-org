@@ -4,15 +4,19 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/components/auth-context"
 import {
   useSetlistBreadcrumb,
+  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
   WTED_ARCHIVES_BREADCRUMB_ROOT,
 } from "@/components/setlist-breadcrumb-context"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
 import {
+  getSetlistGameArchiveIndexUrl,
   getSetlistGameShowArchiveUrl,
   getSetlistGameTourArchiveUrl,
 } from "@/lib/setlist-game-archive-url"
 import { supabase } from "@/lib/supabase"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
+import { WlHomeV2SetlistGameShell } from "@/components/wl-home-v2/wl-home-v2-setlistgame-shell"
 import { useSetlistGameShowData } from "@/hooks/use-setlist-game-show-data"
 import {
   useTopSongsData,
@@ -26,6 +30,7 @@ import { ShowStandingsTable } from "@/components/dpro/setlistgame/show-standings
 import { ShowPicksSection } from "@/components/dpro/setlistgame/show-picks-section"
 import { TopPicksSection } from "@/components/dpro/setlistgame/top-picks-section"
 import { SongSelectionDialog } from "@/components/dpro/setlistgame/song-selection-dialog"
+import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
 
 interface SubmissionDetails {
   totalScore: number
@@ -54,7 +59,15 @@ async function fetchPicksBySubmissionId(
   return data ?? []
 }
 
-export function SetlistGameShowView({ showId }: { showId: string }) {
+export function SetlistGameShowView({
+  showId,
+  variant = "default",
+}: {
+  showId: string
+  variant?: "default" | "wlHomeV2"
+}) {
+  const v2 = variant === "wlHomeV2"
+  const urlShell = useSetlistGameArchiveUrlShell()
   const { session } = useAuth()
   const [activeSongSelectionShow, setActiveSongSelectionShow] =
     useState<GameShow | null>(null)
@@ -172,6 +185,10 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
       setSetlistBreadcrumbs(null)
       return
     }
+    const archiveRoot =
+      urlShell === "legacy" ?
+        WTED_ARCHIVES_BREADCRUMB_ROOT
+      : WL_V2_ARCHIVES_BREADCRUMB_ROOT
     const dateLabel = formatSetlistGameDate(show.show_date)
     const venuePart = show.show_venue_location
       ? ` (${show.show_venue_location})`
@@ -179,84 +196,94 @@ export function SetlistGameShowView({ showId }: { showId: string }) {
     const lastLabel = `${dateLabel}${venuePart}`
     const tours = show.tours as { tour_id: string } | null | undefined
     const items = [
-      WTED_ARCHIVES_BREADCRUMB_ROOT,
-      { label: "Setlist Game", href: "/old/archive/setlistgame" },
+      archiveRoot,
+      { label: "Setlist Game", href: getSetlistGameArchiveIndexUrl(urlShell) },
       ...(show.show_tour && tours?.tour_id
         ? [
             {
               label: show.show_tour,
-              href: getSetlistGameTourArchiveUrl(tours.tour_id),
+              href: getSetlistGameTourArchiveUrl(tours.tour_id, urlShell),
             },
           ]
         : []),
-      { label: lastLabel, href: getSetlistGameShowArchiveUrl(showId) },
+      { label: lastLabel, href: getSetlistGameShowArchiveUrl(showId, urlShell) },
     ]
     setSetlistBreadcrumbs(items)
     return () => setSetlistBreadcrumbs(null)
-  }, [show, showId, setSetlistBreadcrumbs])
+  }, [show, showId, setSetlistBreadcrumbs, urlShell])
 
   if (loading) {
-    return (
-      <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
-        <LoadingPageCard message="Loading show…" page="setlist" />
-      </div>
-    )
+    return v2 ?
+        <WlHomeV2PageLoading message="Loading show…" />
+      : <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
+          <LoadingPageCard message="Loading show…" page="setlist" />
+        </div>
   }
 
   if (!show) {
-    return (
-      <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
-        <div className="rounded-lg border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted-foreground">Show not found.</p>
-        </div>
+    const notFoundInner = (
+      <div className="rounded-lg border border-border bg-card p-4 text-center">
+        <p className="text-sm text-muted-foreground">Show not found.</p>
       </div>
     )
+    return v2 ?
+        <WlHomeV2SetlistGameShell>{notFoundInner}</WlHomeV2SetlistGameShell>
+      : <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
+          {notFoundInner}
+        </div>
   }
 
-  return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
-      <div className="space-y-4">
-        <ShowHeader
-          show={show}
-          totalPlayers={totalPlayers}
-          userSubmission={userSubmission}
+  const main = (
+    <div className="space-y-4">
+      <ShowHeader
+        show={show}
+        totalPlayers={totalPlayers}
+        userSubmission={userSubmission}
+        user={session}
+        onViewSubmission={handleViewSubmission}
+      />
+
+      {show.show_scored ?
+        <ShowStandingsTable
+          standings={standings}
           user={session}
-          onViewSubmission={handleViewSubmission}
+          onViewOtherUserSubmission={handleViewOtherUserSubmission}
         />
+      : <ShowPicksSection
+          show={show}
+          user={session}
+          userSubmission={userSubmission}
+          onMakePicks={handleMakePicks}
+        />}
 
-        {show.show_scored ? (
-          <ShowStandingsTable
-            standings={standings}
-            user={session}
-            onViewOtherUserSubmission={handleViewOtherUserSubmission}
-          />
-        ) : (
-          <ShowPicksSection
-            show={show}
-            user={session}
-            userSubmission={userSubmission}
-            onMakePicks={handleMakePicks}
-          />
-        )}
-
-        <TopPicksSection
-          topSongs={topSongs}
-          topOpeners={topOpeners}
-          topClosers={topClosers}
-        />
-      </div>
-
-      {activeSongSelectionShow && (
-        <SongSelectionDialog
-          open={!!activeSongSelectionShow}
-          onOpenChange={(open) => !open && handleCloseModal()}
-          show={activeSongSelectionShow}
-          existingPicks={userPicks}
-          isEditing={!!userSubmission && !viewMode && !viewingUserId}
-          viewMode={viewMode || !!viewingUserId}
-          submissionDetails={viewMode ? submissionDetails : undefined}
-        />
-      )}
+      <TopPicksSection
+        topSongs={topSongs}
+        topOpeners={topOpeners}
+        topClosers={topClosers}
+      />
     </div>
   )
+
+  const songDialog =
+    activeSongSelectionShow ?
+      <SongSelectionDialog
+        open={!!activeSongSelectionShow}
+        onOpenChange={(open) => !open && handleCloseModal()}
+        show={activeSongSelectionShow}
+        existingPicks={userPicks}
+        isEditing={!!userSubmission && !viewMode && !viewingUserId}
+        viewMode={viewMode || !!viewingUserId}
+        submissionDetails={viewMode ? submissionDetails : undefined}
+      />
+    : null
+
+  return v2 ?
+      <WlHomeV2SetlistGameShell>
+        {main}
+        {songDialog}
+      </WlHomeV2SetlistGameShell>
+    : <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
+        {main}
+        {songDialog}
+      </div>
 }

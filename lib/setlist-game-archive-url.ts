@@ -1,11 +1,27 @@
-/**
- * Canonical Setlist Archive URLs for Setlist Game. Legacy path-based URLs
- * redirect via `public/_redirects` on Netlify.
- */
-export function getSetlistGameShowArchiveUrl(showId: string): string {
-  return `/old/archive/setlistgame?id=${encodeURIComponent(showId)}`
+/** Canonical new shell `/archive/setlistgame`; legacy sidebar `/old/archive/setlistgame`. */
+export type SetlistGameArchiveUrlShell = "v2" | "legacy"
+
+const SETLIST_GAME_PATH: Record<SetlistGameArchiveUrlShell, string> = {
+  v2: "/archive/setlistgame",
+  legacy: "/old/archive/setlistgame",
 }
 
-export function getSetlistGameTourArchiveUrl(tourId: string): string {
-  return `/old/archive/setlistgame?tour_id=${encodeURIComponent(tourId)}`
+export function getSetlistGameArchiveIndexUrl(
+  shell: SetlistGameArchiveUrlShell = "v2",
+): string {
+  return SETLIST_GAME_PATH[shell]
+}
+
+export function getSetlistGameShowArchiveUrl(
+  showId: string,
+  shell: SetlistGameArchiveUrlShell = "v2",
+): string {
+  return `${SETLIST_GAME_PATH[shell]}?id=${encodeURIComponent(showId)}`
+}
+
+export function getSetlistGameTourArchiveUrl(
+  tourId: string,
+  shell: SetlistGameArchiveUrlShell = "v2",
+): string {
+  return `${SETLIST_GAME_PATH[shell]}?tour_id=${encodeURIComponent(tourId)}`
 }

@@ -83,6 +83,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => window.removeEventListener("storage", handleStorage)
   }, [])
 
+  // Same-tab session updates (e.g. dev mock auth bar)
+  useEffect(() => {
+    const sync = () => setSession(getSession())
+    window.addEventListener("wl-session-updated", sync)
+    return () => window.removeEventListener("wl-session-updated", sync)
+  }, [])
+
   // ─── Auth Actions ────────────────────────────────────────────────────────────
 
   const signIn = () => {

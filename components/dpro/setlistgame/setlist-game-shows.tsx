@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
 import { getSetlistGameShowArchiveUrl } from "@/lib/setlist-game-archive-url"
 
 interface SetlistGameShowsProps {
@@ -25,6 +26,8 @@ interface SetlistGameShowsProps {
 }
 
 export function SetlistGameShows({ gameShows, loading }: SetlistGameShowsProps) {
+  const urlShell = useSetlistGameArchiveUrlShell()
+
   if (loading) {
     return <LoadingPageCard message="Loading show statistics…" />
   }
@@ -64,7 +67,10 @@ export function SetlistGameShows({ gameShows, loading }: SetlistGameShowsProps) 
                 <TableRow key={show.show_id} className="text-[11px]">
                   <TableCell className="px-2 py-0.5 text-center font-medium">
                     <Link
-                      href={getSetlistGameShowArchiveUrl(show.show_id)}
+                      href={getSetlistGameShowArchiveUrl(
+                        show.show_id,
+                        urlShell,
+                      )}
                       className="no-underline hover:underline hover:text-foreground"
                     >
                       {formatSetlistDate(show.show_date)}

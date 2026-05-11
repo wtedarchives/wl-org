@@ -8,7 +8,7 @@ export const metadata = {
   title: "Setlist Game",
 }
 
-export default function SetlistGamePage() {
+export default function OldArchiveSetlistGamePage() {
   return (
     <Suspense fallback={<LoadingPageCard message="Loading setlist game…" />}>
       <SetlistGameArchivePageClient />

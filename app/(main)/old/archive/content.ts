@@ -70,7 +70,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "Setlist Game",
-    href: "/old/archive/setlistgame",
+    href: "/archive/setlistgame",
     icon: "Trophy",
     description:
       "Predict the setlist before the show. See how you stack up when the band hits the stage.",

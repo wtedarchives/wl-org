@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { notFound, useSearchParams } from "next/navigation"
-import { SetlistGameArchiveUrlShellProvider } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
+
 import { SetlistGameContent } from "@/components/dpro/setlistgame/setlist-game-content"
 import { SetlistGameShowView } from "@/components/dpro/setlistgame/setlist-game-show-view"
 import { SetlistGameTourView } from "@/components/dpro/setlistgame/setlist-game-tour-view"
@@ -36,7 +36,7 @@ function resolveSetlistGameParams(
   return { showId, tourId, invalidParams: false }
 }
 
-export default function SetlistGameArchivePageClient() {
+export function WlHomeV2SetlistGameView() {
   const searchParams = useSearchParams()
   const { showId, tourId, invalidParams } = useMemo(
     () => resolveSetlistGameParams(searchParams),
@@ -47,25 +47,13 @@ export default function SetlistGameArchivePageClient() {
 
   if (tourId) {
     if (!UUID_RE.test(tourId)) notFound()
-    return (
-      <SetlistGameArchiveUrlShellProvider shell="legacy">
-        <SetlistGameTourView tourId={tourId} />
-      </SetlistGameArchiveUrlShellProvider>
-    )
+    return <SetlistGameTourView tourId={tourId} variant="wlHomeV2" />
   }
 
   if (showId) {
     if (!UUID_RE.test(showId)) notFound()
-    return (
-      <SetlistGameArchiveUrlShellProvider shell="legacy">
-        <SetlistGameShowView showId={showId} />
-      </SetlistGameArchiveUrlShellProvider>
-    )
+    return <SetlistGameShowView showId={showId} variant="wlHomeV2" />
   }
 
-  return (
-    <SetlistGameArchiveUrlShellProvider shell="legacy">
-      <SetlistGameContent />
-    </SetlistGameArchiveUrlShellProvider>
-  )
+  return <SetlistGameContent variant="wlHomeV2" />
 }

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { getSession } from "@/lib/jwt"
-import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
+import { invokeDproAdmin, WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 import type {
   SyncWtedRadioIdsResult,
@@ -145,18 +145,22 @@ export function useAdminRadioTracksPanel() {
     try {
       const base = getSupabaseFunctionsUrl()
       if (!base) throw new Error("Supabase URL is not configured.")
-      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
       const session = getSession()
       if (!session?.token) {
         throw new Error("Sign in again to run this action.")
+      }
+      if (!anon) {
+        throw new Error("Missing Supabase anon key.")
       }
 
       const res = await fetch(`${base}/wted-radio-backfill-artwork`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${session?.token}`,
           "Content-Type": "application/json",
-          ...(anon ? { apikey: anon } : {}),
+          Authorization: `Bearer ${anon}`,
+          [WYSTERIA_AUTH_HEADER]: `Bearer ${session.token}`,
+          apikey: anon,
         },
         body: JSON.stringify({}),
       })

@@ -11,7 +11,7 @@
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 
 /** Must match `supabase/functions/_shared/cors.ts` `Access-Control-Allow-Headers`. */
-const WYSTERIA_AUTH_HEADER = "x-wysteria-authorization"
+export const WYSTERIA_AUTH_HEADER = "x-wysteria-authorization"
 
 export async function invokeDproAdmin<T = unknown>(
   accessToken: string | null | undefined,

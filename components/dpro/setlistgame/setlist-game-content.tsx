@@ -19,6 +19,8 @@ import { PastTours } from "./past-tours"
 import { SetlistGameRulesDialog } from "./setlist-game-rules-dialog"
 import { ScoringDialog } from "./scoring-dialog"
 import { SongSelectionDialog } from "./song-selection-dialog"
+import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
+import { WlHomeV2SetlistGameShell } from "@/components/wl-home-v2/wl-home-v2-setlistgame-shell"
 
 const ACTIVE_LEAGUE = "2026 Viva El Gonzo"
 
@@ -34,7 +36,12 @@ interface SubmissionDetails {
   }>
 }
 
-export function SetlistGameContent() {
+export function SetlistGameContent({
+  variant = "default",
+}: {
+  variant?: "default" | "wlHomeV2"
+} = {}) {
+  const v2 = variant === "wlHomeV2"
   const { session } = useAuth()
   const [activeSongSelectionShow, setActiveSongSelectionShow] =
     useState<GameShow | null>(null)
@@ -118,11 +125,13 @@ export function SetlistGameContent() {
   }
 
   if (loading) {
-    return <LoadingPageCard message="Loading setlist game…" />
+    return v2 ?
+        <WlHomeV2PageLoading message="Loading setlist game…" />
+      : <LoadingPageCard message="Loading setlist game…" />
   }
 
-  return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-b-none p-4 md:rounded-b-xl md:p-6 overflow-hidden">
+  const inner = (
+    <>
       <SetlistGameHeader
         isAdminUser={isAdminUser}
         onShowRules={() => setShowRulesModal(true)}
@@ -151,7 +160,7 @@ export function SetlistGameContent() {
         pastTours={pastTours}
       />
 
-      {activeSongSelectionShow && (
+      {activeSongSelectionShow ?
         <SongSelectionDialog
           open={!!activeSongSelectionShow}
           onOpenChange={(open) => !open && handleCloseModal()}
@@ -164,7 +173,7 @@ export function SetlistGameContent() {
           submissionDetails={viewMode ? submissionDetails : undefined}
           onSuccess={fetchGameShows}
         />
-      )}
+      : null}
 
       <ScoringDialog
         open={showScoringModal}
@@ -177,6 +186,12 @@ export function SetlistGameContent() {
         open={showRulesModal}
         onOpenChange={setShowRulesModal}
       />
-    </div>
+    </>
   )
+
+  return v2 ?
+      <WlHomeV2SetlistGameShell>{inner}</WlHomeV2SetlistGameShell>
+    : <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-b-none p-4 md:rounded-b-xl md:p-6 overflow-hidden">
+        {inner}
+      </div>
 }

@@ -8,7 +8,8 @@ import {
   normalizedArtworkUrl,
 } from "../_shared/wted-radio-artwork-backfill-logic.ts"
 
-const WTED_RADIO_IDS_PAGE_SIZE = 1000
+const DEFAULT_PAGE_SIZE = 100
+const DEFAULT_FLUSH_EVERY = 25
 /** Keep modest to reduce memory (546 WORKER_LIMIT on large batches). */
 const COMPUTE_CONCURRENCY = 3
 const UPDATE_CONCURRENCY = 8
@@ -46,6 +47,31 @@ function parseMaxRows(raw: unknown): number | null {
   return Math.floor(n)
 }
 
+function parseClampedInt(
+  raw: unknown,
+  defaultVal: number,
+  min: number,
+  max: number,
+): number {
+  if (raw === undefined || raw === null) return defaultVal
+  const n = Number(raw)
+  if (!Number.isFinite(n)) return defaultVal
+  return Math.max(min, Math.min(max, Math.floor(n)))
+}
+
+/**
+ * With `verify_jwt = true`, the gateway expects a Supabase JWT in `Authorization`.
+ * Wysteria admin tokens must be sent in `x-wysteria-authorization` (see `lib/dpro-admin-edge.ts`).
+ * If absent, fall back to `Authorization` (e.g. `verify_jwt = false` or tooling).
+ */
+function getWysteriaJwt(req: Request): string | null {
+  const fromHeader = req.headers.get("x-wysteria-authorization")
+  if (fromHeader?.startsWith("Bearer ")) return fromHeader.slice(7).trim() || null
+  const auth = req.headers.get("authorization")
+  if (auth?.startsWith("Bearer ")) return auth.slice(7).trim() || null
+  return null
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -61,8 +87,7 @@ serve(async (req) => {
     )
   }
 
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  const token = getWysteriaJwt(req)
   if (!token) {
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),
@@ -107,7 +132,7 @@ serve(async (req) => {
     )
   }
 
-  let body: { max_rows?: unknown } = {}
+  let body: { max_rows?: unknown; page_size?: unknown; flush_every?: unknown } = {}
   try {
     if (req.headers.get("content-length") !== "0") {
       body = await req.json()
@@ -117,6 +142,13 @@ serve(async (req) => {
   }
 
   const maxRows = parseMaxRows(body.max_rows)
+  const pageSize = parseClampedInt(body.page_size, DEFAULT_PAGE_SIZE, 10, 1000)
+  const flushEvery = parseClampedInt(
+    body.flush_every,
+    DEFAULT_FLUSH_EVERY,
+    1,
+    500,
+  )
 
   let apiMap: Map<string, string | null>
   try {
@@ -144,7 +176,7 @@ serve(async (req) => {
       .from("wted_radio_ids")
       .select("uuid, radio_id, artwork")
       .order("radio_id", { ascending: true })
-      .range(dbFrom, dbFrom + WTED_RADIO_IDS_PAGE_SIZE - 1)
+      .range(dbFrom, dbFrom + pageSize - 1)
 
     if (error) {
       return new Response(
@@ -178,53 +210,59 @@ serve(async (req) => {
     }
 
     if (tasks.length > 0) {
-      const computed = await runPool(
-        tasks,
-        COMPUTE_CONCURRENCY,
-        async (row) => {
-          const rid = String(row.radio_id ?? "").trim()
-          const apiN = apiMap.has(rid) ?
-              normalizedArtworkUrl(apiMap.get(rid))
-            : null
-          const next = apiN ?
-              apiN
-            : await computeReleaseArtworkOnly(supabase, rid)
-          return { row, next }
-        },
-      )
+      for (let ti = 0; ti < tasks.length; ti += flushEvery) {
+        if (maxRows !== null && examined >= maxRows) break
+        const slice = tasks.slice(ti, ti + flushEvery)
 
-      const toUpdate: { uuid: string; radio_id: string; nextN: string | null }[] =
-        []
-      for (const { row, next } of computed) {
-        const curN = normalizedArtworkUrl(row.artwork)
-        const nextN = normalizedArtworkUrl(next)
-        if (curN === nextN) continue
-        toUpdate.push({ uuid: row.uuid, radio_id: row.radio_id, nextN })
+        const computed = await runPool(
+          slice,
+          COMPUTE_CONCURRENCY,
+          async (row) => {
+            const rid = String(row.radio_id ?? "").trim()
+            const apiN = apiMap.has(rid) ?
+                normalizedArtworkUrl(apiMap.get(rid))
+              : null
+            const next = apiN ?
+                apiN
+              : await computeReleaseArtworkOnly(supabase, rid)
+            return { row, next }
+          },
+        )
+
+        const toUpdate: { uuid: string; radio_id: string; nextN: string | null }[] =
+          []
+        for (const { row, next } of computed) {
+          const curN = normalizedArtworkUrl(row.artwork)
+          const nextN = normalizedArtworkUrl(next)
+          if (curN === nextN) continue
+          toUpdate.push({ uuid: row.uuid, radio_id: row.radio_id, nextN })
+        }
+
+        const updateResults = await runPool(
+          toUpdate,
+          UPDATE_CONCURRENCY,
+          async ({ uuid, radio_id, nextN }) => {
+            const { error: upErr } = await supabase
+              .from("wted_radio_ids")
+              .update({ artwork: nextN })
+              .eq("uuid", uuid)
+            if (upErr) return { ok: false as const, radio_id, msg: upErr.message }
+            return { ok: true as const }
+          },
+        )
+
+        for (const r of updateResults) {
+          if (r.ok) updated++
+          else updateErrors.push(`${r.radio_id}: ${r.msg}`)
+        }
+
+        examined += slice.length
+        if (maxRows !== null && examined >= maxRows) break
       }
-
-      const updateResults = await runPool(
-        toUpdate,
-        UPDATE_CONCURRENCY,
-        async ({ uuid, radio_id, nextN }) => {
-          const { error: upErr } = await supabase
-            .from("wted_radio_ids")
-            .update({ artwork: nextN })
-            .eq("uuid", uuid)
-          if (upErr) return { ok: false as const, radio_id, msg: upErr.message }
-          return { ok: true as const }
-        },
-      )
-
-      for (const r of updateResults) {
-        if (r.ok) updated++
-        else updateErrors.push(`${r.radio_id}: ${r.msg}`)
-      }
-
-      examined += tasks.length
     }
 
-    dbFrom += WTED_RADIO_IDS_PAGE_SIZE
-    if (chunk.length < WTED_RADIO_IDS_PAGE_SIZE) {
+    dbFrom += pageSize
+    if (chunk.length < pageSize) {
       dbExhausted = true
     }
 
@@ -241,6 +279,8 @@ serve(async (req) => {
       radio_co_large_url_sync: true,
       empty_artwork_release_backfill: true,
       max_rows: maxRows,
+      page_size: pageSize,
+      flush_every: flushEvery,
       unlimited: maxRows === null,
       examined,
       updated,

@@ -16,6 +16,7 @@ import {
 } from "@/lib/setlist-game-utils"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
 import type { TourGameShow } from "@/hooks/use-setlist-game-tour-details"
+import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
 import { getSetlistGameShowArchiveUrl } from "@/lib/setlist-game-archive-url"
 
 interface TourShowsTableProps {
@@ -23,6 +24,8 @@ interface TourShowsTableProps {
 }
 
 export function TourShowsTable({ gameShows }: TourShowsTableProps) {
+  const urlShell = useSetlistGameArchiveUrlShell()
+
   if (gameShows.length === 0) {
     return (
       <Card className="border-border/60 bg-card/80 py-0">
@@ -87,7 +90,10 @@ export function TourShowsTable({ gameShows }: TourShowsTableProps) {
               >
                 <TableCell className="text-center font-medium px-2 py-0.5">
                   <Link
-                    href={getSetlistGameShowArchiveUrl(show.show_id)}
+                    href={getSetlistGameShowArchiveUrl(
+                      show.show_id,
+                      urlShell,
+                    )}
                     className="no-underline hover:underline"
                   >
                     {formatSetlistGameDate(show.show_date)}
