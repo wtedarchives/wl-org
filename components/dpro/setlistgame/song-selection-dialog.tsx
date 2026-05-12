@@ -17,8 +17,6 @@ import { useSetlistGameWlV2Chrome } from "@/components/dpro/setlistgame/setlist-
 import { getSongSelectionDialogTitle } from "@/components/dpro/setlistgame/song-selection-dialog-title"
 import type { SongSelectionDialogProps } from "@/components/dpro/setlistgame/song-selection-dialog-types"
 
-import "./song-selection-dialog.css"
-
 export type { ShowForSongSelection } from "@/components/dpro/setlistgame/song-selection-dialog-types"
 
 export function SongSelectionDialog({

@@ -273,6 +273,7 @@ export function SetlistDisplay({
             </h4>
             {!viewMode && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemoveSet(setId);
@@ -317,6 +318,7 @@ export function SetlistDisplay({
                 {!viewMode ? (
                   <div className="flex items-center shrink-0 ml-2">
                     <button 
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent event bubbling
                         onMoveSongUp(pick.id);
@@ -327,6 +329,7 @@ export function SetlistDisplay({
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
                     <button 
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent event bubbling
                         onMoveSongDown(pick.id);
@@ -337,6 +340,7 @@ export function SetlistDisplay({
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
                     <button 
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent event bubbling
                         const index = songPicks.findIndex(p => p.id === pick.id);

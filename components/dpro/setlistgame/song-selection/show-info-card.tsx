@@ -53,9 +53,11 @@ export function ShowInfoCard({
           <h1 className="song-selection-show-header-heading">
             <span className="date">{formatSetlistDate(show.show_date)}</span>
             <span className="show-header-title-divider"> — </span>
-            <span className="show-header-title-group">{show.show_subvenue}</span>
+            <span className="show-header-title-group">
+              {show.show_venue_location}
+            </span>
           </h1>
-          <div className="venue">{show.show_venue_location}</div>
+          <div className="venue">{show.show_subvenue}</div>
           <div className="meta song-selection-show-meta">{statusPill}</div>
         </div>
       </div>
@@ -66,11 +68,11 @@ export function ShowInfoCard({
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
       <CardHeader className="pt-2 pb-0.5 px-3">
         <CardTitle className="text-sm font-medium">
-          {formatSetlistDate(show.show_date)} — {show.show_subvenue}
+          {formatSetlistDate(show.show_date)} — {show.show_venue_location}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 pt-0 space-y-1">
-        <p className="text-xs text-muted-foreground">{show.show_venue_location}</p>
+        <p className="text-xs text-muted-foreground">{show.show_subvenue}</p>
         {viewMode && show_scored && submissionDetails ?
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center rounded-md bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">

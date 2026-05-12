@@ -24,6 +24,8 @@ interface SubmitCardProps {
   onClearSelections: () => void
   onClose: () => void
   wlHomeV2Chrome?: boolean
+  /** Sit inside parent `widget-panel` body with picks list (edit mode). */
+  embeddedInParentPanel?: boolean
 }
 
 export function SubmitCard({
@@ -40,6 +42,7 @@ export function SubmitCard({
   onClearSelections,
   onClose,
   wlHomeV2Chrome = false,
+  embeddedInParentPanel = false,
 }: SubmitCardProps) {
   if (viewMode) {
     if (wlHomeV2Chrome) {
@@ -123,63 +126,111 @@ export function SubmitCard({
   }
 
   return (
-    <Card
-      className={cn(
-        "ring-0 border overflow-hidden py-0",
-        wlHomeV2Chrome ?
-          "song-selection-edit-footer-card"
-        : "border-border/60 bg-card/80",
-      )}
-    >
-      <CardContent
-        className={cn(
-          "p-3 space-y-2",
-          wlHomeV2Chrome && "song-selection-edit-footer-inner",
-        )}
-      >
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <span className="text-sm font-medium">
+    wlHomeV2Chrome && embeddedInParentPanel ?
+      <div className="song-selection-submit-embedded">
+        <div className="song-selection-submit-embedded-summary">
+          <span className="song-selection-footer-score-line">
             {totalSongsSelected} song{totalSongsSelected !== 1 ? "s" : ""} selected
           </span>
           {songPicks.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
+              className="song-selection-submit-clear-btn"
               onClick={onClearSelections}
-              className={cn(
-                "text-destructive hover:text-destructive hover:bg-destructive/10 h-6",
-                wlHomeV2Chrome && "song-selection-btn-ghost-warn",
-              )}
             >
-              <Trash2 className="size-3.5" />
+              <Trash2 className="size-3.5 shrink-0" aria-hidden />
               Clear
-            </Button>
+            </button>
           )}
         </div>
-        <Button
-          size="sm"
-          onClick={onSubmit}
+        <button
+          type="button"
           disabled={songPicks.length === 0 || submitting || success}
-          className={cn("w-full", wlHomeV2Chrome && "song-selection-submit-primary")}
+          className="song-selection-submit-primary song-selection-submit-primary-btn song-selection-submit-primary-compact"
+          onClick={() => void onSubmit()}
         >
-          {submitting ? (
+          {submitting ?
             <>
-              <Loader2 className="size-3.5 animate-spin" />
+              <Loader2 className="size-3.5 animate-spin shrink-0" aria-hidden />
               Submitting...
             </>
-          ) : success ? (
+          : success ?
             <>
-              <Check className="size-3.5" />
+              <Check className="size-3.5 shrink-0" aria-hidden />
               Submitted!
             </>
-          ) : (
-            <>
-              <Check className="size-3.5" />
+          : <>
+              <Check className="size-3.5 shrink-0" aria-hidden />
               {isEditing ? "Update Picks" : "Submit Picks"}
             </>
+          }
+        </button>
+      </div>
+    : <Card
+        className={cn(
+          "ring-0 border overflow-hidden py-0",
+          wlHomeV2Chrome ?
+            "song-selection-edit-footer-card"
+          : "border-border/60 bg-card/80",
+        )}
+      >
+        <CardContent
+          className={cn(
+            "p-3 space-y-2",
+            wlHomeV2Chrome && "song-selection-edit-footer-inner",
           )}
-        </Button>
-      </CardContent>
-    </Card>
+        >
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <span
+              className={cn(
+                "text-sm font-medium",
+                wlHomeV2Chrome && "song-selection-footer-score-line",
+              )}
+            >
+              {totalSongsSelected} song{totalSongsSelected !== 1 ? "s" : ""} selected
+            </span>
+            {songPicks.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClearSelections}
+                className={cn(
+                  "text-destructive hover:text-destructive hover:bg-destructive/10 h-6",
+                  wlHomeV2Chrome && "song-selection-btn-ghost-warn",
+                )}
+              >
+                <Trash2 className="size-3.5" />
+                Clear
+              </Button>
+            )}
+          </div>
+          <Button
+            size="sm"
+            onClick={onSubmit}
+            disabled={songPicks.length === 0 || submitting || success}
+            className={cn(
+              "w-full",
+              wlHomeV2Chrome &&
+                "song-selection-submit-primary song-selection-submit-primary-btn",
+            )}
+          >
+            {submitting ?
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                Submitting...
+              </>
+            : success ?
+              <>
+                <Check className="size-3.5" />
+                Submitted!
+              </>
+            : <>
+                <Check className="size-3.5" />
+                {isEditing ? "Update Picks" : "Submit Picks"}
+              </>
+            }
+          </Button>
+        </CardContent>
+      </Card>
   )
 }

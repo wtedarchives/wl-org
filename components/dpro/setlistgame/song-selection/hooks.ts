@@ -350,55 +350,54 @@ export const useSetlistOperations = (songPicks: SongPick[], setSongPicks: React.
 
   // Update placements for all songs to ensure correct labeling
   const updatePlacements = () => {
-    // Keep track of whether we actually made changes
-    let madeChanges = false;
-    
-    setSongPicks(prevPicks => {
+    setSongPicks((prevPicks) => {
+      let madeChanges = false;
+
       // Group songs by set (excluding break markers)
       const setGroups: Record<string, SongPick[]> = {};
-      
-      const realSongs = prevPicks.filter(pick => !pick.isBreak);
-      
-      realSongs.forEach(pick => {
+
+      const realSongs = prevPicks.filter((pick) => !pick.isBreak);
+
+      realSongs.forEach((pick) => {
         if (!setGroups[pick.set]) {
           setGroups[pick.set] = [];
         }
-        
+
         setGroups[pick.set].push(pick);
       });
-      
+
       // Create a new array with updated placements
       const updatedPicks = [...prevPicks];
-      
+
       // Update placements for each song
       for (const setId in setGroups) {
         const setGroup = setGroups[setId];
-        
+
         // Sort songs by setnum for this set
         const sortedSetGroup = [...setGroup].sort((a, b) => a.setnum - b.setnum);
-        
+
         // Update each song in the set
         sortedSetGroup.forEach((song) => {
           // Determine placement based on position
           const oldPlacement = song.placement;
           const placement = getPlacement(setId, sortedSetGroup, song);
-          
+
           // Only update if the placement actually changed
           if (oldPlacement !== placement) {
             madeChanges = true;
-            
+
             // Find and update the song in our picks array
-            const songIndex = updatedPicks.findIndex(p => p.id === song.id);
+            const songIndex = updatedPicks.findIndex((p) => p.id === song.id);
             if (songIndex >= 0) {
               updatedPicks[songIndex] = {
                 ...updatedPicks[songIndex],
-                placement
+                placement,
               };
             }
           }
         });
       }
-      
+
       // Only return a new array if we actually made changes
       // This prevents unnecessary re-renders
       return madeChanges ? updatedPicks : prevPicks;

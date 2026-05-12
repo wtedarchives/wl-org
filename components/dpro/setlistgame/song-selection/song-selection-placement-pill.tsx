@@ -3,7 +3,7 @@
 import type { ReactNode } from "react"
 import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 
-/** Placement label chip — colors from `song-selection-dialog.css` via `data-placement-bar`. */
+/** Placement label chip — colors from `setlist-game-wl-v2.css` via `data-placement-bar`. */
 export function SongSelectionPlacementPill({
   placement,
   children,

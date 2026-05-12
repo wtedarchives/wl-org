@@ -28,6 +28,8 @@ interface PicksDisplayCardProps {
   onMoveSongDown: (pickId: string) => void
   onRemoveSet: (setId: string) => void
   wlHomeV2Chrome?: boolean
+  /** Parent supplies outer `widget-panel` + `.wp-head` (edit-mode right column). */
+  embeddedInParentPanel?: boolean
 }
 
 export function PicksDisplayCard({
@@ -41,7 +43,9 @@ export function PicksDisplayCard({
   onMoveSongDown,
   onRemoveSet,
   wlHomeV2Chrome = false,
+  embeddedInParentPanel = false,
 }: PicksDisplayCardProps) {
+  const wlEmbedded = wlHomeV2Chrome && embeddedInParentPanel
   const uniqueSets = (viewMode && show_scored)
     ? getAllUniqueSets(songPicks, actualSetlist)
     : getUniqueSets(songPicks)
@@ -60,6 +64,13 @@ export function PicksDisplayCard({
   )
 
   if (songPicks.length === 0 && !(viewMode && show_scored && actualSetlist.length > 0)) {
+    if (wlEmbedded) {
+      return (
+        <div className="song-selection-picks-embedded song-selection-picks-embedded--empty">
+          {emptyBody}
+        </div>
+      )
+    }
     if (wlHomeV2Chrome) {
       return (
         <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural song-selection-tour-panel">
@@ -141,6 +152,7 @@ export function PicksDisplayCard({
               {!viewMode ? (
                 <div className="flex shrink-0 items-center gap-0.5">
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon-xs"
                     onClick={() => onMoveSongUp(pick.id)}
@@ -154,6 +166,7 @@ export function PicksDisplayCard({
                     <span className="sr-only">Move up</span>
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon-xs"
                     onClick={() => onMoveSongDown(pick.id)}
@@ -167,6 +180,7 @@ export function PicksDisplayCard({
                     <span className="sr-only">Move down</span>
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon-xs"
                     onClick={() => {
@@ -274,6 +288,11 @@ export function PicksDisplayCard({
   )
 
   if (wlHomeV2Chrome) {
+    if (wlEmbedded) {
+      return (
+        <div className="song-selection-picks-embedded">{picksBody}</div>
+      )
+    }
     return (
       <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural song-selection-tour-panel">
         <div className="wl-home-v2-years-table-scroll min-h-0">{picksBody}</div>

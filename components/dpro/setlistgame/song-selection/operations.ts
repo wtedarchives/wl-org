@@ -338,15 +338,19 @@ export const createSongOperations = (
       }
       
       // Regular case: swap with the song above it within the same set
-      const newPicks = [...prevPicks];
       const prevSong = currentSetSongs[positionInSet - 1];
-      const prevSongIndex = prevPicks.findIndex(p => p.id === prevSong.id);
-      
-      // Swap set numbers
-      const tempSetnum = newPicks[pickIndex].setnum;
-      newPicks[pickIndex].setnum = newPicks[prevSongIndex].setnum;
-      newPicks[prevSongIndex].setnum = tempSetnum;
-      
+      const prevSongIndex = prevPicks.findIndex((p) => p.id === prevSong.id);
+      if (prevSongIndex < 0) return prevPicks;
+
+      const movingSetnum = prevPicks[pickIndex].setnum;
+      const neighborSetnum = prevPicks[prevSongIndex].setnum;
+      const newPicks = [...prevPicks];
+      newPicks[pickIndex] = { ...prevPicks[pickIndex], setnum: neighborSetnum };
+      newPicks[prevSongIndex] = {
+        ...prevPicks[prevSongIndex],
+        setnum: movingSetnum,
+      };
+
       return newPicks;
     });
   };
@@ -413,15 +417,19 @@ export const createSongOperations = (
       }
       
       // Regular case: swap with the song below it within the same set
-      const newPicks = [...prevPicks];
       const nextSong = currentSetSongs[positionInSet + 1];
-      const nextSongIndex = prevPicks.findIndex(p => p.id === nextSong.id);
-      
-      // Swap set numbers
-      const tempSetnum = newPicks[pickIndex].setnum;
-      newPicks[pickIndex].setnum = newPicks[nextSongIndex].setnum;
-      newPicks[nextSongIndex].setnum = tempSetnum;
-      
+      const nextSongIndex = prevPicks.findIndex((p) => p.id === nextSong.id);
+      if (nextSongIndex < 0) return prevPicks;
+
+      const movingSetnum = prevPicks[pickIndex].setnum;
+      const neighborSetnum = prevPicks[nextSongIndex].setnum;
+      const newPicks = [...prevPicks];
+      newPicks[pickIndex] = { ...prevPicks[pickIndex], setnum: neighborSetnum };
+      newPicks[nextSongIndex] = {
+        ...prevPicks[nextSongIndex],
+        setnum: movingSetnum,
+      };
+
       return newPicks;
     });
   };

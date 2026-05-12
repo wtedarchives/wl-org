@@ -122,7 +122,7 @@ export function SongSelectionModalMain({
         />
         {showScored ?
           <>
-            <div className="flex flex-col gap-3 md:hidden">
+            <div className="flex flex-col gap-3 lg:hidden">
               <ToggleSwitch
                 showActualSetlist={showActualSetlist}
                 setShowActualSetlist={setShowActualSetlist}
@@ -154,7 +154,7 @@ export function SongSelectionModalMain({
                   />}
               </div>
             </div>
-            <div className="hidden gap-4 md:grid md:grid-cols-2">
+            <div className="hidden gap-4 lg:grid lg:grid-cols-2">
               <div className="flex min-w-0 flex-col gap-2">
                 {wlV2 ?
                   <h4 className="song-selection-column-title">Your picks</h4>
@@ -224,12 +224,13 @@ export function SongSelectionModalMain({
 
   return (
     <div
-      className={cn(
-        "grid grid-cols-1 gap-4 md:grid-cols-[1.25fr_2fr]",
-        wlV2 && "px-3 pb-3 pt-1 sm:px-4",
-      )}
+      className={
+        wlV2 ?
+          "song-selection-modal-edit-grid"
+        : "grid grid-cols-1 gap-4 lg:grid-cols-[336px_minmax(0,1fr)]"
+      }
     >
-      <div className="order-1 flex flex-col gap-3">
+      <div className={cn("order-1 flex flex-col gap-3", wlV2 && "gap-4")}>
         <ShowInfoCard
           show={showForModal}
           viewMode={viewMode}
@@ -248,6 +249,7 @@ export function SongSelectionModalMain({
             setSelectedSong("")
           }}
           error={error}
+          wlHomeV2Chrome={wlV2}
         />
         <ActionButtonsCard
           onAddSetBreak={handleAddSetBreak}
@@ -256,39 +258,80 @@ export function SongSelectionModalMain({
           onAddNewCoverSong={handleAddNewCoverSong}
           canAddSetBreak={canAddSetBreak}
           canAddEncoreBreak={canAddEncoreBreak}
+          wlHomeV2Chrome={wlV2}
         />
       </div>
-      <div className="order-2 flex flex-col gap-3">
-        {wlV2 ?
-          <h4 className="song-selection-column-title">Your picks</h4>
-        : null}
-        <PicksDisplayCard
-          songPicks={songPicks}
-          actualSetlist={actualSetlist}
-          viewMode={false}
-          show_scored={showScored}
-          isSelectionClosed={showInfo.isSelectionClosed}
-          onRemoveSong={handleRemoveSong}
-          onMoveSongUp={moveSongUp}
-          onMoveSongDown={moveSongDown}
-          onRemoveSet={handleRemoveSet}
-          wlHomeV2Chrome={wlV2}
-        />
-        <SubmitCard
-          viewMode={viewMode}
-          show_scored={showScored}
-          submissionDetails={submissionDetails}
-          rawPointsTotal={rawPointsTotal}
-          totalSongsSelected={totalSongsSelected}
-          songPicks={songPicks}
-          submitting={submitting}
-          success={success}
-          isEditing={isEditing}
-          onSubmit={onSubmit}
-          onClearSelections={onClearSelections}
-          onClose={() => onOpenChange(false)}
-          wlHomeV2Chrome={wlV2}
-        />
+      <div className={cn("order-2 flex flex-col gap-3", wlV2 && "gap-4")}>
+        {wlV2 && !viewMode ?
+          <div className="widget-panel song-selection-tour-panel song-selection-form-panel">
+            <div className="wp-head song-selection-form-panel-head">
+              <span>Your picks</span>
+            </div>
+            <div className="song-selection-form-panel-body">
+              <PicksDisplayCard
+                songPicks={songPicks}
+                actualSetlist={actualSetlist}
+                viewMode={false}
+                show_scored={showScored}
+                isSelectionClosed={showInfo.isSelectionClosed}
+                onRemoveSong={handleRemoveSong}
+                onMoveSongUp={moveSongUp}
+                onMoveSongDown={moveSongDown}
+                onRemoveSet={handleRemoveSet}
+                wlHomeV2Chrome
+                embeddedInParentPanel
+              />
+              <SubmitCard
+                viewMode={viewMode}
+                show_scored={showScored}
+                submissionDetails={submissionDetails}
+                rawPointsTotal={rawPointsTotal}
+                totalSongsSelected={totalSongsSelected}
+                songPicks={songPicks}
+                submitting={submitting}
+                success={success}
+                isEditing={isEditing}
+                onSubmit={onSubmit}
+                onClearSelections={onClearSelections}
+                onClose={() => onOpenChange(false)}
+                wlHomeV2Chrome
+                embeddedInParentPanel
+              />
+            </div>
+          </div>
+        : <>
+            {wlV2 ?
+              <h4 className="song-selection-column-title">Your picks</h4>
+            : null}
+            <PicksDisplayCard
+              songPicks={songPicks}
+              actualSetlist={actualSetlist}
+              viewMode={false}
+              show_scored={showScored}
+              isSelectionClosed={showInfo.isSelectionClosed}
+              onRemoveSong={handleRemoveSong}
+              onMoveSongUp={moveSongUp}
+              onMoveSongDown={moveSongDown}
+              onRemoveSet={handleRemoveSet}
+              wlHomeV2Chrome={wlV2}
+            />
+            <SubmitCard
+              viewMode={viewMode}
+              show_scored={showScored}
+              submissionDetails={submissionDetails}
+              rawPointsTotal={rawPointsTotal}
+              totalSongsSelected={totalSongsSelected}
+              songPicks={songPicks}
+              submitting={submitting}
+              success={success}
+              isEditing={isEditing}
+              onSubmit={onSubmit}
+              onClearSelections={onClearSelections}
+              onClose={() => onOpenChange(false)}
+              wlHomeV2Chrome={wlV2}
+            />
+          </>
+        }
       </div>
     </div>
   )

@@ -11,6 +11,7 @@ interface ActionButtonsCardProps {
   onAddNewCoverSong: () => void
   canAddSetBreak: boolean
   canAddEncoreBreak: boolean
+  wlHomeV2Chrome?: boolean
 }
 
 export function ActionButtonsCard({
@@ -20,7 +21,52 @@ export function ActionButtonsCard({
   onAddNewCoverSong,
   canAddSetBreak,
   canAddEncoreBreak,
+  wlHomeV2Chrome = false,
 }: ActionButtonsCardProps) {
+  if (wlHomeV2Chrome) {
+    return (
+      <div className="widget-panel song-selection-tour-panel song-selection-form-panel">
+        <div className="wp-head song-selection-form-panel-head">
+          <span>Add to setlist</span>
+        </div>
+        <div className="song-selection-action-grid">
+          <button
+            type="button"
+            className="song-selection-action-tile song-selection-action-tile--amber"
+            disabled={!canAddSetBreak}
+            onClick={onAddSetBreak}
+          >
+            Add Set Break
+          </button>
+          <button
+            type="button"
+            className="song-selection-action-tile song-selection-action-tile--rose"
+            disabled={!canAddEncoreBreak}
+            onClick={onAddEncoreBreak}
+          >
+            Add Encore Break
+          </button>
+          <button
+            type="button"
+            className="song-selection-action-tile song-selection-action-tile--emerald"
+            onClick={onAddNewOriginalSong}
+          >
+            <Plus className="size-3.5 shrink-0" aria-hidden />
+            New Original Song
+          </button>
+          <button
+            type="button"
+            className="song-selection-action-tile song-selection-action-tile--sky"
+            onClick={onAddNewCoverSong}
+          >
+            <Plus className="size-3.5 shrink-0" aria-hidden />
+            New Cover Song
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
       <CardHeader className="py-2 px-3">
