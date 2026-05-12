@@ -1,9 +1,33 @@
 "use client"
 
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@supabase/supabase-js"
 import type { WysteriaSession } from "@/lib/jwt"
 import type { SongPick, SongSelectionModalProps } from "./types"
 import { calculateTimeRemaining, getPlacement } from "./utils"
+
+/**
+ * Setlist submissions must run with the Wysteria SSO JWT as Bearer auth so Postgres RLS
+ * sees the same identity as `user_id` (profile UUID). The shared anon-only client does not
+ * send this token after migrating off Supabase Auth.
+ */
+function createSupabaseForSubmission(accessToken: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anonKey) return null
+  return createClient(url, anonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "X-Client-Info": "wl-org-setlist-game-submit",
+      },
+    },
+  })
+}
 
 export const createSubmissionHandler = (
   session: WysteriaSession | null,
@@ -27,7 +51,8 @@ export const createSubmissionHandler = (
       return
     }
 
-    if (!supabase) {
+    const db = createSupabaseForSubmission(session.token)
+    if (!db) {
       setError("Unable to connect. Please try again.")
       return
     }
@@ -48,7 +73,7 @@ export const createSubmissionHandler = (
       // Check if this user already has a submission for this show
       if (!isEditing) {
         // Check if this user already has a submission for this show
-        const { data: existingSubmission, error: existingError } = await supabase
+        const { data: existingSubmission, error: existingError } = await db
           .from('setlist_game_submissions')
           .select('submission_id')
           .eq('user_id', session?.profileId)
@@ -68,7 +93,7 @@ export const createSubmissionHandler = (
         
         try {
           // Delete existing picks but KEEP the submission
-          const { error: picksDeleteError } = await supabase
+          const { error: picksDeleteError } = await db
             .from('setlist_game_picks')
             .delete()
             .eq('submission_id', submissionId);
@@ -83,7 +108,7 @@ export const createSubmissionHandler = (
         
         try {
           // Update the existing submission record
-          const { error: updateError } = await supabase
+          const { error: updateError } = await db
             .from('setlist_game_submissions')
             .update({
               total_songs_picked: songPicks.filter(pick => !pick.isBreak).length
@@ -101,7 +126,7 @@ export const createSubmissionHandler = (
       } else {
         try {
           // Create a new submission record
-          const { data: submissionData, error: submissionError } = await supabase
+          const { data: submissionData, error: submissionError } = await db
             .from('setlist_game_submissions')
             .insert([{
               user_id: session?.profileId,
@@ -168,7 +193,7 @@ export const createSubmissionHandler = (
       });
       
       try {
-        const { error: picksError } = await supabase
+        const { error: picksError } = await db
           .from('setlist_game_picks')
           .insert(picksToInsert);
         
