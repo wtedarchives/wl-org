@@ -1,0 +1,245 @@
+/* Setlist game archive (`/archive/setlistgame`) — WL Home v2 shell + layout. Imported by wl-home-v2-setlistgame-shell.tsx */
+
+.wl-home-v2 .wl-home-v2-setlistgame-tile-main {
+  --tile-bg: url("/newbg3.jpeg");
+}
+
+.wl-home-v2 .setlist-game-wl-v2-main-stack {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 1.25rem;
+}
+
+/* `/archive/setlistgame?tour_id=` — breathing room between header and tables */
+.wl-home-v2 .setlist-game-tour-v2-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Tour game header — grid: desktop [title | champs], stats row; mobile stacks title → stats → champs */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__left {
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+  min-width: 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__left:not(:has(.setlist-game-tour-header__champs-grid)) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "title"
+    "stats";
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__left:has(.setlist-game-tour-header__champs-grid) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "title champs"
+    "stats stats";
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__title-grid {
+  grid-area: title;
+  min-width: 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__stats-grid {
+  grid-area: stats;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__champs-grid {
+  grid-area: champs;
+  min-width: 0;
+  justify-self: end;
+  align-self: center;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .venue
+  .venue-location {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+@media (max-width: 1343px) {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header.setlist-game-tour-header
+    .setlist-game-tour-header__left:has(.setlist-game-tour-header__champs-grid) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "title"
+      "stats"
+      "champs";
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header.setlist-game-tour-header
+    .setlist-game-tour-header__champs-grid {
+    justify-self: start;
+    align-self: start;
+  }
+}
+
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__champs-grid
+  .setlist-game-tour-header__champions-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 6px 8px;
+  max-width: 100%;
+}
+
+@media (max-width: 1343px) {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header.setlist-game-tour-header
+    .setlist-game-tour-header__champs-grid
+    .setlist-game-tour-header__champions-inner {
+    justify-content: flex-start;
+  }
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__champs-grid
+  .setlist-game-tour-header__champions-inner
+  .show-detail-pill {
+  align-items: center;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header.setlist-game-tour-header
+  .setlist-game-tour-header__winner-pill {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.15);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: rgb(254 243 199);
+}
+
+/* Per-show page (`/archive/setlistgame?id=`) — flex gap (margin reset on `.wl-home-v2 *` breaks `space-y-*`) */
+.wl-home-v2 .setlist-game-show-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header
+  .show-header-nav-tour-block
+  .nav-btns.setlist-game-show-header-nav-btns {
+  grid-template-columns: 1fr;
+  justify-items: end;
+  width: max-content;
+  max-width: 100%;
+  justify-self: end;
+}
+
+/* League standings: center all columns except User */
+.setlist-game-standings-table .setlist-game-standings-user-header,
+.setlist-game-standings-table .setlist-game-standings-user-cell {
+  text-align: left;
+}
+
+.setlist-game-standings-table th:not(.setlist-game-standings-user-header),
+.setlist-game-standings-table td:not(.setlist-game-standings-user-cell) {
+  text-align: center;
+}
+
+/* Top picks row — mirrors tour `TopSlotsCarousel` xl flex gap */
+.setlist-game-top-picks-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 1280px) {
+  .setlist-game-top-picks-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .setlist-game-top-picks-row > .widget-panel {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+.setlist-game-top-picks-table-wrap {
+  min-width: 0;
+  max-height: 16rem;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wl-home-v2 .setlist-game-top-pick-art {
+  border: 1px solid rgb(63, 65, 64);
+}
+
+/*
+ * `/archive/setlistgame` — inline text links in widget panels: hover / focus underline
+ * (same idea as `hover:underline` on tour show rows / song matrix).
+ */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .setlist-game-wl-v2-main-stack
+  a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .setlist-game-wl-v2-main-stack
+  a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Song selection / results modal (Setlist Game) — same link affordance. */
+.wl-home-v2.wl-home-v2-modal-layer .modal.modal--song-selection a:hover,
+.wl-home-v2.wl-home-v2-modal-layer .modal.modal--song-selection a:focus-visible,
+.wl-home-v2.wl-home-v2-modal-layer .modal.modal--setlist-game-rules a:hover,
+.wl-home-v2.wl-home-v2-modal-layer .modal.modal--setlist-game-rules a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

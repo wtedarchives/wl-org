@@ -16,11 +16,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 
 interface TooltipContainerProps {
   result: string | undefined
   score: number | undefined
   pick?: SongPick
+  wlHomeV2Chrome?: boolean
 }
 
 function subscribeHoverCapability(cb: () => void) {
@@ -40,7 +42,7 @@ function useTapForScoreExplainer() {
   return useSyncExternalStore(
     subscribeHoverCapability,
     getHoverNoneSnapshot,
-    () => false
+    () => false,
   )
 }
 
@@ -48,39 +50,50 @@ export function TooltipContainer({
   result,
   score,
   pick,
+  wlHomeV2Chrome = false,
 }: TooltipContainerProps) {
   const tapExplainer = useTapForScoreExplainer()
   const html = getResultDescription(
     result,
     pick?.showcloser_correct ?? false,
-    pick?.showopener_correct ?? false
+    pick?.showopener_correct ?? false,
   )
 
   const explainerBody = (
     <div
-      className="text-[11px] leading-tight"
+      className={cn(
+        "leading-tight",
+        wlHomeV2Chrome ? "song-selection-score-tooltip-body" : "text-[11px]",
+      )}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
 
-  const scoreFace = (
-    <>
-      {result === "not_played" ? (
-        <span className="inline-flex items-center justify-center size-4 rounded bg-red-600">
-          <X className="size-3 text-white" />
+  const scoreFace =
+    wlHomeV2Chrome ?
+      result === "not_played" ?
+        <span className="song-selection-score-face song-selection-score-face--miss">
+          <X className="size-3 text-white" aria-hidden />
         </span>
-      ) : (
-        <span className="font-medium text-xs text-white bg-green-600 rounded px-1">
+      : <span className="song-selection-score-face song-selection-score-face--hit tabular-nums">
           +{score}
         </span>
-      )}
-    </>
-  )
+    : <>
+        {result === "not_played" ?
+          <span className="inline-flex items-center justify-center size-4 rounded bg-red-600">
+            <X className="size-3 text-white" />
+          </span>
+        : <span className="font-medium text-xs text-white bg-green-600 rounded px-1">
+            +{score}
+          </span>}
+      </>
 
   const triggerClassName = cn(
     "inline-flex items-center justify-center rounded-md touch-manipulation outline-none",
-    "p-2 -m-2 min-h-9 min-w-11",
-    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    wlHomeV2Chrome ?
+      "min-h-0 min-w-0 p-1 -m-1"
+    : "p-2 -m-2 min-h-9 min-w-11",
+    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
   )
 
   if (tapExplainer) {
@@ -97,7 +110,11 @@ export function TooltipContainer({
           side="left"
           sideOffset={8}
           align="center"
-          className="w-fit max-w-[200px] border-0 bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+          className={
+            wlHomeV2Chrome ?
+              "song-selection-score-popover"
+            : "w-fit max-w-[200px] border-0 bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+          }
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {explainerBody}
@@ -118,9 +135,20 @@ export function TooltipContainer({
             {scoreFace}
           </button>
         </TooltipTrigger>
-        <TooltipContent side="left" className="max-w-[200px]">
-          {explainerBody}
-        </TooltipContent>
+        {wlHomeV2Chrome ?
+          <TooltipContent
+            side={SETLIST_V2_ROW_TOOLTIP_CONTENT.side}
+            sideOffset={SETLIST_V2_ROW_TOOLTIP_CONTENT.sideOffset}
+            className={cn(
+              SETLIST_V2_ROW_TOOLTIP_CONTENT.className,
+              "song-selection-score-tooltip",
+            )}
+          >
+            {explainerBody}
+          </TooltipContent>
+        : <TooltipContent side="left" className="max-w-[200px]">
+            {explainerBody}
+          </TooltipContent>}
       </Tooltip>
     </TooltipProvider>
   )

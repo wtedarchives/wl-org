@@ -1,0 +1,554 @@
+/* Song selection / results — WL Home v2 shell matches Request a Song (`modal--wted-request`).
+   Tour-dates panels + setlist `.show-header` + song modal footer: scoped under `.modal--song-selection`. */
+
+.wl-home-v2 .modal.modal--wted-request.modal--song-selection {
+  max-width: min(900px, 96vw);
+  max-height: min(92vh, 900px);
+}
+
+.wl-home-v2 .modal.modal--song-selection .modal-request-body {
+  margin-top: 10px;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  background: transparent;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-modal-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+}
+
+/* Column headings — desktop; hidden on mobile (toggle labels the view). */
+.wl-home-v2 .modal.modal--song-selection .song-selection-column-title {
+  margin: 0;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+}
+@media (max-width: 767px) {
+  .wl-home-v2 .modal.modal--song-selection .song-selection-column-title {
+    display: none;
+  }
+}
+
+/* Mobile picks / setlist toggle — same chrome as `.modal-setlist-song-footer-close`. */
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-toggle-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-toggle-btn {
+  appearance: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  font-size: 11px;
+  line-height: 1.45;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+  border: 1px solid rgb(63, 65, 64);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-toggle-btn--inactive:hover {
+  color: var(--wl-white);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-toggle-btn--active {
+  color: var(--wl-white);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.26);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-toggle-btn--active:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-toggle-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(88, 200, 174, 0.45);
+}
+
+/*
+ * `#` column — same placement bar + digit treatment as `.wl-home-v2-setlist .set-table td.num-cell`.
+ */
+.wl-home-v2 .modal.modal--song-selection .song-selection-num-cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  padding: 2px 8px 2px 14px; /* +6px right vs archive num-cell — space before song title */
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* Right column for +N / ✕ score control — inset from panel edge */
+.wl-home-v2 .modal.modal--song-selection .song-selection-score-cell {
+  display: flex;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  box-sizing: border-box;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-num-cell-bar {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 4px;
+  border-radius: 0 2px 2px 0;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="set-1-opener"] {
+  background-color: #047857;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="set-1-closer"] {
+  background-color: #1e40af;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="set-opener"] {
+  background-color: #10b981;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="set-closer"] {
+  background-color: #3b82f6;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="encore-1"] {
+  background-color: #be123c;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="encore-23"] {
+  background-color: #f43f5e;
+}
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-num-cell-bar[data-placement-bar="none"] {
+  background-color: transparent;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-num-cell-digit {
+  display: block;
+  width: 100%;
+}
+
+/* Score explainer: above modal backdrop (10001); match `.setlist-header-tooltip` chrome. */
+.song-selection-score-tooltip[data-slot="tooltip-content"] {
+  z-index: 10050 !important;
+  max-width: min(300px, calc(100vw - 1.5rem)) !important;
+}
+.song-selection-score-popover {
+  z-index: 10050 !important;
+  width: fit-content !important;
+  max-width: min(300px, calc(100vw - 1.5rem)) !important;
+  text-align: left !important;
+  border-radius: 10px !important;
+  border: 1px solid rgb(63, 65, 64) !important;
+  background: rgba(12, 14, 13, 0.94) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 10px 12px !important;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+  box-shadow:
+    0 18px 40px -12px rgba(0, 0, 0, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.song-selection-score-tooltip-body {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* Match archive setlist `.show-header` (compact for modal). */
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-header {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.63);
+  border: 1px solid rgb(63, 65, 64);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-header::before {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 122, 103, 0.2),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-header .left {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-header-heading {
+  font-size: clamp(18px, 3.5vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-header-heading .date {
+  color: var(--wl-light-orange);
+}
+
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-show-header-heading
+  .show-header-title-divider {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 700;
+}
+
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-show-header-heading
+  .show-header-title-group {
+  color: #fff;
+  font-weight: 700;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-header .venue {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.35;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-show-meta {
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: inherit;
+}
+
+/* Tour dates–style widget panels inside modal body */
+.wl-home-v2 .modal.modal--song-selection .song-selection-tour-panel.widget-panel {
+  padding: 10px;
+}
+
+/* Set list stacks — flex gap (WL margin reset breaks Tailwind `space-y-*`). */
+.wl-home-v2 .modal.modal--song-selection .song-selection-sets-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-tour-panel
+  + .song-selection-tour-panel {
+  margin-top: 10px;
+}
+
+/* Rows — match `TourShowRow` wlHomeV2 hover */
+.wl-home-v2 .modal.modal--song-selection .song-selection-tour-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  min-height: 1.75rem;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-tour-row:last-child {
+  border-bottom: none;
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-tour-row:hover {
+  background: rgba(88, 200, 174, 0.11);
+}
+
+.wl-home-v2 .modal.modal--song-selection .song-selection-view-footer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 4px;
+}
+
+.wl-home-v2
+  .modal.modal--song-selection
+  .song-selection-view-footer-stack
+  .modal-setlist-song-footer {
+  margin-top: 8px;
+}
+
+/* --- Set block; WL v2 title sits above in mono (`.song-selection-set-group`) --- */
+.wl-home-v2 .modal.modal--song-selection .song-selection-set-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-set-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 2px;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-set-title-mono {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.72);
+  min-width: 0;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-set-block {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgb(44, 46, 45);
+}
+/* Inset header row inside bordered box (non–WL v2 / legacy layout only) */
+.wl-home-v2 .modal.modal--song-selection .song-selection-set-head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-set-head-label {
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-muted-caption {
+  color: rgba(255, 255, 255, 0.55);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-song-title {
+  min-width: 0;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/*
+ * Status pills (show header) — same geometry as `tour-shows-stat-pill`; no inline CSS vars.
+ */
+.wl-home-v2 .modal.modal--song-selection .song-selection-stat-pill {
+  display: inline-block;
+  box-sizing: border-box;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid transparent;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-stat-pill--points {
+  background: rgba(16, 185, 129, 0.4);
+  border-color: rgba(16, 185, 129, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-stat-pill--awaiting {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgb(49, 51, 49);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-stat-pill--closed {
+  background: rgba(248, 113, 113, 0.35);
+  border-color: rgba(248, 113, 113, 0.9);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-stat-pill--time {
+  background: rgba(88, 200, 174, 0.28);
+  border-color: rgba(88, 200, 174, 0.88);
+}
+
+/* Match `.wl-home-v2 .tour-shows-stat-pill` padding reset */
+.wl-home-v2 .modal.modal--song-selection .song-selection-stat-pill {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/*
+ * Placement text pills — tour-dates heatmap style; tokens align with `getPlacementBarCssToken`.
+ */
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill {
+  display: inline-block;
+  box-sizing: border-box;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.35;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid transparent;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="set-1-opener"] {
+  background: rgba(4, 120, 87, 0.4);
+  border-color: rgba(4, 120, 87, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="set-1-closer"] {
+  background: rgba(30, 64, 175, 0.4);
+  border-color: rgba(30, 64, 175, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="set-opener"] {
+  background: rgba(16, 185, 129, 0.4);
+  border-color: rgba(16, 185, 129, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="set-closer"] {
+  background: rgba(59, 130, 246, 0.4);
+  border-color: rgba(59, 130, 246, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="encore-1"] {
+  background: rgba(190, 18, 60, 0.4);
+  border-color: rgba(190, 18, 60, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="encore-23"] {
+  background: rgba(244, 63, 94, 0.4);
+  border-color: rgba(244, 63, 94, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-placement-pill[data-placement-bar="none"] {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgb(49, 51, 49);
+}
+
+/* Score trigger face (+N / ✕) — replaces TourShowsStatPill (no `--tours-stat-pill-*` inline). */
+.wl-home-v2 .modal.modal--song-selection .song-selection-score-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid transparent;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-score-face--miss {
+  background: rgba(248, 113, 113, 0.4);
+  border-color: rgba(248, 113, 113, 0.92);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-score-face--hit {
+  background: rgba(22, 163, 74, 0.42);
+  border-color: rgba(22, 163, 74, 0.92);
+}
+
+/* View footer score copy */
+.wl-home-v2 .modal.modal--song-selection .song-selection-footer-score-line {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-footer-score-em {
+  color: rgba(88, 200, 174, 0.95);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-footer-penalty-line {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-footer-penalty-em {
+  color: rgb(252, 165, 165);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Edit-mode submit shell */
+.wl-home-v2 .modal.modal--song-selection .song-selection-edit-footer-card {
+  border: 1px solid rgb(44, 46, 45);
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-edit-footer-card .song-selection-edit-footer-inner {
+  color: rgba(255, 255, 255, 0.88);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-submit-primary {
+  width: 100%;
+  background: rgb(4, 120, 87);
+  color: #fff;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-submit-primary:hover {
+  background: rgb(5, 150, 105);
+  color: #fff;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-btn-ghost-warn {
+  color: rgb(252, 165, 165);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-btn-ghost-warn:hover {
+  color: rgb(254, 202, 202);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Row icon buttons — WL v2 modal */
+.wl-home-v2 .modal.modal--song-selection .song-selection-row-icon-btn {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-row-icon-btn--muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-row-icon-btn--muted:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-row-icon-btn--danger {
+  color: rgb(252, 165, 165);
+}
+.wl-home-v2 .modal.modal--song-selection .song-selection-row-icon-btn--danger:hover {
+  color: rgb(254, 202, 202);
+  background: rgba(239, 68, 68, 0.15);
+}

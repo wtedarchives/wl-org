@@ -1,0 +1,50 @@
+/* Active league table — status & picks pills (variables only; no inline styles). */
+
+.setlist-game-pill-status--scored.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(37, 99, 235, 0.42);
+  --tours-stat-pill-border: rgb(96, 165, 250);
+}
+
+.setlist-game-pill-status--closed.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(220, 38, 38, 0.42);
+  --tours-stat-pill-border: rgb(248, 113, 113);
+}
+
+.setlist-game-pill-status--warning.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(202, 138, 4, 0.45);
+  --tours-stat-pill-border: rgb(253, 224, 71);
+}
+
+.setlist-game-pill-status--open.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(22, 163, 74, 0.42);
+  --tours-stat-pill-border: rgb(74, 222, 128);
+}
+
+.setlist-game-pill-picks.tour-shows-stat-pill {
+  cursor: pointer;
+}
+
+.setlist-game-pill-picks.tour-shows-stat-pill:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.setlist-game-pill-picks--action.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(34, 197, 94, 0.38);
+  --tours-stat-pill-border: rgb(74, 222, 128);
+}
+
+.setlist-game-pill-picks--info.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(37, 99, 235, 0.42);
+  --tours-stat-pill-border: rgb(96, 165, 250);
+}
+
+.setlist-game-pill-picks--neutral.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(255, 255, 255, 0.08);
+  --tours-stat-pill-border: rgb(72, 74, 73);
+}
+
+.setlist-game-pill-picks--muted.tour-shows-stat-pill {
+  --tours-stat-pill-fill: rgba(148, 163, 184, 0.22);
+  --tours-stat-pill-border: rgb(148, 163, 184);
+}

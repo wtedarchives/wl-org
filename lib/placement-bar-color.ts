@@ -43,3 +43,35 @@ export function getPlacementBarCssToken(
   if (placement === "Encore 2" || placement === "Encore 3") return "encore-23"
   return "none"
 }
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const h = hex.trim().replace(/^#/, "")
+  if (h.length !== 6) return null
+  const n = Number.parseInt(h, 16)
+  if (Number.isNaN(n)) return null
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+}
+
+/**
+ * Fill + border for `TourShowsStatPill` / tour-dates–style stat chips on placement labels.
+ */
+export function getPlacementBarPillColors(
+  placement: string | null | undefined,
+): { fill: string; border: string } {
+  const hex = getPlacementBarColor(placement)
+  if (!hex || hex === "transparent") {
+    return {
+      fill: "rgba(255, 255, 255, 0.08)",
+      border: "rgb(49, 51, 49)",
+    }
+  }
+  const rgb = hexToRgb(hex)
+  if (!rgb) {
+    return { fill: hex, border: "rgba(255, 255, 255, 0.35)" }
+  }
+  const { r, g, b } = rgb
+  return {
+    fill: `rgba(${r}, ${g}, ${b}, 0.4)`,
+    border: `rgba(${r}, ${g}, ${b}, 0.92)`,
+  }
+}

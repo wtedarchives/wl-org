@@ -149,7 +149,9 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     (((pathname ?? "") === "/old/archive/setlist" ||
       (pathname ?? "").startsWith("/old/archive/setlist/") ||
       (pathname ?? "") === "/archive/setlistgame" ||
+      (pathname ?? "").startsWith("/archive/setlistgame/") ||
       (pathname ?? "") === "/old/archive/setlistgame" ||
+      (pathname ?? "").startsWith("/old/archive/setlistgame/") ||
       (pathname ?? "") === "/old/archive/tours" ||
       (pathname ?? "").startsWith("/old/archive/tours/") ||
       (pathname ?? "") === "/archive/song" ||

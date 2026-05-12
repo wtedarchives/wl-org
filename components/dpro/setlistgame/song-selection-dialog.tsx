@@ -1,11 +1,14 @@
 "use client"
 
+import { useEffect, useId } from "react"
 import { useAuth } from "@/components/auth-context"
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { useSongSelection, useSetlistOperations } from "./song-selection/hooks"
 import { createSongOperations } from "./song-selection/operations"
 import { createSubmissionHandler } from "./song-selection/submission"
@@ -17,7 +20,11 @@ import { ActualSetlistCard } from "./song-selection/actual-setlist-card"
 import { ToggleSwitch } from "./song-selection/toggle-switch"
 import { SubmitCard } from "./song-selection/submit-card"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { useSetlistGameWlV2Chrome } from "@/components/dpro/setlistgame/setlist-game-wl-v2-chrome"
 import type { UserPick } from "@/hooks/use-user-picks"
+import { cn } from "@/lib/utils"
+
+import "./song-selection-dialog.css"
 
 /** Minimal show shape needed for song selection (compatible with GameShow from either hook). */
 export interface ShowForSongSelection {
@@ -77,6 +84,18 @@ export function SongSelectionDialog({
   onSuccess,
 }: SongSelectionDialogProps) {
   const { session } = useAuth()
+  const wlV2 = useSetlistGameWlV2Chrome()
+  const headingId = useId()
+  useWlHomeV2ScrollLock(open && wlV2)
+
+  useEffect(() => {
+    if (!open || !wlV2) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onOpenChange(false)
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [open, wlV2, onOpenChange])
 
   const showForModal = {
     show_id: show.show_id,
@@ -171,183 +190,256 @@ export function SongSelectionDialog({
 
   const totalSongsSelected = songPicks.filter((p) => !p.isBreak).length
 
-  if (!open) return null
+  const dialogTitleText = getDialogTitle(viewMode, isEditing, show.show_scored)
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden"
-        showCloseButton={true}
+  const modalMain =
+    loading ? <LoadingPageCard message="Loading songs…" />
+    : success ?
+      <div className="py-12 text-center animate-in fade-in duration-200">
+        <p className="text-sm text-muted-foreground">
+          Your song selections have been {isEditing ? "updated" : "submitted"}{" "}
+          successfully!
+        </p>
+      </div>
+    : viewMode ?
+      <div
+        className={cn(
+          "flex flex-col gap-4",
+          wlV2 && "px-3 pb-3 pt-1 sm:px-4",
+        )}
       >
-        <div className="shrink-0 flex items-center justify-between border-b px-4 py-3">
-          <DialogTitle className="text-sm font-semibold">
-            {getDialogTitle(viewMode, isEditing, show.show_scored)}
-          </DialogTitle>
-        </div>
-
-        <div className="flex-1 overflow-y-auto min-h-0 p-4">
-          {loading ? (
-            <LoadingPageCard message="Loading songs…" />
-          ) : success ? (
-            <div className="text-center py-12 animate-in fade-in duration-200">
-              <p className="text-sm text-muted-foreground">
-                Your song selections have been{" "}
-                {isEditing ? "updated" : "submitted"} successfully!
-              </p>
-            </div>
-          ) : viewMode ? (
-              /* View mode: show info full width, even columns, selection score full width */
-              <div className="flex flex-col gap-4">
-                <ShowInfoCard
-                  show={showForModal}
-                  viewMode={viewMode}
-                  show_scored={show.show_scored}
-                  submissionDetails={submissionDetails}
-                  isSelectionClosed={showInfo.isSelectionClosed}
-                  timeRemaining={showInfo.timeRemaining}
-                />
-                {show.show_scored ? (
-                  <>
-                    <div className="flex flex-col gap-3 md:hidden">
-                      <ToggleSwitch
-                        showActualSetlist={showActualSetlist}
-                        setShowActualSetlist={setShowActualSetlist}
-                        leftLabel="Your picks"
-                        rightLabel="Actual setlist"
-                      />
-                      <div
-                        key={showActualSetlist ? "actual" : "picks"}
-                        className="animate-in fade-in duration-200"
-                      >
-                        {!showActualSetlist ? (
-                          <PicksDisplayCard
-                            songPicks={songPicks}
-                            actualSetlist={actualSetlist}
-                            viewMode={true}
-                            show_scored={show.show_scored}
-                            isSelectionClosed={showInfo.isSelectionClosed}
-                            onRemoveSong={handleRemoveSong}
-                            onMoveSongUp={moveSongUp}
-                            onMoveSongDown={moveSongDown}
-                            onRemoveSet={handleRemoveSet}
-                          />
-                        ) : (
-                          <ActualSetlistCard
-                            actualSetlist={actualSetlist}
-                            songPicks={songPicks}
-                          />
-                        )}
-                      </div>
-                    </div>
-                    <div className="hidden md:grid md:grid-cols-2 gap-4">
-                      <PicksDisplayCard
-                        songPicks={songPicks}
-                        actualSetlist={actualSetlist}
-                        viewMode={true}
-                        show_scored={show.show_scored}
-                        isSelectionClosed={showInfo.isSelectionClosed}
-                        onRemoveSong={handleRemoveSong}
-                        onMoveSongUp={moveSongUp}
-                        onMoveSongDown={moveSongDown}
-                        onRemoveSet={handleRemoveSet}
-                      />
-                      <ActualSetlistCard
-                        actualSetlist={actualSetlist}
-                        songPicks={songPicks}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <PicksDisplayCard
-                      songPicks={songPicks}
-                      actualSetlist={actualSetlist}
-                      viewMode={true}
-                      show_scored={show.show_scored}
-                      isSelectionClosed={showInfo.isSelectionClosed}
-                      onRemoveSong={handleRemoveSong}
-                      onMoveSongUp={moveSongUp}
-                      onMoveSongDown={moveSongDown}
-                      onRemoveSet={handleRemoveSet}
-                    />
-                  </div>
-                )}
-                <SubmitCard
-                  viewMode={viewMode}
-                  show_scored={show.show_scored}
-                  submissionDetails={submissionDetails}
-                  rawPointsTotal={rawPointsTotal}
-                  totalSongsSelected={totalSongsSelected}
-                  songPicks={songPicks}
-                  submitting={submitting}
-                  success={success}
-                  isEditing={isEditing}
-                  onSubmit={handleSubmit}
-                  onClearSelections={handleClearSelections}
-                  onClose={() => onOpenChange(false)}
-                />
-              </div>
-            ) : (
-              /* Edit mode: original 1.25:2 layout */
-              <div className="grid grid-cols-1 md:grid-cols-[1.25fr_2fr] gap-4">
-                <div className="flex flex-col gap-3 order-1">
-                  <ShowInfoCard
-                    show={showForModal}
-                    viewMode={viewMode}
-                    show_scored={show.show_scored}
-                    submissionDetails={submissionDetails}
-                    isSelectionClosed={showInfo.isSelectionClosed}
-                    timeRemaining={showInfo.timeRemaining}
-                  />
-                  <SongSearchCard
-                    songs={songs}
-                    selectedSong={selectedSong}
-                    setSelectedSong={setSelectedSong}
-                    onAddSong={() => {
-                      handleAddSong(selectedSong)
-                      setSelectedSong("")
-                    }}
-                    error={error}
-                  />
-                  <ActionButtonsCard
-                    onAddSetBreak={handleAddSetBreak}
-                    onAddEncoreBreak={handleAddEncoreBreak}
-                    onAddNewOriginalSong={handleAddNewOriginalSong}
-                    onAddNewCoverSong={handleAddNewCoverSong}
-                    canAddSetBreak={canAddSetBreak()}
-                    canAddEncoreBreak={canAddEncoreBreak()}
-                  />
-                </div>
-                <div className="flex flex-col gap-3 order-2">
+        <ShowInfoCard
+          show={showForModal}
+          viewMode={viewMode}
+          show_scored={show.show_scored}
+          submissionDetails={submissionDetails}
+          isSelectionClosed={showInfo.isSelectionClosed}
+          timeRemaining={showInfo.timeRemaining}
+          wlHomeV2Chrome={wlV2}
+        />
+        {show.show_scored ?
+          <>
+            <div className="flex flex-col gap-3 md:hidden">
+              <ToggleSwitch
+                showActualSetlist={showActualSetlist}
+                setShowActualSetlist={setShowActualSetlist}
+                leftLabel="Your picks"
+                rightLabel="Actual setlist"
+                wlV2Chrome={wlV2}
+              />
+              <div
+                key={showActualSetlist ? "actual" : "picks"}
+                className="animate-in fade-in duration-200"
+              >
+                {!showActualSetlist ?
                   <PicksDisplayCard
                     songPicks={songPicks}
                     actualSetlist={actualSetlist}
-                    viewMode={false}
+                    viewMode={true}
                     show_scored={show.show_scored}
                     isSelectionClosed={showInfo.isSelectionClosed}
                     onRemoveSong={handleRemoveSong}
                     onMoveSongUp={moveSongUp}
                     onMoveSongDown={moveSongDown}
                     onRemoveSet={handleRemoveSet}
+                    wlHomeV2Chrome={wlV2}
                   />
-                  <SubmitCard
-                    viewMode={viewMode}
-                    show_scored={show.show_scored}
-                    submissionDetails={submissionDetails}
-                    rawPointsTotal={rawPointsTotal}
-                    totalSongsSelected={totalSongsSelected}
+                : <ActualSetlistCard
+                    actualSetlist={actualSetlist}
                     songPicks={songPicks}
-                    submitting={submitting}
-                    success={success}
-                    isEditing={isEditing}
-                    onSubmit={handleSubmit}
-                    onClearSelections={handleClearSelections}
-                    onClose={() => onOpenChange(false)}
-                  />
-                </div>
+                    wlHomeV2Chrome={wlV2}
+                  />}
               </div>
-          )}
+            </div>
+            <div className="hidden gap-4 md:grid md:grid-cols-2">
+              <div className="flex min-w-0 flex-col gap-2">
+                {wlV2 ?
+                  <h4 className="song-selection-column-title">Your picks</h4>
+                : null}
+                <PicksDisplayCard
+                  songPicks={songPicks}
+                  actualSetlist={actualSetlist}
+                  viewMode={true}
+                  show_scored={show.show_scored}
+                  isSelectionClosed={showInfo.isSelectionClosed}
+                  onRemoveSong={handleRemoveSong}
+                  onMoveSongUp={moveSongUp}
+                  onMoveSongDown={moveSongDown}
+                  onRemoveSet={handleRemoveSet}
+                  wlHomeV2Chrome={wlV2}
+                />
+              </div>
+              <div className="flex min-w-0 flex-col gap-2">
+                {wlV2 ?
+                  <h4 className="song-selection-column-title">
+                    Actual setlist
+                  </h4>
+                : null}
+                <ActualSetlistCard
+                  actualSetlist={actualSetlist}
+                  songPicks={songPicks}
+                  wlHomeV2Chrome={wlV2}
+                />
+              </div>
+            </div>
+          </>
+        : <div className={cn("flex flex-col gap-3", wlV2 && "gap-2")}>
+            {wlV2 ?
+              <h4 className="song-selection-column-title">Your picks</h4>
+            : null}
+            <PicksDisplayCard
+              songPicks={songPicks}
+              actualSetlist={actualSetlist}
+              viewMode={true}
+              show_scored={show.show_scored}
+              isSelectionClosed={showInfo.isSelectionClosed}
+              onRemoveSong={handleRemoveSong}
+              onMoveSongUp={moveSongUp}
+              onMoveSongDown={moveSongDown}
+              onRemoveSet={handleRemoveSet}
+              wlHomeV2Chrome={wlV2}
+            />
+          </div>}
+        <SubmitCard
+          viewMode={viewMode}
+          show_scored={show.show_scored}
+          submissionDetails={submissionDetails}
+          rawPointsTotal={rawPointsTotal}
+          totalSongsSelected={totalSongsSelected}
+          songPicks={songPicks}
+          submitting={submitting}
+          success={success}
+          isEditing={isEditing}
+          onSubmit={handleSubmit}
+          onClearSelections={handleClearSelections}
+          onClose={() => onOpenChange(false)}
+          wlHomeV2Chrome={wlV2}
+        />
+      </div>
+    : <div
+        className={cn(
+          "grid grid-cols-1 gap-4 md:grid-cols-[1.25fr_2fr]",
+          wlV2 && "px-3 pb-3 pt-1 sm:px-4",
+        )}
+      >
+        <div className="order-1 flex flex-col gap-3">
+          <ShowInfoCard
+            show={showForModal}
+            viewMode={viewMode}
+            show_scored={show.show_scored}
+            submissionDetails={submissionDetails}
+            isSelectionClosed={showInfo.isSelectionClosed}
+            timeRemaining={showInfo.timeRemaining}
+            wlHomeV2Chrome={wlV2}
+          />
+          <SongSearchCard
+            songs={songs}
+            selectedSong={selectedSong}
+            setSelectedSong={setSelectedSong}
+            onAddSong={() => {
+              handleAddSong(selectedSong)
+              setSelectedSong("")
+            }}
+            error={error}
+          />
+          <ActionButtonsCard
+            onAddSetBreak={handleAddSetBreak}
+            onAddEncoreBreak={handleAddEncoreBreak}
+            onAddNewOriginalSong={handleAddNewOriginalSong}
+            onAddNewCoverSong={handleAddNewCoverSong}
+            canAddSetBreak={canAddSetBreak()}
+            canAddEncoreBreak={canAddEncoreBreak()}
+          />
         </div>
+        <div className="order-2 flex flex-col gap-3">
+          {wlV2 ?
+            <h4 className="song-selection-column-title">Your picks</h4>
+          : null}
+          <PicksDisplayCard
+            songPicks={songPicks}
+            actualSetlist={actualSetlist}
+            viewMode={false}
+            show_scored={show.show_scored}
+            isSelectionClosed={showInfo.isSelectionClosed}
+            onRemoveSong={handleRemoveSong}
+            onMoveSongUp={moveSongUp}
+            onMoveSongDown={moveSongDown}
+            onRemoveSet={handleRemoveSet}
+            wlHomeV2Chrome={wlV2}
+          />
+          <SubmitCard
+            viewMode={viewMode}
+            show_scored={show.show_scored}
+            submissionDetails={submissionDetails}
+            rawPointsTotal={rawPointsTotal}
+            totalSongsSelected={totalSongsSelected}
+            songPicks={songPicks}
+            submitting={submitting}
+            success={success}
+            isEditing={isEditing}
+            onSubmit={handleSubmit}
+            onClearSelections={handleClearSelections}
+            onClose={() => onOpenChange(false)}
+            wlHomeV2Chrome={wlV2}
+          />
+        </div>
+      </div>
+
+  if (!open) return null
+
+  if (wlV2) {
+    return (
+      <WlHomeV2ModalPortal open={open}>
+        <div
+          className="modal-backdrop open"
+          id="song-selection-modal"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onOpenChange(false)
+          }}
+        >
+          <div
+            className="modal modal--wted-request modal--song-selection"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={headingId}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-request-head">
+              <div className="modal-request-head-text">
+                <h3 id={headingId}>{dialogTitleText}</h3>
+              </div>
+              <button
+                type="button"
+                className="modal-request-close"
+                onClick={() => onOpenChange(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-request-body">
+              <div className="song-selection-modal-scroll">{modalMain}</div>
+            </div>
+          </div>
+        </div>
+      </WlHomeV2ModalPortal>
+    )
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[900px]"
+        showCloseButton={true}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
+          <DialogTitle className="text-sm font-semibold">
+            {dialogTitleText}
+          </DialogTitle>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">{modalMain}</div>
       </DialogContent>
     </Dialog>
   )

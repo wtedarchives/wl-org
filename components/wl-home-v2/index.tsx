@@ -32,6 +32,8 @@ import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
 import { WlHomeV2ThisDayHistoryModal } from "./wl-home-v2-this-day-history-modal"
 import { WlHomeV2TourScheduleModal } from "./wl-home-v2-tour-schedule-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
+import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
+
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import {
   pickWlHomeTickerPhraseQuad,
@@ -229,8 +231,9 @@ export function WlHomeV2({
   ])
 
   return (
-    <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
-      <div className="wl-home-v2">
+    <SetlistBreadcrumbProvider>
+      <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
+        <div className="wl-home-v2">
         <div className="wl-home-v2__stack">
           <WlHomeV2Header
             onOpenLogin={() => setLoginOpen(true)}
@@ -376,7 +379,8 @@ export function WlHomeV2({
         }}
       />
 
-    </div>
-    </WlHomeV2OpenArchiveHubContext.Provider>
+      </div>
+        </WlHomeV2OpenArchiveHubContext.Provider>
+    </SetlistBreadcrumbProvider>
   )
 }

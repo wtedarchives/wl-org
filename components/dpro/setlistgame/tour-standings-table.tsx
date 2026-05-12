@@ -11,7 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 import type { TourPlayerStats } from "@/hooks/use-setlist-game-tour-details"
+import {
+  SetlistGameWlV2Panel,
+  sgWlV2,
+  useSetlistGameWlV2Chrome,
+} from "@/components/dpro/setlistgame/setlist-game-wl-v2-chrome"
 
 type SortDirection = "asc" | "desc"
 
@@ -70,11 +76,11 @@ export function TourStandingsTable({
   standings,
   currentUserId,
 }: TourStandingsTableProps) {
+  const wlV2 = useSetlistGameWlV2Chrome()
   const [sortField, setSortField] =
     useState<TourStandingsSortField>("totalPoints")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
 
-  /** Baseline row order from the latest `standings` prop (for "Rank" column sort). */
   const defaultOrder = useMemo(
     () => new Map(standings.map((p, i) => [p.userId, i])),
     [standings],
@@ -90,7 +96,7 @@ export function TourStandingsTable({
       return a.userId.localeCompare(b.userId)
     })
     return copy
-  }, [standings, sortField, sortDirection])
+  }, [standings, sortField, sortDirection, defaultOrder])
 
   const handleSort = (field: TourStandingsSortField) => {
     if (field === sortField) {
@@ -111,27 +117,162 @@ export function TourStandingsTable({
     align?: "left" | "center"
   }) => (
     <TableHead
-      className={`text-xs font-medium ${
-        align === "left" ? "text-left" : "text-center"
-      }`}
+      className={cn(
+        "text-xs font-medium",
+        wlV2 && sgWlV2.th,
+        align === "left" ? "text-left" : "text-center",
+      )}
     >
       <button
         type="button"
-        className={`flex min-h-11 w-full items-center gap-1 px-0 py-1 md:min-h-0 ${
-          align === "left" ? "justify-start" : "justify-center"
-        } cursor-pointer hover:bg-muted/50 rounded-sm transition-colors`}
+        className={cn(
+          wlV2 ?
+            cn(
+              sgWlV2.sortBtn,
+              align === "left" ? "justify-start" : "justify-center",
+            )
+          : cn(
+              "flex min-h-11 w-full items-center gap-1 px-0 py-1 md:min-h-0 cursor-pointer hover:bg-muted/50 rounded-sm transition-colors",
+              align === "left" ? "justify-start" : "justify-center",
+            ),
+        )}
         onClick={() => handleSort(field)}
       >
         {label}
         {sortField === field &&
-          (sortDirection === "asc" ? (
+          (sortDirection === "asc" ?
             <ChevronUp className="size-3 shrink-0" aria-hidden />
-          ) : (
-            <ChevronDown className="size-3 shrink-0" aria-hidden />
-          ))}
+          : <ChevronDown className="size-3 shrink-0" aria-hidden />)}
       </button>
     </TableHead>
   )
+
+  const emptyBody = (
+    <div className={wlV2 ? sgWlV2.emptyMsg : "py-4 text-center"}>
+      <p className={wlV2 ? undefined : "text-xs text-muted-foreground"}>
+        No standings available yet for this tour.
+      </p>
+    </div>
+  )
+
+  const tableMarkup = (
+    <Table className={cn(wlV2 && sgWlV2.table)}>
+      <TableHeader>
+        <TableRow className={cn(wlV2 ? sgWlV2.headRow : "bg-muted/60 border-border")}>
+          <SortHeader field="rank" label="Rank" />
+          <SortHeader field="username" label="User" align="left" />
+          <SortHeader field="totalPoints" label="Total Points" />
+          <SortHeader field="showsPlayed" label="Shows Played" />
+          <SortHeader field="avgPointsPerShow" label="Pts/Show" />
+          <SortHeader field="songsPicked" label="Songs" />
+          <SortHeader field="setsPicked" label="Sets" />
+          <SortHeader field="showOpenersPicked" label="Openers" />
+          <SortHeader field="showClosersPicked" label="Closers" />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sortedStandings.map((player, index) => (
+          <TableRow
+            key={player.userId}
+            className={cn(
+              currentUserId && player.userId === currentUserId ?
+                wlV2 ?
+                  "border-b bg-white/[0.07] transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+                : "bg-muted/60"
+              : wlV2 ? sgWlV2.bodyRow
+              : "hover:bg-muted/40",
+            )}
+          >
+            <TableCell
+              className={cn(
+                "text-center text-xs font-medium",
+                wlV2 ? sgWlV2.td : "px-2 py-0.5",
+              )}
+            >
+              {index + 1}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-xs font-medium",
+                wlV2 ? sgWlV2.td : "px-2 py-0.5",
+              )}
+            >
+              {player.username}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs font-medium text-primary",
+                wlV2 ? sgWlV2.td : "px-2 py-0.5",
+              )}
+            >
+              {player.totalPoints}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs",
+                wlV2 ? cn(sgWlV2.td, "text-white/65") : "text-muted-foreground px-2 py-0.5",
+              )}
+            >
+              {player.showsPlayed}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs",
+                wlV2 ? cn(sgWlV2.td, "text-white/65") : "text-muted-foreground px-2 py-0.5",
+              )}
+            >
+              {player.avgPointsPerShow.toFixed(2)}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs",
+                wlV2 ? cn(sgWlV2.td, "text-white/65") : "text-muted-foreground px-2 py-0.5",
+              )}
+            >
+              {player.songsPicked}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs",
+                wlV2 ? cn(sgWlV2.td, "text-white/65") : "text-muted-foreground px-2 py-0.5",
+              )}
+            >
+              {player.setsPicked}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs",
+                wlV2 ? cn(sgWlV2.td, "text-white/65") : "text-muted-foreground px-2 py-0.5",
+              )}
+            >
+              {player.showOpenersPicked}
+            </TableCell>
+            <TableCell
+              className={cn(
+                "text-center text-xs",
+                wlV2 ? cn(sgWlV2.td, "text-white/65") : "text-muted-foreground px-2 py-0.5",
+              )}
+            >
+              {player.showClosersPicked}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+
+  const tableBody =
+    standings.length === 0 ?
+      emptyBody
+    : wlV2 ?
+      <div className={sgWlV2.tableScroll}>{tableMarkup}</div>
+    : tableMarkup
+
+  if (wlV2) {
+    return (
+      <SetlistGameWlV2Panel title="Standings">{tableBody}</SetlistGameWlV2Panel>
+    )
+  }
 
   if (standings.length === 0) {
     return (
@@ -139,11 +280,7 @@ export function TourStandingsTable({
         <CardHeader className="py-3">
           <CardTitle className="text-sm font-semibold">Standings</CardTitle>
         </CardHeader>
-        <CardContent className="py-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            No standings available yet for this tour.
-          </p>
-        </CardContent>
+        <CardContent>{emptyBody}</CardContent>
       </Card>
     )
   }
@@ -153,63 +290,7 @@ export function TourStandingsTable({
       <CardHeader className="py-3 border-b border-border">
         <CardTitle className="text-sm font-semibold">Standings</CardTitle>
       </CardHeader>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-border hover:bg-transparent bg-muted/60">
-              <SortHeader field="rank" label="Rank" />
-              <SortHeader field="username" label="User" align="left" />
-              <SortHeader field="totalPoints" label="Total Points" />
-              <SortHeader field="showsPlayed" label="Shows Played" />
-              <SortHeader field="avgPointsPerShow" label="Pts/Show" />
-              <SortHeader field="songsPicked" label="Songs" />
-              <SortHeader field="setsPicked" label="Sets" />
-              <SortHeader field="showOpenersPicked" label="Openers" />
-              <SortHeader field="showClosersPicked" label="Closers" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedStandings.map((player, index) => (
-              <TableRow
-                key={player.userId}
-                className={
-                  currentUserId && player.userId === currentUserId
-                    ? "bg-muted/60"
-                    : "hover:bg-muted/40"
-                }
-              >
-                <TableCell className="text-center text-xs font-medium px-2 py-0.5">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="px-2 py-0.5 text-xs font-medium">
-                  {player.username}
-                </TableCell>
-                <TableCell className="text-center text-xs font-medium text-primary px-2 py-0.5">
-                  {player.totalPoints}
-                </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground px-2 py-0.5">
-                  {player.showsPlayed}
-                </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground px-2 py-0.5">
-                  {player.avgPointsPerShow.toFixed(2)}
-                </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground px-2 py-0.5">
-                  {player.songsPicked}
-                </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground px-2 py-0.5">
-                  {player.setsPicked}
-                </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground px-2 py-0.5">
-                  {player.showOpenersPicked}
-                </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground px-2 py-0.5">
-                  {player.showClosersPicked}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <div className="overflow-x-auto">{tableMarkup}</div>
     </Card>
   )
 }

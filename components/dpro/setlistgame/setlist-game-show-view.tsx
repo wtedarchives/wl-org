@@ -1,18 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useAuth } from "@/components/auth-context"
 import {
   useSetlistBreadcrumb,
-  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
-  WTED_ARCHIVES_BREADCRUMB_ROOT,
 } from "@/components/setlist-breadcrumb-context"
 import { formatSetlistGameDate } from "@/lib/setlist-game-utils"
-import {
-  getSetlistGameArchiveIndexUrl,
-  getSetlistGameShowArchiveUrl,
-  getSetlistGameTourArchiveUrl,
-} from "@/lib/setlist-game-archive-url"
 import { supabase } from "@/lib/supabase"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
@@ -31,6 +24,8 @@ import { ShowPicksSection } from "@/components/dpro/setlistgame/show-picks-secti
 import { TopPicksSection } from "@/components/dpro/setlistgame/top-picks-section"
 import { SongSelectionDialog } from "@/components/dpro/setlistgame/song-selection-dialog"
 import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
+import { buildSetlistGameShowBreadcrumbs } from "@/components/dpro/setlistgame/setlist-game-breadcrumb-items"
+import { SetlistGameWlV2ArchiveCrumbs } from "@/components/dpro/setlistgame/setlist-game-wl-v2-archive-crumbs"
 
 interface SubmissionDetails {
   totalScore: number
@@ -86,6 +81,13 @@ export function SetlistGameShowView({
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { loading, show, standings, totalPlayers, userSubmission } =
     useSetlistGameShowData(showId ?? undefined, session)
+
+  const crumbItems = useMemo(
+    () =>
+      show ? buildSetlistGameShowBreadcrumbs(urlShell, showId, show) : null,
+    [show, showId, urlShell],
+  )
+
   const topSongs = useTopSongsData(showId ?? undefined)
   const topOpeners = useTopOpenersData(showId ?? undefined)
   const topClosers = useTopClosersData(showId ?? undefined)
@@ -181,36 +183,13 @@ export function SetlistGameShowView({
   }, [show])
 
   useEffect(() => {
-    if (!show) {
+    if (!crumbItems) {
       setSetlistBreadcrumbs(null)
       return
     }
-    const archiveRoot =
-      urlShell === "legacy" ?
-        WTED_ARCHIVES_BREADCRUMB_ROOT
-      : WL_V2_ARCHIVES_BREADCRUMB_ROOT
-    const dateLabel = formatSetlistGameDate(show.show_date)
-    const venuePart = show.show_venue_location
-      ? ` (${show.show_venue_location})`
-      : ""
-    const lastLabel = `${dateLabel}${venuePart}`
-    const tours = show.tours as { tour_id: string } | null | undefined
-    const items = [
-      archiveRoot,
-      { label: "Setlist Game", href: getSetlistGameArchiveIndexUrl(urlShell) },
-      ...(show.show_tour && tours?.tour_id
-        ? [
-            {
-              label: show.show_tour,
-              href: getSetlistGameTourArchiveUrl(tours.tour_id, urlShell),
-            },
-          ]
-        : []),
-      { label: lastLabel, href: getSetlistGameShowArchiveUrl(showId, urlShell) },
-    ]
-    setSetlistBreadcrumbs(items)
+    setSetlistBreadcrumbs(crumbItems)
     return () => setSetlistBreadcrumbs(null)
-  }, [show, showId, setSetlistBreadcrumbs, urlShell])
+  }, [crumbItems, setSetlistBreadcrumbs])
 
   if (loading) {
     return v2 ?
@@ -234,7 +213,7 @@ export function SetlistGameShowView({
   }
 
   const main = (
-    <div className="space-y-4">
+    <div className={v2 ? "setlist-game-show-stack" : "space-y-4"}>
       <ShowHeader
         show={show}
         totalPlayers={totalPlayers}
@@ -278,7 +257,13 @@ export function SetlistGameShowView({
     : null
 
   return v2 ?
-      <WlHomeV2SetlistGameShell>
+      <WlHomeV2SetlistGameShell
+        crumbs={
+          crumbItems ?
+            <SetlistGameWlV2ArchiveCrumbs items={crumbItems} />
+          : null
+        }
+      >
         {main}
         {songDialog}
       </WlHomeV2SetlistGameShell>

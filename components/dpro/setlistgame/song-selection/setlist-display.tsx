@@ -1,10 +1,13 @@
 "use client"
 
+import type { ReactNode } from "react"
+
 import { X, ChevronUp, ChevronDown, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { SongPick, SetlistEntry } from "./types"
+import { getPlacementBarPillColors } from "@/lib/placement-bar-color"
+import { TourShowsStatPill } from "@/components/dpro/tours/tour-shows-stat-pill"
 import {
-  getPlacementColor,
   getSetDisplayName,
   getUniqueSets,
   getAllUniqueSets,
@@ -13,6 +16,23 @@ import {
 } from "./utils"
 import { TooltipContainer } from "./tooltip-container"
 import { ToggleSwitch } from "./toggle-switch"
+
+function PlacementTourPill({
+  placement,
+  className,
+  children,
+}: {
+  placement: string | undefined
+  className?: string
+  children: ReactNode
+}) {
+  const { fill, border } = getPlacementBarPillColors(placement)
+  return (
+    <TourShowsStatPill fill={fill} border={border} className={className}>
+      {children}
+    </TourShowsStatPill>
+  )
+}
 
 interface SetlistDisplayProps {
   songPicks: SongPick[];
@@ -93,14 +113,12 @@ export function SetlistDisplay({
                           key={pick.id} 
                           className="flex justify-between items-center rounded-md text-foreground hover:bg-muted/40 transition-colors">
                           <div className="flex items-center gap-3">
-                            <span 
-                              className="text-white text-center rounded text-xs font-medium px-2 py-0.5 flex items-center justify-center"
-                              style={{ 
-                                backgroundColor: getPlacementColor(pick.placement) 
-                              }}
+                            <PlacementTourPill
+                              placement={pick.placement}
+                              className="flex items-center justify-center min-w-[1.25rem] text-center text-xs"
                             >
                               {index + 1}
-                            </span>
+                            </PlacementTourPill>
                             <div className="flex-1 flex flex-col justify-center">
                               <span className="break-words pr-2 font-medium text-xs text-foreground">
                                 {pick.song}
@@ -131,14 +149,12 @@ export function SetlistDisplay({
                           key={entry.entry_id} 
                           className="flex items-center rounded-md text-foreground hover:bg-muted/40 transition-colors">
                           <div className="flex items-center gap-3">
-                            <span 
-                              className="text-white text-center rounded text-xs font-medium px-2 py-0.5 flex items-center justify-center"
-                              style={{ 
-                                backgroundColor: getPlacementColor(entry.entry_placement) 
-                              }}
+                            <PlacementTourPill
+                              placement={entry.entry_placement}
+                              className="flex items-center justify-center min-w-[1.25rem] text-center text-xs"
                             >
                               {index + 1}
-                            </span>
+                            </PlacementTourPill>
                             <div className="flex-1 flex flex-col justify-center">
                               <span className="break-words pr-2 font-medium text-xs text-foreground">
                                 {entry.entry_song}
@@ -181,12 +197,12 @@ export function SetlistDisplay({
                           key={pick.id} 
                           className="flex justify-between items-center rounded-md text-foreground hover:bg-muted/40 transition-colors">
                           <div className="flex items-center gap-3">
-                            <span 
-                              className="text-white text-center rounded text-xs font-medium px-2 py-0.5 flex items-center justify-center"
-                              style={{ backgroundColor: getPlacementColor(pick.placement) }}
+                            <PlacementTourPill
+                              placement={pick.placement}
+                              className="flex items-center justify-center min-w-[1.25rem] text-center text-xs"
                             >
                               {index + 1}
-                            </span>
+                            </PlacementTourPill>
                             <div className="flex-1 flex flex-col justify-center">
                               <span className="break-words pr-2 font-medium text-xs text-foreground">
                                 {pick.song}
@@ -217,12 +233,12 @@ export function SetlistDisplay({
                           key={entry.entry_id} 
                           className="flex items-center rounded-md text-foreground hover:bg-muted/40 transition-colors">
                           <div className="flex items-center gap-3">
-                            <span 
-                              className="text-white text-center rounded text-xs font-medium px-2 py-0.5 flex items-center justify-center"
-                              style={{ backgroundColor: getPlacementColor(entry.entry_placement) }}
+                            <PlacementTourPill
+                              placement={entry.entry_placement}
+                              className="flex items-center justify-center min-w-[1.25rem] text-center text-xs"
                             >
                               {index + 1}
-                            </span>
+                            </PlacementTourPill>
                             <div className="flex-1 flex flex-col justify-center">
                               <span className="break-words pr-2 font-medium text-xs text-foreground">
                                 {entry.entry_song}
@@ -275,14 +291,12 @@ export function SetlistDisplay({
                 key={pick.id} 
                 className="flex justify-between items-center rounded-md text-foreground hover:bg-muted/40 transition-all duration-200 ease-out">
                 <div className="flex items-center gap-3">
-                  <span 
-                    className="text-xs text-white px-1.5 py-0.5 rounded flex items-center font-medium justify-center min-w-[1.5rem]"
-                    style={{ 
-                      backgroundColor: getPlacementColor(pick.placement) 
-                    }}
+                  <PlacementTourPill
+                    placement={pick.placement}
+                    className="flex items-center font-medium justify-center min-w-[1.5rem] text-xs"
                   >
                     {index + 1}
-                  </span>
+                  </PlacementTourPill>
                   <div className="flex items-center gap-1.5 flex-1">
                     <span className="break-words font-medium text-xs">
                       {pick.song}
@@ -290,12 +304,12 @@ export function SetlistDisplay({
                     {/* Only show placement labels if not in view mode or if the show isn't closed */}
                     {pick.placement && (!viewMode || !isSelectionClosed) && 
                      !pick.placement.startsWith('Main Set') && (
-                      <span 
-                        className="inline-block text-xs leading-tight text-white font-medium px-1.5 py-0.5 rounded-full shrink-0"
-                        style={{ backgroundColor: getPlacementColor(pick.placement) }}
+                      <PlacementTourPill
+                        placement={pick.placement}
+                        className="!text-[10px] leading-tight shrink-0 inline-block"
                       >
                         {pick.placement}
-                      </span>
+                      </PlacementTourPill>
                     )}
                   </div>
                 </div>

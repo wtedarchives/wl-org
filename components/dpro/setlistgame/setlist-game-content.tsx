@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useAuth } from "@/components/auth-context"
 import { supabase } from "@/lib/supabase"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
@@ -21,6 +21,10 @@ import { ScoringDialog } from "./scoring-dialog"
 import { SongSelectionDialog } from "./song-selection-dialog"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { WlHomeV2SetlistGameShell } from "@/components/wl-home-v2/wl-home-v2-setlistgame-shell"
+import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
+import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/setlist-game-archive-url-shell-context"
+import { buildSetlistGameIndexBreadcrumbs } from "@/components/dpro/setlistgame/setlist-game-breadcrumb-items"
+import { SetlistGameWlV2ArchiveCrumbs } from "@/components/dpro/setlistgame/setlist-game-wl-v2-archive-crumbs"
 
 const ACTIVE_LEAGUE = "2026 Viva El Gonzo"
 
@@ -42,6 +46,18 @@ export function SetlistGameContent({
   variant?: "default" | "wlHomeV2"
 } = {}) {
   const v2 = variant === "wlHomeV2"
+  const urlShell = useSetlistGameArchiveUrlShell()
+  const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
+  const indexCrumbs = useMemo(
+    () => buildSetlistGameIndexBreadcrumbs(urlShell),
+    [urlShell],
+  )
+
+  useEffect(() => {
+    setSetlistBreadcrumbs(indexCrumbs)
+    return () => setSetlistBreadcrumbs(null)
+  }, [indexCrumbs, setSetlistBreadcrumbs])
+
   const { session } = useAuth()
   const [activeSongSelectionShow, setActiveSongSelectionShow] =
     useState<GameShow | null>(null)
@@ -185,12 +201,17 @@ export function SetlistGameContent({
       <SetlistGameRulesDialog
         open={showRulesModal}
         onOpenChange={setShowRulesModal}
+        wlHomeV2={v2}
       />
     </>
   )
 
   return v2 ?
-      <WlHomeV2SetlistGameShell>{inner}</WlHomeV2SetlistGameShell>
+      <WlHomeV2SetlistGameShell
+        crumbs={<SetlistGameWlV2ArchiveCrumbs items={indexCrumbs} />}
+      >
+        {inner}
+      </WlHomeV2SetlistGameShell>
     : <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-b-none p-4 md:rounded-b-xl md:p-6 overflow-hidden">
         {inner}
       </div>

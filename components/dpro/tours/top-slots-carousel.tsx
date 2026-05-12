@@ -28,6 +28,7 @@ const TOP_SLOTS_CATEGORY_CLASS: Record<string, string> = {
   "Show Openers": "wl-home-v2-top-slots-cat--show-openers",
   "Set Openers": "wl-home-v2-top-slots-cat--set-openers",
   "Set Closers": "wl-home-v2-top-slots-cat--set-closers",
+  "Show Closers": "wl-home-v2-top-slots-cat--set-closers",
   Encores: "wl-home-v2-top-slots-cat--encores",
 }
 
