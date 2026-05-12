@@ -24,7 +24,7 @@ export function SetlistTable({
   onEntrySelect,
 }: SetlistTableProps) {
   return (
-    <Table>
+    <Table className="set-table">
       <TableHeader>
           <TableRow>
             <TableHead className="w-8 py-1 text-center text-sm">S</TableHead>

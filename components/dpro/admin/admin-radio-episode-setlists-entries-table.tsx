@@ -113,7 +113,7 @@ export function AdminRadioEpisodeSetlistsEntriesTable({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-md border border-border/80 bg-muted/45 transition-colors dark:bg-muted/35",
+        "overflow-hidden rounded-[10px] border border-border/80 bg-muted/45 transition-colors dark:bg-muted/35",
       )}
     >
       <div className="max-h-[min(40vh,24rem)] overflow-auto md:max-h-[min(45vh,28rem)]">
@@ -123,9 +123,9 @@ export function AdminRadioEpisodeSetlistsEntriesTable({
             modifiers={[restrictToVerticalAxis]}
             onDragEnd={handleDragEnd}
           >
-            <Table>
+            <Table className="set-table">
               <TableHeader>
-                <TableRow className="border-border/60 bg-muted/55 hover:bg-muted/55 dark:bg-muted/45">
+                <TableRow>
                   <TableHead className="h-auto w-8 align-middle py-1.5 pr-0 pl-2 text-xs leading-tight">
                     <span className="sr-only">Reorder</span>
                   </TableHead>

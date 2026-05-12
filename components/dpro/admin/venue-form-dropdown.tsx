@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import type { VenueDataBasic } from "@/types/admin"
@@ -66,14 +66,17 @@ export function VenueFormDropdown({
   const dropdownContent = isOpen && (
     <div
       ref={dropdownRef}
-      className="wl-home-v2-archive-admin-floating-dropdown fixed"
-      style={{
-        top: dropdownPosition.top,
-        left: dropdownPosition.left,
-        width: dropdownPosition.width || "100%",
-      }}
+      className="wl-home-v2-archive-admin-floating-dropdown fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tlw"
+      style={
+        {
+          ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+          ["--adm-dd-left" as string]: `${dropdownPosition.left}px`,
+          ["--adm-dd-width" as string]:
+            dropdownPosition.width > 0 ? `${dropdownPosition.width}px` : "100%",
+        } as CSSProperties
+      }
     >
-          <div className="p-1">
+          <div className="wl-home-v2-archive-admin-floating-dropdown__search">
             <div className="relative">
               <Input
                 type="text"
@@ -85,7 +88,7 @@ export function VenueFormDropdown({
               <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
             </div>
           </div>
-          <div className="max-h-40 overflow-y-auto divide-y divide-[rgb(49,51,49)]">
+          <div className="wl-home-v2-archive-admin-floating-dropdown__scroll max-h-40 divide-y divide-[rgb(49,51,49)]">
             {filteredVenues.map((venue) => (
               <button
                 key={venue.venue}
@@ -93,8 +96,12 @@ export function VenueFormDropdown({
                 onClick={() => onVenueSelect(venue)}
                 className="wl-home-v2-archive-admin-floating-dropdown__row"
               >
-                <span className="font-medium">{venue.venue}</span> [
-                {venue.venue_location}]
+                <span className="wl-home-v2-archive-admin-floating-dropdown__row-line">
+                  <span className="font-medium">{venue.venue}</span>
+                  {" ["}
+                  {venue.venue_location}
+                  {"]"}
+                </span>
               </button>
             ))}
             {filteredVenues.length === 0 && (

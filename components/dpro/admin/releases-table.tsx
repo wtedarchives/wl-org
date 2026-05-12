@@ -46,10 +46,10 @@ export function ReleasesTable({
           </p>
         </div>
       ) : showReleases.length > 0 ? (
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
+        <div className="overflow-hidden rounded-[10px]">
+          <Table className="set-table">
             <TableHeader>
-              <TableRow className="bg-muted/60">
+              <TableRow>
                 <TableHead className="py-1 text-left text-xs">Display Name</TableHead>
                 <TableHead className="py-1 text-left text-xs">Service</TableHead>
                 <TableHead className="py-1 text-center text-xs">Order</TableHead>
@@ -59,7 +59,7 @@ export function ReleasesTable({
               {showReleases.map((releaseShow) => (
                 <TableRow
                   key={releaseShow.release_id}
-                  className="cursor-pointer text-xs hover:bg-muted/50"
+                  className="cursor-pointer text-xs"
                   onClick={() =>
                     onEditRelease(
                       releaseShow.release_id,

@@ -74,8 +74,8 @@ export function ClickableRadioPlaylistsTable({
       : `Open actions for removed playlist ${radioId}`
 
   return (
-    <div className="max-h-[min(28rem,55vh)] overflow-auto rounded-md border md:max-h-[min(32rem,50vh)]">
-      <Table>
+    <div className="max-h-[min(28rem,55vh)] overflow-auto rounded-[10px] border border-border/80 md:max-h-[min(32rem,50vh)]">
+      <Table className="set-table">
         <TableHeader>
           <TableRow>
             <TableHead className="w-14 text-center">Art</TableHead>
@@ -90,7 +90,7 @@ export function ClickableRadioPlaylistsTable({
             <TableRow
               key={r.uuid}
               className={cn(
-                "cursor-pointer border-b transition-colors hover:bg-muted/40",
+                "cursor-pointer transition-colors",
                 updatingUuid === r.uuid && "pointer-events-none opacity-70",
               )}
               role="button"

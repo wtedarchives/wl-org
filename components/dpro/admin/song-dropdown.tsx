@@ -52,7 +52,7 @@ export function SongDropdown({
         className="h-6 w-64 text-xs"
         showClear={false}
       />
-      <ComboboxContent>
+      <ComboboxContent className="wl-home-v2-archive-admin-combobox-popup">
         <ComboboxEmpty>No songs found.</ComboboxEmpty>
         <ComboboxList>
           {(item) => {

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
-import { formatDate } from "@/lib/utils/show-utils"
+import { formatDate, getShowDisplayData } from "@/lib/utils/show-utils"
 import type { ShowData } from "@/types/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -95,14 +95,16 @@ export function ShowDropdown({
   const dropdownContent = isDropdownOpen && (
     <div
       ref={dropdownRef}
-      className="wl-home-v2-archive-admin-floating-dropdown wl-home-v2-archive-admin-floating-dropdown--wide fixed"
-      style={{
-        top: dropdownPosition.top,
-        right: dropdownPosition.right,
-      }}
+      className="wl-home-v2-archive-admin-floating-dropdown wl-home-v2-archive-admin-floating-dropdown--wide fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
+      style={
+        {
+          ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+          ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
+        } as CSSProperties
+      }
     >
-      <div className="p-1">
-            <div className="relative">
+      <div className="wl-home-v2-archive-admin-floating-dropdown__search">
+        <div className="relative">
               <Input
                 type="text"
                 value={searchTerm}
@@ -111,11 +113,11 @@ export function ShowDropdown({
                 className="h-8 pr-8 text-xs"
               />
               <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
-            </div>
+        </div>
       </div>
       <div
         ref={scrollContainerRef}
-        className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]"
+        className="wl-home-v2-archive-admin-floating-dropdown__scroll divide-y divide-[rgb(49,51,49)]"
       >
             {loading && loadingProgress < 100 ? (
               <div className="wl-home-v2-archive-admin-floating-dropdown-loading">
@@ -130,7 +132,10 @@ export function ShowDropdown({
               </div>
             ) : (
               <>
-                {filteredShows.map((show) => (
+                {filteredShows.map((show) => {
+                  const { dateStr, canonIdStr, locationStr } =
+                    getShowDisplayData(show)
+                  return (
                   <button
                     key={show.show_id}
                     type="button"
@@ -147,13 +152,16 @@ export function ShowDropdown({
                         : "")
                     }
                   >
-                    <span className="font-bold">
-                      {formatDate(show.show_date)}
+                    <span className="wl-home-v2-archive-admin-floating-dropdown__row-date">
+                      {dateStr}
                     </span>
-                    {show.show_canonid ? ` [${show.show_canonid}]` : ""}{" "}
-                    [{show.show_group} – {show.show_venue_location ?? "Unknown"}]
+                    <span className="wl-home-v2-archive-admin-floating-dropdown__row-meta">
+                      {canonIdStr}
+                      {locationStr}
+                    </span>
                   </button>
-                ))}
+                  )
+                })}
                 {filteredShows.length === 0 && !loading && (
                   <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
                     No shows found

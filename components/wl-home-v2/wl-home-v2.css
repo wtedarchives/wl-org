@@ -1152,21 +1152,13 @@
     position: relative;
     isolation: isolate;
   }
-  .wl-home-v2 .wl-home-v2-archive-admin-layout::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background-image: url("/newbg.png");
-    background-size: cover;
-    background-position: center;
-    opacity: 0.18;
-    filter: grayscale(100%) brightness(0.72);
-  }
   .wl-home-v2 .wl-home-v2-archive-admin-layout__inner {
     position: relative;
     z-index: 1;
+    --setlist-rail-label-color: rgba(255, 255, 255, 0.62);
+    --set-table-row-line: rgb(43, 46, 44);
+    --set-table-section-line: rgb(53, 56, 54);
+    --set-table-rail-line: rgb(59, 62, 60);
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
@@ -1186,6 +1178,58 @@
     .wl-home-v2 .wl-home-v2-archive-admin-layout__inner {
       padding: 22px 28px 32px;
     }
+  }
+
+  /* Setlist-style data tables (class `set-table` on shadcn Table) — admin / radio / bugs shell */
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] thead tr {
+    border-bottom: 1px solid var(--set-table-section-line);
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] th[data-slot="table-head"] {
+    text-align: left;
+    padding: 6px 12px;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 10px;
+    color: var(--setlist-rail-label-color);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-color: var(--set-table-row-line);
+    height: auto;
+    vertical-align: middle;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] th[data-slot="table-head"].center,
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] .text-center[data-slot="table-head"] {
+    text-align: center;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] td[data-slot="table-cell"] {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--set-table-row-line);
+    vertical-align: middle;
+    color: rgba(255, 255, 255, 0.9);
+    border-color: var(--set-table-row-line);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] tbody tr[data-slot="table-row"]:last-child td {
+    border-bottom: 0;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] tbody tr[data-slot="table-row"] {
+    transition: background 0.15s ease;
+    background: transparent;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] tbody tr[data-slot="table-row"]:hover td {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner [data-slot="table-container"]:has(.set-table) {
+    border-radius: 10px;
+    border: 1px solid var(--set-table-section-line);
+    background: rgba(0, 0, 0, 0.14);
+    overflow-x: auto;
   }
 
   /* ─── Archive admin inner skin (AdminPanel, AdminRadio, Bugs) ─── */
@@ -1318,7 +1362,7 @@
     margin-top: 16px;
     width: 100%;
     overflow-x: auto;
-    border: 1px solid rgb(49, 51, 49);
+    border: 1px solid var(--set-table-section-line);
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(4px);
@@ -1437,6 +1481,9 @@
   .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown {
     z-index: 10025;
     width: 16rem;
+    max-height: min(70vh, 26rem);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     border-radius: 12px;
     border: 1px solid rgb(49, 51, 49);
@@ -1445,6 +1492,32 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
   }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown--anchor-tr {
+    top: var(--adm-dd-top, 0px);
+    right: var(--adm-dd-right, 0px);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown--anchor-tl {
+    top: var(--adm-dd-top, 0px);
+    left: var(--adm-dd-left, 0px);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown--anchor-tlw {
+    top: var(--adm-dd-top, 0px);
+    left: var(--adm-dd-left, 0px);
+    width: var(--adm-dd-width, auto);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__search {
+    flex-shrink: 0;
+    padding: 4px;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
   .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown.wl-home-v2-archive-admin-floating-dropdown--stack-local {
     z-index: 200;
   }
@@ -1452,8 +1525,12 @@
     width: 20rem;
   }
   .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-shrink: 0;
     width: 100%;
+    box-sizing: border-box;
     margin: 0;
     padding: 0.625rem 0.5rem;
     text-align: left;
@@ -1464,6 +1541,21 @@
     border: 0;
     cursor: pointer;
     transition: background 0.15s ease;
+    white-space: normal;
+    word-break: break-word;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row-date {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.96);
+    line-height: 1.25;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row-meta {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.62);
+    line-height: 1.35;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row-line {
+    width: 100%;
   }
   @media (min-width: 640px) {
     .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row {
@@ -1560,6 +1652,26 @@
   .wl-home-v2 .wl-home-v2-archive-admin-placement-pill[data-admin-placement-pill="encore-23"] {
     background: #f43f5e;
   }
+  .wl-home-v2 .wl-home-v2-archive-admin-combobox-popup[data-slot="combobox-content"] {
+    z-index: 10025 !important;
+    border: 1px solid rgb(49, 51, 49) !important;
+    background: rgba(0, 0, 0, 0.92) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-combobox-popup[data-slot="combobox-content"] [data-slot="combobox-item"] {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-combobox-popup[data-slot="combobox-content"] [data-slot="combobox-item"][data-highlighted] {
+    background: rgba(88, 200, 174, 0.14);
+    color: #fff;
+  }
+  .wl-home-v2 tr[data-admin-dnd-group-top="true"] {
+    box-shadow: inset 0 2px 0 0 color-mix(in oklch, var(--primary) 52%, transparent);
+  }
   .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel h3 {
     margin: 0;
     font-size: 0.875rem;
@@ -1572,34 +1684,6 @@
     font-size: 0.8125rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel [data-slot="table-container"] {
-    border-radius: 12px;
-    border: 1px solid rgb(49, 51, 49);
-    background: rgba(0, 0, 0, 0.18);
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel [data-slot="table-header"] {
-    background: rgba(0, 0, 0, 0.4);
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel [data-slot="table-head"] {
-    font-family: "Geist Mono", monospace;
-    font-weight: 500;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.55);
-    border-color: rgb(49, 51, 49);
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel tbody [data-slot="table-row"] {
-    border-color: rgb(49, 51, 49);
-    background: rgba(0, 0, 0, 0.12);
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel tbody [data-slot="table-row"]:hover {
-    background: rgba(88, 200, 174, 0.12);
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel [data-slot="table-cell"] {
-    color: rgba(255, 255, 255, 0.88);
-    border-color: rgb(49, 51, 49);
   }
   /* Bugs */
   .wl-home-v2 .wl-home-v2-archive-admin-bugs {

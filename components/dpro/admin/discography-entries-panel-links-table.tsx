@@ -37,10 +37,10 @@ export function DiscographyEntriesPanelLinksTable({
   handleDelete,
 }: DiscographyEntriesPanelLinksTableProps) {
   return (
-    <div className="w-full min-w-0 overflow-x-auto rounded-md border border-border/80">
-      <Table className="min-w-[18rem]">
+    <div className="w-full min-w-0 overflow-x-auto rounded-[10px] border border-border/80">
+      <Table className="set-table min-w-[18rem]">
         <TableHeader>
-          <TableRow className="bg-muted/50">
+          <TableRow>
             <TableHead className="w-14 py-0.5 text-xs">Order</TableHead>
             <TableHead className="py-0.5 text-xs">Song</TableHead>
             <TableHead className="w-16 py-0.5 text-right text-xs">

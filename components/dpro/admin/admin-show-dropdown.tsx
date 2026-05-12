@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import { getShowDisplayData } from "@/lib/utils/show-utils"
@@ -78,7 +78,7 @@ export function AdminShowDropdown({
     const rect = triggerRef.current.getBoundingClientRect()
     if (portalAlignTriggerStart) {
       const margin = 8
-      const w = 320 // w-80
+      const w = 320
       const left = Math.max(
         margin,
         Math.min(rect.left, window.innerWidth - w - margin),
@@ -126,75 +126,91 @@ export function AdminShowDropdown({
     }
   }, [isOpen, selectedShow])
 
+  const portalPositionStyle =
+    portalToBody ?
+      portalAlignTriggerStart ?
+        ({
+          ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+          ["--adm-dd-left" as string]: `${dropdownPosition.left ?? 8}px`,
+        } as CSSProperties)
+      : ({
+          ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+          ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
+        } as CSSProperties)
+    : undefined
+
   const dropdownInner = (
     <>
-          <div className="p-1">
-            <div className="relative">
-              <Input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search shows..."
-                className="h-8 pr-8 text-xs"
-              />
-              <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+      <div className="wl-home-v2-archive-admin-floating-dropdown__search">
+        <div className="relative">
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search shows..."
+            className="h-8 pr-8 text-xs"
+          />
+          <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+        </div>
+      </div>
+      <div
+        ref={scrollContainerRef}
+        className="wl-home-v2-archive-admin-floating-dropdown__scroll divide-y divide-[rgb(49,51,49)]"
+      >
+        {loading && loadingProgress < 100 ? (
+          <div className="wl-home-v2-archive-admin-floating-dropdown-loading">
+            <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dots">
+              <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
+              <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
+              <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
             </div>
+            <p className="wl-home-v2-archive-admin-floating-dropdown-loading-text">
+              Loading shows ({Math.round(loadingProgress)}%)
+            </p>
           </div>
-          <div
-            ref={scrollContainerRef}
-            className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]"
-          >
-            {loading && loadingProgress < 100 ? (
-              <div className="wl-home-v2-archive-admin-floating-dropdown-loading">
-                <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dots">
-                  <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
-                  <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
-                  <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
-                </div>
-                <p className="wl-home-v2-archive-admin-floating-dropdown-loading-text">
-                  Loading shows ({Math.round(loadingProgress)}%)
-                </p>
+        ) : (
+          <>
+            {filteredShows.map((show) => {
+              const { dateStr, canonIdStr, locationStr } =
+                getShowDisplayData(show)
+              return (
+                <button
+                  key={show.show_id}
+                  type="button"
+                  ref={
+                    selectedShow?.show_id === show.show_id ?
+                      selectedShowRef
+                    : null
+                  }
+                  onClick={() => onShowSelect(show)}
+                  className={
+                    "wl-home-v2-archive-admin-floating-dropdown__row" +
+                    (selectedShow?.show_id === show.show_id ?
+                      " wl-home-v2-archive-admin-floating-dropdown__row--selected"
+                    : "")
+                  }
+                >
+                  <span className="wl-home-v2-archive-admin-floating-dropdown__row-date">
+                    {dateStr}
+                  </span>
+                  <span className="wl-home-v2-archive-admin-floating-dropdown__row-meta">
+                    {canonIdStr}
+                    {locationStr}
+                  </span>
+                </button>
+              )
+            })}
+            {filteredShows.length === 0 && !loading && (
+              <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
+                No shows found
               </div>
-            ) : (
-              <>
-                {filteredShows.map((show) => {
-                  const { dateStr, canonIdStr, locationStr } =
-                    getShowDisplayData(show)
-                  return (
-                    <button
-                      key={show.show_id}
-                      type="button"
-                      ref={
-                        selectedShow?.show_id === show.show_id
-                          ? selectedShowRef
-                          : null
-                      }
-                      onClick={() => onShowSelect(show)}
-                      className={
-                        "wl-home-v2-archive-admin-floating-dropdown__row" +
-                        (selectedShow?.show_id === show.show_id
-                          ? " wl-home-v2-archive-admin-floating-dropdown__row--selected"
-                          : "")
-                      }
-                    >
-                      <span className="font-bold">{dateStr}</span>
-                      {canonIdStr}
-                      {locationStr}
-                    </button>
-                  )
-                })}
-                {filteredShows.length === 0 && !loading && (
-                  <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
-                    No shows found
-                  </div>
-                )}
-              </>
             )}
-          </div>
+          </>
+        )}
+      </div>
     </>
   )
 
-  /** Marks portaled panel so parent modals (e.g. Radix Dialog) can ignore it in outside-interaction handlers. */
   const dropdownPanel = (
     <div
       ref={dropdownRef}
@@ -202,7 +218,9 @@ export function AdminShowDropdown({
       className={cn(
         "wl-home-v2-archive-admin-floating-dropdown wl-home-v2-archive-admin-floating-dropdown--wide",
         portalToBody ?
-          "fixed"
+          portalAlignTriggerStart ?
+            "fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tl"
+          : "fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
         : "wl-home-v2-archive-admin-floating-dropdown--stack-local absolute top-[calc(100%+0.5rem)]",
         !portalToBody && menuAlign === "left" ? "left-0"
         : !portalToBody ? "right-0"
@@ -210,15 +228,7 @@ export function AdminShowDropdown({
       )}
       style={
         !portalToBody ? undefined
-        : portalAlignTriggerStart ?
-          {
-            top: dropdownPosition.top,
-            left: dropdownPosition.left ?? 8,
-          }
-        : {
-            top: dropdownPosition.top,
-            right: dropdownPosition.right,
-          }
+        : portalPositionStyle
       }
     >
       {dropdownInner}

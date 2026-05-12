@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search, CheckCircle, XCircle } from "lucide-react"
 import { useAuth } from "@/components/auth-context"
@@ -141,13 +141,15 @@ export function AdminArtist() {
             createPortal(
               <div
                 ref={dropdownRef}
-                className="wl-home-v2-archive-admin-floating-dropdown fixed"
-                style={{
-                  top: dropdownPosition.top,
-                  right: dropdownPosition.right,
-                }}
+                className="wl-home-v2-archive-admin-floating-dropdown fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
+                style={
+                  {
+                    ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+                    ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
+                  } as CSSProperties
+                }
               >
-                <div className="p-1">
+                <div className="wl-home-v2-archive-admin-floating-dropdown__search">
                   <div className="relative">
                     <Input
                       type="text"
@@ -159,7 +161,7 @@ export function AdminArtist() {
                     <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
                   </div>
                 </div>
-                <div className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]">
+                <div className="wl-home-v2-archive-admin-floating-dropdown__scroll max-h-64 divide-y divide-[rgb(49,51,49)]">
                   {filteredArtists.map((artist) => (
                     <button
                       key={artist.artist_id}
@@ -171,7 +173,9 @@ export function AdminArtist() {
                       }}
                       className="wl-home-v2-archive-admin-floating-dropdown__row"
                     >
-                      {artist.artist}
+                      <span className="wl-home-v2-archive-admin-floating-dropdown__row-line">
+                        {artist.artist}
+                      </span>
                     </button>
                   ))}
                   {filteredArtists.length === 0 && (

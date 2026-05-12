@@ -5,7 +5,7 @@ import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { formatDate } from "@/lib/utils/show-utils"
-import { getPlacementColor } from "@/components/dpro/setlistgame/song-selection/utils"
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 import type { AdminShowData } from "@/types/admin"
 import { useShowData } from "@/hooks/use-show-data"
 import { AdminShowDropdown } from "./admin-show-dropdown"
@@ -242,7 +242,7 @@ export function AdminWted() {
         </div>
       )}
       {selectedShow && (
-        <div className="overflow-x-auto rounded-lg border">
+        <div className="overflow-x-auto rounded-[10px]">
           {loadingSetlist ? (
             <div className="flex items-center justify-center gap-2 bg-muted/50 p-3">
               <div className="flex gap-2">
@@ -255,7 +255,7 @@ export function AdminWted() {
               </p>
             </div>
           ) : setlistEntries.length > 0 ? (
-            <Table className="bg-muted/50">
+            <Table className="set-table">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8 py-1 text-center text-sm">S</TableHead>
@@ -271,7 +271,7 @@ export function AdminWted() {
                 {setlistEntries.map((entry) => (
                   <TableRow
                     key={entry.entry_id}
-                    className="bg-muted/50 text-[0.625rem] hover:bg-muted/80"
+                    className="text-[0.625rem]"
                   >
                     <TableCell className="py-1 text-center text-xs">
                       {entry.entry_set}
@@ -290,13 +290,10 @@ export function AdminWted() {
                     </TableCell>
                     <TableCell className="py-1">
                       <div
-                        className="mx-auto w-fit rounded-lg px-2 py-0.5 text-center font-medium text-xs"
-                        style={{
-                          backgroundColor: getPlacementColor(
-                            entry.entry_placement ?? undefined
-                          ),
-                          color: "white",
-                        }}
+                        className="wl-home-v2-archive-admin-placement-pill"
+                        data-admin-placement-pill={getPlacementBarCssToken(
+                          entry.entry_placement,
+                        )}
                       >
                         {entry.entry_placement || ""}
                       </div>

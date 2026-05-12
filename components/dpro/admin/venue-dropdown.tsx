@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { ChevronDown, Search } from "lucide-react"
 import type { VenueData } from "@/types/admin"
@@ -85,13 +85,15 @@ export function VenueDropdown({
   const dropdownContent = isOpen && (
     <div
       ref={dropdownRef}
-      className="wl-home-v2-archive-admin-floating-dropdown wl-home-v2-archive-admin-floating-dropdown--wide fixed"
-      style={{
-        top: dropdownPosition.top,
-        right: dropdownPosition.right,
-      }}
+      className="wl-home-v2-archive-admin-floating-dropdown wl-home-v2-archive-admin-floating-dropdown--wide fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
+      style={
+        {
+          ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+          ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
+        } as CSSProperties
+      }
     >
-          <div className="p-1">
+          <div className="wl-home-v2-archive-admin-floating-dropdown__search">
             <div className="relative">
               <Input
                 type="text"
@@ -105,7 +107,7 @@ export function VenueDropdown({
           </div>
           <div
             ref={scrollContainerRef}
-            className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]"
+            className="wl-home-v2-archive-admin-floating-dropdown__scroll divide-y divide-[rgb(49,51,49)]"
           >
             {loading && loadingProgress < 100 ? (
               <div className="wl-home-v2-archive-admin-floating-dropdown-loading">
@@ -138,8 +140,12 @@ export function VenueDropdown({
                           : "")
                       }
                     >
-                      <span className="font-medium">{venue.venue}</span> [
-                      {venue.venue_location}]
+                      <span className="wl-home-v2-archive-admin-floating-dropdown__row-line">
+                        <span className="font-medium">{venue.venue}</span>
+                        {" ["}
+                        {venue.venue_location}
+                        {"]"}
+                      </span>
                     </button>
                   )
                 })}

@@ -1,6 +1,7 @@
 "use client"
 
 import { createPortal } from "react-dom"
+import type { CSSProperties, RefObject } from "react"
 import { ChevronDown, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,10 +23,10 @@ interface AdminGuestDropdownProps {
   filteredGuests: GuestData[]
   selectedGuest: GuestData | null
   onGuestSelect: (guest: GuestData) => void
-  triggerRef: React.RefObject<HTMLButtonElement | null>
-  dropdownRef: React.RefObject<HTMLDivElement | null>
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>
-  selectedGuestRef: React.RefObject<HTMLButtonElement | null>
+  triggerRef: RefObject<HTMLButtonElement | null>
+  dropdownRef: RefObject<HTMLDivElement | null>
+  scrollContainerRef: RefObject<HTMLDivElement | null>
+  selectedGuestRef: RefObject<HTMLButtonElement | null>
   dropdownPosition: { top: number; right: number }
 }
 
@@ -59,13 +60,15 @@ export function AdminGuestDropdown({
         createPortal(
           <div
             ref={dropdownRef}
-            className="wl-home-v2-archive-admin-floating-dropdown fixed"
-            style={{
-              top: dropdownPosition.top,
-              right: dropdownPosition.right,
-            }}
+            className="wl-home-v2-archive-admin-floating-dropdown fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
+            style={
+              {
+                ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+                ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
+              } as CSSProperties
+            }
           >
-            <div className="p-1">
+            <div className="wl-home-v2-archive-admin-floating-dropdown__search">
               <div className="relative">
                 <Input
                   type="text"
@@ -79,7 +82,7 @@ export function AdminGuestDropdown({
             </div>
             <div
               ref={scrollContainerRef}
-              className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]"
+              className="wl-home-v2-archive-admin-floating-dropdown__scroll divide-y divide-[rgb(49,51,49)]"
             >
               {filteredGuests.map((guest) => (
                 <button
@@ -98,7 +101,9 @@ export function AdminGuestDropdown({
                       : "")
                   }
                 >
-                  {guest.guest}
+                  <span className="wl-home-v2-archive-admin-floating-dropdown__row-line">
+                    {guest.guest}
+                  </span>
                 </button>
               ))}
               {filteredGuests.length === 0 && (

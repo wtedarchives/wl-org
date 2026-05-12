@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { getPlacementColor } from "@/components/dpro/setlistgame/song-selection/utils"
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 import { cn } from "@/lib/utils"
 
 export type SetlistPickerEntry = {
@@ -98,14 +98,14 @@ export function AdminRadioEpisodeSetlistsPickerSection({
           </p>
           <div
             className={cn(
-              "overflow-hidden rounded-md border border-border/80 bg-muted/45 transition-all duration-200",
+              "overflow-hidden rounded-[10px] border border-border/80 bg-muted/45 transition-all duration-200",
               "dark:bg-muted/35",
             )}
           >
             <div className="max-h-48 overflow-auto md:max-h-56">
-              <Table>
+              <Table className="set-table">
                 <TableHeader>
-                  <TableRow className="border-border/60 bg-muted/55 hover:bg-muted/55 dark:bg-muted/45">
+                  <TableRow>
                     <TableHead className="h-auto w-14 py-1.5 pr-2 pl-2 text-xs leading-tight">
                       Set
                     </TableHead>
@@ -146,9 +146,6 @@ export function AdminRadioEpisodeSetlistsPickerSection({
                       </TableCell>
                     </TableRow>
                   : pickerEntries.map((pe) => {
-                      const placementBg = getPlacementColor(
-                        pe.entry_placement ?? undefined,
-                      )
                       return (
                         <TableRow
                           key={pe.entry_id}
@@ -179,18 +176,11 @@ export function AdminRadioEpisodeSetlistsPickerSection({
                           <TableCell className="py-1.5 px-2">
                             <div
                               className={cn(
-                                "mx-auto w-fit max-w-[10rem] truncate rounded-md px-1.5 py-0.5 text-center text-[0.65rem] font-medium leading-tight",
-                                placementBg === "transparent" &&
-                                  "bg-transparent text-muted-foreground",
+                                "wl-home-v2-archive-admin-placement-pill mx-auto w-fit max-w-[10rem] truncate text-[0.65rem] leading-tight",
                               )}
-                              style={
-                                placementBg !== "transparent" ?
-                                  {
-                                    backgroundColor: placementBg,
-                                    color: "white",
-                                  }
-                                : undefined
-                              }
+                              data-admin-placement-pill={getPlacementBarCssToken(
+                                pe.entry_placement,
+                              )}
                             >
                               {pe.entry_placement?.trim() ?
                                 pe.entry_placement

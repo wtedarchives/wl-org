@@ -142,10 +142,10 @@ export function AdminReleases() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
+        <div className="overflow-hidden rounded-[10px]">
+          <Table className="set-table">
             <TableHeader>
-              <TableRow className="bg-muted/60">
+              <TableRow>
                 <TableHead className="py-1 text-left text-xs">Display Name</TableHead>
                 <TableHead className="py-1 text-left text-xs">Service</TableHead>
                 <TableHead className="py-1 text-left text-xs">Release</TableHead>
@@ -167,7 +167,7 @@ export function AdminReleases() {
                 filteredReleases.map((release) => (
                   <TableRow
                     key={release.release_id}
-                    className="cursor-pointer text-xs hover:bg-muted/50"
+                    className="cursor-pointer text-xs"
                     onClick={() => handleReleaseClick(release)}
                   >
                     <TableCell className="py-1">

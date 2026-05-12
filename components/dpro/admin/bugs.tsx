@@ -177,7 +177,7 @@ export function Bugs() {
       <h2 className="wl-home-v2-archive-admin-bugs-title">Bug Tracker</h2>
 
       <div className="wl-home-v2-archive-admin-bugs-table-wrap">
-        <Table className="wl-home-v2-archive-admin-bugs-table table-fixed min-w-[1080px]">
+        <Table className="set-table wl-home-v2-archive-admin-bugs-table table-fixed min-w-[1080px]">
           <TableHeader className="wl-home-v2-archive-admin-bugs-thead text-sm">
             <TableRow>
               <TableHead className="min-w-[120px] w-[120px]">Type</TableHead>

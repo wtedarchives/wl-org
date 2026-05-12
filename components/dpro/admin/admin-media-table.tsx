@@ -1,7 +1,7 @@
 "use client"
 
 import { Check } from "lucide-react"
-import { getPlacementColor } from "@/components/dpro/setlistgame/song-selection/utils"
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 import type { AdminSetlistEntryData } from "@/types/admin"
 import type { ReleaseShow } from "@/types/admin"
 import { ReleaseServiceIcon } from "../setlist/setlist-media-section"
@@ -41,9 +41,9 @@ export function AdminMediaTable({
   return (
     <TooltipProvider>
       <div className="overflow-x-auto">
-      <Table>
+      <Table className="set-table">
         <TableHeader>
-          <TableRow className="bg-muted/60">
+          <TableRow>
             <TableHead className="py-1 text-center text-xs border-r">S</TableHead>
             <TableHead className="py-1 text-center text-xs border-r">#</TableHead>
             <TableHead className="py-1 text-left text-xs border-r">Song</TableHead>
@@ -108,7 +108,7 @@ export function AdminMediaTable({
         </TableHeader>
         <TableBody>
           {setlistEntries.map((entry) => (
-            <TableRow key={entry.entry_id} className="text-xs hover:bg-muted/50">
+            <TableRow key={entry.entry_id} className="text-xs">
               <TableCell className="py-1 text-center border-r">
                 {entry.entry_set}
               </TableCell>
@@ -124,13 +124,10 @@ export function AdminMediaTable({
               </TableCell>
               <TableCell className="py-1 border-r">
                 <div
-                  className="mx-auto w-fit rounded-lg px-2 py-0.5 text-center font-medium"
-                  style={{
-                    backgroundColor: getPlacementColor(
-                      entry.entry_placement ?? undefined
-                    ),
-                    color: "white",
-                  }}
+                  className="wl-home-v2-archive-admin-placement-pill"
+                  data-admin-placement-pill={getPlacementBarCssToken(
+                    entry.entry_placement,
+                  )}
                 >
                   {entry.entry_placement || ""}
                 </div>

@@ -242,10 +242,10 @@ export function AdminChanges() {
               </p>
             </div>
           ) : showChanges.length > 0 ? (
-            <div className="overflow-hidden rounded-lg border border-border">
-              <Table>
+            <div className="overflow-hidden rounded-[10px]">
+              <Table className="set-table">
                 <TableHeader>
-                  <TableRow className="bg-muted/60">
+                  <TableRow>
                     <TableHead className="py-1 text-center text-xs">Order</TableHead>
                     <TableHead className="py-1 text-center text-xs">Type</TableHead>
                     <TableHead className="py-1 text-center text-xs w-8" />
@@ -256,7 +256,7 @@ export function AdminChanges() {
                   {showChanges.map((change) => (
                     <TableRow
                       key={change.show_change_uuid}
-                      className="cursor-pointer text-xs hover:bg-muted/50"
+                      className="cursor-pointer text-xs"
                       onClick={() => handleChangeSelect(change)}
                     >
                       <TableCell className="py-1 text-center">

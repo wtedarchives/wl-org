@@ -50,7 +50,7 @@ export function AdminMedia() {
         </div>
       )}
       {selectedShow && (
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="overflow-hidden rounded-[10px]">
           {loadingSetlist || loadingReleases ? (
             <div className="flex items-center justify-center gap-2 p-3">
               <div className="flex gap-2">

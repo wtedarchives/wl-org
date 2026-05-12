@@ -102,10 +102,10 @@ export function DiscographyEntriesPanelAddFromSetlist({
                 : `Add selected (${selectedIds.size}) from order ${nextOrderLabel}`}
             </Button>
           </div>
-          <div className="w-full min-w-0 overflow-x-auto rounded-md border border-border/80">
-            <Table className="min-w-[36rem]">
+          <div className="w-full min-w-0 overflow-x-auto rounded-[10px]">
+            <Table className="set-table min-w-[36rem]">
               <TableHeader>
-                <TableRow className="bg-muted/50">
+                <TableRow>
                   <TableHead className="w-10 py-0.5 pl-2 text-center text-xs">
                     <span className="sr-only">Select</span>
                   </TableHead>

@@ -144,8 +144,8 @@ export function AdminDiscography() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
-          <Table className="bg-muted/50">
+        <div className="overflow-x-auto rounded-[10px]">
+          <Table className="set-table">
             <TableHeader>
               <TableRow>
                 <TableHead className="py-1 text-left text-sm">Name</TableHead>

@@ -81,6 +81,7 @@ export function SortableEpisodeSetlistTableRow({
     <TableRow
       ref={setNodeRef}
       data-dragging={isDragging}
+      data-admin-dnd-group-top={showGroupTopBorder ? "true" : undefined}
       className={cn(
         "align-middle border-border/50 hover:bg-background/55 dark:hover:bg-background/25",
         "relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80",
@@ -88,12 +89,6 @@ export function SortableEpisodeSetlistTableRow({
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        ...(showGroupTopBorder ?
-          {
-            boxShadow:
-              "inset 0 2px 0 0 color-mix(in oklch, var(--primary) 52%, transparent)",
-          }
-        : {}),
       }}
     >
       <TableCell className="align-middle w-8 px-1 py-1">

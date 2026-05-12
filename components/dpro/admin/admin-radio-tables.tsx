@@ -65,8 +65,8 @@ export function ClickableRadioTracksTable({
       : `Open actions for removed track ${radioId}`
 
   return (
-    <div className="max-h-[min(28rem,55vh)] overflow-auto rounded-md border md:max-h-[min(32rem,50vh)]">
-      <Table>
+    <div className="max-h-[min(28rem,55vh)] overflow-auto rounded-[10px] border border-border/80 md:max-h-[min(32rem,50vh)]">
+      <Table className="set-table">
         <TableHeader>
           <TableRow>
             <TableHead className="w-[7rem] whitespace-nowrap">
@@ -81,8 +81,8 @@ export function ClickableRadioTracksTable({
             <TableRow
               key={r.uuid}
               className={cn(
-                "cursor-pointer border-b transition-colors hover:bg-muted/40",
-                updatingUuid === r.uuid && "pointer-events-none opacity-70"
+                "cursor-pointer transition-colors",
+                updatingUuid === r.uuid && "pointer-events-none opacity-70",
               )}
               role="button"
               tabIndex={0}
