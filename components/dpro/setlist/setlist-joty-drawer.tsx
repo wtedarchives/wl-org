@@ -66,7 +66,7 @@ export function SetlistJotyDrawer({
 
         <DrawerFooter className="shrink-0 border-t border-border bg-muted/30 py-3">
           <div className="flex w-full flex-row items-center gap-3">
-            <JotyBracketSponsorLogos stacked />
+            <JotyBracketSponsorLogos />
             <p className="min-w-0 flex-1 text-left text-xs leading-snug text-muted-foreground">
               {JOTY_DESCRIPTION}
             </p>

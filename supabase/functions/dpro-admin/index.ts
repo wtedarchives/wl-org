@@ -162,6 +162,7 @@ async function handleAction(
       if (!show_id || !patch) return { error: "Invalid payload" }
       const allowed = pick(patch, [
         "show_date",
+        "show_time",
         "show_group",
         "show_tour",
         "show_subvenue",

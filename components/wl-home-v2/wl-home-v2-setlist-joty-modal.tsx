@@ -76,7 +76,7 @@ export function WlHomeV2SetlistJotyModal({
             />
           </div>
           <div id={descId} className="modal-joty-footer">
-            <JotyBracketSponsorLogos stacked />
+            <JotyBracketSponsorLogos />
             <p className="modal-joty-footer-copy">{JOTY_DESCRIPTION}</p>
           </div>
         </div>

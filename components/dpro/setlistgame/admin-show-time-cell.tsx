@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
-import { convertToEasternDisplay, convertFromEasternToUTC } from "@/lib/utils/show-utils"
+
+import { useAuth } from "@/components/auth-context"
 import type { GameShow } from "@/hooks/use-game-shows"
-import { Input } from "@/components/ui/input"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
+import { convertFromEasternToUTC, convertToEasternDisplay } from "@/lib/utils/show-utils"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export function AdminShowTimeCell({
   show,
@@ -14,6 +16,9 @@ export function AdminShowTimeCell({
   show: GameShow
   onSaved: () => void | Promise<void>
 }) {
+  const { session } = useAuth()
+  const token = session?.token ?? null
+
   const [draft, setDraft] = useState(() =>
     convertToEasternDisplay(show.show_time ?? null)
   )
@@ -29,7 +34,11 @@ export function AdminShowTimeCell({
   const dirty = draft !== baseline
 
   const handleSave = async () => {
-    if (!supabase || !dirty) return
+    if (!dirty) return
+    if (!token) {
+      setError("You must be signed in.")
+      return
+    }
     setSaving(true)
     setError(null)
     try {
@@ -43,11 +52,12 @@ export function AdminShowTimeCell({
         }
         payload = utc
       }
-      const { error: upErr } = await supabase
-        .from("shows")
-        .update({ show_time: payload })
-        .eq("show_id", show.show_id)
-      if (upErr) throw upErr
+      const { error: fnErr } = await invokeDproAdmin(token, {
+        action: "shows_update",
+        show_id: show.show_id,
+        patch: { show_time: payload },
+      })
+      if (fnErr) throw new Error(fnErr)
       await onSaved()
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed")
@@ -70,7 +80,7 @@ export function AdminShowTimeCell({
           type="button"
           variant="secondary"
           size="xs"
-          disabled={!dirty || saving}
+          disabled={!dirty || saving || !token}
           onClick={handleSave}
           className="shrink-0"
         >

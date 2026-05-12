@@ -33,23 +33,13 @@ function formatShowDate(dateStr: string | null): string {
 }
 
 /** AAT + nugs marks — used by {@link SetlistJotyDrawer} and WL Home v2 JOTY modal. */
-export function JotyBracketSponsorLogos({
-  className,
-  stacked = false,
-}: {
-  className?: string
-  /** Vertical stack, left-aligned — for footer beside attribution copy. */
-  stacked?: boolean
-}) {
+export function JotyBracketSponsorLogos({ className }: { className?: string }) {
   const linkClass =
     "inline-flex shrink-0 origin-center opacity-90 transition-all duration-200 ease-out hover:scale-110 hover:opacity-100 active:scale-100"
   return (
     <div
       className={cn(
-        "flex shrink-0 justify-start",
-        stacked ?
-          "flex-col items-start gap-1"
-        : "flex-row items-center gap-1.5",
+        "flex shrink-0 flex-row items-center justify-start gap-1.5",
         className,
       )}
     >
@@ -206,7 +196,7 @@ function RoundSectionHeaderRow({
         colSpan={3}
         className={cn(y ? "!px-2 !py-1.5" : "py-2 pl-3 pr-2")}
       >
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 font-mono">
           <span
             className={cn(
               "font-medium",
