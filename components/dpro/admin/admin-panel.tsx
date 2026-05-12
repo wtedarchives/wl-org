@@ -94,34 +94,41 @@ export function AdminPanel() {
   }
 
   return (
-    <div className="w-full space-y-4 xl:mx-auto xl:max-w-[1024px]">
-      <div className="flex flex-row items-center justify-between gap-4">
-        <div className="flex shrink-0 items-center gap-2">
-          <h2 className="text-md font-semibold">Admin Panel</h2>
+    <div className="wl-home-v2-archive-admin-root wl-home-v2-archive-admin-root--panel">
+      <div className="wl-home-v2-archive-admin-tools-row">
+        <div className="wl-home-v2-archive-admin-tools-lead">
+          <h2 className="wl-home-v2-archive-admin-heading">Admin Panel</h2>
           {userCount != null && (
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="wl-home-v2-archive-admin-user-badge">
               {userCount.toLocaleString()} {userCount === 1 ? "user" : "users"}
             </Badge>
           )}
         </div>
-        <Button
-          onClick={handleUpdateStatistics}
+        <button
+          type="button"
+          className={
+            "wbtn primary wl-home-v2-archive-admin-update-btn" +
+            (updateStatus.type === "success"
+              ? " wl-home-v2-archive-admin-update-btn--success"
+              : "")
+          }
+          onClick={() => void handleUpdateStatistics()}
           disabled={isUpdating || updateStatus.type === "success"}
-          variant={updateStatus.type === "success" ? "secondary" : "default"}
-          size="sm"
           title="Update all setlist entries statistics"
         >
-          {isUpdating
-            ? "Waiting..."
-            : updateStatus.type === "success"
-              ? updateStatus.message
-              : "Update"}
-        </Button>
+          {isUpdating ?
+            "Waiting…"
+          : updateStatus.type === "success" ?
+            updateStatus.message
+          : "Update"}
+        </button>
       </div>
 
       {updateStatus.type === "error" && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          Error: {updateStatus.message}
+        <div className="wl-home-v2-archive-admin-banner wl-home-v2-archive-admin-banner--error">
+          <p className="wl-home-v2-archive-admin-banner-text">
+            Error: {updateStatus.message}
+          </p>
         </div>
       )}
 
@@ -129,10 +136,10 @@ export function AdminPanel() {
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as (typeof TABS)[number])}
       >
-        <div className="flex flex-row items-center justify-between gap-4">
-          <h2 className="shrink-0 text-sm font-semibold">Manage Data</h2>
-          <div className="ml-auto flex shrink-0 gap-2">
-            <div className="hidden xl:block">
+        <div className="wl-home-v2-archive-admin-tabs-toolbar">
+          <h2 className="wl-home-v2-archive-admin-subheading">Manage Data</h2>
+          <div className="wl-home-v2-archive-admin-tabs-toolbar-trail">
+            <div className="wl-home-v2-archive-admin-tabs-desktop">
               <TabsList className="h-8 w-full flex-wrap justify-start">
                 {TABS.map((tab) => (
                   <TabsTrigger key={tab} value={tab} className="text-xs">
@@ -142,7 +149,7 @@ export function AdminPanel() {
               </TabsList>
             </div>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild className="xl:hidden">
+              <DropdownMenuTrigger asChild className="wl-home-v2-archive-admin-tabs-mobile-trigger">
                 <Button
                   variant="outline"
                   size="sm"
@@ -152,7 +159,10 @@ export function AdminPanel() {
                   <ChevronDownIcon className="ml-1 size-4 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuContent
+                align="end"
+                className="wl-home-v2-archive-admin-portal-content w-40"
+              >
                 {TABS.map((tab) => (
                   <DropdownMenuItem
                     key={tab}
@@ -166,11 +176,11 @@ export function AdminPanel() {
           </div>
         </div>
 
-        <div className="mt-4 w-full overflow-x-auto rounded-lg border">
+        <div className="wl-home-v2-archive-admin-tabs-panel">
           <TabsContent value="Setlist" className="mt-0 w-full p-3 sm:p-4">
             <Suspense
               fallback={
-                <div className="py-6 text-center text-sm text-muted-foreground">
+                <div className="wl-home-v2-archive-admin-tab-fallback">
                   Loading setlist admin…
                 </div>
               }

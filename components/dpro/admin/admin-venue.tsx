@@ -138,8 +138,8 @@ export function AdminVenue() {
         </div>
       )}
       {!selectedVenue && !loading && (
-        <div className="py-8 text-center">
-          <p className="text-xs text-muted-foreground">
+        <div className="wl-home-v2-archive-admin-callout wl-home-v2-archive-admin-callout--spacious">
+          <p>
             Select a venue from the dropdown or create a new one to get started.
           </p>
         </div>

@@ -41,7 +41,7 @@ export function useSetlistAdmin(session: WysteriaSession | null, showId: string 
       localStorage.setItem("adminActiveTab", "Setlist")
     }
     router.push(
-      `/old/archive/admin?show_id=${encodeURIComponent(showId)}`,
+      `/archive/admin?show_id=${encodeURIComponent(showId)}`,
     )
   }, [showId, router])
 

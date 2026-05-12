@@ -85,7 +85,7 @@ export function VenueDropdown({
   const dropdownContent = isOpen && (
     <div
       ref={dropdownRef}
-      className="fixed z-[100] w-80 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+      className="wl-home-v2-archive-admin-floating-dropdown wl-home-v2-archive-admin-floating-dropdown--wide fixed"
       style={{
         top: dropdownPosition.top,
         right: dropdownPosition.right,
@@ -100,21 +100,21 @@ export function VenueDropdown({
                 placeholder="Search venues..."
                 className="h-8 pr-8 text-xs"
               />
-              <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
             </div>
           </div>
           <div
             ref={scrollContainerRef}
-            className="max-h-64 overflow-y-auto divide-y"
+            className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]"
           >
             {loading && loadingProgress < 100 ? (
-              <div className="flex flex-col items-center justify-center p-3 h-16">
-                <div className="flex gap-2">
-                  <div className="size-3 animate-pulse rounded-lg bg-muted" />
-                  <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:150ms]" />
-                  <div className="size-3 animate-pulse rounded-lg bg-muted [animation-delay:300ms]" />
+              <div className="wl-home-v2-archive-admin-floating-dropdown-loading">
+                <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dots">
+                  <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
+                  <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
+                  <div className="wl-home-v2-archive-admin-floating-dropdown-loading-dot" />
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="wl-home-v2-archive-admin-floating-dropdown-loading-text">
                   Loading venues ({Math.round(loadingProgress)}%)
                 </p>
               </div>
@@ -129,10 +129,14 @@ export function VenueDropdown({
                     <button
                       key={`${venue.venue}-${venue.venue_location}`}
                       ref={isSelected ? selectedVenueRef : null}
+                      type="button"
                       onClick={() => onVenueSelect(venue)}
-                      className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
-                        isSelected ? "bg-muted" : ""
-                      }`}
+                      className={
+                        "wl-home-v2-archive-admin-floating-dropdown__row" +
+                        (isSelected
+                          ? " wl-home-v2-archive-admin-floating-dropdown__row--selected"
+                          : "")
+                      }
                     >
                       <span className="font-medium">{venue.venue}</span> [
                       {venue.venue_location}]
@@ -140,7 +144,7 @@ export function VenueDropdown({
                   )
                 })}
                 {filteredVenues.length === 0 && !loading && (
-                  <div className="px-2 py-1 text-center text-xs text-muted-foreground">
+                  <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
                     No venues found
                   </div>
                 )}

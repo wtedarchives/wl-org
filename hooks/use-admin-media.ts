@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
@@ -23,12 +23,6 @@ export function useAdminMedia() {
   const [mediaEntries, setMediaEntries] = useState<Set<string>>(new Set())
   const [loadingSetlist, setLoadingSetlist] = useState(false)
   const [togglingEntry, setTogglingEntry] = useState<string | null>(null)
-  const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    x: number
-    y: number
-  } | null>(null)
-  const headerRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const showDataLoadedRef = useRef(false)
 
   const { allShows, loading, loadingProgress } = useShowData()
@@ -269,21 +263,6 @@ export function useAdminMedia() {
     }
   }
 
-  useEffect(() => {
-    if (hoveredReleaseId && headerRefs.current[hoveredReleaseId]) {
-      const el = headerRefs.current[hoveredReleaseId]
-      if (el) {
-        const rect = el.getBoundingClientRect()
-        setTooltipPosition({
-          x: rect.left + rect.width / 2,
-          y: rect.top - 4,
-        })
-      }
-    } else {
-      setTooltipPosition(null)
-    }
-  }, [hoveredReleaseId])
-
   return {
     searchTerm,
     setSearchTerm,
@@ -295,10 +274,6 @@ export function useAdminMedia() {
     loadingSetlist,
     loadingReleases,
     togglingEntry,
-    hoveredReleaseId,
-    setHoveredReleaseId,
-    tooltipPosition,
-    headerRefs,
     showReleases,
     filteredShows,
     loading,

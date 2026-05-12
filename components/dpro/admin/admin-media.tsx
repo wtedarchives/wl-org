@@ -4,7 +4,6 @@ import { formatDate } from "@/lib/utils/show-utils"
 import { useAdminMedia } from "@/hooks/use-admin-media"
 import { AdminShowDropdown } from "./admin-show-dropdown"
 import { AdminMediaTable } from "./admin-media-table"
-import { AdminMediaReleaseTooltip } from "./admin-media-release-tooltip"
 
 export function AdminMedia() {
   const {
@@ -18,10 +17,6 @@ export function AdminMedia() {
     loadingSetlist,
     loadingReleases,
     togglingEntry,
-    hoveredReleaseId,
-    setHoveredReleaseId,
-    tooltipPosition,
-    headerRefs,
     showReleases,
     filteredShows,
     loading,
@@ -30,10 +25,6 @@ export function AdminMedia() {
     handleToggleMedia,
     handleToggleAllForRelease,
   } = useAdminMedia()
-
-  const hoveredRelease = showReleases.find(
-    (r) => r.release_id === hoveredReleaseId
-  )
 
   return (
     <div>
@@ -77,8 +68,6 @@ export function AdminMedia() {
               showReleases={showReleases}
               mediaEntries={mediaEntries}
               togglingEntry={togglingEntry}
-              headerRefs={headerRefs}
-              onHoverRelease={setHoveredReleaseId}
               onToggleAllForRelease={handleToggleAllForRelease}
               onToggleMedia={handleToggleMedia}
             />
@@ -94,10 +83,6 @@ export function AdminMedia() {
           Select a show to view its media assignments.
         </div>
       )}
-      <AdminMediaReleaseTooltip
-        release={hoveredRelease}
-        position={tooltipPosition}
-      />
     </div>
   )
 }

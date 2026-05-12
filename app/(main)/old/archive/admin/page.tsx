@@ -1,22 +1,17 @@
 "use client"
 
 import { useEffect } from "react"
-import { AdminGuard } from "@/components/dpro/admin/admin-guard"
-import { AdminPanel } from "@/components/dpro/admin/admin-panel"
+import { useRouter } from "next/navigation"
 
-export default function AdminPage() {
+/** Legacy URL; canonical admin UI is `/archive/admin` (see `public/_redirects`). */
+export default function LegacyAdminPageRedirect() {
+  const router = useRouter()
+
   useEffect(() => {
-    document.title = "Admin — WysteriaLane.org"
-    return () => {
-      document.title = "WysteriaLane.org"
-    }
-  }, [])
+    const q =
+      typeof window !== "undefined" ? window.location.search ?? "" : ""
+    router.replace(q ? `/archive/admin${q}` : "/archive/admin")
+  }, [router])
 
-  return (
-    <AdminGuard>
-      <div className="@container/main flex min-w-0 flex-1 flex-col gap-2 p-3 sm:p-4 md:p-6">
-        <AdminPanel />
-      </div>
-    </AdminGuard>
-  )
+  return null
 }

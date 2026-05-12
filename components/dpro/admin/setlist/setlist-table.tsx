@@ -3,7 +3,7 @@
 import {
   formatTimeDisplay,
 } from "@/lib/utils/show-utils"
-import { getPlacementColor } from "@/components/dpro/setlistgame/song-selection/utils"
+import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 import type { AdminSetlistEntryData } from "@/types/admin"
 import {
   Table,
@@ -24,9 +24,8 @@ export function SetlistTable({
   onEntrySelect,
 }: SetlistTableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
-      <Table className="bg-muted/50">
-        <TableHeader>
+    <Table>
+      <TableHeader>
           <TableRow>
             <TableHead className="w-8 py-1 text-center text-sm">S</TableHead>
             <TableHead className="w-8 py-1 text-center text-sm">#</TableHead>
@@ -42,7 +41,7 @@ export function SetlistTable({
           {setlistEntries.map((entry) => (
             <TableRow
               key={entry.entry_id}
-              className="cursor-pointer bg-muted/50 text-[0.625rem] hover:bg-muted/80"
+              className="cursor-pointer text-[0.625rem]"
               onClick={() => onEntrySelect(entry)}
             >
               <TableCell className="py-1 text-center text-xs">{entry.entry_set}</TableCell>
@@ -54,15 +53,10 @@ export function SetlistTable({
               </TableCell>
               <TableCell className="py-1">
                 <div
-                  className="mx-auto w-fit rounded-lg px-2 py-0.5 text-center font-medium text-xs"
-                  style={{
-                    backgroundColor: getPlacementColor(entry.entry_placement ?? undefined),
-                    color:
-                      getPlacementColor(entry.entry_placement ?? undefined) !==
-                      "transparent"
-                        ? "white"
-                        : "white",
-                  }}
+                  className="wl-home-v2-archive-admin-placement-pill"
+                  data-admin-placement-pill={getPlacementBarCssToken(
+                    entry.entry_placement,
+                  )}
                 >
                   {entry.entry_placement ?? ""}
                 </div>
@@ -75,6 +69,5 @@ export function SetlistTable({
           ))}
         </TableBody>
       </Table>
-    </div>
   )
 }

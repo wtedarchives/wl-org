@@ -183,7 +183,7 @@ export const COMMUNITY_FORUM_SUB = [
 ] as const
 
 export const ADMIN_SUB = [
-  { title: "Admin Panel", url: "/old/archive/admin" },
-  { title: "Radio", url: "/old/archive/admin/radio" },
-  { title: "Bugs", url: "/old/archive/bugs" },
+  { title: "Admin Panel", url: "/archive/admin" },
+  { title: "Radio", url: "/archive/admin/radio" },
+  { title: "Bugs", url: "/archive/bugs" },
 ] as const

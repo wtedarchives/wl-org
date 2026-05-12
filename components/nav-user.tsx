@@ -4,9 +4,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 
+import { ADMIN_SUB } from "@/components/app-sidebar.constants"
 import { useAuth } from "@/components/auth-context"
 import { supabase } from "@/lib/supabase"
-import { Button } from "@/components/ui/button"
 import {
   Avatar,
   AvatarFallback,
@@ -26,10 +26,42 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { BarChart3Icon, LogIn, LogOutIcon, User } from "lucide-react"
+import { useAdminStatus } from "@/hooks/use-admin-status"
+import {
+  BarChart3Icon,
+  Bug,
+  LayoutDashboard,
+  LogIn,
+  LogOutIcon,
+  Radio as RadioIcon,
+  Search,
+  User,
+} from "lucide-react"
 
-export function NavUser() {
+function AdminNavIcon({ title }: { title: (typeof ADMIN_SUB)[number]["title"] }) {
+  switch (title) {
+    case "Admin Panel":
+      return <LayoutDashboard className="size-4 shrink-0" />
+    case "Radio":
+      return <RadioIcon className="size-4 shrink-0" />
+    case "Bugs":
+      return <Bug className="size-4 shrink-0" />
+    default:
+      return null
+  }
+}
+
+export function NavUser({
+  onAdminFindClick,
+  openBugCount = null,
+}: {
+  /** Opens the shared {@link FindDialog} from the parent sidebar shell. */
+  onAdminFindClick?: () => void
+  /** Open bug count for the Bugs row badge (from {@link useBugCount} in the parent). */
+  openBugCount?: number | null
+} = {}) {
   const { session, signOut } = useAuth()
+  const { isAdmin } = useAdminStatus(session)
   const { isMobile } = useSidebar()
   const pathname = usePathname()
   const router = useRouter()
@@ -122,6 +154,40 @@ export function NavUser() {
             <DropdownMenuSeparator />
             {isLoggedIn ? (
               <>
+                {isAdmin && (
+                  <>
+                    {ADMIN_SUB.map((item) => (
+                      <DropdownMenuItem key={item.title} asChild>
+                        <Link
+                          href={item.url}
+                          className="flex min-w-0 items-center gap-2"
+                        >
+                          <AdminNavIcon title={item.title} />
+                          <span className="min-w-0 flex-1 truncate">
+                            {item.title}
+                          </span>
+                          {item.title === "Bugs" &&
+                            openBugCount != null &&
+                            openBugCount > 0 && (
+                              <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+                                {openBugCount > 99 ? "99+" : openBugCount}
+                              </span>
+                            )}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    {onAdminFindClick && (
+                      <DropdownMenuItem
+                        onClick={() => onAdminFindClick()}
+                        className="flex cursor-pointer items-center gap-2"
+                      >
+                        <Search className="size-4 shrink-0" />
+                        Find
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem asChild>
                   <Link
                     href="/old/archive/profile/overview"

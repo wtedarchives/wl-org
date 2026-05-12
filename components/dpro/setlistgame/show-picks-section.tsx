@@ -56,14 +56,22 @@ export function ShowPicksSection({
             Show is open for picks.
           </p>
           {user ?
-            <Button variant="outline" size="sm" onClick={onMakePicks}>
-              {userSubmission ? "Edit Picks" : "Make Picks"}
-            </Button>
-          : <Button variant="outline" size="sm" asChild>
-              <Link href="/login" className="no-underline hover:underline">
+            wlV2 ?
+              <button type="button" className="nav-btn" onClick={onMakePicks}>
+                {userSubmission ? "Edit Picks" : "Make Picks"}
+              </button>
+            : <Button variant="outline" size="sm" onClick={onMakePicks}>
+                {userSubmission ? "Edit Picks" : "Make Picks"}
+              </Button>
+          : wlV2 ?
+              <Link href="/login" className="nav-btn no-underline hover:no-underline">
                 Login to Play
               </Link>
-            </Button>}
+            : <Button variant="outline" size="sm" asChild>
+                <Link href="/login" className="no-underline hover:underline">
+                  Login to Play
+                </Link>
+              </Button>}
         </>}
     </div>
   )

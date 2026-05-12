@@ -141,7 +141,7 @@ export function useAdminSetlist() {
       console.error("Error saving selected show to localStorage:", e)
     }
     if (fromUrl) {
-      router.replace("/old/archive/admin", { scroll: false })
+      router.replace("/archive/admin", { scroll: false })
     }
   }, [shows, searchParams, router, fetchSetlistEntries])
 

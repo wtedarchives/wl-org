@@ -20,9 +20,9 @@
 /old/archive/venue  /archive/venue  301
 /archive/user  /old/archive/user  301
 /archive/submit  /old/archive/submit  301
-/archive/admin  /old/archive/admin  301
-/archive/admin/radio  /old/archive/admin/radio  301
-/archive/bugs  /old/archive/bugs  301
+/old/archive/admin  /archive/admin  301
+/old/archive/admin/radio  /archive/admin/radio  301
+/old/archive/bugs  /archive/bugs  301
 /archive/profile  /old/archive/profile  301
 /archive/profile/overview  /old/archive/profile/overview  301
 /archive/profile/shows  /old/archive/profile/shows  301

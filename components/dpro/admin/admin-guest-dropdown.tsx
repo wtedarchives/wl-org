@@ -59,7 +59,7 @@ export function AdminGuestDropdown({
         createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[100] w-64 max-h-[min(24rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+            className="wl-home-v2-archive-admin-floating-dropdown fixed"
             style={{
               top: dropdownPosition.top,
               right: dropdownPosition.right,
@@ -74,12 +74,12 @@ export function AdminGuestDropdown({
                   placeholder="Search guests..."
                   className="h-8 pr-8 text-xs"
                 />
-                <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
               </div>
             </div>
             <div
               ref={scrollContainerRef}
-              className="max-h-64 overflow-y-auto divide-y"
+              className="max-h-64 overflow-y-auto divide-y divide-[rgb(49,51,49)]"
             >
               {filteredGuests.map((guest) => (
                 <button
@@ -91,15 +91,18 @@ export function AdminGuestDropdown({
                   }
                   type="button"
                   onClick={() => onGuestSelect(guest)}
-                  className={`w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted ${
-                    selectedGuest?.guest_id === guest.guest_id ? "bg-muted" : ""
-                  }`}
+                  className={
+                    "wl-home-v2-archive-admin-floating-dropdown__row" +
+                    (selectedGuest?.guest_id === guest.guest_id
+                      ? " wl-home-v2-archive-admin-floating-dropdown__row--selected"
+                      : "")
+                  }
                 >
                   {guest.guest}
                 </button>
               ))}
               {filteredGuests.length === 0 && (
-                <div className="px-2 py-1 text-center text-xs text-muted-foreground">
+                <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
                   No guests found
                 </div>
               )}

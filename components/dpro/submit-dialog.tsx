@@ -1,13 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import { useEffect, useId, useState } from "react"
+
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { supabase } from "@/lib/supabase"
 
 const SUBMISSION_TYPES = [
@@ -37,6 +33,8 @@ interface SubmitDialogProps {
 }
 
 export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
+  const headingId = useId()
+  const subtextId = useId()
   const [formData, setFormData] = useState({
     submissionType: "",
     contactEmail: "",
@@ -50,8 +48,19 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
   const [submitError, setSubmitError] = useState("")
   const [confirmationError, setConfirmationError] = useState(false)
 
+  useWlHomeV2ScrollLock(open)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false)
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [open, onOpenChange])
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -154,7 +163,7 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
     } catch (err) {
       console.error("Submit error:", err)
       setSubmitError(
-        "An error occurred while submitting your information. Please try again."
+        "An error occurred while submitting your information. Please try again.",
       )
     } finally {
       setIsSubmitting(false)
@@ -166,160 +175,208 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
     setSelectedFile(null)
   }
 
+  const backdropClass = open ? "modal-backdrop open" : "modal-backdrop"
+  const codeInputClass =
+    "modal-dpro-submit-code-input" +
+    (confirmationError ? " modal-dpro-submit-code-input--error" : "")
+  const codeHintClass =
+    "modal-dpro-submit-code-hint" +
+    (confirmationError ? " modal-dpro-submit-code-hint--error" : "")
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="w-full max-w-[calc(100%-2rem)] sm:max-w-md"
-        showCloseButton={true}
+    <WlHomeV2ModalPortal open={open}>
+      <div
+        className={backdropClass}
+        id="submit-information-modal"
+        role="presentation"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onOpenChange(false)
+        }}
       >
-        <DialogHeader>
-          <DialogTitle>Submit Information</DialogTitle>
-        </DialogHeader>
-
-        <p className="text-xs text-muted-foreground">
-          Use this form to submit corrections, new information, or report issues
-          with the site.
-        </p>
-
-        {submitSuccess ? (
-          <div className="space-y-3 rounded-md border border-border bg-muted/30 p-3">
-            <p className="text-sm font-medium">
-              Thank you for your submission!
-            </p>
-            <p className="text-xs text-muted-foreground">
-              We have received your information and will review it soon.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSubmitAnother}
-              >
-                Submit Another
-              </Button>
-              <Button variant="default" size="sm" onClick={handleClose}>
-                Close
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {submitError && (
-              <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2">
-                <p className="text-xs text-destructive">{submitError}</p>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <Label htmlFor="submissionType">
-                Submission Type <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={formData.submissionType}
-                onValueChange={(v) =>
-                  setFormData((prev) => ({ ...prev, submissionType: v }))
-                }
-                required
-              >
-                <SelectTrigger id="submissionType" className="w-full">
-                  <SelectValue placeholder="—" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SUBMISSION_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="contactEmail">
-                Contact Email <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                type="email"
-                id="contactEmail"
-                name="contactEmail"
-                value={formData.contactEmail}
-                onChange={handleChange}
-                placeholder="ted@dripfield.pro"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="details">
-                Details <span className="text-destructive">*</span>
-              </Label>
-              <Textarea
-                id="details"
-                name="details"
-                value={formData.details}
-                onChange={handleChange}
-                placeholder="Please provide as much detail as possible about your submission..."
-                rows={6}
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="file">Attach File (Optional)</Label>
-              <Input
-                type="file"
-                id="file"
-                onChange={handleFileChange}
-                accept="*/*"
-                className="h-auto file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-foreground file:hover:bg-primary/90"
-              />
-              {selectedFile && (
-                <p className="text-[0.625rem] text-muted-foreground">
-                  Selected: {selectedFile.name} (
-                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
-              {fileError && (
-                <p className="text-[0.625rem] text-destructive">{fileError}</p>
-              )}
-              <p className="text-[0.625rem] text-muted-foreground">
-                Maximum file size: 50MB.
+        <div
+          className="modal modal--wted-request modal--dpro-submit"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={headingId}
+          aria-describedby={subtextId}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-request-head">
+            <div className="modal-request-head-text">
+              <h3 id={headingId}>Submit Information</h3>
+              <p id={subtextId} className="modal-request-sub">
+                Send corrections, new information, or report issues with the
+                site.
               </p>
             </div>
+            <button
+              type="button"
+              className="modal-request-close"
+              onClick={handleClose}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div className="modal-request-body">
+            <div className="modal-dpro-submit-inner">
+              {submitSuccess ? (
+                <div className="modal-dpro-submit-success">
+                  <p className="modal-auth-success" role="status">
+                    Thank you for your submission! We have received your
+                    information and will review it soon.
+                  </p>
+                  <div className="modal-dpro-submit-actions">
+                    <button
+                      type="button"
+                      className="wbtn"
+                      onClick={handleSubmitAnother}
+                    >
+                      Submit Another
+                    </button>
+                    <button
+                      type="button"
+                      className="wbtn primary"
+                      onClick={handleClose}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="modal-dpro-submit-form">
+                  {submitError && (
+                    <p className="modal-dpro-submit-error" role="alert">
+                      {submitError}
+                    </p>
+                  )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmationCode">
-                Confirmation Code <span className="text-destructive">*</span>
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  id="confirmationCode"
-                  name="confirmationCode"
-                  value={formData.confirmationCode}
-                  onChange={handleChange}
-                  placeholder="—"
-                  required
-                  className={`w-24 ${confirmationError ? "border-destructive" : ""}`}
-                />
-                <span
-                  className={`text-[0.625rem] ${confirmationError ? "text-destructive" : "text-muted-foreground"}`}
-                >
-                  {confirmationError
-                    ? "Incorrect code. Please enter 726."
-                    : "Type the number 726 here."}
-                </span>
-              </div>
-            </div>
+                  <div className="modal-dpro-submit-field modal-dpro-submit-field--select">
+                    <Label htmlFor="submissionType" className="modal-dpro-submit-label">
+                      Submission Type{" "}
+                      <span className="modal-dpro-submit-required">*</span>
+                    </Label>
+                    <Select
+                      value={formData.submissionType}
+                      onValueChange={(v) =>
+                        setFormData((prev) => ({ ...prev, submissionType: v }))
+                      }
+                      required
+                    >
+                      <SelectTrigger id="submissionType">
+                        <SelectValue placeholder="Choose a type…" />
+                      </SelectTrigger>
+                      <SelectContent className="modal-dpro-submit-select-content">
+                        {SUBMISSION_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <div className="flex justify-center pt-2">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </Button>
+                  <div className="modal-dpro-submit-field modal-dpro-submit-field--email">
+                    <Label htmlFor="contactEmail" className="modal-dpro-submit-label">
+                      Contact Email{" "}
+                      <span className="modal-dpro-submit-required">*</span>
+                    </Label>
+                    <Input
+                      type="email"
+                      id="contactEmail"
+                      name="contactEmail"
+                      value={formData.contactEmail}
+                      onChange={handleChange}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="modal-dpro-submit-field modal-dpro-submit-field--details">
+                    <Label htmlFor="details" className="modal-dpro-submit-label">
+                      Details <span className="modal-dpro-submit-required">*</span>
+                    </Label>
+                    <Textarea
+                      id="details"
+                      name="details"
+                      value={formData.details}
+                      onChange={handleChange}
+                      placeholder="Please provide as much detail as possible about your submission…"
+                      rows={5}
+                      required
+                    />
+                  </div>
+
+                  <div className="modal-dpro-submit-field modal-dpro-submit-field--file">
+                    <Label htmlFor="file" className="modal-dpro-submit-label">
+                      Attach File (Optional)
+                    </Label>
+                    <Input
+                      type="file"
+                      id="file"
+                      onChange={handleFileChange}
+                      accept="*/*"
+                      className="modal-dpro-submit-file-input"
+                    />
+                    {selectedFile && (
+                      <p className="modal-dpro-submit-meta">
+                        Selected: {selectedFile.name} (
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
+                    {fileError && (
+                      <p className="modal-dpro-submit-meta modal-dpro-submit-meta--error">
+                        {fileError}
+                      </p>
+                    )}
+                    <p className="modal-dpro-submit-meta">
+                      Maximum file size: 50MB.
+                    </p>
+                  </div>
+
+                  <div className="modal-dpro-submit-field">
+                    <Label
+                      htmlFor="confirmationCode"
+                      className="modal-dpro-submit-label"
+                    >
+                      Confirmation Code{" "}
+                      <span className="modal-dpro-submit-required">*</span>
+                    </Label>
+                    <div className="modal-dpro-submit-confirm-row">
+                      <Input
+                        type="text"
+                        id="confirmationCode"
+                        name="confirmationCode"
+                        value={formData.confirmationCode}
+                        onChange={handleChange}
+                        placeholder="726"
+                        required
+                        className={codeInputClass}
+                        aria-invalid={confirmationError}
+                      />
+                      <span className={codeHintClass}>
+                        {confirmationError
+                          ? "Incorrect code. Please enter 726."
+                          : "Type the number 726."}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="modal-dpro-submit-actions">
+                    <button
+                      type="submit"
+                      className="wbtn primary"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Submitting…" : "Submit"}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
-          </form>
-        )}
-      </DialogContent>
-    </Dialog>
+          </div>
+        </div>
+      </div>
+    </WlHomeV2ModalPortal>
   )
 }

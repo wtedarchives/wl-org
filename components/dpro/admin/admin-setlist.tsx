@@ -100,8 +100,8 @@ export function AdminSetlist() {
               onEntrySelect={handleEntrySelect}
             />
           ) : (
-            <div className="rounded-lg border bg-background p-3 text-center">
-              <p className="text-xs text-muted-foreground">
+            <div className="wl-home-v2-archive-admin-callout">
+              <p>
                 No setlist entries found for this show.
               </p>
             </div>
@@ -109,10 +109,8 @@ export function AdminSetlist() {
         </div>
       )}
       {!selectedShow && !loading && (
-        <div className="rounded-lg border bg-background p-3 text-center">
-          <p className="text-xs text-muted-foreground">
-            Select a show to view its setlist.
-          </p>
+        <div className="wl-home-v2-archive-admin-callout">
+          <p>Select a show to view its setlist.</p>
         </div>
       )}
       {loading && loadingProgress < 100 && !selectedShow && (

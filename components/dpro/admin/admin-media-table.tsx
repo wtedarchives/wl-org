@@ -14,14 +14,18 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface AdminMediaTableProps {
   setlistEntries: AdminSetlistEntryData[]
   showReleases: ReleaseShow[]
   mediaEntries: Set<string>
   togglingEntry: string | null
-  headerRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>
-  onHoverRelease: (releaseId: string | null) => void
   onToggleAllForRelease: (releaseId: string) => void
   onToggleMedia: (entryId: string, releaseId: string) => void
 }
@@ -31,13 +35,12 @@ export function AdminMediaTable({
   showReleases,
   mediaEntries,
   togglingEntry,
-  headerRefs,
-  onHoverRelease,
   onToggleAllForRelease,
   onToggleMedia,
 }: AdminMediaTableProps) {
   return (
-    <div className="overflow-x-auto">
+    <TooltipProvider>
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/60">
@@ -64,16 +67,27 @@ export function AdminMediaTable({
                   className="py-1 text-center text-xs border-r"
                 >
                   <div className="flex flex-col items-center gap-1">
-                    <div
-                      ref={(el) => {
-                        headerRefs.current[rs.release_id] = el
-                      }}
-                      className="cursor-pointer"
-                      onMouseEnter={() => onHoverRelease(rs.release_id)}
-                      onMouseLeave={() => onHoverRelease(null)}
-                    >
-                      <ReleaseServiceIcon service={rs.releases?.release_service ?? null} />
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="inline-flex cursor-default items-center justify-center">
+                          <ReleaseServiceIcon
+                            service={rs.releases?.release_service ?? null}
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <div className="space-y-0.5">
+                          <div className="text-[11px] font-medium">
+                            {rs.releases?.release_displayname ?? "Release"}
+                          </div>
+                          {rs.releases?.release_service ?
+                            <div className="text-[11px] opacity-90">
+                              {rs.releases.release_service}
+                            </div>
+                          : null}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
                     <Button
                       variant={allChecked ? "default" : "outline"}
                       size="sm"
@@ -147,5 +161,6 @@ export function AdminMediaTable({
         </TableBody>
       </Table>
     </div>
+    </TooltipProvider>
   )
 }

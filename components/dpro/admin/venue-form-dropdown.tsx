@@ -66,7 +66,7 @@ export function VenueFormDropdown({
   const dropdownContent = isOpen && (
     <div
       ref={dropdownRef}
-      className="fixed z-[100] max-h-[min(15rem,calc(100vh-8rem))] overflow-y-auto rounded-md border bg-background shadow-lg"
+      className="wl-home-v2-archive-admin-floating-dropdown fixed"
       style={{
         top: dropdownPosition.top,
         left: dropdownPosition.left,
@@ -82,23 +82,23 @@ export function VenueFormDropdown({
                 placeholder="Search venues..."
                 className="h-8 pr-8 text-xs"
               />
-              <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
             </div>
           </div>
-          <div className="max-h-40 overflow-y-auto divide-y">
+          <div className="max-h-40 overflow-y-auto divide-y divide-[rgb(49,51,49)]">
             {filteredVenues.map((venue) => (
               <button
                 key={venue.venue}
                 type="button"
                 onClick={() => onVenueSelect(venue)}
-                className="w-full px-2 py-1 text-left text-xs transition-colors hover:bg-muted"
+                className="wl-home-v2-archive-admin-floating-dropdown__row"
               >
                 <span className="font-medium">{venue.venue}</span> [
                 {venue.venue_location}]
               </button>
             ))}
             {filteredVenues.length === 0 && (
-              <div className="px-2 py-1 text-center text-xs text-muted-foreground">
+              <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
                 No venues found
               </div>
             )}

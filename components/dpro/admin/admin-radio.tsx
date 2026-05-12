@@ -11,7 +11,6 @@ import {
 import { AdminRadioEpisodeSetlistsPanel } from "@/components/dpro/admin/admin-radio-episode-setlists-panel"
 import { AdminRadioPlaylistsPanel } from "@/components/dpro/admin/admin-radio-playlists-panel"
 import { AdminRadioTracksPanel } from "@/components/dpro/admin/admin-radio-tracks-panel"
-import { cn } from "@/lib/utils"
 
 type AdminRadioSection = "tracks" | "playlists" | "episode-setlists"
 
@@ -20,24 +19,24 @@ export function AdminRadio() {
 
   return (
     <div
-      className={cn(
-        "w-full min-w-0 space-y-4",
-        section !== "episode-setlists" && "xl:mx-auto xl:max-w-[1024px]",
-      )}
+      className={
+        "wl-home-v2-archive-admin-root wl-home-v2-archive-admin-root--radio" +
+        (section === "episode-setlists" ?
+          " wl-home-v2-archive-admin-root--radio-wide"
+        : "")
+      }
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            View
-          </label>
+      <div className="wl-home-v2-archive-admin-radio-toolbar">
+        <div className="wl-home-v2-archive-admin-radio-field">
+          <span className="wl-home-v2-archive-admin-field-label">View</span>
           <Select
             value={section}
             onValueChange={(v) => setSection(v as AdminRadioSection)}
           >
-            <SelectTrigger className="h-10 w-full min-w-[12rem] sm:w-[14rem]">
+            <SelectTrigger className="wl-home-v2-archive-admin-select-trigger h-10 w-full min-w-[12rem] sm:w-[14rem]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="wl-home-v2-archive-admin-portal-content">
               <SelectItem value="tracks">Tracks</SelectItem>
               <SelectItem value="playlists">Playlists</SelectItem>
               <SelectItem value="episode-setlists">Episode Setlists</SelectItem>
@@ -46,7 +45,7 @@ export function AdminRadio() {
         </div>
       </div>
 
-      <div className="min-h-0 transition-opacity duration-200 ease-out">
+      <div className="wl-home-v2-archive-admin-radio-body min-h-0 transition-opacity duration-200 ease-out">
         {section === "tracks" ?
           <AdminRadioTracksPanel />
         : section === "playlists" ?

@@ -1,26 +1,36 @@
+import Image from "next/image"
 import Link from "next/link"
-
-import { Button } from "@/components/ui/button"
 
 export function NotFoundContent() {
   return (
-    <div className="flex h-full flex-col rounded-b-none bg-wl-dark-green md:rounded-b-xl">
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-6 text-center text-wl-white">
-          <img
+    <div className="wl-home-v2-not-found">
+      <section
+        className="wl-home-v2-not-found__section"
+        aria-labelledby="wl-home-v2-not-found-heading"
+      >
+        <div className="widget-panel wl-home-v2-not-found__panel">
+          <Image
             src="/404.png"
             alt=""
-            className="w-full max-w-md rounded-xl object-cover"
+            width={800}
+            height={450}
+            className="wl-home-v2-not-found__art"
           />
-          <h1 className="text-2xl font-bold sm:text-3xl">Did the wrung come loose?!</h1>
-          <p className="max-w-md text-base text-wl-white/90">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          <h1
+            id="wl-home-v2-not-found-heading"
+            className="wl-home-v2-not-found__title"
+          >
+            Did the wrung come loose?!
+          </h1>
+          <p className="wl-home-v2-not-found__body">
+            The page you&apos;re looking for doesn&apos;t exist or has been
+            moved.
           </p>
-          <Button asChild size="lg" className="mt-2">
-            <Link href="/">Go to home</Link>
-          </Button>
+          <Link href="/" className="wbtn primary wl-home-v2-not-found__cta">
+            Go to home
+          </Link>
         </div>
-      </main>
+      </section>
     </div>
   )
 }

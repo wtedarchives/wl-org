@@ -5,6 +5,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+import { ADMIN_SUB } from "@/components/app-sidebar.constants"
+import { FindDialog } from "@/components/dpro/admin/find-dialog"
 import { useAuth } from "@/components/auth-context"
 import { supabase } from "@/lib/supabase"
 import {
@@ -20,13 +22,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useAdminStatus } from "@/hooks/use-admin-status"
+import { useBugCount } from "@/hooks/use-bug-count"
 import {
+  Broadcast,
+  Bug,
   CaretDown,
   ChartBarHorizontal,
+  GearSix,
+  MagnifyingGlass,
   SignIn,
   SignOut,
   User,
 } from "@phosphor-icons/react"
+
+function WlHomeV2AdminNavIcon({
+  title,
+}: {
+  title: (typeof ADMIN_SUB)[number]["title"]
+}) {
+  const cls = "top-nav-dd-icon size-4 shrink-0"
+  switch (title) {
+    case "Admin Panel":
+      return <GearSix className={cls} aria-hidden />
+    case "Radio":
+      return <Broadcast className={cls} aria-hidden />
+    case "Bugs":
+      return <Bug className={cls} aria-hidden />
+    default:
+      return null
+  }
+}
 
 /**
  * Same account actions as {@link NavUser}; menu styled for the home page (see `.wl-home-v2-user-dropdown`).
@@ -39,9 +65,12 @@ export function WlHomeV2UserMenu({
   onOpenSignup: () => void
 }) {
   const { session, signOut } = useAuth()
+  const { isAdmin } = useAdminStatus(session)
+  const openBugCount = useBugCount()
   const router = useRouter()
   const [profileUsername, setProfileUsername] = useState<string | null>(null)
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
+  const [findDialogOpen, setFindDialogOpen] = useState(false)
 
   useEffect(() => {
     if (!session || !supabase) {
@@ -114,75 +143,115 @@ export function WlHomeV2UserMenu({
   if (!radixReady) return trigger
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="wl-home-v2-user-dropdown"
-        side="bottom"
-        align="center"
-        sideOffset={6}
-      >
-        <DropdownMenuLabel className="top-nav-dd-label p-0 font-normal">
-          <div className="flex items-center gap-2.5 px-1 py-2">
-            <Avatar className="top-nav-dd-avatar">
-              <AvatarImage src={profilePicture ?? undefined} alt="" />
-              <AvatarFallback className="top-nav-dd-avatar-fallback">
-                {displayName.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="grid min-w-0 flex-1 text-left leading-tight">
-              <span className="top-nav-dd-label-name truncate">
-                {displayName}
-              </span>
-              <span className="top-nav-dd-label-email truncate">
-                {displayEmail}
-              </span>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="wl-home-v2-user-dropdown"
+          side="bottom"
+          align="center"
+          sideOffset={6}
+        >
+          <DropdownMenuLabel className="top-nav-dd-label p-0 font-normal">
+            <div className="flex items-center gap-2.5 px-1 py-2">
+              <Avatar className="top-nav-dd-avatar">
+                <AvatarImage src={profilePicture ?? undefined} alt="" />
+                <AvatarFallback className="top-nav-dd-avatar-fallback">
+                  {displayName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid min-w-0 flex-1 text-left leading-tight">
+                <span className="top-nav-dd-label-name truncate">
+                  {displayName}
+                </span>
+                <span className="top-nav-dd-label-email truncate">
+                  {displayEmail}
+                </span>
+              </div>
             </div>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="top-nav-dd-sep" />
-        {isLoggedIn ? (
-          <>
-            <DropdownMenuItem asChild className="top-nav-dd-item">
-              <Link
-                href="/old/archive/profile/overview"
-                className="top-nav-dd-link flex cursor-pointer items-center gap-2"
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="top-nav-dd-sep" />
+          {isLoggedIn ? (
+            <>
+              {isAdmin && (
+                <>
+                  {ADMIN_SUB.map((item) => (
+                    <DropdownMenuItem key={item.title} asChild className="top-nav-dd-item">
+                      <Link
+                        href={item.url}
+                        className="top-nav-dd-link flex min-w-0 cursor-pointer items-center gap-2"
+                      >
+                        <WlHomeV2AdminNavIcon title={item.title} />
+                        <span className="min-w-0 flex-1 truncate">
+                          {item.title}
+                        </span>
+                        {item.title === "Bugs" &&
+                          openBugCount != null &&
+                          openBugCount > 0 && (
+                            <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+                              {openBugCount > 99 ? "99+" : openBugCount}
+                            </span>
+                          )}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuItem
+                    className="top-nav-dd-item flex cursor-pointer items-center gap-2"
+                    onClick={() => setFindDialogOpen(true)}
+                  >
+                    <MagnifyingGlass
+                      className="top-nav-dd-icon size-4 shrink-0"
+                      aria-hidden
+                    />
+                    Find
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="top-nav-dd-sep" />
+                </>
+              )}
+              <DropdownMenuItem asChild className="top-nav-dd-item">
+                <Link
+                  href="/old/archive/profile/overview"
+                  className="top-nav-dd-link flex cursor-pointer items-center gap-2"
+                >
+                  <ChartBarHorizontal className="top-nav-dd-icon size-4 shrink-0" />
+                  My Show Stats
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="top-nav-dd-sep" />
+              <DropdownMenuItem
+                className="top-nav-dd-item"
+                onClick={() => {
+                  void handleSignOut()
+                  router.push("/")
+                }}
               >
-                <ChartBarHorizontal className="top-nav-dd-icon size-4 shrink-0" />
-                My Show Stats
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="top-nav-dd-sep" />
-            <DropdownMenuItem
-              className="top-nav-dd-item"
-              onClick={() => {
-                void handleSignOut()
-                router.push("/")
-              }}
-            >
-              <SignOut className="top-nav-dd-icon size-4 shrink-0" />
-              Sign Out
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem
-              className="top-nav-dd-item flex cursor-pointer items-center gap-2"
-              onClick={() => void redirectToLogin()}
-            >
-              <SignIn className="top-nav-dd-icon size-4 shrink-0" />
-              Sign In
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="top-nav-dd-item flex cursor-pointer items-center gap-2"
-              onClick={() => void redirectToLogin()}
-            >
-              <User className="top-nav-dd-icon size-4 shrink-0" />
-              Create account
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+                <SignOut className="top-nav-dd-icon size-4 shrink-0" />
+                Sign Out
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem
+                className="top-nav-dd-item flex cursor-pointer items-center gap-2"
+                onClick={() => void redirectToLogin()}
+              >
+                <SignIn className="top-nav-dd-icon size-4 shrink-0" />
+                Sign In
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="top-nav-dd-item flex cursor-pointer items-center gap-2"
+                onClick={() => void redirectToLogin()}
+              >
+                <User className="top-nav-dd-icon size-4 shrink-0" />
+                Create account
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {isAdmin && (
+        <FindDialog open={findDialogOpen} onOpenChange={setFindDialogOpen} />
+      )}
+    </>
   )
 }

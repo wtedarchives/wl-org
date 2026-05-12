@@ -131,7 +131,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="bg-wl-orange py-2 rounded-md mx-2 my-2">
-        <NavUser />
+        <NavUser
+          onAdminFindClick={
+            isAdmin ? () => setFindDialogOpen(true) : undefined
+          }
+          openBugCount={openBugCount}
+        />
       </SidebarFooter>
       {isAdmin && (
         <FindDialog open={findDialogOpen} onOpenChange={setFindDialogOpen} />
