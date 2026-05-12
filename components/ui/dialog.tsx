@@ -3,14 +3,30 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
+import { useOverlayRootScrollLock } from "@/hooks/use-modal-scroll-lock"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
 function Dialog({
+  open,
+  defaultOpen,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  const scrollLock = useOverlayRootScrollLock({
+    open,
+    defaultOpen,
+    onOpenChange,
+  })
+  return (
+    <DialogPrimitive.Root
+      data-slot="dialog"
+      {...props}
+      open={scrollLock.open}
+      onOpenChange={scrollLock.onOpenChange}
+    />
+  )
 }
 
 function DialogTrigger({

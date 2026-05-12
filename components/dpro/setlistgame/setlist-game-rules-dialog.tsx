@@ -244,11 +244,13 @@ export function SetlistGameRulesDialog({
         className="setlist-game-rules-dialog-content"
         showCloseButton={true}
       >
-        <DialogHeader>
+        <DialogHeader className="shrink-0">
           <DialogTitle>Setlist Game Rules</DialogTitle>
         </DialogHeader>
 
-        <SetlistGameRulesBody />
+        <div className="setlist-game-rules-dialog-scroll">
+          <SetlistGameRulesBody />
+        </div>
       </DialogContent>
     </Dialog>
   )

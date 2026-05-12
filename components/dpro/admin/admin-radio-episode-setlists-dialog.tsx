@@ -314,17 +314,6 @@ export function AdminRadioEpisodeSetlistsDialog({
       getWtedEpisodeDisplayName(episode.episode, episode.display_name)
     : ""
 
-  /** Main scroll lives on #main-inset-scroll, not document.body — lock it while open. */
-  useEffect(() => {
-    if (!open) return
-    const main = document.getElementById("main-inset-scroll")
-    const prev = main?.style.overflow ?? ""
-    if (main) main.style.overflow = "hidden"
-    return () => {
-      if (main) main.style.overflow = prev
-    }
-  }, [open])
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

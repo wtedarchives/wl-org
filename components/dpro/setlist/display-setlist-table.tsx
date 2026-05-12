@@ -1,20 +1,8 @@
 "use client"
 
 import { Fragment } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import type { SetlistEntry } from "@/types/setlist"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import { getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
@@ -25,12 +13,11 @@ import {
   jotyRoundDataAttr,
   JOTY_EXPLANATIONS,
   JOTY_ROUND_ORDER,
-  LAST_HEADER_TOOLTIP,
   SHORT_EXPLANATIONS,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
+import { DisplaySetlistTableHeader } from "@/components/dpro/setlist/display-setlist-table-header"
 import { SetlistEntryRow } from "@/components/dpro/setlist/setlist-entry-row"
 import { cn } from "@/lib/utils"
-import { SETLIST_HEADER_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 
 import "@/components/dpro/setlist/display-setlist-table.css"
 
@@ -161,185 +148,17 @@ export function DisplaySetlistTable({
         wlHomeV2SetlistTableChrome && "set-table",
       )}
     >
-          <TableHeader>
-            <TableRow
-              className={cn(
-                "hover:bg-transparent",
-                wlHdr ? "border-0 !h-auto min-h-0" : "h-8 border-border/60",
-              )}
-            >
-              <TableHead
-                className={cn(
-                  hdrPad,
-                  wlHdr && "center num-col shrink-0 text-center",
-                  !wlHdr &&
-                    "h-8 w-4 shrink-0 text-center text-muted-foreground",
-                )}
-              >
-                #
-              </TableHead>
-              <TableHead
-                className={cn(hdrPad, !wlHdr && "h-8 text-muted-foreground")}
-              >
-                {hasSongHeaderTooltipItems && isDesktop ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        className={cn(!wlHdr && "cursor-help", wlHdr && "setlist-th-help")}
-                      >
-                        Song
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className={cn(
-                        "max-w-[280px]",
-                        wlHdr && "setlist-header-tooltip",
-                      )}
-                      {...(wlHdr ? SETLIST_HEADER_TOOLTIP_CONTENT : {})}
-                    >
-                      {songHeaderTooltipContent}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  "Song"
-                )}
-              </TableHead>
-              {showDiscographySourceCol ? (
-                <TableHead
-                  className={cn(
-                    hdrPad,
-                    "min-w-[9rem] whitespace-nowrap text-left",
-                    !wlHdr && "h-8 text-muted-foreground",
-                  )}
-                >
-                  Show
-                </TableHead>
-              ) : null}
-              {showWtedColumn && (
-                <TableHead
-                  className={cn(
-                    hdrPad,
-                    "text-center",
-                    wlHdr && "center",
-                    !wlHdr && "h-8 text-muted-foreground",
-                  )}
-                >
-                  {isDesktop ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span
-                          className={cn(!wlHdr && "cursor-help", wlHdr && "setlist-th-help")}
-                        >
-                          WTED
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        {...(wlHdr ?
-                          {
-                            ...SETLIST_HEADER_TOOLTIP_CONTENT,
-                            className:
-                              "setlist-header-tooltip setlist-header-tooltip--tight",
-                          }
-                        : {})}
-                      >
-                        Use the icons below to request songs on WTED Goose Radio.
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    "WTED"
-                  )}
-                </TableHead>
-              )}
-              <TableHead
-                className={cn(
-                  hdrPad,
-                  "text-center",
-                  wlHdr && "center",
-                  !wlHdr && "h-8 text-muted-foreground",
-                )}
-              >
-                Time
-              </TableHead>
-              {showCanonColumns && (
-                <TableHead
-                  className={cn(
-                    hdrPad,
-                    wlHdr ? "center" : "text-center",
-                    !wlHdr && "h-8 text-muted-foreground",
-                  )}
-                >
-                  {hasLastBadges && isDesktop ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span
-                          className={cn(!wlHdr && "cursor-help", wlHdr && "setlist-th-help")}
-                        >
-                          Last
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        {...(wlHdr ? SETLIST_HEADER_TOOLTIP_CONTENT : {})}
-                        className={cn(
-                          "max-w-[240px] whitespace-pre-wrap text-xs",
-                          wlHdr &&
-                            "setlist-header-tooltip setlist-header-tooltip--last",
-                        )}
-                      >
-                        {LAST_HEADER_TOOLTIP}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    "Last"
-                  )}
-                </TableHead>
-              )}
-              {showCanonColumns && (
-                <TableHead
-                  className={cn(
-                    hdrPad,
-                    wlHdr ? "center text-center" : "text-center",
-                    !wlHdr && "h-8 text-muted-foreground",
-                  )}
-                >
-                  Tour
-                </TableHead>
-              )}
-              {showCanonColumns && (
-                <TableHead
-                  className={cn(
-                    hdrPad,
-                    wlHdr ? "center text-center" : "text-center",
-                    !wlHdr && "h-8 text-muted-foreground",
-                  )}
-                >
-                  Rarity
-                </TableHead>
-              )}
-              <TableHead
-                className={cn(
-                  hdrPad,
-                  wlHdr ?
-                    cn("max-w-[400px] whitespace-normal")
-                  : cn("h-8 w-max max-w-[300px] text-muted-foreground"),
-                )}
-              >
-                Personnel
-              </TableHead>
-              <TableHead
-                className={cn(
-                  hdrPad,
-                  wlHdr ?
-                    "set-table-coach-notes-head max-w-[400px]"
-                  : cn(
-                      "h-8 w-max max-w-[400px] text-muted-foreground",
-                      "py-[1px]",
-                    ),
-                )}
-              >
-                Coach&apos;s Notes
-              </TableHead>
-            </TableRow>
-          </TableHeader>
+          <DisplaySetlistTableHeader
+            wlHdr={wlHdr}
+            hdrPad={hdrPad}
+            showDiscographySourceCol={showDiscographySourceCol}
+            showWtedColumn={showWtedColumn}
+            showCanonColumns={showCanonColumns}
+            hasLastBadges={hasLastBadges}
+            isDesktop={isDesktop}
+            songHeaderTooltipContent={songHeaderTooltipContent}
+            hasSongHeaderTooltipItems={hasSongHeaderTooltipItems}
+          />
           <TableBody>
             {setlist.map((entry, index) => {
               const prevEntry = index > 0 ? setlist[index - 1] : null

@@ -1,0 +1,106 @@
+/* Score Setlist Game — WL v2: same centered shell as Request a Song + setlist `Select` chrome */
+
+.wl-home-v2 .modal.modal--wted-request.modal--setlist-game-scoring {
+  max-width: min(560px, 96vw);
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .modal-request-body {
+  margin-top: 10px;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-alert {
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  border: 1px solid;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-alert--success {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: rgb(167 243 208);
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-alert--error {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: rgb(254 202 202);
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-alert--error strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .modal-setlist-song-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 16px;
+  margin: 0;
+  padding: 0 18px 16px;
+  flex-shrink: 0;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .modal-setlist-song-footer .modal-setlist-song-footer-close {
+  appearance: none;
+  border: 1px solid rgb(63, 65, 64);
+  border-radius: 8px;
+  padding: 6px 12px;
+  background: transparent;
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .modal-setlist-song-footer .modal-setlist-song-footer-close:hover {
+  color: var(--wl-white);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-submit {
+  appearance: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  border: 1px solid rgb(4, 120, 87);
+  background: rgb(4, 120, 87);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-submit:hover:not(:disabled) {
+  background: rgb(5, 150, 105);
+  border-color: rgb(5, 150, 105);
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -26,7 +26,7 @@ import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/set
 import { buildSetlistGameIndexBreadcrumbs } from "@/components/dpro/setlistgame/setlist-game-breadcrumb-items"
 import { SetlistGameWlV2ArchiveCrumbs } from "@/components/dpro/setlistgame/setlist-game-wl-v2-archive-crumbs"
 
-const ACTIVE_LEAGUE = "2026 Viva El Gonzo"
+const ACTIVE_LEAGUE = "2026 Europe Spring"
 
 interface SubmissionDetails {
   totalScore: number
@@ -196,6 +196,7 @@ export function SetlistGameContent({
         onOpenChange={setShowScoringModal}
         gameShows={gameShows}
         onScoringComplete={handleScoringComplete}
+        wlHomeV2={v2}
       />
 
       <SetlistGameRulesDialog

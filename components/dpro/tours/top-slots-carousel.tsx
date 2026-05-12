@@ -170,7 +170,7 @@ export function TopSlotsCarousel({
               <WlTopSlotsCategorySwatch title={slot.title} index={index} />
             </div>
           </div>
-          <div className="min-w-0 max-h-64 overflow-x-auto overflow-y-auto">
+          <div className="min-w-0">
             <table
               className="w-full min-w-max border-collapse text-[11px] leading-3 wl-home-v2-years-table wl-home-v2-top-slots-stats-table"
             >
@@ -201,17 +201,15 @@ export function TopSlotsCarousel({
           <h3 className="text-sm font-semibold">Top {slot.title}</h3>
         </div>
         <CardContent className="p-0">
-          <div className="max-h-64 overflow-y-auto">
-            <table className="w-full border-collapse text-[11px] leading-3">
-              <tbody>
-                <SlotMiniTableRows
-                  data={slot.data}
-                  wlHomeV2={false}
-                  onSongClick={onSongClick}
-                />
-              </tbody>
-            </table>
-          </div>
+          <table className="w-full border-collapse text-[11px] leading-3">
+            <tbody>
+              <SlotMiniTableRows
+                data={slot.data}
+                wlHomeV2={false}
+                onSongClick={onSongClick}
+              />
+            </tbody>
+          </table>
         </CardContent>
       </Card>
     )
@@ -263,7 +261,7 @@ export function TopSlotsCarousel({
                 />
               </div>
             </div>
-            <div className="max-h-72 min-w-0 overflow-x-auto overflow-y-auto">
+            <div className="min-w-0">
               <table
                 className="w-full min-w-max border-collapse text-[11px] leading-3 wl-home-v2-years-table wl-home-v2-top-slots-stats-table"
               >
@@ -311,17 +309,15 @@ export function TopSlotsCarousel({
               )}
             </div>
             <CardContent className="p-0">
-              <div className="max-h-72 overflow-y-auto">
-                <table className="w-full border-collapse text-[11px] leading-3">
-                  <tbody>
-                    <SlotMiniTableRows
-                      data={currentSlide.data}
-                      wlHomeV2={false}
-                      onSongClick={onSongClick}
-                    />
-                  </tbody>
-                </table>
-              </div>
+              <table className="w-full border-collapse text-[11px] leading-3">
+                <tbody>
+                  <SlotMiniTableRows
+                    data={currentSlide.data}
+                    wlHomeV2={false}
+                    onSongClick={onSongClick}
+                  />
+                </tbody>
+              </table>
             </CardContent>
           </Card>
         }

@@ -3,12 +3,30 @@
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
+import { useOverlayRootScrollLock } from "@/hooks/use-modal-scroll-lock"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
-function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />
+function Sheet({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof SheetPrimitive.Root>) {
+  const scrollLock = useOverlayRootScrollLock({
+    open,
+    defaultOpen,
+    onOpenChange,
+  })
+  return (
+    <SheetPrimitive.Root
+      data-slot="sheet"
+      {...props}
+      open={scrollLock.open}
+      onOpenChange={scrollLock.onOpenChange}
+    />
+  )
 }
 
 function SheetTrigger({

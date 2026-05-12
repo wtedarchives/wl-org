@@ -3,13 +3,29 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
+import { useOverlayRootScrollLock } from "@/hooks/use-modal-scroll-lock"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 function AlertDialog({
+  open,
+  defaultOpen,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  const scrollLock = useOverlayRootScrollLock({
+    open,
+    defaultOpen,
+    onOpenChange,
+  })
+  return (
+    <AlertDialogPrimitive.Root
+      data-slot="alert-dialog"
+      {...props}
+      open={scrollLock.open}
+      onOpenChange={scrollLock.onOpenChange}
+    />
+  )
 }
 
 function AlertDialogTrigger({

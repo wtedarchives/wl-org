@@ -1,8 +1,23 @@
 /* Setlist Game "How to play" — imported by setlist-game-rules-dialog.tsx */
 
-/* shadcn dialog panel — override default `sm:max-w-sm` */
+/* shadcn dialog panel — override default `sm:max-w-sm` + max viewport height with inner scroll */
+/* shadcn DialogContent defaults to `display: grid` — force column flex for scroll split */
 [data-slot="dialog-content"].setlist-game-rules-dialog-content {
   max-width: min(720px, calc(100% - 2rem));
+  max-height: min(90dvh, calc(100vh - 2rem));
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden;
+  gap: 1rem;
+}
+
+.setlist-game-rules-dialog-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-right: 2px;
 }
 
 .setlist-game-rules-prose {
@@ -119,23 +134,26 @@
 /* ── WL Home v2 request-style modal shell (portal mounts under `.wl-home-v2`) ── */
 .wl-home-v2 .modal.modal--wted-request.modal--setlist-game-rules {
   max-width: min(720px, 96vw);
-  max-height: none;
-  overflow: visible;
+  max-height: min(90vh, 920px);
+  overflow: hidden;
 }
 
 .wl-home-v2 .modal.modal--setlist-game-rules .modal-request-body {
   margin-top: 10px;
   border-radius: 0;
   box-shadow: none;
-  overflow: visible;
+  overflow: hidden;
   background: transparent;
-  flex: 0 1 auto;
-  min-height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .wl-home-v2 .modal.modal--setlist-game-rules .modal-setlist-game-rules-scroll {
-  max-height: none;
-  overflow: visible;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 4px 8px 10px 2px;
 }
 
