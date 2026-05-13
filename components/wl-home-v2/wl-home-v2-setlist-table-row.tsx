@@ -13,18 +13,9 @@ import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-la
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
 import {
-  SetlistEntryStatsTooltipContent,
-  entryHasSongStatsLines,
-} from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
-import {
   SetlistTruncatableCell,
   SetlistTruncatableHtmlCell,
 } from "@/components/dpro/setlist/setlist-truncatable-cell"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import {
   calculateRarity,
   formatEntryLength,
@@ -135,7 +126,6 @@ export function WlHomeV2SetlistTableRow({
   const shouldRowHighlight = shouldReleaseHighlight || shouldCategoryHighlight
   const shouldRowDim = shouldReleaseDim || shouldCategoryDim
 
-  const showSongStatsTooltip = isDesktop && entryHasSongStatsLines(entry)
   const songCellInner = (
     <div className="song-cell-inner">
       <div className="song-cell-main">
@@ -231,18 +221,7 @@ export function WlHomeV2SetlistTableRow({
         className="song-cell"
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
-        {showSongStatsTooltip ?
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex w-full min-w-0 cursor-default flex-col text-left">
-                {songCellInner}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent {...SETLIST_V2_ROW_TOOLTIP_CONTENT}>
-              <SetlistEntryStatsTooltipContent entry={entry} />
-            </TooltipContent>
-          </Tooltip>
-        : songCellInner}
+        {songCellInner}
       </td>
       {showWtedColumn ?
         <td

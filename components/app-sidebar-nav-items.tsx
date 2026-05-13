@@ -31,7 +31,12 @@ interface AppSidebarNavItemsProps {
 
 function isWtedSubItemActive(pathname: string, url: (typeof WTED_RADIO_SUB)[number]["url"]) {
   if (pathname === url) return true
-  if (url === "/wted/program-director" && pathname === "/wted/episode") return true
+  if (
+    url === "/wted/program-director" &&
+    (pathname === "/wted/episode" || pathname === "/old/wted/episode")
+  ) {
+    return true
+  }
   return false
 }
 

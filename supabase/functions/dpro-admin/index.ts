@@ -608,6 +608,39 @@ async function handleAction(
       }
     }
 
+    /** Admin panel: leave NEW list with linked/skipped (client uses anon + Wysteria via `invokeDproAdmin`). */
+    case "wted_radio_ids_disposition_new": {
+      const uuid = body.uuid as string | undefined
+      const status = body.status as string | undefined
+      if (!uuid || (status !== "linked" && status !== "skipped")) {
+        return { error: "Invalid payload" }
+      }
+      const { data, error } = await db
+        .from("wted_radio_ids")
+        .update({ status })
+        .eq("uuid", uuid)
+        .eq("status", "NEW")
+        .select("uuid")
+      if (error) return { error: error.message }
+      if (!data?.length) return { error: "No matching NEW row." }
+      return { data: true }
+    }
+
+    /** Admin panel: mark REMOVED row skipped (leave REMOVED list). */
+    case "wted_radio_ids_skip_removed": {
+      const uuid = body.uuid as string | undefined
+      if (!uuid) return { error: "Missing uuid" }
+      const { data, error } = await db
+        .from("wted_radio_ids")
+        .update({ status: "skipped" })
+        .eq("uuid", uuid)
+        .eq("status", "REMOVED")
+        .select("uuid")
+      if (error) return { error: error.message }
+      if (!data?.length) return { error: "No matching REMOVED row." }
+      return { data: true }
+    }
+
     default:
       return { error: `Unknown action: ${action}` }
   }

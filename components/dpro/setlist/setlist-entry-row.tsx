@@ -176,7 +176,7 @@ export function SetlistEntryRow({
           entry={entry}
           onSongClick={onSongClick}
           onJotyClick={onJotyClick}
-          showStatsTooltip={showTooltips}
+          showStatsTooltip={showTooltips && !wlHomeV2RowChrome}
           statsTooltipWlV2Chrome={wlHomeV2RowChrome}
         />
       </TableCell>

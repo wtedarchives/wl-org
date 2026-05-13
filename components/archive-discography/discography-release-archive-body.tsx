@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
 import { notFound, useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/components/setlist-breadcrumb-context"
 import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
+import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import { useDiscographyReleaseData } from "@/hooks/use-discography-release-data"
 import { useDiscographyLinkedSetlist } from "@/hooks/use-discography-linked-setlist"
 import { useDiscographyLinkedReleases } from "@/hooks/use-discography-linked-releases"
@@ -60,6 +61,7 @@ export function DiscographyReleaseArchiveBody({
   const router = useRouter()
   const { session } = useAuth()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
+  const wtedModalHeadingId = useId()
   const [releaseArtworkFailed, setReleaseArtworkFailed] = useState(false)
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
   const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
@@ -93,12 +95,26 @@ export function DiscographyReleaseArchiveBody({
 
   const title = release?.displayname ?? ""
 
-  useEffect(() => {
-    setHoveredReleaseId(null)
+  const closeWtedRequestUi = useCallback(() => {
     setWtedSheetOpen(false)
     setWtedSheetEntry(null)
+  }, [])
+
+  useEffect(() => {
+    setHoveredReleaseId(null)
+    closeWtedRequestUi()
     setWtedLoginRequiredOpen(false)
-  }, [id])
+  }, [id, closeWtedRequestUi])
+
+  useEffect(() => {
+    if (!wlHomeV2Shell || !wtedSheetOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return
+      closeWtedRequestUi()
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [wlHomeV2Shell, wtedSheetOpen, closeWtedRequestUi])
 
   useEffect(() => {
     setReleaseArtworkFailed(false)
@@ -214,22 +230,44 @@ export function DiscographyReleaseArchiveBody({
       <SetlistWtedLoginRequiredDialog
         open={wtedLoginRequiredOpen}
         onOpenChange={setWtedLoginRequiredOpen}
+        wlHomeV2={wlHomeV2Shell}
       />
-      <SetlistWtedSheet
-        open={wtedSheetOpen}
-        onOpenChange={setWtedSheetOpen}
-        entry={wtedSheetEntry}
-        setlist={linkedSetlist}
-        show={
-          wtedSheetEntry ?
-            (linkedShowContextById[wtedSheetEntry.entry_show] ??
-              EMPTY_WTED_SHOW)
-          : EMPTY_WTED_SHOW
-        }
-        fallbackReleaseArtwork={
-          discographyReleases[0]?.release_artwork ?? null
-        }
-      />
+      {wlHomeV2Shell ?
+        <WlHomeV2SetlistWtedModal
+          open={wtedSheetOpen}
+          onClose={closeWtedRequestUi}
+          entry={wtedSheetEntry}
+          setlist={linkedSetlist}
+          show={
+            wtedSheetEntry ?
+              (linkedShowContextById[wtedSheetEntry.entry_show] ??
+                EMPTY_WTED_SHOW)
+            : EMPTY_WTED_SHOW
+          }
+          fallbackReleaseArtwork={
+            discographyReleases[0]?.release_artwork ?? null
+          }
+          headingId={wtedModalHeadingId}
+        />
+      : <SetlistWtedSheet
+          open={wtedSheetOpen}
+          onOpenChange={(open) => {
+            setWtedSheetOpen(open)
+            if (!open) setWtedSheetEntry(null)
+          }}
+          entry={wtedSheetEntry}
+          setlist={linkedSetlist}
+          show={
+            wtedSheetEntry ?
+              (linkedShowContextById[wtedSheetEntry.entry_show] ??
+                EMPTY_WTED_SHOW)
+            : EMPTY_WTED_SHOW
+          }
+          fallbackReleaseArtwork={
+            discographyReleases[0]?.release_artwork ?? null
+          }
+        />
+      }
     </>
   )
 

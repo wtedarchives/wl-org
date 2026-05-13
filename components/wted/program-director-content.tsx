@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useProgramDirectorData } from "@/hooks/use-program-director-data"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
@@ -90,49 +91,51 @@ export function ProgramDirectorContent({
       }
     >
       {isV2 ?
-        <div
-          className={"modal-backdrop" + (showInfo != null ? " open" : "")}
-          id="pd-show-info-modal"
-          role="presentation"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowInfo(null)
-          }}
-        >
-          {showInfo != null ?
-            <div
-              className="modal modal--wted-request modal--pd-show-info"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={pdShowInfoHeadingId}
-              aria-describedby={pdShowInfoDescId}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-request-head">
-                <div className="modal-request-head-text">
-                  <h3 id={pdShowInfoHeadingId}>{showInfo.showTitle}</h3>
-                </div>
-                <button
-                  type="button"
-                  className="modal-request-close"
-                  onClick={() => setShowInfo(null)}
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="modal-request-body">
-                <div className="modal-pd-show-info-scroll">
-                  <p
-                    id={pdShowInfoDescId}
-                    className="modal-pd-show-info-text"
+        <WlHomeV2ModalPortal open={showInfo != null}>
+          <div
+            className={"modal-backdrop" + (showInfo != null ? " open" : "")}
+            id="pd-show-info-modal"
+            role="presentation"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowInfo(null)
+            }}
+          >
+            {showInfo != null ?
+              <div
+                className="modal modal--wted-request modal--pd-show-info"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={pdShowInfoHeadingId}
+                aria-describedby={pdShowInfoDescId}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-request-head">
+                  <div className="modal-request-head-text">
+                    <h3 id={pdShowInfoHeadingId}>{showInfo.showTitle}</h3>
+                  </div>
+                  <button
+                    type="button"
+                    className="modal-request-close"
+                    onClick={() => setShowInfo(null)}
+                    aria-label="Close"
                   >
-                    {showInfo.description}
-                  </p>
+                    ×
+                  </button>
+                </div>
+                <div className="modal-request-body">
+                  <div className="modal-pd-show-info-scroll">
+                    <p
+                      id={pdShowInfoDescId}
+                      className="modal-pd-show-info-text"
+                    >
+                      {showInfo.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          : null}
-        </div>
+            : null}
+          </div>
+        </WlHomeV2ModalPortal>
       : <Dialog
           open={showInfo != null}
           onOpenChange={(open) => {

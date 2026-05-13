@@ -166,7 +166,8 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
       (pathname ?? "") === "/archive/discography" ||
       (pathname ?? "") === "/old/archive/discography" ||
       (pathname ?? "").startsWith("/old/archive/discography/")) ||
-      (pathname ?? "") === "/wted/episode") &&
+      (pathname ?? "") === "/wted/episode" ||
+      (pathname ?? "") === "/old/wted/episode") &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride

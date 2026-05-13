@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, type CSSProperties } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Tooltip,
@@ -50,10 +50,12 @@ export function WtedEpisodeGroupSpreadCard({
   rows,
   hoveredGroupKey = null,
   onGroupHover,
+  visualVariant = "default",
 }: {
   rows: WtedEpisodeTableRow[]
   hoveredGroupKey?: string | null
   onGroupHover?: (groupKey: string | null) => void
+  visualVariant?: "default" | "wl-home-v2"
 }) {
   const isDesktop = useIsDesktopContentLayout()
   const { spread, maxCount } = useMemo(() => {
@@ -86,117 +88,221 @@ export function WtedEpisodeGroupSpreadCard({
 
   if (!wtedEpisodeHasMultipleShowGroups(rows)) return null
 
+  const isV2 = visualVariant === "wl-home-v2"
+
+  const list = (
+    <ul
+      className={cn(
+        "space-y-1 text-xs",
+        isV2 ?
+          "wl-home-v2-setlist-song-spread-ul max-h-[min(420px,55vh)] overflow-y-auto py-0.5"
+        : "max-h-[390px] overflow-y-auto p-3 md:max-h-[498px]",
+      )}
+    >
+      {spread.map(({ key, displayLabel, count, items }) => {
+        const sortedForTooltip = [...items].sort((a, b) => {
+          const d = a.showDate.localeCompare(b.showDate)
+          if (d !== 0) return d
+          return getSongNameForSort(a.label).localeCompare(
+            getSongNameForSort(b.label),
+          )
+        })
+        const tooltipSongList =
+          sortedForTooltip.length > 0 ?
+            <ul
+              className={cn(
+                "list-none space-y-0.5 overflow-y-auto leading-tight",
+                isV2 ?
+                  "wl-home-v2-setlist-song-spread-tooltip-songs max-h-[min(280px,40vh)] py-1 text-[12px] text-white/88"
+                : "space-y-[1px] py-1.5 text-[11px]",
+                !isV2 && "px-3",
+              )}
+            >
+              {sortedForTooltip.map((it, idx) => {
+                const bracketIdx = it.label.indexOf(" [")
+                const songName =
+                  bracketIdx >= 0 ?
+                    it.label.slice(0, bracketIdx)
+                  : it.label
+                const artistPart =
+                  bracketIdx >= 0 ? it.label.slice(bracketIdx) : null
+                const dateShown =
+                  it.showDate ? formatSetlistDate(it.showDate) : ""
+                return (
+                  <li
+                    key={`${it.showDate}-${it.label}-${idx}`}
+                    className={cn(!isV2 && "px-3", isV2 && "px-0")}
+                  >
+                    <span className="font-semibold">{songName}</span>
+                    {artistPart ?
+                      <span
+                        className={cn(
+                          "font-normal",
+                          isV2 && "text-white/75",
+                        )}
+                      >
+                        {artistPart}
+                      </span>
+                    : null}
+                    {dateShown ?
+                      <span
+                        className={cn(
+                          "font-normal",
+                          isV2 ? "text-white/72" : "text-muted-foreground",
+                        )}
+                      >
+                        {" "}
+                        — {dateShown}
+                      </span>
+                    : null}
+                  </li>
+                )
+              })}
+            </ul>
+          : null
+
+        const barWidth =
+          maxCount > 0 ? Math.max(4, (count / maxCount) * 100) : 0
+        const isRowHovered = hoveredGroupKey === key
+        const rowKey = key === "" ? "__empty__" : key
+
+        const rowContent = (
+          <div
+            className={cn(
+              "flex items-center gap-2 tabular-nums",
+              isV2 &&
+                cn(
+                  "wl-home-v2-setlist-song-spread-row rounded-md px-0.5 -mx-0.5",
+                  isRowHovered && "wl-home-v2-setlist-song-spread-row--hover",
+                ),
+              !isV2 &&
+                isRowHovered &&
+                "rounded-md bg-muted/80 px-1 -mx-1",
+              onGroupHover && "cursor-default",
+            )}
+            onMouseEnter={() => onGroupHover?.(key)}
+            onMouseLeave={() => onGroupHover?.(null)}
+          >
+            <span
+              className={cn(
+                "flex h-6 shrink-0 items-center justify-center overflow-hidden rounded-sm text-center text-xs font-semibold",
+                isV2 ?
+                  "wl-home-v2-setlist-song-spread-icon w-20 max-w-20 truncate px-0.5 text-[11px] text-white/70"
+                : "inline-block w-20 truncate rounded-md bg-muted px-1 py-0.5 text-muted-foreground",
+              )}
+              title={displayLabel}
+            >
+              {displayLabel}
+            </span>
+            {isV2 ?
+              <div
+                className="wl-home-v2-setlist-song-spread-track wl-home-v2-setlist-song-spread-track--proportion flex min-h-5 min-w-0 flex-1 items-center justify-start"
+                aria-hidden
+              >
+                <div
+                  className="wl-home-v2-setlist-song-spread-proportion-fill"
+                  style={{ width: `${barWidth}%` }}
+                />
+              </div>
+            : <div
+                className={cn(
+                  "wted-episode-spread-bar-track h-4 min-w-0 flex-1 overflow-hidden rounded-full",
+                  "bg-muted",
+                )}
+                style={
+                  {
+                    "--wted-episode-spread-bar-pct": `${barWidth}%`,
+                  } as CSSProperties
+                }
+                aria-hidden
+              >
+                <div
+                  className={cn(
+                    "wted-episode-spread-bar-fill h-full rounded-full bg-wl-orange/60 transition-all duration-200",
+                    isRowHovered ? "opacity-100" : "opacity-80",
+                  )}
+                />
+              </div>
+            }
+            <span
+              className={cn(
+                "shrink-0 text-right tabular-nums",
+                isV2 &&
+                  "wl-home-v2-setlist-song-spread-count inline-block text-[13px] text-white/55",
+                !isV2 && "text-muted-foreground",
+              )}
+              style={
+                isV2 && maxCount >= 10 ?
+                  { minWidth: `${String(maxCount).length}ch` }
+                : undefined
+              }
+            >
+              {count}
+            </span>
+          </div>
+        )
+
+        const tooltipBody =
+          isV2 && tooltipSongList ?
+            <div className="wl-home-v2-setlist-song-spread-tooltip-inner text-left">
+              <p className="wl-home-v2-setlist-song-spread-tooltip-title">
+                {displayLabel}
+              </p>
+              {tooltipSongList}
+            </div>
+          : tooltipSongList ?
+            <>
+              <div className="w-full border-b border-black">
+                <p className="px-3 py-1 text-sm font-bold leading-tight">
+                  {displayLabel}
+                </p>
+              </div>
+              {tooltipSongList}
+            </>
+          : null
+
+        return (
+          <li key={rowKey}>
+            {isDesktop && tooltipBody ?
+              <Tooltip>
+                <TooltipTrigger asChild>{rowContent}</TooltipTrigger>
+                <TooltipContent
+                  side="left"
+                  sideOffset={6}
+                  className={cn(
+                    "max-w-xs p-0",
+                    isV2 ? "setlist-header-tooltip" : "text-[11px]",
+                  )}
+                >
+                  {tooltipBody}
+                </TooltipContent>
+              </Tooltip>
+            : rowContent}
+          </li>
+        )
+      })}
+    </ul>
+  )
+
+  if (visualVariant === "wl-home-v2") {
+    return (
+      <section className="wl-home-v2-years-tile wl-home-v2-tile-bg--newbg4">
+        <div className="wl-home-v2-years-tile-inner">
+          <div className="side-card wl-home-v2-setlist-song-spread-side-card">
+            <div className="sc-label">Group Spread</div>
+            {list}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <Card className="ring-0 border border-border/60 bg-card/80 overflow-hidden py-0">
       <div className="px-3 py-1.5 bg-muted/60 shrink-0">
         <h2 className="text-sm font-semibold">Group Spread</h2>
       </div>
-      <CardContent className="p-0">
-        <ul className="space-y-1 text-xs max-h-[390px] md:max-h-[498px] overflow-y-auto p-3">
-          {spread.map(({ key, displayLabel, count, items }) => {
-            const sortedForTooltip = [...items].sort((a, b) => {
-              const d = a.showDate.localeCompare(b.showDate)
-              if (d !== 0) return d
-              return getSongNameForSort(a.label).localeCompare(
-                getSongNameForSort(b.label),
-              )
-            })
-            const tooltipContent =
-              sortedForTooltip.length > 0 ? (
-                <ul className="list-none space-y-[1px] overflow-y-auto text-[11px] leading-tight py-1.5">
-                  {sortedForTooltip.map((it, idx) => {
-                    const bracketIdx = it.label.indexOf(" [")
-                    const songName =
-                      bracketIdx >= 0 ?
-                        it.label.slice(0, bracketIdx)
-                      : it.label
-                    const artistPart =
-                      bracketIdx >= 0 ? it.label.slice(bracketIdx) : null
-                    const dateShown =
-                      it.showDate ? formatSetlistDate(it.showDate) : ""
-                    return (
-                      <li
-                        key={`${it.showDate}-${it.label}-${idx}`}
-                        className="px-3"
-                      >
-                        <span className="font-semibold">{songName}</span>
-                        {artistPart && (
-                          <span className="font-normal">{artistPart}</span>
-                        )}
-                        {dateShown ?
-                          <span className="text-muted-foreground font-normal">
-                            {" "}
-                            — {dateShown}
-                          </span>
-                        : null}
-                      </li>
-                    )
-                  })}
-                </ul>
-              ) : null
-
-            const barWidth =
-              maxCount > 0 ? Math.max(4, (count / maxCount) * 100) : 0
-            const isRowHovered = hoveredGroupKey === key
-            const rowKey = key === "" ? "__empty__" : key
-
-            const rowContent = (
-              <div
-                className={cn(
-                  "flex items-center gap-2 tabular-nums",
-                  isRowHovered && "bg-muted/80 rounded-md px-1 -mx-1",
-                  onGroupHover && "cursor-default",
-                )}
-                onMouseEnter={() => onGroupHover?.(key)}
-                onMouseLeave={() => onGroupHover?.(null)}
-              >
-                <span
-                  className="inline-block w-20 shrink-0 truncate rounded-md bg-muted px-1 py-0.5 text-center text-xs font-semibold text-muted-foreground"
-                  title={displayLabel}
-                >
-                  {displayLabel}
-                </span>
-                <div
-                  className="h-4 flex-1 min-w-0 rounded-full bg-muted overflow-hidden"
-                  aria-hidden
-                >
-                  <div
-                    className={cn(
-                      "h-full rounded-full bg-wl-orange/60 transition-all duration-200",
-                      isRowHovered ? "opacity-100" : "opacity-80",
-                    )}
-                    style={{ width: `${barWidth}%` }}
-                  />
-                </div>
-                <span className="shrink-0 text-right text-muted-foreground">
-                  {count}
-                </span>
-              </div>
-            )
-
-            return (
-              <li key={rowKey}>
-                {isDesktop && tooltipContent ?
-                  <Tooltip>
-                    <TooltipTrigger asChild>{rowContent}</TooltipTrigger>
-                    <TooltipContent
-                      side="left"
-                      className="max-w-xs text-[11px] p-0"
-                    >
-                      <div className="w-full border-b border-black">
-                        <p className="font-bold px-3 py-1 leading-tight text-sm">
-                          {displayLabel}
-                        </p>
-                      </div>
-                      {tooltipContent}
-                    </TooltipContent>
-                  </Tooltip>
-                : rowContent}
-              </li>
-            )
-          })}
-        </ul>
-      </CardContent>
+      <CardContent className="p-0">{list}</CardContent>
     </Card>
   )
 }

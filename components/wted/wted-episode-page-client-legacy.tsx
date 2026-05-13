@@ -11,17 +11,18 @@ import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
 import { useSetlistBreadcrumb } from "@/components/setlist-breadcrumb-context"
 import { WtedEpisodePageHero } from "@/components/wted/wted-episode-page-hero"
 import { WtedEpisodePlaylistSection } from "@/components/wted/wted-episode-playlist-section"
-import {
-  wtedEpisodeHasMultipleShowYears,
-} from "@/components/wted/wted-episode-performance-spread-card"
+import { wtedEpisodeHasMultipleShowYears } from "@/components/wted/wted-episode-performance-spread-card"
 import { useWtedEpisodeDetailData } from "@/hooks/use-wted-episode-detail-data"
 import { useWtedEpisodePageId } from "@/hooks/use-wted-episode-page-id"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { wtedEpisodeHasMultipleShowGroups } from "@/lib/wted-episode-show-group"
-import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
+import {
+  getWtedOldEpisodeUrl,
+} from "@/lib/wted-episode-url"
 import type { SetlistEntry } from "@/types/setlist"
 
-export function WtedEpisodePageClient() {
+/** Previous `(main)` sidebar episode layout — see `/old/wted/episode`. */
+export function WtedEpisodePageClientLegacy() {
   const router = useRouter()
   const { session } = useAuth()
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
@@ -50,9 +51,7 @@ export function WtedEpisodePageClient() {
     loading,
     notFound,
     loadError,
-  } = useWtedEpisodeDetailData(
-    invalidParams ? undefined : episodeId,
-  )
+  } = useWtedEpisodeDetailData(invalidParams ? undefined : episodeId)
 
   const playlistSetlist = useMemo(
     () => rows.map((r) => r.setlistEntry),
@@ -125,7 +124,10 @@ export function WtedEpisodePageClient() {
     setSetlistBreadcrumbs([
       { label: "WTED Radio", href: "/wted/program-director" },
       { label: showLabel, href: "/wted/program-director" },
-      { label: displayName, href: getWtedEpisodeUrl(episode.uuid) },
+      {
+        label: displayName,
+        href: getWtedOldEpisodeUrl(episode.uuid),
+      },
     ])
     return () => setSetlistBreadcrumbs(null)
   }, [
@@ -158,7 +160,10 @@ export function WtedEpisodePageClient() {
       <div className="flex flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
         <p className="text-center text-sm text-muted-foreground">
           Missing or invalid episode. Open an episode from{" "}
-          <Link href="/wted" className="font-medium text-foreground underline">
+          <Link
+            href="/wted/program-director"
+            className="font-medium text-foreground underline"
+          >
             WTED Radio
           </Link>
           .
@@ -181,7 +186,7 @@ export function WtedEpisodePageClient() {
         </p>
         <p className="text-center">
           <Link
-            href="/wted"
+            href="/wted/program-director"
             className="text-sm font-medium text-foreground underline"
           >
             Back to WTED Radio
@@ -200,7 +205,7 @@ export function WtedEpisodePageClient() {
         showName={showName}
         siblings={siblings}
         onNavigateEpisode={(id) =>
-          router.push(getWtedEpisodeUrl(id), { scroll: false })
+          router.push(getWtedOldEpisodeUrl(id), { scroll: false })
         }
       />
 

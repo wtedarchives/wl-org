@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, type CSSProperties } from "react"
+import { useMemo } from "react"
 import {
   SongSpreadDisplay,
   type CategorySpread,
@@ -112,14 +112,7 @@ export function SetlistSongSpreadCard({
 
   if (visualVariant === "wl-home-v2") {
     return (
-      <section
-        className="wl-home-v2-years-tile"
-        style={
-          {
-            "--tile-bg": "url('/newbg4.jpeg')",
-          } as CSSProperties
-        }
-      >
+      <section className="wl-home-v2-years-tile wl-home-v2-tile-bg--newbg4">
         <div className="wl-home-v2-years-tile-inner">
           <div className="side-card wl-home-v2-setlist-song-spread-side-card">
             <div className="sc-label">Song Spread</div>

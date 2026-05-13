@@ -80,16 +80,20 @@ export function useAdminRadioTracksPanel() {
     uuid: string,
     status: NewDispositionStatus,
   ): Promise<boolean> => {
-    if (!supabase) return false
     setUpdatingUuid(uuid)
     setError(null)
     try {
-      const { error: upErr } = await supabase
-        .from("wted_radio_ids")
-        .update({ status })
-        .eq("uuid", uuid)
-        .eq("status", "NEW")
-      if (upErr) throw upErr
+      const session = getSession()
+      if (!session?.token) {
+        setError("Sign in again to perform this action.")
+        return false
+      }
+      const { error: invokeError } = await invokeDproAdmin(session.token, {
+        action: "wted_radio_ids_disposition_new",
+        uuid,
+        status,
+      })
+      if (invokeError) throw new Error(invokeError)
       await loadNewAndRemoved()
       return true
     } catch (err) {
@@ -109,16 +113,19 @@ export function useAdminRadioTracksPanel() {
   }
 
   const handleRemovedMarkSkipped = async (uuid: string): Promise<boolean> => {
-    if (!supabase) return false
     setUpdatingUuid(uuid)
     setError(null)
     try {
-      const { error: upErr } = await supabase
-        .from("wted_radio_ids")
-        .update({ status: "skipped" })
-        .eq("uuid", uuid)
-        .eq("status", "REMOVED")
-      if (upErr) throw upErr
+      const session = getSession()
+      if (!session?.token) {
+        setError("Sign in again to perform this action.")
+        return false
+      }
+      const { error: invokeError } = await invokeDproAdmin(session.token, {
+        action: "wted_radio_ids_skip_removed",
+        uuid,
+      })
+      if (invokeError) throw new Error(invokeError)
       await loadNewAndRemoved()
       return true
     } catch (err) {

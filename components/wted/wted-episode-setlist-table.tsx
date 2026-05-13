@@ -22,6 +22,7 @@ import "@/components/dpro/setlist/display-setlist-table.css"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
 import { WtedEpisodeSetlistDataRow } from "@/components/wted/wted-episode-setlist-data-row"
 import { WtedEpisodeSetlistTableHead } from "@/components/wted/wted-episode-setlist-table-head"
+import { cn } from "@/lib/utils"
 
 export function WtedEpisodeSetlistTable({
   rows,
@@ -30,6 +31,7 @@ export function WtedEpisodeSetlistTable({
   hoveredShowGroupKey = null,
   onWtedClick,
   onJotyClick,
+  wlHomeV2SetlistChrome = false,
 }: {
   rows: WtedEpisodeTableRow[]
   /** When set, highlights matching song categories and dims others (song spread hover). */
@@ -42,6 +44,8 @@ export function WtedEpisodeSetlistTable({
   onWtedClick?: (entry: SetlistEntry) => void
   /** Opens the same JOTY drawer as the setlist archive page. */
   onJotyClick?: (entry: SetlistEntry) => void
+  /** Use WL Home v2 setlist table visuals (fonts, dividers, row/cell classes). */
+  wlHomeV2SetlistChrome?: boolean
 }) {
   const router = useRouter()
   const isDesktop = useIsDesktopContentLayout()
@@ -75,13 +79,22 @@ export function WtedEpisodeSetlistTable({
           body.push(
             <TableRow
               key={`encore-${row.refId}-${index}`}
-              className="border-border/60 hover:bg-transparent"
+              className={
+                wlHomeV2SetlistChrome ?
+                  "set-divider-row set-divider-row--encore border-0 hover:bg-transparent"
+                : "border-border/60 hover:bg-transparent"
+              }
+              aria-hidden={wlHomeV2SetlistChrome ? true : undefined}
             >
               <TableCell
                 colSpan={colSpan}
-                className="border-y border-border bg-gray-700 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
+                className={
+                  wlHomeV2SetlistChrome ?
+                    "set-divider-cell"
+                  : "border-y border-border bg-gray-700 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
+                }
               >
-                {getEncoreLabel(row.wtedSet)}
+                {wlHomeV2SetlistChrome ? null : getEncoreLabel(row.wtedSet)}
               </TableCell>
             </TableRow>,
           )
@@ -96,13 +109,22 @@ export function WtedEpisodeSetlistTable({
         body.push(
           <TableRow
             key={`setbreak-${row.refId}-${index}`}
-            className="border-border/60 hover:bg-transparent"
+            className={
+              wlHomeV2SetlistChrome ?
+                "set-divider-row border-0 hover:bg-transparent"
+              : "border-border/60 hover:bg-transparent"
+            }
+            aria-hidden={wlHomeV2SetlistChrome ? true : undefined}
           >
             <TableCell
               colSpan={colSpan}
-              className="border-y border-border bg-gray-800 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
+              className={
+                wlHomeV2SetlistChrome ?
+                  "set-divider-cell"
+                : "border-y border-border bg-gray-800 px-0 py-[2px] text-center text-[0.625rem] font-medium text-foreground"
+              }
             >
-              Set Break
+              {wlHomeV2SetlistChrome ? null : "Set Break"}
             </TableCell>
           </TableRow>,
         )
@@ -148,24 +170,35 @@ export function WtedEpisodeSetlistTable({
         showGroupColumn={showGroupColumn}
         onWtedClick={onWtedClick}
         onJotyClick={onJotyClick}
+        wlHomeV2SetlistChrome={wlHomeV2SetlistChrome}
       />,
     )
   })
 
+  const table = (
+    <Table
+      className={cn(
+        "display-setlist-table",
+        wlHomeV2SetlistChrome && "set-table",
+      )}
+    >
+      <TableHeader>
+        <WtedEpisodeSetlistTableHead
+          showGroupColumn={showGroupColumn}
+          showWtedColumn={showWtedColumn}
+          isDesktop={isDesktop}
+          wlHomeV2SetlistChrome={wlHomeV2SetlistChrome}
+        />
+      </TableHeader>
+      <TableBody>{body}</TableBody>
+    </Table>
+  )
+
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="w-full overflow-x-auto">
-        <Table className="display-setlist-table">
-          <TableHeader>
-            <WtedEpisodeSetlistTableHead
-              showGroupColumn={showGroupColumn}
-              showWtedColumn={showWtedColumn}
-              isDesktop={isDesktop}
-            />
-          </TableHeader>
-          <TableBody>{body}</TableBody>
-        </Table>
-      </div>
+      {wlHomeV2SetlistChrome ?
+        table
+      : <div className="w-full overflow-x-auto">{table}</div>}
     </TooltipProvider>
   )
 }

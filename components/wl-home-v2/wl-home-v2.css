@@ -4199,9 +4199,10 @@
     visibility: visible;
     pointer-events: auto;
   }
-  /* Top bar inert while any v2 overlay is open (in-shell or portaled on body). */
+  /* Top bar + footer inert while portaled v2 overlay is open (backdrop not inside .wl-home-v2). */
   .wl-home-v2:has(.modal-backdrop.open) header.top,
-  body:has(.wl-home-v2-modal-layer .modal-backdrop.open) .wl-home-v2 header.top {
+  body:has(.wl-home-v2-modal-layer .modal-backdrop.open) .wl-home-v2 header.top,
+  body:has(.wl-home-v2-modal-layer .modal-backdrop.open) .wl-home-v2 footer.foot {
     pointer-events: none;
   }
   .wl-home-v2 .modal {
@@ -8078,6 +8079,10 @@
     --setlist-rail-label-color: var(--wl-white);
     --setlist-promoted-section-header-size: 11px;
   }
+  .wl-home-v2 .wl-home-v2-wted-episode-page {
+    --setlist-rail-label-color: var(--wl-white);
+    --setlist-promoted-section-header-size: 11px;
+  }
   /* Match setlist main column `.wl-home-v2-setlist .wl-home-v2-years-tile--main` wash. */
   .wl-home-v2
     .wl-home-v2-discography-release-page
@@ -8125,8 +8130,10 @@
   }
   /*
    * Hero: setlist `.show-header` frosted banner + `.side-card` Release stats (`WlHomeV2SetlistShowStatsTile` pattern).
+   * Same banner chrome for WTED episode detail (`.wl-home-v2-wted-episode-page`).
    */
-  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header {
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header,
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__hero .show-header {
     display: flex;
     align-items: stretch;
     flex-wrap: wrap;
@@ -8143,11 +8150,13 @@
     overflow: hidden;
   }
   @media (max-width: 1343px) {
-    .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header {
+    .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header,
+    .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__hero .show-header {
       padding: 12px;
     }
   }
-  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header::before {
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header::before,
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__hero .show-header::before {
     content: "";
     position: absolute;
     right: -40px;
@@ -8157,7 +8166,8 @@
     background: radial-gradient(circle, rgba(255, 122, 103, 0.2), transparent 65%);
     pointer-events: none;
   }
-  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header .left {
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header .left,
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__hero .show-header .left {
     position: relative;
     z-index: 2;
     gap: 6px;
@@ -8166,10 +8176,16 @@
     .wl-home-v2-discography-release-page
     .discography-release-archive__hero
     .show-header
+    .show-header-title-row,
+  .wl-home-v2
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__hero
+    .show-header
     .show-header-title-row {
     width: 100%;
   }
-  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header h1.show-header-heading {
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__hero .show-header h1.show-header-heading,
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__hero .show-header h1.show-header-heading {
     font-size: clamp(22px, 4.2vw, 36px);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -8181,6 +8197,7 @@
   /*
    * Artist line — matches setlist `.show-header .venue .venue-subvenue-text` (no link / hover).
    */
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__artist-meta,
   .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__artist-meta {
     margin: 0;
     font-family:
@@ -8191,6 +8208,7 @@
     color: rgba(255, 255, 255, 0.92);
     font-style: normal;
   }
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__header-meta-region,
   .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta-region {
     box-sizing: border-box;
     width: 100%;
@@ -8199,6 +8217,7 @@
     border-top: 1px solid rgb(53, 56, 54);
   }
   /* Label column width matches longest dt; values align in column 2 (reference layout). */
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__header-meta,
   .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta {
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr);
@@ -8214,12 +8233,14 @@
     font-size: 13px;
     font-weight: 500;
   }
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__header-meta dt,
   .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta dt {
     margin: 0;
     color: rgba(255, 255, 255, 0.55);
     font-weight: 500;
     line-height: 1.35;
   }
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__header-meta dd,
   .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__header-meta dd {
     margin: 0;
     min-width: 0;
@@ -8247,7 +8268,8 @@
       inset 0 1px 0 rgb(255 255 255 / 0.06),
       0 1px 2px rgb(0 0 0 / 0.2);
   }
-  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__artwork {
+  .wl-home-v2 .wl-home-v2-discography-release-page .discography-release-archive__artwork,
+  .wl-home-v2 .wl-home-v2-wted-episode-page .discography-release-archive__artwork {
     border-radius: 10px;
     border: 1px solid rgb(53, 56, 54);
     box-shadow:
@@ -8256,6 +8278,79 @@
     background: rgba(0, 0, 0, 0.32);
     position: relative;
     z-index: 2;
+  }
+  /* Description: setlist coach-notes shell (`.show-notes-inner`, orange rail). */
+  .wl-home-v2
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__hero
+    .show-notes {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+  .wl-home-v2
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__hero
+    .show-notes-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: 100%;
+    background: rgba(0, 0, 0, 0.63);
+    border: 1px solid rgb(63, 65, 64);
+    border-left: 3px solid var(--wl-orange);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .wl-home-v2
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__hero
+    .show-notes-inner
+    .show-notes-body {
+    margin: 0;
+    min-width: 0;
+    line-height: 1.25;
+  }
+  .wl-home-v2
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__hero
+    .show-notes-inner
+    .show-notes-body
+    a {
+    color: var(--wl-orange);
+    font-weight: 600;
+  }
+  .wl-home-v2
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__hero
+    .show-notes-inner
+    .show-notes-body
+    a:hover {
+    color: var(--wl-light-orange);
+    text-decoration: underline;
+  }
+    .wl-home-v2-wted-episode-page
+    .discography-release-archive__header-meta
+    dt.sc-label {
+    color: var(--setlist-rail-label-color);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    line-height: 1.35;
+    margin: 0;
   }
   /*
    * Show column (`SetlistEntryRow`): verbatim sets `a { text-decoration: none }` —
@@ -9875,6 +9970,13 @@
   position: relative;
   z-index: 2;
 }
+/* WTED episode playlist aside: space between Song / Performance / Group spread tiles. */
+.wl-home-v2
+  .wl-home-v2-wted-episode-page.wl-home-v2-setlist
+  .wl-home-v2-setlist-aside-stats-tiles {
+  gap: 16px;
+  padding-top: 16px;
+}
 /* `md`–`< xl`: two-column grid; inter-tile accent strips would break cell pairing, so hide for this band. */
 @media (min-width: 768px) and (max-width: 1343px) {
   .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles {
@@ -11196,7 +11298,8 @@
   white-space: nowrap;
 }
 /* TD / LIB / Debut: same layout as `entry_short` (`.short`); colors from getLastCountPillStyle */
-.wl-home-v2 .wl-home-v2-setlist .set-table td.last-cell .last-pill {
+.wl-home-v2 .wl-home-v2-setlist .set-table td.last-cell .last-pill,
+.wl-home-v2 .wl-home-v2-wted-episode-page .last-pill {
   display: inline-block;
   margin-left: 0;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -11294,6 +11397,18 @@
   .wl-home-v2-setlist
   .wl-home-v2-complete-shows-archive.wl-home-v2-years-tile--main {
   --tile-bg: url("/newbg3.jpeg");
+}
+/* Static tile backdrops: use classes instead of inline `--tile-bg` on tiles. */
+.wl-home-v2 .wl-home-v2-years-tile.wl-home-v2-tile-bg--newbg3 {
+  --tile-bg: url("/newbg3.jpeg");
+}
+.wl-home-v2 .wl-home-v2-years-tile.wl-home-v2-tile-bg--newbg4 {
+  --tile-bg: url("/newbg4.jpeg");
+}
+/* WTED episode spread charts (and legacy sidebar): bar width from `--wted-episode-spread-bar-pct` on the track. */
+.wted-episode-spread-bar-fill {
+  width: var(--wted-episode-spread-bar-pct, 0%);
+  min-width: 4px;
 }
 /* Popular placements (archive): same frosted panel + title row as tour `/archive/tours` top slots. */
 .wl-home-v2
