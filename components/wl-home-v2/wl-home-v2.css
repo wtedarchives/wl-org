@@ -1094,22 +1094,31 @@
       padding: 28px 28px 40px;
     }
   }
-  .wl-home-v2 .wl-home-v2-not-found__panel {
+  .wl-home-v2 .wl-home-v2-not-found__group {
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 32rem;
+    gap: 20px;
+    box-sizing: border-box;
+  }
+  .wl-home-v2 .wl-home-v2-not-found__panel {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
     width: 100%;
-    max-width: 32rem;
     padding: 24px 22px 28px;
     box-sizing: border-box;
     text-align: center;
   }
   .wl-home-v2 .wl-home-v2-not-found__art {
+    display: block;
     width: 100%;
-    max-width: 28rem;
     height: auto;
     border-radius: 12px;
     object-fit: cover;
@@ -8361,7 +8370,8 @@
   /* Compact tour dates header: “Tours” opener — match stats `.wp-head` / `.sc-label` typography */
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill,
   .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill,
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill {
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill,
+  .wl-home-v2 .wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill {
     box-sizing: border-box;
     height: auto;
     min-height: 30px;
@@ -8387,12 +8397,14 @@
   }
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill svg,
   .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill svg,
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill svg {
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill svg,
+  .wl-home-v2 .wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill svg {
     display: block;
   }
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill:hover,
   .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill:hover,
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill:hover {
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill:hover,
+  .wl-home-v2 .wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill:hover {
     color: #fff;
     border-color: rgb(123, 94, 63);
     background: rgba(255, 122, 103, 0.12);
@@ -8433,6 +8445,9 @@
   /* Radio admin + other tabs: same pill read as setlist header on frosted panel */
   .wl-home-v2
     .wl-home-v2-archive-admin-tabs-panel
+    .wl-home-v2-tours-header-pill,
+  .wl-home-v2
+    .wl-home-v2-profile-stats-chrome-box
     .wl-home-v2-tours-header-pill {
     background: rgba(0, 0, 0, 0.45);
     border-color: rgb(63, 65, 64);
@@ -8440,10 +8455,18 @@
   }
   .wl-home-v2
     .wl-home-v2-archive-admin-tabs-panel
+    .wl-home-v2-tours-header-pill:hover,
+  .wl-home-v2
+    .wl-home-v2-profile-stats-chrome-box
     .wl-home-v2-tours-header-pill:hover {
     background: rgba(255, 122, 103, 0.22);
     border-color: rgb(123, 94, 63);
     color: #fff;
+  }
+  @media (max-width: 639px) {
+    .wl-home-v2 .wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill {
+      min-height: 44px;
+    }
   }
   .wl-home-v2
     .wl-home-v2-archive-admin-tab-shell
@@ -9713,12 +9736,16 @@
     width: 100%;
   }
   /*
-   * Tour main column: panel titles match stats archive `.wp-head` (11px / 500, full white).
-   * Skip `.wl-home-v2-years-shows-panel` so the tour dates block keeps default `.wp-head` /
-   * teal `.wp-head-date`.
+   * Tour main column + profile Slots tab: panel titles (Slots, stats carousels, …) match
+   * stats archive — 11px / 500, full white. Skip `.wl-home-v2-years-shows-panel` so the tour
+   * dates block keeps default `.wp-head` / teal `.wp-head-date`.
    */
   .wl-home-v2
     .wl-home-v2-tour-page-main
+    .widget-panel:not(.wl-home-v2-years-shows-panel)
+    > .wp-head,
+  .wl-home-v2
+    .wl-profile-slots-root
     .widget-panel:not(.wl-home-v2-years-shows-panel)
     > .wp-head {
     color: var(--wl-white);
@@ -10439,8 +10466,13 @@
   /* Main stats / aside tools / show stats / song spread / media + now playing headings */
   --setlist-promoted-section-header-size: 11px;
 }
+
 .wl-home-v2 .wl-home-v2-setlist a {
   color: inherit;
+}
+
+/* Zero-specificity wrapper so Tailwind `hover:underline` on links can override this on hover. */
+:where(.wl-home-v2 .wl-home-v2-setlist) a {
   text-decoration: none;
 }
 /* Main / aside use `.wl-home-v2-years-tile` + `.wl-home-v2-years-tile-inner` (same as years). */

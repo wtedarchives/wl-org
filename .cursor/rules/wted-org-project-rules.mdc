@@ -58,7 +58,7 @@ All server-side logic lives in Supabase Edge Functions.
 ### User-Specific Pages — Query Params Only
 - Pages that depend on a user ID that is not known at build time must use query params,
   not dynamic route segments.
-- Pattern: `/archive/user?tab=overview&id=xxx` (and other `tab` slugs from `PROFILE_STATS_TABS`). Legacy `/archive/user/{tab}?id=` **301** to `?tab=` + `&id=` via `public/_redirects`.
+- Pattern: `/user?id=xxx&tab=overview` (and other `tab` slugs from `PROFILE_STATS_TABS`). Legacy `/archive/user` and `/archive/user/{tab}` **301** to `/user` with merged query via `public/_redirects`.
 - Use `lib/user-profile-url.ts` (`getUserProfileUrl`) for generating user profile URLs consistently.
 - Never create a dynamic route segment for user IDs or any other runtime-only identifier.
 

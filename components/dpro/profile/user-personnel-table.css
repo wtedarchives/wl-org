@@ -1,0 +1,11 @@
+/* Personnel list: first-column header — match tours sidebar `.widget-panel … > .wp-head` type. */
+.wl-home-v2 .wl-home-v2-years-table th.wl-profile-personnel-table__name-th {
+  color: var(--wl-white);
+  font-size: 11px;
+  font-weight: 500;
+  vertical-align: middle;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.25;
+}

@@ -14,33 +14,11 @@ import {
 import { ProfileStatsTabsShell } from "@/components/dpro/profile/profile-stats-tabs-shell"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { getUserProfileUrl } from "@/lib/user-profile-url"
+import { resolveArchiveUserSearchParams } from "@/lib/resolve-archive-user-search-params"
 import { supabase } from "@/lib/supabase"
-
-function resolveUserPageParams(
-  searchParams: ReturnType<typeof useSearchParams>,
-): {
-  profileUserId: string | null
-  tabRaw: string
-  invalidParams: boolean
-} {
-  const ids = searchParams
-    .getAll("id")
-    .map((s) => s.trim())
-    .filter(Boolean)
-  if (new Set(ids).size > 1) {
-    return { profileUserId: null, tabRaw: "", invalidParams: true }
-  }
-  const tabs = searchParams
-    .getAll("tab")
-    .map((s) => s.trim())
-    .filter(Boolean)
-  if (new Set(tabs).size > 1) {
-    return { profileUserId: null, tabRaw: "", invalidParams: true }
-  }
-  const profileUserId = ids[0] ?? null
-  const tabRaw = tabs[0] ?? ""
-  return { profileUserId, tabRaw, invalidParams: false }
-}
+import { WL_HOME_V2_PROFILE_CONTENT_MAX_CLASS } from "@/components/wl-home-v2/wl-home-v2-profile-archive-shell"
+import { cn } from "@/lib/utils"
+import { useHydratedProfileStatsTab } from "@/hooks/use-hydrated-profile-stats-tab"
 
 export default function ArchiveUserPageClient() {
   const router = useRouter()
@@ -51,9 +29,13 @@ export default function ArchiveUserPageClient() {
   const [shareCopied, setShareCopied] = useState(false)
 
   const { profileUserId, tabRaw, invalidParams } = useMemo(
-    () => resolveUserPageParams(searchParams),
+    () => resolveArchiveUserSearchParams(searchParams),
     [searchParams],
   )
+
+  const resolvedProfileTab: ProfileStatsTabSlug =
+    !invalidParams && tabRaw && isProfileStatsTabSlug(tabRaw) ? tabRaw : "overview"
+  const displayTab = useHydratedProfileStatsTab(resolvedProfileTab)
 
   const isOwnProfile = !!(
     session &&
@@ -64,9 +46,7 @@ export default function ArchiveUserPageClient() {
   useEffect(() => {
     if (invalidParams) return
     if (profileUserId && !tabRaw) {
-      router.replace(
-        `/old/archive/user?tab=overview&id=${encodeURIComponent(profileUserId)}`,
-      )
+      router.replace(getUserProfileUrl(profileUserId, undefined, "overview"))
     }
   }, [invalidParams, profileUserId, tabRaw, router])
 
@@ -111,7 +91,12 @@ export default function ArchiveUserPageClient() {
 
   if (!profileUserId) {
     return (
-      <div className="flex flex-col gap-6 rounded-b-none p-4 md:rounded-b-xl md:p-6">
+      <div
+        className={cn(
+          WL_HOME_V2_PROFILE_CONTENT_MAX_CLASS,
+          "flex flex-col gap-6 rounded-b-none p-4 md:rounded-b-xl md:p-6",
+        )}
+      >
         <div className="rounded-lg border border-border bg-card p-6 text-center">
           <p className="text-sm text-muted-foreground">
             No user ID provided. Use a share link to view a user&apos;s profile.
@@ -120,8 +105,6 @@ export default function ArchiveUserPageClient() {
       </div>
     )
   }
-
-  const tab = tabRaw as ProfileStatsTabSlug
 
   const handleShare = async () => {
     if (!session || !profileUserId) return
@@ -148,11 +131,11 @@ export default function ArchiveUserPageClient() {
       : undefined
 
   const tabHref = (slug: string) =>
-    `/old/archive/user?tab=${encodeURIComponent(slug)}&id=${encodeURIComponent(profileUserId)}`
+    getUserProfileUrl(profileUserId, undefined, slug as ProfileStatsTabSlug)
 
   return (
     <ProfileStatsTabsShell
-      activeTab={tab}
+      activeTab={displayTab}
       title={title}
       description={description}
       tabHref={tabHref}
@@ -161,7 +144,7 @@ export default function ArchiveUserPageClient() {
       shareCopied={shareCopied}
     >
       <ProfileStatsTabPanel
-        tab={tab}
+        tab={displayTab}
         userId={profileUserId}
         isOwnProfile={isOwnProfile}
         username={username}

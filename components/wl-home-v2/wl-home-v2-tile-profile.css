@@ -1,0 +1,5 @@
+/* Homepage profile tile — static `--tile-bg` (was inline on `<section>`). */
+
+.wl-home-v2 .tile.tile-profile {
+  --tile-bg: url("/newbg4.jpeg");
+}

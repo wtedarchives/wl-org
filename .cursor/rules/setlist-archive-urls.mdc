@@ -20,13 +20,14 @@ All URL slugs for **Setlist Archive** pages must start with `/archive`.
   - **Discography index**: `/archive/discography`. **Discography release**: `/archive/discography?id={uuid}` — use `getDiscographyArchiveUrl(releaseUuid)` from `lib/discography-archive-url.ts`. Same for legacy `/archive/discography/{uuid}`.
   - **Lists index**: `/archive/lists`. **List detail**: `/archive/lists?id={uuid}` — use `getListArchiveUrl(listId)` from `lib/list-archive-url.ts`. Same for legacy `/archive/lists/{uuid}`.
   - **Setlist Game index**: `/archive/setlistgame`. **Per-show game**: `/archive/setlistgame?id={show_id}` — `getSetlistGameShowArchiveUrl` from `lib/setlist-game-archive-url.ts`. **Per-tour game**: `/archive/setlistgame?tour_id={tour_id}` — `getSetlistGameTourArchiveUrl`. Same for legacy path-style setlist game URLs.
-  - **Public user stats**: `/archive/user?tab={slug}&id={user_uuid}` — use `getUserProfileUrl` from `lib/user-profile-url.ts` (overview tab). Exact tab paths like `/archive/user/overview` still **301** in `public/_redirects` where listed.
+  - **My Stats (signed-in)**: `/archive/profile?tab={slug}` — same tab slugs as public profiles. Legacy `/archive/profile/{tab}` **301** in `public/_redirects`.
+  - **Public user stats**: `/user?id={user_uuid}&tab={slug}` (`overview`, `shows`, `songs`, `slots`, `personnel`, `loose-ends`) — use `getUserProfileUrl` from `lib/user-profile-url.ts`. Legacy `/archive/user` and `/archive/user/{tab}` **301** to `/user` with merged query in `public/_redirects`. Legacy `/user/{uuid}` **301** to `?id=`.
   - Submit: `/archive/submit`
   - **Show setlist (per-show)**: `/archive/setlist?id={uuid}` — use `getSetlistArchiveUrl(showId)` from `lib/setlist-archive-url.ts` for every internal link. Static export cannot add new `generateStaticParams` entries after deploy; query-based URLs avoid that. **Legacy** `?show_id=` is still accepted on the client and replaced with `?id=` for the same value.
 
 ## Implementation
 
-- **App Router**: Place Setlist Archive pages under `app/(main)/archive/...` (e.g. `app/(main)/archive/years/page.tsx`, …, `app/(main)/archive/setlistgame/page.tsx`, `app/(main)/archive/user/page.tsx`).
+- **App Router**: Setlist Archive under `app/(wl-home-v2)/archive/...`. My Stats: `app/(wl-home-v2)/archive/profile/page.tsx` (query `tab`). Public profile: `app/(wl-home-v2)/user/page.tsx`.
 - **Links**: Use `/archive/...` and the `get*ArchiveUrl` helpers above for internal links (show setlist, year, tour on archive, song, personnel, list, venue, discography, setlist game show/tour). For public user profile links, use `getUserProfileUrl`.
 - **Breadcrumbs**: For any Setlist Archive page, the first breadcrumb segment after Home must show **"Setlist Archive"** (not "Dpro"); link target remains `/archive`.
 - **Pathname checks**: Treat `pathname.startsWith("/archive")` as “user is in B” for sidebar expansion and active state.

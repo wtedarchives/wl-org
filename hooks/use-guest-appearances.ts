@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { GuestPersonnelShowRow } from "@/lib/guest-appearance-detail-fetch"
 
 export interface GuestCount {
   guest_id: string
@@ -27,6 +28,8 @@ export interface GuestAppearancesModalData {
   guestInstrument: string | null
   songs: SongWithGuest[]
   tourName: string
+  /** When set, modal lists these shows instead of song rows (profile personnel). */
+  personnelShows?: GuestPersonnelShowRow[]
 }
 
 export function useGuestAppearances(
@@ -157,66 +160,16 @@ export function useGuestAppearances(
         if (data) tourName = (data as { tour: string }).tour
       }
 
-      const { data, error } = await supabase
-        .from("setlist_entries")
-        .select(
-          `
-          entry_song,
-          entry_length,
-          entry_short,
-          entry_segue,
-          entry_show,
-          entry_set,
-          entry_setnum,
-          songs:entry_song(song_displayname),
-          setlist_entry_guests!inner (
-            guest_id
-          ),
-          shows (
-            show_date,
-            show_venue_location,
-            show_canonid
-          )
-        `,
-        )
-        .in("entry_show", showIds)
-        .eq("setlist_entry_guests.guest_id", guestId)
-        .order("shows(show_canonid)", { ascending: true })
-        .order("entry_set", { ascending: true })
-        .order("entry_setnum", { ascending: true })
-
-      if (error) throw error
-
-      const songs: SongWithGuest[] = ((data ?? []) as Array<{
-        entry_song: string
-        entry_length: string | null
-        entry_short: string | null
-        entry_segue: string | null
-        entry_show: string
-        songs?: { song_displayname?: string | null } | Array<{ song_displayname?: string | null }>
-        shows?: { show_date?: string; show_venue_location?: string } | Array<{ show_date?: string; show_venue_location?: string }>
-      }>).map((entry) => {
-        const show = Array.isArray(entry.shows) ? entry.shows[0] : entry.shows
-        const songsRel = entry.songs
-        const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
-        return {
-          entry_song: entry.entry_song,
-          song_displayname: songRow?.song_displayname ?? null,
-          show_date: show?.show_date ?? "",
-          show_id: entry.entry_show,
-          show_venue_location: show?.show_venue_location ?? "",
-          entry_length: entry.entry_length,
-          entry_short: entry.entry_short,
-          entry_segue: entry.entry_segue,
-        }
-      })
+      const songs = await (
+        await import("@/lib/guest-appearance-detail-fetch")
+      ).fetchGuestAppearanceSongsForShows(guestId, showIds)
 
       setModalData({
         isOpen: true,
         guestId,
         guestName,
         guestInstrument,
-        songs,
+        songs: songs as SongWithGuest[],
         tourName,
       })
     } catch (err) {

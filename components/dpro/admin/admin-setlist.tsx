@@ -1,35 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { CircleNotch } from "@phosphor-icons/react"
 import { useAdminSetlist } from "@/hooks/use-admin-setlist"
 import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
+import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { MainHeader } from "./setlist/main-header"
 import { ShowHeader } from "./setlist/show-header"
 import { SetlistTable } from "./setlist/setlist-table"
 
 import { SetlistEntryModal } from "./setlist-entry-modal"
 import { AdminTabShell } from "./admin-tab-shell"
-
-function AdminSetlistProgress({ message }: { message: string }) {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={
-        "widget-panel wl-home-v2-admin-setlist-loading flex min-h-0 w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 px-4 py-12"
-      }
-    >
-      <CircleNotch
-        className="size-8 shrink-0 animate-spin text-[var(--wl-light-orange)]"
-        aria-hidden
-      />
-      <p className="m-0 max-w-sm text-center text-sm leading-relaxed text-white/80">
-        {message}
-      </p>
-    </div>
-  )
-}
 
 export function AdminSetlist() {
   const {
@@ -107,7 +87,7 @@ export function AdminSetlist() {
       />
 
       {loading && !selectedShow ?
-        <AdminSetlistProgress
+        <WlWidgetPanelLoading
           message={
             loadingProgress < 100 ?
               `Loading shows (${Math.round(loadingProgress)}%)`
@@ -116,7 +96,7 @@ export function AdminSetlist() {
         />
       : selectedShow ?
         loading ?
-          <AdminSetlistProgress
+          <WlWidgetPanelLoading
             message={
               loadingProgress < 100 ?
                 `Loading setlist… (${Math.round(loadingProgress)}%)`

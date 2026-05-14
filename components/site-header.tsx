@@ -137,14 +137,17 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
   const { setlistBreadcrumbs } = useSetlistBreadcrumb()
   const { publicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
   const legacyHomeHref = (pathname ?? "").startsWith("/old") ? "/old" : "/"
-  const isPublicUserProfilePath = (pathname ?? "").startsWith(
-    "/old/archive/user",
-  )
+  const isPublicUserProfilePath =
+    (pathname ?? "").startsWith("/old/archive/user") ||
+    (pathname ?? "").startsWith("/archive/user") ||
+    (pathname ?? "") === "/user"
   const useYearOverride =
     ((pathname ?? "") === "/old/archive/years" ||
       (pathname ?? "").startsWith("/old/archive/years/")) &&
     yearLabel != null
-  const useProfileTrail = (pathname ?? "").startsWith("/old/archive/profile")
+  const useProfileTrail =
+    (pathname ?? "").startsWith("/old/archive/profile") ||
+    (pathname ?? "").startsWith("/archive/profile")
   const useSetlistTrail =
     (((pathname ?? "") === "/old/archive/setlist" ||
       (pathname ?? "").startsWith("/old/archive/setlist/") ||
@@ -182,7 +185,7 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     : useProfileTrail
       ? [
           { label: "Home", href: legacyHomeHref },
-          { label: "Profile", href: "/old/archive/profile/overview" },
+          { label: "Profile", href: "/archive/profile?tab=overview" },
         ]
       : useSetlistTrail
       ? setlistBreadcrumbs

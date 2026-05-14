@@ -123,7 +123,12 @@ export function WlHomeV2ArchiveSubnavContent({
 export function WlHomeV2ArchiveSubnav() {
   const pathname = usePathname()
 
-  if (pathname == null || !(pathname === "/archive" || pathname.startsWith("/archive/"))) {
+  if (
+    pathname == null ||
+    !(pathname === "/archive" ||
+      pathname.startsWith("/archive/") ||
+      pathname === "/user")
+  ) {
     return null
   }
 

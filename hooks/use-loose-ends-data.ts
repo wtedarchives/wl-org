@@ -30,6 +30,32 @@ import {
 import { supabase } from "@/lib/supabase"
 import type { GroupedLooseEnds, LooseEndRow } from "@/types/loose-ends"
 
+/** DB may expose `end_local_file` and/or legacy `end_image` (see schema snapshot). */
+function normalizeLooseEndRows(rows: unknown[] | null): LooseEndRow[] {
+  if (!rows?.length) return []
+  return rows.map((raw) => {
+    const row = raw as Record<string, unknown>
+    const file =
+      (typeof row.end_local_file === "string" && row.end_local_file.trim() !== "" ?
+        row.end_local_file
+      : null) ??
+      (typeof row.end_image === "string" && row.end_image.trim() !== "" ?
+        row.end_image
+      : null)
+    return {
+      end: String(row.end ?? ""),
+      end_description: String(row.end_description ?? ""),
+      end_id: String(row.end_id ?? ""),
+      end_order:
+        typeof row.end_order === "number" ? row.end_order : Number(row.end_order ?? 0),
+      end_category:
+        row.end_category == null || row.end_category === "" ? null : String(row.end_category),
+      end_visible: row.end_visible !== false,
+      end_local_file: file,
+    }
+  })
+}
+
 export function useLooseEndsData(userId: string | null) {
   const [groupedLooseEnds, setGroupedLooseEnds] = useState<GroupedLooseEnds>({})
   const [categories, setCategories] = useState<string[]>([])
@@ -75,9 +101,7 @@ export function useLooseEndsData(userId: string | null) {
 
         const { data: looseEndsRows, error: looseErr } = await supabase
           .from("looseends")
-          .select(
-            "end, end_description, end_id, end_local_file, end_order, end_category, end_visible"
-          )
+          .select("*")
           .eq("end_visible", true)
           .order("end_order", { ascending: true })
 
@@ -86,7 +110,7 @@ export function useLooseEndsData(userId: string | null) {
           return
         }
 
-        const looseEndsData = (looseEndsRows ?? []) as LooseEndRow[]
+        const looseEndsData = normalizeLooseEndRows(looseEndsRows ?? [])
         setLoadingProgress(12)
         preloadLooseEndBadgeArtworkFromRows(looseEndsData)
 

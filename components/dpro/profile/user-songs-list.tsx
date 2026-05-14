@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Check } from "lucide-react"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
@@ -28,14 +28,18 @@ function CategorySection({
   title: string
   songsByCategory: Record<string, UserSong[]>
   userSongStats: UserSongStat[]
-  onSongClick?: (songName: string, songDisplayName?: string | null, songId?: string) => void
+  onSongClick?: (
+    songName: string,
+    songDisplayName?: string | null,
+    songId?: string
+  ) => void
 }) {
   if (sectionCategories.length === 0) return null
 
   const isCoverSongs = title === "Cover Songs"
-  const containerClass = isCoverSongs
-    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 4col:grid-cols-4 gap-4 items-start"
-    : "columns-1 gap-x-4 md:columns-2 lg:columns-3 4col:columns-4 space-y-4"
+  const deckClass = isCoverSongs ?
+      "wl-profile-songs-category-section__deck wl-profile-songs-category-section__deck--grid"
+    : "wl-profile-songs-category-section__deck wl-profile-songs-category-section__deck--columns"
 
   const getSongStats = (songId: string) => {
     const stat = userSongStats.find((s) => s.song_id === songId)
@@ -43,113 +47,108 @@ function CategorySection({
   }
 
   return (
-    <div className="mb-8 space-y-3">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h3>
-      <div className={containerClass}>
+    <div className="wl-profile-songs-category-section">
+      <h3 className="wl-profile-songs-category-section__heading">{title}</h3>
+      <div className={deckClass}>
         {sectionCategories.map((category, index) => {
           const categorySongs = songsByCategory[category.category] ?? []
-          const isFirstCoverCard =
-            isCoverSongs && sectionCategories.length > 1 && index === 0
-          const isSecondCoverCard =
-            isCoverSongs && sectionCategories.length > 1 && index === 1
-          const cardClass = isFirstCoverCard
-            ? "col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0"
-            : isSecondCoverCard
-              ? "col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2 overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0"
-              : "overflow-hidden rounded-lg border border-border/60 bg-background/70 shadow-sm py-0 break-inside-avoid"
+          const multiCover = isCoverSongs && sectionCategories.length > 1
+          const isWideCover = multiCover && (index === 0 || index === 1)
+          const cardClass =
+            isWideCover
+              ? "wl-profile-songs-category-card wl-profile-songs-category-card--cover-span wl-profile-songs-category-card--cover-span-md"
+            : "wl-profile-songs-category-card"
 
           return (
-            <Card key={category.category} className={cardClass}>
-              <div className="bg-muted/60 px-4 py-2 flex flex-row items-center justify-between gap-2">
-                <CardTitle className="text-sm font-medium truncate pr-2">
+            <div key={category.category} className={cardClass}>
+              <div className="wl-profile-songs-category-card__head">
+                <p className="wl-profile-songs-category-card__title">
                   {category.category}
-                </CardTitle>
+                </p>
                 {category.category_artwork?.trim() && (
-                  <span className="shrink-0 size-5 relative rounded overflow-hidden border border-border">
+                  <span className="wl-profile-songs-category-card__art">
                     <Image
                       src={category.category_artwork}
                       alt=""
                       width={20}
                       height={20}
-                      className="size-5 object-cover"
+                      className="h-full w-full object-cover"
                       unoptimized
                     />
                   </span>
                 )}
               </div>
-              <CardContent className="p-0">
-                <ul
-                  className={
-                    title === "Cover Songs"
-                      ? "grid grid-cols-1 sm:grid-cols-2 gap-0"
-                      : ""
-                  }
-                >
-                  {categorySongs.map((song) => {
-                    const count = getSongStats(song.song_id)
-                    const seen = count > 0
-                    const songNameEl = (
-                      <SongDisplayName
-                        song={song.song}
-                        songDisplayName={song.song_displayname}
-                      />
-                    )
-                    return (
-                      <li
-                        key={song.song_id}
-                        className="border-t border-border/40 bg-background/70 hover:bg-muted/40 transition-colors"
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-between gap-2 py-0.5 pl-3 pr-3 text-xs font-medium text-foreground">
-                              <span className="min-w-0 flex-1">
-                                {onSongClick ? (
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      onSongClick(
-                                        song.song,
-                                        song.song_displayname,
-                                        song.song_id
-                                      )
-                                    }
-                                    className="text-left hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
-                                  >
-                                    {songNameEl}
-                                  </button>
-                                ) : (
-                                  <Link
-                                    href={getSongArchiveUrl(song.song_id)}
-                                    className="hover:underline"
-                                  >
-                                    {songNameEl}
-                                  </Link>
-                                )}
-                                {seen && (
-                                  <span className="ml-2 font-normal text-wl-orange">
-                                    ({count})
-                                  </span>
-                                )}
-                              </span>
+              <ul
+                className={
+                  title === "Cover Songs"
+                    ? "wl-profile-songs-category-card__list wl-profile-songs-category-card__list--grid-two"
+                    : "wl-profile-songs-category-card__list"
+                }
+              >
+                {categorySongs.map((song) => {
+                  const count = getSongStats(song.song_id)
+                  const seen = count > 0
+                  const songNameEl = (
+                    <SongDisplayName
+                      song={song.song}
+                      songDisplayName={song.song_displayname}
+                    />
+                  )
+                  return (
+                    <li
+                      key={song.song_id}
+                      className={cn(
+                        "wl-profile-songs-song-row",
+                        !seen && "wl-profile-songs-song-row--unseen",
+                      )}
+                    >
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="wl-profile-songs-song-row__inner">
+                            <span className="wl-profile-songs-song-row__name">
+                              {onSongClick ?
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    onSongClick(
+                                      song.song,
+                                      song.song_displayname,
+                                      song.song_id,
+                                    )
+                                  }
+                                  className="wl-profile-songs-song-name-btn"
+                                >
+                                  {songNameEl}
+                                </button>
+                              : <Link href={getSongArchiveUrl(song.song_id)}>
+                                  {songNameEl}
+                                </Link>
+                              }
                               {seen && (
-                                <Check className="size-3.5 shrink-0 text-wl-green" />
+                                <span className="wl-profile-songs-song-row__count">
+                                  ({count})
+                                </span>
                               )}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            <span className="text-xs">
-                              {song.song_displayname?.trim() || song.song}
                             </span>
-                          </TooltipContent>
-                        </Tooltip>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </CardContent>
-            </Card>
+                            {seen && (
+                              <Check
+                                className="wl-profile-songs-song-row__check"
+                                aria-hidden
+                              />
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <span className="text-xs">
+                            {song.song_displayname?.trim() || song.song}
+                          </span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           )
         })}
       </div>
@@ -177,7 +176,7 @@ export function UserSongsList({
   const songsByCategory: Record<string, UserSong[]> = {}
   categories.forEach((category) => {
     const categorySongs = songs.filter(
-      (song) => song.song_category === category.category
+      (song) => song.song_category === category.category,
     )
     const sorted = [...categorySongs].sort((a, b) => {
       if (a.song_categoryorder !== b.song_categoryorder) {
@@ -189,24 +188,24 @@ export function UserSongsList({
   })
 
   const sortedCategories = [...categories].sort(
-    (a, b) => a.category_canonid - b.category_canonid
+    (a, b) => a.category_canonid - b.category_canonid,
   )
   const studioReleases = sortedCategories.filter((c) => c.category_canonid <= 20)
   const liveOnlySongs = sortedCategories.filter(
     (c) =>
       (c.category_canonid >= 21 && c.category_canonid <= 170) ||
-      c.category_canonid === 298
+      c.category_canonid === 298,
   )
   const tedTapesSongs = sortedCategories.filter(
-    (c) => c.category_canonid >= 171 && c.category_canonid <= 297
+    (c) => c.category_canonid >= 171 && c.category_canonid <= 297,
   )
   const coverSongs = sortedCategories.filter(
-    (c) => c.category_canonid === 299 || c.category_canonid === 300
+    (c) => c.category_canonid === 299 || c.category_canonid === 300,
   )
   const sideProjects = sortedCategories.filter((c) => c.category_canonid > 300)
 
   return (
-    <div className="pb-8 w-full">
+    <div className="wl-profile-songs-list">
       <CategorySection
         sectionCategories={studioReleases}
         title="Studio Releases"

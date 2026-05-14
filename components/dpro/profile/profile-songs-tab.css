@@ -1,0 +1,715 @@
+/* Profile — Songs tab: layout + isolated panels (archive tile / setlist shell). */
+
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-profile-songs-tab.wl-home-v2-profile-songs--root a:hover,
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-profile-songs-tab.wl-home-v2-profile-songs--root a:focus-visible {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-songs-tab {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.wl-home-v2-profile-songs-tab__section {
+  width: 100%;
+  min-width: 0;
+}
+
+.wl-home-v2-profile-songs-tab__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1280px) {
+  .wl-home-v2-profile-songs-tab__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  }
+}
+
+.wl-home-v2-profile-songs-tab__main {
+  min-width: 0;
+}
+
+.wl-home-v2-profile-songs-tab__sidebar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .wl-home-v2-profile-songs-tab__sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .wl-home-v2-profile-songs-tab__sidebar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Messages (login / empty / error) ─── */
+
+.wl-profile-songs-message {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: 1.25rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+/* Profile My Stats — Songs tab: shell grows with full list/matrix; page/tile scrolls. */
+.wl-home-v2
+  .wl-home-v2-profile-stats-tabs-shell:has(.wl-home-v2-profile-songs--root) {
+  flex: 0 1 auto;
+  min-height: auto;
+  overflow: visible;
+}
+
+/* ─── Main “Songs played” panel ─── */
+
+.wl-profile-songs-panel {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.63);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-profile-songs-panel--matrix {
+  border-color: rgb(35, 35, 37);
+}
+
+.wl-profile-songs-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.wl-profile-songs-panel__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.wl-profile-songs-panel__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.wl-profile-songs-panel__sort-wrap {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.25rem 0.125rem 0.375rem;
+  border-radius: 8px;
+  border: 1px solid rgb(53, 56, 54);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+@media (min-width: 768px) {
+  .wl-profile-songs-panel__sort-wrap {
+    display: inline-flex;
+  }
+}
+
+.wl-profile-songs-panel__sort-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-right: 0.125rem;
+}
+
+.wl-profile-songs-panel__sort-btn {
+  box-sizing: border-box;
+  border: none;
+  border-radius: 6px;
+  padding: 0.125rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.wl-profile-songs-panel__sort-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wl-profile-songs-panel__sort-btn--active {
+  background: rgba(88, 200, 174, 0.18);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgb(52, 109, 95);
+}
+
+.wl-profile-songs-panel__sort-btn:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 1px;
+}
+
+.wl-profile-songs-panel__sort-menu-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  border: 1px solid rgb(53, 56, 54);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+@media (min-width: 768px) {
+  .wl-profile-songs-panel__sort-menu-btn {
+    display: none;
+  }
+}
+
+.wl-profile-songs-panel__sort-menu-btn:hover {
+  border-color: rgba(123, 94, 63, 0.65);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wl-profile-songs-panel__sort-menu-btn:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+
+.wl-profile-songs-panel__view {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.wl-profile-songs-panel__view-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.wl-profile-songs-panel__view-icon--on {
+  color: #fff;
+}
+
+.wl-profile-songs-panel__view-switch {
+  position: relative;
+  display: inline-flex;
+  width: 2.9375rem;
+  height: 1rem;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid rgb(53, 56, 54);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.wl-profile-songs-panel__view-switch:hover {
+  border-color: rgba(123, 94, 63, 0.55);
+}
+
+.wl-profile-songs-panel__view-switch:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+
+.wl-profile-songs-panel__view-switch-thumb {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 4px;
+  background: #fff;
+  transform: translateY(-50%) translateX(0);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.wl-profile-songs-panel__view-switch[data-mode="matrix"] .wl-profile-songs-panel__view-switch-thumb {
+  transform: translateY(-50%) translateX(1.9375rem);
+}
+
+.wl-profile-songs-panel__body {
+  min-width: 0;
+}
+
+.wl-profile-songs-panel__body--list {
+  padding: 1rem;
+}
+
+/* ─── Song list (by category) ─── */
+
+.wl-profile-songs-list {
+  width: 100%;
+  padding-bottom: 1.5rem;
+}
+
+/* Spacing between category blocks (Studio vs Live-Only, etc.). */
+/* Tile inner resets `div { margin: 0 }` — need higher specificity inside archive profile tile. */
+.wl-home-v2 .wl-home-v2-years-tile-inner .wl-profile-songs-category-section {
+  margin-bottom: 1.25rem;
+}
+
+.wl-home-v2
+  .wl-home-v2-years-tile-inner
+  .wl-profile-songs-category-section:last-child {
+  margin-bottom: 0;
+}
+
+.wl-profile-songs-category-section {
+  margin-bottom: 1.25rem;
+}
+
+.wl-profile-songs-category-section:last-child {
+  margin-bottom: 0;
+}
+
+.wl-profile-songs-category-section__heading {
+  margin: 0 0 0.75rem;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--wl-white);
+}
+
+.wl-profile-songs-category-section__deck {
+  display: block;
+}
+
+.wl-profile-songs-category-section__deck--columns {
+  columns: 1;
+  column-gap: 1rem;
+  padding-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .wl-profile-songs-category-section__deck--columns {
+    columns: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wl-profile-songs-category-section__deck--columns {
+    columns: 3;
+  }
+}
+
+.wl-profile-songs-category-section__deck--grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  row-gap: 1rem;
+  column-gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .wl-profile-songs-category-section__deck--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .wl-profile-songs-category-section__deck--grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Between album/deck cards in multi-column list mode; grid mode uses row-gap. */
+.wl-home-v2 .wl-home-v2-years-tile-inner .wl-profile-songs-category-card {
+  margin-bottom: 12px;
+}
+
+.wl-profile-songs-category-card {
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  break-inside: avoid;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.wl-home-v2
+  .wl-home-v2-years-tile-inner
+  .wl-profile-songs-category-section__deck--grid
+  .wl-profile-songs-category-card {
+  margin-bottom: 0;
+}
+
+.wl-profile-songs-category-section__deck--grid
+  .wl-profile-songs-category-card {
+  margin-bottom: 0;
+}
+
+.wl-home-v2
+  .wl-home-v2-years-tile-inner
+  .wl-profile-songs-category-section__deck--columns
+  .wl-profile-songs-category-card:last-child {
+  margin-bottom: 0;
+}
+
+.wl-profile-songs-category-section__deck--columns
+  .wl-profile-songs-category-card:last-child {
+  margin-bottom: 0;
+}
+
+.wl-profile-songs-category-card--cover-span {
+  grid-column: span 1;
+}
+
+@media (min-width: 768px) {
+  .wl-profile-songs-category-card--cover-span-md {
+    grid-column: span 2;
+  }
+}
+
+.wl-profile-songs-category-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wl-profile-songs-category-card__title {
+  margin: 0;
+  min-width: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wl-profile-songs-category-card__art {
+  flex-shrink: 0;
+  position: relative;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.wl-profile-songs-category-card__art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wl-profile-songs-category-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wl-profile-songs-category-card__list--grid-two {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .wl-profile-songs-category-card__list--grid-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.wl-profile-songs-song-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+  transition: background 0.15s ease;
+}
+
+.wl-profile-songs-song-row:first-child {
+  border-top: none;
+}
+
+.wl-profile-songs-song-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wl-profile-songs-song-row--unseen .wl-profile-songs-song-row__inner {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.wl-profile-songs-song-row--unseen:hover .wl-profile-songs-song-row__inner {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.wl-profile-songs-song-row--unseen .wl-profile-songs-song-row__name a {
+  color: inherit;
+}
+
+.wl-profile-songs-song-row__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 2px 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.wl-profile-songs-song-row__name {
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.wl-profile-songs-song-name-btn {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.wl-profile-songs-song-name-btn:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+
+.wl-profile-songs-song-row__count {
+  margin-left: 0.375rem;
+  font-weight: 400;
+  color: var(--wl-orange);
+}
+
+.wl-profile-songs-song-row__check {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  color: var(--wl-green);
+}
+
+/* ─── Song spread sidebar panel ─── */
+
+.wl-profile-songs-spread {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.63);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.wl-profile-songs-spread__head {
+  flex-shrink: 0;
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 0.75rem 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--wl-white);
+  background: transparent;
+  border: none;
+}
+
+.wl-profile-songs-spread__body {
+  flex: 0 1 auto;
+  overflow: visible;
+  padding: 0 0.75rem 0.75rem;
+}
+
+/* ─── Matrix table ─── */
+
+.wl-profile-songs-matrix-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wl-profile-songs-matrix__table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.wl-profile-songs-matrix__thead-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.wl-profile-songs-matrix__th {
+  padding: 0.25rem 0.25rem;
+  font-weight: 600;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+  vertical-align: bottom;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wl-profile-songs-matrix__th:last-child {
+  border-right: none;
+}
+
+.wl-profile-songs-matrix__th--song {
+  text-align: left;
+  padding-left: 0.75rem;
+  vertical-align: bottom;
+  border-right: 1px solid rgb(63, 65, 64);
+}
+
+.wl-profile-songs-panel--matrix .wl-profile-songs-matrix__th--song {
+  border-right-color: rgb(35, 35, 37);
+}
+
+.wl-profile-songs-matrix__th--show {
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 3rem;
+}
+
+.wl-profile-songs-matrix__song-btn {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.wl-profile-songs-matrix__song-btn:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 1px;
+}
+
+.wl-profile-songs-matrix__tbody tr {
+  border-bottom: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.15s ease;
+}
+
+.wl-profile-songs-panel--matrix .wl-profile-songs-matrix__tbody tr {
+  border-bottom-color: rgb(35, 35, 37);
+}
+
+.wl-profile-songs-matrix__tbody tr:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wl-profile-songs-matrix__tr--unseen .wl-profile-songs-matrix__td-song,
+.wl-profile-songs-matrix__tr--unseen .wl-profile-songs-matrix__song-btn {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.wl-profile-songs-matrix__tr--unseen .wl-profile-songs-matrix__td-song a {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.wl-profile-songs-matrix__tr--unseen:hover .wl-profile-songs-matrix__td-song,
+.wl-profile-songs-matrix__tr--unseen:hover .wl-profile-songs-matrix__song-btn,
+.wl-profile-songs-matrix__tr--unseen:hover
+  .wl-profile-songs-matrix__td-song
+  a {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.wl-profile-songs-matrix__td-song {
+  padding: 0.125rem 0.75rem;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-right: 1px solid rgb(63, 65, 64);
+}
+
+.wl-profile-songs-panel--matrix .wl-profile-songs-matrix__td-song {
+  border-right-color: rgb(35, 35, 37);
+}
+
+.wl-profile-songs-matrix__td-cell {
+  padding: 0;
+  text-align: center;
+  border-left: 1px solid rgb(63, 65, 64);
+  border-right: 1px solid rgb(63, 65, 64);
+  min-width: 3rem;
+  background-color: var(--wl-matrix-cell-bg, transparent);
+}
+
+.wl-profile-songs-panel--matrix .wl-profile-songs-matrix__td-cell {
+  border-left-color: rgb(35, 35, 37);
+  border-right-color: rgb(35, 35, 37);
+}
+
+.wl-profile-songs-matrix__td-inner {
+  display: inline-block;
+  padding: 0.125rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}

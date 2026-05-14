@@ -1,0 +1,54 @@
+/* Capped profile column: horizontal center (Tailwind `mx-auto` is overridden by
+ * `.wl-home-v2-years-tile-inner div { margin: 0 }` in wl-home-v2.css). */
+.wl-home-v2 .wl-home-v2-years-tile-inner .wl-home-v2-profile-archive-content-max {
+  margin-inline: auto;
+}
+
+.wl-home-v2-profile-archive-content-max {
+  margin-inline: auto;
+}
+
+/* Profile archive shell (`WlHomeV2ProfileArchiveShell`) — colocated tokens; imported from TSX. */
+
+/* Always two direct flex children under `.wl-home-v2-years-page` (crumbs + body) so SSR
+   and the client’s first paint match when crumbs appear only after async auth/tab state. */
+.wl-home-v2 .wl-home-v2-profile-archive-crumbs-slot--empty {
+  display: none;
+}
+
+/* Profile stats tab chrome inside archive tile (`ProfileStatsTabsShell`). */
+.wl-home-v2 .wl-home-v2-profile-stats-tabs-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 1rem;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 0;
+}
+
+.wl-home-v2 .wl-home-v2-profile-archive-suspense-body {
+  display: flex;
+  min-height: min(60vh, 420px);
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: 2rem;
+}
+
+.wl-home-v2 .wl-home-v2-profile-archive-tile-inner {
+  color: #fff;
+  --card-foreground: #fff;
+  --foreground: #fff;
+}
+.wl-home-v2 .wl-home-v2-profile-archive-tile-inner .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.55);
+}
+.wl-home-v2 .wl-home-v2-profile-archive-tile-inner .border-border {
+  border-color: rgb(53, 56, 54);
+}
+.wl-home-v2 .wl-home-v2-profile-archive-tile-inner [data-slot="separator"] {
+  background-color: rgb(53, 56, 54);
+}

@@ -1,0 +1,338 @@
+/* Profile — Shows tab layout and panels (widget-panel + wp-head, no inline styles). */
+
+/*
+ * Profile shell uses `.wl-home-v2-setlist` for layout parity; that stylesheet sets
+ * `.wl-home-v2 .wl-home-v2-setlist a { text-decoration: none }`, which beats Tailwind
+ * `hover:underline` in the cascade. Restore tour-style underlines inside the shows tab only.
+ */
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-profile-shows-tab a:hover,
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-profile-shows-tab a:focus-visible {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-shows-tab {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.wl-home-v2-profile-shows-tab__section {
+  width: 100%;
+  min-width: 0;
+}
+
+.wl-home-v2-profile-shows-tab__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1280px) {
+  .wl-home-v2-profile-shows-tab__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  }
+}
+
+.wl-home-v2-profile-shows-tab__main {
+  min-width: 0;
+}
+
+.wl-home-v2-profile-shows-tab__sidebar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .wl-home-v2-profile-shows-tab__sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── Attended shows (main panel) ─── */
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-shows-attended {
+  overflow: hidden;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-attended.wl-home-v2-profile-shows-attended--own {
+  padding-top: 6px;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-attended.wl-home-v2-profile-shows-attended--public {
+  padding-top: 12px;
+}
+
+/* Manage shows: same pill shell as admin setlist “Add entry”; default fill from --wl-orange. */
+.wl-home-v2
+  .wl-home-v2-years-shows-panel.wl-home-v2-profile-shows-attended
+  .wl-home-v2-tours-header-pill.wl-home-v2-profile-shows-manage-pill {
+  background: color-mix(in srgb, var(--wl-orange) 30%, transparent);
+  border-color: color-mix(in srgb, var(--wl-orange) 42%, rgb(63, 65, 64));
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.wl-home-v2
+  .wl-home-v2-years-shows-panel.wl-home-v2-profile-shows-attended
+  .wl-home-v2-tours-header-pill.wl-home-v2-profile-shows-manage-pill:hover {
+  color: #fff;
+  border-color: rgb(123, 94, 63);
+  background: color-mix(in srgb, var(--wl-orange) 46%, transparent);
+}
+
+@media (max-width: 639px) {
+  .wl-home-v2
+    .wl-home-v2-years-shows-panel.wl-home-v2-profile-shows-attended
+    .wl-home-v2-tours-header-pill.wl-home-v2-profile-shows-manage-pill {
+    min-height: 44px;
+  }
+}
+
+.wl-home-v2-profile-shows-message {
+  padding: 1.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: color-mix(in srgb, var(--wl-white) 72%, transparent);
+}
+
+.wl-home-v2-profile-shows-td-goose {
+  text-align: center;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-home-v2-profile-shows-td-goose--canon {
+  background-color: rgb(0, 100, 0);
+  color: var(--wl-white);
+}
+
+/* ─── Group pie chart ─── */
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-shows-group-chart {
+  overflow: hidden;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-group-chart.wl-home-v2-profile-shows-panel--own {
+  padding-top: 12px;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-group-chart.wl-home-v2-profile-shows-panel--public {
+  padding-top: 12px;
+}
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-shows-group-chart > .wp-head {
+  justify-content: flex-start;
+  color: var(--wl-white);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.wl-home-v2-profile-shows-group-chart-body {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem 1rem;
+}
+
+.wl-home-v2-profile-shows-group-chart-root {
+  width: min(100%, 280px);
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0;
+  align-self: center;
+  aspect-ratio: 1;
+  max-height: 240px;
+}
+
+.wl-home-v2 .wl-home-v2-profile-shows-group-chart-root .recharts-tooltip-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.wl-home-v2-profile-shows-group-legend {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 1rem;
+  row-gap: 0.125rem;
+  padding-bottom: 0.25rem;
+}
+
+.wl-home-v2-profile-shows-group-legend-item {
+  display: block;
+}
+
+.wl-home-v2-profile-shows-group-chart-empty,
+.wl-home-v2-profile-shows-stat-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 8rem;
+  padding: 1.5rem 1rem;
+}
+
+.wl-home-v2-profile-shows-group-chart-empty-msg,
+.wl-home-v2-profile-shows-stat-empty-msg {
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: color-mix(in srgb, var(--wl-white) 72%, transparent);
+}
+
+/* Pie tooltip (Recharts), no shadcn — match overview chart panel */
+.wl-home-v2-profile-shows-group-ttpanel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: max-content;
+  max-width: min(16rem, 92vw);
+  padding: 0.375rem 0.5rem;
+  margin: 0;
+  border: 1px solid rgb(44, 46, 45);
+  border-radius: 6px;
+  background-color: rgb(34, 37, 35);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.45);
+}
+
+.wl-home-v2-profile-shows-group-ttpanel-name {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.wl-home-v2-profile-shows-group-ttpanel-count {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+/* ─── Attendance stats sidebar ─── */
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-shows-stats {
+  overflow: hidden;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-stats.wl-home-v2-profile-shows-panel--own {
+  padding-top: 12px;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-stats.wl-home-v2-profile-shows-panel--public {
+  padding-top: 12px;
+}
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-shows-stats > .wp-head {
+  justify-content: flex-start;
+  color: var(--wl-white);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-stats
+  > .wp-head.wl-home-v2-years-shows-wp-head {
+  margin-bottom: 0;
+}
+
+.wl-home-v2
+  .widget-panel.wl-home-v2-profile-shows-stats
+  > .wp-head.wl-home-v2-years-shows-wp-head.wl-home-v2-profile-shows-stats-tours-head {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.wl-home-v2-profile-shows-stats-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+}
+
+.wl-home-v2-profile-shows-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--wl-white) 72%, transparent);
+}
+
+.wl-home-v2-profile-shows-stats-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.wl-home-v2-profile-shows-stats-list-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.wl-home-v2-profile-shows-stats-list-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.wl-home-v2-profile-shows-stat-pill {
+  display: inline-block;
+  border-radius: 0.25rem;
+  padding: 1px 0.375rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--wl-white);
+  background-color: color-mix(in srgb, var(--wl-white) 10%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--wl-white) 12%, transparent);
+}
+
+.wl-home-v2-profile-shows-tours-none {
+  margin: 0;
+  padding-left: 0.75rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: color-mix(in srgb, var(--wl-white) 65%, transparent);
+}
+
+.wl-home-v2-profile-shows-tours-list {
+  margin: 0;
+  padding-left: 0.75rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.wl-home-v2-profile-shows-tours-count {
+  margin-left: 0.625rem;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--wl-white) 72%, transparent);
+}

@@ -1,16 +1,14 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import { List, LayoutGrid, ArrowDownUp } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { UserSongsList } from "./user-songs-list"
 import { UserSongMatrix } from "./user-song-matrix"
 import type {
@@ -18,24 +16,11 @@ import type {
   UserSongMatrixData,
   YearGroup,
 } from "@/hooks/use-user-song-matrix"
-import type { UserSong, UserSongCategory, UserSongStat } from "@/hooks/use-user-songs-data"
-
-function getViewFromParams(params: URLSearchParams): "list" | "matrix" {
-  const v = params.get("songsView")
-  return v === "list" || v === "matrix" ? v : "list"
-}
-
-function getSortFromParams(params: URLSearchParams): UserMatrixSortMode {
-  const s = params.get("songsSort")
-  if (
-    s === "alphabetical" ||
-    s === "chronological" ||
-    s === "playcount"
-  ) {
-    return s
-  }
-  return "chronological"
-}
+import type {
+  UserSong,
+  UserSongCategory,
+  UserSongStat,
+} from "@/hooks/use-user-songs-data"
 
 export interface UserSongsCombinedProps {
   viewMode: "list" | "matrix"
@@ -74,14 +59,10 @@ export function UserSongsCombined({
 }: UserSongsCombinedProps) {
   const searchParams = useSearchParams()
 
-  useEffect(() => {
-    const urlView = getViewFromParams(searchParams)
-    const urlSort = getSortFromParams(searchParams)
-    if (urlView !== viewMode) setViewMode(urlView)
-    if (urlSort !== matrixSortMode) setMatrixSortMode(urlSort)
-  }, [searchParams])
-
-  const updateUrl = (updates: { view?: "list" | "matrix"; sort?: UserMatrixSortMode }) => {
+  const updateUrl = (updates: {
+    view?: "list" | "matrix"
+    sort?: UserMatrixSortMode
+  }) => {
     const params = new URLSearchParams(searchParams.toString())
     if (updates.view !== undefined) {
       if (updates.view === "list") {
@@ -108,7 +89,10 @@ export function UserSongsCombined({
 
   const handleViewChange = (mode: "list" | "matrix") => {
     setViewMode(mode)
-    updateUrl({ view: mode, sort: mode === "matrix" ? matrixSortMode : undefined })
+    updateUrl({
+      view: mode,
+      sort: mode === "matrix" ? matrixSortMode : undefined,
+    })
   }
 
   const handleSortChange = (sort: UserMatrixSortMode) => {
@@ -125,101 +109,125 @@ export function UserSongsCombined({
   }, [songs])
 
   const uniqueSongCount = songMatrix.songs.length
+  const matrixMode = viewMode === "matrix"
 
   return (
-    <Card
-      className={`ring-0 bg-card/80 overflow-hidden py-0 ${
-        viewMode === "matrix"
-          ? "border border-[#232325]"
-          : "border border-border/60"
-      }`}
+    <div
+      className={
+        matrixMode ?
+          "wl-profile-songs-panel wl-profile-songs-panel--matrix"
+        : "wl-profile-songs-panel"
+      }
     >
-      <div className="border-b border-border/60 bg-muted/60 px-3 py-1.5 flex justify-between items-center">
-        <h2 className="text-sm font-semibold">{uniqueSongCount} Songs Played</h2>
-        <div className="flex items-center gap-3">
-          {viewMode === "matrix" && (
+      <div className="wl-profile-songs-panel__head">
+        <h2 className="wl-profile-songs-panel__title">
+          {uniqueSongCount} Songs Seen
+        </h2>
+        <div className="wl-profile-songs-panel__tools">
+          {matrixMode ?
             <>
-              <div className="hidden md:flex items-center bg-background rounded-md border border-border py-0.5 px-1 gap-1">
-                <span className="text-muted-foreground text-[0.625rem] ml-1 font-medium">
-                  Sort:
-                </span>
-                <Button
-                  variant={matrixSortMode === "alphabetical" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="h-6 text-xs"
+              <div className="wl-profile-songs-panel__sort-wrap">
+                <span className="wl-profile-songs-panel__sort-label">Sort</span>
+                <button
+                  type="button"
+                  className={
+                    matrixSortMode === "alphabetical"
+                      ? "wl-profile-songs-panel__sort-btn wl-profile-songs-panel__sort-btn--active"
+                    : "wl-profile-songs-panel__sort-btn"
+                  }
                   onClick={() => handleSortChange("alphabetical")}
                 >
                   A-Z
-                </Button>
-                <Button
-                  variant={matrixSortMode === "chronological" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="h-6 text-xs"
+                </button>
+                <button
+                  type="button"
+                  className={
+                    matrixSortMode === "chronological"
+                      ? "wl-profile-songs-panel__sort-btn wl-profile-songs-panel__sort-btn--active"
+                    : "wl-profile-songs-panel__sort-btn"
+                  }
                   onClick={() => handleSortChange("chronological")}
                 >
                   Chronological
-                </Button>
-                <Button
-                  variant={matrixSortMode === "playcount" ? "secondary" : "ghost"}
-                  size="sm"
-                  className="h-6 text-xs"
+                </button>
+                <button
+                  type="button"
+                  className={
+                    matrixSortMode === "playcount"
+                      ? "wl-profile-songs-panel__sort-btn wl-profile-songs-panel__sort-btn--active"
+                    : "wl-profile-songs-panel__sort-btn"
+                  }
                   onClick={() => handleSortChange("playcount")}
                 >
                   Most Played
-                </Button>
+                </button>
               </div>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild className="md:hidden">
-                  <Button variant="outline" size="icon" className="h-7 w-7">
-                    <ArrowDownUp className="size-4" />
-                  </Button>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="wl-profile-songs-panel__sort-menu-btn"
+                    aria-label="Sort matrix"
+                  >
+                    <ArrowDownUp className="size-4" aria-hidden />
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleSortChange("alphabetical")}>
+                  <DropdownMenuItem
+                    onClick={() => handleSortChange("alphabetical")}
+                  >
                     A-Z
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSortChange("chronological")}>
+                  <DropdownMenuItem
+                    onClick={() => handleSortChange("chronological")}
+                  >
                     Chronological
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSortChange("playcount")}>
+                  <DropdownMenuItem
+                    onClick={() => handleSortChange("playcount")}
+                  >
                     Most Played
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
-          )}
-          <div className="flex items-center gap-2">
+          : null}
+          <div className="wl-profile-songs-panel__view">
             <List
-              className={`size-4 ${
-                viewMode === "list" ? "text-foreground" : "text-muted-foreground"
-              }`}
+              className={
+                viewMode === "list" ?
+                  "wl-profile-songs-panel__view-icon wl-profile-songs-panel__view-icon--on"
+                : "wl-profile-songs-panel__view-icon"
+              }
+              aria-hidden
             />
             <button
               type="button"
               role="switch"
-              aria-checked={viewMode === "matrix"}
+              aria-checked={matrixMode}
+              aria-label={matrixMode ? "Show list view" : "Show matrix view"}
+              data-mode={matrixMode ? "matrix" : "list"}
+              className="wl-profile-songs-panel__view-switch"
               onClick={() =>
                 handleViewChange(viewMode === "list" ? "matrix" : "list")
               }
-              className="relative inline-flex h-4 w-[47px] items-center rounded-full border border-border transition-colors bg-background"
             >
-              <span
-                className={`absolute h-[10px] w-[10px] rounded-lg bg-foreground transition-transform duration-200 ${
-                  viewMode === "matrix" ? "left-[33px]" : "left-[2px]"
-                }`}
-              />
+              <span className="wl-profile-songs-panel__view-switch-thumb" />
             </button>
             <LayoutGrid
-              className={`size-4 ${
-                viewMode === "matrix" ? "text-foreground" : "text-muted-foreground"
-              }`}
+              className={
+                matrixMode ?
+                  "wl-profile-songs-panel__view-icon wl-profile-songs-panel__view-icon--on"
+                : "wl-profile-songs-panel__view-icon"
+              }
+              aria-hidden
             />
           </div>
         </div>
       </div>
-      <CardContent className="p-0">
-        {viewMode === "list" ? (
-          <div className="p-4">
+      <div className="wl-profile-songs-panel__body">
+        {viewMode === "list" ?
+          <div className="wl-profile-songs-panel__body--list">
             <UserSongsList
               categories={categories}
               songs={songs}
@@ -227,8 +235,7 @@ export function UserSongsCombined({
               onSongClick={onSongClick}
             />
           </div>
-        ) : (
-          <UserSongMatrix
+        : <UserSongMatrix
             songMatrix={songMatrix}
             sortedSongs={sortedSongs}
             yearGroups={yearGroups}
@@ -237,8 +244,8 @@ export function UserSongsCombined({
             shows={shows}
             onSongClick={onSongClick}
           />
-        )}
-      </CardContent>
-    </Card>
+        }
+      </div>
+    </div>
   )
 }

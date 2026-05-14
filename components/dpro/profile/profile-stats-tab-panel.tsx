@@ -13,6 +13,12 @@ import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
 import { ProfileSongsTabContent } from "@/components/dpro/profile/profile-songs-tab-content"
 import type { ProfileStatsTabSlug } from "@/components/dpro/profile/profile-stats-tab-config"
 
+import "./profile-overview-tab.css"
+import "./profile-shows-tab.css"
+import "./profile-slots-tab.css"
+import "./profile-personnel-tab.css"
+import "./profile-loose-ends-tab.css"
+
 export interface ProfileStatsTabPanelProps {
   tab: ProfileStatsTabSlug
   userId: string | null
@@ -37,75 +43,97 @@ export function ProfileStatsTabPanel({
   switch (tab) {
     case "overview":
       return (
-        <div className="flex flex-col gap-6">
-          <OverviewChart
-            userId={userId}
-            isOwnProfile={isOwnProfile}
-            username={username}
-          />
-          <UserStats
-            userId={userId}
-            effectiveUserId={userId}
-            isOwnProfile={isOwnProfile}
-            showCopyButton={isOwnProfile}
-          />
+        <div className="wl-home-v2-profile-overview-tab">
+          <div className="wl-home-v2-profile-overview-tab__chart">
+            <OverviewChart
+              userId={userId}
+              isOwnProfile={isOwnProfile}
+              username={username}
+            />
+          </div>
+          <div className="wl-home-v2-profile-overview-tab__stats">
+            <UserStats
+              userId={userId}
+              effectiveUserId={userId}
+              isOwnProfile={isOwnProfile}
+              showCopyButton={isOwnProfile}
+              overviewColumnLayout
+            />
+          </div>
         </div>
       )
     case "shows":
       return (
-        <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:items-start">
-            <div className="xl:col-span-3">
-              <AttendedShows
-                userId={userId}
-                isOwnProfile={isOwnProfile}
-                username={username}
-                readOnly={!isOwnProfile}
-                onManagingToggle={
-                  isOwnProfile ? handleManagingToggle : undefined
-                }
-              />
-            </div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-1">
-              <AttendedByGroupChart
-                userId={userId}
-                isOwnProfile={isOwnProfile}
-                username={username}
-                refetchKey={sidebarRefetchKey}
-              />
-              <AttendanceStats
-                userId={userId}
-                isOwnProfile={isOwnProfile}
-                username={username}
-                refetchKey={sidebarRefetchKey}
-              />
+        <div className="wl-home-v2-profile-shows-tab">
+          <div className="wl-home-v2-profile-shows-tab__section">
+            <div className="wl-home-v2-profile-shows-tab__grid">
+              <div className="wl-home-v2-profile-shows-tab__main">
+                <AttendedShows
+                  userId={userId}
+                  isOwnProfile={isOwnProfile}
+                  username={username}
+                  readOnly={!isOwnProfile}
+                  onManagingToggle={
+                    isOwnProfile ? handleManagingToggle : undefined
+                  }
+                />
+              </div>
+              <div className="wl-home-v2-profile-shows-tab__sidebar">
+                <AttendedByGroupChart
+                  userId={userId}
+                  isOwnProfile={isOwnProfile}
+                  username={username}
+                  refetchKey={sidebarRefetchKey}
+                />
+                <AttendanceStats
+                  userId={userId}
+                  isOwnProfile={isOwnProfile}
+                  username={username}
+                  refetchKey={sidebarRefetchKey}
+                />
+              </div>
             </div>
           </div>
         </div>
       )
     case "songs":
       return (
-        <ProfileSongsTabContent userId={userId} isOwnProfile={isOwnProfile} />
+        <ProfileSongsTabContent
+          userId={userId}
+          isOwnProfile={isOwnProfile}
+        />
       )
     case "slots":
       return (
-        <UserSlots
-          userId={userId}
-          effectiveUserId={userId}
-          isOwnProfile={isOwnProfile}
-        />
+        <div className="wl-home-v2-profile-slots-tab">
+          <div className="wl-home-v2-profile-slots-tab__section">
+            <UserSlots
+              userId={userId}
+              effectiveUserId={userId}
+              isOwnProfile={isOwnProfile}
+            />
+          </div>
+        </div>
       )
     case "personnel":
       return (
-        <UserPersonnel
-          userId={userId}
-          effectiveUserId={userId}
-          isOwnProfile={isOwnProfile}
-        />
+        <div className="wl-home-v2-profile-personnel-tab">
+          <div className="wl-home-v2-profile-personnel-tab__section">
+            <UserPersonnel
+              userId={userId}
+              effectiveUserId={userId}
+              isOwnProfile={isOwnProfile}
+            />
+          </div>
+        </div>
       )
     case "loose-ends":
       return (
-        <LooseEndsContent userId={userId} isOwnProfile={isOwnProfile} />
+        <div className="wl-home-v2-profile-loose-ends-tab">
+          <div className="wl-home-v2-profile-loose-ends-tab__section">
+            <LooseEndsContent userId={userId} isOwnProfile={isOwnProfile} />
+          </div>
+        </div>
       )
     default:
       return null

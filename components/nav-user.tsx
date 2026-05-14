@@ -190,7 +190,7 @@ export function NavUser({
                 )}
                 <DropdownMenuItem asChild>
                   <Link
-                    href="/old/archive/profile/overview"
+                    href="/archive/profile?tab=overview"
                     className="flex items-center gap-2"
                   >
                     <BarChart3Icon className="size-4" />

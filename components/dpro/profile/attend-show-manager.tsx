@@ -1,18 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronLeft } from "lucide-react"
+import { ChevronDown, ChevronLeft, Search, X } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDown, Search, X } from "lucide-react"
 import { useAttendShowData } from "@/hooks/use-attend-show-data"
 import { useYearsData } from "@/hooks/use-years-data"
 import {
@@ -20,6 +16,8 @@ import {
   getFilteredAndSortedShows,
 } from "@/hooks/use-table-sort"
 import { AttendShowManagerTable } from "./attend-show-manager-table"
+
+import "./attend-show-manage.css"
 
 interface AttendShowManagerProps {
   onClose: () => void
@@ -37,52 +35,66 @@ export function AttendShowManager({ onClose }: AttendShowManagerProps) {
     shows,
     searchQuery,
     sortColumn,
-    sortDirection
+    sortDirection,
   )
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="py-3 shrink-0 gap-1.5 bg-wl-orange/80 text-xs hover:!bg-wl-orange/50"
+    <section
+      className="wl-attend-manage wl-attend-manage--root"
+      aria-labelledby="wl-attend-manage-title"
+    >
+      <header className="wl-attend-manage__head">
+        <div className="wl-attend-manage__head-left">
+          <button
+            type="button"
+            className="wl-attend-manage__back"
             onClick={onClose}
             aria-label="Back to attended shows"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-3.5 shrink-0 opacity-80" aria-hidden />
             <span>Back to Shows</span>
-          </Button>
-          <h2 className="text-sm font-semibold">Manage Attended Shows</h2>
+          </button>
+          <h2 id="wl-attend-manage-title" className="wl-attend-manage__title">
+            Manage Attended Shows
+          </h2>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <div className="relative flex-1 sm:w-48">
-            <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
+        <div className="wl-attend-manage__toolbar">
+          <div className="wl-attend-manage__search-wrap">
+            <Search
+              className="wl-attend-manage__search-icon"
+              aria-hidden
+            />
+            <input
+              type="search"
               placeholder="Search shows…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 pl-8 pr-8 text-xs"
+              className="wl-attend-manage__search-input"
+              aria-label="Search shows"
+              autoComplete="off"
             />
-            {searchQuery && (
+            {searchQuery ?
               <button
                 type="button"
+                className="wl-attend-manage__search-clear"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
               >
-                <X className="size-3" />
+                <X className="size-3" aria-hidden />
               </button>
-            )}
+            : null}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 gap-1">
+              <button type="button" className="wl-attend-manage__year-trigger">
                 {yearFilter || "Select Year"}
-                <ChevronDown className="size-4" />
-              </Button>
+                <ChevronDown className="size-4 shrink-0 opacity-80" aria-hidden />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
+            <DropdownMenuContent
+              align="end"
+              className="max-h-64 overflow-y-auto"
+            >
               {years.map((year) => (
                 <DropdownMenuItem
                   key={year}
@@ -94,9 +106,9 @@ export function AttendShowManager({ onClose }: AttendShowManagerProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-xs text-muted-foreground pt-1">
+      </header>
+      <div className="wl-attend-manage__body">
+        <p className="wl-attend-manage__hint">
           Check the boxes next to shows you&apos;ve attended to add them to
           your list. Uncheck to remove them.
         </p>
@@ -104,13 +116,11 @@ export function AttendShowManager({ onClose }: AttendShowManagerProps) {
           shows={filteredShows}
           loading={loading}
           searchQuery={searchQuery}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
           onSort={handleSort}
           getSortIcon={getSortIcon}
           onAttendanceToggle={handleAttendanceToggle}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

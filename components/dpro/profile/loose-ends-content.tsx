@@ -5,9 +5,8 @@ import { ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 
 import { LooseEndCard } from "@/components/dpro/profile/loose-end-card"
-import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Collapsible,
   CollapsibleContent,
@@ -58,19 +57,17 @@ export function LooseEndsContent({
 
   if (!userId) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-muted-foreground text-sm">
-            Sign in to view Loose Ends on your profile.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="wl-profile-loose-ends-root">
+        <p className="wl-profile-loose-ends-message">
+          Sign in to view Loose Ends on your profile.
+        </p>
+      </div>
     )
   }
 
   if (loading) {
     return (
-      <LoadingPageCard
+      <WlWidgetPanelLoading
         message="Loading Loose Ends data…"
         progress={loadingProgress}
       />
@@ -79,43 +76,43 @@ export function LooseEndsContent({
 
   if (error) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center gap-4 py-8">
-          <p className="text-muted-foreground text-center text-sm">
+      <div className="wl-profile-loose-ends-root">
+        <div className="wl-profile-loose-ends-message">
+          <p>
             Something went wrong while loading Loose Ends.
           </p>
-          <Button type="button" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
+          <div className="wl-profile-loose-ends-message-actions">
+            <Button type="button" size="sm" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
     )
   }
 
   if (categories.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-muted-foreground text-sm">
-            No Loose Ends are configured yet.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="wl-profile-loose-ends-root">
+        <p className="wl-profile-loose-ends-message">
+          Nothing to show yet. Loose Ends are collectible badges from the site
+          catalog; they will appear here by category once they exist and are
+          marked visible.
+        </p>
+      </div>
     )
   }
 
   return (
-    <div className="flex min-w-0 w-full flex-col gap-4">
+    <div className="wl-profile-loose-ends-root flex min-w-0 w-full flex-col gap-4">
       {attendedShowCount === 0 && (
-        <Card className="border-dashed bg-muted/30">
-          <CardContent className="py-4">
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {isOwnProfile
-                ? "Add shows to your attended list to begin collecting Loose Ends stubs."
-                : "This user hasn't added any shows to their attended list yet."}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="widget-panel border-dashed px-4 py-4">
+          <p className="text-sm leading-relaxed text-white/70">
+            {isOwnProfile ?
+              "Add shows to your attended list to begin collecting Loose Ends stubs."
+            : "This user hasn't added any shows to their attended list yet."}
+          </p>
+        </div>
       )}
 
       <div className="flex flex-col gap-3">
@@ -123,11 +120,11 @@ export function LooseEndsContent({
           const items = groupedLooseEnds[category] ?? []
           return (
             <Collapsible key={category} defaultOpen>
-              <Card className="overflow-hidden py-0 gap-0">
+              <div className="widget-panel overflow-hidden py-0">
                 <CollapsibleTrigger
                   className={cn(
-                    "group flex w-full min-h-11 items-center justify-between gap-2 bg-muted/80 px-4 py-3 text-left text-sm font-semibold text-foreground transition-opacity hover:opacity-95",
-                    "touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    "group flex w-full min-h-11 items-center justify-between gap-2 px-4 py-3 text-left text-sm font-semibold text-white/90 transition-all duration-200 ease-out hover:bg-white/[0.06]",
+                    "touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   )}
                 >
                   <span>{category}</span>
@@ -137,7 +134,7 @@ export function LooseEndsContent({
                   />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <CardContent className="border-t border-border/60 pt-4 pb-4">
+                  <div className="border-t border-white/10 px-4 pt-4 pb-4">
                     {/* Viewport: &lt;1024 → 1 · 1024–1279 → 2 · 1280–1685 → 3 · ≥1686 → 4 */}
                     <div className="grid grid-cols-1 gap-3 min-[1024px]:grid-cols-2 min-[1280px]:grid-cols-3 min-[1686px]:grid-cols-4">
                       {items.map((looseEnd) => (
@@ -148,9 +145,9 @@ export function LooseEndsContent({
                         />
                       ))}
                     </div>
-                  </CardContent>
+                  </div>
                 </CollapsibleContent>
-              </Card>
+              </div>
             </Collapsible>
           )
         })}

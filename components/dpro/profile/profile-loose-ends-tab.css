@@ -1,0 +1,46 @@
+/* Profile — Loose Ends tab shell + archive tile message parity (see `user-personnel.css`). */
+
+.wl-home-v2 .wl-home-v2-setlist .wl-profile-loose-ends-root a:hover,
+.wl-home-v2 .wl-home-v2-setlist .wl-profile-loose-ends-root a:focus-visible {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-loose-ends-tab {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.wl-home-v2-profile-loose-ends-tab__section {
+  width: 100%;
+  min-width: 0;
+}
+
+.wl-home-v2 .wl-profile-loose-ends-root {
+  width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.wl-profile-loose-ends-message {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: 1.25rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.wl-profile-loose-ends-message-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: center;
+}

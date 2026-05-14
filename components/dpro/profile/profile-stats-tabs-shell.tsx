@@ -1,17 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { Check, ChevronDownIcon, Share2 } from "lucide-react"
+import { Check, Share2 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { buttonVariants } from "@/components/ui/button"
 import { PROFILE_STATS_TABS } from "@/components/dpro/profile/profile-stats-tab-config"
+import { WL_HOME_V2_PROFILE_CONTENT_MAX_CLASS } from "@/components/wl-home-v2/wl-home-v2-profile-archive-shell"
+import { cn } from "@/lib/utils"
+
+import "./profile-stats-tabs-shell.css"
 
 export interface ProfileStatsTabsShellProps {
   activeTab: string
@@ -22,6 +19,8 @@ export interface ProfileStatsTabsShellProps {
   onShare?: () => void
   shareCopied?: boolean
   children: React.ReactNode
+  /** Merged onto the outer shell (e.g. drop padding inside WL Home v2 archive tiles). */
+  className?: string
 }
 
 export function ProfileStatsTabsShell({
@@ -33,80 +32,90 @@ export function ProfileStatsTabsShell({
   onShare,
   shareCopied = false,
   children,
+  className,
 }: ProfileStatsTabsShellProps) {
-  const activeLabel =
-    PROFILE_STATS_TABS.find((t) => t.slug === activeTab)?.label ?? "Overview"
-
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6">
-      <div className="flex flex-row flex-wrap items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <h1 className="text-lg font-semibold">{title}</h1>
-            {showShareButton && onShare ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 shrink-0 gap-1.5"
+    <div
+      className={cn(
+        WL_HOME_V2_PROFILE_CONTENT_MAX_CLASS,
+        "flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-b-none p-4 md:rounded-b-xl md:p-6",
+        className,
+      )}
+    >
+      <div className="wl-home-v2-archive-admin-root wl-home-v2-profile-stats-tabs-chrome wl-home-v2-profile-stats-chrome-box">
+        <header>
+          <div className="wl-home-v2-profile-stats-chrome-title-row">
+            <div className="min-w-0 text-center">
+              <span
+                role="heading"
+                aria-level={1}
+                className="block text-lg font-semibold"
+              >
+                {title}
+              </span>
+            </div>
+            {showShareButton && onShare ?
+              <button
+                type="button"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "wl-home-v2-tours-header-pill shrink-0 gap-1",
+                )}
                 onClick={onShare}
                 title={shareCopied ? "Copied!" : "Copy share link"}
               >
-                {shareCopied ? (
+                {shareCopied ?
                   <>
-                    <Check className="size-3.5 text-green-500" />
+                    <Check
+                      className="size-3.5 shrink-0 text-green-400 opacity-90"
+                      aria-hidden
+                    />
                     Copied!
                   </>
-                ) : (
-                  <>
-                    <Share2 className="size-3.5" />
+                : <>
+                    <Share2 className="size-3.5 shrink-0 opacity-80" aria-hidden />
                     Share
                   </>
-                )}
-              </Button>
-            ) : null}
+                }
+              </button>
+            : null}
           </div>
-          {description ? (
-            <p className="text-sm text-muted-foreground sm:max-w-none">
+          {description ?
+            <p className="max-w-prose text-sm text-muted-foreground">
               {description}
             </p>
-          ) : null}
-        </div>
-        <Tabs value={activeTab} className="w-full md:w-auto">
-          <div className="hidden md:block">
-            <TabsList className="h-8 w-full flex-wrap justify-start">
-              {PROFILE_STATS_TABS.map((tab) => (
-                <TabsTrigger
+          : null}
+        </header>
+
+        <div className="wl-home-v2-profile-stats-tabs-scroll">
+          <nav
+            role="tablist"
+            aria-label="Profile sections"
+            data-slot="tabs-list"
+            className="wl-home-v2-archive-admin-tabs-list mx-auto flex h-7 min-h-7 min-w-full w-max flex-nowrap items-center justify-center gap-0.5 p-0.5"
+          >
+            {PROFILE_STATS_TABS.map((tab) => {
+              const isActive = activeTab === tab.slug
+              return (
+                <Link
                   key={tab.slug}
-                  value={tab.slug}
-                  asChild
-                  className="text-xs"
+                  role="tab"
+                  aria-selected={isActive}
+                  href={tabHref(tab.slug)}
+                  prefetch={false}
+                  scroll={false}
+                  data-slot="tabs-trigger"
+                  data-state={isActive ? "active" : "inactive"}
+                  className="wl-home-v2-archive-admin-tabs-trigger inline-flex flex-none shrink-0 items-center justify-center text-xs"
                 >
-                  <Link href={tabHref(tab.slug)}>{tab.label}</Link>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="md:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-auto min-h-11 justify-between gap-1 sm:min-h-8"
-              >
-                {activeLabel}
-                <ChevronDownIcon className="ml-1 size-4 shrink-0" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              {PROFILE_STATS_TABS.map((tab) => (
-                <DropdownMenuItem key={tab.slug} asChild>
-                  <Link href={tabHref(tab.slug)}>{tab.label}</Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </Tabs>
+                  {tab.label}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
       </div>
+
       <div className="min-w-0 w-full pb-8">{children}</div>
     </div>
   )

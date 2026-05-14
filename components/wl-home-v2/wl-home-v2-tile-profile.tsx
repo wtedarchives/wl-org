@@ -3,14 +3,14 @@
 import { ArrowRight } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
-import type { CSSProperties } from "react"
-
 import type { AttendanceStatsData } from "@/types/attendance"
 import type { UserCanonicalBookendShow } from "@/hooks/use-user-canonical-bookend-shows"
 import {
   wlHomeProfileBookendTitle,
 } from "@/hooks/use-user-canonical-bookend-shows"
 import { formatWlHomeTileShowDate } from "@/hooks/use-wl-home-most-recent-show"
+
+import "./wl-home-v2-tile-profile.css"
 
 export function WlHomeV2TileProfile({
   onOpenLogin,
@@ -43,11 +43,10 @@ export function WlHomeV2TileProfile({
         "tile tile-profile" +
         (!profileSignedIn ? " tile-profile--guest" : "")
       }
-      style={{ "--tile-bg": "url('/newbg4.jpeg')" } as CSSProperties}
     >
       {profileSignedIn ?
         <Link
-          href="/old/archive/profile/overview"
+          href="/archive/profile?tab=overview"
           className="tile-link"
           aria-label="View your show stats"
         />

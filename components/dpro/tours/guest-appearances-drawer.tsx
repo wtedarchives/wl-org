@@ -13,17 +13,11 @@ import {
   DrawerClose,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
-import type { SongWithGuest } from "@/hooks/use-guest-appearances"
+import { GuestPersonnelShowsTable } from "@/components/dpro/tours/guest-personnel-shows-table"
+import type { GuestAppearancesModalData } from "@/hooks/use-guest-appearances"
 
 export interface GuestAppearancesDrawerProps {
-  modalData: {
-    isOpen: boolean
-    guestId: string
-    guestName: string
-    guestInstrument: string | null
-    songs: SongWithGuest[]
-    tourName: string
-  }
+  modalData: GuestAppearancesModalData
   onOpenChange: (open: boolean) => void
 }
 
@@ -70,11 +64,18 @@ export function GuestAppearancesDrawer({
         </DrawerHeader>
 
         <div className="flex-1 min-h-0 overflow-auto px-4 pb-4 pt-2">
-          <GuestAppearancesDetailTable
-            songs={modalData.songs}
-            variant="drawer"
-            onNavigate={() => onOpenChange(false)}
-          />
+          {modalData.personnelShows !== undefined ?
+            <GuestPersonnelShowsTable
+              shows={modalData.personnelShows}
+              variant="drawer"
+              onNavigate={() => onOpenChange(false)}
+            />
+          : <GuestAppearancesDetailTable
+              songs={modalData.songs}
+              variant="drawer"
+              onNavigate={() => onOpenChange(false)}
+            />
+          }
         </div>
 
         <DrawerFooter className="border-t border-border/60 shrink-0 pt-3 pb-4">

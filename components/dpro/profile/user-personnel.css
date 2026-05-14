@@ -1,0 +1,47 @@
+/* Profile — Personnel: root + message states (archive tile parity). */
+
+.wl-home-v2 .wl-profile-personnel-root {
+  width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.wl-profile-personnel-message {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: 1.25rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+/* Main personnel panels: 1 col → 2 → 3 by viewport (mobile-first). */
+.wl-profile-personnel-grid {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  .wl-profile-personnel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .wl-profile-personnel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Sub-table wrapper inside the Guests panel (between stacked tables). */
+.wl-profile-personnel-subblock {
+  min-width: 0;
+}

@@ -3,29 +3,27 @@
 import { useEffect, useState, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 
-import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { ProfileStatBox } from "@/components/dpro/profile/profile-stat-box"
 import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
 import { useUserShows } from "@/hooks/use-user-shows"
 import { useUserStats } from "@/hooks/use-user-stats"
+import { getProfileUserStatCategoryClass } from "@/lib/profile-user-stat-wl-category"
 import { getLoadingMessage } from "@/lib/utils/user-stats-utils"
+import { cn } from "@/lib/utils"
 import type { StatData } from "@/types/user-stats"
+
+import "./profile-user-stats.css"
 
 interface UserStatsProps {
   userId?: string | null
   effectiveUserId: string | null
   isOwnProfile: boolean
   showCopyButton?: boolean
-}
-
-const MOBILE_ORDER: Record<string, number> = {
-  topSongs: 1,
-  longestPerformances: 2,
-  showOpeners: 3,
-  setOpeners: 4,
-  setClosers: 5,
-  encoreSongs: 6,
-  notSeenSongs: 7,
+  /**
+   * Overview tab: single column of WL top-slots-style panels (parent provides grid).
+   */
+  overviewColumnLayout?: boolean
 }
 
 export function UserStats({
@@ -33,6 +31,7 @@ export function UserStats({
   effectiveUserId,
   isOwnProfile,
   showCopyButton = true,
+  overviewColumnLayout = false,
 }: UserStatsProps) {
   const [username, setUsername] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -45,13 +44,13 @@ export function UserStats({
   const { shows } = useUserShows(effectiveUserId)
   const attendedShowIds = useMemo(
     () => shows.map((s) => s.show_id),
-    [shows]
+    [shows],
   )
 
   const handleSongClick = (
     songName: string,
     songDisplayName?: string | null,
-    songId?: string
+    songId?: string,
   ) => {
     setSheetSongName(songName)
     setSheetSongDisplayName(songDisplayName ?? null)
@@ -152,7 +151,9 @@ export function UserStats({
 
   if (loading) {
     return (
-      <LoadingPageCard message={getLoadingMessage(isOwnProfile, username)} />
+      <WlWidgetPanelLoading
+        message={getLoadingMessage(isOwnProfile, username)}
+      />
     )
   }
 
@@ -185,16 +186,76 @@ export function UserStats({
     )
   }
 
+  const sheet = (
+    <UserSongPerformancesSheet
+      open={sheetOpen}
+      onOpenChange={setSheetOpen}
+      songName={sheetSongName}
+      songDisplayName={sheetSongDisplayName}
+      songId={sheetSongId}
+      userId={effectiveUserId}
+      attendedShowIds={attendedShowIds}
+      isOwnProfile={isOwnProfile}
+    />
+  )
+
+  const OVERVIEW_STAT_GRID_ORDER = [
+    "topSongs",
+    "longestPerformances",
+    "notSeenSongs",
+    "showOpeners",
+    "setOpeners",
+    "setClosers",
+    "encoreSongs",
+  ] as const
+
+  const OVERVIEW_STAT_NO_SWATCH = new Set<string>([
+    "topSongs",
+    "longestPerformances",
+    "notSeenSongs",
+  ])
+
+  if (overviewColumnLayout) {
+    const orderedOverviewStats = OVERVIEW_STAT_GRID_ORDER.map((t) =>
+      statData.find((s) => s.type === t),
+    ).filter((s): s is StatData => s != null)
+
+    return (
+      <>
+        <div className="wl-home-v2-profile-overview-stats-grid">
+          {orderedOverviewStats.map((stat) => (
+            <div key={stat.type} className="wl-home-v2-profile-stat-slot">
+              <ProfileStatBox
+                stat={stat}
+                showCopyButton={showCopyButton}
+                onSongClick={handleSongClick}
+                variant="wlPanel"
+                isOwnProfile={isOwnProfile}
+                showCategorySwatch={!OVERVIEW_STAT_NO_SWATCH.has(stat.type)}
+                wlCategoryClass={
+                  OVERVIEW_STAT_NO_SWATCH.has(stat.type) ?
+                    undefined
+                  : getProfileUserStatCategoryClass(stat.type)
+                }
+              />
+            </div>
+          ))}
+        </div>
+        {sheet}
+      </>
+    )
+  }
+
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {statData.map((stat, index) => (
+      <div className="wl-home-v2-profile-user-stats-grid">
+        {statData.map((stat) => (
           <div
             key={stat.type}
-            className="min-h-[200px]"
-            style={{
-              order: MOBILE_ORDER[stat.type] ?? index + 1,
-            }}
+            className={cn(
+              "wl-home-v2-profile-stat-slot",
+              `wl-home-v2-profile-stat-slot--${stat.type}`,
+            )}
           >
             <ProfileStatBox
               stat={stat}
@@ -204,17 +265,7 @@ export function UserStats({
           </div>
         ))}
       </div>
-
-      <UserSongPerformancesSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        songName={sheetSongName}
-        songDisplayName={sheetSongDisplayName}
-        songId={sheetSongId}
-        userId={effectiveUserId}
-        attendedShowIds={attendedShowIds}
-        isOwnProfile={isOwnProfile}
-      />
+      {sheet}
     </>
   )
 }

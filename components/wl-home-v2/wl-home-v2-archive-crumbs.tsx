@@ -126,3 +126,9 @@ export function WlHomeV2ArchiveCrumbsTrail({
     </>
   )
 }
+
+/** My Stats (`/archive/profile`) — no session; safe on loading / Suspense fallbacks. */
+export const WL_HOME_V2_PROFILE_MY_STATS_CRUMB_ITEMS: BreadcrumbItem[] = [
+  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
+  { label: "My Stats", href: "/archive/profile?tab=overview" },
+]

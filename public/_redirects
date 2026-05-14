@@ -18,18 +18,25 @@
 /old/archive/lists  /archive/lists  301
 /old/archive/song  /archive/song  301
 /old/archive/venue  /archive/venue  301
-/archive/user  /old/archive/user  301
 /archive/submit  /old/archive/submit  301
+/old/archive/user  /user  301
+/archive/user  /user  301
+/old/archive/profile  /archive/profile?tab=overview  301
+/old/archive/profile/overview  /archive/profile?tab=overview  301
+/old/archive/profile/shows  /archive/profile?tab=shows  301
+/old/archive/profile/songs  /archive/profile?tab=songs  301
+/old/archive/profile/slots  /archive/profile?tab=slots  301
+/old/archive/profile/personnel  /archive/profile?tab=personnel  301
+/old/archive/profile/loose-ends  /archive/profile?tab=loose-ends  301
+/archive/profile/overview  /archive/profile?tab=overview  301
+/archive/profile/shows  /archive/profile?tab=shows  301
+/archive/profile/songs  /archive/profile?tab=songs  301
+/archive/profile/slots  /archive/profile?tab=slots  301
+/archive/profile/personnel  /archive/profile?tab=personnel  301
+/archive/profile/loose-ends  /archive/profile?tab=loose-ends  301
 /old/archive/admin  /archive/admin  301
 /old/archive/admin/radio  /archive/admin/radio  301
 /old/archive/bugs  /archive/bugs  301
-/archive/profile  /old/archive/profile  301
-/archive/profile/overview  /old/archive/profile/overview  301
-/archive/profile/shows  /old/archive/profile/shows  301
-/archive/profile/songs  /old/archive/profile/songs  301
-/archive/profile/slots  /old/archive/profile/slots  301
-/archive/profile/personnel  /old/archive/profile/personnel  301
-/archive/profile/loose-ends  /old/archive/profile/loose-ends  301
 
 # Legacy tours shell → canonical `/archive/tours` (query string preserved)
 /old/archive/tours  /archive/tours  301
@@ -38,10 +45,13 @@
 # route when migrated or 404, so redirects to `/old/archive` are not mistaken for
 # “done” new-site pages. Re-add explicit lines (or splats) when cutting over a section.
 
-# Public user stats: path tab → query (incoming ?id= preserved by Netlify)
-/archive/user/overview  /old/archive/user?tab=overview  301
-/archive/user/shows  /old/archive/user?tab=shows  301
-/archive/user/songs  /old/archive/user?tab=songs  301
-/archive/user/slots  /old/archive/user?tab=slots  301
-/archive/user/personnel  /old/archive/user?tab=personnel  301
-/archive/user/loose-ends  /old/archive/user?tab=loose-ends  301
+# Public user profile: legacy path tabs → canonical /user?id=&tab= (incoming ?id= merges on Netlify)
+/archive/user/overview  /user?tab=overview  301
+/archive/user/shows  /user?tab=shows  301
+/archive/user/songs  /user?tab=songs  301
+/archive/user/slots  /user?tab=slots  301
+/archive/user/personnel  /user?tab=personnel  301
+/archive/user/loose-ends  /user?tab=loose-ends  301
+
+# Legacy path-style /user/{uuid} → query canonical (tab defaults in-app when omitted)
+/user/*  /user?id=:splat  301

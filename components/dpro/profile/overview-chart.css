@@ -1,0 +1,140 @@
+/* Profile overview — “Shows per year” inside `.wl-home-v2-profile-overview-tab__chart`.
+ * Shell uses `.widget-panel` (same frost/bg as stat panels). Header matches `ProfileStatBox` wp-head. */
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-overview-chart-shell {
+  overflow: visible;
+  min-width: 0;
+}
+
+/* Same title treatment as `.wl-home-v2-profile-stat-box--wl > .wp-head`. */
+.wl-home-v2 .widget-panel.wl-home-v2-profile-overview-chart-shell > .wp-head {
+  justify-content: flex-start;
+  color: var(--wl-white);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.wl-home-v2-profile-overview-chart-root {
+  min-width: 0;
+  height: 280px;
+  width: 100%;
+  overflow: visible;
+}
+
+/* Chart chrome on dark frost (axis letters, grid, legend copy). */
+.wl-home-v2 .wl-home-v2-profile-overview-chart-root .recharts-cartesian-grid-horizontal line,
+.wl-home-v2 .wl-home-v2-profile-overview-chart-root .recharts-cartesian-grid-vertical line {
+  stroke: rgb(44, 46, 45);
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-root .recharts-layer.recharts-cartesian-axis
+  .recharts-cartesian-axis-tick
+  text {
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-root .recharts-legend-wrapper {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.wl-home-v2-profile-overview-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 0;
+}
+
+.wl-home-v2-profile-overview-chart-empty-msg {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* Recharts positions the real box; keep it flush—only the inner panel is painted. */
+.wl-home-v2 .wl-home-v2-profile-overview-chart-root .recharts-tooltip-wrapper {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Custom tooltip (no shadcn): compact rows, solid panel, height hugs content. */
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: max-content;
+  min-width: 7.5rem;
+  max-width: min(16rem, 92vw);
+  padding: 0.375rem 0.5rem;
+  margin: 0;
+  border: 1px solid rgb(44, 46, 45);
+  border-radius: 6px;
+  background-color: rgb(34, 37, 35);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.45);
+  align-self: flex-start;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-head {
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-row-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-swatch {
+  flex-shrink: 0;
+  display: block;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-name {
+  color: rgba(255, 255, 255, 0.58);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wl-home-v2 .wl-home-v2-profile-overview-chart-ttpanel-value {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: right;
+}

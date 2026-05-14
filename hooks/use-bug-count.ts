@@ -6,17 +6,18 @@ import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 
 /**
- * Open (unresolved) bug count for the Admin sidebar badge.
- * Uses `dpro-admin` + service role because SSO JWT is not Supabase Auth (anon SELECT is empty under RLS).
+ * Open (unresolved) bug count for the Admin sidebar / user-menu badge.
+ * Only runs when `isAdmin` is true; uses `dpro-admin` + service role because SSO JWT is not Supabase Auth.
  */
 export function useBugCount(): number | null {
-  const { session, loading: authLoading } = useAuth()
+  const { session, loading: authLoading, isAdmin } = useAuth()
   const token = session?.token ?? null
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
     if (authLoading) return
-    if (!token) {
+    /** Badge is admin-only; `dpro-admin` rejects non-admins and unverifiable JWTs with 401/403. */
+    if (!token || !isAdmin) {
       setCount(null)
       return
     }
@@ -40,7 +41,7 @@ export function useBugCount(): number | null {
     return () => {
       cancelled = true
     }
-  }, [authLoading, token])
+  }, [authLoading, isAdmin, token])
 
   return count
 }

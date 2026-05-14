@@ -1,26 +1,13 @@
 "use client"
 
-
+import type { CSSProperties } from "react"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getYearArchiveUrl } from "@/lib/year-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import Link from "next/link"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { getMatrixPlacementColor } from "@/lib/stats/tour-utils"
 import type { UserSongMatrixData, YearGroup } from "@/hooks/use-user-song-matrix"
-
-/** Match tour song matrix borders (`components/dpro/tours/tour-song-matrix.tsx`). */
-const MATRIX_BORDER = "border-[#232325]"
-/** Softer rules for matrix header: toolbar→grid, between years, between dates. */
-const HEADER_RULE = "border-border/60"
 
 function formatShowDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z")
@@ -53,125 +40,120 @@ export function UserSongMatrix({
   onSongClick,
 }: UserSongMatrixProps) {
   return (
-    <div className="overflow-x-auto overflow-y-auto">
-      <Table>
-        <TableHeader>
-          <TableRow className={`border-b ${HEADER_RULE} bg-muted/50`}>
-            <TableHead
+    <div className="wl-profile-songs-matrix-scroll">
+      <table className="wl-profile-songs-matrix__table">
+        <thead>
+          <tr className="wl-profile-songs-matrix__thead-row">
+            <th
+              scope="colgroup"
               rowSpan={2}
-              className={`pl-3 py-1.5 text-left text-xs font-medium bg-muted/50 border-b border-r ${HEADER_RULE} align-bottom`}
+              className="wl-profile-songs-matrix__th wl-profile-songs-matrix__th--song"
             >
               Song
-            </TableHead>
+            </th>
             {yearGroups.map((group) => (
-              <TableHead
+              <th
                 key={group.year}
+                scope="colgroup"
                 colSpan={group.shows.length}
-                className={`h-auto px-1 py-1 text-center text-xs font-semibold bg-muted/50 border-b border-r ${HEADER_RULE} last:border-r-0`}
+                className="wl-profile-songs-matrix__th"
               >
-                {yearIdMap[group.year] ? (
-                  <Link
-                    href={getYearArchiveUrl(yearIdMap[group.year])}
-                    className="hover:underline"
-                  >
+                {yearIdMap[group.year] ?
+                  <Link href={getYearArchiveUrl(yearIdMap[group.year])}>
                     {group.year}
                   </Link>
-                ) : (
-                  <span>{group.year}</span>
-                )}
-              </TableHead>
+                : <span>{group.year}</span>}
+              </th>
             ))}
-          </TableRow>
-          <TableRow className={`border-b ${HEADER_RULE} bg-muted/50`}>
+          </tr>
+          <tr className="wl-profile-songs-matrix__thead-row">
             {shows.map((show) => (
-              <TableHead
+              <th
                 key={show.show_id}
-                className={`h-auto px-1 py-1 text-center text-xs font-medium whitespace-nowrap min-w-[3rem] border-r ${HEADER_RULE} last:border-r-0`}
+                scope="col"
+                className="wl-profile-songs-matrix__th wl-profile-songs-matrix__th--show"
               >
-                <Link
-                  href={getSetlistArchiveUrl(show.show_id)}
-                  className="hover:underline"
-                >
+                <Link href={getSetlistArchiveUrl(show.show_id)}>
                   {formatShowDate(show.show_date)}
                 </Link>
-              </TableHead>
+              </th>
             ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+          </tr>
+        </thead>
+        <tbody className="wl-profile-songs-matrix__tbody">
           {sortedSongs.map((song) => {
             const performances = songMatrix.data[song] ?? []
+            const heardAtAnyAttendedShow = performances.length > 0
             return (
-              <TableRow
+              <tr
                 key={song}
-                className={`${MATRIX_BORDER} bg-background/70 hover:bg-muted/40`}
+                className={
+                  heardAtAnyAttendedShow ?
+                    undefined
+                  : "wl-profile-songs-matrix__tr--unseen"
+                }
               >
-                <TableCell
-                  className={`font-medium text-xs pl-3 py-0.5 whitespace-nowrap border-r ${MATRIX_BORDER}`}
-                >
-                  {onSongClick ? (
+                <td className="wl-profile-songs-matrix__td-song">
+                  {onSongClick ?
                     <button
                       type="button"
                       onClick={() =>
                         onSongClick(
                           song,
                           songMatrix.songDisplayNameMap?.[song],
-                          songIdMap[song]
+                          songIdMap[song],
                         )
                       }
-                      className="text-left hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
+                      className="wl-profile-songs-matrix__song-btn"
                     >
                       <SongDisplayName
                         song={song}
                         songDisplayName={songMatrix.songDisplayNameMap?.[song]}
                       />
                     </button>
-                  ) : songIdMap[song] ? (
-                    <Link
-                      href={getSongArchiveUrl(songIdMap[song])}
-                      className="hover:underline"
-                    >
+                  : songIdMap[song] ?
+                    <Link href={getSongArchiveUrl(songIdMap[song])}>
                       <SongDisplayName
                         song={song}
                         songDisplayName={songMatrix.songDisplayNameMap?.[song]}
                       />
                     </Link>
-                  ) : (
-                    <SongDisplayName
+                  : <SongDisplayName
                       song={song}
                       songDisplayName={songMatrix.songDisplayNameMap?.[song]}
                     />
-                  )}
-                </TableCell>
+                  }
+                </td>
                 {shows.map((show) => {
                   const perf = performances.find(
-                    (p) => p.showId === show.show_id
+                    (p) => p.showId === show.show_id,
                   )
                   const base = getMatrixPlacementColor(perf?.placement ?? null)
                   const bg =
                     perf?.placement?.startsWith("Main Set") ? "#333333" : base
                   return (
-                    <TableCell
+                    <td
                       key={`${song}-${show.show_id}`}
-                      className={`text-center border-x ${MATRIX_BORDER} p-0`}
-                      style={{
-                        backgroundColor: bg || undefined,
-                        minWidth: "3rem",
-                      }}
+                      className="wl-profile-songs-matrix__td-cell"
+                      style={
+                        {
+                          "--wl-matrix-cell-bg": bg || "transparent",
+                        } as CSSProperties
+                      }
                     >
-                      {perf && (
-                        <span className="text-white text-xs font-medium inline-block py-0.5">
+                      {perf ?
+                        <span className="wl-profile-songs-matrix__td-inner">
                           {perf.venueAppearanceCount}
                         </span>
-                      )}
-                    </TableCell>
+                      : null}
+                    </td>
                   )
                 })}
-              </TableRow>
+              </tr>
             )
           })}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   )
 }

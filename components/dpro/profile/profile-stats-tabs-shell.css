@@ -1,0 +1,160 @@
+/* Profile stats tab triggers (inside frosted header). TabsList has no tray chrome. */
+
+/* Tab row: no outer “tray” behind triggers (scroll wrapper is neutral). */
+.wl-home-v2-profile-stats-tabs-chrome .wl-home-v2-profile-stats-tabs-scroll [data-slot="tabs-list"],
+.wl-home-v2
+  .wl-home-v2-profile-stats-tabs-chrome
+  .wl-home-v2-profile-stats-tabs-scroll
+  [data-slot="tabs-list"] {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 2px;
+  gap: 2px;
+}
+.wl-home-v2-profile-stats-tabs-chrome [data-slot="tabs-trigger"] {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.62);
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.wl-home-v2-profile-stats-tabs-chrome
+  .wl-home-v2-profile-stats-tabs-scroll
+  [data-slot="tabs-trigger"] {
+  padding-inline: 7px;
+  padding-block: 3px;
+  min-height: 28px;
+}
+.wl-home-v2-profile-stats-tabs-chrome
+  [data-slot="tabs-trigger"][data-state="active"] {
+  background: rgba(88, 200, 174, 0.16);
+  color: #fff;
+  border: 1px solid rgb(52, 109, 95);
+}
+
+.wl-home-v2-profile-stats-tabs-chrome
+  [data-slot="tabs-trigger"]:not([data-state="active"]):hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(123, 94, 63, 0.65);
+}
+
+/* Frosted shell: setlist-style panel + column layout (no layout Tailwind on the node). */
+.wl-home-v2-profile-stats-chrome-box {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.63);
+  border: 1px solid rgb(63, 65, 64);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  padding-block: 12px;
+  padding-inline: 12px;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2-profile-stats-chrome-box {
+    padding-inline: 24px;
+  }
+}
+
+.wl-home-v2-profile-stats-chrome-box header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.wl-home-v2-profile-stats-chrome-box .wl-home-v2-profile-stats-chrome-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wl-home-v2-profile-stats-chrome-box::before {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 122, 103, 0.2),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.wl-home-v2-profile-stats-chrome-box > * {
+  position: relative;
+  z-index: 1;
+}
+
+.wl-home-v2-profile-stats-tabs-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+/* Legacy `(main)` inset: “Add entry” pill (frosted panel variant from admin setlist). */
+.wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill {
+  box-sizing: border-box;
+  height: auto;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border-radius: 999px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.95);
+  padding-block: 5px;
+  padding-inline: 11px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill svg {
+  display: block;
+}
+.wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill:hover {
+  color: #fff;
+  border-color: rgb(123, 94, 63);
+  background: rgba(255, 122, 103, 0.22);
+}
+
+@media (max-width: 639px) {
+  .wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill {
+    min-height: 44px;
+  }
+}

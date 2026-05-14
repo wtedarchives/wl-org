@@ -6,8 +6,8 @@ import { Calendar, Building2, Music } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 
-import { Card, CardContent, CardTitle } from "@/components/ui/card"
-import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
+import { cn } from "@/lib/utils"
 import { useAttendanceStats } from "@/hooks/use-attendance-stats"
 
 interface AttendanceStatsProps {
@@ -20,12 +20,12 @@ interface AttendanceStatsProps {
 export function AttendanceStats({
   userId,
   isOwnProfile,
-  username,
+  username: _username,
   refetchKey = 0,
 }: AttendanceStatsProps) {
   const { data, loading, loadingProgress } = useAttendanceStats(
     userId,
-    refetchKey
+    refetchKey,
   )
   const [displayUsername, setDisplayUsername] = useState<string | null>(null)
 
@@ -52,73 +52,114 @@ export function AttendanceStats({
       ? `${displayUsername} hasn't attended any tours yet`
       : "No tour data available"
 
+  const panelPadClass = isOwnProfile
+    ? "wl-home-v2-profile-shows-panel--own"
+    : "wl-home-v2-profile-shows-panel--public"
+
   if (loading) {
-    return <LoadingPageCard message={loadingMsg} progress={loadingProgress} />
+    return (
+      <WlWidgetPanelLoading message={loadingMsg} progress={loadingProgress} />
+    )
+  }
+
+  if (!userId) {
+    return (
+      <div
+        className={cn(
+          "widget-panel wl-home-v2-profile-shows-stats",
+          panelPadClass,
+        )}
+      >
+        <div className="wp-head wl-home-v2-years-shows-wp-head">
+          <span className="min-w-0 truncate">Canonical Attendance Stats</span>
+        </div>
+        <div className="wl-home-v2-profile-shows-stat-empty">
+          <p className="wl-home-v2-profile-shows-stat-empty-msg">
+            Please log in to see attendance stats.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <Card className="overflow-hidden py-0">
-      <div className="bg-muted/60 px-4 py-2">
-        <CardTitle className="text-sm font-medium">
-          Canonical Attendance Stats
-        </CardTitle>
+    <div
+      className={cn(
+        "widget-panel wl-home-v2-profile-shows-stats",
+        panelPadClass,
+      )}
+    >
+      <div className="wp-head wl-home-v2-years-shows-wp-head">
+        <span className="min-w-0 truncate">Canonical Attendance Stats</span>
       </div>
-      <CardContent className="space-y-4 p-3">
-        <ul className="space-y-1.5 text-xs text-muted-foreground">
-          <li className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="size-3.5 shrink-0" />
+      <div className="wl-home-v2-profile-shows-stats-body">
+        <ul className="wl-home-v2-profile-shows-stats-list">
+          <li>
+            <span className="wl-home-v2-profile-shows-stats-list-label">
+              <Calendar
+                className="wl-home-v2-profile-shows-stats-list-icon"
+                aria-hidden
+              />
               Shows Attended
             </span>
-            <span className="inline-block rounded px-1.5 py-[1px] tabular-nums font-medium text-foreground bg-muted/60 ring-1 ring-border/50">
+            <span className="wl-home-v2-profile-shows-stat-pill">
               {data.showsCount}
             </span>
           </li>
-          <li className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">
-              <Building2 className="size-3.5 shrink-0" />
+          <li>
+            <span className="wl-home-v2-profile-shows-stats-list-label">
+              <Building2
+                className="wl-home-v2-profile-shows-stats-list-icon"
+                aria-hidden
+              />
               Venues Visited
             </span>
-            <span className="inline-block rounded px-1.5 py-[1px] tabular-nums font-medium text-foreground bg-muted/60 ring-1 ring-border/50">
+            <span className="wl-home-v2-profile-shows-stat-pill">
               {data.venuesCount}
             </span>
           </li>
-          <li className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">
-              <Music className="size-3.5 shrink-0" />
+          <li>
+            <span className="wl-home-v2-profile-shows-stats-list-label">
+              <Music
+                className="wl-home-v2-profile-shows-stats-list-icon"
+                aria-hidden
+              />
               Songs Seen
             </span>
-            <span className="inline-block rounded px-1.5 py-[1px] tabular-nums font-medium text-foreground bg-muted/60 ring-1 ring-border/50">
+            <span className="wl-home-v2-profile-shows-stat-pill">
               {data.songsCount}
             </span>
           </li>
         </ul>
-
-        <div>
-          <h4 className="mb-2 text-xs font-semibold">Tours Attended</h4>
-          {data.tourCounts.length === 0 ? (
-            <p className="pl-3 text-xs italic text-muted-foreground">
-              {noToursMsg}
-            </p>
-          ) : (
-            <ul className="space-y-0.5 pl-3">
-              {data.tourCounts.map((tour) => (
-                <li key={tour.tour}>
-                  <Link
-                    href={getTourArchiveUrl(tour.tour_id)}
-                    className="text-xs font-medium text-foreground hover:underline"
-                  >
-                    {tour.tour}
-                  </Link>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    ({tour.count})
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div
+        className={cn(
+          "wp-head wl-home-v2-years-shows-wp-head",
+          "wl-home-v2-profile-shows-stats-tours-head",
+        )}
+      >
+        <span className="min-w-0 truncate">Tours Attended</span>
+      </div>
+      <div className="wl-home-v2-profile-shows-stats-body">
+        {data.tourCounts.length === 0 ?
+          <p className="wl-home-v2-profile-shows-tours-none">{noToursMsg}</p>
+        : <ul className="wl-home-v2-profile-shows-tours-list">
+            {data.tourCounts.map((tour) => (
+              <li key={tour.tour}>
+                <Link
+                  href={getTourArchiveUrl(tour.tour_id)}
+                  className="text-[0.75rem] font-medium text-white hover:underline"
+                >
+                  {tour.tour}
+                </Link>
+                <span className="wl-home-v2-profile-shows-tours-count">
+                  ({tour.count})
+                </span>
+              </li>
+            ))}
+          </ul>
+        }
+      </div>
+    </div>
   )
 }

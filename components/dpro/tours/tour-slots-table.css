@@ -1,0 +1,16 @@
+/* Tour / profile slots table: fixed slot column geometry + header swatch via token. */
+
+.wl-tour-slots-table__slot-head {
+  box-sizing: border-box;
+  width: 190px;
+  min-width: 190px;
+  color: #fff;
+  background-color: var(--wl-tour-slots-col-bg, transparent);
+}
+
+.wl-tour-slots-table__slot-cell {
+  box-sizing: border-box;
+  width: 190px;
+  min-width: 190px;
+  max-width: 190px;
+}

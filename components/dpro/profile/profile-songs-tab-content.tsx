@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { UserSongsCombined } from "@/components/dpro/profile/user-songs-combined"
 import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
 import { UserSongSpread } from "@/components/dpro/profile/user-song-spread"
 import { useUserShows } from "@/hooks/use-user-shows"
 import { useUserSongsData } from "@/hooks/use-user-songs-data"
 import { useUserSongMatrix, type UserMatrixSortMode } from "@/hooks/use-user-song-matrix"
+
+import "./profile-songs-tab.css"
 
 function getViewFromParams(params: URLSearchParams): "list" | "matrix" {
   const v = params.get("songsView")
@@ -111,40 +112,41 @@ export function ProfileSongsTabContent({
     setSheetOpen(true)
   }
 
+  const rootClass =
+    "wl-home-v2-profile-songs-tab wl-home-v2-profile-songs--root"
+
   if (!userId) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">
-            {isOwnProfile
-              ? "Please log in to see your song stats."
-              : "No user selected."}
-          </p>
-        </CardContent>
-      </Card>
+      <div className={rootClass}>
+        <p className="wl-profile-songs-message">
+          {isOwnProfile
+            ? "Please log in to see your song stats."
+            : "No user selected."}
+        </p>
+      </div>
     )
   }
 
   if (showsLoading) {
     return (
-      <LoadingPageCard
-        message="Loading attended shows…"
-        progress={showsProgress}
-      />
+      <div className={rootClass}>
+        <WlWidgetPanelLoading
+          message="Loading attended shows…"
+          progress={showsProgress}
+        />
+      </div>
     )
   }
 
   if (shows.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">
-            {isOwnProfile
-              ? "You haven't attended any shows yet. Add shows to your attendance to see song stats here."
-              : "This user hasn't attended any shows yet."}
-          </p>
-        </CardContent>
-      </Card>
+      <div className={rootClass}>
+        <p className="wl-profile-songs-message">
+          {isOwnProfile
+            ? "You haven't attended any shows yet. Add shows to your attendance to see song stats here."
+            : "This user hasn't attended any shows yet."}
+        </p>
+      </div>
     )
   }
 
@@ -157,24 +159,24 @@ export function ProfileSongsTabContent({
 
   if (mainContentLoading) {
     return (
-      <LoadingPageCard
-        message={
-          viewMode === "list"
-            ? "Loading song stats…"
-            : "Loading song matrix…"
-        }
-        progress={combinedProgress}
-      />
+      <div className={rootClass}>
+        <WlWidgetPanelLoading
+          message={
+            viewMode === "list"
+              ? "Loading song stats…"
+              : "Loading song matrix…"
+          }
+          progress={combinedProgress}
+        />
+      </div>
     )
   }
 
   if (viewMode === "matrix" && matrixError) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">{matrixError}</p>
-        </CardContent>
-      </Card>
+      <div className={rootClass}>
+        <p className="wl-profile-songs-message">{matrixError}</p>
+      </div>
     )
   }
 
@@ -185,43 +187,43 @@ export function ProfileSongsTabContent({
 
   if (!hasSongData) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">
-            {isOwnProfile
-              ? "You've attended shows but no song data is available yet."
-              : "This user has attended shows but no song data is available yet."}
-          </p>
-        </CardContent>
-      </Card>
+      <div className={rootClass}>
+        <p className="wl-profile-songs-message">
+          {isOwnProfile
+            ? "You've attended shows but no song data is available yet."
+            : "This user has attended shows but no song data is available yet."}
+        </p>
+      </div>
     )
   }
 
   return (
     <>
-      <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 xl:items-start">
-          <div className="xl:col-span-3">
-            <UserSongsCombined
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              matrixSortMode={matrixSortMode}
-              setMatrixSortMode={setMatrixSortMode}
-              categories={categories}
-              songs={songs}
-              userSongStats={userSongStats}
-              songMatrix={songMatrix}
-              sortedSongs={sortedSongs}
-              yearGroups={yearGroups}
-              yearIdMap={yearIdMap}
-              shows={shows}
-              onSongClick={handleSongClick}
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-1">
-            {songSpreadData.length > 0 && (
-              <UserSongSpread songSpreadData={songSpreadData} />
-            )}
+      <div className={rootClass}>
+        <div className="wl-home-v2-profile-songs-tab__section">
+          <div className="wl-home-v2-profile-songs-tab__grid">
+            <div className="wl-home-v2-profile-songs-tab__main">
+              <UserSongsCombined
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                matrixSortMode={matrixSortMode}
+                setMatrixSortMode={setMatrixSortMode}
+                categories={categories}
+                songs={songs}
+                userSongStats={userSongStats}
+                songMatrix={songMatrix}
+                sortedSongs={sortedSongs}
+                yearGroups={yearGroups}
+                yearIdMap={yearIdMap}
+                shows={shows}
+                onSongClick={handleSongClick}
+              />
+            </div>
+            <div className="wl-home-v2-profile-songs-tab__sidebar">
+              {songSpreadData.length > 0 ?
+                <UserSongSpread songSpreadData={songSpreadData} />
+              : null}
+            </div>
           </div>
         </div>
       </div>

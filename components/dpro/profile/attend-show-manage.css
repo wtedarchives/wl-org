@@ -1,0 +1,459 @@
+/* Manage attended shows — isolated from `.widget-panel`, shadcn table slots, and
+ * `.wl-home-v2-setlist a` (profile shell). All rules hang off `.wl-attend-manage--root`. */
+
+.wl-home-v2 .wl-attend-manage.wl-attend-manage--root {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.63);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12px;
+  padding: 10px 14px 14px;
+  animation: wl-attend-manage-enter 0.22s ease-out;
+}
+
+@keyframes wl-attend-manage-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-home-v2 .wl-attend-manage.wl-attend-manage--root {
+    animation: none;
+  }
+}
+
+/* Beat `.wl-home-v2 .wl-home-v2-setlist a { text-decoration: none }` via the extra root class. */
+.wl-home-v2 .wl-attend-manage.wl-attend-manage--root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.wl-home-v2 .wl-attend-manage.wl-attend-manage--root a:hover,
+.wl-home-v2 .wl-attend-manage.wl-attend-manage--root a:focus-visible {
+  text-decoration: underline;
+}
+
+.wl-home-v2 .wl-attend-manage.wl-attend-manage--root a.wl-attend-manage__link--emphasis {
+  font-weight: 500;
+  color: #fff;
+}
+
+.wl-attend-manage__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .wl-attend-manage__head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.wl-attend-manage__head-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* Match “Manage shows” pill: `wl-home-v2-tours-header-pill` + `wl-home-v2-profile-shows-manage-pill`. */
+.wl-attend-manage__back {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 30px;
+  height: auto;
+  padding-block: 5px;
+  padding-inline: 11px;
+  line-height: 1;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--wl-orange) 42%, rgb(63, 65, 64));
+  background: color-mix(in srgb, var(--wl-orange) 30%, transparent);
+  color: rgba(255, 255, 255, 0.96);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.wl-attend-manage__back svg {
+  display: block;
+}
+
+.wl-attend-manage__back:hover {
+  color: #fff;
+  border-color: rgb(123, 94, 63);
+  background: color-mix(in srgb, var(--wl-orange) 46%, transparent);
+}
+
+.wl-attend-manage__back:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+
+.wl-attend-manage__title {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--wl-white);
+}
+
+.wl-attend-manage__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wl-attend-manage__search-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .wl-attend-manage__search-wrap {
+    flex: 0 1 12rem;
+    width: 12rem;
+  }
+}
+
+.wl-attend-manage__search-icon {
+  position: absolute;
+  left: 0.625rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.wl-attend-manage__search-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 2rem;
+  padding: 0 2rem 0 2rem;
+  border-radius: 8px;
+  border: 1px solid rgb(49, 51, 49);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.wl-attend-manage__search-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.wl-attend-manage__search-input:focus-visible {
+  border-color: rgb(82, 109, 97);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.wl-attend-manage__search-clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.wl-attend-manage__search-clear:hover {
+  color: #fff;
+}
+
+.wl-attend-manage__search-clear:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 1px;
+}
+
+.wl-attend-manage__year-trigger {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  height: 2rem;
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  border-radius: 8px;
+  border: 1px solid rgb(53, 56, 54);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.wl-attend-manage__year-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(123, 94, 63, 0.65);
+}
+
+.wl-attend-manage__year-trigger:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+
+.wl-attend-manage__body {
+  min-width: 0;
+}
+
+.wl-attend-manage__hint {
+  margin: 0 0 0.75rem;
+  padding-top: 0.125rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.wl-attend-manage__table-scroll {
+  overflow-x: auto;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-overflow-scrolling: touch;
+}
+
+.wl-attend-manage__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.wl-attend-manage__table thead tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.wl-attend-manage__th {
+  padding: 2px 0.5rem;
+  font-weight: 500;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.72);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.wl-attend-manage__th--check {
+  width: 2.5rem;
+  text-align: center;
+}
+
+.wl-attend-manage__th--check svg {
+  display: block;
+  margin-inline: auto;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.wl-attend-manage__sort-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+  padding: 2px 2px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.wl-attend-manage__sort-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wl-attend-manage__sort-btn:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 1px;
+}
+
+.wl-attend-manage__sort-btn svg {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.wl-attend-manage__table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.wl-attend-manage__table tbody tr:hover {
+  background: rgba(88, 200, 174, 0.11);
+}
+
+.wl-attend-manage__td {
+  padding: 2px 0.5rem;
+  vertical-align: middle;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+.wl-attend-manage__td--center {
+  text-align: center;
+}
+
+.wl-attend-manage__empty {
+  padding: 2px 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+.wl-attend-manage__check {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0 auto;
+  padding: 0;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.wl-attend-manage__check--on {
+  border: none;
+  background-color: rgb(22 163 74);
+  color: var(--wl-white);
+}
+
+.wl-attend-manage__check--on:hover {
+  background-color: rgb(220 38 38);
+}
+
+.wl-attend-manage__check--off {
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.wl-attend-manage__check--off:hover {
+  background-color: rgb(22 163 74);
+  border-color: transparent;
+  color: var(--wl-white);
+}
+
+.wl-attend-manage__check-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.wl-attend-manage__check--off .wl-attend-manage__check-icon {
+  opacity: 0.45;
+}
+
+.wl-attend-manage__check:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+
+.wl-attend-manage__alert {
+  font-weight: 500;
+  color: #ce1126;
+}
+
+.wl-attend-manage__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.wl-attend-manage__loading-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.wl-attend-manage__loading-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.18);
+  animation: wl-attend-manage-pulse 1.2s ease-in-out infinite;
+}
+
+.wl-attend-manage__loading-dot--2 {
+  animation-delay: 150ms;
+}
+
+.wl-attend-manage__loading-dot--3 {
+  animation-delay: 300ms;
+}
+
+@keyframes wl-attend-manage-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.wl-attend-manage__loading-msg {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+}

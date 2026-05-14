@@ -102,6 +102,77 @@ ${colorConfig
   )
 }
 
+function ChartTooltipIndicatorDot({ fill }: { fill: string }) {
+  return (
+    <svg
+      className="shrink-0"
+      width={10}
+      height={10}
+      viewBox="0 0 10 10"
+      aria-hidden
+    >
+      <rect x="1" y="1" width="8" height="8" rx="2" fill={fill} />
+    </svg>
+  )
+}
+
+function ChartTooltipIndicatorLine({ fill }: { fill: string }) {
+  return (
+    <svg
+      className="w-1 shrink-0"
+      width={4}
+      height={10}
+      viewBox="0 0 4 10"
+      aria-hidden
+    >
+      <rect width="4" height="10" rx="1" fill={fill} />
+    </svg>
+  )
+}
+
+function ChartTooltipIndicatorDashed({
+  fill,
+  nestLabel,
+}: {
+  fill: string
+  nestLabel: boolean
+}) {
+  return (
+    <svg
+      className={cn("w-0 shrink-0", nestLabel && "my-0.5")}
+      width={6}
+      height={10}
+      viewBox="0 0 6 10"
+      aria-hidden
+    >
+      <line
+        x1="3"
+        y1="0"
+        x2="3"
+        y2="10"
+        stroke={fill}
+        strokeWidth={1.5}
+        strokeDasharray="3 2"
+      />
+    </svg>
+  )
+}
+
+function ChartLegendColorSwatch({ color }: { color: string | undefined }) {
+  const fill = color ?? "currentColor"
+  return (
+    <svg
+      className="h-2 w-2 shrink-0"
+      width={8}
+      height={8}
+      viewBox="0 0 8 8"
+      aria-hidden
+    >
+      <rect width="8" height="8" rx="2" fill={fill} />
+    </svg>
+  )
+}
+
 const ChartTooltip = RechartsPrimitive.Tooltip
 
 function ChartTooltipContent({
@@ -202,24 +273,24 @@ function ChartTooltipContent({
                       <itemConfig.icon />
                     ) : (
                       !hideIndicator && (
-                        <div
-                          className={cn(
-                            "shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)",
-                            {
-                              "h-2.5 w-2.5": indicator === "dot",
-                              "w-1": indicator === "line",
-                              "w-0 border-[1.5px] border-dashed bg-transparent":
-                                indicator === "dashed",
-                              "my-0.5": nestLabel && indicator === "dashed",
-                            }
+                        <>
+                          {indicator === "dot" && (
+                            <ChartTooltipIndicatorDot
+                              fill={String(indicatorColor ?? "currentColor")}
+                            />
                           )}
-                          style={
-                            {
-                              "--color-bg": indicatorColor,
-                              "--color-border": indicatorColor,
-                            } as React.CSSProperties
-                          }
-                        />
+                          {indicator === "line" && (
+                            <ChartTooltipIndicatorLine
+                              fill={String(indicatorColor ?? "currentColor")}
+                            />
+                          )}
+                          {indicator === "dashed" && (
+                            <ChartTooltipIndicatorDashed
+                              fill={String(indicatorColor ?? "currentColor")}
+                              nestLabel={nestLabel}
+                            />
+                          )}
+                        </>
                       )
                     )}
                     <div
@@ -293,12 +364,7 @@ function ChartLegendContent({
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
               ) : (
-                <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
-                  style={{
-                    backgroundColor: item.color,
-                  }}
-                />
+                <ChartLegendColorSwatch color={item.color} />
               )}
               {itemConfig?.label}
             </div>

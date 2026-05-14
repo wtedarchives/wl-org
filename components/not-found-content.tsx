@@ -8,7 +8,7 @@ export function NotFoundContent() {
         className="wl-home-v2-not-found__section"
         aria-labelledby="wl-home-v2-not-found-heading"
       >
-        <div className="widget-panel wl-home-v2-not-found__panel">
+        <div className="wl-home-v2-not-found__group">
           <Image
             src="/404.png"
             alt=""
@@ -16,19 +16,21 @@ export function NotFoundContent() {
             height={450}
             className="wl-home-v2-not-found__art"
           />
-          <h1
-            id="wl-home-v2-not-found-heading"
-            className="wl-home-v2-not-found__title"
-          >
-            Did the wrung come loose?!
-          </h1>
-          <p className="wl-home-v2-not-found__body">
-            The page you&apos;re looking for doesn&apos;t exist or has been
-            moved.
-          </p>
-          <Link href="/" className="wbtn primary wl-home-v2-not-found__cta">
-            Go to home
-          </Link>
+          <div className="widget-panel wl-home-v2-not-found__panel">
+            <h1
+              id="wl-home-v2-not-found-heading"
+              className="wl-home-v2-not-found__title"
+            >
+              Did the wrung come loose?!
+            </h1>
+            <p className="wl-home-v2-not-found__body">
+              The page you&apos;re looking for doesn&apos;t exist or has been
+              moved.
+            </p>
+            <Link href="/" className="wbtn primary wl-home-v2-not-found__cta">
+              Go to home
+            </Link>
+          </div>
         </div>
       </section>
     </div>

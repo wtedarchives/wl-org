@@ -23,7 +23,9 @@ export default function ProfileLayout({
   useEffect(() => {
     if (authLoading) return
     if (!session) {
-      router.replace(`/login?from=${encodeURIComponent("/old/archive/profile/overview")}`)
+      router.replace(
+        `/login?from=${encodeURIComponent("/archive/profile?tab=overview")}`,
+      )
     }
   }, [session, authLoading, router])
 
@@ -57,7 +59,9 @@ export default function ProfileLayout({
     <ProfileStatsTabsShell
       activeTab={activeTab}
       title="My Stats"
-      tabHref={(slug) => `/old/archive/profile/${slug}`}
+      tabHref={(slug) =>
+        `/archive/profile?tab=${encodeURIComponent(slug)}`
+      }
       showShareButton
       onShare={handleShare}
       shareCopied={shareCopied}

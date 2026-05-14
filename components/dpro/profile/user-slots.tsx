@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { supabase } from "@/lib/supabase"
-import { Card, CardContent } from "@/components/ui/card"
-import { LoadingPageCard } from "@/components/dpro/loading-page-card"
-import { UserSlotsTable } from "@/components/dpro/profile/user-slots-table"
+import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
+import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
 import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
 import { useUserSlots } from "@/hooks/use-user-slots"
+import type { SlotShowData } from "@/types/tour"
 import {
   getSlotsLoadingMessage,
   getSlotsNoUserMessage,
@@ -14,10 +14,20 @@ import {
   getSlotsNoSlotsMessage,
 } from "@/lib/utils/user-slots-messages"
 
+import "./user-slots.css"
+
 interface UserSlotsProps {
   userId: string | null
   effectiveUserId: string | null
   isOwnProfile: boolean
+}
+
+function SlotsMessage({ children }: { children: ReactNode }) {
+  return (
+    <div className="wl-profile-slots-root">
+      <p className="wl-profile-slots-message">{children}</p>
+    </div>
+  )
 }
 
 export function UserSlots({
@@ -62,78 +72,55 @@ export function UserSlots({
 
   const handleSongClick = (
     songName: string,
-    songDisplayName?: string | null
+    songDisplayName?: string | null,
   ) => {
     setSheetSongName(songName)
     setSheetSongDisplayName(
-      songDisplayName ?? songDisplayNameMap[songName] ?? null
+      songDisplayName ?? songDisplayNameMap[songName] ?? null,
     )
     setSheetSongId(songIdMap[songName] ?? null)
     setSheetOpen(true)
   }
 
   if (!effectiveUserId) {
-    return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">
-            {getSlotsNoUserMessage(isOwnProfile)}
-          </p>
-        </CardContent>
-      </Card>
-    )
+    return <SlotsMessage>{getSlotsNoUserMessage(isOwnProfile)}</SlotsMessage>
   }
 
   if (isLoading) {
     return (
-      <LoadingPageCard
-        message={getSlotsLoadingMessage(isOwnProfile, username)}
-        progress={loadingProgress}
-      />
+      <div className="wl-profile-slots-root w-full">
+        <WlWidgetPanelLoading
+          message={getSlotsLoadingMessage(isOwnProfile, username)}
+          progress={loadingProgress}
+        />
+      </div>
     )
   }
 
   if (attendedShowIds.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">
-            {getSlotsNoShowsMessage(isOwnProfile, username)}
-          </p>
-        </CardContent>
-      </Card>
+      <SlotsMessage>{getSlotsNoShowsMessage(isOwnProfile, username)}</SlotsMessage>
     )
   }
 
   if (!hasSlotEntries) {
     return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">
-            {getSlotsNoSlotsMessage(isOwnProfile, username)}
-          </p>
-        </CardContent>
-      </Card>
+      <SlotsMessage>{getSlotsNoSlotsMessage(isOwnProfile, username)}</SlotsMessage>
     )
   }
 
   if (errorMessage) {
-    return (
-      <Card>
-        <CardContent className="py-6">
-          <p className="text-sm text-muted-foreground">{errorMessage}</p>
-        </CardContent>
-      </Card>
-    )
+    return <SlotsMessage>{errorMessage}</SlotsMessage>
   }
 
   return (
     <>
-      <div className="mt-4">
-        <UserSlotsTable
-          slots={slots}
-          activeColumns={activeColumns}
+      <div className="wl-profile-slots-root">
+        <TourSlotsTable
+          slots={slots as SlotShowData[]}
+          activeColumns={activeColumns as (keyof SlotShowData)[]}
           onSongClick={handleSongClick}
+          wlHomeV2
         />
       </div>
 

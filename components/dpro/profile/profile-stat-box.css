@@ -1,0 +1,168 @@
+/* Default card: copy icon hover matches former header tint tokens (no inline CSS vars). */
+.profile-stat-box__copy--type-topSongs:hover svg,
+.profile-stat-box__copy--type-longestPerformances:hover svg {
+  color: var(--muted-foreground);
+}
+.profile-stat-box__copy--type-notSeenSongs:hover svg {
+  color: #000;
+}
+.profile-stat-box__copy--type-showOpeners:hover svg {
+  color: #047857;
+}
+.profile-stat-box__copy--type-setOpeners:hover svg {
+  color: #10b981;
+}
+.profile-stat-box__copy--type-setClosers:hover svg {
+  color: #3b82f6;
+}
+.profile-stat-box__copy--type-encoreSongs:hover svg {
+  color: #be123c;
+}
+
+/* WL layout: matches tour `TopSlotsCarousel` widget-panel + wp-head + mini table. */
+
+/* Overview WL panels: own vs public profile top inset (sides/bottom still from `.widget-panel`). */
+.wl-home-v2 .widget-panel.wl-home-v2-profile-stat-box--wl.wl-home-v2-profile-stat-box--wl-pad-own {
+  padding-top: 6px;
+}
+
+.wl-home-v2 .widget-panel.wl-home-v2-profile-stat-box--wl.wl-home-v2-profile-stat-box--wl-pad-public {
+  padding-top: 12px;
+}
+
+/* Panel title: same as tours sidebar `.widget-panel[data-wl-v2-tours-sidebar] > .wp-head`. */
+.wl-home-v2 .widget-panel.wl-home-v2-profile-stat-box--wl > .wp-head {
+  color: var(--wl-white);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Scroll wide tables inside the panel; header stays fixed. */
+.wl-home-v2 .widget-panel.wl-home-v2-profile-stat-box--wl > .wl-home-v2-profile-stat-box__wl-body {
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-table {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.wl-home-v2-profile-stat-box--wl:not(.wl-home-v2-profile-stat-box--wl-neutral)
+  .wl-home-v2-profile-stat-box__copy:hover
+  svg {
+  color: var(--wl-top-slots-cat, #fff);
+}
+
+.wl-home-v2-profile-stat-box--wl-neutral .wl-home-v2-profile-stat-box__copy:hover svg {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__song-btn {
+  cursor: pointer;
+  text-align: left;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.25;
+  border-radius: 4px;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__song-btn:hover {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__song-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__song-link {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__song-link:hover {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__meta-link {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__meta-link:hover {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__album-art {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding-right: 0.5rem;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__album-art-img {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgb(63, 65, 64);
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__album-art-img--hidden {
+  display: none;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__count-cell {
+  width: 30px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__count-cell--wide {
+  width: 50px;
+  padding-left: 0.5rem;
+}
+
+/* When not under `.wl-home-v2` (legacy inset), mirror top-slots row chrome. */
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-top-slots-stats-table tbody tr.wl-home-v2-top-slots-stats-row {
+  border-width: 0;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgb(34, 37, 35);
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-top-slots-stats-table tbody tr.wl-home-v2-top-slots-stats-row:hover {
+  background-color: rgba(88, 200, 174, 0.11);
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-top-slots-stats-table tbody td.wl-home-v2-top-slots-stats-cell {
+  padding: 1px 0;
+  vertical-align: middle;
+}
+
+.wl-home-v2-profile-stat-box--wl .wl-home-v2-profile-stat-box__empty {
+  padding: 1rem 0.75rem;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}

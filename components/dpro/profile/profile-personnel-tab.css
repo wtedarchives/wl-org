@@ -1,0 +1,20 @@
+/* Profile — Personnel tab layout + link underlines (mirror `profile-slots-tab.css`). */
+
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-profile-personnel-tab a:hover,
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-profile-personnel-tab a:focus-visible {
+  text-decoration: underline;
+}
+
+.wl-home-v2-profile-personnel-tab {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.wl-home-v2-profile-personnel-tab__section {
+  width: 100%;
+  min-width: 0;
+}

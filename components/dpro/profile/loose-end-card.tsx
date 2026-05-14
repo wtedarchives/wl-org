@@ -5,7 +5,10 @@ import Image from "next/image"
 import { Check, ImageOff } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { looseEndBadgePublicPath } from "@/lib/loose-end-badge-path"
+import {
+  isLooseEndBadgeRemoteUrl,
+  looseEndBadgePublicPath,
+} from "@/lib/loose-end-badge-path"
 import { cn } from "@/lib/utils"
 import type { LooseEndDisplay } from "@/types/loose-ends"
 
@@ -23,6 +26,7 @@ export function LooseEndCard({
   const [imgFailed, setImgFailed] = useState(false)
 
   const badgeSrc = looseEndBadgePublicPath(looseEnd.end_local_file)
+  const badgeRemote = isLooseEndBadgeRemoteUrl(badgeSrc)
 
   return (
     <Card
@@ -56,6 +60,7 @@ export function LooseEndCard({
               sizes="(max-width: 639px) 80px, (max-width: 1023px) 96px, 116px"
               priority={imagePriority}
               fetchPriority={imagePriority ? "high" : "low"}
+              unoptimized={badgeRemote}
               onError={() => setImgFailed(true)}
             />
           ) : (

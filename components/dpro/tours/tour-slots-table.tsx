@@ -1,5 +1,6 @@
 "use client"
 
+import type { CSSProperties } from "react"
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import Link from "next/link"
@@ -17,6 +18,8 @@ import type { SlotShowData, SongEntryWithId } from "@/types/tour"
 import { getColumnBackgroundColor } from "@/lib/stats/tour-utils"
 import { formatTourShowDate } from "./tour-show-format"
 import { cn } from "@/lib/utils"
+
+import "./tour-slots-table.css"
 
 interface TourSlotsTableProps {
   slots: SlotShowData[]
@@ -92,10 +95,9 @@ export function TourSlotsTable({
     <div className="overflow-x-auto">
       <Table
         className={cn(
-          "min-w-max text-[11px]",
+          "table-fixed min-w-max text-[11px]",
           wlHomeV2 && "wl-home-v2-years-table",
         )}
-        style={{ tableLayout: "fixed" }}
       >
         <TableHeader>
           <TableRow
@@ -117,15 +119,15 @@ export function TourSlotsTable({
               <TableHead
                 key={column}
                 className={cn(
-                  "text-left text-[11px] font-medium",
+                  "wl-tour-slots-table__slot-head text-left text-[11px] font-medium",
                   wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
                 )}
-                style={{
-                  width: "190px",
-                  minWidth: "190px",
-                  backgroundColor: getColumnBackgroundColor(String(column)),
-                  color: "white",
-                }}
+                style={
+                  {
+                    "--wl-tour-slots-col-bg":
+                      getColumnBackgroundColor(String(column)) || "transparent",
+                  } as CSSProperties
+                }
               >
                 {formatColumnLabel(String(column))}
               </TableHead>
@@ -159,14 +161,9 @@ export function TourSlotsTable({
                     <TableCell
                       key={`${slot.show_id}-${column}`}
                       className={cn(
-                        "text-left align-middle whitespace-normal break-words overflow-hidden text-[11px]",
+                        "wl-tour-slots-table__slot-cell text-left align-middle whitespace-normal break-words overflow-hidden text-[11px]",
                         wlHomeV2 ? "!px-2 !py-0.5" : "px-2 py-1",
                       )}
-                      style={{
-                        width: "190px",
-                        minWidth: "190px",
-                        maxWidth: "190px",
-                      }}
                     >
                       {renderSongList(slot[column] as SongEntryWithId[] | null)}
                     </TableCell>

@@ -193,6 +193,11 @@ interface SongSpreadDisplayProps {
    * Set by {@link TourSongSpread}; does not apply to setlist/venue spreads.
    */
   tooltipPadTourTrailingPlayCount?: boolean
+  /**
+   * When false, the v2 category list has no max-height and does not scroll (e.g. profile sidebar).
+   * Default true for setlist aside layouts.
+   */
+  constrainListHeight?: boolean
 }
 
 function getSongNameForSort(s: string): string {
@@ -221,6 +226,7 @@ export function SongSpreadDisplay({
   tooltipSide = "left",
   variant = "card",
   tooltipPadTourTrailingPlayCount = false,
+  constrainListHeight = true,
 }: SongSpreadDisplayProps) {
   const isDesktop = useIsDesktopContentLayout()
   const maxCount = spread.length > 0 ? Math.max(...spread.map((s) => s.count)) : 0
@@ -245,7 +251,10 @@ export function SongSpreadDisplay({
       className={cn(
         "space-y-1 text-xs",
         isV2 ?
-          "wl-home-v2-setlist-song-spread-ul max-h-[min(420px,55vh)] overflow-y-auto py-0.5"
+          cn(
+            "wl-home-v2-setlist-song-spread-ul py-0.5",
+            constrainListHeight && "max-h-[min(420px,55vh)] overflow-y-auto",
+          )
         : ulClassName,
       )}
     >

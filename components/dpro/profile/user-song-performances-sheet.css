@@ -1,0 +1,5 @@
+/* Song performances drawer: vertical placement indicator uses --wl-placement-index-bg. */
+
+.wl-user-song-perf-sheet__placement-bar {
+  background-color: var(--wl-placement-index-bg, transparent);
+}

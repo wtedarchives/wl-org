@@ -4,6 +4,7 @@ import { useEffect, useId } from "react"
 import Link from "next/link"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import { GuestAppearancesDetailTable } from "@/components/dpro/tours/guest-appearances-detail-table"
+import { GuestPersonnelShowsTable } from "@/components/dpro/tours/guest-personnel-shows-table"
 import type { GuestAppearancesDrawerProps } from "@/components/dpro/tours/guest-appearances-drawer"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { Button } from "@/components/ui/button"
@@ -95,11 +96,18 @@ export function WlHomeV2GuestAppearancesModal({
           </div>
           <div className="modal-request-body modal-setlist-song-body">
             <div className="wl-home-v2-years-table-scroll flex min-h-0 flex-1 flex-col overflow-auto px-0.5 pt-0.5 pb-1.5">
-              <GuestAppearancesDetailTable
-                songs={modalData.songs}
-                variant="wl-modal"
-                onNavigate={() => onOpenChange(false)}
-              />
+              {modalData.personnelShows !== undefined ?
+                <GuestPersonnelShowsTable
+                  shows={modalData.personnelShows}
+                  variant="wl-modal"
+                  onNavigate={() => onOpenChange(false)}
+                />
+              : <GuestAppearancesDetailTable
+                  songs={modalData.songs}
+                  variant="wl-modal"
+                  onNavigate={() => onOpenChange(false)}
+                />
+              }
             </div>
           </div>
           <div className="modal-setlist-song-footer">

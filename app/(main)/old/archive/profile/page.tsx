@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
 
 export default function ProfilePage() {
-  redirect("/old/archive/profile/overview")
+  redirect("/archive/profile?tab=overview")
 }

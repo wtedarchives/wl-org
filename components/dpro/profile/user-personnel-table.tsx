@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -13,86 +12,131 @@ import {
 import type { UserGuest } from "@/types/user-guests"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 
-const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
-  "Goose (current)": "Current Goose Members",
-  "Goose (former)": "Former Goose Members",
-  Guest: "Guests",
-  Group: "Groups",
-}
+import "./user-personnel-table.css"
 
-export interface UserPersonnelTableProps {
-  category: string
+export interface UserPersonnelListTableProps {
+  /** Shown as the first column header (displayed uppercase; meant to match panel context). */
+  nameColumnHeader: string
   guests: UserGuest[]
-  count: number
   onPersonnelClick?: (guestName: string, guestId: string) => void
+  /** Archive / WL table chrome (hover rows, borders). */
+  wlHomeV2?: boolean
 }
 
-export function UserPersonnelTable({
-  category,
+export function UserPersonnelListTable({
+  nameColumnHeader,
   guests,
   onPersonnelClick,
-}: UserPersonnelTableProps) {
-  const displayName = CATEGORY_DISPLAY_NAMES[category] ?? category
+  wlHomeV2 = false,
+}: UserPersonnelListTableProps) {
+  if (guests.length === 0) return null
 
   return (
-    <Card className="overflow-hidden py-0">
-      <CardHeader className="bg-muted/60 py-2">
-        <CardTitle className="text-sm font-medium">{displayName}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table className="min-w-full text-[11px]">
-            <TableHeader>
-              <TableRow className="bg-background/70 hover:bg-background/70">
-                <TableHead className="pl-3 py-1.5 text-left text-xs font-medium text-muted-foreground">
-                  Personnel
-                </TableHead>
-                <TableHead className="w-[80px] py-1.5 text-center text-xs font-medium text-muted-foreground">
-                  # of Songs
-                </TableHead>
-                <TableHead className="w-[80px] py-1.5 text-center text-xs font-medium text-muted-foreground">
-                  # of Shows
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {guests.map((guest) => (
-                <TableRow
-                  key={guest.guest_id}
-                  className="border-border bg-background/70 hover:bg-muted/40 transition-colors"
-                >
-                  <TableCell className="pl-3 py-1 text-foreground">
-                    {onPersonnelClick ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onPersonnelClick(guest.guest, guest.guest_id)
-                        }
-                        className="text-left font-medium text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50 rounded"
-                      >
-                        {guest.guest}
-                      </button>
-                    ) : (
-                      <Link
-                        href={getPersonnelArchiveUrl(guest.guest_id)}
-                        className="font-medium text-foreground hover:underline"
-                      >
-                        {guest.guest}
-                      </Link>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center font-medium text-foreground tabular-nums">
-                    {guest.song_count}
-                  </TableCell>
-                  <TableCell className="text-center font-medium text-foreground text-[11px] tabular-nums">
-                    {guest.show_count}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="overflow-x-auto">
+      <Table
+        className={
+          wlHomeV2 ?
+            "wl-home-v2-years-table min-w-full text-[11px]"
+          : "min-w-full text-[11px]"
+        }
+      >
+        <TableHeader>
+          <TableRow
+            className={
+              wlHomeV2 ?
+                "border-b bg-black/25 hover:bg-black/25"
+              : "bg-muted/60"
+            }
+          >
+            <TableHead
+              className={
+                wlHomeV2 ?
+                  "wl-profile-personnel-table__name-th max-w-[min(100%,14rem)] text-left align-middle !px-2 !py-0.5"
+                : "max-w-[min(100%,14rem)] py-1.5 pl-3 text-left align-middle font-mono text-[10px] font-normal uppercase leading-tight tracking-wide text-muted-foreground"
+              }
+            >
+              {nameColumnHeader}
+            </TableHead>
+            <TableHead
+              className={
+                wlHomeV2 ?
+                  "w-[72px] py-1.5 text-center align-middle text-[11px] font-medium tabular-nums !px-2 !py-0.5"
+                : "w-[80px] py-1.5 text-center text-xs font-medium text-muted-foreground"
+              }
+            >
+              Songs
+            </TableHead>
+            <TableHead
+              className={
+                wlHomeV2 ?
+                  "w-[72px] py-1.5 text-center align-middle text-[11px] font-medium tabular-nums !px-2 !py-0.5"
+                : "w-[80px] py-1.5 text-center text-xs font-medium text-muted-foreground"
+              }
+            >
+              Shows
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {guests.map((guest) => (
+            <TableRow
+              key={guest.guest_id}
+              className={
+                wlHomeV2 ?
+                  "border-b bg-transparent transition-colors hover:bg-[rgba(88,200,174,0.11)]"
+                : "border-border bg-background/70 transition-colors hover:bg-muted/40"
+              }
+            >
+              <TableCell
+                className={
+                  wlHomeV2 ? "py-1 pl-3 text-[11px] !px-2 !py-0.5" : "py-1 pl-3"
+                }
+              >
+                {onPersonnelClick ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onPersonnelClick(guest.guest, guest.guest_id)
+                    }
+                    className={
+                      wlHomeV2 ?
+                        "rounded text-left font-medium text-foreground hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                      : "rounded text-left font-medium text-foreground hover:underline focus:outline-none focus:ring-2 focus:ring-muted-foreground/50"
+                    }
+                  >
+                    {guest.guest}
+                  </button>
+                ) : (
+                  <Link
+                    href={getPersonnelArchiveUrl(guest.guest_id)}
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    {guest.guest}
+                  </Link>
+                )}
+              </TableCell>
+              <TableCell
+                className={
+                  wlHomeV2 ?
+                    "text-center text-[11px] font-medium tabular-nums text-foreground !px-2 !py-0.5"
+                  : "text-center font-medium text-foreground tabular-nums"
+                }
+              >
+                {guest.song_count}
+              </TableCell>
+              <TableCell
+                className={
+                  wlHomeV2 ?
+                    "text-center text-[11px] font-medium tabular-nums text-foreground !px-2 !py-0.5"
+                  : "text-center font-medium text-foreground tabular-nums"
+                }
+              >
+                {guest.show_count}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import type { CSSProperties } from "react"
 
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
@@ -28,6 +29,8 @@ import { Button } from "@/components/ui/button"
 import { formatSetlistDate, formatEntryLength } from "@/lib/setlist-utils"
 import { getPlacementIndexCellBg } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { useSongUserPerformances } from "@/hooks/use-song-user-performances"
+
+import "./user-song-performances-sheet.css"
 
 interface UserSongPerformancesSheetProps {
   open: boolean
@@ -144,12 +147,14 @@ export function UserSongPerformancesSheet({
                       >
                         {perf.entry_placement ? (
                           <div
-                            className="absolute inset-y-1 w-1 left-0 right-0 rounded-sm"
-                            style={{
-                              backgroundColor: getPlacementIndexCellBg(
-                                perf.entry_placement
-                              ),
-                            }}
+                            className="wl-user-song-perf-sheet__placement-bar absolute inset-y-1 left-0 right-0 w-1 rounded-sm"
+                            style={
+                              {
+                                "--wl-placement-index-bg":
+                                  getPlacementIndexCellBg(perf.entry_placement) ??
+                                  "transparent",
+                              } as CSSProperties
+                            }
                             aria-hidden
                           />
                         ) : null}

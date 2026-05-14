@@ -13,6 +13,7 @@ export function isProfileStatsTabSlug(s: string): s is ProfileStatsTabSlug {
   return PROFILE_STATS_TABS.some((t) => t.slug === s)
 }
 
+/** Path-based URLs only (e.g. `/old/archive/profile/overview`). Query-based My Stats uses `?tab=` on `/archive/profile`. */
 export function getProfileStatsActiveTab(
   pathname: string | null | undefined
 ): ProfileStatsTabSlug {

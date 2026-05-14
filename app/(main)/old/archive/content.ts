@@ -91,7 +91,7 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
   },
   {
     title: "My Stats",
-    href: "/old/archive/profile/overview",
+    href: "/archive/profile?tab=overview",
     icon: "UserCircle",
     description:
       "Your personal archive stats. Track shows attended, songs seen, and your own Goose journey.",
