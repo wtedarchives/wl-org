@@ -1,13 +1,9 @@
 "use client"
 
+import "./admin-radio-tabs.css"
+
 import { useState } from "react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AdminRadioEpisodeSetlistsPanel } from "@/components/dpro/admin/admin-radio-episode-setlists-panel"
 import { AdminRadioPlaylistsPanel } from "@/components/dpro/admin/admin-radio-playlists-panel"
 import { AdminRadioTracksPanel } from "@/components/dpro/admin/admin-radio-tracks-panel"
@@ -26,32 +22,57 @@ export function AdminRadio() {
         : "")
       }
     >
-      <div className="wl-home-v2-archive-admin-radio-toolbar">
-        <div className="wl-home-v2-archive-admin-radio-field">
-          <span className="wl-home-v2-archive-admin-field-label">View</span>
-          <Select
-            value={section}
-            onValueChange={(v) => setSection(v as AdminRadioSection)}
-          >
-            <SelectTrigger className="wl-home-v2-archive-admin-select-trigger h-10 w-full min-w-[12rem] sm:w-[14rem]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="wl-home-v2-archive-admin-portal-content">
-              <SelectItem value="tracks">Tracks</SelectItem>
-              <SelectItem value="playlists">Playlists</SelectItem>
-              <SelectItem value="episode-setlists">Episode Setlists</SelectItem>
-            </SelectContent>
-          </Select>
+      <h1 className="wl-home-v2-archive-admin-heading">WTED Radio Admin</h1>
+      <Tabs
+        value={section}
+        onValueChange={(v) => setSection(v as AdminRadioSection)}
+      >
+        <div className="wl-home-v2-archive-admin-tabs-toolbar">
+          <div className="wl-home-v2-archive-admin-tabs-scroll">
+            <TabsList className="wl-home-v2-archive-admin-tabs-list mx-auto h-7 min-h-7 min-w-full w-max flex-nowrap justify-center gap-0.5 p-0.5">
+              <TabsTrigger
+                value="tracks"
+                className="wl-home-v2-archive-admin-tabs-trigger flex-none shrink-0 text-xs"
+              >
+                Tracks
+              </TabsTrigger>
+              <TabsTrigger
+                value="playlists"
+                className="wl-home-v2-archive-admin-tabs-trigger flex-none shrink-0 text-xs"
+              >
+                Playlists
+              </TabsTrigger>
+              <TabsTrigger
+                value="episode-setlists"
+                className="wl-home-v2-archive-admin-tabs-trigger flex-none shrink-0 text-xs"
+              >
+                Episode Setlists
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
-      </div>
 
-      <div className="wl-home-v2-archive-admin-radio-body min-h-0 transition-opacity duration-200 ease-out">
-        {section === "tracks" ?
-          <AdminRadioTracksPanel />
-        : section === "playlists" ?
-          <AdminRadioPlaylistsPanel />
-        : <AdminRadioEpisodeSetlistsPanel />}
-      </div>
+        <div className="wl-home-v2-archive-admin-tabs-panel">
+          <TabsContent
+            value="tracks"
+            className="mt-0 min-h-0 w-full p-3 transition-opacity duration-200 ease-out sm:p-4"
+          >
+            <AdminRadioTracksPanel />
+          </TabsContent>
+          <TabsContent
+            value="playlists"
+            className="mt-0 min-h-0 w-full p-3 transition-opacity duration-200 ease-out sm:p-4"
+          >
+            <AdminRadioPlaylistsPanel />
+          </TabsContent>
+          <TabsContent
+            value="episode-setlists"
+            className="mt-0 min-h-0 w-full p-3 transition-opacity duration-200 ease-out sm:p-4"
+          >
+            <AdminRadioEpisodeSetlistsPanel />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   )
 }

@@ -1,5 +1,7 @@
 "use client"
 
+import "./admin-radio-episode-setlists-table.css"
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "@/components/auth-context"
 import { supabase } from "@/lib/supabase"
@@ -318,7 +320,7 @@ export function AdminRadioEpisodeSetlistsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="flex h-[90vh] max-w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl md:max-w-5xl"
+        className="wl-home-v2-admin-radio-episode-setlists-dialog flex h-[90vh] max-w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl md:max-w-5xl"
       >
         <DialogHeader className="shrink-0 space-y-1 border-b px-4 py-3 sm:px-6">
           <DialogTitle className="text-base sm:text-lg">Episode setlist</DialogTitle>

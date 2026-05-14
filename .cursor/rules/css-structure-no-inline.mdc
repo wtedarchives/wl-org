@@ -1,0 +1,24 @@
+---
+description: Prefer colocated CSS + Tailwind; avoid inline style objects except for dynamic values.
+alwaysApply: true
+---
+
+# CSS structure (no arbitrary inline CSS)
+
+## Default
+
+- **Layout, spacing, typography, colors:** use **Tailwind** classes in JSX (`className`) and/or **`cn()`** when merging.
+- **Component-specific or repeated visual rules** (especially Wysteria / archive admin / v2 shell): put them in a **colocated `*.css` file** next to the component (or in `components/wl-home-v2/wl-home-v2.css` for shared shell tokens) and **import** it from the TSX file (`import "./feature.css"`).
+- **Class naming:** follow existing prefixes (`wl-home-v2-*`, feature-specific blocks) so styles stay grep-able and consistent with `wl-home-v2.css`.
+
+## Avoid
+
+- **`style={{ … }}`** for static or design-token styling — move to Tailwind or the colocated stylesheet.
+- Large style objects or one-off inline styles that belong in CSS for readability and theming.
+
+## Exceptions (inline `style` is OK)
+
+- **Truly dynamic values** only available at runtime (e.g. width/height from measurement, drag position, chart geometry).
+- Setting a **single CSS variable** on a wrapper for use inside nested CSS (e.g. `--progress: 0.5`) when the value is computed in JS.
+
+When touching **shadcn / Radix** primitives, prefer **Tailwind + `className`** overrides; use `style` only when the library or behavior requires it.

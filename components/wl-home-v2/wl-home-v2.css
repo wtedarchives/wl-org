@@ -8360,7 +8360,8 @@
   }
   /* Compact tour dates header: “Tours” opener — match stats `.wp-head` / `.sc-label` typography */
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill,
-  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill {
+  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill,
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill {
     box-sizing: border-box;
     height: auto;
     min-height: 30px;
@@ -8385,11 +8386,13 @@
       color 0.15s ease;
   }
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill svg,
-  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill svg {
+  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill svg,
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill svg {
     display: block;
   }
   .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill:hover,
-  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill:hover {
+  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill:hover,
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel .wl-home-v2-tours-header-pill:hover {
     color: #fff;
     border-color: rgb(123, 94, 63);
     background: rgba(255, 122, 103, 0.12);
@@ -8422,6 +8425,21 @@
   .wl-home-v2
     .wl-home-v2-archive-admin-tab-shell
     .wl-home-v2-years-shows-panel
+    .wl-home-v2-tours-header-pill:hover {
+    background: rgba(255, 122, 103, 0.22);
+    border-color: rgb(123, 94, 63);
+    color: #fff;
+  }
+  /* Radio admin + other tabs: same pill read as setlist header on frosted panel */
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tabs-panel
+    .wl-home-v2-tours-header-pill {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgb(63, 65, 64);
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tabs-panel
     .wl-home-v2-tours-header-pill:hover {
     background: rgba(255, 122, 103, 0.22);
     border-color: rgb(123, 94, 63);

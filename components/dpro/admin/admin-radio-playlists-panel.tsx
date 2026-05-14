@@ -9,7 +9,7 @@ import {
   type WtedEpisodeRadioSyncRow,
 } from "@/lib/wted-episodes-radio-sync"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 import {
   NewPlaylistEditDialog,
   type SaveNewPlaylistEpisodePayload,
@@ -18,8 +18,6 @@ import {
   ClickableRadioPlaylistsTable,
   RemovedPlaylistDispositionDialog,
 } from "@/components/dpro/admin/admin-radio-playlist-tables"
-
-// ─── Edge Function helper ─────────────────────────────────────────────────────
 
 async function callAdminEpisodes(
   action: string,
@@ -47,8 +45,6 @@ async function callAdminEpisodes(
   }
   return data
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function AdminRadioPlaylistsPanel() {
   const authReady = Boolean(getSession()?.token)
@@ -189,50 +185,65 @@ export function AdminRadioPlaylistsPanel() {
         updating={savingRemovedDisposition}
       />
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-md font-semibold">Radio.co playlists</h2>
-          <p className="text-sm text-muted-foreground">
-            Compare Radio.co Studio playlists with{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              wted_episodes
-            </code>{" "}
-            (rows with a{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              radio_id
-            </code>
-            ). New rows get <span className="font-medium">show</span>{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              {WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW}
-            </code>{" "}
-            until you assign a real show in the database.
-          </p>
-        </div>
-        <Button
-          type="button"
-          size="default"
-          className="min-h-11 w-full shrink-0 touch-manipulation sm:w-auto sm:min-h-10"
-          onClick={handleSync}
-          disabled={syncing || loading || !authReady}
+      <div className="wl-home-v2-admin-radio-tab-stack">
+        <div
+          className={
+            "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
+          }
         >
-          {syncing ? (
-            <>
-              <RefreshCwIcon className="mr-2 size-4 animate-spin" />
-              Syncing…
-            </>
-          ) : (
-            <>
-              <RefreshCwIcon className="mr-2 size-4" />
-              Sync
-            </>
-          )}
-        </Button>
-      </div>
+          <div
+            className={cn(
+              "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
+              "wl-home-v2-admin-radio-tab-intro-head",
+            )}
+          >
+            <span className="wp-head-date min-w-0 flex-1 truncate pr-2">
+              Radio.co playlists
+            </span>
+            <div className="wl-home-v2-admin-radio-tab-actions">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="wl-home-v2-tours-header-pill wl-home-v2-admin-radio-action-pill"
+                onClick={handleSync}
+                disabled={syncing || loading || !authReady}
+              >
+                {syncing ? (
+                  <>
+                    <RefreshCwIcon className="size-3.5 shrink-0 animate-spin opacity-80" />
+                    Syncing…
+                  </>
+                ) : (
+                  <>
+                    <RefreshCwIcon className="size-3.5 shrink-0 opacity-80" />
+                    Sync
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+          <div className="wl-home-v2-admin-radio-tab-description-wrap">
+            <p className="wl-home-v2-admin-radio-tab-description">
+              Compare Radio.co Studio playlists with{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">
+                wted_episodes
+              </code>{" "}
+              (rows with a{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">radio_id</code>
+              ). New rows get{" "}
+              <span className="wl-home-v2-admin-radio-tab-code-strong">show</span>{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">
+                {WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW}
+              </code>{" "}
+              until you assign a real show in the database.
+            </p>
+          </div>
+        </div>
 
-      {(!authReady || syncBanner || (error && !syncBanner)) && (
-        <div className="mt-5 flex flex-col gap-2">
+        <div className="wl-home-v2-admin-radio-tab-alerts">
           {!authReady && (
-            <p className="text-sm text-muted-foreground">
+            <p className="wl-home-v2-admin-radio-tab-muted-hint">
               Sign in to sync playlists (Studio API runs through a secure edge
               function).
             </p>
@@ -259,61 +270,80 @@ export function AdminRadioPlaylistsPanel() {
             </div>
           )}
         </div>
-      )}
 
-      <div className="mt-4 flex flex-col gap-4 pb-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">
-              NEW{" "}
-              <span className="font-normal text-muted-foreground">
-                ({loading ? "…" : newRows.length})
+        <div className="wl-home-v2-admin-radio-tab-tables">
+          <div
+            className={
+              "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
+            }
+          >
+            <div
+              className={cn(
+                "wp-head wl-home-v2-years-shows-wp-head",
+                "wl-home-v2-admin-radio-tab-section-head",
+              )}
+            >
+              <span className="wp-head-date min-w-0 truncate">
+                NEW{" "}
+                <span className="font-normal text-white/55">
+                  ({loading ? "…" : newRows.length})
+                </span>
               </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            ) : (
-              <ClickableRadioPlaylistsTable
-                listKind="new"
-                rows={newRows}
-                updatingUuid={updatingUuid}
-                onRowClick={(row) => {
-                  if (updatingUuid !== null) return
-                  setRemovedDispositionRow(null)
-                  setNewDispositionRow(row)
-                }}
-              />
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">
-              REMOVED{" "}
-              <span className="font-normal text-muted-foreground">
-                ({loading ? "…" : removedRows.length})
+            </div>
+            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+              {loading ? (
+                <p className="wl-home-v2-admin-radio-tab-table-hint">Loading…</p>
+              ) : (
+                <ClickableRadioPlaylistsTable
+                  listKind="new"
+                  rows={newRows}
+                  updatingUuid={updatingUuid}
+                  onRowClick={(row) => {
+                    if (updatingUuid !== null) return
+                    setRemovedDispositionRow(null)
+                    setNewDispositionRow(row)
+                  }}
+                />
+              )}
+            </div>
+          </div>
+
+          <div
+            className={
+              "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
+            }
+          >
+            <div
+              className={cn(
+                "wp-head wl-home-v2-years-shows-wp-head",
+                "wl-home-v2-admin-radio-tab-section-head",
+              )}
+            >
+              <span className="wp-head-date min-w-0 truncate">
+                REMOVED{" "}
+                <span className="font-normal text-white/55">
+                  ({loading ? "…" : removedRows.length})
+                </span>
               </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            ) : (
-              <ClickableRadioPlaylistsTable
-                listKind="removed"
-                rows={removedRows}
-                updatingUuid={updatingUuid}
-                onRowClick={(row) => {
-                  if (updatingUuid !== null) return
-                  setNewDispositionRow(null)
-                  setRemovedDispositionRow(row)
-                }}
-              />
-            )}
-          </CardContent>
-        </Card>
+            </div>
+            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+              {loading ? (
+                <p className="wl-home-v2-admin-radio-tab-table-hint">Loading…</p>
+              ) : (
+                <ClickableRadioPlaylistsTable
+                  listKind="removed"
+                  rows={removedRows}
+                  updatingUuid={updatingUuid}
+                  onRowClick={(row) => {
+                    if (updatingUuid !== null) return
+                    setNewDispositionRow(null)
+                    setRemovedDispositionRow(row)
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   )

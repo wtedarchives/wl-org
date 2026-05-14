@@ -1,5 +1,7 @@
 "use client"
 
+import "./admin-radio-episode-setlists-table.css"
+
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { GripVerticalIcon, Loader2Icon, Trash2Icon } from "lucide-react"
@@ -33,9 +35,6 @@ function orderSelectValue(v: string | null) {
 function placementSelectValue(v: string | null) {
   return v === EPISODE_SETLIST_NULL || !v ? null : v
 }
-
-const episodeSetlistSelectTriggerClass =
-  "h-auto min-h-6 w-max max-w-none shrink-0 px-1.5 py-1 text-[0.65rem] leading-tight [&_svg]:size-3 [&_[data-slot=select-value]]:!flex-none [&_[data-slot=select-value]]:!overflow-visible [&_[data-slot=select-value]]:whitespace-nowrap"
 
 export function SortableEpisodeSetlistTableRow({
   r,
@@ -87,6 +86,7 @@ export function SortableEpisodeSetlistTableRow({
         "relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80",
       )}
       style={{
+        // Runtime-only: dnd-kit sortable transform / transition (see css-structure-no-inline.mdc).
         transform: CSS.Transform.toString(transform),
         transition,
       }}
@@ -129,7 +129,7 @@ export function SortableEpisodeSetlistTableRow({
         >
           <SelectTrigger
             size="sm"
-            className={episodeSetlistSelectTriggerClass}
+            className="wl-home-v2-admin-radio-episode-setlist-select-trigger"
           >
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -156,7 +156,7 @@ export function SortableEpisodeSetlistTableRow({
         >
           <SelectTrigger
             size="sm"
-            className={episodeSetlistSelectTriggerClass}
+            className="wl-home-v2-admin-radio-episode-setlist-select-trigger"
           >
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -184,7 +184,7 @@ export function SortableEpisodeSetlistTableRow({
         >
           <SelectTrigger
             size="sm"
-            className={episodeSetlistSelectTriggerClass}
+            className="wl-home-v2-admin-radio-episode-setlist-select-trigger"
           >
             <SelectValue placeholder="—" />
           </SelectTrigger>

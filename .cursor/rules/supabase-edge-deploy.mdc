@@ -1,0 +1,22 @@
+---
+description: After changing Supabase Edge Functions, tell the user exactly how to deploy them.
+alwaysApply: true
+---
+
+# Supabase Edge Function deploy reminders
+
+When you **add, edit, or delete** anything under `supabase/functions/` (or when the user’s task implies a deployed function must be updated), **always** include in your response:
+
+1. **The exact terminal command(s)** to deploy from the repo root (directory that contains `supabase/functions/`), one per function touched:
+
+   `supabase functions deploy <function-folder-name>`
+
+   Example: changing `supabase/functions/dpro-admin/index.ts` →
+
+   `supabase functions deploy dpro-admin`
+
+2. If the project may be unlinked, mention linking first: `supabase link --project-ref <ref>` then deploy.
+
+3. Briefly state that the static Next.js app does **not** deploy functions; Supabase CLI (or Dashboard) must run the deploy.
+
+Do not assume the user remembers to deploy; treat it as part of completing the task summary.

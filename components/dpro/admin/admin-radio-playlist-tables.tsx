@@ -65,7 +65,9 @@ export function ClickableRadioPlaylistsTable({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No rows in this category.</p>
+      <p className="wl-home-v2-admin-radio-tab-table-hint">
+        No rows in this category.
+      </p>
     )
   }
   const ariaOpen = (radioId: string) =>
@@ -74,71 +76,69 @@ export function ClickableRadioPlaylistsTable({
       : `Open actions for removed playlist ${radioId}`
 
   return (
-    <div className="max-h-[min(28rem,55vh)] overflow-auto rounded-[10px] border border-border/80 md:max-h-[min(32rem,50vh)]">
-      <Table className="set-table">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-14 text-center">Art</TableHead>
-            <TableHead className="w-[7rem] whitespace-nowrap">
-              Radio ID
-            </TableHead>
-            <TableHead>Episode</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((r) => (
-            <TableRow
-              key={r.uuid}
-              className={cn(
-                "cursor-pointer transition-colors",
-                updatingUuid === r.uuid && "pointer-events-none opacity-70",
-              )}
-              role="button"
-              tabIndex={0}
-              aria-busy={updatingUuid === r.uuid}
-              aria-label={ariaOpen(r.radio_id)}
-              onClick={() => onRowClick(r)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
-                  onRowClick(r)
-                }
-              }}
-            >
-              <TableCell className="w-14 align-middle">
-                {r.artwork ? (
-                  <div className="relative mx-auto size-10 overflow-hidden rounded bg-muted">
-                    <Image
-                      src={r.artwork}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      unoptimized
-                      sizes="40px"
-                    />
-                  </div>
-                ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
-                )}
-              </TableCell>
-              <TableCell className="align-top font-mono text-xs">
-                {updatingUuid === r.uuid ? (
-                  <Loader2Icon
-                    className="size-4 animate-spin text-muted-foreground"
-                    aria-hidden
+    <Table className="set-table">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-14 text-center">Art</TableHead>
+          <TableHead className="w-[7rem] whitespace-nowrap">
+            Radio ID
+          </TableHead>
+          <TableHead>Episode</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((r) => (
+          <TableRow
+            key={r.uuid}
+            className={cn(
+              "cursor-pointer text-xs transition-colors",
+              updatingUuid === r.uuid && "pointer-events-none opacity-70",
+            )}
+            role="button"
+            tabIndex={0}
+            aria-busy={updatingUuid === r.uuid}
+            aria-label={ariaOpen(r.radio_id)}
+            onClick={() => onRowClick(r)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onRowClick(r)
+              }
+            }}
+          >
+            <TableCell className="w-14 align-middle">
+              {r.artwork ? (
+                <div className="relative mx-auto size-10 overflow-hidden rounded bg-muted">
+                  <Image
+                    src={r.artwork}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    unoptimized
+                    sizes="40px"
                   />
-                ) : (
-                  r.radio_id
-                )}
-              </TableCell>
-              <TableCell className="align-top text-sm break-words">
-                {r.episode}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                </div>
+              ) : (
+                <span className="text-xs opacity-70">—</span>
+              )}
+            </TableCell>
+            <TableCell className="align-top font-mono text-xs">
+              {updatingUuid === r.uuid ? (
+                <Loader2Icon
+                  className="size-4 shrink-0 animate-spin opacity-70"
+                  aria-hidden
+                />
+              ) : (
+                r.radio_id
+              )}
+            </TableCell>
+            <TableCell className="align-top text-xs break-words">
+              {r.episode}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }
 

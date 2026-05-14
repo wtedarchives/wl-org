@@ -1,0 +1,28 @@
+/* Episode setlists admin table — compact Select triggers (sortable rows).
+   In-tab table lives under `.wl-home-v2-archive-admin-root--radio`; dialog content is portaled. */
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--radio .wl-home-v2-admin-radio-episode-setlist-select-trigger[data-slot="select-trigger"],
+.wl-home-v2 .wl-home-v2-admin-radio-episode-setlists-dialog .wl-home-v2-admin-radio-episode-setlist-select-trigger[data-slot="select-trigger"] {
+  height: auto;
+  min-height: 1.5rem;
+  width: max-content;
+  max-width: none;
+  flex-shrink: 0;
+  padding: 0.25rem 0.375rem;
+  font-size: 0.65rem;
+  line-height: 1.25;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--radio .wl-home-v2-admin-radio-episode-setlist-select-trigger[data-slot="select-trigger"] svg,
+.wl-home-v2 .wl-home-v2-admin-radio-episode-setlists-dialog .wl-home-v2-admin-radio-episode-setlist-select-trigger[data-slot="select-trigger"] svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--radio .wl-home-v2-admin-radio-episode-setlist-select-trigger[data-slot="select-trigger"] [data-slot="select-value"],
+.wl-home-v2 .wl-home-v2-admin-radio-episode-setlists-dialog .wl-home-v2-admin-radio-episode-setlist-select-trigger[data-slot="select-value"] {
+  display: flex !important;
+  flex: none !important;
+  overflow: visible !important;
+  white-space: nowrap;
+}

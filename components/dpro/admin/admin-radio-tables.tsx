@@ -56,7 +56,9 @@ export function ClickableRadioTracksTable({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No rows in this category.</p>
+      <p className="wl-home-v2-admin-radio-tab-table-hint">
+        No rows in this category.
+      </p>
     )
   }
   const ariaOpen = (radioId: string) =>
@@ -65,58 +67,54 @@ export function ClickableRadioTracksTable({
       : `Open actions for removed track ${radioId}`
 
   return (
-    <div className="max-h-[min(28rem,55vh)] overflow-auto rounded-[10px] border border-border/80 md:max-h-[min(32rem,50vh)]">
-      <Table className="set-table">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[7rem] whitespace-nowrap">
-              Radio ID
-            </TableHead>
-            <TableHead>Artist</TableHead>
-            <TableHead>Title</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((r) => (
-            <TableRow
-              key={r.uuid}
-              className={cn(
-                "cursor-pointer transition-colors",
-                updatingUuid === r.uuid && "pointer-events-none opacity-70",
+    <Table className="set-table">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[7rem] whitespace-nowrap">
+            Radio ID
+          </TableHead>
+          <TableHead>Artist</TableHead>
+          <TableHead>Title</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {rows.map((r) => (
+          <TableRow
+            key={r.uuid}
+            className={cn(
+              "cursor-pointer text-xs transition-colors",
+              updatingUuid === r.uuid && "pointer-events-none opacity-70",
+            )}
+            role="button"
+            tabIndex={0}
+            aria-busy={updatingUuid === r.uuid}
+            aria-label={ariaOpen(r.radio_id)}
+            onClick={() => onRowClick(r)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onRowClick(r)
+              }
+            }}
+          >
+            <TableCell className="align-top font-mono text-xs">
+              {updatingUuid === r.uuid ? (
+                <Loader2Icon
+                  className="size-4 shrink-0 animate-spin opacity-70"
+                  aria-hidden
+                />
+              ) : (
+                r.radio_id
               )}
-              role="button"
-              tabIndex={0}
-              aria-busy={updatingUuid === r.uuid}
-              aria-label={ariaOpen(r.radio_id)}
-              onClick={() => onRowClick(r)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault()
-                  onRowClick(r)
-                }
-              }}
-            >
-              <TableCell className="align-top font-mono text-xs">
-                {updatingUuid === r.uuid ? (
-                  <Loader2Icon
-                    className="size-4 animate-spin text-muted-foreground"
-                    aria-hidden
-                  />
-                ) : (
-                  r.radio_id
-                )}
-              </TableCell>
-              <TableCell className="align-top text-sm">
-                {r.track_artist ?? "—"}
-              </TableCell>
-              <TableCell className="align-top text-sm break-words">
-                {r.track_title ?? "—"}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+            </TableCell>
+            <TableCell className="align-top text-xs">{r.track_artist ?? "—"}</TableCell>
+            <TableCell className="align-top text-xs break-words">
+              {r.track_title ?? "—"}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }
 
