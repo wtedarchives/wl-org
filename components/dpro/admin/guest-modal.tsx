@@ -19,15 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-interface GuestData {
-  guest: string
-  guest_id: string
-  guest_displayname: string | null
-  guest_instrument: string | null
-  guest_category: string | null
-  guest_canonid: number | null
-}
+import { GUEST_CATEGORIES } from "@/constants/guest-categories"
+import type { GuestData } from "./admin-guest-dropdown"
 
 interface GuestModalProps {
   isOpen: boolean
@@ -36,13 +29,6 @@ interface GuestModalProps {
   onSave: () => void
   isNewGuest: boolean
 }
-
-const GUEST_CATEGORIES = [
-  "Goose (current)",
-  "Goose (former)",
-  "Group",
-  "Guest",
-]
 
 export function GuestModal({
   isOpen,
@@ -124,7 +110,9 @@ export function GuestModal({
       onClose()
     } catch (err) {
       console.error("Error saving guest:", err)
-      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -135,13 +123,13 @@ export function GuestModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-h-[90vh] max-w-md overflow-y-auto"
+        className="max-h-[90vh] max-w-3xl overflow-y-auto sm:max-w-3xl"
         showCloseButton={false}
       >
         <div className="flex items-center justify-between">
           <DialogHeader>
             <DialogTitle>
-              {isNewGuest ? "Add New Guest" : "Edit Guest"}
+              {isNewGuest ? "Add New Personnel" : "Edit Personnel"}
             </DialogTitle>
           </DialogHeader>
           <div className="flex gap-2">
@@ -159,73 +147,74 @@ export function GuestModal({
             {error}
           </div>
         )}
-        <div className="space-y-2">
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Guest Name <span className="text-destructive">*</span>
-            </label>
-            <Input
-              name="guest"
-              value={formData.guest ?? ""}
-              onChange={handleInputChange}
-              className="h-8 text-xs"
-              required
-            />
+        <div className="wl-home-v2-archive-admin-song-form">
+          <div className="wl-home-v2-archive-admin-song-form__grid">
+            <div className="min-w-0">
+              <label htmlFor="guest-modal-name">
+                Guest Name <span className="text-destructive">*</span>
+              </label>
+              <Input
+                id="guest-modal-name"
+                name="guest"
+                value={formData.guest ?? ""}
+                onChange={handleInputChange}
+                placeholder="Enter guest name"
+                required
+              />
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="guest-modal-displayname">Display Name</label>
+              <Input
+                id="guest-modal-displayname"
+                name="guest_displayname"
+                value={formData.guest_displayname ?? ""}
+                onChange={handleInputChange}
+                placeholder="Enter display name"
+              />
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="guest-modal-instrument">Instrument</label>
+              <Input
+                id="guest-modal-instrument"
+                name="guest_instrument"
+                value={formData.guest_instrument ?? ""}
+                onChange={handleInputChange}
+                placeholder="Enter instrument"
+              />
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="guest-modal-category">
+                Category <span className="text-destructive">*</span>
+              </label>
+              <Select
+                value={formData.guest_category || "__none__"}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    guest_category: v === "__none__" ? "" : v,
+                  }))
+                }
+              >
+                <SelectTrigger id="guest-modal-category" size="sm">
+                  <SelectValue placeholder="-- Select Category --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Category --</SelectItem>
+                  {GUEST_CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {isNewGuest && (
+              <p className="wl-home-v2-archive-admin-song-form__notes text-xs text-muted-foreground">
+                Canon ID will be automatically assigned based on the selected
+                category.
+              </p>
+            )}
           </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Display Name
-            </label>
-            <Input
-              name="guest_displayname"
-              value={formData.guest_displayname ?? ""}
-              onChange={handleInputChange}
-              className="h-8 text-xs"
-            />
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Instrument
-            </label>
-            <Input
-              name="guest_instrument"
-              value={formData.guest_instrument ?? ""}
-              onChange={handleInputChange}
-              className="h-8 text-xs"
-            />
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Category <span className="text-destructive">*</span>
-            </label>
-            <Select
-              value={formData.guest_category || "__none__"}
-              onValueChange={(v) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  guest_category: v === "__none__" ? "" : v,
-                }))
-              }
-            >
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="-- Select Category --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Category --</SelectItem>
-                {GUEST_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {isNewGuest && (
-            <p className="text-xs italic text-muted-foreground">
-              Canon ID will be automatically assigned based on the selected
-              category.
-            </p>
-          )}
         </div>
       </DialogContent>
     </Dialog>

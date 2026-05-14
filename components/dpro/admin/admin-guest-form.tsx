@@ -1,6 +1,6 @@
 "use client"
 
-import { Save, Edit } from "lucide-react"
+import { FloppyDisk, PencilSimple } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -37,76 +37,79 @@ export function AdminGuestForm({
   onToggleEdit,
 }: AdminGuestFormProps) {
   return (
-    <div className="pb-1">
-      <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-sm font-medium">{guest.guest}</h4>
+    <div className="wl-home-v2-archive-admin-song-form">
+      <div className="wl-home-v2-archive-admin-song-form__head">
+        <h4 className="wl-home-v2-archive-admin-song-form__title">
+          {guest.guest}
+        </h4>
         <Button
-          variant="outline"
+          type="button"
+          variant="ghost"
           size="sm"
           onClick={onToggleEdit}
           disabled={isSubmitting}
-          className="gap-1"
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
         >
-          {isEditing ? (
+          {isEditing ?
             <>
-              <Save className="size-4" />
+              <FloppyDisk className="size-3.5 shrink-0 opacity-80" aria-hidden />
               Save
             </>
-          ) : (
-            <>
-              <Edit className="size-4" />
+          : <>
+              <PencilSimple
+                className="size-3.5 shrink-0 opacity-80"
+                aria-hidden
+              />
               Edit
             </>
-          )}
+          }
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Guest Name</label>
+      <div className="wl-home-v2-archive-admin-song-form__grid">
+        <div className="min-w-0">
+          <label htmlFor="personnel-admin-name">Guest Name</label>
           <Input
+            id="personnel-admin-name"
             type="text"
             name="guest"
             value={editedGuest?.guest ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
           />
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">
-            Display Name
-          </label>
+        <div className="min-w-0">
+          <label htmlFor="personnel-admin-displayname">Display Name</label>
           <Input
+            id="personnel-admin-displayname"
             type="text"
             name="guest_displayname"
             value={editedGuest?.guest_displayname ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
           />
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Instrument</label>
+        <div className="min-w-0">
+          <label htmlFor="personnel-admin-instrument">Instrument</label>
           <Input
+            id="personnel-admin-instrument"
             type="text"
             name="guest_instrument"
             value={editedGuest?.guest_instrument ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
           />
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Category</label>
-          {isEditing ? (
+        <div className="min-w-0">
+          <label htmlFor="personnel-admin-category">Category</label>
+          {isEditing ?
             <Select
               value={editedGuest?.guest_category || "__none__"}
               onValueChange={onCategoryChange}
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger id="personnel-admin-category" size="sm">
                 <SelectValue placeholder="-- Select Category --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Category --</SelectItem>
                 {GUEST_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
@@ -115,22 +118,21 @@ export function AdminGuestForm({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedGuest?.guest_category ?? ""}
-              readOnly
-              className="h-8 text-xs"
-            />
-          )}
+          : <Input value={editedGuest?.guest_category ?? ""} readOnly />}
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Canon ID</label>
+        <div className="min-w-0">
+          <label htmlFor="personnel-admin-canonid">Canon ID</label>
           <Input
-            value={editedGuest?.guest_canonid ?? ""}
+            id="personnel-admin-canonid"
+            value={
+              editedGuest?.guest_canonid === null ||
+              editedGuest?.guest_canonid === undefined
+                ? ""
+                : String(editedGuest.guest_canonid)
+            }
             readOnly
-            className="h-8 text-xs"
           />
-          <p className="mt-0.5 text-xs italic text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             Auto-generated value
           </p>
         </div>

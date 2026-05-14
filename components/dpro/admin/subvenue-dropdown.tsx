@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
-import { ChevronDown, Search } from "lucide-react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import type { SubvenueData, VenueDataBasic } from "@/types/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -114,7 +114,7 @@ export function SubvenueDropdown({
                 placeholder="Search subvenues..."
                 className="h-8 pr-8 text-xs"
               />
-              <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+              <MagnifyingGlass className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
             </div>
           </div>
           <div
@@ -172,13 +172,13 @@ export function SubvenueDropdown({
     <>
       <Button
         ref={triggerRef}
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={onToggle}
-        className="gap-2"
+        className="wl-home-v2-tours-header-pill gap-1"
       >
         Subvenue
-        <ChevronDown className="size-4" />
+        <CaretDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
       </Button>
       {dropdownContent && createPortal(dropdownContent, document.body)}
     </>

@@ -1,18 +1,17 @@
 "use client"
 
 import { Suspense, useEffect, useState } from "react"
-import { ChevronDownIcon } from "lucide-react"
 import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
+import { supabase } from "@/lib/supabase"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY,
+  ADMIN_PANEL_TABS,
+  isAdminPanelTab,
+  type AdminPanelTab,
+} from "@/components/dpro/admin/admin-panel.constants"
 import { AdminSetlist } from "./admin-setlist"
 import { AdminArtist } from "./admin-artist"
 import { AdminSong } from "./admin-song"
@@ -26,25 +25,10 @@ import { AdminSubvenue } from "./admin-subvenue"
 import { AdminWted } from "./admin-wted"
 import { AdminDiscography } from "./admin-discography"
 
-const TABS = [
-  "Setlist",
-  "Artist",
-  "Song",
-  "Personnel",
-  "Show",
-  "Changes",
-  "Releases",
-  "Discography",
-  "Media",
-  "Venue",
-  "Subvenue",
-  "WTED",
-] as const
-
 export function AdminPanel() {
   const { session } = useAuth()
   const token = session?.token ?? null
-  const [userCount, setUserCount] = useState<number | null>(null)
+  const [profileCountLine, setProfileCountLine] = useState("…")
   const [isUpdating, setIsUpdating] = useState(false)
   const [updateStatus, setUpdateStatus] = useState<{
     type: "success" | "error" | null
@@ -52,23 +36,34 @@ export function AdminPanel() {
   }>({ type: null, message: null })
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window === "undefined") return "Setlist"
-    const stored = localStorage.getItem("adminActiveTab") || "Setlist"
+    const stored =
+      localStorage.getItem(ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY) || "Setlist"
     const migrated = stored === "Guest" ? "Personnel" : stored
-    return migrated as (typeof TABS)[number]
+    return isAdminPanelTab(migrated) ? migrated : "Setlist"
   })
 
   useEffect(() => {
-    if (!token) return
-    void (async () => {
-      const { data, error } = await invokeDproAdmin<{ count: number }>(token, {
-        action: "profiles_count",
+    if (!supabase) {
+      setProfileCountLine("—")
+      return
+    }
+    void supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+      .then(({ count, error }) => {
+        if (error) {
+          setProfileCountLine("—")
+          return
+        }
+        const n = count ?? 0
+        setProfileCountLine(
+          `${n.toLocaleString()} ${n === 1 ? "user" : "users"}`,
+        )
       })
-      if (!error && data) setUserCount(data.count ?? 0)
-    })()
-  }, [token])
+  }, [])
 
   useEffect(() => {
-    localStorage.setItem("adminActiveTab", activeTab)
+    localStorage.setItem(ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY, activeTab)
   }, [activeTab])
 
   const handleUpdateStatistics = async () => {
@@ -95,33 +90,36 @@ export function AdminPanel() {
 
   return (
     <div className="wl-home-v2-archive-admin-root wl-home-v2-archive-admin-root--panel">
-      <div className="wl-home-v2-archive-admin-tools-row">
-        <div className="wl-home-v2-archive-admin-tools-lead">
-          <h2 className="wl-home-v2-archive-admin-heading">Admin Panel</h2>
-          {userCount != null && (
-            <Badge variant="secondary" className="wl-home-v2-archive-admin-user-badge">
-              {userCount.toLocaleString()} {userCount === 1 ? "user" : "users"}
+      <div className="widget-panel wl-home-v2-archive-admin-ops-panel">
+        <div className="wp-head wl-home-v2-archive-admin-ops-head">
+          <span className="wl-home-v2-archive-admin-ops-title">Admin panel</span>
+          <span className="wp-head-right wl-home-v2-archive-admin-ops-head-trail">
+            <Badge
+              variant="secondary"
+              className="wl-home-v2-archive-admin-user-badge wl-home-v2-archive-admin-ops-user-pill"
+            >
+              {profileCountLine}
             </Badge>
-          )}
+            <button
+              type="button"
+              className={
+                "wbtn primary wl-home-v2-archive-admin-update-btn" +
+                (updateStatus.type === "success"
+                  ? " wl-home-v2-archive-admin-update-btn--success"
+                  : "")
+              }
+              onClick={() => void handleUpdateStatistics()}
+              disabled={isUpdating || updateStatus.type === "success"}
+              title="Update all setlist entries statistics"
+            >
+              {isUpdating ?
+                "Waiting…"
+              : updateStatus.type === "success" ?
+                updateStatus.message
+              : "Update"}
+            </button>
+          </span>
         </div>
-        <button
-          type="button"
-          className={
-            "wbtn primary wl-home-v2-archive-admin-update-btn" +
-            (updateStatus.type === "success"
-              ? " wl-home-v2-archive-admin-update-btn--success"
-              : "")
-          }
-          onClick={() => void handleUpdateStatistics()}
-          disabled={isUpdating || updateStatus.type === "success"}
-          title="Update all setlist entries statistics"
-        >
-          {isUpdating ?
-            "Waiting…"
-          : updateStatus.type === "success" ?
-            updateStatus.message
-          : "Update"}
-        </button>
       </div>
 
       {updateStatus.type === "error" && (
@@ -134,45 +132,21 @@ export function AdminPanel() {
 
       <Tabs
         value={activeTab}
-        onValueChange={(v) => setActiveTab(v as (typeof TABS)[number])}
+        onValueChange={(v) => setActiveTab(v as AdminPanelTab)}
       >
         <div className="wl-home-v2-archive-admin-tabs-toolbar">
-          <h2 className="wl-home-v2-archive-admin-subheading">Manage Data</h2>
-          <div className="wl-home-v2-archive-admin-tabs-toolbar-trail">
-            <div className="wl-home-v2-archive-admin-tabs-desktop">
-              <TabsList className="h-8 w-full flex-wrap justify-start">
-                {TABS.map((tab) => (
-                  <TabsTrigger key={tab} value={tab} className="text-xs">
-                    {tab}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild className="wl-home-v2-archive-admin-tabs-mobile-trigger">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-auto justify-between gap-1"
+          <div className="wl-home-v2-archive-admin-tabs-scroll">
+            <TabsList className="wl-home-v2-archive-admin-tabs-list mx-auto h-7 min-h-7 min-w-full w-max flex-nowrap justify-center gap-0.5 p-0.5">
+              {ADMIN_PANEL_TABS.map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  className="wl-home-v2-archive-admin-tabs-trigger flex-none shrink-0 text-xs"
                 >
-                  {activeTab}
-                  <ChevronDownIcon className="ml-1 size-4 shrink-0" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="wl-home-v2-archive-admin-portal-content w-40"
-              >
-                {TABS.map((tab) => (
-                  <DropdownMenuItem
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {tab}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {tab}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
         </div>
 

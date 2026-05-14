@@ -1,5 +1,7 @@
 "use client"
 
+import { FloppyDisk, PencilSimple } from "@phosphor-icons/react"
+import { formatDate } from "@/lib/utils/show-utils"
 import type {
   AdminShowData,
   GroupData,
@@ -7,6 +9,7 @@ import type {
   SubvenueDisplayData,
   YearData,
 } from "@/types/admin"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -20,6 +23,8 @@ import { CallbacksEditor } from "./callbacks-editor"
 interface ShowFormFieldsProps {
   editedShow: AdminShowData | null
   isEditing: boolean
+  isSubmitting: boolean
+  onToggleEdit: () => void
   onInputChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => void
@@ -35,6 +40,8 @@ interface ShowFormFieldsProps {
 export function ShowFormFields({
   editedShow,
   isEditing,
+  isSubmitting,
+  onToggleEdit,
   onInputChange,
   groups,
   tours,
@@ -45,22 +52,49 @@ export function ShowFormFields({
   songs,
 }: ShowFormFieldsProps) {
   return (
-    <div className="pb-1">
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Date</label>
+    <>
+      <div className="wl-home-v2-archive-admin-song-form__head">
+        <h4 className="wl-home-v2-archive-admin-song-form__title">
+          {formatDate(selectedShow.show_date)} — {selectedShow.show_subvenue}
+        </h4>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onToggleEdit}
+          disabled={isSubmitting}
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
+        >
+          {isEditing ?
+            <>
+              <FloppyDisk className="size-3.5 shrink-0 opacity-80" aria-hidden />
+              Save
+            </>
+          : <>
+              <PencilSimple
+                className="size-3.5 shrink-0 opacity-80"
+                aria-hidden
+              />
+              Edit
+            </>
+          }
+        </Button>
+      </div>
+      <div className="wl-home-v2-archive-admin-song-form__grid">
+        <div className="min-w-0">
+          <label htmlFor="show-admin-date">Date</label>
           <Input
+            id="show-admin-date"
             type="date"
             name="show_date"
             value={editedShow?.show_date ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
           />
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Group</label>
-          {isEditing ? (
+        <div className="min-w-0">
+          <label htmlFor="show-admin-group">Group</label>
+          {isEditing ?
             <Select
               value={editedShow?.show_group || "__none__"}
               onValueChange={(v) =>
@@ -70,12 +104,12 @@ export function ShowFormFields({
                     value: v === "__none__" ? "" : v,
                   },
                 } as React.ChangeEvent<HTMLSelectElement>)
-                }
+              }
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger id="show-admin-group" size="sm">
                 <SelectValue placeholder="-- Select Group --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Group --</SelectItem>
                 {groups.map((g) => (
                   <SelectItem key={g.group} value={g.group}>
@@ -84,17 +118,11 @@ export function ShowFormFields({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedShow?.show_group ?? ""}
-              readOnly
-              className="h-8 text-xs"
-            />
-          )}
+          : <Input value={editedShow?.show_group ?? ""} readOnly />}
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Tour</label>
-          {isEditing ? (
+        <div className="min-w-0">
+          <label htmlFor="show-admin-tour">Tour</label>
+          {isEditing ?
             <Select
               value={editedShow?.show_tour || "__none__"}
               onValueChange={(v) =>
@@ -106,10 +134,10 @@ export function ShowFormFields({
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger id="show-admin-tour" size="sm">
                 <SelectValue placeholder="-- Select Tour --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Tour --</SelectItem>
                 {tours.map((t) => (
                   <SelectItem key={t.tour} value={t.tour}>
@@ -118,17 +146,11 @@ export function ShowFormFields({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedShow?.show_tour ?? ""}
-              readOnly
-              className="h-8 text-xs"
-            />
-          )}
+          : <Input value={editedShow?.show_tour ?? ""} readOnly />}
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Subvenue</label>
-          {isEditing ? (
+        <div className="min-w-0">
+          <label htmlFor="show-admin-subvenue">Subvenue</label>
+          {isEditing ?
             <Select
               value={editedShow?.show_subvenue || "__none__"}
               onValueChange={(v) =>
@@ -140,10 +162,10 @@ export function ShowFormFields({
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger id="show-admin-subvenue" size="sm">
                 <SelectValue placeholder="-- Select Subvenue --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Subvenue --</SelectItem>
                 {subvenues.map((s) => (
                   <SelectItem key={s.subvenue} value={s.subvenue}>
@@ -153,17 +175,11 @@ export function ShowFormFields({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedShow?.show_subvenue ?? ""}
-              readOnly
-              className="h-8 text-xs"
-            />
-          )}
+          : <Input value={editedShow?.show_subvenue ?? ""} readOnly />}
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Year</label>
-          {isEditing ? (
+        <div className="min-w-0">
+          <label htmlFor="show-admin-year">Year</label>
+          {isEditing ?
             <Select
               value={editedShow?.show_year || "__none__"}
               onValueChange={(v) =>
@@ -175,10 +191,10 @@ export function ShowFormFields({
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger id="show-admin-year" size="sm">
                 <SelectValue placeholder="-- Select Year --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Year --</SelectItem>
                 {years.map((y) => (
                   <SelectItem key={y.year} value={y.year}>
@@ -187,98 +203,88 @@ export function ShowFormFields({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedShow?.show_year ?? ""}
-              readOnly
-              className="h-8 text-xs"
-            />
-          )}
+          : <Input value={editedShow?.show_year ?? ""} readOnly />}
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Canon ID</label>
+        <div className="min-w-0">
+          <label htmlFor="show-admin-canonid">Canon ID</label>
           <Input
+            id="show-admin-canonid"
             value={editedShow?.show_canonid ?? ""}
             readOnly
-            className="h-8 text-xs"
           />
-          <p className="mt-0.5 text-xs italic text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             Auto-generated value
           </p>
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Detail</label>
+        <div className="min-w-0">
+          <label htmlFor="show-admin-detail">Detail</label>
           <Input
+            id="show-admin-detail"
             name="show_detail"
             value={editedShow?.show_detail ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
           />
         </div>
-        <div>
-          <label className="mb-0.5 block text-xs font-medium">Alert</label>
+        <div className="min-w-0">
+          <label htmlFor="show-admin-alert">Alert</label>
           <Input
+            id="show-admin-alert"
             name="show_alert"
             value={editedShow?.show_alert ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-8 text-xs"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="show_iscanon"
-            name="show_iscanon"
-            checked={editedShow?.show_iscanon ?? false}
-            onChange={onInputChange}
-            disabled={!isEditing}
-            className="size-4 rounded"
-          />
-          <label htmlFor="show_iscanon" className="text-xs font-medium">
-            Is Canon?
-          </label>
+        <div className="min-w-0 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="show_iscanon"
+              name="show_iscanon"
+              checked={editedShow?.show_iscanon ?? false}
+              onChange={onInputChange}
+              disabled={!isEditing}
+              className="size-4 shrink-0 rounded"
+            />
+            <label htmlFor="show_iscanon">Is Canon?</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="show_issetlistgame"
+              name="show_issetlistgame"
+              checked={editedShow?.show_issetlistgame ?? false}
+              onChange={onInputChange}
+              disabled={!isEditing}
+              className="size-4 shrink-0 rounded"
+            />
+            <label htmlFor="show_issetlistgame">Is Setlist Game?</label>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="show_issetlistgame"
-            name="show_issetlistgame"
-            checked={editedShow?.show_issetlistgame ?? false}
-            onChange={onInputChange}
-            disabled={!isEditing}
-            className="size-4 rounded"
-          />
-          <label htmlFor="show_issetlistgame" className="text-xs font-medium">
-            Is Setlist Game?
-          </label>
-        </div>
-        <div className="md:col-span-2">
-          <label className="mb-0.5 block text-xs font-medium">
+        <div className="wl-home-v2-archive-admin-song-form__notes min-w-0">
+          <label htmlFor="show-admin-wl-link">
             WysteriaLane.org Thread Link
           </label>
           <Input
+            id="show-admin-wl-link"
             type="url"
             name="show_wl_link"
             value={editedShow?.show_wl_link ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
             placeholder="https://wysterialane.org/..."
-            className="h-8 text-xs"
           />
         </div>
-        <div className="md:col-span-2">
-          <label className="mb-0.5 block text-xs font-medium">
-            Coach&apos;s Notes
-          </label>
+        <div className="wl-home-v2-archive-admin-song-form__notes min-w-0">
+          <label htmlFor="show-admin-coachnotes">Coach&apos;s Notes</label>
           <textarea
+            id="show-admin-coachnotes"
             name="show_coachnotes"
             value={editedShow?.show_coachnotes ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            rows={3}
-            className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            rows={4}
           />
         </div>
         <CallbacksEditor
@@ -290,6 +296,6 @@ export function ShowFormFields({
           songs={songs}
         />
       </div>
-    </div>
+    </>
   )
 }

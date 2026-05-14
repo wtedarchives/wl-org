@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY } from "@/components/dpro/admin/admin-panel.constants"
 import type { WysteriaSession } from "@/lib/jwt"
 
 const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
@@ -38,7 +39,7 @@ export function useSetlistAdmin(session: WysteriaSession | null, showId: string 
     if (!showId) return
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("adminSelectedShowId", showId)
-      localStorage.setItem("adminActiveTab", "Setlist")
+      localStorage.setItem(ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY, "Setlist")
     }
     router.push(
       `/archive/admin?show_id=${encodeURIComponent(showId)}`,

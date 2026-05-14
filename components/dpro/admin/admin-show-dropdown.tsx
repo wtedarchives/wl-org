@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
-import { ChevronDown, Search } from "lucide-react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { getShowDisplayData } from "@/lib/utils/show-utils"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -58,7 +58,7 @@ export function AdminShowDropdown({
   loading,
   loadingProgress,
   selectedShow,
-  triggerLabel = "Show",
+  triggerLabel = "Select show",
   portalToBody = true,
   portalAlignTriggerStart = false,
   menuAlign = "right",
@@ -150,7 +150,7 @@ export function AdminShowDropdown({
             placeholder="Search shows..."
             className="h-8 pr-8 text-xs"
           />
-          <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+          <MagnifyingGlass className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
         </div>
       </div>
       <div
@@ -184,7 +184,8 @@ export function AdminShowDropdown({
                   }
                   onClick={() => onShowSelect(show)}
                   className={
-                    "wl-home-v2-archive-admin-floating-dropdown__row" +
+                    "wl-home-v2-archive-admin-floating-dropdown__row " +
+                    "wl-home-v2-archive-admin-floating-dropdown__row--compact" +
                     (selectedShow?.show_id === show.show_id ?
                       " wl-home-v2-archive-admin-floating-dropdown__row--selected"
                     : "")
@@ -238,13 +239,13 @@ export function AdminShowDropdown({
   const trigger = (
     <Button
       ref={triggerRef}
-      variant="outline"
+      variant="ghost"
       size="sm"
       onClick={onToggle}
-      className="gap-2"
+      className="wl-home-v2-tours-header-pill gap-1"
     >
       {triggerLabel}
-      <ChevronDown className="size-4" />
+      <CaretDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
     </Button>
   )
 

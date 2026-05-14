@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
-import { ChevronDown, Search } from "lucide-react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import type { VenueDataBasic } from "@/types/admin"
 import { Input } from "@/components/ui/input"
 
@@ -83,9 +83,12 @@ export function VenueFormDropdown({
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search venues..."
-                className="h-8 pr-8 text-xs"
+                className="h-8 w-full min-w-0 pr-8 text-xs focus-visible:ring-0"
               />
-              <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+              <MagnifyingGlass
+                className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40"
+                aria-hidden
+              />
             </div>
           </div>
           <div className="wl-home-v2-archive-admin-floating-dropdown__scroll max-h-40 divide-y divide-[rgb(49,51,49)]">
@@ -119,12 +122,12 @@ export function VenueFormDropdown({
         ref={triggerRef}
         type="button"
         onClick={onToggle}
-        className="flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-2 text-left text-xs"
+        className="wl-home-v2-archive-admin-form-combobox-trigger min-w-0"
       >
-        <span className="truncate">
+        <span className="min-w-0 truncate">
           {selectedVenue || "Select venue..."}
         </span>
-        <ChevronDown className="size-4 shrink-0" />
+        <CaretDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
       </button>
       {dropdownContent && createPortal(dropdownContent, document.body)}
     </>

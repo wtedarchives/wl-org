@@ -40,32 +40,26 @@ export function AdminMediaTable({
 }: AdminMediaTableProps) {
   return (
     <TooltipProvider>
-      <div className="overflow-x-auto">
-      <Table className="set-table">
+      <Table className="set-table wl-home-v2-admin-setlist-entry-table">
         <TableHeader>
           <TableRow>
-            <TableHead className="py-1 text-center text-xs border-r">S</TableHead>
-            <TableHead className="py-1 text-center text-xs border-r">#</TableHead>
-            <TableHead className="py-1 text-left text-xs border-r">Song</TableHead>
-            <TableHead className="py-1 text-left text-xs border-r">Short</TableHead>
-            <TableHead className="py-1 text-left text-xs border-r">→</TableHead>
-            <TableHead className="py-1 text-center text-xs border-r">
-              Placement
-            </TableHead>
+            <TableHead className="w-8 text-center text-sm">S</TableHead>
+            <TableHead className="w-8 text-center text-sm">#</TableHead>
+            <TableHead className="text-left text-sm">Song</TableHead>
+            <TableHead className="text-left text-sm">Short</TableHead>
+            <TableHead className="text-center text-sm">→</TableHead>
+            <TableHead className="text-center text-sm">Placement</TableHead>
             {showReleases.map((rs: ReleaseShow) => {
               const allChecked =
                 setlistEntries.length > 0 &&
                 setlistEntries.every((e) =>
-                  mediaEntries.has(`${e.entry_id}:${rs.release_id}`)
+                  mediaEntries.has(`${e.entry_id}:${rs.release_id}`),
                 )
               const someChecked = setlistEntries.some((e) =>
-                mediaEntries.has(`${e.entry_id}:${rs.release_id}`)
+                mediaEntries.has(`${e.entry_id}:${rs.release_id}`),
               )
               return (
-                <TableHead
-                  key={rs.release_id}
-                  className="py-1 text-center text-xs border-r"
-                >
+                <TableHead key={rs.release_id} className="text-center text-sm">
                   <div className="flex flex-col items-center gap-1">
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -108,28 +102,28 @@ export function AdminMediaTable({
         </TableHeader>
         <TableBody>
           {setlistEntries.map((entry) => (
-            <TableRow key={entry.entry_id} className="text-xs">
-              <TableCell className="py-1 text-center border-r">
+            <TableRow key={entry.entry_id} className="text-[0.625rem]">
+              <TableCell className="text-center text-xs">
                 {entry.entry_set}
               </TableCell>
-              <TableCell className="py-1 text-center border-r">
+              <TableCell className="text-center text-xs">
                 {entry.entry_setnum}
               </TableCell>
-              <TableCell className="py-1 border-r">{entry.entry_song}</TableCell>
-              <TableCell className="py-1 border-r">
-                {entry.entry_short || ""}
+              <TableCell className="text-xs font-medium">
+                {entry.entry_song}
               </TableCell>
-              <TableCell className="py-1 border-r">
-                {entry.entry_segue === ">" ? "→" : (entry.entry_segue || "")}
+              <TableCell className="text-xs">{entry.entry_short ?? ""}</TableCell>
+              <TableCell className="text-center text-xs">
+                {(entry.entry_segue ?? "").replace(/>/g, "→")}
               </TableCell>
-              <TableCell className="py-1 border-r">
+              <TableCell className="text-center">
                 <div
-                  className="wl-home-v2-archive-admin-placement-pill"
+                  className="wl-home-v2-archive-admin-placement-pill inline-block align-middle"
                   data-admin-placement-pill={getPlacementBarCssToken(
                     entry.entry_placement,
                   )}
                 >
-                  {entry.entry_placement || ""}
+                  {entry.entry_placement ?? ""}
                 </div>
               </TableCell>
               {showReleases.map((rs: ReleaseShow) => {
@@ -137,10 +131,7 @@ export function AdminMediaTable({
                 const isChecked = mediaEntries.has(key)
                 const isToggling = togglingEntry === key
                 return (
-                  <TableCell
-                    key={rs.release_id}
-                    className="py-1 text-center border-r"
-                  >
+                  <TableCell key={rs.release_id} className="text-center">
                     <Button
                       variant={isChecked ? "default" : "outline"}
                       size="sm"
@@ -157,7 +148,6 @@ export function AdminMediaTable({
           ))}
         </TableBody>
       </Table>
-    </div>
     </TooltipProvider>
   )
 }

@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
-import { ChevronDown, Search } from "lucide-react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { formatDate, getShowDisplayData } from "@/lib/utils/show-utils"
 import type { ShowData } from "@/types/admin"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
 interface ShowDropdownProps {
@@ -14,6 +15,8 @@ interface ShowDropdownProps {
   loadingProgress: number
   onShowSelect: (show: ShowData) => void
   selectedShow?: ShowData | null
+  /** Merged onto the trigger (default: tours header pill). */
+  triggerClassName?: string
 }
 
 export function ShowDropdown({
@@ -22,6 +25,7 @@ export function ShowDropdown({
   loadingProgress,
   onShowSelect,
   selectedShow,
+  triggerClassName,
 }: ShowDropdownProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -112,7 +116,7 @@ export function ShowDropdown({
                 placeholder="Search shows..."
                 className="h-8 pr-8 text-xs"
               />
-              <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+              <MagnifyingGlass className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
         </div>
       </div>
       <div
@@ -146,7 +150,8 @@ export function ShowDropdown({
                     }
                     onClick={() => handleShowSelect(show)}
                     className={
-                      "wl-home-v2-archive-admin-floating-dropdown__row" +
+                      "wl-home-v2-archive-admin-floating-dropdown__row " +
+                      "wl-home-v2-archive-admin-floating-dropdown__row--compact" +
                       (selectedShow?.show_id === show.show_id
                         ? " wl-home-v2-archive-admin-floating-dropdown__row--selected"
                         : "")
@@ -177,13 +182,17 @@ export function ShowDropdown({
     <>
       <Button
         ref={triggerRef}
-        variant="outline"
+        type="button"
+        variant="ghost"
         size="sm"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="gap-2"
+        className={cn(
+          "wl-home-v2-tours-header-pill gap-1",
+          triggerClassName,
+        )}
       >
-        Select Show
-        <ChevronDown className="size-4" />
+        Select show
+        <CaretDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
       </Button>
       {dropdownContent &&
         createPortal(dropdownContent, document.body)}

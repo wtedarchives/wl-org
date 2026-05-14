@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Save, Edit, Plus } from "lucide-react"
+import { FloppyDisk, PencilSimple, Plus } from "@phosphor-icons/react"
 import type { VenueData } from "@/types/admin"
 import { useAdminVenueData } from "@/hooks/use-admin-venue-data"
 import { useVenueForm } from "@/hooks/use-venue-form"
@@ -9,6 +9,8 @@ import { useVenueActions } from "@/hooks/use-venue-actions"
 import { VenueDropdown } from "./venue-dropdown"
 import { VenueForm } from "./venue-form"
 import { Button } from "@/components/ui/button"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
 
 export function AdminVenue() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -69,14 +71,19 @@ export function AdminVenue() {
   }
 
   return (
-    <div className="pb-1">
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Venue Management</h3>
-        <div className="flex items-center gap-2">
-          <Button variant="default" size="sm" onClick={handleCreateNew}>
-            <Plus className="size-4" />
-          </Button>
-          <VenueDropdown
+    <AdminTabShell>
+      <AdminTabToolbar title="Venue Management">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleCreateNew}
+          className="wl-home-v2-tours-header-pill gap-1"
+          title="New venue"
+        >
+          <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+        </Button>
+        <VenueDropdown
             isOpen={isDropdownOpen}
             onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
             onClose={() => setIsDropdownOpen(false)}
@@ -88,45 +95,46 @@ export function AdminVenue() {
             loadingProgress={loadingProgress}
             selectedVenue={selectedVenue}
           />
-        </div>
-      </div>
+      </AdminTabToolbar>
       {selectedVenue && (
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h4 className="text-sm font-medium">
-              {isCreatingNew
-                ? "New Venue"
-                : `${selectedVenue.venue} - ${selectedVenue.venue_location}`}
+        <div className="wl-home-v2-archive-admin-song-form wl-home-v2-archive-admin-form--two-col">
+          <div className="wl-home-v2-archive-admin-song-form__head">
+            <h4 className="wl-home-v2-archive-admin-song-form__title">
+              {isCreatingNew ?
+                "New Venue"
+              : `${selectedVenue.venue} - ${selectedVenue.venue_location}`}
             </h4>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-shrink-0 flex-wrap items-center justify-end gap-2">
               {isEditing && (
                 <Button
-                  variant="secondary"
+                  type="button"
+                  variant="ghost"
                   size="sm"
                   onClick={handleCancel}
                   disabled={isSubmitting}
+                  className="wl-home-v2-tours-header-pill"
                 >
                   Cancel
                 </Button>
               )}
               <Button
-                variant="default"
+                type="button"
+                variant="ghost"
                 size="sm"
                 onClick={toggleEdit}
                 disabled={isSubmitting}
-                className="gap-1"
+                className="wl-home-v2-tours-header-pill gap-1"
               >
-                {isEditing ? (
+                {isEditing ?
                   <>
-                    <Save className="size-4" />
+                    <FloppyDisk className="size-3.5 shrink-0 opacity-80" aria-hidden />
                     Save
                   </>
-                ) : (
-                  <>
-                    <Edit className="size-4" />
+                : <>
+                    <PencilSimple className="size-3.5 shrink-0 opacity-80" aria-hidden />
                     Edit
                   </>
-                )}
+                }
               </Button>
             </div>
           </div>
@@ -144,6 +152,6 @@ export function AdminVenue() {
           </p>
         </div>
       )}
-    </div>
+    </AdminTabShell>
   )
 }

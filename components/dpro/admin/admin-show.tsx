@@ -13,6 +13,7 @@ import { ReleasesTable } from "./releases-table"
 import { ShowCompletionFlagsSection } from "./show-completion-flags-section"
 import { ShowModal } from "./show-modal"
 import { ShowReleaseModal } from "./show-release-modal"
+import { AdminTabShell } from "./admin-tab-shell"
 
 export function AdminShow() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -88,7 +89,7 @@ export function AdminShow() {
   }
 
   return (
-    <div>
+    <AdminTabShell>
       <AdminShowHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -100,15 +101,14 @@ export function AdminShow() {
         setIsDropdownOpen={setIsDropdownOpen}
         onOpenNewShowModal={handleOpenNewShowModal}
         selectedShow={selectedShow}
-        isEditing={isEditing}
-        isSubmitting={isSubmitting}
-        onToggleEdit={toggleEdit}
       />
       {selectedShow && (
-        <div>
+        <div className="wl-home-v2-archive-admin-song-form wl-home-v2-archive-admin-show-form">
           <ShowFormFields
             editedShow={editedShow}
             isEditing={isEditing}
+            isSubmitting={isSubmitting}
+            onToggleEdit={toggleEdit}
             onInputChange={handleInputChange}
             groups={groups}
             tours={tours}
@@ -153,6 +153,6 @@ export function AdminShow() {
           existingOrder={selectedReleaseForEdit?.order}
         />
       )}
-    </div>
+    </AdminTabShell>
   )
 }

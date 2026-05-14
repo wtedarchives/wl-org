@@ -57,6 +57,7 @@ export function VenueSongSpreadCard({
       onCategoryHover={setHoveredCategory}
       cardMaxHeight={wlHomeV2 ? undefined : "max-h-[400px]"}
       variant={wlHomeV2 ? "wl-home-v2-setlist" : "card"}
+      tooltipSide="top"
       tooltipPadTourTrailingPlayCount={wlHomeV2}
     />
   )

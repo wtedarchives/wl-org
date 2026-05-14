@@ -1225,6 +1225,13 @@
   .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table[data-slot="table"] tbody tr[data-slot="table-row"]:hover td {
     background: rgba(255, 255, 255, 0.04);
   }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner [data-slot="table-container"]:has(.set-table.wl-home-v2-admin-setlist-entry-table) {
+    border-radius: 10px;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table.wl-home-v2-admin-setlist-entry-table[data-slot="table"] th[data-slot="table-head"],
+  .wl-home-v2 .wl-home-v2-archive-admin-layout__inner .set-table.wl-home-v2-admin-setlist-entry-table[data-slot="table"] td[data-slot="table-cell"] {
+    padding: 2px 12px;
+  }
   .wl-home-v2 .wl-home-v2-archive-admin-layout__inner [data-slot="table-container"]:has(.set-table) {
     border-radius: 10px;
     border: 1px solid var(--set-table-section-line);
@@ -1272,20 +1279,57 @@
     font-size: 0.8125rem;
     color: rgba(255, 255, 255, 0.88);
   }
-  .wl-home-v2 .wl-home-v2-archive-admin-tools-row {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+  .wl-home-v2 .wl-home-v2-archive-admin-ops-panel.widget-panel {
+    margin-top: 0;
+    padding: 6px 12px 5px;
   }
-  .wl-home-v2 .wl-home-v2-archive-admin-tools-lead {
+  .wl-home-v2 .wl-home-v2-archive-admin-ops-head {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin-bottom: 0;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-ops-title {
+    font-family:
+      var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--wl-white);
+    letter-spacing: -0.02em;
+    text-transform: none;
+    line-height: 1.25;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-ops-head-trail {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 8px;
-    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-ops-user-pill[data-slot="badge"] {
+    border-radius: 999px;
+    padding-inline: 10px;
+    padding-block: 4px;
+    border: 1px solid rgb(52, 109, 95);
+    background: rgba(52, 109, 95, 0.35);
+    color: rgba(255, 255, 255, 0.92);
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-ops-panel .wl-home-v2-archive-admin-update-btn {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 4px 12px;
+    min-height: 30px;
+    line-height: 1.15;
+  }
+  @media (max-width: 639px) {
+    .wl-home-v2 .wl-home-v2-archive-admin-ops-panel .wl-home-v2-archive-admin-update-btn {
+      min-height: 40px;
+      padding: 6px 14px;
+    }
   }
   .wl-home-v2 .wl-home-v2-archive-admin-user-badge[data-slot="badge"] {
     border: 1px solid rgb(49, 51, 49);
@@ -1329,37 +1373,21 @@
     color: #fecaca;
   }
   .wl-home-v2 .wl-home-v2-archive-admin-tabs-toolbar {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-toolbar-trail {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-desktop {
-    display: none;
-  }
-  @media (min-width: 1280px) {
-    .wl-home-v2 .wl-home-v2-archive-admin-tabs-desktop {
-      display: block;
-    }
-  }
-  .wl-home-v2 .wl-home-v2-archive-admin-tabs-mobile-trigger {
-    display: inline-flex;
-  }
-  @media (min-width: 1280px) {
-    .wl-home-v2 .wl-home-v2-archive-admin-tabs-mobile-trigger {
-      display: none;
-    }
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-scroll {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
   }
   .wl-home-v2 .wl-home-v2-archive-admin-tabs-panel {
-    margin-top: 16px;
+    margin-top: 0;
     width: 100%;
     overflow-x: auto;
     border: 1px solid var(--set-table-section-line);
@@ -1372,8 +1400,10 @@
     background: rgba(0, 0, 0, 0.32);
     border: 1px solid rgb(49, 51, 49);
     border-radius: 10px;
-    padding: 4px;
-    gap: 4px;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-scroll [data-slot="tabs-list"] {
+    padding: 2px;
+    gap: 2px;
   }
   .wl-home-v2 .wl-home-v2-archive-admin-root [data-slot="tabs-trigger"] {
     border-radius: 8px;
@@ -1382,6 +1412,11 @@
     font-size: 10px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-tabs-scroll [data-slot="tabs-trigger"] {
+    padding-inline: 7px;
+    padding-block: 3px;
+    min-height: 28px;
   }
   .wl-home-v2 .wl-home-v2-archive-admin-root [data-slot="tabs-trigger"][data-state="active"] {
     background: rgba(88, 200, 174, 0.16);
@@ -1394,6 +1429,7 @@
     font-size: 13px;
     color: rgba(255, 255, 255, 0.55);
   }
+
   .wl-home-v2 .wl-home-v2-archive-admin-field-label {
     display: block;
     font-family: "Geist Mono", monospace;
@@ -1460,6 +1496,313 @@
   .wl-home-v2 .wl-home-v2-archive-admin-root [data-slot="input"]::placeholder {
     color: rgba(255, 255, 255, 0.42);
   }
+  /* Inline text + pill row (e.g. Artist “new name” — colors from rule above). */
+  .wl-home-v2 .wl-home-v2-archive-admin-inline-field-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-inline-field-row [data-slot="input"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 2rem;
+    height: 2rem;
+    padding-inline: 12px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+
+  /*
+   * Song admin tab + song modal: self-contained field skin (modal may portal outside
+   * `.wl-home-v2-archive-admin-root` — do not rely only on root [data-slot=input]).
+   */
+  .wl-home-v2-archive-admin-song-form [data-slot="input"] {
+    width: 100%;
+    min-height: 2rem;
+    height: 2rem;
+    padding-inline: 12px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgb(49, 51, 49);
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2-archive-admin-song-form [data-slot="input"]::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+  }
+  .wl-home-v2-archive-admin-song-form [data-slot="input"]:focus-visible {
+    border-color: rgba(255, 122, 103, 0.55);
+    box-shadow: 0 0 0 2px rgba(255, 122, 103, 0.2);
+  }
+  .wl-home-v2-archive-admin-song-form [data-slot="select-trigger"] {
+    width: 100%;
+    min-height: 2rem;
+    height: 2rem;
+    padding-inline: 12px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgb(49, 51, 49);
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2-archive-admin-song-form [data-slot="select-trigger"] svg {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  /* Inline floating-dropdown / combobox trigger — same shell as select (Subvenue parent venue picker) */
+  .wl-home-v2-archive-admin-song-form button.wl-home-v2-archive-admin-form-combobox-trigger {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 2rem;
+    height: 2rem;
+    padding-inline: 12px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgb(49, 51, 49);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.375rem;
+    cursor: pointer;
+    outline: none;
+    text-align: left;
+  }
+  .wl-home-v2-archive-admin-song-form button.wl-home-v2-archive-admin-form-combobox-trigger:focus-visible {
+    border-color: rgba(255, 122, 103, 0.55);
+    box-shadow: 0 0 0 2px rgba(255, 122, 103, 0.2);
+  }
+  .wl-home-v2-archive-admin-song-form button.wl-home-v2-archive-admin-form-combobox-trigger svg {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .wl-home-v2-archive-admin-song-form textarea {
+    width: 100%;
+    min-height: 5rem;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    border-radius: 6px;
+    resize: vertical;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgb(49, 51, 49);
+    color: rgba(255, 255, 255, 0.92);
+    outline: none;
+  }
+  .wl-home-v2-archive-admin-song-form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+  }
+  .wl-home-v2-archive-admin-song-form textarea:focus-visible {
+    border-color: rgba(255, 122, 103, 0.55);
+    box-shadow: 0 0 0 2px rgba(255, 122, 103, 0.2);
+  }
+  .wl-home-v2-archive-admin-song-form__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .wl-home-v2-archive-admin-song-form__title {
+    margin: 0;
+    min-width: 0;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .wl-home-v2-archive-admin-song-form__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  @media (min-width: 768px) {
+    .wl-home-v2-archive-admin-song-form__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+  }
+  /* Venue / Subvenue admin: two-column desktop grid (same field skin as song tab) */
+  @media (min-width: 768px) {
+    .wl-home-v2-archive-admin-song-form.wl-home-v2-archive-admin-form--two-col
+      .wl-home-v2-archive-admin-song-form__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  /* Show admin tab: slightly tighter field grid than song/personnel modals */
+  .wl-home-v2-archive-admin-song-form.wl-home-v2-archive-admin-show-form
+    .wl-home-v2-archive-admin-song-form__grid {
+    gap: 0.375rem;
+  }
+  @media (min-width: 768px) {
+    .wl-home-v2-archive-admin-song-form.wl-home-v2-archive-admin-show-form
+      .wl-home-v2-archive-admin-song-form__grid {
+      gap: 0.75rem;
+    }
+  }
+  .wl-home-v2-archive-admin-song-form label {
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2-archive-admin-song-form .wl-home-v2-archive-admin-inline-check-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .wl-home-v2-archive-admin-song-form .wl-home-v2-archive-admin-inline-check-row label {
+    margin-bottom: 0;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.78);
+    cursor: pointer;
+  }
+  /* Same look as field labels (e.g. Coach's Notes) for show-tab section titles */
+  .wl-home-v2-archive-admin-song-form__section-label {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: normal;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  /* Beat `.wl-home-v2-archive-admin-tabs-panel h3` (admin tabs panel) */
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tabs-panel
+    .wl-home-v2-archive-admin-song-form
+    .wl-home-v2-archive-admin-song-form__section-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: normal;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  @media (min-width: 768px) {
+    .wl-home-v2-archive-admin-song-form__notes {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Show tab: releases block + completion badges (archive admin) */
+  .wl-home-v2-archive-admin-show-releases {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+  }
+  .wl-home-v2-archive-admin-show-releases__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .wl-home-v2-archive-admin-show-releases__loading-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .wl-home-v2-archive-admin-show-releases__loading-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    animation: wl-home-v2-admin-pulse 1.2s ease-in-out infinite;
+  }
+  .wl-home-v2-archive-admin-show-releases__loading-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .wl-home-v2-archive-admin-show-releases__loading-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .wl-home-v2-archive-admin-show-releases__loading-text {
+    margin: 0;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .wl-home-v2-archive-admin-show-releases__table-shell {
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  .wl-home-v2-archive-admin-show-releases__empty {
+    border: 1px solid rgb(49, 51, 49);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.22);
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .wl-home-v2-archive-admin-show-releases__th {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    text-align: left;
+    font-size: 0.75rem;
+  }
+  .wl-home-v2-archive-admin-show-releases__th--center {
+    text-align: center;
+  }
+  .wl-home-v2-archive-admin-show-releases__row {
+    cursor: pointer;
+    font-size: 0.75rem;
+  }
+  .wl-home-v2-archive-admin-show-releases__cell {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  .wl-home-v2-archive-admin-show-releases__cell--center {
+    text-align: center;
+  }
+
+  .wl-home-v2-archive-admin-show-completion {
+    margin-top: 0;
+    padding-top: 1.25rem;
+  }
+  .wl-home-v2-archive-admin-show-completion__flags {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem 1rem;
+    align-items: center;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2-archive-admin-show-completion__flags {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1280px) {
+    .wl-home-v2-archive-admin-show-completion__flags {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 768px) {
+    .wl-home-v2-archive-admin-show-completion__flags {
+      grid-column: 1 / -1;
+    }
+  }
+  .wl-home-v2-archive-admin-show-completion__flag-row {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .wl-home-v2-archive-admin-song-form
+    .wl-home-v2-archive-admin-show-completion__flag-row
+    label {
+    margin-bottom: 0;
+    display: inline;
+    font-weight: 400;
+  }
+
   .wl-home-v2 .wl-home-v2-archive-admin-callout {
     border: 1px solid rgb(49, 51, 49);
     border-radius: 12px;
@@ -1514,6 +1857,106 @@
   .wl-home-v2-archive-admin-floating-dropdown__search {
     flex-shrink: 0;
     padding: 4px;
+  }
+  /* Toolbar search row (e.g. Releases tab) — matches floating-dropdown search shell */
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search,
+  .wl-home-v2-archive-admin-toolbar-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: 0.25rem 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search,
+    .wl-home-v2-archive-admin-toolbar-search {
+      flex: 0 0 auto;
+      width: 12rem;
+      padding-inline: 0.5rem;
+    }
+    .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search--wide,
+    .wl-home-v2-archive-admin-toolbar-search--wide {
+      width: 14rem;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__inner,
+  .wl-home-v2-archive-admin-toolbar-search__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"],
+  .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"] {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    outline: none;
+    /* Input ships many px-* utilities; win padding here so text/icon never touch the pill edge */
+    padding-left: 0.75rem !important;
+    padding-right: 2.25rem !important;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"]::placeholder,
+  .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"]::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"]:focus-visible,
+  .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"]:focus-visible {
+    border-color: rgba(251, 191, 36, 0.5);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 0 2px rgba(251, 191, 36, 0.22);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__icon,
+  .wl-home-v2-archive-admin-toolbar-search__icon {
+    pointer-events: none;
+    position: absolute;
+    right: 0.625rem;
+    width: 1rem;
+    height: 1rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  /* Leading icon + optional clear (e.g. Discography tab) */
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search--affix-leading .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"],
+  .wl-home-v2-archive-admin-toolbar-search--affix-leading .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"] {
+    padding-left: 2.25rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search--affix-leading.wl-home-v2-archive-admin-toolbar-search--has-clear .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"],
+  .wl-home-v2-archive-admin-toolbar-search--affix-leading.wl-home-v2-archive-admin-toolbar-search--has-clear .wl-home-v2-archive-admin-toolbar-search__inner [data-slot="input"] {
+    padding-right: 2.25rem !important;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__icon--leading,
+  .wl-home-v2-archive-admin-toolbar-search__icon--leading {
+    right: auto;
+    left: 0.625rem;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__clear,
+  .wl-home-v2-archive-admin-toolbar-search__clear {
+    position: absolute;
+    right: 0.125rem;
+    top: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: color 150ms ease-out, opacity 150ms ease-out;
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__clear:hover,
+  .wl-home-v2-archive-admin-toolbar-search__clear:hover {
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-toolbar-search__clear:focus-visible,
+  .wl-home-v2-archive-admin-toolbar-search__clear:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.28);
   }
   .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__scroll,
   .wl-home-v2-archive-admin-floating-dropdown__scroll {
@@ -1582,11 +2025,29 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .wl-home-v2 .wl-home-v2-archive-admin-song-dropdown__primary,
+  .wl-home-v2-archive-admin-song-dropdown__primary {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.35;
+  }
   @media (min-width: 640px) {
     .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row,
     .wl-home-v2-archive-admin-floating-dropdown__row {
       padding-top: 0.5rem;
       padding-bottom: 0.5rem;
+    }
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row--compact,
+  .wl-home-v2-archive-admin-floating-dropdown__row--compact {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+  @media (min-width: 640px) {
+    .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row--compact,
+    .wl-home-v2-archive-admin-floating-dropdown__row--compact {
+      padding-top: 0.375rem;
+      padding-bottom: 0.375rem;
     }
   }
   .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown__row:hover,
@@ -3650,6 +4111,9 @@
     font-family: "Geist Mono", monospace; font-size: 10px;
     color: rgba(255,255,255,0.55); letter-spacing: 0.08em; text-transform: uppercase;
     margin-bottom: 8px;
+  }
+  .wl-home-v2 .widget-panel.wl-home-v2-archive-admin-ops-panel > .wp-head {
+    margin-bottom: 0;
   }
   /* Stats archive: same panel title color as tour main-column `.widget-panel > .wp-head`. */
   .wl-home-v2
@@ -7895,11 +8359,15 @@
     background: rgba(255, 122, 103, 0.12);
   }
   /* Compact tour dates header: “Tours” opener — match stats `.wp-head` / `.sc-label` typography */
-  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill {
+  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill,
+  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill {
     box-sizing: border-box;
     height: auto;
     min-height: 30px;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    line-height: 1;
     border-radius: 999px;
     border: 1px solid rgb(49, 51, 49);
     background: rgba(255, 255, 255, 0.06);
@@ -7916,10 +8384,60 @@
       border-color 0.15s ease,
       color 0.15s ease;
   }
-  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill:hover {
+  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill svg,
+  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill svg {
+    display: block;
+  }
+  .wl-home-v2 .wl-home-v2-years-shows-panel .wl-home-v2-tours-header-pill:hover,
+  .wl-home-v2 .wl-home-v2-tour-page-main .wl-home-v2-tours-header-pill:hover {
     color: #fff;
     border-color: rgb(123, 94, 63);
     background: rgba(255, 122, 103, 0.12);
+  }
+  /* Archive admin tabs: stronger pill fill on blurred tile */
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-tour-page-main
+    .wl-home-v2-tours-header-pill {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgb(63, 65, 64);
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-tour-page-main
+    .wl-home-v2-tours-header-pill:hover {
+    background: rgba(255, 122, 103, 0.22);
+    border-color: rgb(123, 94, 63);
+    color: #fff;
+  }
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-years-shows-panel
+    .wl-home-v2-tours-header-pill {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgb(63, 65, 64);
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-years-shows-panel
+    .wl-home-v2-tours-header-pill:hover {
+    background: rgba(255, 122, 103, 0.22);
+    border-color: rgb(123, 94, 63);
+    color: #fff;
+  }
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-years-shows-wp-head
+    .wp-head-date {
+    font-size: 11px;
+  }
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-archive-admin-show-detail
+    .wp-head-date {
+    font-size: 11px;
   }
   .wl-home-v2 .wl-home-v2-years-columns {
     display: flex;
@@ -7957,6 +8475,9 @@
     opacity: 0.82;
     filter: grayscale(35%) brightness(0.8);
     transition: opacity 0.5s, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .wl-home-v2 .wl-home-v2-archive-admin-tab-tile.wl-home-v2-years-tile::before {
+    filter: grayscale(100%) brightness(0.82);
   }
   .wl-home-v2 .wl-home-v2-years-tile::after {
     content: "";

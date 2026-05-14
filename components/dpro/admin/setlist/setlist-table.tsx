@@ -24,17 +24,17 @@ export function SetlistTable({
   onEntrySelect,
 }: SetlistTableProps) {
   return (
-    <Table className="set-table">
+    <Table className="set-table wl-home-v2-admin-setlist-entry-table">
       <TableHeader>
           <TableRow>
-            <TableHead className="w-8 py-1 text-center text-sm">S</TableHead>
-            <TableHead className="w-8 py-1 text-center text-sm">#</TableHead>
-            <TableHead className="py-1 text-left text-sm">Song</TableHead>
-            <TableHead className="py-1 text-left text-sm">Short</TableHead>
-            <TableHead className="py-1 text-left text-sm">→</TableHead>
-            <TableHead className="py-1 text-center text-sm">Placement</TableHead>
-            <TableHead className="py-1 text-center text-sm">Length</TableHead>
-            <TableHead className="py-1 text-left text-sm">Notes</TableHead>
+            <TableHead className="w-8 text-center text-sm">S</TableHead>
+            <TableHead className="w-8 text-center text-sm">#</TableHead>
+            <TableHead className="text-left text-sm">Song</TableHead>
+            <TableHead className="text-left text-sm">Short</TableHead>
+            <TableHead className="text-center text-sm">→</TableHead>
+            <TableHead className="text-center text-sm">Placement</TableHead>
+            <TableHead className="text-center text-sm">Length</TableHead>
+            <TableHead className="text-left text-sm">Notes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -44,16 +44,16 @@ export function SetlistTable({
               className="cursor-pointer text-[0.625rem]"
               onClick={() => onEntrySelect(entry)}
             >
-              <TableCell className="py-1 text-center text-xs">{entry.entry_set}</TableCell>
-              <TableCell className="py-1 text-center text-xs">{entry.entry_setnum}</TableCell>
-              <TableCell className="py-1 text-xs font-medium">{entry.entry_song}</TableCell>
-              <TableCell className="py-1 text-xs">{entry.entry_short ?? ""}</TableCell>
-              <TableCell className="py-1 text-xs">
+              <TableCell className="text-center text-xs">{entry.entry_set}</TableCell>
+              <TableCell className="text-center text-xs">{entry.entry_setnum}</TableCell>
+              <TableCell className="text-xs font-medium">{entry.entry_song}</TableCell>
+              <TableCell className="text-xs">{entry.entry_short ?? ""}</TableCell>
+              <TableCell className="text-center text-xs">
                 {(entry.entry_segue ?? "").replace(/>/g, "→")}
               </TableCell>
-              <TableCell className="py-1">
+              <TableCell className="text-center">
                 <div
-                  className="wl-home-v2-archive-admin-placement-pill"
+                  className="wl-home-v2-archive-admin-placement-pill inline-block align-middle"
                   data-admin-placement-pill={getPlacementBarCssToken(
                     entry.entry_placement,
                   )}
@@ -61,10 +61,10 @@ export function SetlistTable({
                   {entry.entry_placement ?? ""}
                 </div>
               </TableCell>
-              <TableCell className="py-1 text-center text-xs">
+              <TableCell className="text-center text-xs">
                 {formatTimeDisplay(entry.entry_length)}
               </TableCell>
-              <TableCell className="py-1 text-xs">{entry.entry_coachnotes ?? ""}</TableCell>
+              <TableCell className="text-xs">{entry.entry_coachnotes ?? ""}</TableCell>
             </TableRow>
           ))}
         </TableBody>

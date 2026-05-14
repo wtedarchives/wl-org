@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Search, X, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
+import { MagnifyingGlass } from "@phosphor-icons/react"
 import { supabase } from "@/lib/supabase"
 import type { ReleaseData } from "@/types/admin"
 import { ReleaseModal } from "./release-modal"
@@ -15,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
 
 const PAGE_SIZE = 1000
 
@@ -98,35 +101,34 @@ export function AdminReleases() {
   }, [releases, searchQuery])
 
   return (
-    <div>
-      <div className="mb-2 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <h3 className="text-sm font-semibold">Manage Releases</h3>
-        <div className="flex gap-2">
-          <div className="relative flex-1 lg:flex-initial">
+    <AdminTabShell>
+      <AdminTabToolbar title="Manage Releases">
+        <div className="wl-home-v2-archive-admin-toolbar-search">
+          <div className="wl-home-v2-archive-admin-toolbar-search__inner">
             <Input
               type="text"
               placeholder="Search releases..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-6 w-full pl-8 pr-8 text-xs lg:w-48"
+              className="h-8 w-full min-w-0 text-xs focus-visible:ring-0"
             />
-            <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
-              >
-                <X className="size-3" />
-              </button>
-            )}
+            <MagnifyingGlass
+              className="wl-home-v2-archive-admin-toolbar-search__icon"
+              aria-hidden
+            />
           </div>
-          <Button variant="default" size="sm" onClick={handleAddNew} className="gap-1">
-            <Plus className="size-4" />
-            Add Release
-          </Button>
         </div>
-      </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleAddNew}
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
+        >
+          <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+          Add release
+        </Button>
+      </AdminTabToolbar>
       <p className="mb-2 text-xs text-muted-foreground">
         Click on any release to view and edit its details.
       </p>
@@ -193,6 +195,6 @@ export function AdminReleases() {
         release={selectedRelease}
         isAddMode={isAddMode}
       />
-    </div>
+    </AdminTabShell>
   )
 }

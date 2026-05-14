@@ -17,6 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
 
 const PAGE_SIZE = 1000
 
@@ -195,9 +197,8 @@ export function AdminChanges() {
   }
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Show Changes Management</h3>
+    <AdminTabShell>
+      <AdminTabToolbar title="Show Changes Management">
         <AdminShowDropdown
           isOpen={isDropdownOpen}
           onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -210,24 +211,29 @@ export function AdminChanges() {
           selectedShow={selectedShow}
           triggerLabel="Show"
         />
-      </div>
+      </AdminTabToolbar>
       {selectedShow && (
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium">
+          <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+            <div className="wl-home-v2-archive-admin-show-detail flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="wp-head-date min-w-0 truncate">
                 {formatDate(selectedShow.show_date)} [{selectedShow.show_group}]
-              </h4>
-              <div className="text-xs text-muted-foreground">
-                {selectedShow.show_subvenue} — {selectedShow.show_venue_location}
-              </div>
+              </span>
+              <span className="text-[11px] leading-snug text-white/55">
+                {selectedShow.show_subvenue} —{" "}
+                {selectedShow.show_venue_location}
+              </span>
             </div>
             <Button
-              variant="outline"
+              type="button"
+              variant="ghost"
               size="sm"
               onClick={handleCreateNewChange}
+              className="wl-home-v2-tours-header-pill shrink-0 gap-1"
+              title="Add change"
             >
-              <Plus className="size-4" />
+              <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+              Add change
             </Button>
           </div>
           {changesLoading ? (
@@ -317,6 +323,6 @@ export function AdminChanges() {
         onSave={handleSaveChange}
         isNewChange={isNewChange}
       />
-    </div>
+    </AdminTabShell>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { Save, Edit } from "lucide-react"
+import { FloppyDisk, PencilSimple } from "@phosphor-icons/react"
 import type { SongDataFull } from "@/types/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,59 +36,57 @@ export function SongDetailsForm({
   onInputChange,
 }: SongDetailsFormProps) {
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-sm font-medium">{selectedSong.song}</h4>
+    <div className="wl-home-v2-archive-admin-song-form">
+      <div className="wl-home-v2-archive-admin-song-form__head">
+        <h4 className="wl-home-v2-archive-admin-song-form__title">
+          {selectedSong.song}
+        </h4>
         <Button
-          variant="outline"
+          type="button"
+          variant="ghost"
           size="sm"
           onClick={onToggleEdit}
           disabled={isSubmitting}
-          className="gap-1"
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
         >
-          {isEditing ? (
+          {isEditing ?
             <>
-              <Save className="size-4" />
+              <FloppyDisk className="size-3.5 shrink-0 opacity-80" aria-hidden />
               Save
             </>
-          ) : (
-            <>
-              <Edit className="size-4" />
+          : <>
+              <PencilSimple className="size-3.5 shrink-0 opacity-80" aria-hidden />
               Edit
             </>
-          )}
+          }
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-3 md:gap-4">
+      <div className="wl-home-v2-archive-admin-song-form__grid">
         <div className="min-w-0">
-          <label className="mb-0.5 block text-xs font-medium">Song Title</label>
+          <label htmlFor="song-admin-song">Song Title</label>
           <Input
+            id="song-admin-song"
             type="text"
             name="song"
             value={editedSong?.song ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-6 w-full text-xs"
           />
         </div>
         <div className="min-w-0">
-          <label className="mb-0.5 block text-xs font-medium">
-            Display Name
-          </label>
+          <label htmlFor="song-admin-displayname">Display Name</label>
           <Input
+            id="song-admin-displayname"
             type="text"
             name="song_displayname"
             value={editedSong?.song_displayname ?? ""}
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-6 w-full text-xs"
           />
         </div>
         <div className="min-w-0">
-          <label className="mb-0.5 block text-xs font-medium">
-            Original Artist
-          </label>
-          {isEditing ? (
+          <label htmlFor="song-admin-original-artist">Original Artist</label>
+          {isEditing ?
             <Select
               value={editedSong?.song_originalartist || "__none__"}
               onValueChange={(v) =>
@@ -100,10 +98,10 @@ export function SongDetailsForm({
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
-              <SelectTrigger className="h-6 w-full text-xs">
+              <SelectTrigger id="song-admin-original-artist" size="sm">
                 <SelectValue placeholder="-- Select Artist --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Artist --</SelectItem>
                 {artists.map((a) => (
                   <SelectItem key={a.artist} value={a.artist}>
@@ -112,17 +110,11 @@ export function SongDetailsForm({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedSong?.song_originalartist ?? ""}
-              readOnly
-              className="h-6 w-full text-xs"
-            />
-          )}
+          : <Input value={editedSong?.song_originalartist ?? ""} readOnly />}
         </div>
         <div className="min-w-0">
-          <label className="mb-0.5 block text-xs font-medium">Category</label>
-          {isEditing ? (
+          <label htmlFor="song-admin-category">Category</label>
+          {isEditing ?
             <Select
               value={editedSong?.song_category || "__none__"}
               onValueChange={(v) =>
@@ -134,10 +126,10 @@ export function SongDetailsForm({
                 } as React.ChangeEvent<HTMLSelectElement>)
               }
             >
-              <SelectTrigger className="h-6 w-full text-xs">
+              <SelectTrigger id="song-admin-category" size="sm">
                 <SelectValue placeholder="-- Select Category --" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="wl-home-v2-archive-admin-portal-content">
                 <SelectItem value="__none__">-- Select Category --</SelectItem>
                 {categories.map((c) => (
                   <SelectItem key={c.category} value={c.category}>
@@ -146,44 +138,34 @@ export function SongDetailsForm({
                 ))}
               </SelectContent>
             </Select>
-          ) : (
-            <Input
-              value={editedSong?.song_category ?? ""}
-              readOnly
-              className="h-6 w-full text-xs"
-            />
-          )}
+          : <Input value={editedSong?.song_category ?? ""} readOnly />}
         </div>
         <div className="min-w-0">
-          <label className="mb-0.5 block text-xs font-medium">
-            Category Order
-          </label>
+          <label htmlFor="song-admin-categoryorder">Category Order</label>
           <Input
+            id="song-admin-categoryorder"
             type="text"
             name="song_categoryorder"
             value={
               editedSong?.song_categoryorder === null
                 ? ""
-                : editedSong?.song_categoryorder ?? ""
+                : (editedSong?.song_categoryorder ?? "")
             }
             onChange={onInputChange}
             readOnly={!isEditing}
-            className="h-6 w-full text-xs"
           />
         </div>
-      </div>
-      <div className="mt-2">
-        <label className="mb-0.5 block text-xs font-medium">
-          Coach&apos;s Notes
-        </label>
-        <textarea
-          name="song_coachnotes"
-          value={editedSong?.song_coachnotes ?? ""}
-          onChange={onInputChange}
-          readOnly={!isEditing}
-          rows={4}
-          className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-        />
+        <div className="wl-home-v2-archive-admin-song-form__notes min-w-0">
+          <label htmlFor="song-admin-coachnotes">Coach&apos;s Notes</label>
+          <textarea
+            id="song-admin-coachnotes"
+            name="song_coachnotes"
+            value={editedSong?.song_coachnotes ?? ""}
+            onChange={onInputChange}
+            readOnly={!isEditing}
+            rows={4}
+          />
+        </div>
       </div>
     </div>
   )

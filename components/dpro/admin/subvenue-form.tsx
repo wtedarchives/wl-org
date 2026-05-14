@@ -40,24 +40,22 @@ export function SubvenueForm({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-      <div>
-        <label className="mb-0.5 block text-xs font-medium">
-          Subvenue Name
-        </label>
+    <div className="wl-home-v2-archive-admin-song-form__grid">
+      <div className="min-w-0">
+        <label htmlFor="subvenue-admin-name">Subvenue Name</label>
         <Input
+          id="subvenue-admin-name"
           type="text"
           name="subvenue"
           value={editedSubvenue?.subvenue ?? ""}
           onChange={onInputChange}
           readOnly={!isEditing}
           placeholder="Enter subvenue name"
-          className="h-8 text-xs"
         />
       </div>
-      <div>
-        <label className="mb-0.5 block text-xs font-medium">Venue</label>
-        {isEditing ? (
+      <div className="min-w-0">
+        <label htmlFor="subvenue-admin-venue">Venue</label>
+        {isEditing ?
           <VenueFormDropdown
             isOpen={isVenueDropdownOpen}
             onToggle={onVenueDropdownToggle}
@@ -68,34 +66,33 @@ export function SubvenueForm({
             onVenueSelect={onVenueSelect}
             selectedVenue={getSelectedVenueDisplay()}
           />
-        ) : (
-          <Input
+        : <Input
+            id="subvenue-admin-venue"
             value={getSelectedVenueDisplay()}
             readOnly
-            className="h-8 text-xs"
           />
-        )}
+        }
       </div>
-      <div>
-        <label className="mb-0.5 block text-xs font-medium">Start Date</label>
+      <div className="min-w-0">
+        <label htmlFor="subvenue-admin-start">Start Date</label>
         <Input
+          id="subvenue-admin-start"
           type="date"
           name="subvenue_startdate"
           value={editedSubvenue?.subvenue_startdate ?? ""}
           onChange={onInputChange}
           readOnly={!isEditing}
-          className="h-8 text-xs"
         />
       </div>
-      <div>
-        <label className="mb-0.5 block text-xs font-medium">End Date</label>
+      <div className="min-w-0">
+        <label htmlFor="subvenue-admin-end">End Date</label>
         <Input
+          id="subvenue-admin-end"
           type="date"
           name="subvenue_enddate"
           value={editedSubvenue?.subvenue_enddate ?? ""}
           onChange={onInputChange}
           readOnly={!isEditing}
-          className="h-8 text-xs"
         />
       </div>
     </div>

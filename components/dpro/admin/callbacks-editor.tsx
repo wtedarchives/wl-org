@@ -117,9 +117,9 @@ export function CallbacksEditor({
   if (!selectedShow?.show_callbacks && !isEditing) return null
 
   return (
-    <div className="space-y-1 md:col-span-2">
+    <div className="wl-home-v2-archive-admin-song-form__notes space-y-1">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <label className="block text-xs font-medium">Callbacks</label>
+        <label htmlFor="show-admin-callbacks">Callbacks</label>
 
         {isEditing && (
           <div className="flex flex-wrap items-center gap-2">
@@ -255,11 +255,12 @@ export function CallbacksEditor({
       {isEditing ? (
         <textarea
           ref={callbacksTextareaRef}
+          id="show-admin-callbacks"
           name="show_callbacks"
           value={editedShow?.show_callbacks ?? ""}
           onChange={onInputChange}
           rows={4}
-          className="w-full rounded-md border border-input bg-background px-2 py-1 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          className="font-mono"
           placeholder="Enter callbacks HTML..."
         />
       ) : (

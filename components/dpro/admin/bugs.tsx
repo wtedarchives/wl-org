@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { AlertCircle, ExternalLink } from "lucide-react"
 import { useAuth } from "@/components/auth-context"
 import { BugsResolveModal } from "@/components/dpro/admin/bugs-resolve-modal"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
-import { supabase } from "@/lib/supabase"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
@@ -51,7 +50,7 @@ function CopyToClipboard({ text }: { text: string }) {
 }
 
 export function Bugs() {
-  const { session } = useAuth()
+  const { session, loading: authLoading } = useAuth()
   const token = session?.token ?? null
   const [bugs, setBugs] = useState<Bug[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,43 +59,34 @@ export function Bugs() {
   const [modalOpen, setModalOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
 
-  const fetchBugs = async () => {
-    if (!supabase) return
+  const fetchBugs = useCallback(async () => {
+    if (!token) return
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from("bugs")
-        .select(
-          "bug_id, bug_type, bug_submissiondate, bug_contactemail, bug_detail, bug_completion, bug_file_url"
-        )
-        .order("bug_submissiondate", { ascending: false })
+      setError(null)
+      const { data, error: invokeErr } = await invokeDproAdmin<{
+        bugs: Bug[]
+      }>(token, { action: "bugs_list" })
 
-      if (error) throw error
-      setBugs(data ?? [])
+      if (invokeErr) throw new Error(invokeErr)
+      setBugs(data?.bugs ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load bugs")
     } finally {
       setLoading(false)
     }
-  }
+  }, [token])
 
   useEffect(() => {
-    fetchBugs()
-
-    if (!supabase) return
-    const channel = supabase
-      .channel("bugs-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bugs" },
-        () => fetchBugs()
-      )
-      .subscribe()
-
-    return () => {
-      supabase?.removeChannel(channel)
+    if (authLoading) return
+    if (!token) {
+      setLoading(false)
+      setBugs([])
+      setError(null)
+      return
     }
-  }, [])
+    void fetchBugs()
+  }, [authLoading, token, fetchBugs])
 
   const handleRowClick = (bug: Bug) => {
     if (bug.bug_completion) return
@@ -119,6 +109,7 @@ export function Bugs() {
       })
       if (err) throw new Error(err)
       setBugs((prev) => prev.filter((b) => b.bug_id !== selectedBug.bug_id))
+      setError(null)
       handleModalClose()
     } catch (err) {
       setError(
@@ -138,7 +129,15 @@ export function Bugs() {
     })
   }
 
-  if (loading) {
+  if (!authLoading && !token) {
+    return (
+      <div className="wl-home-v2-archive-admin-root wl-home-v2-archive-admin-bugs-empty">
+        Sign in with an administrator account to load bug reports.
+      </div>
+    )
+  }
+
+  if (authLoading || loading) {
     return (
       <div className="wl-home-v2-archive-admin-root wl-home-v2-archive-admin-bugs-loading">
         <div className="wl-home-v2-archive-admin-bugs-loading-dots" aria-hidden>

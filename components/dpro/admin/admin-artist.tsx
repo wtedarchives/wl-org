@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useRef, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
-import { ChevronDown, Search, CheckCircle, XCircle } from "lucide-react"
+import { CaretDown, CheckCircle, MagnifyingGlass, XCircle } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
 
 interface ArtistBasic {
   artist: string
@@ -123,22 +126,21 @@ export function AdminArtist() {
   }
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Artist Management</h3>
-        <div>
-          <Button
-            ref={triggerRef}
-            variant="outline"
-            size="sm"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="gap-2"
-          >
-            Current Artists
-            <ChevronDown className="size-4" />
-          </Button>
-          {isDropdownOpen &&
-            createPortal(
+    <AdminTabShell>
+      <AdminTabToolbar title="Artist Management">
+        <Button
+          ref={triggerRef}
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="wl-home-v2-tours-header-pill gap-1"
+        >
+          Current artists
+          <CaretDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
+        </Button>
+      </AdminTabToolbar>
+      {isDropdownOpen &&
+        createPortal(
               <div
                 ref={dropdownRef}
                 className="wl-home-v2-archive-admin-floating-dropdown fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
@@ -158,7 +160,7 @@ export function AdminArtist() {
                       placeholder="Search artists..."
                       className="h-8 pr-8 text-xs"
                     />
-                    <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+                    <MagnifyingGlass className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
                   </div>
                 </div>
                 <div className="wl-home-v2-archive-admin-floating-dropdown__scroll max-h-64 divide-y divide-[rgb(49,51,49)]">
@@ -187,17 +189,16 @@ export function AdminArtist() {
               </div>,
               document.body
             )}
-        </div>
-      </div>
-      <div className="flex flex-row items-center gap-2">
+      <div className="wl-home-v2-archive-admin-inline-field-row">
         <Input
           type="text"
           value={newArtistName}
           onChange={(e) => setNewArtistName(e.target.value)}
           placeholder="Enter artist name"
-          className="h-8 min-w-0 flex-1 text-xs"
         />
         <Button
+          type="button"
+          variant="ghost"
           size="sm"
           onClick={handleSubmit}
           disabled={
@@ -205,24 +206,30 @@ export function AdminArtist() {
             buttonState === "success" ||
             buttonState === "error"
           }
-          variant={
-            buttonState === "success"
-              ? "default"
-              : buttonState === "error"
-                ? "destructive"
-                : "default"
-          }
-          className="h-8 shrink-0"
+          className={cn(
+            "wl-home-v2-tours-header-pill shrink-0 gap-1",
+            buttonState === "success" &&
+              "border-emerald-600/50 text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200",
+            buttonState === "error" &&
+              "border-red-600/50 text-red-300 hover:bg-red-500/15 hover:text-red-200",
+          )}
         >
           {isSubmitting
-            ? "Adding..."
+            ? "Adding…"
             : buttonState === "success"
-              ? <CheckCircle className="size-4" />
+              ? (
+                  <CheckCircle
+                    className="size-3.5 shrink-0 opacity-90"
+                    aria-hidden
+                  />
+                )
               : buttonState === "error"
-                ? <XCircle className="size-4" />
+                ? (
+                    <XCircle className="size-3.5 shrink-0 opacity-90" aria-hidden />
+                  )
                 : "Submit"}
         </Button>
       </div>
-    </div>
+    </AdminTabShell>
   )
 }

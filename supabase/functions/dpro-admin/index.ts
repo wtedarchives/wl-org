@@ -557,6 +557,26 @@ async function handleAction(
       return { data: true }
     }
 
+    case "bugs_list": {
+      const { data, error } = await db
+        .from("bugs")
+        .select(
+          "bug_id, bug_type, bug_submissiondate, bug_contactemail, bug_detail, bug_completion, bug_file_url",
+        )
+        .order("bug_submissiondate", { ascending: false })
+      if (error) return { error: error.message }
+      return { data: { bugs: data ?? [] } }
+    }
+
+    case "bugs_open_count": {
+      const { count, error } = await db
+        .from("bugs")
+        .select("*", { count: "exact", head: true })
+        .eq("bug_completion", false)
+      if (error) return { error: error.message }
+      return { data: { count: count ?? 0 } }
+    }
+
     case "bugs_delete": {
       const bug_id = body.bug_id as string | undefined
       if (!bug_id) return { error: "Missing bug_id" }

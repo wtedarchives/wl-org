@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/auth-context"
 import { useSongsData } from "@/hooks/use-songs-data"
@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { SongDropdown } from "./song-dropdown"
 import { SongDetailsForm } from "./song-details-form"
 import { SongModal } from "./song-modal"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
 
 export function AdminSong() {
   const { session } = useAuth()
@@ -87,24 +89,24 @@ export function AdminSong() {
   }
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Song Management</h3>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleOpenNewSongModal}
-          >
-            <Plus className="size-4" />
-          </Button>
-          <SongDropdown
-            songs={allSongs}
-            onSongSelect={handleSongSelect}
-            selectedSong={selectedSong}
-          />
-        </div>
-      </div>
+    <AdminTabShell>
+      <AdminTabToolbar title="Song Management">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleOpenNewSongModal}
+          className="wl-home-v2-tours-header-pill gap-1"
+          title="New song"
+        >
+          <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+        </Button>
+        <SongDropdown
+          songs={allSongs}
+          onSongSelect={handleSongSelect}
+          selectedSong={selectedSong}
+        />
+      </AdminTabToolbar>
       {selectedSong && (
         <SongDetailsForm
           selectedSong={selectedSong}
@@ -124,6 +126,6 @@ export function AdminSong() {
         onSave={handleSongModalSave}
         isNewSong={isNewSong}
       />
-    </div>
+    </AdminTabShell>
   )
 }

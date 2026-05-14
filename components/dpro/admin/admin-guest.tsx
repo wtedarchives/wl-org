@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Plus } from "lucide-react"
+import { Plus } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { GuestModal } from "./guest-modal"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
 import { AdminGuestDropdown } from "./admin-guest-dropdown"
 import { AdminGuestForm } from "./admin-guest-form"
 import type { GuestData } from "./admin-guest-dropdown"
@@ -15,64 +17,13 @@ export function AdminGuest() {
   const { session } = useAuth()
   const token = session?.token ?? null
   const [allGuests, setAllGuests] = useState<GuestData[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedGuest, setSelectedGuest] = useState<GuestData | null>(null)
   const [editedGuest, setEditedGuest] = useState<GuestData | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false)
   const [isNewGuest, setIsNewGuest] = useState(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const selectedGuestRef = useRef<HTMLButtonElement | null>(null)
   const mountedRef = useRef(false)
-
-  useEffect(() => {
-    if (isDropdownOpen && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 8,
-        right: window.innerWidth - rect.right,
-      })
-    }
-  }, [isDropdownOpen])
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node
-      if (
-        isDropdownOpen &&
-        triggerRef.current &&
-        !triggerRef.current.contains(target) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(target)
-      ) {
-        setIsDropdownOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isDropdownOpen])
-
-  useEffect(() => {
-    if (
-      isDropdownOpen &&
-      selectedGuest &&
-      selectedGuestRef.current &&
-      scrollContainerRef.current
-    ) {
-      setTimeout(() => {
-        selectedGuestRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
-        })
-      }, 100)
-    }
-  }, [isDropdownOpen, selectedGuest])
 
   useEffect(() => {
     if (!mountedRef.current && supabase) {
@@ -89,15 +40,9 @@ export function AdminGuest() {
     }
   }, [])
 
-  const filteredGuests = allGuests.filter((g) =>
-    g.guest.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
   const handleGuestSelect = (guest: GuestData) => {
     setSelectedGuest(guest)
     setEditedGuest(guest)
-    setIsDropdownOpen(false)
-    setSearchTerm("")
     setIsEditing(false)
   }
 
@@ -108,9 +53,11 @@ export function AdminGuest() {
   ) => {
     if (!editedGuest) return
     const { name, value } = e.target
+    const nextValue =
+      name === "guest" ? value : value === "" ? null : value
     setEditedGuest({
       ...editedGuest,
-      [name]: value === "" ? null : value,
+      [name]: nextValue,
     })
   }
 
@@ -192,33 +139,24 @@ export function AdminGuest() {
     )
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold">Personnel Management</h3>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleOpenNewGuestModal}
-          >
-            <Plus className="size-4" />
-          </Button>
-          <AdminGuestDropdown
-            isOpen={isDropdownOpen}
-            onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filteredGuests={filteredGuests}
-            selectedGuest={selectedGuest}
-            onGuestSelect={handleGuestSelect}
-            triggerRef={triggerRef}
-            dropdownRef={dropdownRef}
-            scrollContainerRef={scrollContainerRef}
-            selectedGuestRef={selectedGuestRef}
-            dropdownPosition={dropdownPosition}
-          />
-        </div>
-      </div>
+    <AdminTabShell>
+      <AdminTabToolbar title="Personnel Management">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleOpenNewGuestModal}
+          className="wl-home-v2-tours-header-pill gap-1"
+          title="New personnel"
+        >
+          <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+        </Button>
+        <AdminGuestDropdown
+          guests={allGuests}
+          onGuestSelect={handleGuestSelect}
+          selectedGuest={selectedGuest}
+        />
+      </AdminTabToolbar>
       {selectedGuest && (
         <AdminGuestForm
           guest={selectedGuest}
@@ -237,6 +175,6 @@ export function AdminGuest() {
         onSave={handleGuestModalSave}
         isNewGuest={isNewGuest}
       />
-    </div>
+    </AdminTabShell>
   )
 }

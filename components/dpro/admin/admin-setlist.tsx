@@ -1,13 +1,35 @@
 "use client"
 
 import { useState } from "react"
+import { CircleNotch } from "@phosphor-icons/react"
 import { useAdminSetlist } from "@/hooks/use-admin-setlist"
 import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
 import { MainHeader } from "./setlist/main-header"
 import { ShowHeader } from "./setlist/show-header"
 import { SetlistTable } from "./setlist/setlist-table"
+
 import { SetlistEntryModal } from "./setlist-entry-modal"
-import { LoadingPageCard } from "@/components/dpro/loading-page-card"
+import { AdminTabShell } from "./admin-tab-shell"
+
+function AdminSetlistProgress({ message }: { message: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className={
+        "widget-panel wl-home-v2-admin-setlist-loading flex min-h-0 w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 px-4 py-12"
+      }
+    >
+      <CircleNotch
+        className="size-8 shrink-0 animate-spin text-[var(--wl-light-orange)]"
+        aria-hidden
+      />
+      <p className="m-0 max-w-sm text-center text-sm leading-relaxed text-white/80">
+        {message}
+      </p>
+    </div>
+  )
+}
 
 export function AdminSetlist() {
   const {
@@ -20,7 +42,7 @@ export function AdminSetlist() {
     fetchSetlistEntries,
   } = useAdminSetlist()
   const [selectedEntry, setSelectedEntry] = useState<AdminSetlistEntryData | null>(
-    null
+    null,
   )
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false)
   const [isNewEntry, setIsNewEntry] = useState(false)
@@ -67,14 +89,14 @@ export function AdminSetlist() {
   }
 
   const handleSaveStatusUpdate = (
-    status: "idle" | "processing" | "done" | "error"
+    status: "idle" | "processing" | "done" | "error",
   ) => {
     setSaveStatus(status)
     if (status === "done") setTimeout(() => setSaveStatus("idle"), 2000)
   }
 
   return (
-    <div>
+    <AdminTabShell>
       <MainHeader
         saveStatus={saveStatus}
         shows={shows}
@@ -83,42 +105,57 @@ export function AdminSetlist() {
         onShowSelect={handleShowSelect}
         selectedShow={selectedShow}
       />
-      {selectedShow && (
-        <div>
-          <ShowHeader
-            selectedShow={selectedShow as ShowData}
-            onCreateNewEntry={handleCreateNewEntry}
-          />
-          {loading ? (
-            <LoadingPageCard
-              message="Loading setlist..."
-              progress={loadingProgress}
-            />
-          ) : setlistEntries.length > 0 ? (
-            <SetlistTable
-              setlistEntries={setlistEntries}
-              onEntrySelect={handleEntrySelect}
-            />
-          ) : (
-            <div className="wl-home-v2-archive-admin-callout">
-              <p>
-                No setlist entries found for this show.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-      {!selectedShow && !loading && (
-        <div className="wl-home-v2-archive-admin-callout">
-          <p>Select a show to view its setlist.</p>
-        </div>
-      )}
-      {loading && loadingProgress < 100 && !selectedShow && (
-        <LoadingPageCard
-          message={`Loading shows (${Math.round(loadingProgress)}%)`}
-          progress={loadingProgress}
+
+      {loading && !selectedShow ?
+        <AdminSetlistProgress
+          message={
+            loadingProgress < 100 ?
+              `Loading shows (${Math.round(loadingProgress)}%)`
+            : "Loading shows…"
+          }
         />
-      )}
+      : selectedShow ?
+        loading ?
+          <AdminSetlistProgress
+            message={
+              loadingProgress < 100 ?
+                `Loading setlist… (${Math.round(loadingProgress)}%)`
+              : "Loading setlist…"
+            }
+          />
+        : setlistEntries.length > 0 ?
+          <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
+            <ShowHeader
+              selectedShow={selectedShow as ShowData}
+              onCreateNewEntry={handleCreateNewEntry}
+            />
+            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+              <SetlistTable
+                setlistEntries={setlistEntries}
+                onEntrySelect={handleEntrySelect}
+              />
+            </div>
+          </div>
+        : <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
+            <ShowHeader
+              selectedShow={selectedShow as ShowData}
+              onCreateNewEntry={handleCreateNewEntry}
+            />
+            <div className="px-1 py-6 text-center text-xs text-white/65">
+              <p className="m-0">No setlist entries found for this show.</p>
+            </div>
+          </div>
+
+      : <div className="widget-panel wl-home-v2-admin-setlist-empty flex flex-col gap-3">
+          <div className="wp-head">
+            <span>Setlist</span>
+          </div>
+          <p className="m-0 text-[13px] leading-relaxed text-white/65">
+            Use the show picker above to load a setlist for editing.
+          </p>
+        </div>
+      }
+
       <SetlistEntryModal
         isOpen={isEntryModalOpen}
         onClose={() => setIsEntryModalOpen(false)}
@@ -127,6 +164,6 @@ export function AdminSetlist() {
         onSaveStatusUpdate={handleSaveStatusUpdate}
         isNewEntry={isNewEntry}
       />
-    </div>
+    </AdminTabShell>
   )
 }

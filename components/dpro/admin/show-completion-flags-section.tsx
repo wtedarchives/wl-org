@@ -1,14 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { FloppyDisk } from "@phosphor-icons/react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { AdminShowData } from "@/types/admin"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 
 interface ShowCompletionFlagsSectionProps {
   show: AdminShowData
@@ -86,68 +85,79 @@ export function ShowCompletionFlagsSection({
     checked: boolean,
     onCheckedChange: (v: boolean) => void,
   ) => (
-    <div className="flex items-center gap-2">
-      <Checkbox
+    <div className="wl-home-v2-archive-admin-show-completion__flag-row">
+      <input
+        type="checkbox"
         id={id}
         checked={checked}
-        onCheckedChange={(c) => onCheckedChange(c === true)}
+        onChange={(e) => onCheckedChange(e.target.checked)}
+        className="size-4 shrink-0 rounded"
       />
-      <Label htmlFor={id} className="cursor-pointer font-normal">
-        {label}
-      </Label>
+      <label htmlFor={id}>{label}</label>
     </div>
   )
 
   return (
-    <div className="mt-6 space-y-4 rounded-lg border border-border/60 bg-muted/20 p-4 transition-opacity duration-200">
-      <h4 className="text-sm font-medium">Completion Badges</h4>
-      <div className="flex flex-col gap-3 sm:max-w-md">
-        {flagRow(
-          "show_setlistcomplete",
-          "Setlist complete",
-          showSetlistComplete,
-          setShowSetlistComplete,
-        )}
-        {flagRow(
-          "discography_display",
-          "Display in discography",
-          discographyDisplay,
-          setDiscographyDisplay,
-        )}
-        {flagRow(
-          "show_dripfieldcomplete",
-          "Dripfield Suite complete",
-          showDripfieldComplete,
-          setShowDripfieldComplete,
-        )}
-        {flagRow(
-          "show_jivecomplete",
-          "Jive Suite complete",
-          showJiveComplete,
-          setShowJiveComplete,
-        )}
-        <div className="space-y-1.5">
-          <Label htmlFor="show_listcategorycomplete" className="text-xs">
+    <div className="wl-home-v2-archive-admin-show-completion">
+      <div className="wl-home-v2-archive-admin-song-form__head">
+        <div
+          role="heading"
+          aria-level={3}
+          className="wl-home-v2-archive-admin-song-form__section-label"
+        >
+          Completion Badges
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => void handleSave()}
+          disabled={saving}
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
+        >
+          <FloppyDisk className="size-3.5 shrink-0 opacity-80" aria-hidden />
+          {saving ? "Saving…" : "Save flags"}
+        </Button>
+      </div>
+      <div className="wl-home-v2-archive-admin-song-form__grid">
+        <div className="wl-home-v2-archive-admin-show-completion__flags">
+          {flagRow(
+            "show_setlistcomplete",
+            "Setlist complete",
+            showSetlistComplete,
+            setShowSetlistComplete,
+          )}
+          {flagRow(
+            "discography_display",
+            "Display in discography",
+            discographyDisplay,
+            setDiscographyDisplay,
+          )}
+          {flagRow(
+            "show_dripfieldcomplete",
+            "Dripfield Suite complete",
+            showDripfieldComplete,
+            setShowDripfieldComplete,
+          )}
+          {flagRow(
+            "show_jivecomplete",
+            "Jive Suite complete",
+            showJiveComplete,
+            setShowJiveComplete,
+          )}
+        </div>
+        <div className="wl-home-v2-archive-admin-song-form__notes min-w-0">
+          <label htmlFor="show_listcategorycomplete">
             Album category completed
-          </Label>
+          </label>
           <Input
             id="show_listcategorycomplete"
             value={showListCategoryComplete}
             onChange={(e) => setShowListCategoryComplete(e.target.value)}
             placeholder="Category name or leave empty for null"
-            className="h-9 text-sm"
           />
         </div>
       </div>
-      <Button
-        type="button"
-        size="sm"
-        onClick={() => void handleSave()}
-        disabled={saving}
-        className="min-h-11 sm:min-h-9"
-      >
-        {saving ? "Saving…" : "Save flags"}
-      </Button>
     </div>
   )
 }

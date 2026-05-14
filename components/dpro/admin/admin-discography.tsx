@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { Search, X, Plus } from "lucide-react"
+import { X, Plus } from "lucide-react"
+import { MagnifyingGlass } from "@phosphor-icons/react"
 import { supabase } from "@/lib/supabase"
 import type { DiscographyAdminRecord } from "@/types/admin"
 import { DiscographyModal } from "./discography-modal"
@@ -15,6 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AdminTabShell } from "./admin-tab-shell"
+import { AdminTabToolbar } from "./admin-tab-toolbar"
+import { cn } from "@/lib/utils"
 
 const PAGE_SIZE = 1000
 
@@ -94,40 +98,49 @@ export function AdminDiscography() {
   }, [rows, searchQuery])
 
   return (
-    <div>
-      <div className="mb-2 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <h3 className="text-sm font-semibold">Discography</h3>
-        <div className="flex gap-2">
-          <div className="relative flex-1 lg:flex-initial">
+    <AdminTabShell>
+      <AdminTabToolbar title="Discography">
+        <div
+          className={cn(
+            "wl-home-v2-archive-admin-toolbar-search wl-home-v2-archive-admin-toolbar-search--affix-leading wl-home-v2-archive-admin-toolbar-search--wide",
+            searchQuery && "wl-home-v2-archive-admin-toolbar-search--has-clear",
+          )}
+        >
+          <div className="wl-home-v2-archive-admin-toolbar-search__inner">
             <Input
               type="text"
               placeholder="Search by name…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-6 w-full pl-8 pr-8 text-xs lg:w-56"
+              className="h-8 w-full min-w-0 text-xs focus-visible:ring-0"
             />
-            <Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            {searchQuery ? (
+            <MagnifyingGlass
+              className="wl-home-v2-archive-admin-toolbar-search__icon wl-home-v2-archive-admin-toolbar-search__icon--leading"
+              aria-hidden
+            />
+            {searchQuery ?
               <button
                 type="button"
+                className="wl-home-v2-archive-admin-toolbar-search__clear"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
               >
-                <X className="size-3" />
+                <X className="size-3 shrink-0" aria-hidden />
               </button>
-            ) : null}
+            : null}
           </div>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleAddNew}
-            className="gap-1"
-          >
-            <Plus className="size-4" />
-            Add entry
-          </Button>
         </div>
-      </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleAddNew}
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
+        >
+          <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+          Add entry
+        </Button>
+      </AdminTabToolbar>
       <p className="mb-2 text-xs text-muted-foreground">
         Filter rows by the <span className="font-medium">name</span> field. Click
         a row to edit.
@@ -201,6 +214,6 @@ export function AdminDiscography() {
         record={selected}
         isAddMode={isAddMode}
       />
-    </div>
+    </AdminTabShell>
   )
 }

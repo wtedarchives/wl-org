@@ -172,118 +172,110 @@ export function SongModal({
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Song Title
-            </label>
-            <Input
-              type="text"
-              name="song"
-              value={editedSong?.song ?? ""}
-              onChange={handleInputChange}
-              className="h-8 text-xs"
-              placeholder="Enter song title"
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Display Name
-            </label>
-            <Input
-              type="text"
-              name="song_displayname"
-              value={editedSong?.song_displayname ?? ""}
-              onChange={handleInputChange}
-              className="h-8 text-xs"
-              placeholder="Enter display name"
-              required
-            />
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Original Artist
-            </label>
-            <Select
-              value={editedSong?.song_originalartist || "__none__"}
-              onValueChange={(v) =>
-                handleInputChange({
-                  target: {
-                    name: "song_originalartist",
-                    value: v === "__none__" ? "" : v,
-                  },
-                } as React.ChangeEvent<HTMLSelectElement>)
-              }
-            >
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="-- Select Artist --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Artist --</SelectItem>
-                {artists.map((a) => (
-                  <SelectItem key={a.artist} value={a.artist}>
-                    {a.artist}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">Category</label>
-            <Select
-              value={editedSong?.song_category || "__none__"}
-              onValueChange={(v) =>
-                handleInputChange({
-                  target: {
-                    name: "song_category",
-                    value: v === "__none__" ? "" : v,
-                  },
-                } as React.ChangeEvent<HTMLSelectElement>)
-              }
-            >
-              <SelectTrigger className="h-8 text-xs">
-                <SelectValue placeholder="-- Select Category --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Category --</SelectItem>
-                {categories.map((c) => (
-                  <SelectItem key={c.category} value={c.category}>
-                    {c.category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Category Order
-            </label>
-            <Input
-              type="text"
-              name="song_categoryorder"
-              value={
-                editedSong?.song_categoryorder === null
-                  ? ""
-                  : editedSong?.song_categoryorder ?? ""
-              }
-              onChange={handleInputChange}
-              className="h-8 text-xs"
-              placeholder="Enter order number"
-            />
-          </div>
-          <div className="md:col-span-3">
-            <label className="mb-0.5 block text-xs font-medium">
-              Coach&apos;s Notes
-            </label>
-            <textarea
-              name="song_coachnotes"
-              value={editedSong?.song_coachnotes ?? ""}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Add notes here..."
-            />
+        <div className="wl-home-v2-archive-admin-song-form">
+          <div className="wl-home-v2-archive-admin-song-form__grid">
+            <div>
+              <label htmlFor="song-modal-song">Song Title</label>
+              <Input
+                id="song-modal-song"
+                type="text"
+                name="song"
+                value={editedSong?.song ?? ""}
+                onChange={handleInputChange}
+                placeholder="Enter song title"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="song-modal-displayname">Display Name</label>
+              <Input
+                id="song-modal-displayname"
+                type="text"
+                name="song_displayname"
+                value={editedSong?.song_displayname ?? ""}
+                onChange={handleInputChange}
+                placeholder="Enter display name"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="song-modal-artist">Original Artist</label>
+              <Select
+                value={editedSong?.song_originalartist || "__none__"}
+                onValueChange={(v) =>
+                  handleInputChange({
+                    target: {
+                      name: "song_originalartist",
+                      value: v === "__none__" ? "" : v,
+                    },
+                  } as React.ChangeEvent<HTMLSelectElement>)
+                }
+              >
+                <SelectTrigger id="song-modal-artist" size="sm">
+                  <SelectValue placeholder="-- Select Artist --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Artist --</SelectItem>
+                  {artists.map((a) => (
+                    <SelectItem key={a.artist} value={a.artist}>
+                      {a.artist}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label htmlFor="song-modal-category">Category</label>
+              <Select
+                value={editedSong?.song_category || "__none__"}
+                onValueChange={(v) =>
+                  handleInputChange({
+                    target: {
+                      name: "song_category",
+                      value: v === "__none__" ? "" : v,
+                    },
+                  } as React.ChangeEvent<HTMLSelectElement>)
+                }
+              >
+                <SelectTrigger id="song-modal-category" size="sm">
+                  <SelectValue placeholder="-- Select Category --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Category --</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.category} value={c.category}>
+                      {c.category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label htmlFor="song-modal-order">Category Order</label>
+              <Input
+                id="song-modal-order"
+                type="text"
+                name="song_categoryorder"
+                value={
+                  editedSong?.song_categoryorder === null
+                    ? ""
+                    : (editedSong?.song_categoryorder ?? "")
+                }
+                onChange={handleInputChange}
+                placeholder="Enter order number"
+              />
+            </div>
+            <div className="wl-home-v2-archive-admin-song-form__notes">
+              <label htmlFor="song-modal-notes">Coach&apos;s Notes</label>
+              <textarea
+                id="song-modal-notes"
+                name="song_coachnotes"
+                value={editedSong?.song_coachnotes ?? ""}
+                onChange={handleInputChange}
+                rows={4}
+                placeholder="Add notes here..."
+              />
+            </div>
           </div>
         </div>
       </DialogContent>

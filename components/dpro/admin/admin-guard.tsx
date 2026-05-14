@@ -10,9 +10,13 @@ interface AdminGuardProps {
   children: React.ReactNode
 }
 
+const DEV_BYPASS_ADMIN_GATE = process.env.NODE_ENV === "development"
+
 /**
  * Redirects non-admin users away from admin pages.
  * Waits for both auth and admin check to complete before redirecting.
+ *
+ * In `next dev`, the guard is skipped (same behavior as {@link WlHomeV2AdminGate}).
  */
 export function AdminGuard({ children }: AdminGuardProps) {
   const router = useRouter()
@@ -22,6 +26,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
   const isLoading = authLoading || adminLoading
 
   useEffect(() => {
+    if (DEV_BYPASS_ADMIN_GATE) return
     if (isLoading) return
     if (!session) {
       router.replace("/")
@@ -31,6 +36,10 @@ export function AdminGuard({ children }: AdminGuardProps) {
       router.replace("/")
     }
   }, [session, isAdmin, isLoading, router])
+
+  if (DEV_BYPASS_ADMIN_GATE) {
+    return <>{children}</>
+  }
 
   if (isLoading) {
     return (

@@ -1,55 +1,46 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 
 /**
- * Fetches the count of open (unresolved) bugs for the Admin sidebar badge.
+ * Open (unresolved) bug count for the Admin sidebar badge.
+ * Uses `dpro-admin` + service role because SSO JWT is not Supabase Auth (anon SELECT is empty under RLS).
  */
 export function useBugCount(): number | null {
+  const { session, loading: authLoading } = useAuth()
+  const token = session?.token ?? null
   const [count, setCount] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!supabase) {
+    if (authLoading) return
+    if (!token) {
       setCount(null)
       return
     }
-    const sb = supabase
+
+    let cancelled = false
 
     async function fetchOpenBugCount() {
-      try {
-        const { count: openCount, error } = await sb
-          .from("bugs")
-          .select("*", { count: "exact", head: true })
-          .eq("bug_completion", false)
-
-        if (error) {
-          setCount(null)
-          return
-        }
-        setCount(openCount ?? 0)
-      } catch {
+      const { data, error } = await invokeDproAdmin<{ count: number }>(token, {
+        action: "bugs_open_count",
+      })
+      if (cancelled) return
+      if (error) {
         setCount(null)
+        return
       }
+      setCount(data?.count ?? 0)
     }
 
-    fetchOpenBugCount()
-
-    const channel = sb
-      .channel("bugs-count-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bugs" },
-        () => {
-          fetchOpenBugCount()
-        }
-      )
-      .subscribe()
+    void fetchOpenBugCount()
 
     return () => {
-      sb.removeChannel(channel)
+      cancelled = true
     }
-  }, [])
+  }, [authLoading, token])
 
   return count
 }

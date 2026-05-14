@@ -1,9 +1,10 @@
 "use client"
 
+import { useState, useRef, useEffect, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
-import type { CSSProperties, RefObject } from "react"
-import { ChevronDown, Search } from "lucide-react"
+import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 
 export interface GuestData {
@@ -16,105 +17,171 @@ export interface GuestData {
 }
 
 interface AdminGuestDropdownProps {
-  isOpen: boolean
-  onToggle: () => void
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  filteredGuests: GuestData[]
-  selectedGuest: GuestData | null
+  guests: GuestData[]
   onGuestSelect: (guest: GuestData) => void
-  triggerRef: RefObject<HTMLButtonElement | null>
-  dropdownRef: RefObject<HTMLDivElement | null>
-  scrollContainerRef: RefObject<HTMLDivElement | null>
-  selectedGuestRef: RefObject<HTMLButtonElement | null>
-  dropdownPosition: { top: number; right: number }
+  selectedGuest?: GuestData | null
+  /** Merged onto the trigger (default: tours header pill). */
+  triggerClassName?: string
 }
 
 export function AdminGuestDropdown({
-  isOpen,
-  onToggle,
-  searchTerm,
-  onSearchChange,
-  filteredGuests,
-  selectedGuest,
+  guests,
   onGuestSelect,
-  triggerRef,
-  dropdownRef,
-  scrollContainerRef,
-  selectedGuestRef,
-  dropdownPosition,
+  selectedGuest,
+  triggerClassName,
 }: AdminGuestDropdownProps) {
-  return (
-    <div>
-      <Button
-        ref={triggerRef}
-        variant="outline"
-        size="sm"
-        onClick={onToggle}
-        className="gap-2"
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const selectedGuestRef = useRef<HTMLButtonElement | null>(null)
+
+  const filteredGuests = guests.filter((g) => {
+    const q = searchTerm.toLowerCase().trim()
+    if (!q) return true
+    const dn = (g.guest_displayname ?? "").toLowerCase()
+    const inst = (g.guest_instrument ?? "").toLowerCase()
+    return (
+      g.guest.toLowerCase().includes(q) ||
+      dn.includes(q) ||
+      inst.includes(q)
+    )
+  })
+
+  useEffect(() => {
+    if (isDropdownOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [isDropdownOpen])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (
+        isDropdownOpen &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isDropdownOpen])
+
+  useEffect(() => {
+    if (
+      isDropdownOpen &&
+      selectedGuest &&
+      selectedGuestRef.current &&
+      scrollContainerRef.current
+    ) {
+      setTimeout(() => {
+        selectedGuestRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        })
+      }, 100)
+    }
+  }, [isDropdownOpen, selectedGuest])
+
+  const handleGuestSelect = (guest: GuestData) => {
+    onGuestSelect(guest)
+    setIsDropdownOpen(false)
+    setSearchTerm("")
+  }
+
+  const dropdownContent = isDropdownOpen && (
+    <div
+      ref={dropdownRef}
+      className={
+        "wl-home-v2-archive-admin-floating-dropdown " +
+        "wl-home-v2-archive-admin-floating-dropdown--wide fixed " +
+        "wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
+      }
+      style={
+        {
+          ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
+          ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
+        } as CSSProperties
+      }
+    >
+      <div className="wl-home-v2-archive-admin-floating-dropdown__search">
+        <div className="relative">
+          <Input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search personnel..."
+            className="h-8 pr-8 text-xs"
+          />
+          <MagnifyingGlass className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+        </div>
+      </div>
+      <div
+        ref={scrollContainerRef}
+        className="wl-home-v2-archive-admin-floating-dropdown__scroll divide-y divide-[rgb(49,51,49)]"
       >
-        Personnel
-        <ChevronDown className="size-4" />
-      </Button>
-      {isOpen &&
-        createPortal(
-          <div
-            ref={dropdownRef}
-            className="wl-home-v2-archive-admin-floating-dropdown fixed wl-home-v2-archive-admin-floating-dropdown--anchor-tr"
-            style={
-              {
-                ["--adm-dd-top" as string]: `${dropdownPosition.top}px`,
-                ["--adm-dd-right" as string]: `${dropdownPosition.right}px`,
-              } as CSSProperties
+        {filteredGuests.map((guest) => (
+          <button
+            key={guest.guest_id}
+            type="button"
+            ref={
+              selectedGuest?.guest_id === guest.guest_id
+                ? selectedGuestRef
+                : null
+            }
+            onClick={() => handleGuestSelect(guest)}
+            className={
+              "wl-home-v2-archive-admin-floating-dropdown__row " +
+              "wl-home-v2-archive-admin-floating-dropdown__row--compact" +
+              (selectedGuest?.guest_id === guest.guest_id
+                ? " wl-home-v2-archive-admin-floating-dropdown__row--selected"
+                : "")
             }
           >
-            <div className="wl-home-v2-archive-admin-floating-dropdown__search">
-              <div className="relative">
-                <Input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Search guests..."
-                  className="h-8 pr-8 text-xs"
-                />
-                <Search className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white/40" />
-              </div>
-            </div>
-            <div
-              ref={scrollContainerRef}
-              className="wl-home-v2-archive-admin-floating-dropdown__scroll divide-y divide-[rgb(49,51,49)]"
+            <span
+              className={
+                "wl-home-v2-archive-admin-floating-dropdown__row-line " +
+                "wl-home-v2-archive-admin-song-dropdown__primary"
+              }
             >
-              {filteredGuests.map((guest) => (
-                <button
-                  key={guest.guest_id}
-                  ref={
-                    selectedGuest?.guest_id === guest.guest_id
-                      ? selectedGuestRef
-                      : null
-                  }
-                  type="button"
-                  onClick={() => onGuestSelect(guest)}
-                  className={
-                    "wl-home-v2-archive-admin-floating-dropdown__row" +
-                    (selectedGuest?.guest_id === guest.guest_id
-                      ? " wl-home-v2-archive-admin-floating-dropdown__row--selected"
-                      : "")
-                  }
-                >
-                  <span className="wl-home-v2-archive-admin-floating-dropdown__row-line">
-                    {guest.guest}
-                  </span>
-                </button>
-              ))}
-              {filteredGuests.length === 0 && (
-                <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
-                  No guests found
-                </div>
-              )}
-            </div>
-          </div>,
-          document.body
+              {guest.guest}
+            </span>
+          </button>
+        ))}
+        {filteredGuests.length === 0 && (
+          <div className="wl-home-v2-archive-admin-floating-dropdown-empty">
+            No personnel found
+          </div>
         )}
+      </div>
     </div>
+  )
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={cn("wl-home-v2-tours-header-pill gap-1", triggerClassName)}
+      >
+        Select personnel
+        <CaretDown className="size-3.5 shrink-0 opacity-80" aria-hidden />
+      </Button>
+      {dropdownContent && createPortal(dropdownContent, document.body)}
+    </>
   )
 }

@@ -165,190 +165,207 @@ export function ShowModal({
             {errors.submit}
           </div>
         )}
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Date <span className="text-destructive">*</span>
-            </label>
-            <Input
-              type="date"
-              name="show_date"
-              value={formData.show_date ?? ""}
-              onChange={handleChange}
-              className={`h-8 text-xs ${errors.show_date ? "border-destructive" : ""}`}
-            />
-            {errors.show_date && (
-              <p className="mt-0.5 text-xs text-destructive">
-                {errors.show_date}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Group <span className="text-destructive">*</span>
-            </label>
-            <Select
-              value={formData.show_group || "__none__"}
-              onValueChange={(v) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  show_group: v === "__none__" ? "" : v,
-                }))
-              }
-            >
-              <SelectTrigger
-                className={`h-8 text-xs ${errors.show_group ? "border-destructive" : ""}`}
+        <div className="wl-home-v2-archive-admin-song-form">
+          <div className="wl-home-v2-archive-admin-song-form__grid">
+            <div className="min-w-0">
+              <label htmlFor="show-modal-date">
+                Date <span className="text-destructive">*</span>
+              </label>
+              <Input
+                id="show-modal-date"
+                type="date"
+                name="show_date"
+                value={formData.show_date ?? ""}
+                onChange={handleChange}
+                className={errors.show_date ? "border-destructive" : undefined}
+              />
+              {errors.show_date && (
+                <p className="mt-0.5 text-xs text-destructive">
+                  {errors.show_date}
+                </p>
+              )}
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="show-modal-group">
+                Group <span className="text-destructive">*</span>
+              </label>
+              <Select
+                value={formData.show_group || "__none__"}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    show_group: v === "__none__" ? "" : v,
+                  }))
+                }
               >
-                <SelectValue placeholder="-- Select Group --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Group --</SelectItem>
-                {groups.map((g) => (
-                  <SelectItem key={g.group} value={g.group}>
-                    {g.group}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.show_group && (
-              <p className="mt-0.5 text-xs text-destructive">
-                {errors.show_group}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Tour <span className="text-destructive">*</span>
-            </label>
-            <Select
-              value={formData.show_tour || "__none__"}
-              onValueChange={(v) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  show_tour: v === "__none__" ? "" : v,
-                }))
-              }
-            >
-              <SelectTrigger
-                className={`h-8 text-xs ${errors.show_tour ? "border-destructive" : ""}`}
+                <SelectTrigger
+                  id="show-modal-group"
+                  size="sm"
+                  className={errors.show_group ? "border-destructive" : undefined}
+                >
+                  <SelectValue placeholder="-- Select Group --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Group --</SelectItem>
+                  {groups.map((g) => (
+                    <SelectItem key={g.group} value={g.group}>
+                      {g.group}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.show_group && (
+                <p className="mt-0.5 text-xs text-destructive">
+                  {errors.show_group}
+                </p>
+              )}
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="show-modal-tour">
+                Tour <span className="text-destructive">*</span>
+              </label>
+              <Select
+                value={formData.show_tour || "__none__"}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    show_tour: v === "__none__" ? "" : v,
+                  }))
+                }
               >
-                <SelectValue placeholder="-- Select Tour --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Tour --</SelectItem>
-                {tours.map((t) => (
-                  <SelectItem key={t.tour} value={t.tour}>
-                    {t.tour}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.show_tour && (
-              <p className="mt-0.5 text-xs text-destructive">
-                {errors.show_tour}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Subvenue <span className="text-destructive">*</span>
-            </label>
-            <Select
-              value={formData.show_subvenue || "__none__"}
-              onValueChange={(v) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  show_subvenue: v === "__none__" ? "" : v,
-                }))
-              }
-            >
-              <SelectTrigger
-                className={`h-8 text-xs ${errors.show_subvenue ? "border-destructive" : ""}`}
+                <SelectTrigger
+                  id="show-modal-tour"
+                  size="sm"
+                  className={errors.show_tour ? "border-destructive" : undefined}
+                >
+                  <SelectValue placeholder="-- Select Tour --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Tour --</SelectItem>
+                  {tours.map((t) => (
+                    <SelectItem key={t.tour} value={t.tour}>
+                      {t.tour}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.show_tour && (
+                <p className="mt-0.5 text-xs text-destructive">
+                  {errors.show_tour}
+                </p>
+              )}
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="show-modal-subvenue">
+                Subvenue <span className="text-destructive">*</span>
+              </label>
+              <Select
+                value={formData.show_subvenue || "__none__"}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    show_subvenue: v === "__none__" ? "" : v,
+                  }))
+                }
               >
-                <SelectValue placeholder="-- Select Subvenue --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Subvenue --</SelectItem>
-                {subvenues.map((s) => (
-                  <SelectItem key={s.subvenue} value={s.subvenue}>
-                    {s.subvenue}
-                    {s.subvenue_venue_location &&
-                      ` - ${s.subvenue_venue_location}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.show_subvenue && (
-              <p className="mt-0.5 text-xs text-destructive">
-                {errors.show_subvenue}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="show_iscanon"
-              checked={formData.show_iscanon ?? false}
-              onChange={handleChange}
-              className="size-4 rounded"
-            />
-            <label className="text-xs font-medium">Is Canon?</label>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="show_issetlistgame"
-              checked={formData.show_issetlistgame ?? false}
-              onChange={handleChange}
-              className="size-4 rounded"
-            />
-            <label className="text-xs font-medium">Is Setlist Game?</label>
-          </div>
-          <div>
-            <label className="mb-0.5 block text-xs font-medium">
-              Year <span className="text-destructive">*</span>
-            </label>
-            <Select
-              value={formData.show_year || "__none__"}
-              onValueChange={(v) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  show_year: v === "__none__" ? "" : v,
-                }))
-              }
-            >
-              <SelectTrigger
-                className={`h-8 text-xs ${errors.show_year ? "border-destructive" : ""}`}
+                <SelectTrigger
+                  id="show-modal-subvenue"
+                  size="sm"
+                  className={
+                    errors.show_subvenue ? "border-destructive" : undefined
+                  }
+                >
+                  <SelectValue placeholder="-- Select Subvenue --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Subvenue --</SelectItem>
+                  {subvenues.map((s) => (
+                    <SelectItem key={s.subvenue} value={s.subvenue}>
+                      {s.subvenue}
+                      {s.subvenue_venue_location &&
+                        ` - ${s.subvenue_venue_location}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.show_subvenue && (
+                <p className="mt-0.5 text-xs text-destructive">
+                  {errors.show_subvenue}
+                </p>
+              )}
+            </div>
+            <div className="min-w-0 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="show-modal-iscanon"
+                  name="show_iscanon"
+                  checked={formData.show_iscanon ?? false}
+                  onChange={handleChange}
+                  className="size-4 shrink-0 rounded"
+                />
+                <label htmlFor="show-modal-iscanon">Is Canon?</label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="show-modal-issetlistgame"
+                  name="show_issetlistgame"
+                  checked={formData.show_issetlistgame ?? false}
+                  onChange={handleChange}
+                  className="size-4 shrink-0 rounded"
+                />
+                <label htmlFor="show-modal-issetlistgame">
+                  Is Setlist Game?
+                </label>
+              </div>
+            </div>
+            <div className="min-w-0">
+              <label htmlFor="show-modal-year">
+                Year <span className="text-destructive">*</span>
+              </label>
+              <Select
+                value={formData.show_year || "__none__"}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    show_year: v === "__none__" ? "" : v,
+                  }))
+                }
               >
-                <SelectValue placeholder="-- Select Year --" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">-- Select Year --</SelectItem>
-                {years.map((y) => (
-                  <SelectItem key={y.year} value={y.year}>
-                    {y.year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.show_year && (
-              <p className="mt-0.5 text-xs text-destructive">
-                {errors.show_year}
-              </p>
-            )}
-          </div>
-          <div className="md:col-span-2">
-            <label className="mb-0.5 block text-xs font-medium">
-              Detail (Optional)
-            </label>
-            <textarea
-              name="show_detail"
-              value={formData.show_detail ?? ""}
-              onChange={handleChange}
-              rows={3}
-              className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Enter any additional details..."
-            />
+                <SelectTrigger
+                  id="show-modal-year"
+                  size="sm"
+                  className={errors.show_year ? "border-destructive" : undefined}
+                >
+                  <SelectValue placeholder="-- Select Year --" />
+                </SelectTrigger>
+                <SelectContent className="wl-home-v2-archive-admin-portal-content">
+                  <SelectItem value="__none__">-- Select Year --</SelectItem>
+                  {years.map((y) => (
+                    <SelectItem key={y.year} value={y.year}>
+                      {y.year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.show_year && (
+                <p className="mt-0.5 text-xs text-destructive">
+                  {errors.show_year}
+                </p>
+              )}
+            </div>
+            <div className="wl-home-v2-archive-admin-song-form__notes min-w-0">
+              <label htmlFor="show-modal-detail">Detail (Optional)</label>
+              <textarea
+                id="show-modal-detail"
+                name="show_detail"
+                value={formData.show_detail ?? ""}
+                onChange={handleChange}
+                rows={4}
+                placeholder="Enter any additional details..."
+              />
+            </div>
           </div>
         </div>
       </DialogContent>
