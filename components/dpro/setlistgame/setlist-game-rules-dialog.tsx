@@ -163,7 +163,7 @@ function SetlistGameRulesBody() {
         <p>
           If you experience unforeseen errors,{" "}
           <Link
-            href="/old/archive/submit"
+            href="/archive/submit"
             className="setlist-game-rules-callout-link"
           >
             submit a bug report here

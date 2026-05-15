@@ -35,9 +35,9 @@ export function PersonnelContent() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    document.title = "Personnel – WysteriaLane.org"
+    document.title = "Personnel – WTEDRadio.com"
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [])
 

@@ -3,6 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import type {
   AttendedShowJoined,
   CategoryProgress,
+  CategoryProgressBundle,
+  CompletionistSongRow,
   LooseEndRow,
   ShowForLooseEnds,
   StandsAttended,
@@ -349,9 +351,12 @@ export async function buildCategoryProgress(
   allCategories: { category: string }[],
   attendedShowIds: string[],
   setLoadingProgress: (n: number) => void
-): Promise<CategoryProgress> {
+): Promise<CategoryProgressBundle> {
   const progress: CategoryProgress = {}
-  if (categoryLooseEnds.length === 0) return progress
+  const songsByCompletionistEnd: Record<string, CompletionistSongRow[]> = {}
+  if (categoryLooseEnds.length === 0) {
+    return { progress, songsByCompletionistEnd }
+  }
 
   const categoryMapping: Record<string, string> = {}
   for (const looseEnd of categoryLooseEnds) {
@@ -369,7 +374,8 @@ export async function buildCategoryProgress(
     ),
   ]
 
-  const songsByCategory: Record<string, string[]> = {}
+  type SongMeta = { song: string; categoryOrder: number }
+  const songsByCategory: Record<string, SongMeta[]> = {}
   for (const name of categoryNames) {
     songsByCategory[name] = []
   }
@@ -380,7 +386,7 @@ export async function buildCategoryProgress(
     while (sMore) {
       const { data: songRows, error: songsError } = await client
         .from("songs")
-        .select("song, song_category")
+        .select("song, song_category, song_categoryorder")
         .in("song_category", categoryNames)
         .range(sPage * PAGE_SIZE, (sPage + 1) * PAGE_SIZE - 1)
 
@@ -391,7 +397,14 @@ export async function buildCategoryProgress(
             if (!songsByCategory[r.song_category]) {
               songsByCategory[r.song_category] = []
             }
-            songsByCategory[r.song_category].push(r.song)
+            const co =
+              typeof r.song_categoryorder === "number"
+                ? r.song_categoryorder
+                : 32767
+            songsByCategory[r.song_category].push({
+              song: r.song,
+              categoryOrder: co,
+            })
           }
         }
         sPage++
@@ -403,7 +416,9 @@ export async function buildCategoryProgress(
   }
 
   const unionSongs = [
-    ...new Set(categoryNames.flatMap((n) => songsByCategory[n] ?? [])),
+    ...new Set(
+      categoryNames.flatMap((n) => (songsByCategory[n] ?? []).map((m) => m.song))
+    ),
   ]
 
   setLoadingProgress(48)
@@ -432,21 +447,30 @@ export async function buildCategoryProgress(
 
     if (songsInCategory.length === 0) {
       progress[looseEnd.end] = { seen: 0, total: 10, percentage: 0 }
+      songsByCompletionistEnd[looseEnd.end] = []
       continue
     }
 
-    const playableSongs = songsInCategory.filter((s) =>
-      canonicallyPlayable.has(s)
-    )
-    const totalPlayable = playableSongs.length
+    songsInCategory.sort((a, b) => a.categoryOrder - b.categoryOrder)
+
+    const playableMetas: SongMeta[] = []
+    const dedupe = new Set<string>()
+    for (const m of songsInCategory) {
+      if (!canonicallyPlayable.has(m.song)) continue
+      if (dedupe.has(m.song)) continue
+      dedupe.add(m.song)
+      playableMetas.push(m)
+    }
+    const totalPlayable = playableMetas.length
 
     if (totalPlayable === 0) {
       progress[looseEnd.end] = { seen: 0, total: 0, percentage: 0 }
+      songsByCompletionistEnd[looseEnd.end] = []
       continue
     }
 
     let seenCount = 0
-    for (const song of playableSongs) {
+    for (const { song } of playableMetas) {
       if (heardSongs.has(song)) seenCount++
     }
     const percentage = Math.round((seenCount / totalPlayable) * 100)
@@ -455,7 +479,12 @@ export async function buildCategoryProgress(
       total: totalPlayable,
       percentage,
     }
+
+    songsByCompletionistEnd[looseEnd.end] = playableMetas.map(({ song }) => ({
+      song,
+      heard: heardSongs.has(song),
+    }))
   }
 
-  return progress
+  return { progress, songsByCompletionistEnd }
 }

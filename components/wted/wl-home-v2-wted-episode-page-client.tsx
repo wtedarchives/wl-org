@@ -163,10 +163,10 @@ export function WlHomeV2WtedEpisodePageClient() {
         episode.episode,
         episode.display_name,
       )
-      document.title = `${label} – WTED Radio – WysteriaLane.org`
+      document.title = `${label} – WTED Radio – WTEDRadio.com`
     }
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [episode?.episode, episode?.display_name])
 

@@ -7,51 +7,28 @@
 # Shows page retired; UI preserved in repo (components/wted-shows.tsx)
 /wted/shows  /wted/program-director  301
 
-# Archive app UI moved to /old/archive; deep links below rewrite to the new prefix.
-# /archive alone is the new static hub (Next emits /archive/index.html).
+# Setlist Archive: static routes under `/archive` (see `app/(wl-home-v2)/archive`).
 
-# Exact legacy archive index URLs → /old/archive/…
-# /archive/years → new WTED grid page (Next static route)
-# /archive/tours → new WTED grid page (Next static route)
-
-# Lists index + detail live on `/archive/lists` (Next static route).
-/old/archive/lists  /archive/lists  301
-/old/archive/song  /archive/song  301
-/old/archive/venue  /archive/venue  301
-/archive/submit  /old/archive/submit  301
-/old/archive/user  /user  301
-/archive/user  /user  301
-/old/archive/profile  /archive/profile?tab=overview  301
-/old/archive/profile/overview  /archive/profile?tab=overview  301
-/old/archive/profile/shows  /archive/profile?tab=shows  301
-/old/archive/profile/songs  /archive/profile?tab=songs  301
-/old/archive/profile/slots  /archive/profile?tab=slots  301
-/old/archive/profile/personnel  /archive/profile?tab=personnel  301
-/old/archive/profile/loose-ends  /archive/profile?tab=loose-ends  301
+# My Stats — path-style tabs → canonical query on `/archive/profile`
 /archive/profile/overview  /archive/profile?tab=overview  301
 /archive/profile/shows  /archive/profile?tab=shows  301
 /archive/profile/songs  /archive/profile?tab=songs  301
 /archive/profile/slots  /archive/profile?tab=slots  301
 /archive/profile/personnel  /archive/profile?tab=personnel  301
-/archive/profile/loose-ends  /archive/profile?tab=loose-ends  301
-/old/archive/admin  /archive/admin  301
-/old/archive/admin/radio  /archive/admin/radio  301
-/old/archive/bugs  /archive/bugs  301
+/archive/profile/badges  /archive/profile?tab=badges  301
+/archive/profile/loose-ends  /archive/profile?tab=badges  301
 
-# Legacy tours shell → canonical `/archive/tours` (query string preserved)
-/old/archive/tours  /archive/tours  301
+# Public profile — `/archive/user` → `/user` (query merged on Netlify)
+/archive/user  /user  301
 
-# No splat/wildcard rules here: `/archive/.../segment` URLs either hit a real Next
-# route when migrated or 404, so redirects to `/old/archive` are not mistaken for
-# “done” new-site pages. Re-add explicit lines (or splats) when cutting over a section.
-
-# Public user profile: legacy path tabs → canonical /user?id=&tab= (incoming ?id= merges on Netlify)
+# Public user profile — legacy path tabs → canonical `/user?tab=` (incoming ?id= merges on Netlify)
 /archive/user/overview  /user?tab=overview  301
 /archive/user/shows  /user?tab=shows  301
 /archive/user/songs  /user?tab=songs  301
 /archive/user/slots  /user?tab=slots  301
 /archive/user/personnel  /user?tab=personnel  301
-/archive/user/loose-ends  /user?tab=loose-ends  301
+/archive/user/badges  /user?tab=badges  301
+/archive/user/loose-ends  /user?tab=badges  301
 
 # Legacy path-style /user/{uuid} → query canonical (tab defaults in-app when omitted)
 /user/*  /user?id=:splat  301

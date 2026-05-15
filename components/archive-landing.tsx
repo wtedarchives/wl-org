@@ -90,7 +90,7 @@ export function ArchiveLanding() {
                 Have setlist corrections, new shows, or other archive data to
                 contribute? Use our{" "}
                 <Link
-                  href="/old/archive/submit"
+                  href="/archive/submit"
                   className="font-medium text-wl-orange underline hover:text-wl-light-orange"
                 >
                   Submit

@@ -49,10 +49,10 @@ function DproStatsContent() {
     if (selectedYear !== null) {
       const yearLabel =
         selectedYear === "all-time" ? "All-Time" : String(selectedYear)
-      document.title = `${yearLabel} Stats – WysteriaLane.org`
+      document.title = `${yearLabel} Stats – WTEDRadio.com`
     }
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [selectedYear])
 
@@ -60,7 +60,7 @@ function DproStatsContent() {
     if (selectedYear !== null) return
     const params = new URLSearchParams(searchParams.toString())
     params.set("year", String(DEFAULT_YEAR))
-    router.replace(`/old/archive/stats?${params.toString()}`, { scroll: false })
+    router.replace(`/archive/stats?${params.toString()}`, { scroll: false })
   }, [selectedYear, router, searchParams])
 
   const testConnection = useCallback(async () => {
@@ -109,7 +109,7 @@ function DproStatsContent() {
   const setYear = (year: number | string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set("year", String(year))
-    router.replace(`/old/archive/stats?${params.toString()}`, { scroll: false })
+    router.replace(`/archive/stats?${params.toString()}`, { scroll: false })
   }
 
   if (!isSupabaseConfigured() || connectionError) {

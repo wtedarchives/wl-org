@@ -95,9 +95,9 @@ export function WlHomeV2VenueArchiveDetailView({
 
   useEffect(() => {
     if (!venue) return
-    document.title = `${venue.venue} — WysteriaLane.org`
+    document.title = `${venue.venue} — WTEDRadio.com`
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [venue])
 

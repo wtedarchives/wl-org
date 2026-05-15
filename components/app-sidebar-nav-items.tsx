@@ -124,13 +124,14 @@ export function AppSidebarNavItems({
         <SidebarMenuButton
           tooltip="WTED Archives"
           isActive={
+            pathname.startsWith("/archive") ||
             pathname.startsWith("/old/archive") ||
             pathname === "/goose101" ||
             pathname === "/old/goose101"
           }
           asChild
         >
-          <Link href="/old/archive" className="flex min-w-0 items-center gap-2">
+          <Link href="/archive" className="flex min-w-0 items-center gap-2">
             <Image
               src="/wted-sa-cropped-2.png"
               alt=""

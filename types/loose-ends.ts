@@ -9,6 +9,11 @@ export interface LooseEndRow {
   end_local_file: string | null
 }
 
+export interface CompletionistSongRow {
+  song: string
+  heard: boolean
+}
+
 export interface LooseEndDisplay extends LooseEndRow {
   isCompleted?: boolean
   progress?: {
@@ -16,6 +21,8 @@ export interface LooseEndDisplay extends LooseEndRow {
     total: number
     percentage: number
   }
+  /** Populated for Completionist badges: canonical songs in category + heard at attended shows. */
+  completionistSongs?: CompletionistSongRow[]
 }
 
 export type GroupedLooseEnds = Record<string, LooseEndDisplay[]>
@@ -24,6 +31,12 @@ export type CategoryProgress = Record<
   string,
   { seen: number; total: number; percentage: number }
 >
+
+/** Result of {@link buildCategoryProgress}: progress totals + per-badge song rows for the UI. */
+export type CategoryProgressBundle = {
+  progress: CategoryProgress
+  songsByCompletionistEnd: Record<string, CompletionistSongRow[]>
+}
 
 export interface ShowForLooseEnds {
   show_id: string

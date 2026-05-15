@@ -5,9 +5,9 @@ import { WlHomeV2 } from "@/components/wl-home-v2"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { WlHomeV2SetlistPageClient } from "@/components/wl-home-v2/wl-home-v2-setlist-page-client"
 
-/** Plain fallback until `useSetlistArchiveDocumentTitle` runs with `WysteriaLane.org` suffix. */
+/** Plain fallback until `useSetlistArchiveDocumentTitle` runs with `WTEDRadio.com` suffix. */
 export const metadata: Metadata = {
-  title: { absolute: "Setlist" },
+  title: { absolute: "Setlist – WTEDRadio.com" },
 }
 
 export default function ArchiveSetlistPage() {

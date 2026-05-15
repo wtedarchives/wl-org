@@ -61,9 +61,9 @@ function SongPageContent({ songId }: { songId: string }) {
 
   useEffect(() => {
     if (song) {
-      document.title = `${song.song} – WysteriaLane.org`
+      document.title = `${song.song} – WTEDRadio.com`
       return () => {
-        document.title = ""
+        document.title = "WTEDRadio.com"
       }
     }
   }, [song])

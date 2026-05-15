@@ -1,4 +1,4 @@
-/* Profile — Loose Ends tab shell + archive tile message parity (see `user-personnel.css`). */
+/* Profile — Badges tab (My Stats); archive tile message parity (see `user-personnel.css`). */
 
 .wl-home-v2 .wl-home-v2-setlist .wl-profile-loose-ends-root a:hover,
 .wl-home-v2 .wl-home-v2-setlist .wl-profile-loose-ends-root a:focus-visible {
@@ -17,6 +17,7 @@
 .wl-home-v2-profile-loose-ends-tab__section {
   width: 100%;
   min-width: 0;
+  align-self: stretch;
 }
 
 .wl-home-v2 .wl-profile-loose-ends-root {
@@ -43,4 +44,84 @@
   margin-top: 0.75rem;
   display: flex;
   justify-content: center;
+}
+
+/* Main column: tighter rhythm on narrow viewports */
+.wl-profile-loose-ends-main {
+  gap: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .wl-profile-loose-ends-main {
+    gap: 2rem;
+  }
+}
+
+/* Category title row — inside panel */
+.wl-profile-loose-ends-category__head {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.wl-profile-loose-ends-category__title {
+  margin: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/*
+ * Per-category shell — match profile tab chrome (`.wl-home-v2-profile-stats-chrome-box`):
+ * rgba(0,0,0,0.63), rgb(63,65,64), blur(6px).
+ */
+.wl-profile-loose-ends-category__panel {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: loose-ends-cat;
+  position: relative;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.63);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 12px 14px 14px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Responsive 1→2→3→4 columns by *available* width inside the category panel (not viewport). */
+.wl-profile-loose-ends-category__grid {
+  box-sizing: border-box;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  align-items: start;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container loose-ends-cat (min-width: 28rem) {
+  .wl-profile-loose-ends-category__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container loose-ends-cat (min-width: 42rem) {
+  .wl-profile-loose-ends-category__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container loose-ends-cat (min-width: 53rem) {
+  .wl-profile-loose-ends-category__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

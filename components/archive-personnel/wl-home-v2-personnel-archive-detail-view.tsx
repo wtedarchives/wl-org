@@ -191,9 +191,9 @@ export function WlHomeV2PersonnelArchiveDetailView({
 
   useEffect(() => {
     if (!guest) return
-    document.title = `${guestName} — WysteriaLane.org`
+    document.title = `${guestName} — WTEDRadio.com`
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [guest, guestName])
 

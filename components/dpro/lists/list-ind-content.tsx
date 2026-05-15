@@ -8,7 +8,6 @@ import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import {
   useSetlistBreadcrumb,
-  WTED_ARCHIVES_BREADCRUMB_ROOT,
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
 } from "@/components/setlist-breadcrumb-context"
 import { useListIndData } from "@/hooks/use-list-ind-data"
@@ -27,15 +26,14 @@ interface ListIndContentProps {
 
 export function ListIndContent({ listId }: ListIndContentProps) {
   const pathname = usePathname()
-  const archiveV2Lists = pathname === "/archive/lists"
+  const pathnameBase = pathname?.split("?")[0] ?? ""
+  const archiveV2Lists =
+    pathnameBase === "/archive/lists" ||
+    pathnameBase === "/old/archive/lists"
   const { list, items, loading, error } = useListIndData(listId)
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
-  const listsIndexHref =
-    pathname === "/archive/lists" ? "/archive/lists" : "/old/archive/lists"
-  const archiveRoot =
-    pathname === "/archive/lists"
-      ? WL_V2_ARCHIVES_BREADCRUMB_ROOT
-      : WTED_ARCHIVES_BREADCRUMB_ROOT
+  const listsIndexHref = "/archive/lists"
+  const archiveRoot = WL_V2_ARCHIVES_BREADCRUMB_ROOT
 
   useEffect(() => {
     if (!list) return
@@ -55,9 +53,9 @@ export function ListIndContent({ listId }: ListIndContentProps) {
 
   useEffect(() => {
     if (list) {
-      document.title = `${list.list_name} – WysteriaLane.org`
+      document.title = `${list.list_name} – WTEDRadio.com`
       return () => {
-        document.title = ""
+        document.title = "WTEDRadio.com"
       }
     }
   }, [list])

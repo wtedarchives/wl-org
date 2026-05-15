@@ -27,14 +27,14 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "WysteriaLane.org",
+    default: "WTEDRadio.com",
     /**
      * `(main)` and other segments: child titles omit the suffix; this adds it.
-     * Homepage and future peers live under `(wl-home-v2)` with `— WysteriaLane.org` (see that layout).
+     * Homepage and future peers live under `(wl-home-v2)` with `— WTEDRadio.com` (see that layout).
      */
-    template: "%s – WysteriaLane.org",
+    template: "%s – WTEDRadio.com",
   },
-  description: "WysteriaLane.org",
+  description: "WTEDRadio.com",
 };
 
 export default function RootLayout({

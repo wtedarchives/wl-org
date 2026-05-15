@@ -145,7 +145,7 @@ export function DiscographyReleaseArchiveBody({
   useEffect(() => {
     if (!release) return
     const previousTitle = document.title
-    document.title = `${release.displayname} – WysteriaLane.org`
+    document.title = `${release.displayname} – WTEDRadio.com`
     return () => {
       document.title = previousTitle
     }

@@ -131,9 +131,9 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
 
   useEffect(() => {
     if (currentTour) {
-      document.title = `${currentTour.tour} – WysteriaLane.org`
+      document.title = `${currentTour.tour} – WTEDRadio.com`
       return () => {
-        document.title = ""
+        document.title = "WTEDRadio.com"
       }
     }
   }, [currentTour])

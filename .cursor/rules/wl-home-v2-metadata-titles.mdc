@@ -8,28 +8,28 @@ alwaysApply: false
 
 Routes under `app/(wl-home-v2)/` share `app/(wl-home-v2)/layout.tsx`, which sets:
 
-- **`template: "%s — WysteriaLane.org"`** (em dash, U+2014) for child pages
-- **`default: "WysteriaLane.org"`** when no page title is set
+- **`template: "%s — WTEDRadio.com"`** (em dash, U+2014) for child pages
+- **`default: "WTEDRadio.com"`** when no page title is set
 
 ## Rules
 
 1. **Root `/` (homepage)**  
-   In `app/(wl-home-v2)/page.tsx`, keep **`title: { absolute: "WysteriaLane.org" }`** so the tab is exactly `WysteriaLane.org` (no suffix, no template).
+   In `app/(wl-home-v2)/page.tsx`, keep **`title: { absolute: "WTEDRadio.com" }`** so the tab is exactly `WTEDRadio.com` (no suffix, no template).
 
 2. **Any new page in this group** (e.g. `app/(wl-home-v2)/about/page.tsx`)  
    Export metadata with a **short page name only**:
    - `export const metadata: Metadata = { title: "About" }`  
-   The layout produces **`About — WysteriaLane.org`**.  
-   **Do not** append ` — WysteriaLane.org` (or variants) in the page `title` string.
+   The layout produces **`About — WTEDRadio.com`**.  
+   **Do not** append ` — WTEDRadio.com` (or variants) in the page `title` string.
 
 3. **Full custom titles**  
    If a page must bypass the template, use `title: { absolute: "…" }` and document why.
 
 4. **Other app segments** (e.g. `(main)`, archive, auth)  
-   They use the root `app/layout.tsx` title template (`WysteriaLane.org` suffix). Do not move archive/auth routes into `(wl-home-v2)` unless the product intent is to rebrand those tabs to `— WysteriaLane.org`.
+   They use the root `app/layout.tsx` title template (`WTEDRadio.com` suffix). Do not move archive/auth routes into `(wl-home-v2)` unless the product intent is to rebrand those tabs to `— WTEDRadio.com`.
 
 ## Checklist
 
 - [ ] New v2-era route lives under `app/(wl-home-v2)/…`
-- [ ] Homepage still uses `title.absolute: "WysteriaLane.org"`
+- [ ] Homepage still uses `title.absolute: "WTEDRadio.com"`
 - [ ] Child pages use plain `title: "Name"` only (suffix comes from the group layout)

@@ -242,7 +242,7 @@ export function CommunityArchiveSection() {
             alt="WTED Archives"
             label="WTED Archives"
             description="The ultimate show history archive for Goose."
-            href="/old/archive"
+            href="/archive"
             mutedBg
             logoSrc="/wted-sa-cropped-2.png"
           />

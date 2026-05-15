@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth-context"
 import { ProfileMyStatsTab } from "@/components/dpro/profile/profile-my-stats-tab"
 import { ProfileStatsTabsShell } from "@/components/dpro/profile/profile-stats-tabs-shell"
 import {
+  canonicalProfileStatsTabParam,
   isProfileStatsTabSlug,
   type ProfileStatsTabSlug,
 } from "@/components/dpro/profile/profile-stats-tab-config"
@@ -23,6 +24,7 @@ import {
   WlHomeV2ProfileArchiveShell,
   WL_HOME_V2_PROFILE_STATS_TABS_SHELL_CLASS,
 } from "@/components/wl-home-v2/wl-home-v2-profile-archive-shell"
+import { useClientMounted } from "@/hooks/use-client-mounted"
 import { useHydratedProfileStatsTab } from "@/hooks/use-hydrated-profile-stats-tab"
 
 const ARCHIVE_PROFILE_TAB_HREF = (slug: string) =>
@@ -85,14 +87,23 @@ export function WlHomeV2ArchiveProfileLayoutClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
+  const clientMounted = useClientMounted()
 
   const tabRaw = useMemo(
     () => searchParams.get("tab")?.trim() ?? "",
     [searchParams],
   )
 
+  /** Matches static/SSR snapshot (empty query) until mount; avoids shell vs loading-body mismatches. */
+  const structuralTabRaw = clientMounted ? tabRaw : ""
+
+  const tabCanonical = useMemo(
+    () => (tabRaw ? canonicalProfileStatsTabParam(tabRaw) : ""),
+    [tabRaw],
+  )
+
   const resolvedTabForHydration: ProfileStatsTabSlug =
-    tabRaw && isProfileStatsTabSlug(tabRaw) ? tabRaw : "overview"
+    tabCanonical && isProfileStatsTabSlug(tabCanonical) ? tabCanonical : "overview"
   const displayTab = useHydratedProfileStatsTab(resolvedTabForHydration)
 
   useEffect(() => {
@@ -108,6 +119,16 @@ export function WlHomeV2ArchiveProfileLayoutClient() {
     if (authLoading || !session) return
     if (!tabRaw) {
       router.replace("/archive/profile?tab=overview", { scroll: false })
+    }
+  }, [authLoading, session, tabRaw, router])
+
+  useEffect(() => {
+    if (authLoading || !session || !tabRaw) return
+    const canon = canonicalProfileStatsTabParam(tabRaw)
+    if (tabRaw !== canon && isProfileStatsTabSlug(canon)) {
+      router.replace(`/archive/profile?tab=${encodeURIComponent(canon)}`, {
+        scroll: false,
+      })
     }
   }, [authLoading, session, tabRaw, router])
 
@@ -142,11 +163,14 @@ export function WlHomeV2ArchiveProfileLayoutClient() {
     return null
   }
 
-  if (tabRaw && !isProfileStatsTabSlug(tabRaw)) {
+  if (
+    structuralTabRaw &&
+    !isProfileStatsTabSlug(canonicalProfileStatsTabParam(structuralTabRaw))
+  ) {
     notFound()
   }
 
-  if (!tabRaw) {
+  if (!structuralTabRaw) {
     return (
       <ProfileArchiveMyStatsLoadingBody
         message="Loading profile…"

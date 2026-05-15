@@ -66,9 +66,9 @@ function PersonnelDetailPageContent({ guestId }: { guestId: string }) {
 
   useEffect(() => {
     if (guest) {
-      document.title = `${guestName} – WysteriaLane.org`
+      document.title = `${guestName} – WTEDRadio.com`
       return () => {
-        document.title = ""
+        document.title = "WTEDRadio.com"
       }
     }
   }, [guest, guestName])

@@ -83,9 +83,9 @@ export function ListsContent() {
   const { songLists, showLists, loading, error } = useListsData()
 
   useEffect(() => {
-    document.title = "Lists – WysteriaLane.org"
+    document.title = "Lists – WTEDRadio.com"
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [])
 

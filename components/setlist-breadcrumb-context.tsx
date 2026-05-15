@@ -10,10 +10,10 @@ import {
 
 export type BreadcrumbItem = { label: string; href: string }
 
-/** First segment for /old/archive routes in the site header breadcrumb. */
+/** First breadcrumb segment for setlist archive trails (link target `/archive`). */
 export const WTED_ARCHIVES_BREADCRUMB_ROOT: BreadcrumbItem = {
   label: "WTED Archives",
-  href: "/old/archive",
+  href: "/archive",
 }
 
 /** First segment for WL Home v2 `/archive/*` inline trails (e.g. setlist page). */

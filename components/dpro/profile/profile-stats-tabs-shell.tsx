@@ -6,6 +6,7 @@ import { Check, Share2 } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { PROFILE_STATS_TABS } from "@/components/dpro/profile/profile-stats-tab-config"
 import { WL_HOME_V2_PROFILE_CONTENT_MAX_CLASS } from "@/components/wl-home-v2/wl-home-v2-profile-archive-shell"
+import { useClientMounted } from "@/hooks/use-client-mounted"
 import { cn } from "@/lib/utils"
 
 import "./profile-stats-tabs-shell.css"
@@ -34,6 +35,10 @@ export function ProfileStatsTabsShell({
   children,
   className,
 }: ProfileStatsTabsShellProps) {
+  const shareChromeMounted = useClientMounted()
+  const showShareChrome =
+    shareChromeMounted && showShareButton && typeof onShare === "function"
+
   return (
     <div
       className={cn(
@@ -54,12 +59,12 @@ export function ProfileStatsTabsShell({
                 {title}
               </span>
             </div>
-            {showShareButton && onShare ?
+            {showShareChrome ?
               <button
                 type="button"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "sm" }),
-                  "wl-home-v2-tours-header-pill shrink-0 gap-1",
+                  "wl-home-v2-tours-header-pill shrink-0 gap-1 transition-opacity duration-200 ease-out",
                 )}
                 onClick={onShare}
                 title={shareCopied ? "Copied!" : "Copy share link"}

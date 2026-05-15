@@ -175,10 +175,10 @@ export function SetlistGameShowView({
       const dateLabel = formatSetlistGameDate(show.show_date)
       const venuePart = show.show_venue_location ?? ""
       const titlePart = venuePart ? `${dateLabel} - ${venuePart}` : dateLabel
-      document.title = `Setlist Game (${titlePart}) – WysteriaLane.org`
+      document.title = `Setlist Game (${titlePart}) – WTEDRadio.com`
     }
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [show])
 

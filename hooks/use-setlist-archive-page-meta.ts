@@ -11,7 +11,7 @@ import {
 } from "@/components/setlist-breadcrumb-context"
 import type { Show } from "@/types/setlist"
 
-/** Same trail as `/old/archive/setlist` header crumbs; `archivesRoot` chooses legacy vs v2 hub link. */
+/** Breadcrumb trail for setlist archive pages; `archivesRoot` is usually `WTED_ARCHIVES_BREADCRUMB_ROOT`. */
 export function buildSetlistArchiveBreadcrumbItems(
   archivesRoot: BreadcrumbItem,
   show: Show,
@@ -55,7 +55,7 @@ export function useSetlistArchiveDocumentTitle(
   show: Show | null | undefined,
   options?: { titleSuffix?: string },
 ) {
-  const titleSuffix = options?.titleSuffix ?? "WysteriaLane.org"
+  const titleSuffix = options?.titleSuffix ?? "WTEDRadio.com"
 
   useEffect(() => {
     if (!show) return
@@ -72,7 +72,7 @@ export function useSetlistArchiveDocumentTitle(
             : ""
     document.title = `${datePart}${middle} – ${titleSuffix}`
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [show, titleSuffix])
 }

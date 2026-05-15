@@ -53,9 +53,9 @@ export function VenuesContent() {
   const loading = venuesLoading || mapLoading || !mapChunkReady
 
   useEffect(() => {
-    document.title = "Venues – WysteriaLane.org"
+    document.title = "Venues – WTEDRadio.com"
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [])
 

@@ -162,9 +162,9 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
 
   useEffect(() => {
     if (!song) return
-    document.title = `${song.song_displayname?.trim() || song.song} — WysteriaLane.org`
+    document.title = `${song.song_displayname?.trim() || song.song} — WTEDRadio.com`
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [song])
 

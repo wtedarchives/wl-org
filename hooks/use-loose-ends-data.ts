@@ -177,13 +177,14 @@ export function useLooseEndsData(userId: string | null) {
           (e) => e.end_category === "Completionist"
         )
 
-        const progress = await buildCategoryProgress(
+        const categoryBundle = await buildCategoryProgress(
           supabase,
           categoryLooseEnds,
           allCategories,
           showIds,
           setLoadingProgress
         )
+        const { progress, songsByCompletionistEnd } = categoryBundle
 
         setLoadingProgress(92)
         const updatedLooseEnds = updateLooseEndsCompletion(
@@ -192,7 +193,8 @@ export function useLooseEndsData(userId: string | null) {
           showStats,
           standsAttended,
           fiveDone,
-          progress
+          progress,
+          songsByCompletionistEnd,
         )
         const { grouped, categoryList } =
           groupLooseEndsByCategory(updatedLooseEnds)

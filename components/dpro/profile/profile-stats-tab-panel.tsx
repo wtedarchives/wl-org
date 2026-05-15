@@ -127,7 +127,7 @@ export function ProfileStatsTabPanel({
           </div>
         </div>
       )
-    case "loose-ends":
+    case "badges":
       return (
         <div className="wl-home-v2-profile-loose-ends-tab">
           <div className="wl-home-v2-profile-loose-ends-tab__section">

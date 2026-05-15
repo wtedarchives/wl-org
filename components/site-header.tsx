@@ -82,9 +82,7 @@ function pathnameToBreadcrumbs(
     return [{ label: "Welcome to Wysteria Lane", href: "/old" }]
   }
   let pathForCrumb = pathname
-  let oldArchiveHrefPrefix = false
   if (pathname.startsWith("/old/archive")) {
-    oldArchiveHrefPrefix = true
     pathForCrumb = "/archive" + pathname.slice("/old/archive".length)
   }
   if (!pathForCrumb || pathForCrumb === "/") {
@@ -120,12 +118,7 @@ function pathnameToBreadcrumbs(
       segment === "wted" ? "/wted/program-director" : href
     items.push({ label, href: itemHref })
   }
-  if (!oldArchiveHrefPrefix) return items
-  return items.map((item) => ({
-    ...item,
-    href:
-      item.href.startsWith("/archive") ? `/old${item.href}` : item.href,
-  }))
+  return items
 }
 
 export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string } = {}) {
@@ -142,35 +135,46 @@ export function SiteHeader({ breadcrumbOverride }: { breadcrumbOverride?: string
     (pathname ?? "").startsWith("/archive/user") ||
     (pathname ?? "") === "/user"
   const useYearOverride =
-    ((pathname ?? "") === "/old/archive/years" ||
+    ((pathname ?? "") === "/archive/years" ||
+      (pathname ?? "").startsWith("/archive/years/") ||
+      (pathname ?? "") === "/old/archive/years" ||
       (pathname ?? "").startsWith("/old/archive/years/")) &&
     yearLabel != null
   const useProfileTrail =
     (pathname ?? "").startsWith("/old/archive/profile") ||
     (pathname ?? "").startsWith("/archive/profile")
+  const pathBase = (pathname ?? "").split("?")[0] ?? ""
   const useSetlistTrail =
-    (((pathname ?? "") === "/old/archive/setlist" ||
-      (pathname ?? "").startsWith("/old/archive/setlist/") ||
-      (pathname ?? "") === "/archive/setlistgame" ||
-      (pathname ?? "").startsWith("/archive/setlistgame/") ||
-      (pathname ?? "") === "/old/archive/setlistgame" ||
-      (pathname ?? "").startsWith("/old/archive/setlistgame/") ||
-      (pathname ?? "") === "/old/archive/tours" ||
-      (pathname ?? "").startsWith("/old/archive/tours/") ||
-      (pathname ?? "") === "/archive/song" ||
-      (pathname ?? "") === "/old/archive/song" ||
-      (pathname ?? "").startsWith("/old/archive/song/") ||
-      (pathname ?? "") === "/archive/personnel" ||
-      (pathname ?? "") === "/old/archive/personnel" ||
-      (pathname ?? "").startsWith("/old/archive/personnel/") ||
-      (pathname ?? "") === "/old/archive/venue" ||
-      (pathname ?? "") === "/old/archive/lists" ||
-      (pathname ?? "") === "/archive/lists" ||
-      (pathname ?? "") === "/archive/discography" ||
-      (pathname ?? "") === "/old/archive/discography" ||
-      (pathname ?? "").startsWith("/old/archive/discography/")) ||
-      (pathname ?? "") === "/wted/episode" ||
-      (pathname ?? "") === "/old/wted/episode") &&
+    ((
+      pathBase === "/archive/setlist" ||
+      pathBase.startsWith("/archive/setlist/") ||
+      pathBase === "/old/archive/setlist" ||
+      pathBase.startsWith("/old/archive/setlist/") ||
+      pathBase === "/archive/setlistgame" ||
+      pathBase.startsWith("/archive/setlistgame/") ||
+      pathBase === "/old/archive/setlistgame" ||
+      pathBase.startsWith("/old/archive/setlistgame/") ||
+      pathBase === "/archive/tours" ||
+      pathBase.startsWith("/archive/tours/") ||
+      pathBase === "/old/archive/tours" ||
+      pathBase.startsWith("/old/archive/tours/") ||
+      pathBase === "/archive/song" ||
+      pathBase.startsWith("/archive/song/") ||
+      pathBase === "/old/archive/song" ||
+      pathBase.startsWith("/old/archive/song/") ||
+      pathBase === "/archive/personnel" ||
+      pathBase.startsWith("/archive/personnel/") ||
+      pathBase === "/old/archive/personnel" ||
+      pathBase.startsWith("/old/archive/personnel/") ||
+      pathBase === "/archive/venue" ||
+      pathBase === "/old/archive/venue" ||
+      pathBase === "/archive/lists" ||
+      pathBase === "/old/archive/lists" ||
+      pathBase === "/archive/discography" ||
+      pathBase === "/old/archive/discography" ||
+      pathBase.startsWith("/old/archive/discography/")) ||
+      pathBase === "/wted/episode" ||
+      pathBase === "/old/wted/episode") &&
     setlistBreadcrumbs != null &&
     setlistBreadcrumbs.length > 0
   const breadcrumbs = breadcrumbOverride

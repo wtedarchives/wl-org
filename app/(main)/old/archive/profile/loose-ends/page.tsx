@@ -1,16 +1,6 @@
-"use client"
+import { redirect } from "next/navigation"
 
-import { useAuth } from "@/components/auth-context"
-import { ProfileStatsTabPanel } from "@/components/dpro/profile/profile-stats-tab-panel"
-
-export default function ProfileLooseEndsPage() {
-  const { session } = useAuth()
-
-  return (
-    <ProfileStatsTabPanel
-      tab="loose-ends"
-      userId={session?.profileId ?? null}
-      isOwnProfile
-    />
-  )
+/** Legacy path — canonical tab is `badges`. */
+export default function ProfileLooseEndsLegacyRedirectPage() {
+  redirect("/archive/profile?tab=badges")
 }

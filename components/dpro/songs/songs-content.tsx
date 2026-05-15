@@ -136,9 +136,9 @@ export function SongsContent() {
     useSongsArchiveData()
 
   useEffect(() => {
-    document.title = "Songs – WysteriaLane.org"
+    document.title = "Songs – WTEDRadio.com"
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [])
 

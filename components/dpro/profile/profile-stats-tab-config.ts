@@ -4,20 +4,32 @@ export const PROFILE_STATS_TABS = [
   { slug: "songs", label: "Songs" },
   { slug: "slots", label: "Slots" },
   { slug: "personnel", label: "Personnel" },
-  { slug: "loose-ends", label: "Loose Ends" },
+  { slug: "badges", label: "Badges" },
 ] as const
 
 export type ProfileStatsTabSlug = (typeof PROFILE_STATS_TABS)[number]["slug"]
+
+const PROFILE_STATS_TAB_LEGACY_ALIASES: Partial<Record<string, ProfileStatsTabSlug>> = {
+  "loose-ends": "badges",
+}
+
+/** Map legacy `?tab=` or path segments (e.g. `loose-ends`) to the current slug. */
+export function canonicalProfileStatsTabParam(raw: string): string {
+  const trimmed = raw.trim()
+  if (!trimmed) return ""
+  return PROFILE_STATS_TAB_LEGACY_ALIASES[trimmed] ?? trimmed
+}
 
 export function isProfileStatsTabSlug(s: string): s is ProfileStatsTabSlug {
   return PROFILE_STATS_TABS.some((t) => t.slug === s)
 }
 
-/** Path-based URLs only (e.g. `/old/archive/profile/overview`). Query-based My Stats uses `?tab=` on `/archive/profile`. */
+/** Path-based profile URLs (e.g. `/archive/profile/overview`) **301** to `?tab=`; canonical My Stats is `/archive/profile?tab=`. */
 export function getProfileStatsActiveTab(
   pathname: string | null | undefined
 ): ProfileStatsTabSlug {
   const segment = pathname?.split("/").pop() ?? ""
-  if (segment && isProfileStatsTabSlug(segment)) return segment
+  const canonical = canonicalProfileStatsTabParam(segment)
+  if (canonical && isProfileStatsTabSlug(canonical)) return canonical
   return "overview"
 }

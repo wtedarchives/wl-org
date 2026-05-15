@@ -43,10 +43,10 @@ export function SetlistGameTourView({
 
   useEffect(() => {
     if (tourInfo) {
-      document.title = `Setlist Game (${tourInfo.tour}) – WysteriaLane.org`
+      document.title = `Setlist Game (${tourInfo.tour}) – WTEDRadio.com`
     }
     return () => {
-      document.title = ""
+      document.title = "WTEDRadio.com"
     }
   }, [tourInfo])
 

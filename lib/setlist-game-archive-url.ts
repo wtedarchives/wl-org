@@ -1,9 +1,9 @@
-/** Canonical new shell `/archive/setlistgame`; legacy sidebar `/old/archive/setlistgame`. */
+/** Canonical `/archive/setlistgame`; `legacy` matches until old route tree is removed. */
 export type SetlistGameArchiveUrlShell = "v2" | "legacy"
 
 const SETLIST_GAME_PATH: Record<SetlistGameArchiveUrlShell, string> = {
   v2: "/archive/setlistgame",
-  legacy: "/old/archive/setlistgame",
+  legacy: "/archive/setlistgame",
 }
 
 export function getSetlistGameArchiveIndexUrl(

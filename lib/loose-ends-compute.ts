@@ -1,6 +1,7 @@
 import type {
   AttendedShowJoined,
   CategoryProgress,
+  CompletionistSongRow,
   GroupedLooseEnds,
   LooseEndDisplay,
   LooseEndRow,
@@ -111,7 +112,8 @@ export function updateLooseEndsCompletion(
   showStats: ShowStatsBundle,
   standsAttended: StandsAttended,
   fiveInARowCompleted: boolean,
-  progress: CategoryProgress
+  progress: CategoryProgress,
+  songsByCompletionistEnd: Record<string, CompletionistSongRow[]>,
 ): LooseEndDisplay[] {
   return looseEndsData.map((looseEnd) => {
     const cat = looseEnd.end_category
@@ -129,6 +131,7 @@ export function updateLooseEndsCompletion(
         ...looseEnd,
         isCompleted: isComplete,
         progress: categoryProgressData,
+        completionistSongs: songsByCompletionistEnd[looseEnd.end] ?? [],
       }
     }
 

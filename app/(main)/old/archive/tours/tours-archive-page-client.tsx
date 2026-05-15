@@ -119,9 +119,9 @@ function TourPageContent({ tourId }: { tourId: string }) {
 
   useEffect(() => {
     if (currentTour) {
-      document.title = `${currentTour.tour} – WysteriaLane.org`
+      document.title = `${currentTour.tour} – WTEDRadio.com`
       return () => {
-        document.title = ""
+        document.title = "WTEDRadio.com"
       }
     }
   }, [currentTour])
@@ -297,7 +297,7 @@ export default function ToursArchivePageClient() {
     let cancelled = false
     ;(async () => {
       if (!supabase) {
-        if (!cancelled) router.replace("/old/archive")
+        if (!cancelled) router.replace("/archive")
         return
       }
       const { data: tour } = await supabase
@@ -309,7 +309,7 @@ export default function ToursArchivePageClient() {
       if (tour?.tour_id) {
         router.replace(getTourArchiveUrl(tour.tour_id))
       } else {
-        router.replace("/old/archive")
+        router.replace("/archive")
       }
     })()
     return () => {

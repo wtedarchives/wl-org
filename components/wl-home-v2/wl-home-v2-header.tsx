@@ -10,12 +10,10 @@ import {
   useState,
   type MouseEvent,
 } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 
 import { RadioHomeSlot, RadioMobileSlot } from "@/components/persistent-radio"
 import { useIsBelowXl } from "@/hooks/use-mobile"
-
-import { toggleOldPathPrefix } from "@/lib/toggle-old-path-prefix"
 
 import { WlHomeV2ArchiveSubnavContent } from "./wl-home-v2-archive-subnav"
 import {
@@ -42,26 +40,6 @@ function TopNavPrimaryImage({ src }: { src: string }) {
   )
 }
 
-function TopNavOldPathToggle({
-  oldPathDebugActive,
-  onToggle,
-}: {
-  oldPathDebugActive: boolean
-  onToggle: () => void
-}) {
-  return (
-    <button
-      type="button"
-      className="top-nav-old-toggle"
-      aria-pressed={oldPathDebugActive}
-      title="Toggle /old/ in URL (compare legacy vs new)"
-      onClick={onToggle}
-    >
-      OLD
-    </button>
-  )
-}
-
 export function WlHomeV2Header({
   onOpenLogin,
   onOpenSignup,
@@ -80,7 +58,6 @@ export function WlHomeV2Header({
 }) {
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
-  const router = useRouter()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   /** Stable id (not `useId`) — see `WL_HOME_V2_TOP_NAV_PANEL_ID` in constants. */
   const mobileNavId = WL_HOME_V2_TOP_NAV_PANEL_ID
@@ -139,17 +116,6 @@ export function WlHomeV2Header({
     },
     [onOpenRadio, closeMobileNav],
   )
-
-  const onOldPathDebugToggle = useCallback(() => {
-    const nextPath = toggleOldPathPrefix(pathname)
-    const search = typeof window !== "undefined" ? window.location.search : ""
-    const hash = typeof window !== "undefined" ? window.location.hash : ""
-    router.push(`${nextPath}${search}${hash}`)
-    closeMobileNav()
-  }, [pathname, router, closeMobileNav])
-
-  const oldPathDebugActive =
-    pathname === "/old" || pathname.startsWith("/old/")
 
   const isHomeIndex = pathname === "/"
 
@@ -220,10 +186,6 @@ export function WlHomeV2Header({
             <span className="dotorg">Powered by Wysteria Lane</span>
           </div>
         </Link>
-        <TopNavOldPathToggle
-          oldPathDebugActive={oldPathDebugActive}
-          onToggle={onOldPathDebugToggle}
-        />
       </div>
 
       <nav

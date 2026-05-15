@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-const DISCOGRAPHY_INDEX_TITLE = "Discography – WysteriaLane.org"
+const DISCOGRAPHY_INDEX_TITLE = "Discography – WTEDRadio.com"
 
 function DiscographyCategoryCard({
   category,

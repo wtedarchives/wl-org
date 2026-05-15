@@ -16,16 +16,16 @@ export const WTED_RADIO_SUB = [
 ] as const
 
 export const SETLIST_ARCHIVE_SUB = [
-  { title: "Tours", url: "/old/archive/tours" },
+  { title: "Tours", url: "/archive/tours" },
   { title: "Songs", url: "/archive/songs" },
   { title: "Stats", url: "/archive/stats" },
   { title: "Personnel", url: "/archive/personnel" },
   { title: "Venues", url: "/archive/venues" },
   { title: "Discography", url: "/archive/discography" },
   { title: "Lists", url: "/archive/lists" },
-  { title: "Setlist Game", url: "/old/archive/setlistgame" },
+  { title: "Setlist Game", url: "/archive/setlistgame" },
   { title: "Goose 101", url: "/goose101" },
-  { title: "Submit", url: "/old/archive/submit" },
+  { title: "Submit", url: "/archive/submit" },
 ] as const
 
 /** Hardcoded years for nav; year_id must match Supabase years table (year, year_id). */

@@ -76,9 +76,6 @@
     gap: 12px;
     min-width: 0;
   }
-  .wl-home-v2 header.top .top-brand-cluster .top-nav-old-toggle {
-    flex-shrink: 0;
-  }
   .wl-home-v2 header.top nav.top-nav {
     grid-area: nav;
     justify-self: center;
@@ -183,36 +180,6 @@
     object-fit: contain;
   }
   .wl-home-v2 nav.top-nav .top-nav-primary-row > a:hover{ color: #fff; background: rgba(255,255,255,0.06); }
-  .wl-home-v2 header.top button.top-nav-old-toggle {
-    display: inline-flex;
-    align-items: center;
-    font-size: 12px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.55);
-    text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px dashed rgb(68, 70, 69);
-    background: rgba(0, 0, 0, 0.12);
-    font-family: "Geist Mono", ui-monospace, monospace;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: color 0.15s, background 0.15s, border-color 0.15s;
-  }
-  .wl-home-v2 header.top button.top-nav-old-toggle:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgb(99, 101, 100);
-  }
-  .wl-home-v2 header.top button.top-nav-old-toggle[aria-pressed="true"] {
-    color: var(--wl-light-orange);
-    border-color: rgb(123, 65, 55);
-    background: rgba(255, 122, 103, 0.1);
-  }
-  .wl-home-v2 header.top button.top-nav-old-toggle:focus-visible {
-    outline: 2px solid var(--wl-light-orange);
-    outline-offset: 2px;
-  }
   .wl-home-v2 .top-nav-user-trigger {
     display: inline-flex;
     align-items: center;
@@ -435,25 +402,6 @@
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a:hover {
       background: rgba(88, 200, 174, 0.18);
       border-color: rgb(52, 109, 95);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-    .wl-home-v2 header.top .top-brand-cluster .top-nav-old-toggle {
-      flex-shrink: 0;
-      box-sizing: border-box;
-      min-height: 44px;
-      min-width: 44px;
-      padding: 8px 10px;
-      justify-content: center;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 600;
-      line-height: 1.15;
-      border-style: dashed;
-    }
-    .wl-home-v2 header.top .top-brand-cluster .top-nav-old-toggle:hover {
-      background: rgba(255, 122, 103, 0.15);
-      border-color: rgb(123, 65, 55);
       color: #fff;
       transform: translateY(-1px);
     }

@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth-context"
 import { usePublicProfileBreadcrumb } from "@/components/public-profile-breadcrumb-context"
 import { ProfileStatsTabPanel } from "@/components/dpro/profile/profile-stats-tab-panel"
 import {
+  canonicalProfileStatsTabParam,
   isProfileStatsTabSlug,
   type ProfileStatsTabSlug,
 } from "@/components/dpro/profile/profile-stats-tab-config"
@@ -18,11 +19,13 @@ import { resolveArchiveUserSearchParams } from "@/lib/resolve-archive-user-searc
 import { supabase } from "@/lib/supabase"
 import { WL_HOME_V2_PROFILE_CONTENT_MAX_CLASS } from "@/components/wl-home-v2/wl-home-v2-profile-archive-shell"
 import { cn } from "@/lib/utils"
+import { useClientMounted } from "@/hooks/use-client-mounted"
 import { useHydratedProfileStatsTab } from "@/hooks/use-hydrated-profile-stats-tab"
 
 export default function ArchiveUserPageClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const clientMounted = useClientMounted()
   const { session } = useAuth()
   const { setPublicProfileBreadcrumbLabel } = usePublicProfileBreadcrumb()
   const [username, setUsername] = useState<string | null>(null)
@@ -33,8 +36,13 @@ export default function ArchiveUserPageClient() {
     [searchParams],
   )
 
+  const structuralTabRaw = clientMounted ? tabRaw : ""
+
+  const tabCanonical = tabRaw ? canonicalProfileStatsTabParam(tabRaw) : ""
   const resolvedProfileTab: ProfileStatsTabSlug =
-    !invalidParams && tabRaw && isProfileStatsTabSlug(tabRaw) ? tabRaw : "overview"
+    !invalidParams && tabCanonical && isProfileStatsTabSlug(tabCanonical) ?
+      tabCanonical
+    : "overview"
   const displayTab = useHydratedProfileStatsTab(resolvedProfileTab)
 
   const isOwnProfile = !!(
@@ -47,6 +55,14 @@ export default function ArchiveUserPageClient() {
     if (invalidParams) return
     if (profileUserId && !tabRaw) {
       router.replace(getUserProfileUrl(profileUserId, undefined, "overview"))
+    }
+  }, [invalidParams, profileUserId, tabRaw, router])
+
+  useEffect(() => {
+    if (invalidParams || !profileUserId || !tabRaw) return
+    const canon = canonicalProfileStatsTabParam(tabRaw)
+    if (tabRaw !== canon && isProfileStatsTabSlug(canon)) {
+      router.replace(getUserProfileUrl(profileUserId, undefined, canon))
     }
   }, [invalidParams, profileUserId, tabRaw, router])
 
@@ -81,11 +97,14 @@ export default function ArchiveUserPageClient() {
 
   if (invalidParams) notFound()
 
-  if (tabRaw && !isProfileStatsTabSlug(tabRaw)) {
+  if (
+    structuralTabRaw &&
+    !isProfileStatsTabSlug(canonicalProfileStatsTabParam(structuralTabRaw))
+  ) {
     notFound()
   }
 
-  if (profileUserId && !tabRaw) {
+  if (profileUserId && !structuralTabRaw) {
     return <LoadingPageCard message="Loading profile…" />
   }
 

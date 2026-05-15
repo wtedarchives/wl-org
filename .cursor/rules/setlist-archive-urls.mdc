@@ -10,7 +10,7 @@ All URL slugs for **Setlist Archive** pages must start with `/archive`.
 ## Convention
 
 - **Base path**: `/archive`
-- **`public/_redirects`**: Exact section index URLs (e.g. `/archive/years`) still **301** to `/old/archive/...` where the live app lives today. **Wildcard / splat rules** (e.g. `/archive/setlist/*` → `?id=:splat`) are **not** used: path-style legacy URLs either hit a real migrated Next route or **404**, so a redirect to `/old/archive` is not mistaken for a finished `/archive` page. Re-add explicit or splat rules when cutting over a section to production.
+- **`public/_redirects`**: Profile tab paths (`/archive/profile/overview`, etc.) and public user paths (`/archive/user/...`) normalize to query forms. There are **no** `/old/archive` → `/archive` migration redirects (pre-launch site).
 - **Examples**:
   - Years: `/archive/years?id={uuid}` — use `getYearArchiveUrl(yearId)` from `lib/year-archive-url.ts`. Old path form `/archive/years/{uuid}` has no blanket redirect; migrate the route or add a rule when ready.
   - Tours: `/archive/tours?id={uuid}` — use `getTourArchiveUrl(tourId)` from `lib/tour-archive-url.ts`. Same for legacy `/archive/tours/{uuid}`.
@@ -20,8 +20,8 @@ All URL slugs for **Setlist Archive** pages must start with `/archive`.
   - **Discography index**: `/archive/discography`. **Discography release**: `/archive/discography?id={uuid}` — use `getDiscographyArchiveUrl(releaseUuid)` from `lib/discography-archive-url.ts`. Same for legacy `/archive/discography/{uuid}`.
   - **Lists index**: `/archive/lists`. **List detail**: `/archive/lists?id={uuid}` — use `getListArchiveUrl(listId)` from `lib/list-archive-url.ts`. Same for legacy `/archive/lists/{uuid}`.
   - **Setlist Game index**: `/archive/setlistgame`. **Per-show game**: `/archive/setlistgame?id={show_id}` — `getSetlistGameShowArchiveUrl` from `lib/setlist-game-archive-url.ts`. **Per-tour game**: `/archive/setlistgame?tour_id={tour_id}` — `getSetlistGameTourArchiveUrl`. Same for legacy path-style setlist game URLs.
-  - **My Stats (signed-in)**: `/archive/profile?tab={slug}` — same tab slugs as public profiles. Legacy `/archive/profile/{tab}` **301** in `public/_redirects`.
-  - **Public user stats**: `/user?id={user_uuid}&tab={slug}` (`overview`, `shows`, `songs`, `slots`, `personnel`, `loose-ends`) — use `getUserProfileUrl` from `lib/user-profile-url.ts`. Legacy `/archive/user` and `/archive/user/{tab}` **301** to `/user` with merged query in `public/_redirects`. Legacy `/user/{uuid}` **301** to `?id=`.
+  - **My Stats (signed-in)**: `/archive/profile?tab={slug}` — same tab slugs as public profiles. Path-style `/archive/profile/{tab}` **301** in `public/_redirects` to `?tab=`.
+  - **Public user stats**: `/user?id={user_uuid}&tab={slug}` (`overview`, `shows`, `songs`, `slots`, `personnel`, `badges`; legacy `loose-ends` **301** / canonicalized to `badges`) — use `getUserProfileUrl` from `lib/user-profile-url.ts`. `/archive/user` **301** to `/user` with merged query in `public/_redirects`. Legacy `/user/{uuid}` **301** to `?id=`.
   - Submit: `/archive/submit`
   - **Show setlist (per-show)**: `/archive/setlist?id={uuid}` — use `getSetlistArchiveUrl(showId)` from `lib/setlist-archive-url.ts` for every internal link. Static export cannot add new `generateStaticParams` entries after deploy; query-based URLs avoid that. **Legacy** `?show_id=` is still accepted on the client and replaced with `?id=` for the same value.
 
