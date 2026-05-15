@@ -1,6 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
@@ -13,6 +20,7 @@ import {
   WlHomeV2ArchiveCrumbsShell,
   WlHomeV2ArchiveCrumbsTrail,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
+import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
 import { WtedEpisodeGroupSpreadCard } from "@/components/wted/wted-episode-group-spread-card"
 import { WtedEpisodePageHeroV2 } from "@/components/wted/wted-episode-page-hero-v2"
 import {
@@ -25,12 +33,15 @@ import { useWtedEpisodePageId } from "@/hooks/use-wted-episode-page-id"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { wtedEpisodeHasMultipleShowGroups } from "@/lib/wted-episode-show-group"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
+import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 
 import "@/components/archive-songs/songs-archive-verbatim.css"
 
 const WL_V2_WTED_EPISODE_PAGE_CLASS =
   "wl-home-v2-years-page wl-home-v2-setlist songs-archive-verbatim wl-home-v2-songs-archive-page wl-home-v2-wted-episode-page box-border flex min-h-0 min-w-0 w-full flex-1 flex-col"
+
+type WtedEpisodeLayoutMode = "mobile" | "desktop" | null
 
 export function WlHomeV2WtedEpisodePageClient() {
   const router = useRouter()
@@ -52,6 +63,7 @@ export function WlHomeV2WtedEpisodePageClient() {
   const [jotyDrawerYear, setJotyDrawerYear] = useState<number | null>(null)
   const [jotyDrawerHighlightedEntryId, setJotyDrawerHighlightedEntryId] =
     useState<string | null>(null)
+  const [layoutMode, setLayoutMode] = useState<WtedEpisodeLayoutMode>(null)
   const { episodeId, invalidParams } = useWtedEpisodePageId()
   const {
     episode,
@@ -62,6 +74,18 @@ export function WlHomeV2WtedEpisodePageClient() {
     notFound,
     loadError,
   } = useWtedEpisodeDetailData(invalidParams ? undefined : episodeId)
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia(`(min-width: ${TAILWIND_XL_MIN_PX}px)`)
+    const apply = () => {
+      setLayoutMode(mq.matches ? "desktop" : "mobile")
+    }
+    apply()
+    mq.addEventListener("change", apply)
+    return () => mq.removeEventListener("change", apply)
+  }, [])
+
+  const useTwoColumnLayout = layoutMode === "desktop"
 
   const playlistSetlist = useMemo(
     () => rows.map((r) => r.setlistEntry),
@@ -241,7 +265,12 @@ export function WlHomeV2WtedEpisodePageClient() {
       />
 
       <div className="wl-home-v2-years-body">
-        <div className="wl-home-v2-years-columns wl-home-v2-years-columns--desktop">
+        <div
+          className={cn(
+            "wl-home-v2-years-columns",
+            useTwoColumnLayout && "wl-home-v2-years-columns--desktop",
+          )}
+        >
           <section className="wl-home-v2-years-tile wl-home-v2-years-tile--main wl-home-v2-tile-bg--newbg3">
             <div className="wl-home-v2-years-tile-inner flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
               <WtedEpisodePageHeroV2

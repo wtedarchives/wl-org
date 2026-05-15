@@ -87,14 +87,6 @@
   background: color-mix(in srgb, var(--wl-orange) 46%, transparent);
 }
 
-@media (max-width: 639px) {
-  .wl-home-v2
-    .wl-home-v2-years-shows-panel.wl-home-v2-profile-shows-attended
-    .wl-home-v2-tours-header-pill.wl-home-v2-profile-shows-manage-pill {
-    min-height: 44px;
-  }
-}
-
 .wl-home-v2-profile-shows-message {
   padding: 1.5rem 1rem;
   font-size: 0.875rem;

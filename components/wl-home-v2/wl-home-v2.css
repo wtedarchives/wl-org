@@ -8411,11 +8411,6 @@
     border-color: rgb(123, 94, 63);
     color: #fff;
   }
-  @media (max-width: 639px) {
-    .wl-home-v2 .wl-home-v2-profile-stats-chrome-box .wl-home-v2-tours-header-pill {
-      min-height: 44px;
-    }
-  }
   .wl-home-v2
     .wl-home-v2-archive-admin-tab-shell
     .wl-home-v2-years-shows-wp-head

@@ -141,7 +141,7 @@ export function WtedEpisodeSetlistDataRow({
         className={cn(
           pxPad,
           wl ?
-            "align-top text-[13px] text-white/65 whitespace-normal"
+            "align-top text-[13px] text-white/65 whitespace-nowrap"
           : "whitespace-nowrap text-muted-foreground",
         )}
       >
