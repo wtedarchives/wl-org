@@ -10940,6 +10940,70 @@
   line-height: 1.15 !important;
   padding-left: 6px !important;
 }
+
+/* Setlist crumbs admin icons — same pill recipe as `.wl-home-v2-setlist-select-trigger`. */
+.wl-home-v2-setlist-admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.wl-home-v2-setlist-admin-toolbar__btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 4px 10px;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  border-radius: 8px;
+  border: 1px solid rgb(49, 51, 49);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    opacity 0.18s;
+}
+.wl-home-v2-setlist-admin-toolbar__btn:hover:not(:disabled) {
+  background: rgba(255, 122, 103, 0.12);
+  border-color: rgb(135, 70, 60);
+  color: rgba(255, 255, 255, 0.9);
+}
+.wl-home-v2-setlist-admin-toolbar__btn:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+}
+.wl-home-v2-setlist-admin-toolbar__btn:active:not(:disabled) {
+  opacity: 0.9;
+}
+.wl-home-v2-setlist-admin-toolbar__btn--copied {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgb(52, 120, 75);
+  color: rgba(255, 255, 255, 0.92);
+}
+.wl-home-v2-setlist-admin-toolbar__btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.wl-home-v2-setlist-admin-toolbar__btn svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 .wl-home-v2-setlist-select-content {
   background: rgba(18, 20, 19, 0.98) !important;
   color: rgba(255, 255, 255, 0.92) !important;

@@ -41,8 +41,13 @@ import type { SetlistEntry } from "@/types/setlist"
 export function WlHomeV2SetlistPageClient() {
   const { session } = useAuth()
   const { showId, invalidParams } = useSetlistArchiveShowId()
-  const { showAdminUi } = useSetlistAdmin(session, showId)
   const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
+  const {
+    showAdminUi,
+    linkCopied,
+    handleCopyLink,
+    handleEditShow,
+  } = useSetlistAdmin(session, showId, show?.show_id)
   const { tours } = useTours()
   const { showDates } = useShowDates(show ?? null, showId)
   const showPosition = useShowPosition(show ?? null, showDates)
@@ -222,6 +227,9 @@ export function WlHomeV2SetlistPageClient() {
         showId={showId}
         setlist={setlist}
         showAdminUi={showAdminUi}
+        adminLinkCopied={linkCopied}
+        onAdminCopyShowId={handleCopyLink}
+        onAdminEditShow={handleEditShow}
         copiedEntryIds={showAdminUi ? copiedEntryIds : undefined}
         onNumberClick={showAdminUi ? handleNumberClick : undefined}
         onJotyBadgeClick={onJotyBadgeClick}

@@ -7,12 +7,23 @@ import type { WysteriaSession } from "@/lib/jwt"
 
 const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
 
-export function useSetlistAdmin(session: WysteriaSession | null, showId: string | undefined) {
+/** Set to `false` before shipping — bypasses admin check for setlist admin UI (toolbar, row tools). */
+const TEMP_DISABLE_SETLIST_ADMIN_GATE = true
+
+export function useSetlistAdmin(
+  session: WysteriaSession | null,
+  showId: string | undefined,
+  /** Prefer `shows.show_id` from loaded row; falls back to URL param when omitted. */
+  clipboardShowId?: string | null,
+) {
   const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAdminLoading, setIsAdminLoading] = useState(true)
   const [linkCopied, setLinkCopied] = useState(false)
   const [wlHovered, setWlHovered] = useState(false)
+
+  const idForClipboard =
+    clipboardShowId?.trim() || showId?.trim() || ""
 
   useEffect(() => {
     if (!session) {
@@ -25,32 +36,34 @@ export function useSetlistAdmin(session: WysteriaSession | null, showId: string 
   }, [session])
 
   const handleCopyLink = useCallback(async () => {
-    if (!showId) return
+    if (!idForClipboard) return
     try {
-      await navigator.clipboard.writeText(showId)
+      await navigator.clipboard.writeText(idForClipboard)
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     } catch (err) {
       console.error("Failed to copy:", err)
     }
-  }, [showId])
+  }, [idForClipboard])
 
   const handleEditShow = useCallback(() => {
-    if (!showId) return
+    if (!idForClipboard) return
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem("adminSelectedShowId", showId)
+      localStorage.setItem("adminSelectedShowId", idForClipboard)
       localStorage.setItem(ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY, "Setlist")
     }
     router.push(
-      `/archive/admin?show_id=${encodeURIComponent(showId)}`,
+      `/archive/admin?show_id=${encodeURIComponent(idForClipboard)}`,
     )
-  }, [showId, router])
+  }, [idForClipboard, router])
 
   const handleWlMouseEnter = useCallback(() => setWlHovered(true), [])
   const handleWlMouseLeave = useCallback(() => setWlHovered(false), [])
 
   const showAdminUi =
-    !isAdminLoading && (isAdmin || session?.profileId === LEGACY_ADMIN_USER_ID)
+    TEMP_DISABLE_SETLIST_ADMIN_GATE ||
+    (!isAdminLoading &&
+      (isAdmin || session?.profileId === LEGACY_ADMIN_USER_ID))
 
   return {
     isAdmin,

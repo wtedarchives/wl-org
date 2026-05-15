@@ -107,7 +107,7 @@ export default function SetlistArchivePageClient() {
     linkCopied,
     handleCopyLink,
     handleEditShow,
-  } = useSetlistAdmin(session, showId)
+  } = useSetlistAdmin(session, showId, show?.show_id)
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { changes, loading: changesLoading } = useShowChanges(showId)
   const { setlistUrl } = useSetlistScan(showId)

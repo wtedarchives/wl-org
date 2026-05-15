@@ -57,6 +57,9 @@ export function WlHomeV2SetlistPlaceholderView({
   showId,
   setlist,
   showAdminUi,
+  adminLinkCopied,
+  onAdminCopyShowId,
+  onAdminEditShow,
   copiedEntryIds,
   onNumberClick,
   showPositionInTour,
@@ -92,6 +95,9 @@ export function WlHomeV2SetlistPlaceholderView({
   showId: string
   setlist: SetlistEntry[]
   showAdminUi?: boolean
+  adminLinkCopied?: boolean
+  onAdminCopyShowId?: () => void
+  onAdminEditShow?: () => void
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
   onJotyBadgeClick: (entry: SetlistEntry) => void
@@ -217,6 +223,10 @@ export function WlHomeV2SetlistPlaceholderView({
         onTourSelect={onTourSelect}
         onTourShowSelect={onTourShowSelect}
         openArchiveHub={openArchiveHub ?? undefined}
+        showAdminUi={showAdminUi}
+        adminLinkCopied={adminLinkCopied}
+        onAdminCopyShowId={onAdminCopyShowId}
+        onAdminEditShow={onAdminEditShow}
       />
 
       <div className="wl-home-v2-years-body">

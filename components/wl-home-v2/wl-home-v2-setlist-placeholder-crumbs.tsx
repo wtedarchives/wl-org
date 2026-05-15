@@ -15,6 +15,7 @@ import {
   WL_HOME_V2_SETLIST_SELECT_CONTENT,
   WL_HOME_V2_SETLIST_SELECT_TRIGGER,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view.constants"
+import { WlHomeV2SetlistAdminToolbar } from "@/components/wl-home-v2/wl-home-v2-setlist-admin-toolbar"
 
 export type WlHomeV2SetlistPlaceholderCrumbsBarProps = {
   breadcrumbs: BreadcrumbItem[] | null
@@ -25,6 +26,10 @@ export type WlHomeV2SetlistPlaceholderCrumbsBarProps = {
   onTourSelect: (tourId: string) => void
   onTourShowSelect: (showId: string) => void
   openArchiveHub: (() => void) | undefined
+  showAdminUi?: boolean
+  adminLinkCopied?: boolean
+  onAdminCopyShowId?: () => void
+  onAdminEditShow?: () => void
 }
 
 export function WlHomeV2SetlistPlaceholderCrumbsBar({
@@ -36,6 +41,10 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
   onTourSelect,
   onTourShowSelect,
   openArchiveHub,
+  showAdminUi,
+  adminLinkCopied,
+  onAdminCopyShowId,
+  onAdminEditShow,
 }: WlHomeV2SetlistPlaceholderCrumbsBarProps) {
   return (
     <WlHomeV2ArchiveCrumbsShell
@@ -50,6 +59,13 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
       }
       selectors={
         <>
+          {showAdminUi && onAdminCopyShowId && onAdminEditShow ?
+            <WlHomeV2SetlistAdminToolbar
+              linkCopied={adminLinkCopied ?? false}
+              onCopyShowId={onAdminCopyShowId}
+              onEditInAdmin={onAdminEditShow}
+            />
+          : null}
           <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
             <SetlistTourDropdown
               tours={tours}
