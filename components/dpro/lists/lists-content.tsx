@@ -6,7 +6,6 @@ import { Card, CardTitle } from "@/components/ui/card"
 import {
   CategoryCompleteRotatingArtwork,
   DripfieldRotatingArtwork,
-  JiveRotatingArtwork,
 } from "@/components/dpro/rotating-bandcamp-artwork"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { useListsData, type List } from "@/hooks/use-lists-data"
@@ -28,12 +27,6 @@ function ListCard({ list }: { list: List }) {
           )}
           {list.list_type === "category_complete" && (
             <CategoryCompleteRotatingArtwork
-              className="float-right mb-1 ml-2 size-8 border-border/60"
-              imageSizes="32px"
-            />
-          )}
-          {list.list_type === "jive_complete" && (
-            <JiveRotatingArtwork
               className="float-right mb-1 ml-2 size-8 border-border/60"
               imageSizes="32px"
             />

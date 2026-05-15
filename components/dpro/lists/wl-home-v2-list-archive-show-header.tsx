@@ -4,14 +4,13 @@ import {
   CategoryCompleteRotatingArtwork,
   CoverSongsRotatingArtwork,
   DripfieldRotatingArtwork,
-  JiveRotatingArtwork,
 } from "@/components/dpro/rotating-bandcamp-artwork"
 
 export type WlHomeV2ListArchiveHeaderArtwork =
   | "cover-songs"
   | "category-complete"
-  | "jive"
   | "dripfield"
+  | "none"
 
 const rotatingArtClassName =
   "wl-home-v2-list-archive-header-rotating-art relative z-[3] float-right mb-2 ml-3 size-10 shrink-0 border-[rgb(49,51,49)]"
@@ -28,13 +27,9 @@ export function WlHomeV2ListArchiveShowHeader({
   const desc = listDescription?.trim() ?? ""
 
   const rotating =
-    artwork === "category-complete" ?
+    artwork === "none" ? null
+    : artwork === "category-complete" ?
       <CategoryCompleteRotatingArtwork
-        className={rotatingArtClassName}
-        imageSizes="40px"
-      />
-    : artwork === "jive" ?
-      <JiveRotatingArtwork
         className={rotatingArtClassName}
         imageSizes="40px"
       />

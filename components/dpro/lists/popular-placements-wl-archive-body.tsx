@@ -49,6 +49,7 @@ export function PopularPlacementsWlArchiveBody({
           <WlHomeV2ListArchiveShowHeader
             listName={listName}
             listDescription={listDescription}
+            artwork="none"
           />
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
@@ -124,7 +125,7 @@ export function PopularPlacementsWlArchiveBody({
               </div>
             </div>
 
-            <div className="hidden min-h-0 flex-1 xl:flex xl:flex-row xl:gap-4">
+            <div className="hidden min-h-0 flex-1 xl:flex xl:flex-row xl:items-start xl:gap-4">
               {sectionModels.map(({ section, index, items }) => (
                 <PopularPlacementsWlSectionTable
                   key={section.title}

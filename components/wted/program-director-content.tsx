@@ -16,6 +16,7 @@ import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { SHOWS_INTRO } from "@/app/(main)/wted/shows/content"
 import { Card, CardContent } from "@/components/ui/card"
 import { ProgramDirectorShowsSection } from "@/components/wted/program-director-shows-section"
+import { WTED_PROGRAM_DIRECTOR_CATALOG_PATH } from "@/lib/wted-program-director-catalog-url"
 
 const PROGRAM_DIRECTOR_LEDE_P1 =
   "WTED Goose Radio features a slate of regularly occurring shows covering a wide range of topics and experiences — from seasonal tour mixes and highlights from special tours like Taboose, to listener-curated shows, events, and partnerships with friends of WTED. Check the schedule on our homepage or in our iOS and Android apps and tune in regularly."
@@ -159,6 +160,10 @@ export function ProgramDirectorContent({
           <div className="wl-home-v2-page-lede-body">
             <p>{PROGRAM_DIRECTOR_LEDE_P1}</p>
             <p>
+              <Link href={WTED_PROGRAM_DIRECTOR_CATALOG_PATH}>Click here</Link>{" "}
+              to view the full list of performances that have been chosen for shows airing on WTED Radio.
+            </p>
+            <p>
               Have an idea or want to contribute? Become a GORP (Goose Obsessed
               Radio Personality) over at the{" "}
               <Link
@@ -185,6 +190,15 @@ export function ProgramDirectorContent({
             <CardContent className="border-t border-border/40 bg-muted/20 px-3 py-3 text-xs leading-relaxed text-muted-foreground">
               <div className="space-y-4">
                 <p>{PROGRAM_DIRECTOR_LEDE_P1}</p>
+                <p>
+                  <Link
+                    href={WTED_PROGRAM_DIRECTOR_CATALOG_PATH}
+                    className="font-medium text-foreground hover:underline"
+                  >
+                    Click here
+                  </Link>{" "}
+                  to view the full list of performances that have been chosen for shows airing on WTED Radio.
+                </p>
                 <p>
                   Have an idea or want to contribute? Become a GORP (Goose Obsessed
                   Radio Personality) over at the{" "}

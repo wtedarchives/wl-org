@@ -3,10 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-  DripfieldRotatingArtwork,
-  JiveRotatingArtwork,
-} from "@/components/dpro/rotating-bandcamp-artwork"
+import { DripfieldRotatingArtwork } from "@/components/dpro/rotating-bandcamp-artwork"
 import { useCategoryArtwork } from "@/hooks/use-category-artwork"
 import type { Show } from "@/types/setlist"
 import { cn } from "@/lib/utils"
@@ -121,20 +118,6 @@ export function JiveCompleteBadge({
   return (
     <BadgeLink
       href={getListArchiveUrl(JIVE_LIST_ID)}
-      imageSlot={
-        <JiveRotatingArtwork
-          className={
-            linkClassName?.includes("wl-home-v2-setlist-badge-link") ?
-              "wl-home-v2-setlist-badge-rotating-art"
-            : undefined
-          }
-          imageSizes={
-            linkClassName?.includes("wl-home-v2-setlist-badge-link") ?
-              "40px"
-            : undefined
-          }
-        />
-      }
       imageAlt="Jive Suite"
       className={linkClassName}
       asideMediaLayout={linkClassName?.includes("wl-home-v2-setlist-badge-link")}

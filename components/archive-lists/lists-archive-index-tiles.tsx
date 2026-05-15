@@ -7,7 +7,6 @@ import { useId } from "react"
 import {
   CategoryCompleteRotatingArtwork,
   DripfieldRotatingArtwork,
-  JiveRotatingArtwork,
 } from "@/components/dpro/rotating-bandcamp-artwork"
 import { HOME_BG_IMAGES } from "@/components/wl-home-shared"
 import { cn } from "@/lib/utils"
@@ -40,14 +39,6 @@ function ListTypeArtwork({
   if (listType === "category_complete") {
     return (
       <CategoryCompleteRotatingArtwork
-        className={cn("size-7 shrink-0 border border-[rgb(49,51,49)]", className)}
-        imageSizes="28px"
-      />
-    )
-  }
-  if (listType === "jive_complete") {
-    return (
-      <JiveRotatingArtwork
         className={cn("size-7 shrink-0 border border-[rgb(49,51,49)]", className)}
         imageSizes="28px"
       />

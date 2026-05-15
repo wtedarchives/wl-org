@@ -138,6 +138,43 @@ export function formatSetlistDate(dateInput: string | number | null | undefined)
   return `${month}.${day}.${year}`
 }
 
+/**
+ * Show date as MM.DD.YYYY (four-digit year), UTC — for WTED catalog and similar.
+ */
+export function formatShowDateLongYear(
+  dateInput: string | number | null | undefined,
+): string {
+  if (dateInput == null) return ""
+  if (typeof dateInput === "number") {
+    const date = new Date(dateInput)
+    if (Number.isNaN(date.getTime())) return ""
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0")
+    const day = date.getUTCDate().toString().padStart(2, "0")
+    const year = date.getUTCFullYear().toString()
+    return `${month}.${day}.${year}`
+  }
+  const s = String(dateInput).trim()
+  if (!s) return ""
+  if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)) {
+    const [mo, da, yr] = s.split(".")
+    return `${mo!.padStart(2, "0")}.${da!.padStart(2, "0")}.${yr}`
+  }
+  if (/^\d{1,2}\.\d{1,2}\.\d{2}$/.test(s)) {
+    const [mo, da, yr2] = s.split(".")
+    const yNum = Number.parseInt(yr2!, 10)
+    const fullYear =
+      yNum >= 70 ? 1900 + yNum : 2000 + yNum
+    return `${mo!.padStart(2, "0")}.${da!.padStart(2, "0")}.${fullYear}`
+  }
+  const date = new Date(s.includes("T") ? s : s + "T00:00:00Z")
+  const time = date.getTime()
+  if (Number.isNaN(time)) return s
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0")
+  const day = date.getUTCDate().toString().padStart(2, "0")
+  const year = date.getUTCFullYear().toString()
+  return `${month}.${day}.${year}`
+}
+
 export function calculateShowPosition(
   show: Show,
   showDates: ShowDate[],

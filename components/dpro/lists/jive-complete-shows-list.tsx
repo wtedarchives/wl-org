@@ -57,7 +57,7 @@ export function JiveCompleteShowsList({
         <CompleteShowsListWlShell
           listName={listName}
           listDescription={listDescription}
-          headerArtwork="jive"
+          headerArtwork="none"
         >
           <div className="px-3 py-2 text-xs text-white/55">No shows found.</div>
         </CompleteShowsListWlShell>
@@ -87,7 +87,7 @@ export function JiveCompleteShowsList({
       <CompleteShowsListWlShell
         listName={listName}
         listDescription={listDescription}
-        headerArtwork="jive"
+        headerArtwork="none"
       >
         {table}
       </CompleteShowsListWlShell>

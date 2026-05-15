@@ -62,6 +62,7 @@ const PATH_LABELS: Record<string, string> = {
   "wted/shows": "Shows and More",
   "wted/about": "About Us and FAQ",
   "wted/program-director": "Program Director",
+  "wted/program-director/catalog": "Performance Catalog",
   "old/support": "Support WTED",
   support: "Support Wysteria Lane",
   archive: WTED_ARCHIVES_BREADCRUMB_ROOT.label,

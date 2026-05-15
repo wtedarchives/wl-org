@@ -3,7 +3,6 @@
 import {
   CategoryCompleteRotatingArtwork,
   DripfieldRotatingArtwork,
-  JiveRotatingArtwork,
 } from "@/components/dpro/rotating-bandcamp-artwork"
 import { LoadingPageCard } from "@/components/dpro/loading-page-card"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
@@ -186,12 +185,6 @@ export function ListContentWithLoading({
                         imageSizes="40px"
                       />
                     )}
-                    {listType === "jive_complete" && (
-                      <JiveRotatingArtwork
-                        className="size-8 shrink-0 border-border/60"
-                        imageSizes="40px"
-                      />
-                    )}
                     <div className="min-w-0 flex-1 space-y-2">
                       <h1 className="text-sm font-semibold">
                         {list.list_name}
@@ -244,12 +237,6 @@ export function ListContentWithLoading({
                     )}
                     {listType === "category_complete" && (
                       <CategoryCompleteRotatingArtwork
-                        className="size-8 shrink-0 border-border/60"
-                        imageSizes="40px"
-                      />
-                    )}
-                    {listType === "jive_complete" && (
-                      <JiveRotatingArtwork
                         className="size-8 shrink-0 border-border/60"
                         imageSizes="40px"
                       />

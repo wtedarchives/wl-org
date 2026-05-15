@@ -60,6 +60,7 @@ export function LongestShowsList({
               <WlHomeV2ListArchiveShowHeader
                 listName={listName}
                 listDescription={listDescription}
+                artwork="none"
               />
               <div className="px-3 py-2 text-xs text-white/55">No shows found.</div>
             </div>
@@ -95,6 +96,7 @@ export function LongestShowsList({
             <WlHomeV2ListArchiveShowHeader
               listName={listName}
               listDescription={listDescription}
+              artwork="none"
             />
             {table}
           </div>

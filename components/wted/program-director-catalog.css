@@ -1,0 +1,500 @@
+/* Performance catalog — entry_short pill matches WL Home v2 setlist `.short` */
+
+.wl-home-v2 .wl-home-v2-pd-catalog-entry-short {
+  display: inline-block;
+  margin-left: 0;
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 11px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(200, 88, 108, 0.15);
+  color: oklch(0.84 0.12 12);
+  border: 1px solid rgb(100, 44, 58);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episodes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episode-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.18);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background-color 0.15s ease-out,
+    border-color 0.15s ease-out;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episode-link:hover {
+  background: rgba(88, 200, 174, 0.11);
+  border-color: rgb(80, 120, 108);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episode-art {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episode-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episode-series {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-episode-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+/* ----- Performance catalog page layout (avoid Tailwind utility order clashes with wl-home-v2.css) ----- */
+
+.wl-home-v2 .wl-home-v2-pd-catalog-stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-stage-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: rgb(22, 27, 24);
+  background-image: url("/WTED3.png");
+  background-repeat: no-repeat;
+  background-position: center 38%;
+  background-size: min(920px, 132vw);
+  opacity: 0.12;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-content > .wl-home-v2-page-lede {
+  flex-shrink: 0;
+}
+
+/*
+ * Outer gutters + tours-style marbled backdrop (full grayscale vs years tile’s partial grayscale).
+ * Same asset as `.wl-home-v2-years-tile::before` / setlist aside (`/newbg.png`).
+ */
+.wl-home-v2 .wl-home-v2-pd-catalog-panel-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 24px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-panel-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/newbg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.68;
+  filter: grayscale(100%) brightness(0.78);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-panel-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 16, 15, 0.78) 0%,
+    rgba(8, 9, 9, 0.92) 100%
+  );
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-panel-wrap > * {
+  position: relative;
+  z-index: 2;
+}
+
+.wl-home-v2 .widget-panel.wl-home-v2-pd-catalog-widget-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-widget-panel > .wp-head {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-wrap {
+  flex: 1 1 auto;
+  min-width: min(100%, 148px);
+  max-width: 280px;
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-pd-catalog-search-wrap {
+    flex: 0 0 248px;
+    max-width: none;
+    min-width: 180px;
+  }
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-field {
+  position: relative;
+  width: 100%;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-field .wl-home-v2-pd-catalog-search-input[data-slot="input"] {
+  padding-right: 10px;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-search-field--has-value
+  .wl-home-v2-pd-catalog-search-input[data-slot="input"] {
+  padding-right: 26px;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-input[data-slot="input"] {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+  height: auto;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(0, 0, 0, 0.38);
+  color: rgba(255, 255, 255, 0.92);
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: normal;
+  text-transform: none;
+  transition:
+    border-color 0.18s ease-out,
+    box-shadow 0.18s ease-out,
+    background-color 0.18s ease-out;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-pd-catalog-search-input[data-slot="input"] {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 0;
+  line-height: 0;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  transition:
+    color 0.18s ease-out,
+    background-color 0.18s ease-out;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-clear span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-clear:hover {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-clear:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(88, 200, 174, 0.45);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-input[data-slot="input"]::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-search-input[data-slot="input"]:focus-visible {
+  outline: none;
+  border-color: rgba(88, 200, 174, 0.65);
+  box-shadow: 0 0 0 2px rgba(88, 200, 174, 0.28);
+  background: rgba(0, 0, 0, 0.48);
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-widget-panel .wl-home-v2-years-table-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-error {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 40px 22px;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-pd-catalog-error {
+    padding: 48px 36px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wl-home-v2 .wl-home-v2-pd-catalog-error {
+    padding: 56px 44px;
+  }
+}
+
+/*
+ * `.set-table` thead/th/td — mirrors `.wl-home-v2-setlist .set-table` (WL Home setlist page).
+ * Scoped under `.wl-home-v2-pd-catalog-widget-panel` so shadcn `<Table>` picks up the same look.
+ */
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --set-table-row-line: rgb(43, 46, 44);
+  --set-table-section-line: rgb(53, 56, 54);
+}
+
+/* Shadcn `<Table>` wraps `<table>` in a scrolling container; size table by content for horizontal scroll. */
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  [data-slot="table-container"]
+  table.set-table.wl-home-v2-pd-catalog-set-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  .wl-home-v2-pd-catalog-cell-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  .wl-home-v2-pd-catalog-cell-link:hover {
+  text-decoration: underline;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  thead
+  tr[data-slot="table-row"] {
+  border-bottom: 1px solid var(--set-table-section-line);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  thead
+  th[data-slot="table-head"] {
+  height: auto !important;
+  min-height: 0 !important;
+  text-align: left;
+  padding: 2px 14px;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  thead
+  th[data-slot="table-head"].center {
+  text-align: center;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  td[data-slot="table-cell"] {
+  padding: 2px 14px;
+  border-bottom: 1px solid var(--set-table-row-line);
+  vertical-align: middle;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  td[data-slot="table-cell"].wl-home-v2-pd-catalog-td-muted {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  td[data-slot="table-cell"].center {
+  text-align: center;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  tr[data-slot="table-row"]:last-child
+  td {
+  border-bottom: 0;
+}
+
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  tr[data-slot="table-row"]:hover
+  td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Row opens modal; nested song title spans otherwise default to the text caret */
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  tr[data-slot="table-row"].song-row,
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  tr[data-slot="table-row"].song-row
+  td[data-slot="table-cell"],
+.wl-home-v2
+  .wl-home-v2-pd-catalog-widget-panel
+  .set-table.wl-home-v2-pd-catalog-set-table
+  tbody
+  tr[data-slot="table-row"].song-row
+  td[data-slot="table-cell"]
+  * {
+  cursor: pointer;
+}

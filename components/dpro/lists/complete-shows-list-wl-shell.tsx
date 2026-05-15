@@ -9,7 +9,7 @@ import {
 
 export type CompleteShowsListHeaderArtwork = Extract<
   WlHomeV2ListArchiveHeaderArtwork,
-  "category-complete" | "jive" | "dripfield"
+  "category-complete" | "dripfield" | "none"
 >
 
 /**

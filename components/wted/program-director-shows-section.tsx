@@ -22,13 +22,7 @@ export function ProgramDirectorShowsSection({
 }) {
   if (isV2) {
     return (
-      <section
-        className="wl-home-v2-pd-shows-grid"
-        aria-labelledby="wl-home-v2-pd-shows-heading"
-      >
-        <h2 id="wl-home-v2-pd-shows-heading" className="wl-home-v2-pd-shows-grid-label">
-          Shows
-        </h2>
+      <section className="wl-home-v2-pd-shows-grid" aria-label="Shows">
         {showsWithEpisodes.length === 0 ?
           <p className="col-span-full px-7 py-10 text-center text-xs italic text-white/50 sm:px-8">
             No shows with episodes to display.
@@ -118,10 +112,7 @@ export function ProgramDirectorShowsSection({
   }
 
   return (
-    <div className="mb-8 w-full min-w-0 space-y-3 pb-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Shows
-      </h2>
+    <div className="mb-8 w-full min-w-0 pb-4">
       {showsWithEpisodes.length === 0 ?
         <p className="text-xs italic text-muted-foreground">
           No shows with episodes to display.

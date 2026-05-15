@@ -54,9 +54,10 @@ export function SeguesWlArchiveBody({
           <WlHomeV2ListArchiveShowHeader
             listName={listName}
             listDescription={listDescription}
+            artwork="none"
           />
 
-          <div className="widget-panel w-full min-w-0 flex-1">
+          <div className="widget-panel w-full min-w-0 shrink-0">
             <div className="wp-head wl-home-v2-years-shows-wp-head">
               <span className="min-w-0 truncate">Most Common Segues</span>
             </div>

@@ -2345,24 +2345,6 @@
       grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
-  .wl-home-v2 .wl-home-v2-pd-shows-grid-label {
-    grid-column: 1 / -1;
-    margin: 0;
-    padding: 16px 28px 12px;
-    font-family: "Geist Mono", ui-monospace, monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.55);
-    border-bottom: 1px solid rgb(34, 37, 35);
-    background: rgba(0, 0, 0, 0.12);
-  }
-  @media (max-width: 1023px) {
-    .wl-home-v2 .wl-home-v2-pd-shows-grid-label {
-      padding-inline: 20px;
-    }
-  }
   .wl-home-v2 .wl-home-v2-pd-show-cell {
     min-width: 0;
     min-height: 0;
@@ -5018,6 +5000,45 @@
     max-width: min(56rem, 96vw);
     width: 100%;
     max-height: min(90vh, 900px);
+  }
+  /* Program Director catalog — between wide tour modal (~56rem) and prior narrow (~340px) */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-song.modal--pd-catalog-airplay {
+    max-width: min(618px, 94vw);
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-song.modal--pd-catalog-airplay
+    .modal-request-body.modal-setlist-song-body {
+    box-shadow: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-song.modal--pd-catalog-airplay
+    .modal-request-head.modal-setlist-song-head {
+    position: relative;
+    align-items: flex-start;
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-song.modal--pd-catalog-airplay
+    .modal-setlist-song-head-spacer {
+    display: none;
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-song.modal--pd-catalog-airplay
+    .modal-setlist-song-head-center {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    padding-right: 44px;
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-song.modal--pd-catalog-airplay
+    .modal-setlist-song-head-trailing {
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex: 0 0 auto;
+    min-width: 0;
   }
   /* Setlist rating / reviews — same flow as archive drawer; wide for review list */
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-rating {

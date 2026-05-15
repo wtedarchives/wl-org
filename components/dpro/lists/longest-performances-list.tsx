@@ -233,6 +233,7 @@ export function LongestPerformancesList({
           <WlHomeV2ListArchiveShowHeader
             listName={listName}
             listDescription={listDescription}
+            artwork="none"
           />
 
           <div className="widget-panel wl-home-v2-longest-perf-table-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

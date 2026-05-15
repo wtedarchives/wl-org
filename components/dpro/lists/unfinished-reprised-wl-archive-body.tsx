@@ -30,9 +30,10 @@ export function UnfinishedReprisedWlArchiveBody({
           <WlHomeV2ListArchiveShowHeader
             listName={listName}
             listDescription={listDescription}
+            artwork="none"
           />
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 xl:flex-row xl:gap-4">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 xl:flex-row xl:items-start xl:gap-4">
             <UnfinishedWlPanel rows={unfinished} />
             <ReprisesWlPanel rows={sandwiches} onSandwichClick={onSandwichClick} />
           </div>
