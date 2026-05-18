@@ -8,6 +8,7 @@ import {
 import type { SetlistEntry } from "@/types/setlist"
 import {
   INDEX_SKIP_SONG_IMPROV_JAM,
+  getSetlistEntrySongSpreadCategoryKey,
   isSongSpreadCoverCategory,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 
@@ -32,8 +33,7 @@ export function computeSetlistSongSpread(
   const seenSongs = new Set<string>()
 
   for (const entry of source) {
-    const category =
-      entry.song_category || entry.songs?.song_category || "undefined"
+    const category = getSetlistEntrySongSpreadCategoryKey(entry)
     const songKey = entry.entry_song
 
     if (!includeAllEpisodeEntries) {

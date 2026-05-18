@@ -1,0 +1,555 @@
+/*
+ * Share-image export — mirrors WL Home v2 setlist main column:
+ * `.wl-home-v2-years-tile` base + `::before` tile bg + `.wl-home-v2-setlist .wl-home-v2-years-tile--main` wash,
+ * and `.setlist-card` for the table / coach / callbacks panels (no backdrop-filter for reliable PNG capture).
+ *
+ * Capture width is set inline from `WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX` (see share export card).
+ */
+.wl-home-v2-share-export__root {
+  box-sizing: border-box;
+  position: relative;
+  background: transparent;
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* Same shell as `.wl-home-v2-years-tile` + rounded clip */
+.wl-home-v2-share-export__frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(49, 58, 52, 0.97);
+}
+
+/* Stacked bg: photo layer + green wash (setlist main tile ::before / ::after) */
+.wl-home-v2-share-export__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wl-home-v2-share-export__bg-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.9;
+  filter: grayscale(35%) brightness(0.8);
+}
+
+.wl-home-v2-share-export__bg-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 91, 78, 0.43) 0%,
+    rgba(40, 91, 78, 0.86) 88%
+  );
+}
+
+.wl-home-v2-share-export__body {
+  position: relative;
+  z-index: 2;
+  padding: 8px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Mirrors `.wl-home-v2 a.brand` / `.brand-mark` / `.brand-text` — compact strip for PNG export */
+.wl-home-v2-share-export__brand-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: -8px -16px 8px -16px;
+  padding: 5px 16px;
+  box-sizing: border-box;
+  background: #285b4e;
+  border-bottom: 1px solid rgb(34, 37, 35);
+}
+
+.wl-home-v2-share-export__brand-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.wl-home-v2-share-export__brand-mark {
+  flex-shrink: 0;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgb(31, 31, 31);
+  border: 1px solid rgb(24, 25, 24);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.wl-home-v2-share-export__brand-mark-img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
+
+.wl-home-v2-share-export__brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.wl-home-v2-share-export__brand-title {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.wl-home-v2-share-export__brand-tagline {
+  margin-top: 3px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.wl-home-v2-share-export__top-split {
+  display: grid;
+  grid-template-columns: 1.75fr 1.25fr;
+  gap: 6px;
+  align-items: start;
+}
+
+.wl-home-v2-share-export__top-split-main {
+  min-width: 0;
+}
+
+.wl-home-v2-share-export__top-split-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wl-home-v2-share-export__top-split-aside > .wl-home-v2-share-export__block {
+  margin-top: 0;
+}
+
+.wl-home-v2-share-export__show-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.72);
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.wl-home-v2-share-export__show-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wl-home-v2-share-export__show-stats-label {
+  min-width: 0;
+  flex: 1;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.25;
+}
+
+.wl-home-v2-share-export__show-stats-pill {
+  flex-shrink: 0;
+  display: inline-block;
+  box-sizing: border-box;
+  padding: 1px 4px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.wl-home-v2-share-export__pills {
+  display: flex;
+  gap: 6px;
+}
+
+.wl-home-v2-share-export__pills--stack {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+.wl-home-v2-share-export__pills--stack .wl-home-v2-share-export__pill {
+  width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+/* Frosted panel — match `.wl-home-v2-share-export__table-wrap` radius */
+.wl-home-v2-share-export__pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.72);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.wl-home-v2-share-export__pill--group-date {
+  font-size: 13px;
+}
+
+.wl-home-v2-share-export__pill-line {
+  display: block;
+  width: 100%;
+}
+
+.wl-home-v2-share-export__pill-line--muted {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Matches `.wl-home-v2-setlist .setlist-card` */
+.wl-home-v2-share-export__table-wrap {
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.72);
+  overflow: hidden;
+}
+
+.wl-home-v2-share-export__table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.wl-home-v2-share-export__tbody tr.wl-home-v2-share-export__song-row td {
+  vertical-align: top;
+  padding: 0;
+  border-bottom: none;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.wl-home-v2-share-export__tbody
+  tr.wl-home-v2-share-export__song-row
+  td.wl-home-v2-share-export__rail {
+  vertical-align: middle;
+}
+
+/* Same recipe as `.wl-home-v2-setlist .set-table tr.set-divider-row td.set-divider-cell` */
+.wl-home-v2-share-export__divider-cell {
+  padding: 0 !important;
+  height: 9px;
+  line-height: 0;
+  font-size: 0;
+  vertical-align: middle;
+  border-bottom: none;
+  background: rgba(255, 122, 103, 0.16);
+  border-top: 1px solid rgb(59, 62, 60);
+}
+
+.wl-home-v2-share-export__divider-row--encore .wl-home-v2-share-export__divider-cell {
+  background: rgba(255, 122, 103, 0.29);
+  border-top-color: rgb(95, 60, 53);
+}
+
+/* Set rail — table-cell only (flex on td breaks rowspan height); label centered */
+.wl-home-v2-share-export__rail {
+  box-sizing: border-box;
+  width: 0.875rem;
+  min-width: 0.875rem;
+  max-width: 0.875rem;
+  padding: 0;
+  vertical-align: middle;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.36);
+  border-right: 1px solid rgb(59, 62, 60);
+}
+
+.wl-home-v2-share-export__rail--encore {
+  background: rgba(255, 122, 103, 0.18);
+  border-right-color: rgb(95, 60, 53);
+}
+
+.wl-home-v2-share-export__rail-text {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.wl-home-v2-share-export__rail--encore .wl-home-v2-share-export__rail-text {
+  color: rgb(255, 186, 176);
+}
+
+/* Mirrors `.wl-home-v2-setlist .set-table td.song-cell` — short/segue hug title (no flex-grow gap). */
+.wl-home-v2-share-export__song-cell {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.wl-home-v2-share-export__song-cell .wl-home-v2-share-export__song-cell-stack {
+  margin-inline: 8px;
+}
+
+.wl-home-v2-share-export__song-cell-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Within each entry_set run: first row 4px top, last row 4px bottom, middle rows 2px vertical. */
+.wl-home-v2-share-export__song-cell-stack--set-first.wl-home-v2-share-export__song-cell-stack--set-last {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.wl-home-v2-share-export__song-cell-stack--set-first:not(
+    .wl-home-v2-share-export__song-cell-stack--set-last
+  ) {
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.wl-home-v2-share-export__song-cell-stack--set-last:not(
+    .wl-home-v2-share-export__song-cell-stack--set-first
+  ) {
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+
+.wl-home-v2-share-export__song-cell-stack:not(
+    .wl-home-v2-share-export__song-cell-stack--set-first
+  ):not(.wl-home-v2-share-export__song-cell-stack--set-last) {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.wl-home-v2-share-export__song-cell-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  line-height: 1;
+}
+
+.wl-home-v2-share-export__song-cell-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 1px 4px;
+  max-width: 100%;
+  min-width: 0;
+  line-height: 1;
+}
+
+.wl-home-v2-share-export__song-name-slot {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  display: block;
+  /* Trailing fade — avoids widening the table column; pairs with `table-layout: fixed` + `td` overflow */
+  mask-image: linear-gradient(
+    to right,
+    #fff 0%,
+    #fff calc(100% - 14px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #fff 0%,
+    #fff calc(100% - 14px),
+    transparent 100%
+  );
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+/* SongDisplayName (`compactInline`) uses `inline` spans — constrain for fade + nowrap in flex row */
+.wl-home-v2-share-export__song-name-slot > * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.wl-home-v2-share-export__short,
+.wl-home-v2-share-export__segue {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* Same as `.wl-home-v2-setlist .set-table td.song-cell .short` */
+.wl-home-v2-share-export__short {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0;
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(200, 88, 108, 0.19);
+  color: oklch(0.84 0.12 12);
+  border: 1px solid rgb(100, 44, 58);
+}
+
+/* Same as `.wl-home-v2-setlist .set-table td.song-cell .segue` */
+.wl-home-v2-share-export__segue {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  line-height: 1;
+  color: oklch(0.6 0.14 12);
+  margin: 0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.wl-home-v2-share-export__entry-coach {
+  padding-top: 0;
+  margin-left: 12px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Coach HTML often leads with <p> — strip default top margin so it hugs the song line */
+.wl-home-v2-share-export__rich.wl-home-v2-share-export__rich--entry-coach > :first-child {
+  margin-top: 0 !important;
+}
+
+.wl-home-v2-share-export__rich.wl-home-v2-share-export__rich--entry-coach
+  :where(p, ul, ol) {
+  margin-bottom: 0;
+}
+
+.wl-home-v2-share-export__rich.wl-home-v2-share-export__rich--entry-coach
+  :where(p + p, li + li) {
+  margin-top: 0.2em;
+}
+
+/*
+ * Must chain both classes: the element uses `rich` + `rich--entry-coach`, and base
+ * `.wl-home-v2-share-export__rich` is declared later — equal specificity would lose.
+ */
+.wl-home-v2-share-export__rich.wl-home-v2-share-export__rich--entry-coach {
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.wl-home-v2-share-export__rich.wl-home-v2-share-export__rich--entry-coach a {
+  font-size: inherit;
+  color: rgba(255, 163, 148, 0.55);
+}
+
+.wl-home-v2-share-export__rich a {
+  color: rgb(255, 163, 148);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Coach / callbacks — same panel recipe as `.setlist-card` */
+.wl-home-v2-share-export__block {
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.72);
+  padding: 8px;
+}
+
+.wl-home-v2-share-export__block-title {
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.wl-home-v2-share-export__rich {
+  font-size: 11px;
+  line-height: 1.05;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-home-v2-share-export__top-split-aside > .wl-home-v2-share-export__block .wl-home-v2-share-export__rich {
+  font-size: 10px;
+}
+
+/*
+ * Line breaks in CMS HTML: `<br>` spacing is unreliable in layout + html-to-image; breaks are
+ * rewritten to this block in `prepareWlHomeV2ShareExportRichHtml`. Tune height for paragraph gaps.
+ */
+.wl-home-v2-share-export__rich-br-gap {
+  display: block;
+  height: 3px;
+}

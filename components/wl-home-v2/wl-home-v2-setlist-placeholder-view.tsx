@@ -60,6 +60,7 @@ export function WlHomeV2SetlistPlaceholderView({
   adminLinkCopied,
   onAdminCopyShowId,
   onAdminEditShow,
+  onShareSetlistImage,
   copiedEntryIds,
   onNumberClick,
   showPositionInTour,
@@ -98,6 +99,7 @@ export function WlHomeV2SetlistPlaceholderView({
   adminLinkCopied?: boolean
   onAdminCopyShowId?: () => void
   onAdminEditShow?: () => void
+  onShareSetlistImage?: () => void
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
   onJotyBadgeClick: (entry: SetlistEntry) => void
@@ -227,6 +229,7 @@ export function WlHomeV2SetlistPlaceholderView({
         adminLinkCopied={adminLinkCopied}
         onAdminCopyShowId={onAdminCopyShowId}
         onAdminEditShow={onAdminEditShow}
+        onShareSetlistImage={onShareSetlistImage}
       />
 
       <div className="wl-home-v2-years-body">

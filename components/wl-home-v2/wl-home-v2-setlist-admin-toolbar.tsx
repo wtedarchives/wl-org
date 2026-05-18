@@ -8,12 +8,14 @@ export type WlHomeV2SetlistAdminToolbarProps = {
   linkCopied: boolean
   onCopyShowId: () => void
   onEditInAdmin: () => void
+  onShareSetlistImage?: () => void
 }
 
 export function WlHomeV2SetlistAdminToolbar({
   linkCopied,
   onCopyShowId,
   onEditInAdmin,
+  onShareSetlistImage,
 }: WlHomeV2SetlistAdminToolbarProps) {
   return (
     <div
@@ -38,9 +40,14 @@ export function WlHomeV2SetlistAdminToolbar({
       <button
         type="button"
         className="wl-home-v2-setlist-admin-toolbar__btn"
-        disabled
-        aria-label="Setlist image export (coming soon)"
-        title="Setlist image export (coming soon)"
+        disabled={!onShareSetlistImage}
+        onClick={onShareSetlistImage}
+        aria-label="Generate setlist share image"
+        title={
+          onShareSetlistImage ?
+            "Generate setlist image"
+          : "Setlist image unavailable"
+        }
       >
         <UploadSimple className="size-3.5" weight="bold" aria-hidden />
       </button>

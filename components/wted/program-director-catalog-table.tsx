@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { ProgramDirectorCatalogRow } from "@/lib/fetch-program-director-catalog"
-import { formatShowDateLongYear } from "@/lib/setlist-utils"
+import { formatSetlistDate } from "@/lib/setlist-utils"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { cn } from "@/lib/utils"
@@ -128,9 +128,9 @@ export function ProgramDirectorCatalogTable({
                       className="wl-home-v2-pd-catalog-cell-link"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {formatShowDateLongYear(row.showDate)}
+                      {formatSetlistDate(row.showDate)}
                     </Link>
-                  : formatShowDateLongYear(row.showDate)
+                  : formatSetlistDate(row.showDate)
                 : null}
               </TableCell>
               <TableCell className="wl-home-v2-pd-catalog-location wl-home-v2-pd-catalog-td-muted">

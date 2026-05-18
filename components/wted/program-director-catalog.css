@@ -17,6 +17,42 @@
   border: 1px solid rgb(100, 44, 58);
 }
 
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-show-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0 6px;
+}
+
+.wl-home-v2 .wl-home-v2-pd-catalog-modal-show-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgb(63, 84, 76);
+  transition:
+    border-color 0.15s ease-out,
+    background-color 0.15s ease-out;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-pd-catalog-modal-show-pill {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
 .wl-home-v2 .wl-home-v2-pd-catalog-modal-episodes {
   display: flex;
   flex-direction: column;
@@ -371,6 +407,8 @@
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --set-table-row-line: rgb(43, 46, 44);
   --set-table-section-line: rgb(53, 56, 54);
+  --set-table-rail-line: rgb(59, 62, 60);
+  --set-table-encore-line: rgb(95, 60, 53);
 }
 
 /* Shadcn `<Table>` wraps `<table>` in a scrolling container; size table by content for horizontal scroll. */

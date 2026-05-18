@@ -15,6 +15,7 @@ import { WlHomeV2SetlistSongModal } from "@/components/wl-home-v2/wl-home-v2-set
 import { WlHomeV2SetlistPlaceholderView } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view"
 import { WlHomeV2SetlistRatingModal } from "@/components/wl-home-v2/wl-home-v2-setlist-rating-modal"
 import { WlHomeV2SetlistScanModal } from "@/components/wl-home-v2/wl-home-v2-setlist-scan-modal"
+import { WlHomeV2SetlistShareExportModal } from "@/components/wl-home-v2/wl-home-v2-setlist-share-export-modal"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import {
   buildSetlistArchiveBreadcrumbItems,
@@ -36,6 +37,7 @@ import { useSetlistReleases } from "@/hooks/use-setlist-releases"
 import { useSetlistScan } from "@/hooks/use-setlist-scan"
 import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
+import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import type { SetlistEntry } from "@/types/setlist"
 
 export function WlHomeV2SetlistPageClient() {
@@ -86,6 +88,10 @@ export function WlHomeV2SetlistPageClient() {
   const [copiedEntryIds, setCopiedEntryIds] = useState<Set<string>>(new Set())
   const [setlistScanModalOpen, setSetlistScanModalOpen] = useState(false)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+  const [shareExportOpen, setShareExportOpen] = useState(false)
+  const [shareExportBg, setShareExportBg] = useState(
+    pickRandomShareBackground,
+  )
 
   const { changes: showChanges, loading: showChangesLoading } =
     useShowChanges(showId)
@@ -178,6 +184,11 @@ export function WlHomeV2SetlistPageClient() {
     setWtedModalEntry(null)
   }, [])
 
+  const openShareExport = useCallback(() => {
+    setShareExportBg(pickRandomShareBackground())
+    setShareExportOpen(true)
+  }, [])
+
   useEffect(() => {
     if (!wtedModalOpen) return
     function onKey(e: KeyboardEvent) {
@@ -230,6 +241,7 @@ export function WlHomeV2SetlistPageClient() {
         adminLinkCopied={linkCopied}
         onAdminCopyShowId={handleCopyLink}
         onAdminEditShow={handleEditShow}
+        onShareSetlistImage={showAdminUi ? openShareExport : undefined}
         copiedEntryIds={showAdminUi ? copiedEntryIds : undefined}
         onNumberClick={showAdminUi ? handleNumberClick : undefined}
         onJotyBadgeClick={onJotyBadgeClick}
@@ -261,6 +273,14 @@ export function WlHomeV2SetlistPageClient() {
         }
         hoveredCategory={hoveredCategory}
         onCategoryHover={setHoveredCategory}
+      />
+      <WlHomeV2SetlistShareExportModal
+        open={shareExportOpen}
+        onOpenChange={setShareExportOpen}
+        backgroundSrc={shareExportBg}
+        show={show}
+        setlist={setlist}
+        showPositionInTour={showPositionInTour}
       />
       <WlHomeV2SetlistRatingModal
         open={ratingModalOpen}

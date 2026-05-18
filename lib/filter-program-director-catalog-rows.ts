@@ -1,5 +1,5 @@
 import type { ProgramDirectorCatalogRow } from "@/lib/fetch-program-director-catalog"
-import { formatShowDateLongYear } from "@/lib/setlist-utils"
+import { formatSetlistDate, formatShowDateLongYear } from "@/lib/setlist-utils"
 
 export function normalizeProgramDirectorCatalogSearchQuery(raw: string): string {
   return raw.trim().toLowerCase()
@@ -20,6 +20,8 @@ export function programDirectorCatalogRowMatchesSearch(
     row.showDate ?
       formatShowDateLongYear(row.showDate).toLowerCase()
     : ""
+  const shortDateLc =
+    row.showDate ? formatSetlistDate(row.showDate).toLowerCase() : ""
 
   const hayLower = [
     row.entrySong,
@@ -29,6 +31,7 @@ export function programDirectorCatalogRowMatchesSearch(
     row.venueLocation ?? "",
     row.showDate ?? "",
     formattedDateLc,
+    shortDateLc,
   ].map((s) => s.toLowerCase())
 
   const tokens = q.split(/\s+/).filter(Boolean)

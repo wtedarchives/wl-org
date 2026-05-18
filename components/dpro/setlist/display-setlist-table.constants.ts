@@ -43,6 +43,13 @@ export function isSongSpreadCoverCategory(category: string): boolean {
   return (SONG_SPREAD_COVER_CATEGORIES as readonly string[]).includes(category)
 }
 
+/** Bucket key for Song Spread rows and row hover highlight — same string `useCategoryArtwork` queries (`categories.category`). */
+export function getSetlistEntrySongSpreadCategoryKey(
+  entry: SetlistEntry,
+): string {
+  return entry.song_category || entry.songs?.song_category || "undefined"
+}
+
 /**
  * Compute display number for each setlist row: running count 1, 2, 3, …
  * Skip (null) when entry_short is in INDEX_SKIP_SHORTS, when entry_song is

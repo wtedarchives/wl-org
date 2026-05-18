@@ -11,7 +11,10 @@ export function mapSupabaseSetlistRowToEntry(
         song_displayname: string | null
         song_category: string
         song_originalartist: string | null
-        categories: { category_canonid: number }
+        categories: {
+          category_canonid: number
+          category_artwork?: string | null
+        }
       }
     | undefined
   const guestsRaw = entry.setlist_entry_guests as
@@ -57,7 +60,8 @@ export function mapSupabaseSetlistRowToEntry(
           song_originalartist: songs.song_originalartist ?? null,
           categories: {
             category_canonid: songs.categories?.category_canonid ?? 0,
-            category_artwork: null,
+            category_artwork:
+              songs.categories?.category_artwork?.trim() || null,
           },
         }
       : {
@@ -105,7 +109,8 @@ export const SETLIST_ENTRY_DETAIL_SELECT = `
     song_category,
     song_originalartist,
     categories (
-      category_canonid
+      category_canonid,
+      category_artwork
     )
   ),
   setlist_entry_guests(

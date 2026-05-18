@@ -9,6 +9,7 @@ import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-po
 import { Button } from "@/components/ui/button"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import type { ProgramDirectorCatalogRow } from "@/lib/fetch-program-director-catalog"
+import { formatSetlistDate } from "@/lib/setlist-utils"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { getWtedEpisodeUrl } from "@/lib/wted-episode-url"
@@ -70,11 +71,24 @@ export function ProgramDirectorCatalogAirplayModal({
                       songDisplayName={row.songDisplayName}
                     />
                   </h3>
-                  <p id={descId} className="modal-setlist-song-tour">
-                    This performance appears on {row.wtedAppearancesCount}{" "}
-                    {row.wtedAppearancesCount === 1 ? "show listing" : "show listings"}
-                    .
-                  </p>
+                  <div
+                    id={descId}
+                    className="wl-home-v2-pd-catalog-modal-show-pills"
+                    role="group"
+                    aria-label="Show date, tour group, and venue"
+                  >
+                    <span className="wl-home-v2-pd-catalog-modal-show-pill">
+                      {row.showDate ?
+                        formatSetlistDate(row.showDate)
+                      : "—"}
+                    </span>
+                    <span className="wl-home-v2-pd-catalog-modal-show-pill">
+                      {row.showGroup?.trim() ? row.showGroup : "—"}
+                    </span>
+                    <span className="wl-home-v2-pd-catalog-modal-show-pill">
+                      {row.venueLocation?.trim() ? row.venueLocation : "—"}
+                    </span>
+                  </div>
                 </>
               : <>
                   <h3 id={headingId}>Performance</h3>

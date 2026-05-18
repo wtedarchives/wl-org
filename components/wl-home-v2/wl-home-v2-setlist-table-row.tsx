@@ -5,6 +5,7 @@ import { useState, type CSSProperties } from "react"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   getLastCountBadgeStyle,
+  getSetlistEntrySongSpreadCategoryKey,
   jotyRoundDataAttr,
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
@@ -112,8 +113,7 @@ export function WlHomeV2SetlistTableRow({
   const shouldReleaseDim =
     !!hoveredReleaseId && !isEntryOnHoveredRelease
 
-  const entryCategory =
-    entry.song_category || entry.songs?.song_category || "undefined"
+  const entryCategory = getSetlistEntrySongSpreadCategoryKey(entry)
   const shouldCategoryHighlight =
     !hoveredReleaseId &&
     !!hoveredCategory &&

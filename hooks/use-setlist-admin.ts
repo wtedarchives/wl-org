@@ -8,7 +8,7 @@ import type { WysteriaSession } from "@/lib/jwt"
 const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
 
 /** Set to `false` before shipping — bypasses admin check for setlist admin UI (toolbar, row tools). */
-const TEMP_DISABLE_SETLIST_ADMIN_GATE = true
+const TEMP_DISABLE_SETLIST_ADMIN_GATE = false
 
 export function useSetlistAdmin(
   session: WysteriaSession | null,
