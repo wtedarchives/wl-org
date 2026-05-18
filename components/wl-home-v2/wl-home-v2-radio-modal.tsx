@@ -1,6 +1,12 @@
 "use client"
 
-import { Info, ListNumbers, MusicNote, Users } from "@phosphor-icons/react"
+import {
+  Export,
+  Info,
+  ListNumbers,
+  MusicNote,
+  Users,
+} from "@phosphor-icons/react"
 import Link from "next/link"
 import { useId } from "react"
 
@@ -22,6 +28,8 @@ type WlHomeV2RadioModalProps = {
   headingId: string
   /** Opens the same Request a Song flow as the homepage tile. */
   onRequestSong: () => void
+  /** Admin-only: closes hub then opens schedule PNG generator. */
+  onShareSchedule?: () => void
 }
 
 export function WlHomeV2RadioModal({
@@ -29,6 +37,7 @@ export function WlHomeV2RadioModal({
   onClose,
   headingId,
   onRequestSong,
+  onShareSchedule,
 }: WlHomeV2RadioModalProps) {
   const descId = useId()
   useWlHomeV2ScrollLock(open)
@@ -68,7 +77,8 @@ export function WlHomeV2RadioModal({
             </button>
           </div>
           <div className="modal-request-body modal-radio-hub-body">
-            <div className="modal-radio-hub-grid">
+            <div className="modal-radio-hub-stack">
+              <div className="modal-radio-hub-grid">
               <button
                 type="button"
                 className="modal-archive-tile modal-archive-tile--button"
@@ -146,6 +156,33 @@ export function WlHomeV2RadioModal({
                   The hosts and contributors of the shows on WTED Radio.
                 </span>
               </Link>
+            </div>
+
+            {onShareSchedule ?
+                <button
+                  type="button"
+                  className="modal-archive-tile modal-archive-tile--button modal-radio-hub-share-schedule"
+                  onClick={() => {
+                    onClose()
+                    onShareSchedule()
+                  }}
+                >
+                  <span className="modal-archive-tile-top">
+                    <span className="modal-archive-tile-title">
+                      Share Schedule
+                    </span>
+                    <Export
+                      className="modal-archive-tile-icon"
+                      {...ICON_PROPS}
+                      aria-hidden
+                    />
+                  </span>
+                  <span className="modal-archive-tile-desc">
+                    Generate a 9∶16 image of today&apos;s on-air lineup for social
+                    posts.
+                  </span>
+                </button>
+              : null}
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Copy, Download } from "@phosphor-icons/react"
-import { toBlob, toPng } from "html-to-image"
+import { toBlob } from "html-to-image"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -25,6 +25,7 @@ import {
   WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO,
   WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
 } from "@/lib/wl-home-v2-setlist-share-export-config"
+import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
 
 const SETLIST_SHARE_CAPTURE_OPTS = {
   cacheBust: true,
@@ -73,12 +74,20 @@ export function WlHomeV2SetlistShareExportModal({
     setBusy("download")
     setNotice(null)
     try {
-      const dataUrl = await toPng(node, SETLIST_SHARE_CAPTURE_OPTS)
-      const a = document.createElement("a")
-      a.href = dataUrl
-      a.download = shareFilename(show)
-      a.click()
-      setNotice("Download started.")
+      const blob = await toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+      if (!blob) {
+        setNotice("Could not create image.")
+        return
+      }
+      const name = shareFilename(show)
+      const how = await downloadOrWebSharePng(blob, name, {
+        shareTitle: `Setlist ${formatSetlistDate(show.show_date)}`,
+      })
+      setNotice(
+        how === "shared" ?
+          "Share sheet opened — tap Save Image to add to Photos (or share elsewhere)."
+        : "Download started.",
+      )
     } catch (e) {
       console.error(e)
       setNotice("Could not create image. Try again.")

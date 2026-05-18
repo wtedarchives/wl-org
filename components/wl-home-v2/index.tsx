@@ -13,7 +13,10 @@ import {
 } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
+import { useAuth } from "@/components/auth-context"
 import { useWtedRadioNowPlaying } from "@/hooks/use-wted-radio-now-playing"
+import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
+import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import { cn } from "@/lib/utils"
 
 import "./wl-home-v2.css"
@@ -22,6 +25,7 @@ import { SubmitModalHandler } from "@/components/submit-modal-handler"
 import { WlHomeV2ArchiveModal } from "./wl-home-v2-archive-modal"
 import { WlHomeV2FollowUsModal } from "./wl-home-v2-follow-us-modal"
 import { WlHomeV2RadioModal } from "./wl-home-v2-radio-modal"
+import { WlHomeV2RadioScheduleShareExportModal } from "./wl-home-v2-radio-schedule-share-export-modal"
 import { WlHomeV2ArchiveSubnav } from "./wl-home-v2-archive-subnav"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
 import { WlHomeV2ForgotPasswordModal } from "./wl-home-v2-forgot-password-modal"
@@ -68,6 +72,8 @@ export function WlHomeV2({
 }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { session } = useAuth()
+  const { showAdminUi } = useSetlistAdmin(session, undefined, undefined)
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -96,6 +102,11 @@ export function WlHomeV2({
   const [radioOpen, setRadioOpen] = useState(false)
   const radioHeadingId = useId()
 
+  const [radioScheduleShareOpen, setRadioScheduleShareOpen] = useState(false)
+  const [radioScheduleShareBg, setRadioScheduleShareBg] = useState(() =>
+    pickRandomShareBackground(),
+  )
+
   const [followUsOpen, setFollowUsOpen] = useState(false)
   const followUsHeadingId = useId()
 
@@ -109,6 +120,15 @@ export function WlHomeV2({
   const openArchiveHub = useCallback(() => {
     setArchiveOpen(true)
   }, [])
+
+  const openRadioScheduleShare = useCallback(() => {
+    setRadioScheduleShareBg(pickRandomShareBackground())
+    setRadioScheduleShareOpen(true)
+  }, [])
+
+  useEffect(() => {
+    if (!showAdminUi) setRadioScheduleShareOpen(false)
+  }, [showAdminUi])
 
   const { title: nowPlayingTitle, loading: nowPlayingLoading } =
     useWtedRadioNowPlaying()
@@ -198,7 +218,8 @@ export function WlHomeV2({
       !signupOpen &&
       !archiveOpen &&
       !radioOpen &&
-      !followUsOpen
+      !followUsOpen &&
+      !radioScheduleShareOpen
     )
       return
     function onKey(e: KeyboardEvent) {
@@ -213,6 +234,7 @@ export function WlHomeV2({
       closeArchiveModal()
       setRadioOpen(false)
       setFollowUsOpen(false)
+      setRadioScheduleShareOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
@@ -227,6 +249,7 @@ export function WlHomeV2({
     archiveOpen,
     radioOpen,
     followUsOpen,
+    radioScheduleShareOpen,
     closeArchiveModal,
   ])
 
@@ -338,6 +361,14 @@ export function WlHomeV2({
         onClose={() => setRadioOpen(false)}
         headingId={radioHeadingId}
         onRequestSong={() => setRequestOpen(true)}
+        onShareSchedule={
+          showAdminUi ? openRadioScheduleShare : undefined
+        }
+      />
+      <WlHomeV2RadioScheduleShareExportModal
+        open={showAdminUi && radioScheduleShareOpen}
+        onOpenChange={setRadioScheduleShareOpen}
+        backgroundSrc={radioScheduleShareBg}
       />
       <WlHomeV2FollowUsModal
         open={followUsOpen}

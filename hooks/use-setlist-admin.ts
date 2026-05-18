@@ -7,6 +7,14 @@ import type { WysteriaSession } from "@/lib/jwt"
 
 const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
 
+/** Matches setlist admin toolbar: `isAdmin` JWT claim or legacy profile id. */
+export function isWlHomeV2AdminSession(
+  session: WysteriaSession | null,
+): boolean {
+  if (!session) return false
+  return session.isAdmin || session.profileId === LEGACY_ADMIN_USER_ID
+}
+
 /** Set to `false` before shipping — bypasses admin check for setlist admin UI (toolbar, row tools). */
 const TEMP_DISABLE_SETLIST_ADMIN_GATE = false
 
@@ -62,8 +70,7 @@ export function useSetlistAdmin(
 
   const showAdminUi =
     TEMP_DISABLE_SETLIST_ADMIN_GATE ||
-    (!isAdminLoading &&
-      (isAdmin || session?.profileId === LEGACY_ADMIN_USER_ID))
+    (!isAdminLoading && isWlHomeV2AdminSession(session))
 
   return {
     isAdmin,
