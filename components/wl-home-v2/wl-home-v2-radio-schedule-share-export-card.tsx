@@ -148,10 +148,10 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                       slot.event.start,
                       slot.event.end,
                     )
-                    const hostNames =
+                    const hostHandles =
                       wted ?
                         parseWtedEpisodeHosts(wted.host)
-                          .map((h) => h.name.trim())
+                          .map((h) => h.handle.trim())
                           .filter(Boolean)
                       : []
                     return (
@@ -174,9 +174,9 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                               <span className="wl-radio-schedule-share-export__upcoming-time">
                                 {timeRange}
                               </span>
-                              {hostNames.length > 0 ?
+                              {hostHandles.length > 0 ?
                                 <div className="wl-radio-schedule-share-export__row-hosts">
-                                  {hostNames.map((name, hi) => (
+                                  {hostHandles.map((handle, hi) => (
                                     <span
                                       key={`${slot.event.event_id}-${slot.event.start}-host-${hi}`}
                                       className="wl-radio-schedule-share-export__host-pill"
@@ -187,7 +187,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                                         weight="regular"
                                         aria-hidden
                                       />
-                                      {name}
+                                      {handle}
                                     </span>
                                   ))}
                                 </div>

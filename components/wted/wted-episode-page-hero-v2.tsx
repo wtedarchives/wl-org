@@ -60,6 +60,7 @@ export function WtedEpisodePageHeroV2({
   )
   const description = episode.description?.trim() ?? ""
   const hosts = episode.hosts
+  const hostsWithHandles = hosts.filter((h) => h.handle?.trim())
   const descriptionHtml =
     description ? wtedEpisodeDescriptionHtml(description) : ""
 
@@ -93,7 +94,7 @@ export function WtedEpisodePageHeroV2({
               {showName}
             </p>
 
-            {siblings.length > 1 || hosts.length > 0 ?
+            {siblings.length > 1 || hostsWithHandles.length > 0 ?
               <div className="discography-release-archive__header-meta-region">
                 <dl className="discography-release-archive__header-meta">
                   {siblings.length > 1 ?
@@ -138,46 +139,36 @@ export function WtedEpisodePageHeroV2({
                     </>
                   : null}
 
-                  {hosts.length > 0 ?
+                  {hostsWithHandles.length > 0 ?
                     <>
                       <dt className="sc-label">
-                        {hosts.length > 1 ? "Hosts" : "Host"}
+                        {hostsWithHandles.length > 1 ? "Hosts" : "Host"}
                       </dt>
                       <dd>
-                        <ul className="m-0 list-none space-y-2 p-0">
-                          {hosts.map((h, i) => {
+                        <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+                          {hostsWithHandles.map((h, i) => {
                             const profileHref =
-                              h.handle ?
-                                discourseUserProfileUrlFromHandle(h.handle)
-                              : null
+                              discourseUserProfileUrlFromHandle(h.handle)
+                            const handle = h.handle.trim()
                             return (
-                              <li
-                                key={`${h.name}-${h.handle}-${i}`}
-                                className="flex flex-wrap items-center gap-2"
-                              >
-                                {h.name ?
-                                  <span className="text-sm font-normal text-white/88">
-                                    {h.name}
+                              <li key={`${handle}-${i}`} className="m-0 p-0">
+                                {profileHref ?
+                                  <Link
+                                    href={profileHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="last-pill max-w-full min-w-0 truncate no-underline transition-opacity hover:opacity-90"
+                                    style={hostHandlePillStyle()}
+                                  >
+                                    {handle}
+                                  </Link>
+                                : <span
+                                    className="last-pill inline-block max-w-full min-w-0 truncate"
+                                    style={hostHandlePillStyle()}
+                                  >
+                                    {handle}
                                   </span>
-                                : null}
-                                {h.handle ?
-                                  profileHref ?
-                                    <Link
-                                      href={profileHref}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="last-pill max-w-full min-w-0 truncate no-underline transition-opacity hover:opacity-90"
-                                      style={hostHandlePillStyle()}
-                                    >
-                                      {h.handle}
-                                    </Link>
-                                  : <span
-                                      className="last-pill inline-block max-w-full min-w-0 truncate"
-                                      style={hostHandlePillStyle()}
-                                    >
-                                      {h.handle}
-                                    </span>
-                                : null}
+                                }
                               </li>
                             )
                           })}

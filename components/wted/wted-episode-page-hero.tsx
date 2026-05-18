@@ -50,6 +50,7 @@ export function WtedEpisodePageHero({
   )
   const description = episode.description?.trim() ?? ""
   const hosts = episode.hosts
+  const hostsWithHandles = hosts.filter((h) => h.handle?.trim())
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
@@ -106,43 +107,35 @@ export function WtedEpisodePageHero({
           </div>
         : null}
 
-        {(hosts.length > 0) || description ?
+        {(hostsWithHandles.length > 0) || description ?
           <Separator />
         : null}
 
-        {hosts.length > 0 ?
+        {hostsWithHandles.length > 0 ?
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {hosts.length > 1 ? "Hosts" : "Host"}
+              {hostsWithHandles.length > 1 ? "Hosts" : "Host"}
             </h2>
-            <ul className="m-0 mt-2 list-none space-y-2 p-0 font-medium text-foreground">
-              {hosts.map((h, i) => {
+            <ul className="m-0 mt-2 flex list-none flex-wrap gap-2 p-0 font-medium text-foreground">
+              {hostsWithHandles.map((h, i) => {
                 const profileHref =
-                  h.handle ?
-                    discourseUserProfileUrlFromHandle(h.handle)
-                  : null
+                  discourseUserProfileUrlFromHandle(h.handle)
+                const handle = h.handle.trim()
                 return (
-                  <li
-                    key={`${h.name}-${h.handle}-${i}`}
-                    className="flex flex-wrap items-center gap-2"
-                  >
-                    {h.name ?
-                      <span className="text-sm font-normal">{h.name}</span>
-                    : null}
-                    {h.handle ?
-                      profileHref ?
-                        <Link
-                          href={profileHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={hostHandlePillClassName}
-                        >
-                          {h.handle}
-                        </Link>
-                      : <span className="inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
-                          {h.handle}
-                        </span>
-                    : null}
+                  <li key={`${handle}-${i}`} className="m-0 p-0">
+                    {profileHref ?
+                      <Link
+                        href={profileHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={hostHandlePillClassName}
+                      >
+                        {handle}
+                      </Link>
+                    : <span className="inline-flex max-w-full min-w-0 items-center truncate rounded-full border border-border/80 bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
+                        {handle}
+                      </span>
+                    }
                   </li>
                 )
               })}
@@ -152,7 +145,7 @@ export function WtedEpisodePageHero({
 
         {description ?
           <>
-            {hosts.length > 0 ?
+            {hostsWithHandles.length > 0 ?
               <Separator />
             : null}
             <div>
