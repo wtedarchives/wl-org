@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Copy, Download } from "@phosphor-icons/react"
 import { toBlob } from "html-to-image"
 
@@ -17,6 +17,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { formatSetlistDate } from "@/lib/setlist-utils"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { useSharePngMobilePreview } from "@/hooks/use-share-png-mobile-preview"
 import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import type { SetlistEntry, Show } from "@/types/setlist"
 
@@ -61,6 +63,46 @@ export function WlHomeV2SetlistShareExportModal({
   const [busy, setBusy] = useState<null | "copy" | "download">(null)
   const [showEntryCoachNotes, setShowEntryCoachNotes] = useState(true)
 
+  const isMobile = useIsMobile()
+
+  const setlistCaptureSignature = useMemo(() => {
+    const tourSig = showPositionInTour
+      ? `${showPositionInTour.position}/${showPositionInTour.total}`
+      : ""
+    const rows = setlist
+      .map((e) => `${e.entry_id}:${e.entry_song ?? ""}`)
+      .join("~")
+    return [
+      show.show_id,
+      String(show.show_date ?? ""),
+      backgroundSrc,
+      String(showEntryCoachNotes),
+      tourSig,
+      rows,
+    ].join("§")
+  }, [
+    show.show_id,
+    show.show_date,
+    backgroundSrc,
+    showEntryCoachNotes,
+    showPositionInTour,
+    setlist,
+  ])
+
+  const {
+    previewUrl: mobileSetlistPreviewUrl,
+    generating: mobileSetlistPreviewGenerating,
+    cachedRasterBlobRef: setlistMobileRasterRef,
+  } = useSharePngMobilePreview({
+    open,
+    isMobile,
+    captureRef,
+    readyToCapture: open,
+    captureSignature: setlistCaptureSignature,
+    toBlobOptions: SETLIST_SHARE_CAPTURE_OPTS,
+    logPrefix: "[setlist share png]",
+  })
+
   useEffect(() => {
     if (!open) {
       setNotice(null)
@@ -69,17 +111,27 @@ export function WlHomeV2SetlistShareExportModal({
     }
   }, [open])
 
+  const captureSetlistBlob = useCallback(async () => {
+    const node = captureRef.current
+    if (!node) return null
+    if (isMobile) {
+      const cached = setlistMobileRasterRef.current
+      if (cached) return cached
+    }
+    return withShareCaptureImagesInlined(
+      node,
+      "[setlist share png]",
+      () => toBlob(node, SETLIST_SHARE_CAPTURE_OPTS),
+    )
+  }, [isMobile, setlistMobileRasterRef])
+
   const handleDownload = useCallback(async () => {
     const node = captureRef.current
     if (!node) return
     setBusy("download")
     setNotice(null)
     try {
-      const blob = await withShareCaptureImagesInlined(
-        node,
-        "[setlist share png]",
-        () => toBlob(node, SETLIST_SHARE_CAPTURE_OPTS),
-      )
+      const blob = await captureSetlistBlob()
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -99,7 +151,7 @@ export function WlHomeV2SetlistShareExportModal({
     } finally {
       setBusy(null)
     }
-  }, [show])
+  }, [captureSetlistBlob, show])
 
   const handleCopy = useCallback(async () => {
     const node = captureRef.current
@@ -107,11 +159,7 @@ export function WlHomeV2SetlistShareExportModal({
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await withShareCaptureImagesInlined(
-        node,
-        "[setlist share png]",
-        () => toBlob(node, SETLIST_SHARE_CAPTURE_OPTS),
-      )
+      const blob = await captureSetlistBlob()
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -132,7 +180,11 @@ export function WlHomeV2SetlistShareExportModal({
     } finally {
       setBusy(null)
     }
-  }, [])
+  }, [captureSetlistBlob])
+
+  const mobileSetlistActionDisabled =
+    busy !== null ||
+    (isMobile && mobileSetlistPreviewGenerating)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,18 +209,62 @@ export function WlHomeV2SetlistShareExportModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[min(62vh,680px)] w-fit max-w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
-          <div className="inline-block w-min min-w-min shrink-0">
-            <WlHomeV2SetlistShareExportCard
-              ref={captureRef}
-              backgroundSrc={backgroundSrc}
-              show={show}
-              setlist={setlist}
-              showPositionInTour={showPositionInTour}
-              showEntryCoachNotes={showEntryCoachNotes}
-            />
+        {isMobile ?
+          <div className="flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/25 p-3">
+            {mobileSetlistPreviewGenerating ?
+              <p className="text-center text-xs text-muted-foreground">
+                Rendering image preview…
+              </p>
+            : null}
+            {!mobileSetlistPreviewGenerating && mobileSetlistPreviewUrl ?
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview of rasterized export */}
+                <img
+                  src={mobileSetlistPreviewUrl}
+                  alt="Setlist share — same image as download"
+                  className="mx-auto max-h-[min(62vh,680px)] w-full max-w-full object-contain"
+                  draggable={false}
+                />
+              </>
+            : null}
+            {!mobileSetlistPreviewGenerating &&
+            !mobileSetlistPreviewUrl ?
+              <p className="text-center text-xs text-muted-foreground">
+                Could not build preview. Try Download PNG.
+              </p>
+            : null}
           </div>
-        </div>
+        : <div className="max-h-[min(62vh,680px)] w-fit max-w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
+            <div className="inline-block w-min min-w-min shrink-0">
+              <WlHomeV2SetlistShareExportCard
+                ref={captureRef}
+                backgroundSrc={backgroundSrc}
+                show={show}
+                setlist={setlist}
+                showPositionInTour={showPositionInTour}
+                showEntryCoachNotes={showEntryCoachNotes}
+              />
+            </div>
+          </div>
+        }
+
+        {isMobile ?
+          <div
+            className="pointer-events-none fixed top-0 left-[-12000px] z-0 opacity-100"
+            aria-hidden
+          >
+            <div className="inline-block w-min min-w-min shrink-0">
+              <WlHomeV2SetlistShareExportCard
+                ref={captureRef}
+                backgroundSrc={backgroundSrc}
+                show={show}
+                setlist={setlist}
+                showPositionInTour={showPositionInTour}
+                showEntryCoachNotes={showEntryCoachNotes}
+              />
+            </div>
+          </div>
+        : null}
 
         {notice ?
           <p className="text-center text-xs text-muted-foreground">{notice}</p>
@@ -179,7 +275,7 @@ export function WlHomeV2SetlistShareExportModal({
             <Checkbox
               id="wl-share-export-entry-coach"
               checked={showEntryCoachNotes}
-              disabled={busy !== null}
+              disabled={busy !== null || (isMobile && mobileSetlistPreviewGenerating)}
               onCheckedChange={(checked) =>
                 setShowEntryCoachNotes(checked === true)
               }
@@ -197,7 +293,7 @@ export function WlHomeV2SetlistShareExportModal({
               variant="outline"
               size="sm"
               className="gap-1.5"
-              disabled={busy !== null}
+              disabled={mobileSetlistActionDisabled}
               onClick={handleCopy}
             >
               <Copy className="size-3.5" aria-hidden />
@@ -207,7 +303,7 @@ export function WlHomeV2SetlistShareExportModal({
               type="button"
               size="sm"
               className="gap-1.5"
-              disabled={busy !== null}
+              disabled={mobileSetlistActionDisabled}
               onClick={handleDownload}
             >
               <Download className="size-3.5" aria-hidden />
