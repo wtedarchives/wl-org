@@ -194,9 +194,14 @@ export async function captureScheduleShareNodeToBlob(
     shouldInline ? await inlineImagesForScheduleShareCapture(node) : () => {}
 
   const requestedPixelRatio = options.pixelRatio ?? 1
-  /** Capture at 1× on iOS, then upscale — matches working mobile preview capture. */
+  /**
+   * Legacy path only: proxied/blob artwork on iOS. Pre-resolved data URLs capture
+   * sharply at full pixelRatio (no 1× → upscale, which softens text and photos).
+   */
   const useIosLowCapture =
-    requestedPixelRatio > 1 && isScheduleShareCaptureIOSWebKit()
+    !assetsPreResolved &&
+    requestedPixelRatio > 1 &&
+    isScheduleShareCaptureIOSWebKit()
   const captureOptions: ScheduleShareCaptureOptions =
     useIosLowCapture ? { ...options, pixelRatio: 1 } : options
 
