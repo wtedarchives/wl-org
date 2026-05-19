@@ -6,7 +6,7 @@ import { corsHeaders } from "../_shared/cors.ts"
 const BUCKET = "setlist-images"
 
 /** Set to `false` before ship — when `true`, any valid JWT can upload (testing). */
-const TEMP_DISABLE_SETLIST_SHARE_UPLOAD_ADMIN_GATE = true
+const TEMP_DISABLE_SETLIST_SHARE_UPLOAD_ADMIN_GATE = false
 
 function httpErr(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
