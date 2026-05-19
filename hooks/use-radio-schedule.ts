@@ -125,6 +125,14 @@ function sameLocalCalendarDay(a: Date, b: Date): boolean {
   )
 }
 
+/** Shorten long artwork URLs so console stays readable during debugging. */
+function truncateUrlForLog(url: string, max = 96): string {
+  const t = url.trim()
+  if (!t) return "(empty)"
+  if (t.length <= max) return t
+  return `${t.slice(0, max)}…`
+}
+
 /** Events whose **start** falls on the user's local calendar day for `day`. */
 export function filterRadioEventsStartingOnLocalDay(
   events: RadioScheduleEvent[],
@@ -196,9 +204,19 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
     const merged = mergeBackToBackSameTitleSlotsCore(rawSlots)
     console.log(`${logPrefix} step 4/8: merge consecutive Radio.co rows`, {
       rule:
-        "Same trimmed playlist.title and start/end within 5s back-to-back → one row with extended end (first row’s artwork/name kept).",
+        "Same trimmed playlist.title and start/end within 5s back-to-back → one row with extended end (first row’s playlist block kept: name/title/Radio artwork).",
       beforeMergeCount: rawSlots.length,
       afterMergeCount: merged.length,
+      perMergedSlotRadioArtPreview: merged.map((s, i) => ({
+        i,
+        playlistName: s.event.playlist.name?.trim(),
+        radioArtworkChosenForMergedRow_preview: truncateUrlForLog(
+          s.event.playlist.artwork ?? "",
+          120,
+        ),
+        note:
+          "If this row absorbed back-to-back slots, PNG still uses Radio art from this first segment until step 8 may replace with WTED DB art.",
+      })),
     })
 
     const slotsBase = merged.map((slot) => ({
@@ -236,6 +254,13 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
       matchedEpisodeKeys: matchedKeys,
       unmatchedEpisodeKeys: unmatchedKeys,
       note: "Show ribbon + DB title/art when key matched; only REMOVED rows excluded from lookup (skipped still resolves for this PNG).",
+      artworkFromDb_previewByMatchedKey: Object.fromEntries(
+        matchedKeys.map((k) => {
+          const row = episodeMap.get(k)!
+          const u = row.artwork?.trim() ?? ""
+          return [k, { db_artwork_preview: truncateUrlForLog(u, 120) }]
+        }),
+      ),
     })
 
     const slots: RadioScheduleSlot[] = slotsBase.map((s) => {
@@ -253,17 +278,31 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
         ? getWtedEpisodeDisplayName(playlistName, wted.display_name)
         : (radioTitle || playlistName)
       const hasShowRibbon = Boolean(wted)
+      const wtedArt = wted?.artwork?.trim() ?? ""
+      const radioArt = s.event.playlist.artwork?.trim() ?? ""
+      const chosenArtSrc = wtedArt || radioArt
+      let artworkDecision: string
+      if (wtedArt) {
+        artworkDecision =
+          "1) wted_episodes.artwork wins (joined on playlist.name = episode)."
+      } else if (radioArt) {
+        artworkDecision =
+          wted ?
+            "2) Radio playlist.artwork (DB row matched but artwork empty)."
+          : "3) Radio playlist.artwork only (no wted_episodes match for this playlist.name)."
+      } else {
+        artworkDecision =
+          "4) No URL → export card renders grey placeholder thumbnail."
+      }
       const artworkSource =
-        wted?.artwork?.trim() ?
-          "wted_episodes.artwork"
-        : s.event.playlist.artwork?.trim() ?
-          "radio playlist.artwork"
+        wtedArt ? "wted_episodes.artwork"
+        : radioArt ? "radio playlist.artwork"
         : "placeholder (no URL)"
       const timeLine = formatRadioScheduleTimeRange(s.event.start, s.event.end)
-      const hostPillNames =
+      const hostPillsForPngHandles =
         wted ?
           parseWtedEpisodeHosts(wted.host)
-            .map((h) => h.name.trim())
+            .map((h) => h.handle.trim())
             .filter(Boolean)
         : []
 
@@ -278,15 +317,33 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
         mainTitleRule: wted ?
           "getWtedEpisodeDisplayName(playlistName, display_name)"
         : "radio title, else playlist.name",
-        artworkSource,
+        imageResolution: {
+          rule_order:
+            "Same as export card: wted_episodes.artwork if non-empty, else playlist.artwork, else placeholder.",
+          artworkDecision_branched: artworkDecision,
+          artworkSource_field: artworkSource,
+          wted_artwork_nonEmpty: Boolean(wtedArt),
+          radio_playlist_artwork_nonEmpty: Boolean(radioArt),
+          wted_artwork_preview: truncateUrlForLog(wtedArt, 140),
+          radio_playlist_artwork_preview: truncateUrlForLog(radioArt, 140),
+          chosen_artwork_for_png_preview: truncateUrlForLog(chosenArtSrc, 140),
+        },
         timeLineInPng: timeLine,
-        hostPillNames,
+        hostHandlesUsedInPngPills: hostPillsForPngHandles,
         isNowPlayingSlot: s.isNowPlaying,
       }
     })
 
-    console.log(`${logPrefix} step 8/8: PNG row model (matches WlHomeV2RadioScheduleShareExportCard)`, {
+    console.log(`${logPrefix} step 8/8: PNG row model + image choice (WlHomeV2RadioScheduleShareExportCard)`, {
       rowCount: displayPlan.length,
+      summaryImageSources: displayPlan.reduce(
+        (acc, row) => {
+          const src = row.imageResolution.artworkSource_field
+          acc[src] = (acc[src] ?? 0) + 1
+          return acc
+        },
+        {} as Record<string, number>,
+      ),
       rows: displayPlan,
     })
 

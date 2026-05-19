@@ -149,11 +149,12 @@ export function WlHomeV2RadioScheduleShareExportModal({
       <DialogContent
         showCloseButton
         className={cn(
-          "flex max-h-[min(92vh,900px)] flex-col items-start gap-3 overflow-hidden p-4 sm:p-5",
-          "w-fit max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)]",
+          "flex max-h-[min(92vh,900px)] w-full max-w-[min(600px,calc(100vw-2rem))] flex-col gap-3 overflow-hidden p-4 sm:p-5",
+          /* DialogContent ships `sm:max-w-sm` (384px); override so this modal can reach 600px wide. */
+          "sm:max-w-[min(600px,calc(100vw-2rem))]",
         )}
       >
-        <DialogHeader className="max-w-full gap-1 text-left">
+        <DialogHeader className="w-full max-w-full gap-1 text-left">
           <DialogTitle className="text-base">Schedule image</DialogTitle>
           <DialogDescription className="text-xs">
             Preview{" "}
@@ -167,16 +168,18 @@ export function WlHomeV2RadioScheduleShareExportModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[min(62vh,680px)] w-fit max-w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
-          <div className="inline-block w-min min-w-min shrink-0">
-            <WlHomeV2RadioScheduleShareExportCard
-              ref={captureRef}
-              backgroundSrc={backgroundSrc}
-              scheduleDay={scheduleDay}
-              slots={slots}
-              loading={scheduleLoading}
-              error={loadError}
-            />
+        <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
+          <div className="flex w-full min-w-0 justify-center">
+            <div className="inline-block w-min min-w-min shrink-0">
+              <WlHomeV2RadioScheduleShareExportCard
+                ref={captureRef}
+                backgroundSrc={backgroundSrc}
+                scheduleDay={scheduleDay}
+                slots={slots}
+                loading={scheduleLoading}
+                error={loadError}
+              />
+            </div>
           </div>
         </div>
 

@@ -50,6 +50,9 @@ const WELCOME_TICKER_COPY =
 
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
+/** Set to `false` before ship — when `true`, radio hub “Share schedule” is not admin-gated. */
+const TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE = false
+
 function initialTickerPhraseQuadSeed(): readonly [string, string, string, string] {
   const w = WL_HOME_V2_TICKER_RANDOM_PHRASES
   const n = w.length
@@ -74,6 +77,8 @@ export function WlHomeV2({
   const router = useRouter()
   const { session } = useAuth()
   const { showAdminUi } = useSetlistAdmin(session, undefined, undefined)
+  const showRadioScheduleShare =
+    TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE || showAdminUi
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -127,8 +132,8 @@ export function WlHomeV2({
   }, [])
 
   useEffect(() => {
-    if (!showAdminUi) setRadioScheduleShareOpen(false)
-  }, [showAdminUi])
+    if (!showRadioScheduleShare) setRadioScheduleShareOpen(false)
+  }, [showRadioScheduleShare])
 
   const { title: nowPlayingTitle, loading: nowPlayingLoading } =
     useWtedRadioNowPlaying()
@@ -362,11 +367,11 @@ export function WlHomeV2({
         headingId={radioHeadingId}
         onRequestSong={() => setRequestOpen(true)}
         onShareSchedule={
-          showAdminUi ? openRadioScheduleShare : undefined
+          showRadioScheduleShare ? openRadioScheduleShare : undefined
         }
       />
       <WlHomeV2RadioScheduleShareExportModal
-        open={showAdminUi && radioScheduleShareOpen}
+        open={showRadioScheduleShare && radioScheduleShareOpen}
         onOpenChange={setRadioScheduleShareOpen}
         backgroundSrc={radioScheduleShareBg}
       />

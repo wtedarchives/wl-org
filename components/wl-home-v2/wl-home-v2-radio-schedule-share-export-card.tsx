@@ -12,8 +12,12 @@ import {
 } from "@/lib/wl-home-v2-radio-schedule-share-export-config"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { parseWtedEpisodeHosts } from "@/lib/wted-episode-host"
+import { cn } from "@/lib/utils"
 
 import "./wl-home-v2-radio-schedule-share-export.css"
+
+/** Row art uses a smaller radius when the resolved PNG title matches this episode only. */
+const RADIO_SHARE_EXPORT_RANDY_REQUEST_DISPLAY_TITLE = "requesTED w/ Randy"
 
 export type WlHomeV2RadioScheduleShareExportCardProps = {
   backgroundSrc: string
@@ -121,14 +125,22 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                           wted.display_name,
                         )
                       : (radioTitle || playlistName)
-                    if (!displayTitle) return null
+                    const displayTitleNormalized = displayTitle.trim()
+                    if (!displayTitleNormalized) return null
+                    const tightRowArtRadius =
+                      displayTitleNormalized ===
+                      RADIO_SHARE_EXPORT_RANDY_REQUEST_DISPLAY_TITLE
                     const artworkSrc =
                       wted?.artwork?.trim() ||
                       slot.event.playlist.artwork?.trim() ||
                       ""
                     const rowArt = (
                       <div
-                        className="wl-radio-schedule-share-export__row-art"
+                        className={cn(
+                          "wl-radio-schedule-share-export__row-art",
+                          tightRowArtRadius &&
+                            "wl-radio-schedule-share-export__row-art--randy-request-title",
+                        )}
                         aria-hidden
                       >
                         {artworkSrc ?
@@ -163,17 +175,19 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                           {rowArt}
                           <div className="wl-radio-schedule-share-export__row-main">
                             <div className="wl-radio-schedule-share-export__upcoming">
-                              {wted ?
-                                <span className="wl-radio-schedule-share-export__row-show">
-                                  {wted.show}
-                                </span>
-                              : null}
-                              <span className="wl-radio-schedule-share-export__upcoming-title">
-                                {displayTitle}
-                              </span>
                               <span className="wl-radio-schedule-share-export__upcoming-time">
                                 {timeRange}
                               </span>
+                              <div className="wl-radio-schedule-share-export__upcoming-primary">
+                                {wted ?
+                                  <span className="wl-radio-schedule-share-export__row-show">
+                                    {wted.show}
+                                  </span>
+                                : null}
+                                <span className="wl-radio-schedule-share-export__upcoming-title">
+                                  {displayTitleNormalized}
+                                </span>
+                              </div>
                               {hostHandles.length > 0 ?
                                 <div className="wl-radio-schedule-share-export__row-hosts">
                                   {hostHandles.map((handle, hi) => (
@@ -183,7 +197,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                                     >
                                       <UserSound
                                         className="wl-radio-schedule-share-export__host-pill-icon"
-                                        size={14}
+                                        size={16}
                                         weight="regular"
                                         aria-hidden
                                       />
