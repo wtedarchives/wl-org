@@ -62,7 +62,7 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
       }
       selectors={
         <>
-          {showAdminUi && onAdminCopyShowId && onAdminEditShow ?
+          {onShareSetlistImage || onAdminCopyShowId || onAdminEditShow ?
             <WlHomeV2SetlistAdminToolbar
               linkCopied={adminLinkCopied ?? false}
               onCopyShowId={onAdminCopyShowId}

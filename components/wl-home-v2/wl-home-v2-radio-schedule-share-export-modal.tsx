@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { useRadioScheduleShareMobilePreview } from "@/hooks/use-radio-schedule-share-mobile-preview"
 import { useScheduleShareResolvedAssets } from "@/hooks/use-schedule-share-resolved-assets"
 import {
   Dialog,
@@ -51,14 +50,13 @@ import { captureScheduleShareNodeToBlob } from "@/lib/wl-schedule-share-capture"
 import { cn } from "@/lib/utils"
 
 const RADIO_SCHEDULE_SHARE_CAPTURE_OPTS = {
-  /**
-   * Must stay false when row artwork uses `blob:` URLs (proxied cross-origin images).
-   * `cacheBust: true` appends `?…` to src for reloads; query suffix breaks blob URLs → capture fetch fails.
-   */
   cacheBust: false,
   pixelRatio: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO,
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const
+
+const MOBILE_DESKTOP_ONLY_MESSAGE =
+  "Image generation is only available in desktop mode."
 
 function scheduleShareFilename(day: Date): string {
   const y = day.getFullYear()
@@ -67,18 +65,52 @@ function scheduleShareFilename(day: Date): string {
   return `wted-schedule-${y}-${m}-${d}.png`
 }
 
-export function WlHomeV2RadioScheduleShareExportModal({
-  open,
-  onOpenChange,
-  backgroundSrc,
-}: {
+export type WlHomeV2RadioScheduleShareExportModalProps = {
   open: boolean
   onOpenChange: (next: boolean) => void
   backgroundSrc: string
-}) {
+}
+
+export function WlHomeV2RadioScheduleShareExportModal(
+  props: WlHomeV2RadioScheduleShareExportModalProps,
+) {
   const isMobile = useIsMobile()
+  if (isMobile) {
+    return <WlHomeV2RadioScheduleShareExportModalMobile {...props} />
+  }
+  return <WlHomeV2RadioScheduleShareExportModalDesktop {...props} />
+}
+
+function WlHomeV2RadioScheduleShareExportModalMobile({
+  open,
+  onOpenChange,
+}: WlHomeV2RadioScheduleShareExportModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton
+        className={cn(
+          "flex max-h-[min(92vh,900px)] w-full max-w-[min(600px,calc(100vw-2rem))] flex-col gap-4 overflow-hidden p-4 sm:p-5",
+          "sm:max-w-[min(600px,calc(100vw-2rem))]",
+        )}
+      >
+        <DialogHeader className="w-full max-w-full gap-1 text-left">
+          <DialogTitle className="text-base">Schedule image</DialogTitle>
+        </DialogHeader>
+        <p className="py-6 text-center text-sm text-muted-foreground">
+          {MOBILE_DESKTOP_ONLY_MESSAGE}
+        </p>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function WlHomeV2RadioScheduleShareExportModalDesktop({
+  open,
+  onOpenChange,
+  backgroundSrc,
+}: WlHomeV2RadioScheduleShareExportModalProps) {
   const { session } = useAuth()
-  /** Desktop-layout export card (visible on desktop; in-viewport capture layer on mobile). */
   const desktopCaptureRef = useRef<HTMLDivElement>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [busy, setBusy] = useState<null | "copy" | "download" | "generate">(null)
@@ -107,31 +139,17 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const assetsReady =
     resolvedAssets != null && !assetsLoading && !scheduleLoading
 
-  const {
-    previewUrl: mobilePreviewUrl,
-    previewLoading: mobilePreviewLoading,
-    clearPreview: clearMobilePreview,
-  } = useRadioScheduleShareMobilePreview({
-    enabled: open && isMobile && assetsReady,
-    captureRef: desktopCaptureRef,
-    scheduleLoading,
-    slots,
-    backgroundSrc,
-    scheduleDay,
-  })
-
   useEffect(() => {
     if (!open) {
       setNotice(null)
       setBusy(null)
-      clearMobilePreview()
       return
     }
     const today = startOfLocalCalendarDay()
     setDayOptions(buildRadioScheduleShareExportDayOptions())
     setScheduleDay(today)
     setSelectedDayKey(localCalendarDayKey(today))
-  }, [open, clearMobilePreview])
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -264,11 +282,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
     WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO
 
   const exportActionsDisabled =
-    busy !== null ||
-    scheduleLoading ||
-    assetsLoading ||
-    !assetsReady ||
-    (isMobile && mobilePreviewLoading)
+    busy !== null || scheduleLoading || assetsLoading || !assetsReady
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -276,7 +290,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
         showCloseButton
         className={cn(
           "flex max-h-[min(92vh,900px)] w-full max-w-[min(600px,calc(100vw-2rem))] flex-col gap-3 overflow-hidden p-4 sm:p-5",
-          /* DialogContent ships `sm:max-w-sm` (384px); override so this modal can reach 600px wide. */
           "sm:max-w-[min(600px,calc(100vw-2rem))]",
         )}
       >
@@ -288,75 +301,35 @@ export function WlHomeV2RadioScheduleShareExportModal({
             {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX}px (9∶16). Export{" "}
             {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO}× ({exportWidthPx}×
             {exportHeightPx}px). Top and bottom margins keep UI out of Instagram
-            Story safe bands (first and last {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_CLEAR_BAND_PX}
-            px at {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_REF_HEIGHT_PX}px height—background
+            Story safe bands (first and last{" "}
+            {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_CLEAR_BAND_PX}px at{" "}
+            {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_REF_HEIGHT_PX}px height—background
             only there). All shows on the selected day in your local timezone.
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
-          {isMobile ?
-            <div className="relative flex min-h-[200px] w-full items-center justify-center">
-              <div
-                className="pointer-events-none fixed left-0 top-0 z-0 flex w-full min-w-0 justify-center opacity-[0.01]"
-                aria-hidden
-              >
-                <div className="inline-block w-min min-w-min shrink-0">
-                  {resolvedAssets ?
-                    <WlHomeV2RadioScheduleShareExportCard
-                      ref={desktopCaptureRef}
-                      resolvedAssets={resolvedAssets}
-                      scheduleDay={scheduleDay}
-                      slots={slots}
-                      loading={scheduleLoading}
-                      error={loadError ?? assetsError}
-                    />
-                  : null}
-                </div>
-              </div>
-              {scheduleLoading || assetsLoading || mobilePreviewLoading ?
-                <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                  {assetsLoading ?
-                    "Loading artwork…"
-                  : "Building preview…"}
-                </p>
-              : mobilePreviewUrl ?
-                // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
-                <img
-                  src={mobilePreviewUrl}
-                  alt={`WTED Radio schedule for ${dayOptions.find((o) => o.key === selectedDayKey)?.label ?? "selected day"}`}
-                  className="relative z-[2] mx-auto max-h-[min(58vh,640px)] w-auto max-w-full object-contain"
+          <div className="flex w-full min-w-0 flex-col items-center justify-center gap-2">
+            {scheduleLoading || assetsLoading ?
+              <p className="text-center text-xs text-muted-foreground">
+                {assetsLoading ? "Loading artwork…" : "Loading schedule…"}
+              </p>
+            : null}
+            {resolvedAssets ?
+              <div className="inline-block w-min min-w-min shrink-0">
+                <WlHomeV2RadioScheduleShareExportCard
+                  ref={desktopCaptureRef}
+                  resolvedAssets={resolvedAssets}
+                  scheduleDay={scheduleDay}
+                  slots={slots}
+                  loading={scheduleLoading}
+                  error={loadError ?? assetsError}
                 />
-              : <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                  Preview unavailable. You can still download the image.
-                </p>
-              }
-            </div>
-          : <div className="flex w-full min-w-0 flex-col items-center justify-center gap-2">
-              {scheduleLoading || assetsLoading ?
-                <p className="text-center text-xs text-muted-foreground">
-                  {assetsLoading ?
-                    "Loading artwork…"
-                  : "Loading schedule…"}
-                </p>
-              : null}
-              {resolvedAssets ?
-                <div className="inline-block w-min min-w-min shrink-0">
-                  <WlHomeV2RadioScheduleShareExportCard
-                    ref={desktopCaptureRef}
-                    resolvedAssets={resolvedAssets}
-                    scheduleDay={scheduleDay}
-                    slots={slots}
-                    loading={scheduleLoading}
-                    error={loadError ?? assetsError}
-                  />
-                </div>
-              : assetsError ?
-                <p className="text-center text-xs text-destructive">{assetsError}</p>
-              : null}
-            </div>
-          }
-
+              </div>
+            : assetsError ?
+              <p className="text-center text-xs text-destructive">{assetsError}</p>
+            : null}
+          </div>
         </div>
 
         {notice ?
@@ -383,19 +356,17 @@ export function WlHomeV2RadioScheduleShareExportModal({
               ))}
             </SelectContent>
           </Select>
-          {!isMobile ?
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              disabled={exportActionsDisabled}
-              onClick={handleCopy}
-            >
-              <Copy className="size-3.5" aria-hidden />
-              Copy image
-            </Button>
-          : null}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={exportActionsDisabled}
+            onClick={handleCopy}
+          >
+            <Copy className="size-3.5" aria-hidden />
+            Copy image
+          </Button>
           <Button
             type="button"
             variant="outline"

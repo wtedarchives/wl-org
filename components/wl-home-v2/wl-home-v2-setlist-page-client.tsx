@@ -238,10 +238,10 @@ export function WlHomeV2SetlistPageClient() {
         showId={showId}
         setlist={setlist}
         showAdminUi={showAdminUi}
-        adminLinkCopied={linkCopied}
-        onAdminCopyShowId={handleCopyLink}
-        onAdminEditShow={handleEditShow}
-        onShareSetlistImage={showAdminUi ? openShareExport : undefined}
+        adminLinkCopied={showAdminUi ? linkCopied : false}
+        onAdminCopyShowId={showAdminUi ? handleCopyLink : undefined}
+        onAdminEditShow={showAdminUi ? handleEditShow : undefined}
+        onShareSetlistImage={openShareExport}
         copiedEntryIds={showAdminUi ? copiedEntryIds : undefined}
         onNumberClick={showAdminUi ? handleNumberClick : undefined}
         onJotyBadgeClick={onJotyBadgeClick}

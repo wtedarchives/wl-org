@@ -1,9 +1,10 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Copy, Download } from "@phosphor-icons/react"
+import { Copy, Download, UploadSimple } from "@phosphor-icons/react"
 import { toBlob } from "html-to-image"
 
+import { useAuth } from "@/components/auth-context"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -19,25 +20,33 @@ import {
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import type { SetlistEntry, Show } from "@/types/setlist"
+import {
+  downloadSetlistShareFromStorage,
+  setlistShareImageExistsInStorage,
+  setlistShareStoragePath,
+  uploadSetlistSharePng,
+} from "@/lib/setlist-share-upload"
 
 import { WlHomeV2SetlistShareExportCard } from "@/components/wl-home-v2/wl-home-v2-setlist-share-export-card"
 import {
   WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO,
   WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
 } from "@/lib/wl-home-v2-setlist-share-export-config"
-import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
+
+/** Set to `false` before ship — when `true`, any signed-in user can use Generate. */
+const TEMP_DISABLE_SETLIST_SHARE_UPLOAD_ADMIN_GATE = true
 
 const SETLIST_SHARE_CAPTURE_OPTS = {
   cacheBust: true,
   pixelRatio: WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO,
-  /** Fully transparent canvas outside painted pixels (rounded corners stay crisp). */
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const
 
-function shareFilename(show: Show): string {
+function shareFilename(show: Show, withEntryCoachNotes: boolean): string {
   const d = formatSetlistDate(show.show_date).replace(/\./g, "-")
-  const idPart = show.show_id.replace(/[^a-zA-Z0-9_-]+/g, "").slice(0, 12)
-  return `setlist-${d}-${idPart}.png`
+  const suffix = withEntryCoachNotes ? "_cn" : ""
+  const idPart = show.show_id.replace(/[^a-zA-Z0-9_-]+/g, "").slice(0, 24)
+  return `setlist-${d}-${idPart}${suffix}.png`
 }
 
 export function WlHomeV2SetlistShareExportModal({
@@ -55,54 +64,50 @@ export function WlHomeV2SetlistShareExportModal({
   setlist: SetlistEntry[]
   showPositionInTour: ShowPositionInTour | null
 }) {
+  const { session } = useAuth()
   const captureRef = useRef<HTMLDivElement>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  const [busy, setBusy] = useState<null | "copy" | "download">(null)
+  const [busy, setBusy] = useState<null | "copy" | "download" | "generate">(null)
   const [showEntryCoachNotes, setShowEntryCoachNotes] = useState(true)
+  const [storageFileExists, setStorageFileExists] = useState(false)
+  const [storageCheckLoading, setStorageCheckLoading] = useState(false)
 
   useEffect(() => {
     if (!open) {
       setNotice(null)
       setBusy(null)
       setShowEntryCoachNotes(true)
+      setStorageFileExists(false)
+      setStorageCheckLoading(false)
+      return
     }
-  }, [open])
 
-  const handleDownload = useCallback(async () => {
-    const node = captureRef.current
-    if (!node) return
-    setBusy("download")
-    setNotice(null)
-    try {
-      const blob = await toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
-      if (!blob) {
-        setNotice("Could not create image.")
-        return
-      }
-      const name = shareFilename(show)
-      const how = await downloadOrWebSharePng(blob, name, {
-        shareTitle: `Setlist ${formatSetlistDate(show.show_date)}`,
-      })
-      setNotice(
-        how === "shared" ?
-          "Share sheet opened — tap Save Image to add to Photos (or share elsewhere)."
-        : "Download started.",
-      )
-    } catch (e) {
-      console.error(e)
-      setNotice("Could not create image. Try again.")
-    } finally {
-      setBusy(null)
+    let cancelled = false
+    setStorageCheckLoading(true)
+    setlistShareImageExistsInStorage(show.show_id, showEntryCoachNotes).then(
+      (exists) => {
+        if (cancelled) return
+        setStorageFileExists(exists)
+        setStorageCheckLoading(false)
+      },
+    )
+
+    return () => {
+      cancelled = true
     }
-  }, [show])
+  }, [open, show.show_id, showEntryCoachNotes])
+
+  const capturePreviewPng = useCallback(async () => {
+    const node = captureRef.current
+    if (!node) return null
+    return toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+  }, [])
 
   const handleCopy = useCallback(async () => {
-    const node = captureRef.current
-    if (!node) return
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+      const blob = await capturePreviewPng()
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -118,34 +123,87 @@ export function WlHomeV2SetlistShareExportModal({
     } catch (e) {
       console.error(e)
       setNotice(
-        "Copy failed (browser may block clipboard images). Use Download.",
+        "Copy failed (browser may block clipboard images).",
       )
     } finally {
       setBusy(null)
     }
-  }, [])
+  }, [capturePreviewPng])
+
+  const handleGenerate = useCallback(async () => {
+    if (!session?.token) {
+      setNotice("Sign in to upload setlist images.")
+      return
+    }
+    setBusy("generate")
+    setNotice(null)
+    try {
+      const blob = await capturePreviewPng()
+      if (!blob) {
+        setNotice("Could not create image.")
+        return
+      }
+      const path = setlistShareStoragePath(show.show_id, showEntryCoachNotes)
+      const { publicUrl, error } = await uploadSetlistSharePng(
+        session.token,
+        path,
+        blob,
+      )
+      if (error) {
+        setNotice(error)
+        return
+      }
+      setStorageFileExists(true)
+      setNotice(
+        publicUrl ?
+          `Uploaded to setlist-images: ${publicUrl}`
+        : `Uploaded to setlist-images (${path}).`,
+      )
+    } catch (e) {
+      console.error(e)
+      setNotice("Could not generate or upload image.")
+    } finally {
+      setBusy(null)
+    }
+  }, [capturePreviewPng, session?.token, show.show_id, showEntryCoachNotes])
+
+  const handleDownloadFromStorage = useCallback(async () => {
+    setBusy("download")
+    setNotice(null)
+    try {
+      const { error } = await downloadSetlistShareFromStorage(
+        show.show_id,
+        showEntryCoachNotes,
+        shareFilename(show, showEntryCoachNotes),
+      )
+      if (error) {
+        setNotice(error)
+        return
+      }
+      setNotice("Download started.")
+    } catch (e) {
+      console.error(e)
+      setNotice("Could not download image.")
+    } finally {
+      setBusy(null)
+    }
+  }, [show, showEntryCoachNotes])
+
+  const actionsDisabled = busy !== null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
         className={cn(
-          /* Override dialog defaults (`grid` + `w-full`): column flex + fit-content width shrink-wraps the preview card instead of stretching to the viewport. */
           "flex max-h-[min(92vh,900px)] flex-col items-start gap-3 overflow-hidden p-4 sm:p-5",
           "w-fit max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)]",
         )}
       >
         <DialogHeader className="max-w-full gap-1 text-left">
           <DialogTitle className="text-base">
-            Setlist image ({formatSetlistDate(show.show_date)})
+            Setlist Image ({formatSetlistDate(show.show_date)})
           </DialogTitle>
-          <DialogDescription className="text-xs">
-            Preview is {WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX}px wide; height follows the setlist.
-            Exported PNG uses {WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO}× pixel density (
-            {WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX *
-              WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO}
-            px wide).
-          </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(62vh,680px)] w-fit max-w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
@@ -170,7 +228,7 @@ export function WlHomeV2SetlistShareExportModal({
             <Checkbox
               id="wl-share-export-entry-coach"
               checked={showEntryCoachNotes}
-              disabled={busy !== null}
+              disabled={actionsDisabled}
               onCheckedChange={(checked) =>
                 setShowEntryCoachNotes(checked === true)
               }
@@ -188,7 +246,7 @@ export function WlHomeV2SetlistShareExportModal({
               variant="outline"
               size="sm"
               className="gap-1.5"
-              disabled={busy !== null}
+              disabled={actionsDisabled}
               onClick={handleCopy}
             >
               <Copy className="size-3.5" aria-hidden />
@@ -196,14 +254,27 @@ export function WlHomeV2SetlistShareExportModal({
             </Button>
             <Button
               type="button"
+              variant="outline"
               size="sm"
               className="gap-1.5"
-              disabled={busy !== null}
-              onClick={handleDownload}
+              disabled={actionsDisabled}
+              onClick={handleGenerate}
             >
-              <Download className="size-3.5" aria-hidden />
-              Download PNG
+              <UploadSimple className="size-3.5" aria-hidden />
+              Generate
             </Button>
+            {storageFileExists && !storageCheckLoading ?
+              <Button
+                type="button"
+                size="sm"
+                className="gap-1.5"
+                disabled={actionsDisabled}
+                onClick={handleDownloadFromStorage}
+              >
+                <Download className="size-3.5" aria-hidden />
+                Download
+              </Button>
+            : null}
           </div>
         </DialogFooter>
       </DialogContent>

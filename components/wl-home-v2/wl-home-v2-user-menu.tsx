@@ -29,6 +29,7 @@ import {
   Bug,
   CaretDown,
   ChartBarHorizontal,
+  Export,
   GearSix,
   MagnifyingGlass,
   SignIn,
@@ -60,9 +61,12 @@ function WlHomeV2AdminNavIcon({
 export function WlHomeV2UserMenu({
   onOpenLogin,
   onOpenSignup,
+  onOpenShareSchedule,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
+  /** Admin-only: opens schedule image export modal. */
+  onOpenShareSchedule?: () => void
 }) {
   const { session, signOut } = useAuth()
   const { isAdmin } = useAdminStatus(session)
@@ -205,6 +209,18 @@ export function WlHomeV2UserMenu({
                     />
                     Find
                   </DropdownMenuItem>
+                  {onOpenShareSchedule ?
+                    <DropdownMenuItem
+                      className="top-nav-dd-item flex cursor-pointer items-center gap-2"
+                      onClick={onOpenShareSchedule}
+                    >
+                      <Export
+                        className="top-nav-dd-icon size-4 shrink-0"
+                        aria-hidden
+                      />
+                      Share schedule
+                    </DropdownMenuItem>
+                  : null}
                   <DropdownMenuSeparator className="top-nav-dd-sep" />
                 </>
               )}

@@ -46,6 +46,7 @@ export function WlHomeV2Header({
   onOpenArchive,
   onOpenRadio,
   onOpenFollowUs,
+  onOpenShareSchedule,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
@@ -55,6 +56,8 @@ export function WlHomeV2Header({
   onOpenRadio: () => void
   /** Open Follow Us (social links) modal — no route change. */
   onOpenFollowUs: () => void
+  /** Admin-only: schedule PNG export modal. */
+  onOpenShareSchedule?: () => void
 }) {
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
@@ -254,6 +257,7 @@ export function WlHomeV2Header({
           <WlHomeV2UserMenu
             onOpenLogin={onOpenLogin}
             onOpenSignup={onOpenSignup}
+            onOpenShareSchedule={onOpenShareSchedule}
           />
         </div>
       </div>
