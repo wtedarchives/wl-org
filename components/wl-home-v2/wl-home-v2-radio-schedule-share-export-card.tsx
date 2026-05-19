@@ -13,6 +13,7 @@ import {
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { parseWtedEpisodeHosts } from "@/lib/wted-episode-host"
 import { cn } from "@/lib/utils"
+import { WlRadioScheduleShareStoreBadgeImg } from "@/components/wl-home-v2/wl-radio-schedule-share-store-badge-img"
 import { WlScheduleShareProxiedArtworkImg } from "@/components/wl-home-v2/wl-schedule-share-proxied-artwork-img"
 import { scheduleShareExportImageNeedsProxy } from "@/lib/wl-schedule-share-proxy-image"
 
@@ -226,13 +227,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
               rel="noopener noreferrer"
               aria-label="Download WTED Goose Radio on the App Store"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- PNG capture */}
-              <img
-                src="/iOS.svg"
-                alt=""
-                className="wl-radio-schedule-share-export__store-badge-img"
-                draggable={false}
-              />
+              <WlRadioScheduleShareStoreBadgeImg variant="ios" />
             </a>
             <a
               className="wl-radio-schedule-share-export__store-badge-link"
@@ -241,13 +236,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
               rel="noopener noreferrer"
               aria-label="Get WTED Goose Radio on Google Play"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- PNG capture */}
-              <img
-                src="/Android.svg"
-                alt=""
-                className="wl-radio-schedule-share-export__store-badge-img"
-                draggable={false}
-              />
+              <WlRadioScheduleShareStoreBadgeImg variant="android" />
             </a>
           </div>
         </div>
