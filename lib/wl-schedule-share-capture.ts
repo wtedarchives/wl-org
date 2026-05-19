@@ -1,4 +1,6 @@
-import { toBlob, type Options } from "html-to-image"
+import { toBlob } from "html-to-image"
+
+type ScheduleShareCaptureOptions = NonNullable<Parameters<typeof toBlob>[1]>
 
 /** iOS WebKit often skips painting images far off-screen; capture must stay in the viewport. */
 export const WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS =
@@ -80,7 +82,7 @@ async function inlineImagesForScheduleShareCapture(
 
 export async function captureScheduleShareNodeToBlob(
   node: HTMLElement,
-  options: Options,
+  options: ScheduleShareCaptureOptions,
 ): Promise<Blob | null> {
   await waitForScheduleShareCaptureImages(node)
   await new Promise<void>((resolve) => {
