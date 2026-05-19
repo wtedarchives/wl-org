@@ -2,9 +2,9 @@ import { toBlob } from "html-to-image"
 
 type ScheduleShareCaptureOptions = NonNullable<Parameters<typeof toBlob>[1]>
 
-/** iOS WebKit often skips painting images far off-screen; capture must stay in the viewport. */
+/** Off-screen / low-opacity capture layer (avoid negative z-index — iOS may skip painting). */
 export const WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS =
-  "pointer-events-none fixed left-0 top-0 z-[-1] opacity-[0.01]"
+  "pointer-events-none fixed left-0 top-0 z-0 opacity-[0.01]"
 
 export function isScheduleShareCaptureIOSWebKit(): boolean {
   if (typeof navigator === "undefined") return false
@@ -13,6 +13,50 @@ export function isScheduleShareCaptureIOSWebKit(): boolean {
     /iP(hone|ad|od)/.test(ua) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   )
+}
+
+/**
+ * Wait until proxied row art has mounted `<img>` nodes (not placeholders) and decoded.
+ * `data-schedule-share-expected-row-art` is set on the export frame in the card component.
+ */
+export async function waitForScheduleShareCaptureReady(
+  root: HTMLElement,
+  timeoutMs = 20000,
+): Promise<void> {
+  const expectedRowArt = Number.parseInt(
+    root.getAttribute("data-schedule-share-expected-row-art") ?? "0",
+    10,
+  )
+  const start = Date.now()
+
+  while (Date.now() - start < timeoutMs) {
+    const rowArtImgs = root.querySelectorAll(
+      ".wl-radio-schedule-share-export__row-art-img",
+    )
+    const pendingPlaceholders = root.querySelectorAll(
+      ".wl-radio-schedule-share-export__row-art .wl-radio-schedule-share-export__row-art-placeholder",
+    )
+    const brandImg = root.querySelector<HTMLImageElement>(
+      ".wl-radio-schedule-share-export__brand-mark-img",
+    )
+    const brandReady =
+      !brandImg ||
+      (brandImg.complete && (brandImg.naturalWidth ?? 0) > 0)
+
+    const rowArtReady =
+      rowArtImgs.length >= expectedRowArt && pendingPlaceholders.length === 0
+
+    if (rowArtReady && brandReady) {
+      await waitForScheduleShareCaptureImages(root, 3000)
+      return
+    }
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 100)
+    })
+  }
+
+  await waitForScheduleShareCaptureImages(root, 3000)
 }
 
 export async function waitForScheduleShareCaptureImages(
@@ -84,6 +128,7 @@ export async function captureScheduleShareNodeToBlob(
   node: HTMLElement,
   options: ScheduleShareCaptureOptions,
 ): Promise<Blob | null> {
+  await waitForScheduleShareCaptureReady(node)
   await waitForScheduleShareCaptureImages(node)
   await new Promise<void>((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))

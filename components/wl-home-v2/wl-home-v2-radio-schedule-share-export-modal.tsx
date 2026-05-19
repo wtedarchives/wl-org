@@ -48,7 +48,7 @@ import {
 } from "@/lib/radio-schedule-share-upload"
 import {
   captureScheduleShareNodeToBlob,
-  WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS,
+  waitForScheduleShareCaptureReady,
 } from "@/lib/wl-schedule-share-capture"
 import { cn } from "@/lib/utils"
 
@@ -94,6 +94,9 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const [slots, setSlots] = useState<RadioScheduleSlot[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
+  /** On iOS, briefly show the live export card in the modal while capturing (WebKit paints images). */
+  const [mobileCaptureSurfaceVisible, setMobileCaptureSurfaceVisible] =
+    useState(false)
 
   const {
     previewUrl: mobilePreviewUrl,
@@ -141,11 +144,27 @@ export function WlHomeV2RadioScheduleShareExportModal({
     }
   }, [open, scheduleDay])
 
-  const captureDesktopSchedulePng = useCallback(async () => {
+  const prepareMobileCaptureSurface = useCallback(async () => {
+    if (!isMobile) return
+    setMobileCaptureSurfaceVisible(true)
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    })
     const node = desktopCaptureRef.current
-    if (!node) return null
-    return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
-  }, [])
+    if (node) await waitForScheduleShareCaptureReady(node)
+  }, [isMobile])
+
+  const captureDesktopSchedulePng = useCallback(async () => {
+    try {
+      if (isMobile) await prepareMobileCaptureSurface()
+      const node = desktopCaptureRef.current
+      if (!node) return null
+      if (!isMobile) await waitForScheduleShareCaptureReady(node)
+      return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+    } finally {
+      if (isMobile) setMobileCaptureSurfaceVisible(false)
+    }
+  }, [isMobile, prepareMobileCaptureSurface])
 
   const handleDownload = useCallback(async () => {
     const node = desktopCaptureRef.current
@@ -254,6 +273,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const exportActionsDisabled =
     busy !== null ||
     scheduleLoading ||
+    mobileCaptureSurfaceVisible ||
     (isMobile && mobilePreviewLoading)
 
   return (
@@ -282,20 +302,45 @@ export function WlHomeV2RadioScheduleShareExportModal({
 
         <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
           {isMobile ?
-            <div className="flex min-h-[200px] w-full items-center justify-center">
-              {scheduleLoading || mobilePreviewLoading ?
-                <p className="text-center text-xs text-muted-foreground">
-                  Building preview…
-                </p>
-              : mobilePreviewUrl ?
-                // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
-                <img
-                  src={mobilePreviewUrl}
-                  alt={`WTED Radio schedule for ${dayOptions.find((o) => o.key === selectedDayKey)?.label ?? "selected day"}`}
-                  className="mx-auto max-h-[min(58vh,640px)] w-auto max-w-full object-contain"
-                />
-              : <p className="text-center text-xs text-muted-foreground">
-                  Preview unavailable. You can still download the image.
+            <div className="relative flex min-h-[200px] w-full items-center justify-center">
+              <div
+                className={cn(
+                  "flex w-full min-w-0 justify-center",
+                  mobileCaptureSurfaceVisible ?
+                    "relative z-[1] opacity-100"
+                  : "pointer-events-none fixed left-0 top-0 z-0 opacity-[0.01]",
+                )}
+                aria-hidden={!mobileCaptureSurfaceVisible}
+              >
+                <div className="inline-block w-min min-w-min shrink-0">
+                  <WlHomeV2RadioScheduleShareExportCard
+                    ref={desktopCaptureRef}
+                    backgroundSrc={backgroundSrc}
+                    scheduleDay={scheduleDay}
+                    slots={slots}
+                    loading={scheduleLoading}
+                    error={loadError}
+                  />
+                </div>
+              </div>
+              {!mobileCaptureSurfaceVisible ?
+                scheduleLoading || mobilePreviewLoading ?
+                  <p className="relative z-[2] text-center text-xs text-muted-foreground">
+                    Building preview…
+                  </p>
+                : mobilePreviewUrl ?
+                  // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
+                  <img
+                    src={mobilePreviewUrl}
+                    alt={`WTED Radio schedule for ${dayOptions.find((o) => o.key === selectedDayKey)?.label ?? "selected day"}`}
+                    className="relative z-[2] mx-auto max-h-[min(58vh,640px)] w-auto max-w-full object-contain"
+                  />
+                : <p className="relative z-[2] text-center text-xs text-muted-foreground">
+                    Preview unavailable. You can still download the image.
+                  </p>
+
+              : <p className="relative z-[2] text-center text-xs text-muted-foreground">
+                  Preparing image…
                 </p>
               }
             </div>
@@ -313,23 +358,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
             </div>
           }
 
-          {isMobile ?
-            <div
-              className={WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS}
-              aria-hidden
-            >
-              <div className="inline-block w-min min-w-min shrink-0">
-                <WlHomeV2RadioScheduleShareExportCard
-                  ref={desktopCaptureRef}
-                  backgroundSrc={backgroundSrc}
-                  scheduleDay={scheduleDay}
-                  slots={slots}
-                  loading={scheduleLoading}
-                  error={loadError}
-                />
-              </div>
-            </div>
-          : null}
         </div>
 
         {notice ?

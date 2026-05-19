@@ -45,6 +45,13 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
     year: "numeric",
   }).format(scheduleDay)
 
+  const expectedRowArtCount = slots.filter((slot) => {
+    const wted = slot.wtedEpisode
+    return Boolean(
+      wted?.artwork?.trim() || slot.event.playlist.artwork?.trim(),
+    )
+  }).length
+
   return (
     <div
       className="wl-radio-schedule-share-export__root"
@@ -55,6 +62,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
     >
       <div
         ref={ref}
+        data-schedule-share-expected-row-art={String(expectedRowArtCount)}
         className="wl-radio-schedule-share-export__frame"
         style={{
           width: "100%",
