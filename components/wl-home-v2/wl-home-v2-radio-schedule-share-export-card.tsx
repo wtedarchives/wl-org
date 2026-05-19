@@ -13,6 +13,7 @@ import {
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { parseWtedEpisodeHosts } from "@/lib/wted-episode-host"
 import { cn } from "@/lib/utils"
+import { WlScheduleShareProxiedArtworkImg } from "@/components/wl-home-v2/wl-schedule-share-proxied-artwork-img"
 
 import "./wl-home-v2-radio-schedule-share-export.css"
 
@@ -144,13 +145,9 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                         aria-hidden
                       >
                         {artworkSrc ?
-                          /* eslint-disable-next-line @next/next/no-img-element -- episode / Radio.co artwork for PNG capture */
-                          <img
-                            src={artworkSrc}
-                            alt=""
-                            crossOrigin="anonymous"
-                            className="wl-radio-schedule-share-export__row-art-img"
-                            draggable={false}
+                          <WlScheduleShareProxiedArtworkImg
+                            originalHref={artworkSrc}
+                            imgClassName="wl-radio-schedule-share-export__row-art-img"
                           />
                         : <div className="wl-radio-schedule-share-export__row-art-placeholder" />
                         }
