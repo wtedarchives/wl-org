@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Copy, Download } from "@phosphor-icons/react"
-import { toBlob } from "html-to-image"
-
 import { WlHomeV2RadioScheduleShareExportCard } from "@/components/wl-home-v2/wl-home-v2-radio-schedule-share-export-card"
 import { Button } from "@/components/ui/button"
 import {
@@ -43,6 +41,10 @@ import {
   type RadioScheduleShareExportDayOption,
 } from "@/lib/wl-home-v2-radio-schedule-share-export-days"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
+import {
+  captureScheduleShareNodeToBlob,
+  WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS,
+} from "@/lib/wl-schedule-share-capture"
 import { cn } from "@/lib/utils"
 
 const RADIO_SCHEDULE_SHARE_CAPTURE_OPTS = {
@@ -138,7 +140,10 @@ export function WlHomeV2RadioScheduleShareExportModal({
     setBusy("download")
     setNotice(null)
     try {
-      const blob = await toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+      const blob = await captureScheduleShareNodeToBlob(
+        node,
+        RADIO_SCHEDULE_SHARE_CAPTURE_OPTS,
+      )
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -166,7 +171,10 @@ export function WlHomeV2RadioScheduleShareExportModal({
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+      const blob = await captureScheduleShareNodeToBlob(
+        node,
+        RADIO_SCHEDULE_SHARE_CAPTURE_OPTS,
+      )
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -260,7 +268,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
 
           {isMobile ?
             <div
-              className="pointer-events-none fixed top-0 -left-[12000px] z-[-1]"
+              className={WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS}
               aria-hidden
             >
               <div className="inline-block w-min min-w-min shrink-0">

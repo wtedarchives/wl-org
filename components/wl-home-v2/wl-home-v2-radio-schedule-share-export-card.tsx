@@ -14,6 +14,7 @@ import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { parseWtedEpisodeHosts } from "@/lib/wted-episode-host"
 import { cn } from "@/lib/utils"
 import { WlScheduleShareProxiedArtworkImg } from "@/components/wl-home-v2/wl-schedule-share-proxied-artwork-img"
+import { scheduleShareExportImageNeedsProxy } from "@/lib/wl-schedule-share-proxy-image"
 
 import "./wl-home-v2-radio-schedule-share-export.css"
 
@@ -69,7 +70,9 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
           <img
             src={backgroundSrc}
             alt=""
-            crossOrigin="anonymous"
+            {...(scheduleShareExportImageNeedsProxy(backgroundSrc) ?
+              { crossOrigin: "anonymous" as const }
+            : {})}
             className="wl-radio-schedule-share-export__bg-img"
             draggable={false}
           />

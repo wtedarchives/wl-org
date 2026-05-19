@@ -1,37 +1,14 @@
 "use client"
 
 import { useCallback, useEffect, useState, type RefObject } from "react"
-import { toBlob } from "html-to-image"
+
+import { captureScheduleShareNodeToBlob } from "@/lib/wl-schedule-share-capture"
 
 const PREVIEW_CAPTURE_OPTS = {
   cacheBust: false,
   pixelRatio: 1,
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const
-
-async function waitForCaptureImages(
-  root: HTMLElement,
-  timeoutMs = 5000,
-): Promise<void> {
-  const imgs = Array.from(root.querySelectorAll("img"))
-  if (imgs.length === 0) return
-  await Promise.race([
-    Promise.all(
-      imgs.map(
-        (img) =>
-          img.complete ?
-            Promise.resolve()
-          : new Promise<void>((resolve) => {
-              img.addEventListener("load", () => resolve(), { once: true })
-              img.addEventListener("error", () => resolve(), { once: true })
-            }),
-      ),
-    ),
-    new Promise<void>((resolve) => {
-      setTimeout(resolve, timeoutMs)
-    }),
-  ])
-}
 
 export function useRadioScheduleShareMobilePreview({
   enabled,
@@ -79,14 +56,12 @@ export function useRadioScheduleShareMobilePreview({
       const node = captureRef.current
       if (!node || cancelled) return
       setPreviewLoading(true)
-      await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-      })
-      if (cancelled) return
-      await waitForCaptureImages(node)
       if (cancelled) return
       try {
-        const blob = await toBlob(node, PREVIEW_CAPTURE_OPTS)
+        const blob = await captureScheduleShareNodeToBlob(
+          node,
+          PREVIEW_CAPTURE_OPTS,
+        )
         if (cancelled || !blob) return
         const url = URL.createObjectURL(blob)
         setPreviewUrl((prev) => {
