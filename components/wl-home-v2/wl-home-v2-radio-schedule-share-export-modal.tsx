@@ -7,6 +7,15 @@ import { toBlob } from "html-to-image"
 import { WlHomeV2RadioScheduleShareExportCard } from "@/components/wl-home-v2/wl-home-v2-radio-schedule-share-export-card"
 import { Button } from "@/components/ui/button"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { useRadioScheduleShareMobilePreview } from "@/hooks/use-radio-schedule-share-mobile-preview"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -25,6 +34,14 @@ import {
   WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO,
   WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX,
 } from "@/lib/wl-home-v2-radio-schedule-share-export-config"
+import {
+  buildRadioScheduleShareExportDayOptions,
+  isSameLocalCalendarDay,
+  localCalendarDayKey,
+  parseLocalCalendarDayKey,
+  startOfLocalCalendarDay,
+  type RadioScheduleShareExportDayOption,
+} from "@/lib/wl-home-v2-radio-schedule-share-export-days"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
 import { cn } from "@/lib/utils"
 
@@ -54,35 +71,66 @@ export function WlHomeV2RadioScheduleShareExportModal({
   onOpenChange: (next: boolean) => void
   backgroundSrc: string
 }) {
+  const isMobile = useIsMobile()
   const captureRef = useRef<HTMLDivElement>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [busy, setBusy] = useState<null | "copy" | "download">(null)
-  const [scheduleDay, setScheduleDay] = useState(() => new Date())
+  const [scheduleDay, setScheduleDay] = useState(() => startOfLocalCalendarDay())
+  const [selectedDayKey, setSelectedDayKey] = useState(() =>
+    localCalendarDayKey(startOfLocalCalendarDay()),
+  )
+  const [dayOptions, setDayOptions] = useState<
+    RadioScheduleShareExportDayOption[]
+  >(() => buildRadioScheduleShareExportDayOptions())
   const [slots, setSlots] = useState<RadioScheduleSlot[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
+
+  const {
+    previewUrl: mobilePreviewUrl,
+    previewLoading: mobilePreviewLoading,
+    clearPreview: clearMobilePreview,
+  } = useRadioScheduleShareMobilePreview({
+    enabled: open && isMobile,
+    captureRef,
+    scheduleLoading,
+    slots,
+    backgroundSrc,
+    scheduleDay,
+  })
 
   useEffect(() => {
     if (!open) {
       setNotice(null)
       setBusy(null)
+      clearMobilePreview()
       return
     }
-    const day = new Date()
-    setScheduleDay(day)
+    const today = startOfLocalCalendarDay()
+    setDayOptions(buildRadioScheduleShareExportDayOptions())
+    setScheduleDay(today)
+    setSelectedDayKey(localCalendarDayKey(today))
+  }, [open, clearMobilePreview])
+
+  useEffect(() => {
+    if (!open) return
     setScheduleLoading(true)
     setLoadError(null)
     let cancelled = false
-    fetchRadioScheduleMergedSlotsForLocalDay(day).then((result) => {
-      if (cancelled) return
-      setSlots(result.slots)
-      setLoadError(result.error)
-      setScheduleLoading(false)
-    })
+    const nowMs =
+      isSameLocalCalendarDay(scheduleDay, new Date()) ? Date.now() : 0
+    fetchRadioScheduleMergedSlotsForLocalDay(scheduleDay, nowMs).then(
+      (result) => {
+        if (cancelled) return
+        setSlots(result.slots)
+        setLoadError(result.error)
+        setScheduleLoading(false)
+      },
+    )
     return () => {
       cancelled = true
     }
-  }, [open])
+  }, [open, scheduleDay])
 
   const handleDownload = useCallback(async () => {
     const node = captureRef.current
@@ -148,6 +196,11 @@ export function WlHomeV2RadioScheduleShareExportModal({
     WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX *
     WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO
 
+  const exportActionsDisabled =
+    busy !== null ||
+    scheduleLoading ||
+    (isMobile && mobilePreviewLoading)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -168,23 +221,60 @@ export function WlHomeV2RadioScheduleShareExportModal({
             {exportHeightPx}px). Top and bottom margins keep UI out of Instagram
             Story safe bands (first and last {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_CLEAR_BAND_PX}
             px at {WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_REF_HEIGHT_PX}px height—background
-            only there). All shows starting today in your local timezone.
+            only there). All shows on the selected day in your local timezone.
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
-          <div className="flex w-full min-w-0 justify-center">
-            <div className="inline-block w-min min-w-min shrink-0">
-              <WlHomeV2RadioScheduleShareExportCard
-                ref={captureRef}
-                backgroundSrc={backgroundSrc}
-                scheduleDay={scheduleDay}
-                slots={slots}
-                loading={scheduleLoading}
-                error={loadError}
-              />
+          {isMobile ?
+            <div className="flex min-h-[200px] w-full items-center justify-center">
+              {scheduleLoading || mobilePreviewLoading ?
+                <p className="text-center text-xs text-muted-foreground">
+                  Building preview…
+                </p>
+              : mobilePreviewUrl ?
+                // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
+                <img
+                  src={mobilePreviewUrl}
+                  alt={`WTED Radio schedule for ${dayOptions.find((o) => o.key === selectedDayKey)?.label ?? "selected day"}`}
+                  className="mx-auto max-h-[min(58vh,640px)] w-auto max-w-full object-contain"
+                />
+              : <p className="text-center text-xs text-muted-foreground">
+                  Preview unavailable. You can still download the image.
+                </p>
+              }
             </div>
-          </div>
+          : <div className="flex w-full min-w-0 justify-center">
+              <div className="inline-block w-min min-w-min shrink-0">
+                <WlHomeV2RadioScheduleShareExportCard
+                  ref={captureRef}
+                  backgroundSrc={backgroundSrc}
+                  scheduleDay={scheduleDay}
+                  slots={slots}
+                  loading={scheduleLoading}
+                  error={loadError}
+                />
+              </div>
+            </div>
+          }
+
+          {isMobile ?
+            <div
+              className="pointer-events-none fixed top-0 -left-[12000px] z-[-1]"
+              aria-hidden
+            >
+              <div className="inline-block w-min min-w-min shrink-0">
+                <WlHomeV2RadioScheduleShareExportCard
+                  ref={captureRef}
+                  backgroundSrc={backgroundSrc}
+                  scheduleDay={scheduleDay}
+                  slots={slots}
+                  loading={scheduleLoading}
+                  error={loadError}
+                />
+              </div>
+            </div>
+          : null}
         </div>
 
         {notice ?
@@ -192,22 +282,43 @@ export function WlHomeV2RadioScheduleShareExportModal({
         : null}
 
         <DialogFooter className="w-full flex-row flex-wrap items-center justify-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            disabled={busy !== null}
-            onClick={handleCopy}
+          <Select
+            value={selectedDayKey}
+            disabled={exportActionsDisabled}
+            onValueChange={(key) => {
+              setSelectedDayKey(key)
+              setScheduleDay(parseLocalCalendarDayKey(key))
+            }}
           >
-            <Copy className="size-3.5" aria-hidden />
-            Copy image
-          </Button>
+            <SelectTrigger size="sm" className="min-w-[6.5rem]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {dayOptions.map((opt) => (
+                <SelectItem key={opt.key} value={opt.key}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {!isMobile ?
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              disabled={exportActionsDisabled}
+              onClick={handleCopy}
+            >
+              <Copy className="size-3.5" aria-hidden />
+              Copy image
+            </Button>
+          : null}
           <Button
             type="button"
             size="sm"
             className="gap-1.5"
-            disabled={busy !== null}
+            disabled={exportActionsDisabled}
             onClick={handleDownload}
           >
             <Download className="size-3.5" aria-hidden />
