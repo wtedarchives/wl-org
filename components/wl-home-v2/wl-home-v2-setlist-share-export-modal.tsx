@@ -26,6 +26,7 @@ import {
   WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
 } from "@/lib/wl-home-v2-setlist-share-export-config"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
+import { withShareCaptureImagesInlined } from "@/lib/wl-home-v2-share-capture-inline-images"
 
 const SETLIST_SHARE_CAPTURE_OPTS = {
   cacheBust: true,
@@ -74,7 +75,11 @@ export function WlHomeV2SetlistShareExportModal({
     setBusy("download")
     setNotice(null)
     try {
-      const blob = await toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+      const blob = await withShareCaptureImagesInlined(
+        node,
+        "[setlist share png]",
+        () => toBlob(node, SETLIST_SHARE_CAPTURE_OPTS),
+      )
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -102,7 +107,11 @@ export function WlHomeV2SetlistShareExportModal({
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+      const blob = await withShareCaptureImagesInlined(
+        node,
+        "[setlist share png]",
+        () => toBlob(node, SETLIST_SHARE_CAPTURE_OPTS),
+      )
       if (!blob) {
         setNotice("Could not create image.")
         return

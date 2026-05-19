@@ -26,6 +26,7 @@ import {
   WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX,
 } from "@/lib/wl-home-v2-radio-schedule-share-export-config"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
+import { withShareCaptureImagesInlined } from "@/lib/wl-home-v2-share-capture-inline-images"
 import { cn } from "@/lib/utils"
 
 const RADIO_SCHEDULE_SHARE_CAPTURE_OPTS = {
@@ -86,7 +87,11 @@ export function WlHomeV2RadioScheduleShareExportModal({
     setBusy("download")
     setNotice(null)
     try {
-      const blob = await toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+      const blob = await withShareCaptureImagesInlined(
+        node,
+        "[radio schedule share png]",
+        () => toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS),
+      )
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -114,7 +119,11 @@ export function WlHomeV2RadioScheduleShareExportModal({
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+      const blob = await withShareCaptureImagesInlined(
+        node,
+        "[radio schedule share png]",
+        () => toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS),
+      )
       if (!blob) {
         setNotice("Could not create image.")
         return
