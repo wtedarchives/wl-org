@@ -29,7 +29,11 @@ import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
 import { cn } from "@/lib/utils"
 
 const RADIO_SCHEDULE_SHARE_CAPTURE_OPTS = {
-  cacheBust: true,
+  /**
+   * Must stay false when row artwork uses `blob:` URLs (proxied cross-origin images).
+   * `cacheBust: true` appends `?…` to src for reloads; query suffix breaks blob URLs → capture fetch fails.
+   */
+  cacheBust: false,
   pixelRatio: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO,
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const

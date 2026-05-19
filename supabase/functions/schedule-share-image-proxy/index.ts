@@ -7,6 +7,7 @@ function isAllowedUpstream(url: URL): boolean {
   if (url.protocol !== "https:") return false
   const h = url.hostname.toLowerCase()
   if (h === "radio.co" || h.endsWith(".radio.co")) return true
+  if (h === "postimg.cc" || h.endsWith(".postimg.cc")) return true
   if (h.endsWith(".supabase.co")) {
     const p = url.pathname
     return (

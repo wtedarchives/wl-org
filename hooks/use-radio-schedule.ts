@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react"
 
 import {
+  extractRadioCoPlaylistIdFromArtworkUrl,
   fetchWtedEpisodeScheduleLookupsByNames,
+  fetchWtedEpisodeScheduleLookupsByRadioIds,
   type WtedEpisodeScheduleLookup,
 } from "@/lib/wted-episodes-schedule-lookup"
 import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
@@ -29,7 +31,7 @@ interface RadioScheduleResponse {
   data: RadioScheduleEvent[]
 }
 
-/** `wted_episodes` row matched on Radio.co `playlist.name` (= `wted_episodes.episode`). */
+/** `wted_episodes` row matched on Radio.co `playlist.name` (= `episode`) or fallback `radio_id` from artwork URL. */
 export type RadioScheduleWtedEpisode = WtedEpisodeScheduleLookup
 
 export interface RadioScheduleSlot {
@@ -248,12 +250,48 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
 
     const episodeMap = await fetchWtedEpisodeScheduleLookupsByNames(episodeKeys)
     const matchedKeys = uniqueEpisodeKeys.filter((k) => episodeMap.has(k))
-    const unmatchedKeys = uniqueEpisodeKeys.filter((k) => !episodeMap.has(k))
+    const unmatchedEpisodeKeys = uniqueEpisodeKeys.filter(
+      (k) => !episodeMap.has(k),
+    )
+
+    const radioIdsFromArtwork = slotsBase
+      .map((s) =>
+        extractRadioCoPlaylistIdFromArtworkUrl(s.event.playlist.artwork ?? ""),
+      )
+      .filter((id): id is string => Boolean(id))
+    const uniqueRadioIds = [...new Set(radioIdsFromArtwork)]
+
+    const radioMap =
+      await fetchWtedEpisodeScheduleLookupsByRadioIds(uniqueRadioIds)
+    const matchedRadioIds = uniqueRadioIds.filter((id) => radioMap.has(id))
+    const unmatchedRadioIds = uniqueRadioIds.filter((id) => !radioMap.has(id))
+
+    const suspectedAnonRlsSkippedPlaylistNames = unmatchedEpisodeKeys.filter(
+      (ek) => {
+        const slot = slotsBase.find((s) => s.event.playlist.name?.trim() === ek)
+        const rid = slot ?
+          extractRadioCoPlaylistIdFromArtworkUrl(
+            slot.event.playlist.artwork ?? "",
+          )
+        : null
+        return Boolean(rid && unmatchedRadioIds.includes(rid))
+      },
+    )
+
     console.log(`${logPrefix} step 7/8: wted_episodes join result`, {
-      rowsResolvedFromSupabase: episodeMap.size,
+      rowsResolvedFromSupabase_byEpisodeKey: episodeMap.size,
       matchedEpisodeKeys: matchedKeys,
-      unmatchedEpisodeKeys: unmatchedKeys,
-      note: "Show ribbon + DB title/art when key matched; only REMOVED rows excluded from lookup (skipped still resolves for this PNG).",
+      unmatchedEpisodeKeys,
+      rowsResolvedFromSupabase_byRadioId: radioMap.size,
+      radioIdLookupKeysFromArtworkUrl: uniqueRadioIds,
+      matchedRadioIds,
+      unmatchedRadioIds,
+      suspectedAnonRlsSkippedPlaylistNames:
+        suspectedAnonRlsSkippedPlaylistNames.length > 0 ?
+          suspectedAnonRlsSkippedPlaylistNames
+        : undefined,
+      note:
+        "Fallback join: radio_id parsed from images.radio.co …/playlist.{id}.… when playlist.name misses. If BOTH miss for the same slot, anon Supabase RLS may be hiding those wted_episodes rows (e.g. status=skipped).",
       artworkFromDb_previewByMatchedKey: Object.fromEntries(
         matchedKeys.map((k) => {
           const row = episodeMap.get(k)!
@@ -261,18 +299,39 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
           return [k, { db_artwork_preview: truncateUrlForLog(u, 120) }]
         }),
       ),
+      artworkFromDb_previewByMatchedRadioId: Object.fromEntries(
+        matchedRadioIds.map((rid) => {
+          const row = radioMap.get(rid)!
+          const u = row.artwork?.trim() ?? ""
+          return [rid, { db_artwork_preview: truncateUrlForLog(u, 120) }]
+        }),
+      ),
     })
 
     const slots: RadioScheduleSlot[] = slotsBase.map((s) => {
       const key = s.event.playlist.name?.trim()
-      const wtedEpisode =
-        key ? (episodeMap.get(key) ?? null) : null
+      const byEpisode = key ? episodeMap.get(key) ?? null : null
+      const rid = extractRadioCoPlaylistIdFromArtworkUrl(
+        s.event.playlist.artwork ?? "",
+      )
+      const byRadioId =
+        byEpisode ? null : (rid ? radioMap.get(rid) ?? null : null)
+      const wtedEpisode = byEpisode ?? byRadioId ?? null
       return { ...s, wtedEpisode }
     })
 
     const displayPlan = slots.map((s, i) => {
       const playlistName = s.event.playlist.name?.trim() ?? ""
       const radioTitle = s.event.playlist.title?.trim() ?? ""
+      const episodeRowForLog =
+        playlistName ? episodeMap.get(playlistName) ?? null : null
+      const ridForLog = extractRadioCoPlaylistIdFromArtworkUrl(
+        s.event.playlist.artwork ?? "",
+      )
+      const radioRowForLog =
+        episodeRowForLog ?
+          null
+        : (ridForLog ? radioMap.get(ridForLog) ?? null : null)
       const wted = s.wtedEpisode
       const mainTitle = wted
         ? getWtedEpisodeDisplayName(playlistName, wted.display_name)
@@ -281,15 +340,24 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
       const wtedArt = wted?.artwork?.trim() ?? ""
       const radioArt = s.event.playlist.artwork?.trim() ?? ""
       const chosenArtSrc = wtedArt || radioArt
+      const dbJoin =
+        episodeRowForLog ? "episode_name"
+        : radioRowForLog ? "radio_id_from_artwork_url"
+        : null
+
       let artworkDecision: string
       if (wtedArt) {
         artworkDecision =
-          "1) wted_episodes.artwork wins (joined on playlist.name = episode)."
+          episodeRowForLog ?
+            "1a) wted_episodes.artwork wins (joined on playlist.name = episode)."
+          : radioRowForLog ?
+            "1b) wted_episodes.artwork wins (joined on radio_id parsed from Radio artwork URL)."
+          : "1) wted_episodes.artwork wins."
       } else if (radioArt) {
         artworkDecision =
           wted ?
             "2) Radio playlist.artwork (DB row matched but artwork empty)."
-          : "3) Radio playlist.artwork only (no wted_episodes match for this playlist.name)."
+          : "3) Radio playlist.artwork only (no wted_episodes row from anon lookup)."
       } else {
         artworkDecision =
           "4) No URL → export card renders grey placeholder thumbnail."
@@ -311,6 +379,7 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
         layout: "schedule row (show ribbon optional, title, start–end time range only)",
         lookupKeyPlaylistName: playlistName || null,
         dbMatched: wted != null,
+        wtedEpisodesJoin: dbJoin,
         showRibbonText: wted?.show ?? null,
         showRibbonRendered: hasShowRibbon,
         mainTitleUsedInPng: mainTitle,
