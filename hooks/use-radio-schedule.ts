@@ -8,8 +8,6 @@ import {
   fetchWtedEpisodeScheduleLookupsByRadioIds,
   type WtedEpisodeScheduleLookup,
 } from "@/lib/wted-episodes-schedule-lookup"
-import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
-import { parseWtedEpisodeHosts } from "@/lib/wted-episode-host"
 
 const RADIO_SCHEDULE_URL =
   "https://public.radio.co/stations/s3c11c85d6/embed/schedule"
@@ -127,15 +125,6 @@ function sameLocalCalendarDay(a: Date, b: Date): boolean {
   )
 }
 
-/** Shorten long artwork URLs so console stays readable during debugging. */
-function truncateUrlForLog(url: string, max = 96): string {
-  const t = url.trim()
-  if (!t) return "(empty)"
-  if (t.length <= max) return t
-  return `${t.slice(0, max)}…`
-}
-
-/** Events whose **start** falls on the user's local calendar day for `day`. */
 export function filterRadioEventsStartingOnLocalDay(
   events: RadioScheduleEvent[],
   day: Date,
@@ -155,71 +144,21 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
   day: Date = new Date(),
   nowMs: number = Date.now(),
 ): Promise<{ slots: RadioScheduleSlot[]; error: string | null }> {
-  const logPrefix = "[radio schedule share]"
   try {
-    console.log(`${logPrefix} step 1/8: request Radio.co embed schedule`, {
-      url: RADIO_SCHEDULE_URL,
-      localCalendarDay: day.toDateString(),
-      nowMs,
-      nowIso: new Date(nowMs).toISOString(),
-    })
-
     const res = await fetch(RADIO_SCHEDULE_URL)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const json: RadioScheduleResponse = await res.json()
     if (!json.data?.length) {
-      console.log(`${logPrefix} step 2/8: API returned no events — nothing to render`, {
-        localCalendarDay: day.toDateString(),
-      })
       return { slots: [], error: null }
     }
 
-    console.log(`${logPrefix} step 2/8: API response`, {
-      totalEventsInPayload: json.data.length,
-      sampleFirstEvent: {
-        playlistName: json.data[0]?.playlist?.name,
-        title: json.data[0]?.playlist?.title,
-        start: json.data[0]?.start,
-        end: json.data[0]?.end,
-      },
-    })
-
     const filtered = filterRadioEventsStartingOnLocalDay(json.data, day)
-    console.log(`${logPrefix} step 3/8: filter to local calendar day (event.start in viewer timezone)`, {
-      rule:
-        "Keep rows where start date matches the same Y/M/D as `localCalendarDay`; sort by start time.",
-      localCalendarDay: day.toDateString(),
-      keptCount: filtered.length,
-      rows: filtered.map((e) => ({
-        event_id: e.event_id,
-        playlistName: e.playlist.name,
-        title: e.playlist.title,
-        start: e.start,
-        end: e.end,
-      })),
-    })
 
     const rawSlots: RadioScheduleSlot[] = filtered.map((event) => ({
       event,
       isNowPlaying: false,
     }))
     const merged = mergeBackToBackSameTitleSlotsCore(rawSlots)
-    console.log(`${logPrefix} step 4/8: merge consecutive Radio.co rows`, {
-      rule:
-        "Same trimmed playlist.title and start/end within 5s back-to-back → one row with extended end (first row’s playlist block kept: name/title/Radio artwork).",
-      beforeMergeCount: rawSlots.length,
-      afterMergeCount: merged.length,
-      perMergedSlotRadioArtPreview: merged.map((s, i) => ({
-        i,
-        playlistName: s.event.playlist.name?.trim(),
-        radioArtworkChosenForMergedRow_preview: truncateUrlForLog(
-          s.event.playlist.artwork ?? "",
-          120,
-        ),
-        note:
-          "If this row absorbed back-to-back slots, PNG still uses Radio art from this first segment until step 8 may replace with WTED DB art.",
-      })),
-    })
 
     const slotsBase = merged.map((slot) => ({
       ...slot,
@@ -227,32 +166,9 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
         nowMs >= new Date(slot.event.start).getTime() &&
         nowMs < new Date(slot.event.end).getTime(),
     }))
-    const onAirIndices = slotsBase
-      .map((s, i) => (s.isNowPlaying ? i : -1))
-      .filter((i) => i >= 0)
-    console.log(`${logPrefix} step 5/8: which row is “now playing” (for data only; PNG has no on-air UI)`, {
-      onAirRowIndices: onAirIndices,
-      perRow: slotsBase.map((s, i) => ({
-        i,
-        playlistName: s.event.playlist.name,
-        start: s.event.start,
-        end: s.event.end,
-        isNowPlaying: s.isNowPlaying,
-      })),
-    })
 
     const episodeKeys = slotsBase.map((s) => s.event.playlist.name?.trim() ?? "")
-    const uniqueEpisodeKeys = [...new Set(episodeKeys.filter(Boolean))]
-    console.log(`${logPrefix} step 6/8: Supabase lookup keys (= Radio playlist.name → wted_episodes.episode)`, {
-      uniqueKeyCount: uniqueEpisodeKeys.length,
-      keys: uniqueEpisodeKeys,
-    })
-
     const episodeMap = await fetchWtedEpisodeScheduleLookupsByNames(episodeKeys)
-    const matchedKeys = uniqueEpisodeKeys.filter((k) => episodeMap.has(k))
-    const unmatchedEpisodeKeys = uniqueEpisodeKeys.filter(
-      (k) => !episodeMap.has(k),
-    )
 
     const radioIdsFromArtwork = slotsBase
       .map((s) =>
@@ -263,50 +179,6 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
 
     const radioMap =
       await fetchWtedEpisodeScheduleLookupsByRadioIds(uniqueRadioIds)
-    const matchedRadioIds = uniqueRadioIds.filter((id) => radioMap.has(id))
-    const unmatchedRadioIds = uniqueRadioIds.filter((id) => !radioMap.has(id))
-
-    const suspectedAnonRlsSkippedPlaylistNames = unmatchedEpisodeKeys.filter(
-      (ek) => {
-        const slot = slotsBase.find((s) => s.event.playlist.name?.trim() === ek)
-        const rid = slot ?
-          extractRadioCoPlaylistIdFromArtworkUrl(
-            slot.event.playlist.artwork ?? "",
-          )
-        : null
-        return Boolean(rid && unmatchedRadioIds.includes(rid))
-      },
-    )
-
-    console.log(`${logPrefix} step 7/8: wted_episodes join result`, {
-      rowsResolvedFromSupabase_byEpisodeKey: episodeMap.size,
-      matchedEpisodeKeys: matchedKeys,
-      unmatchedEpisodeKeys,
-      rowsResolvedFromSupabase_byRadioId: radioMap.size,
-      radioIdLookupKeysFromArtworkUrl: uniqueRadioIds,
-      matchedRadioIds,
-      unmatchedRadioIds,
-      suspectedAnonRlsSkippedPlaylistNames:
-        suspectedAnonRlsSkippedPlaylistNames.length > 0 ?
-          suspectedAnonRlsSkippedPlaylistNames
-        : undefined,
-      note:
-        "Fallback join: radio_id parsed from images.radio.co …/playlist.{id}.… when playlist.name misses. If BOTH miss for the same slot, anon Supabase RLS may be hiding those wted_episodes rows (e.g. status=skipped).",
-      artworkFromDb_previewByMatchedKey: Object.fromEntries(
-        matchedKeys.map((k) => {
-          const row = episodeMap.get(k)!
-          const u = row.artwork?.trim() ?? ""
-          return [k, { db_artwork_preview: truncateUrlForLog(u, 120) }]
-        }),
-      ),
-      artworkFromDb_previewByMatchedRadioId: Object.fromEntries(
-        matchedRadioIds.map((rid) => {
-          const row = radioMap.get(rid)!
-          const u = row.artwork?.trim() ?? ""
-          return [rid, { db_artwork_preview: truncateUrlForLog(u, 120) }]
-        }),
-      ),
-    })
 
     const slots: RadioScheduleSlot[] = slotsBase.map((s) => {
       const key = s.event.playlist.name?.trim()
@@ -320,105 +192,8 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
       return { ...s, wtedEpisode }
     })
 
-    const displayPlan = slots.map((s, i) => {
-      const playlistName = s.event.playlist.name?.trim() ?? ""
-      const radioTitle = s.event.playlist.title?.trim() ?? ""
-      const episodeRowForLog =
-        playlistName ? episodeMap.get(playlistName) ?? null : null
-      const ridForLog = extractRadioCoPlaylistIdFromArtworkUrl(
-        s.event.playlist.artwork ?? "",
-      )
-      const radioRowForLog =
-        episodeRowForLog ?
-          null
-        : (ridForLog ? radioMap.get(ridForLog) ?? null : null)
-      const wted = s.wtedEpisode
-      const mainTitle = wted
-        ? getWtedEpisodeDisplayName(playlistName, wted.display_name)
-        : (radioTitle || playlistName)
-      const hasShowRibbon = Boolean(wted)
-      const wtedArt = wted?.artwork?.trim() ?? ""
-      const radioArt = s.event.playlist.artwork?.trim() ?? ""
-      const chosenArtSrc = wtedArt || radioArt
-      const dbJoin =
-        episodeRowForLog ? "episode_name"
-        : radioRowForLog ? "radio_id_from_artwork_url"
-        : null
-
-      let artworkDecision: string
-      if (wtedArt) {
-        artworkDecision =
-          episodeRowForLog ?
-            "1a) wted_episodes.artwork wins (joined on playlist.name = episode)."
-          : radioRowForLog ?
-            "1b) wted_episodes.artwork wins (joined on radio_id parsed from Radio artwork URL)."
-          : "1) wted_episodes.artwork wins."
-      } else if (radioArt) {
-        artworkDecision =
-          wted ?
-            "2) Radio playlist.artwork (DB row matched but artwork empty)."
-          : "3) Radio playlist.artwork only (no wted_episodes row from anon lookup)."
-      } else {
-        artworkDecision =
-          "4) No URL → export card renders grey placeholder thumbnail."
-      }
-      const artworkSource =
-        wtedArt ? "wted_episodes.artwork"
-        : radioArt ? "radio playlist.artwork"
-        : "placeholder (no URL)"
-      const timeLine = formatRadioScheduleTimeRange(s.event.start, s.event.end)
-      const hostPillsForPngHandles =
-        wted ?
-          parseWtedEpisodeHosts(wted.host)
-            .map((h) => h.handle.trim())
-            .filter(Boolean)
-        : []
-
-      return {
-        rowIndex: i,
-        layout: "schedule row (show ribbon optional, title, start–end time range only)",
-        lookupKeyPlaylistName: playlistName || null,
-        dbMatched: wted != null,
-        wtedEpisodesJoin: dbJoin,
-        showRibbonText: wted?.show ?? null,
-        showRibbonRendered: hasShowRibbon,
-        mainTitleUsedInPng: mainTitle,
-        mainTitleRule: wted ?
-          "getWtedEpisodeDisplayName(playlistName, display_name)"
-        : "radio title, else playlist.name",
-        imageResolution: {
-          rule_order:
-            "Same as export card: wted_episodes.artwork if non-empty, else playlist.artwork, else placeholder.",
-          artworkDecision_branched: artworkDecision,
-          artworkSource_field: artworkSource,
-          wted_artwork_nonEmpty: Boolean(wtedArt),
-          radio_playlist_artwork_nonEmpty: Boolean(radioArt),
-          wted_artwork_preview: truncateUrlForLog(wtedArt, 140),
-          radio_playlist_artwork_preview: truncateUrlForLog(radioArt, 140),
-          chosen_artwork_for_png_preview: truncateUrlForLog(chosenArtSrc, 140),
-        },
-        timeLineInPng: timeLine,
-        hostHandlesUsedInPngPills: hostPillsForPngHandles,
-        isNowPlayingSlot: s.isNowPlaying,
-      }
-    })
-
-    console.log(`${logPrefix} step 8/8: PNG row model + image choice (WlHomeV2RadioScheduleShareExportCard)`, {
-      rowCount: displayPlan.length,
-      summaryImageSources: displayPlan.reduce(
-        (acc, row) => {
-          const src = row.imageResolution.artworkSource_field
-          acc[src] = (acc[src] ?? 0) + 1
-          return acc
-        },
-        {} as Record<string, number>,
-      ),
-      rows: displayPlan,
-    })
-
     return { slots, error: null }
   } catch (err) {
-    console.warn(`${logPrefix} fetch failed`, err)
     return {
       slots: [],
       error: err instanceof Error ? err.message : "Failed to load schedule",

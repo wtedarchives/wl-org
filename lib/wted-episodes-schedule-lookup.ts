@@ -50,7 +50,6 @@ export async function fetchWtedEpisodeScheduleLookupsByNames(
       .in("episode", chunk)
 
     if (error) {
-      console.warn("wted_episodes schedule lookup", error)
       continue
     }
 
@@ -97,7 +96,6 @@ export async function fetchWtedEpisodeScheduleLookupsByRadioIds(
       .in("radio_id", chunk)
 
     if (error) {
-      console.warn("wted_episodes schedule lookup by radio_id", error)
       continue
     }
 

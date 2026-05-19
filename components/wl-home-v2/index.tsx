@@ -51,7 +51,13 @@ const WELCOME_TICKER_COPY =
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
 /** Set to `false` before ship — when `true`, radio hub “Share schedule” is not admin-gated. */
-const TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE = true
+const TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE = false
+
+/**
+ * Temporary URL — opens schedule PNG modal on load and bypasses admin gate for that modal only.
+ * Remove this route and bypass logic before ship.
+ */
+const RADIO_SCHEDULE_SHARE_TEMP_BYPASS_PATH = "/radio-schedule-temp"
 
 function initialTickerPhraseQuadSeed(): readonly [string, string, string, string] {
   const w = WL_HOME_V2_TICKER_RANDOM_PHRASES
@@ -77,8 +83,12 @@ export function WlHomeV2({
   const router = useRouter()
   const { session } = useAuth()
   const { showAdminUi } = useSetlistAdmin(session, undefined, undefined)
+  const isRadioScheduleShareTempBypassRoute =
+    pathname === RADIO_SCHEDULE_SHARE_TEMP_BYPASS_PATH
   const showRadioScheduleShare =
-    TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE || showAdminUi
+    TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE ||
+    showAdminUi ||
+    isRadioScheduleShareTempBypassRoute
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -134,6 +144,11 @@ export function WlHomeV2({
   useEffect(() => {
     if (!showRadioScheduleShare) setRadioScheduleShareOpen(false)
   }, [showRadioScheduleShare])
+
+  useEffect(() => {
+    if (!isRadioScheduleShareTempBypassRoute) return
+    openRadioScheduleShare()
+  }, [isRadioScheduleShareTempBypassRoute, openRadioScheduleShare])
 
   const { title: nowPlayingTitle, loading: nowPlayingLoading } =
     useWtedRadioNowPlaying()
