@@ -25,13 +25,21 @@ import {
 } from "@/lib/setlist-share-upload"
 
 import { WlHomeV2SetlistShareExportCard } from "@/components/wl-home-v2/wl-home-v2-setlist-share-export-card"
-import { WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO } from "@/lib/wl-home-v2-setlist-share-export-config"
+import {
+  WL_HOME_V2_SETLIST_SHARE_EXPORT_FRAME_RADIUS_PX,
+  WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO,
+  WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
+} from "@/lib/wl-home-v2-setlist-share-export-config"
+import { applyShareExportRoundedCorners } from "@/lib/wl-share-export-rounded-png"
 
 const SETLIST_SHARE_CAPTURE_OPTS = {
   cacheBust: true,
   pixelRatio: WL_HOME_V2_SETLIST_SHARE_EXPORT_PIXEL_RATIO,
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const
+
+/** Re-enable Generate + Download in the setlist share modal when ready to ship. */
+const SETLIST_SHARE_GENERATE_AND_DOWNLOAD_ENABLED = false
 
 type ShareVariant = "withCoachNotes" | "withoutCoachNotes"
 
@@ -121,7 +129,12 @@ export function WlHomeV2SetlistShareExportModal({
   const captureVariantPng = useCallback(async (withEntryCoachNotes: boolean) => {
     const node = captureRefFor(withEntryCoachNotes).current
     if (!node) return null
-    return toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+    const raw = await toBlob(node, SETLIST_SHARE_CAPTURE_OPTS)
+    if (!raw) return null
+    return applyShareExportRoundedCorners(raw, {
+      borderRadiusPx: WL_HOME_V2_SETLIST_SHARE_EXPORT_FRAME_RADIUS_PX,
+      designWidthPx: WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
+    })
   }, [captureRefFor])
 
   const handleCopy = useCallback(
@@ -289,7 +302,8 @@ export function WlHomeV2SetlistShareExportModal({
                         Copy Image
                       </Button>
                     : null}
-                    {canUploadShareImage ?
+                    {SETLIST_SHARE_GENERATE_AND_DOWNLOAD_ENABLED &&
+                    canUploadShareImage ?
                       <Button
                         type="button"
                         variant="outline"
@@ -304,7 +318,8 @@ export function WlHomeV2SetlistShareExportModal({
                         Generate
                       </Button>
                     : null}
-                    {hasStoredFile &&
+                    {SETLIST_SHARE_GENERATE_AND_DOWNLOAD_ENABLED &&
+                    hasStoredFile &&
                     !storageCheckLoading &&
                     (isMobile || canUploadShareImage) ?
                       <Button

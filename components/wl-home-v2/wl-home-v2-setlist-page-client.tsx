@@ -241,7 +241,7 @@ export function WlHomeV2SetlistPageClient() {
         adminLinkCopied={showAdminUi ? linkCopied : false}
         onAdminCopyShowId={showAdminUi ? handleCopyLink : undefined}
         onAdminEditShow={showAdminUi ? handleEditShow : undefined}
-        onShareSetlistImage={openShareExport}
+        onShareSetlistImage={showAdminUi ? openShareExport : undefined}
         copiedEntryIds={showAdminUi ? copiedEntryIds : undefined}
         onNumberClick={showAdminUi ? handleNumberClick : undefined}
         onJotyBadgeClick={onJotyBadgeClick}
