@@ -286,7 +286,7 @@ export function WlHomeV2SetlistShareExportModal({
                         }
                       >
                         <Copy className="size-3.5" aria-hidden />
-                        Copy image
+                        Copy Image
                       </Button>
                     : null}
                     {canUploadShareImage ?
@@ -304,7 +304,9 @@ export function WlHomeV2SetlistShareExportModal({
                         Generate
                       </Button>
                     : null}
-                    {hasStoredFile && !storageCheckLoading ?
+                    {hasStoredFile &&
+                    !storageCheckLoading &&
+                    (isMobile || canUploadShareImage) ?
                       <Button
                         type="button"
                         size="sm"

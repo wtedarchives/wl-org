@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation"
 import { ADMIN_PANEL_ACTIVE_TAB_STORAGE_KEY } from "@/components/dpro/admin/admin-panel.constants"
 import type { WysteriaSession } from "@/lib/jwt"
 
-const LEGACY_ADMIN_USER_ID = "8f13a985-ef21-44dc-a381-d6e80c43803f"
-
 /** Matches setlist admin toolbar: `isAdmin` JWT claim or legacy profile id. */
 export function isWlHomeV2AdminSession(
   session: WysteriaSession | null,
 ): boolean {
   if (!session) return false
-  return session.isAdmin || session.profileId === LEGACY_ADMIN_USER_ID
+  return session.isAdmin
 }
 
 /** Set to `false` before shipping — bypasses admin check for setlist admin UI (toolbar, row tools). */
