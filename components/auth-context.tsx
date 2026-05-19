@@ -29,7 +29,7 @@ import {
   clearSession,
   type WysteriaSession,
 } from "@/lib/jwt"
-import { supabase } from "@/lib/supabase"
+import { invokeUserAttendance } from "@/lib/user-attendance-edge"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,24 +125,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   // ─── Attendance Actions ───────────────────────────────────────────────────────
-  // These write directly to DPRO using the profile UUID from the JWT.
+  // Service-role edge function (Wysteria JWT); anon client + RLS use auth.uid().
 
   const addAttendedShow = async (showId: string) => {
-    if (!supabase || !session) throw new Error("User must be logged in")
-    const { error } = await supabase
-      .from("user_attended_shows")
-      .insert({ user_id: session.profileId, show_id: showId })
-    if (error) throw error
+    if (!session?.token) throw new Error("User must be logged in")
+    await invokeUserAttendance(session.token, "add", showId)
   }
 
   const removeAttendedShow = async (showId: string) => {
-    if (!supabase || !session) throw new Error("User must be logged in")
-    const { error } = await supabase
-      .from("user_attended_shows")
-      .delete()
-      .eq("user_id", session.profileId)
-      .eq("show_id", showId)
-    if (error) throw error
+    if (!session?.token) throw new Error("User must be logged in")
+    await invokeUserAttendance(session.token, "remove", showId)
   }
 
   // ─── Context Value ────────────────────────────────────────────────────────────
