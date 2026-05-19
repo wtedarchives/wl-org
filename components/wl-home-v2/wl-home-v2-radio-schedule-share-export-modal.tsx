@@ -1,7 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Copy, Download } from "@phosphor-icons/react"
+import { Copy, Download, UploadSimple } from "@phosphor-icons/react"
+import { useAuth } from "@/components/auth-context"
 import { WlHomeV2RadioScheduleShareExportCard } from "@/components/wl-home-v2/wl-home-v2-radio-schedule-share-export-card"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +43,10 @@ import {
 } from "@/lib/wl-home-v2-radio-schedule-share-export-days"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
 import {
+  radioScheduleShareStoragePath,
+  uploadRadioScheduleSharePng,
+} from "@/lib/radio-schedule-share-upload"
+import {
   captureScheduleShareNodeToBlob,
   WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS,
 } from "@/lib/wl-schedule-share-capture"
@@ -74,9 +79,11 @@ export function WlHomeV2RadioScheduleShareExportModal({
   backgroundSrc: string
 }) {
   const isMobile = useIsMobile()
-  const captureRef = useRef<HTMLDivElement>(null)
+  const { session } = useAuth()
+  /** Desktop-layout export card (visible on desktop; in-viewport capture layer on mobile). */
+  const desktopCaptureRef = useRef<HTMLDivElement>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  const [busy, setBusy] = useState<null | "copy" | "download">(null)
+  const [busy, setBusy] = useState<null | "copy" | "download" | "generate">(null)
   const [scheduleDay, setScheduleDay] = useState(() => startOfLocalCalendarDay())
   const [selectedDayKey, setSelectedDayKey] = useState(() =>
     localCalendarDayKey(startOfLocalCalendarDay()),
@@ -94,7 +101,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
     clearPreview: clearMobilePreview,
   } = useRadioScheduleShareMobilePreview({
     enabled: open && isMobile,
-    captureRef,
+    captureRef: desktopCaptureRef,
     scheduleLoading,
     slots,
     backgroundSrc,
@@ -134,16 +141,19 @@ export function WlHomeV2RadioScheduleShareExportModal({
     }
   }, [open, scheduleDay])
 
+  const captureDesktopSchedulePng = useCallback(async () => {
+    const node = desktopCaptureRef.current
+    if (!node) return null
+    return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+  }, [])
+
   const handleDownload = useCallback(async () => {
-    const node = captureRef.current
+    const node = desktopCaptureRef.current
     if (!node) return
     setBusy("download")
     setNotice(null)
     try {
-      const blob = await captureScheduleShareNodeToBlob(
-        node,
-        RADIO_SCHEDULE_SHARE_CAPTURE_OPTS,
-      )
+      const blob = await captureDesktopSchedulePng()
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -163,18 +173,55 @@ export function WlHomeV2RadioScheduleShareExportModal({
     } finally {
       setBusy(null)
     }
-  }, [scheduleDay])
+  }, [scheduleDay, captureDesktopSchedulePng])
+
+  const handleGenerate = useCallback(async () => {
+    if (!session?.token) {
+      setNotice("Sign in to upload schedule images.")
+      return
+    }
+    setBusy("generate")
+    setNotice(null)
+    try {
+      const blob = await captureDesktopSchedulePng()
+      if (!blob) {
+        setNotice("Could not create image.")
+        return
+      }
+      const filename = scheduleShareFilename(scheduleDay)
+      const path = radioScheduleShareStoragePath(
+        localCalendarDayKey(scheduleDay),
+        filename,
+      )
+      const { publicUrl, error } = await uploadRadioScheduleSharePng(
+        session.token,
+        path,
+        blob,
+      )
+      if (error) {
+        setNotice(error)
+        return
+      }
+      setNotice(
+        publicUrl ?
+          `Uploaded to radio-schedules: ${publicUrl}`
+        : `Uploaded to radio-schedules (${path}).`,
+      )
+    } catch (e) {
+      console.error(e)
+      setNotice("Could not generate or upload image.")
+    } finally {
+      setBusy(null)
+    }
+  }, [captureDesktopSchedulePng, scheduleDay, session?.token])
 
   const handleCopy = useCallback(async () => {
-    const node = captureRef.current
+    const node = desktopCaptureRef.current
     if (!node) return
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await captureScheduleShareNodeToBlob(
-        node,
-        RADIO_SCHEDULE_SHARE_CAPTURE_OPTS,
-      )
+      const blob = await captureDesktopSchedulePng()
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -195,7 +242,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
     } finally {
       setBusy(null)
     }
-  }, [])
+  }, [captureDesktopSchedulePng])
 
   const exportWidthPx =
     WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX *
@@ -255,7 +302,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
           : <div className="flex w-full min-w-0 justify-center">
               <div className="inline-block w-min min-w-min shrink-0">
                 <WlHomeV2RadioScheduleShareExportCard
-                  ref={captureRef}
+                  ref={desktopCaptureRef}
                   backgroundSrc={backgroundSrc}
                   scheduleDay={scheduleDay}
                   slots={slots}
@@ -273,7 +320,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
             >
               <div className="inline-block w-min min-w-min shrink-0">
                 <WlHomeV2RadioScheduleShareExportCard
-                  ref={captureRef}
+                  ref={desktopCaptureRef}
                   backgroundSrc={backgroundSrc}
                   scheduleDay={scheduleDay}
                   slots={slots}
@@ -322,6 +369,17 @@ export function WlHomeV2RadioScheduleShareExportModal({
               Copy image
             </Button>
           : null}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={exportActionsDisabled}
+            onClick={handleGenerate}
+          >
+            <UploadSimple className="size-3.5" aria-hidden />
+            Generate
+          </Button>
           <Button
             type="button"
             size="sm"
