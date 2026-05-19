@@ -1,4 +1,5 @@
 import { WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
+import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 
 export const SETLIST_IMAGES_STORAGE_BUCKET = "setlist-images"
@@ -100,7 +101,11 @@ export async function downloadSetlistShareFromStorage(
   showId: string,
   withEntryCoachNotes: boolean,
   downloadFilename: string,
-): Promise<{ error: string | null }> {
+  options?: { shareTitle?: string },
+): Promise<{
+  error: string | null
+  delivery?: "shared" | "downloaded"
+}> {
   const url = getSetlistSharePublicUrl(showId, withEntryCoachNotes)
   if (!url) return { error: "Missing Supabase configuration." }
 
@@ -108,16 +113,10 @@ export async function downloadSetlistShareFromStorage(
     const res = await fetch(url)
     if (!res.ok) return { error: "Image not found in storage." }
     const blob = await res.blob()
-    const blobUrl = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = blobUrl
-    a.download = downloadFilename
-    a.rel = "noopener"
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(blobUrl)
-    return { error: null }
+    const delivery = await downloadOrWebSharePng(blob, downloadFilename, {
+      shareTitle: options?.shareTitle ?? downloadFilename,
+    })
+    return { error: null, delivery }
   } catch (e) {
     console.error(e)
     return { error: "Could not download image." }
