@@ -49,7 +49,7 @@ import {
 } from "@/lib/radio-schedule-share-upload"
 import {
   captureScheduleShareNodeToBlob,
-  waitForScheduleShareCaptureReady,
+  upscaleScheduleSharePngBlob,
 } from "@/lib/wl-schedule-share-capture"
 import { cn } from "@/lib/utils"
 
@@ -95,9 +95,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const [slots, setSlots] = useState<RadioScheduleSlot[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
-  /** On iOS, briefly show the live export card in the modal while capturing (WebKit paints images). */
-  const [mobileCaptureSurfaceVisible, setMobileCaptureSurfaceVisible] =
-    useState(false)
 
   const {
     assets: resolvedAssets,
@@ -159,27 +156,27 @@ export function WlHomeV2RadioScheduleShareExportModal({
     }
   }, [open, scheduleDay])
 
-  const prepareMobileCaptureSurface = useCallback(async () => {
-    if (!isMobile) return
-    setMobileCaptureSurfaceVisible(true)
-    await new Promise<void>((resolve) => {
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-    })
-    const node = desktopCaptureRef.current
-    if (node) await waitForScheduleShareCaptureReady(node)
-  }, [isMobile])
-
   const captureDesktopSchedulePng = useCallback(async () => {
-    try {
-      if (isMobile) await prepareMobileCaptureSurface()
-      const node = desktopCaptureRef.current
-      if (!node) return null
-      if (!isMobile) await waitForScheduleShareCaptureReady(node)
-      return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
-    } finally {
-      if (isMobile) setMobileCaptureSurfaceVisible(false)
+    /** Mobile preview is captured at 1× and already shows all artwork — reuse for upload/download. */
+    if (isMobile && mobilePreviewUrl) {
+      try {
+        const previewBlob = await fetch(mobilePreviewUrl).then((r) => r.blob())
+        return upscaleScheduleSharePngBlob(
+          previewBlob,
+          WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_PIXEL_RATIO,
+        )
+      } catch (e) {
+        console.warn(
+          "Schedule share: preview blob reuse failed, re-capturing",
+          e,
+        )
+      }
     }
-  }, [isMobile, prepareMobileCaptureSurface])
+
+    const node = desktopCaptureRef.current
+    if (!node) return null
+    return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+  }, [isMobile, mobilePreviewUrl])
 
   const handleDownload = useCallback(async () => {
     const node = desktopCaptureRef.current
@@ -290,7 +287,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
     scheduleLoading ||
     assetsLoading ||
     !assetsReady ||
-    mobileCaptureSurfaceVisible ||
     (isMobile && mobilePreviewLoading)
 
   return (
@@ -321,13 +317,8 @@ export function WlHomeV2RadioScheduleShareExportModal({
           {isMobile ?
             <div className="relative flex min-h-[200px] w-full items-center justify-center">
               <div
-                className={cn(
-                  "flex w-full min-w-0 justify-center",
-                  mobileCaptureSurfaceVisible ?
-                    "relative z-[1] opacity-100"
-                  : "pointer-events-none fixed left-0 top-0 z-0 opacity-[0.01]",
-                )}
-                aria-hidden={!mobileCaptureSurfaceVisible}
+                className="pointer-events-none fixed left-0 top-0 z-0 flex w-full min-w-0 justify-center opacity-[0.01]"
+                aria-hidden
               >
                 <div className="inline-block w-min min-w-min shrink-0">
                   {resolvedAssets ?
@@ -342,26 +333,21 @@ export function WlHomeV2RadioScheduleShareExportModal({
                   : null}
                 </div>
               </div>
-              {!mobileCaptureSurfaceVisible ?
-                scheduleLoading || assetsLoading || mobilePreviewLoading ?
-                  <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                    {assetsLoading ?
-                      "Loading artwork…"
-                    : "Building preview…"}
-                  </p>
-                : mobilePreviewUrl ?
-                  // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
-                  <img
-                    src={mobilePreviewUrl}
-                    alt={`WTED Radio schedule for ${dayOptions.find((o) => o.key === selectedDayKey)?.label ?? "selected day"}`}
-                    className="relative z-[2] mx-auto max-h-[min(58vh,640px)] w-auto max-w-full object-contain"
-                  />
-                : <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                    Preview unavailable. You can still download the image.
-                  </p>
-
+              {scheduleLoading || assetsLoading || mobilePreviewLoading ?
+                <p className="relative z-[2] text-center text-xs text-muted-foreground">
+                  {assetsLoading ?
+                    "Loading artwork…"
+                  : "Building preview…"}
+                </p>
+              : mobilePreviewUrl ?
+                // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
+                <img
+                  src={mobilePreviewUrl}
+                  alt={`WTED Radio schedule for ${dayOptions.find((o) => o.key === selectedDayKey)?.label ?? "selected day"}`}
+                  className="relative z-[2] mx-auto max-h-[min(58vh,640px)] w-auto max-w-full object-contain"
+                />
               : <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                  Preparing image…
+                  Preview unavailable. You can still download the image.
                 </p>
               }
             </div>

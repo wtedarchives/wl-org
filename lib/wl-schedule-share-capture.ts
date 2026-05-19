@@ -1,5 +1,10 @@
 import { toBlob } from "html-to-image"
 
+import {
+  WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX,
+  WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX,
+} from "@/lib/wl-home-v2-radio-schedule-share-export-config"
+
 type ScheduleShareCaptureOptions = NonNullable<Parameters<typeof toBlob>[1]>
 
 /** Off-screen / low-opacity capture layer (avoid negative z-index — iOS may skip painting). */
@@ -124,6 +129,42 @@ async function inlineImagesForScheduleShareCapture(
   }
 }
 
+/**
+ * Scale a 1× schedule PNG to export pixel density. iOS WebKit often drops embedded
+ * images when html-to-image runs at pixelRatio 5 with large data-URL sources.
+ */
+export async function upscaleScheduleSharePngBlob(
+  blob: Blob,
+  pixelRatio: number,
+): Promise<Blob> {
+  if (pixelRatio <= 1) return blob
+
+  const targetWidth = WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX * pixelRatio
+  const targetHeight =
+    WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX * pixelRatio
+
+  const bitmap = await createImageBitmap(blob)
+  try {
+    const canvas = document.createElement("canvas")
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+    const ctx = canvas.getContext("2d")
+    if (!ctx) throw new Error("Canvas 2D unavailable")
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
+    ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight)
+
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("canvas.toBlob failed"))),
+        "image/png",
+      )
+    })
+  } finally {
+    bitmap.close()
+  }
+}
+
 export async function captureScheduleShareNodeToBlob(
   node: HTMLElement,
   options: ScheduleShareCaptureOptions,
@@ -152,8 +193,18 @@ export async function captureScheduleShareNodeToBlob(
   const restore =
     shouldInline ? await inlineImagesForScheduleShareCapture(node) : () => {}
 
+  const requestedPixelRatio = options.pixelRatio ?? 1
+  /** Capture at 1× on iOS, then upscale — matches working mobile preview capture. */
+  const useIosLowCapture =
+    requestedPixelRatio > 1 && isScheduleShareCaptureIOSWebKit()
+  const captureOptions: ScheduleShareCaptureOptions =
+    useIosLowCapture ? { ...options, pixelRatio: 1 } : options
+
   try {
-    return await toBlob(node, options)
+    const blob = await toBlob(node, captureOptions)
+    if (!blob) return null
+    if (!useIosLowCapture) return blob
+    return upscaleScheduleSharePngBlob(blob, requestedPixelRatio)
   } finally {
     restore()
   }
