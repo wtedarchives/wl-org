@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useRadioScheduleShareMobilePreview } from "@/hooks/use-radio-schedule-share-mobile-preview"
+import { useScheduleShareResolvedAssets } from "@/hooks/use-schedule-share-resolved-assets"
 import {
   Dialog,
   DialogContent,
@@ -99,11 +100,25 @@ export function WlHomeV2RadioScheduleShareExportModal({
     useState(false)
 
   const {
+    assets: resolvedAssets,
+    loading: assetsLoading,
+    error: assetsError,
+  } = useScheduleShareResolvedAssets({
+    enabled: open,
+    backgroundSrc,
+    slots,
+    scheduleLoading,
+  })
+
+  const assetsReady =
+    resolvedAssets != null && !assetsLoading && !scheduleLoading
+
+  const {
     previewUrl: mobilePreviewUrl,
     previewLoading: mobilePreviewLoading,
     clearPreview: clearMobilePreview,
   } = useRadioScheduleShareMobilePreview({
-    enabled: open && isMobile,
+    enabled: open && isMobile && assetsReady,
     captureRef: desktopCaptureRef,
     scheduleLoading,
     slots,
@@ -273,6 +288,8 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const exportActionsDisabled =
     busy !== null ||
     scheduleLoading ||
+    assetsLoading ||
+    !assetsReady ||
     mobileCaptureSurfaceVisible ||
     (isMobile && mobilePreviewLoading)
 
@@ -313,20 +330,24 @@ export function WlHomeV2RadioScheduleShareExportModal({
                 aria-hidden={!mobileCaptureSurfaceVisible}
               >
                 <div className="inline-block w-min min-w-min shrink-0">
-                  <WlHomeV2RadioScheduleShareExportCard
-                    ref={desktopCaptureRef}
-                    backgroundSrc={backgroundSrc}
-                    scheduleDay={scheduleDay}
-                    slots={slots}
-                    loading={scheduleLoading}
-                    error={loadError}
-                  />
+                  {resolvedAssets ?
+                    <WlHomeV2RadioScheduleShareExportCard
+                      ref={desktopCaptureRef}
+                      resolvedAssets={resolvedAssets}
+                      scheduleDay={scheduleDay}
+                      slots={slots}
+                      loading={scheduleLoading}
+                      error={loadError ?? assetsError}
+                    />
+                  : null}
                 </div>
               </div>
               {!mobileCaptureSurfaceVisible ?
-                scheduleLoading || mobilePreviewLoading ?
+                scheduleLoading || assetsLoading || mobilePreviewLoading ?
                   <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                    Building preview…
+                    {assetsLoading ?
+                      "Loading artwork…"
+                    : "Building preview…"}
                   </p>
                 : mobilePreviewUrl ?
                   // eslint-disable-next-line @next/next/no-img-element -- blob preview of captured PNG
@@ -344,17 +365,28 @@ export function WlHomeV2RadioScheduleShareExportModal({
                 </p>
               }
             </div>
-          : <div className="flex w-full min-w-0 justify-center">
-              <div className="inline-block w-min min-w-min shrink-0">
-                <WlHomeV2RadioScheduleShareExportCard
-                  ref={desktopCaptureRef}
-                  backgroundSrc={backgroundSrc}
-                  scheduleDay={scheduleDay}
-                  slots={slots}
-                  loading={scheduleLoading}
-                  error={loadError}
-                />
-              </div>
+          : <div className="flex w-full min-w-0 flex-col items-center justify-center gap-2">
+              {scheduleLoading || assetsLoading ?
+                <p className="text-center text-xs text-muted-foreground">
+                  {assetsLoading ?
+                    "Loading artwork…"
+                  : "Loading schedule…"}
+                </p>
+              : null}
+              {resolvedAssets ?
+                <div className="inline-block w-min min-w-min shrink-0">
+                  <WlHomeV2RadioScheduleShareExportCard
+                    ref={desktopCaptureRef}
+                    resolvedAssets={resolvedAssets}
+                    scheduleDay={scheduleDay}
+                    slots={slots}
+                    loading={scheduleLoading}
+                    error={loadError ?? assetsError}
+                  />
+                </div>
+              : assetsError ?
+                <p className="text-center text-xs text-destructive">{assetsError}</p>
+              : null}
             </div>
           }
 

@@ -14,8 +14,10 @@ import { getWtedEpisodeDisplayName } from "@/lib/wted-episode-display-name"
 import { parseWtedEpisodeHosts } from "@/lib/wted-episode-host"
 import { cn } from "@/lib/utils"
 import { WlRadioScheduleShareStoreBadgeImg } from "@/components/wl-home-v2/wl-radio-schedule-share-store-badge-img"
-import { WlScheduleShareProxiedArtworkImg } from "@/components/wl-home-v2/wl-schedule-share-proxied-artwork-img"
-import { scheduleShareExportImageNeedsProxy } from "@/lib/wl-schedule-share-proxy-image"
+import {
+  scheduleShareRowArtKey,
+  type ScheduleShareResolvedAssets,
+} from "@/lib/wl-schedule-share-resolve-assets"
 
 import "./wl-home-v2-radio-schedule-share-export.css"
 
@@ -23,7 +25,8 @@ import "./wl-home-v2-radio-schedule-share-export.css"
 const RADIO_SHARE_EXPORT_RANDY_REQUEST_DISPLAY_TITLE = "requesTED w/ Randy"
 
 export type WlHomeV2RadioScheduleShareExportCardProps = {
-  backgroundSrc: string
+  /** Preloaded data URLs for every bitmap in this card (required for iOS capture). */
+  resolvedAssets: ScheduleShareResolvedAssets
   /** Local calendar day this schedule snapshot represents (subtitle + filtering already applied). */
   scheduleDay: Date
   slots: RadioScheduleSlot[]
@@ -35,7 +38,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
   HTMLDivElement,
   WlHomeV2RadioScheduleShareExportCardProps
 >(function WlHomeV2RadioScheduleShareExportCard(
-  { backgroundSrc, scheduleDay, slots, loading, error },
+  { resolvedAssets, scheduleDay, slots, loading, error },
   ref,
 ) {
   const dateSubtitle = new Intl.DateTimeFormat(undefined, {
@@ -44,13 +47,6 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
     day: "numeric",
     year: "numeric",
   }).format(scheduleDay)
-
-  const expectedRowArtCount = slots.filter((slot) => {
-    const wted = slot.wtedEpisode
-    return Boolean(
-      wted?.artwork?.trim() || slot.event.playlist.artwork?.trim(),
-    )
-  }).length
 
   return (
     <div
@@ -62,13 +58,12 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
     >
       <div
         ref={ref}
-        data-schedule-share-expected-row-art={String(expectedRowArtCount)}
+        data-schedule-share-assets-resolved="1"
         className="wl-radio-schedule-share-export__frame"
         style={{
           width: "100%",
           height: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX,
           maxHeight: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX,
-          /* IG Stories: UI in-flow only between bands; bg stays full-bleed via absolute layer */
           paddingTop: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_SAFE_INSET_PX,
           paddingBottom: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_IG_SAFE_INSET_PX,
           boxSizing: "border-box",
@@ -77,11 +72,8 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
         <div className="wl-radio-schedule-share-export__bg" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element -- PNG capture */}
           <img
-            src={backgroundSrc}
+            src={resolvedAssets.backgroundDataUrl}
             alt=""
-            {...(scheduleShareExportImageNeedsProxy(backgroundSrc) ?
-              { crossOrigin: "anonymous" as const }
-            : {})}
             className="wl-radio-schedule-share-export__bg-img"
             draggable={false}
           />
@@ -97,7 +89,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/WTED3.png"
+                  src={resolvedAssets.brandMarkDataUrl}
                   alt=""
                   className="wl-radio-schedule-share-export__brand-mark-img"
                   draggable={false}
@@ -143,10 +135,9 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                     const tightRowArtRadius =
                       displayTitleNormalized ===
                       RADIO_SHARE_EXPORT_RANDY_REQUEST_DISPLAY_TITLE
-                    const artworkSrc =
-                      wted?.artwork?.trim() ||
-                      slot.event.playlist.artwork?.trim() ||
-                      ""
+                    const rowKey = scheduleShareRowArtKey(slot)
+                    const rowArtDataUrl =
+                      resolvedAssets.rowArtDataUrlByKey[rowKey]
                     const rowArt = (
                       <div
                         className={cn(
@@ -156,10 +147,13 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                         )}
                         aria-hidden
                       >
-                        {artworkSrc ?
-                          <WlScheduleShareProxiedArtworkImg
-                            originalHref={artworkSrc}
-                            imgClassName="wl-radio-schedule-share-export__row-art-img"
+                        {rowArtDataUrl ?
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={rowArtDataUrl}
+                            alt=""
+                            className="wl-radio-schedule-share-export__row-art-img"
+                            draggable={false}
                           />
                         : <div className="wl-radio-schedule-share-export__row-art-placeholder" />
                         }
@@ -177,7 +171,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                       : []
                     return (
                       <div
-                        key={`${slot.event.event_id}-${slot.event.start}`}
+                        key={rowKey}
                         className="wl-radio-schedule-share-export__row"
                       >
                         <div className="wl-radio-schedule-share-export__row-layout">
@@ -201,7 +195,7 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
                                 <div className="wl-radio-schedule-share-export__row-hosts">
                                   {hostHandles.map((handle, hi) => (
                                     <span
-                                      key={`${slot.event.event_id}-${slot.event.start}-host-${hi}`}
+                                      key={`${rowKey}-host-${hi}`}
                                       className="wl-radio-schedule-share-export__host-pill"
                                     >
                                       <UserSound
@@ -235,7 +229,10 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
               rel="noopener noreferrer"
               aria-label="Download WTED Goose Radio on the App Store"
             >
-              <WlRadioScheduleShareStoreBadgeImg variant="ios" />
+              <WlRadioScheduleShareStoreBadgeImg
+                variant="ios"
+                src={resolvedAssets.storeBadgeIosDataUrl}
+              />
             </a>
             <a
               className="wl-radio-schedule-share-export__store-badge-link"
@@ -244,7 +241,10 @@ export const WlHomeV2RadioScheduleShareExportCard = forwardRef<
               rel="noopener noreferrer"
               aria-label="Get WTED Goose Radio on Google Play"
             >
-              <WlRadioScheduleShareStoreBadgeImg variant="android" />
+              <WlRadioScheduleShareStoreBadgeImg
+                variant="android"
+                src={resolvedAssets.storeBadgeAndroidDataUrl}
+              />
             </a>
           </div>
         </div>

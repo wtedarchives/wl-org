@@ -128,17 +128,26 @@ export async function captureScheduleShareNodeToBlob(
   node: HTMLElement,
   options: ScheduleShareCaptureOptions,
 ): Promise<Blob | null> {
-  await waitForScheduleShareCaptureReady(node)
-  await waitForScheduleShareCaptureImages(node)
+  const assetsPreResolved =
+    node.getAttribute("data-schedule-share-assets-resolved") === "1"
+
+  if (assetsPreResolved) {
+    await waitForScheduleShareCaptureImages(node, 3000)
+  } else {
+    await waitForScheduleShareCaptureReady(node)
+    await waitForScheduleShareCaptureImages(node)
+  }
+
   await new Promise<void>((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
   })
 
   const shouldInline =
-    isScheduleShareCaptureIOSWebKit() ||
-    Array.from(node.querySelectorAll("img")).some((img) =>
-      img.src.startsWith("blob:"),
-    )
+    !assetsPreResolved &&
+    (isScheduleShareCaptureIOSWebKit() ||
+      Array.from(node.querySelectorAll("img")).some((img) =>
+        img.src.startsWith("blob:"),
+      ))
 
   const restore =
     shouldInline ? await inlineImagesForScheduleShareCapture(node) : () => {}
