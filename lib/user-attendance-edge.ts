@@ -1,3 +1,4 @@
+import { WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 
 export type UserAttendanceAction = "add" | "remove"
@@ -17,7 +18,8 @@ export async function invokeUserAttendance(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${anonKey}`,
+      [WYSTERIA_AUTH_HEADER]: `Bearer ${accessToken}`,
       apikey: anonKey,
     },
     body: JSON.stringify({ action, show_id: showId }),

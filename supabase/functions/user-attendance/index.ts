@@ -1,6 +1,7 @@
 /**
- * Add or remove user_attended_shows using Wysteria SSO JWT (Bearer).
- * PostgREST + RLS use auth.uid(); SSO users call this with service role after jwtVerify.
+ * Add or remove user_attended_shows using Wysteria SSO JWT.
+ * Client sends anon JWT in Authorization and Wysteria token in x-wysteria-authorization
+ * (see lib/user-attendance-edge.ts). PostgREST + RLS use auth.uid(); this uses service role.
  *
  * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WYSTERIA_JWT_SECRET
  */
@@ -11,6 +12,12 @@ import { corsHeaders } from "../_shared/cors.ts"
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function bearerToken(h: string | null): string | null {
+  if (!h?.startsWith("Bearer ")) return null
+  const t = h.slice(7).trim()
+  return t !== "" ? t : null
+}
 
 function jsonResponse(body: Record<string, unknown>, status: number) {
   return new Response(JSON.stringify(body), {
@@ -28,8 +35,10 @@ serve(async (req) => {
     return jsonResponse({ error: "Method not allowed" }, 405)
   }
 
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  /** Gateway accepts project JWT in `Authorization`; Wysteria SSO in `x-wysteria-authorization`. */
+  const token =
+    bearerToken(req.headers.get("x-wysteria-authorization")) ??
+    bearerToken(req.headers.get("authorization"))
   if (!token) {
     return jsonResponse({ error: "Unauthorized" }, 401)
   }
