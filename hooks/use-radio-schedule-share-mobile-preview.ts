@@ -10,8 +10,9 @@ const PREVIEW_CAPTURE_OPTS = {
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const
 
-/** One delayed recapture for proxied row artwork that resolves after the first pass. */
-const PREVIEW_FOLLOW_UP_CAPTURE_MS = 750
+const CAPTURE_DEBOUNCE_MS = 200
+/** Backup recapture if artwork settles without a child-list mutation. */
+const PREVIEW_FOLLOW_UP_CAPTURE_MS = 1000
 
 export function useRadioScheduleShareMobilePreview({
   enabled,
@@ -57,13 +58,21 @@ export function useRadioScheduleShareMobilePreview({
 
     let cancelled = false
     let captureGeneration = 0
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+    let followUpTimer: ReturnType<typeof setTimeout> | undefined
+    let observer: MutationObserver | undefined
+    let isCapturing = false
 
     const runCapture = async (showLoading: boolean) => {
       const node = captureRef.current
-      if (!node || cancelled) return
+      if (!node || cancelled || isCapturing) return
 
       const generation = ++captureGeneration
-      if (showLoading) setPreviewLoading(true)
+      isCapturing = true
+      observer?.disconnect()
+
+      if (showLoading && !previewUrlRef.current) setPreviewLoading(true)
 
       try {
         const blob = await captureScheduleShareNodeToBlob(
@@ -85,37 +94,58 @@ export function useRadioScheduleShareMobilePreview({
           })
         }
       } finally {
+        isCapturing = false
         if (!cancelled && generation === captureGeneration) {
           setPreviewLoading(false)
+        }
+        if (!cancelled && observer && captureRef.current) {
+          observer.observe(captureRef.current, {
+            childList: true,
+            subtree: true,
+          })
         }
       }
     }
 
-    const waitForNode = () =>
-      new Promise<HTMLDivElement | null>((resolve) => {
-        const tryResolve = () => {
-          const node = captureRef.current
-          if (node) resolve(node)
-          else if (!cancelled) requestAnimationFrame(tryResolve)
-          else resolve(null)
-        }
-        tryResolve()
+    const scheduleCapture = () => {
+      if (isCapturing || cancelled) return
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        void runCapture(!previewUrlRef.current)
+      }, CAPTURE_DEBOUNCE_MS)
+    }
+
+    const attachObserver = () => {
+      const node = captureRef.current
+      if (!node) {
+        retryTimer = setTimeout(attachObserver, 50)
+        return
+      }
+
+      scheduleCapture()
+
+      // childList only: proxied art swaps placeholder → <img>. Do not watch `src` —
+      // capture inlines/restores src and would retrigger forever.
+      observer = new MutationObserver(scheduleCapture)
+      observer.observe(node, {
+        childList: true,
+        subtree: true,
       })
 
-    void (async () => {
-      const node = await waitForNode()
-      if (!node || cancelled) return
-      await runCapture(!previewUrlRef.current)
-    })()
+      followUpTimer = setTimeout(() => {
+        scheduleCapture()
+      }, PREVIEW_FOLLOW_UP_CAPTURE_MS)
+    }
 
-    const followUpTimer = setTimeout(() => {
-      void runCapture(false)
-    }, PREVIEW_FOLLOW_UP_CAPTURE_MS)
+    attachObserver()
 
     return () => {
       cancelled = true
       captureGeneration += 1
-      clearTimeout(followUpTimer)
+      if (debounceTimer) clearTimeout(debounceTimer)
+      if (retryTimer) clearTimeout(retryTimer)
+      if (followUpTimer) clearTimeout(followUpTimer)
+      observer?.disconnect()
     }
   }, [enabled, scheduleLoading, slots, backgroundSrc, scheduleDay, captureRef])
 
