@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState, type RefObject } from "react"
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 
 import { captureScheduleShareNodeToBlob } from "@/lib/wl-schedule-share-capture"
 
@@ -9,6 +9,9 @@ const PREVIEW_CAPTURE_OPTS = {
   pixelRatio: 1,
   backgroundColor: "rgba(0, 0, 0, 0)",
 } as const
+
+/** One delayed recapture for proxied row artwork that resolves after the first pass. */
+const PREVIEW_FOLLOW_UP_CAPTURE_MS = 750
 
 export function useRadioScheduleShareMobilePreview({
   enabled,
@@ -27,6 +30,11 @@ export function useRadioScheduleShareMobilePreview({
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewLoading, setPreviewLoading] = useState(false)
+  const previewUrlRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    previewUrlRef.current = previewUrl
+  }, [previewUrl])
 
   useEffect(() => {
     if (!enabled) {
@@ -48,21 +56,21 @@ export function useRadioScheduleShareMobilePreview({
     }
 
     let cancelled = false
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined
-    let retryTimer: ReturnType<typeof setTimeout> | undefined
-    let observer: MutationObserver | undefined
+    let captureGeneration = 0
 
-    const capturePreview = async () => {
+    const runCapture = async (showLoading: boolean) => {
       const node = captureRef.current
       if (!node || cancelled) return
-      setPreviewLoading(true)
-      if (cancelled) return
+
+      const generation = ++captureGeneration
+      if (showLoading) setPreviewLoading(true)
+
       try {
         const blob = await captureScheduleShareNodeToBlob(
           node,
           PREVIEW_CAPTURE_OPTS,
         )
-        if (cancelled || !blob) return
+        if (cancelled || generation !== captureGeneration || !blob) return
         const url = URL.createObjectURL(blob)
         setPreviewUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev)
@@ -70,56 +78,46 @@ export function useRadioScheduleShareMobilePreview({
         })
       } catch (e) {
         console.error(e)
-        if (!cancelled) {
+        if (!cancelled && generation === captureGeneration) {
           setPreviewUrl((prev) => {
             if (prev) URL.revokeObjectURL(prev)
             return null
           })
         }
       } finally {
-        if (!cancelled) setPreviewLoading(false)
+        if (!cancelled && generation === captureGeneration) {
+          setPreviewLoading(false)
+        }
       }
     }
 
-    const scheduleCapture = () => {
-      if (debounceTimer) clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => {
-        void capturePreview()
-      }, 200)
-    }
-
-    const attachObserver = () => {
-      const node = captureRef.current
-      if (!node) {
-        retryTimer = setTimeout(attachObserver, 50)
-        return
-      }
-      scheduleCapture()
-      observer = new MutationObserver(scheduleCapture)
-      observer.observe(node, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["src"],
+    const waitForNode = () =>
+      new Promise<HTMLDivElement | null>((resolve) => {
+        const tryResolve = () => {
+          const node = captureRef.current
+          if (node) resolve(node)
+          else if (!cancelled) requestAnimationFrame(tryResolve)
+          else resolve(null)
+        }
+        tryResolve()
       })
-    }
 
-    attachObserver()
+    void (async () => {
+      const node = await waitForNode()
+      if (!node || cancelled) return
+      await runCapture(!previewUrlRef.current)
+    })()
+
+    const followUpTimer = setTimeout(() => {
+      void runCapture(false)
+    }, PREVIEW_FOLLOW_UP_CAPTURE_MS)
 
     return () => {
       cancelled = true
-      if (debounceTimer) clearTimeout(debounceTimer)
-      if (retryTimer) clearTimeout(retryTimer)
-      observer?.disconnect()
+      captureGeneration += 1
+      clearTimeout(followUpTimer)
     }
-  }, [
-    enabled,
-    scheduleLoading,
-    slots,
-    backgroundSrc,
-    scheduleDay,
-    captureRef,
-  ])
+  }, [enabled, scheduleLoading, slots, backgroundSrc, scheduleDay, captureRef])
 
   useEffect(() => {
     return () => {
