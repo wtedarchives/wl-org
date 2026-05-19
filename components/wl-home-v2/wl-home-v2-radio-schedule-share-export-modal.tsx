@@ -47,10 +47,7 @@ import {
   radioScheduleShareStoragePath,
   uploadRadioScheduleSharePng,
 } from "@/lib/radio-schedule-share-upload"
-import {
-  captureScheduleShareNodeToBlob,
-  waitForScheduleShareCaptureImages,
-} from "@/lib/wl-schedule-share-capture"
+import { captureScheduleShareNodeToBlob } from "@/lib/wl-schedule-share-capture"
 import { cn } from "@/lib/utils"
 
 const RADIO_SCHEDULE_SHARE_CAPTURE_OPTS = {
@@ -95,9 +92,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const [slots, setSlots] = useState<RadioScheduleSlot[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
-  /** Briefly show the export card at full opacity for native 5× capture on mobile. */
-  const [hiresExportCaptureVisible, setHiresExportCaptureVisible] =
-    useState(false)
 
   const {
     assets: resolvedAssets,
@@ -160,23 +154,10 @@ export function WlHomeV2RadioScheduleShareExportModal({
   }, [open, scheduleDay])
 
   const captureDesktopSchedulePng = useCallback(async () => {
-    try {
-      if (isMobile) {
-        setHiresExportCaptureVisible(true)
-        await new Promise<void>((resolve) => {
-          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-        })
-        const node = desktopCaptureRef.current
-        if (node) await waitForScheduleShareCaptureImages(node, 5000)
-      }
-
-      const node = desktopCaptureRef.current
-      if (!node) return null
-      return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
-    } finally {
-      if (isMobile) setHiresExportCaptureVisible(false)
-    }
-  }, [isMobile])
+    const node = desktopCaptureRef.current
+    if (!node) return null
+    return captureScheduleShareNodeToBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
+  }, [])
 
   const handleDownload = useCallback(async () => {
     const node = desktopCaptureRef.current
@@ -287,7 +268,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
     scheduleLoading ||
     assetsLoading ||
     !assetsReady ||
-    hiresExportCaptureVisible ||
     (isMobile && mobilePreviewLoading)
 
   return (
@@ -318,13 +298,8 @@ export function WlHomeV2RadioScheduleShareExportModal({
           {isMobile ?
             <div className="relative flex min-h-[200px] w-full items-center justify-center">
               <div
-                className={cn(
-                  "flex w-full min-w-0 justify-center",
-                  hiresExportCaptureVisible ?
-                    "relative z-[1] opacity-100"
-                  : "pointer-events-none fixed left-0 top-0 z-0 opacity-[0.01]",
-                )}
-                aria-hidden={!hiresExportCaptureVisible}
+                className="pointer-events-none fixed left-0 top-0 z-0 flex w-full min-w-0 justify-center opacity-[0.01]"
+                aria-hidden
               >
                 <div className="inline-block w-min min-w-min shrink-0">
                   {resolvedAssets ?
@@ -339,11 +314,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
                   : null}
                 </div>
               </div>
-              {hiresExportCaptureVisible ?
-                <p className="relative z-[2] text-center text-xs text-muted-foreground">
-                  Preparing image…
-                </p>
-              : scheduleLoading || assetsLoading || mobilePreviewLoading ?
+              {scheduleLoading || assetsLoading || mobilePreviewLoading ?
                 <p className="relative z-[2] text-center text-xs text-muted-foreground">
                   {assetsLoading ?
                     "Loading artwork…"

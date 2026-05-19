@@ -20,6 +20,12 @@ export function isScheduleShareCaptureIOSWebKit(): boolean {
   )
 }
 
+async function scheduleShareDoubleRaf(): Promise<void> {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  })
+}
+
 /**
  * Wait until proxied row art has mounted `<img>` nodes (not placeholders) and decoded.
  * `data-schedule-share-expected-row-art` is set on the export frame in the card component.
@@ -129,22 +135,16 @@ async function inlineImagesForScheduleShareCapture(
   }
 }
 
-/**
- * Scale a 1× schedule PNG to export pixel density. iOS WebKit often drops embedded
- * images when html-to-image runs at pixelRatio 5 with large data-URL sources.
- */
-export async function upscaleScheduleSharePngBlob(
+async function upscaleScheduleSharePngBlobByFactor(
   blob: Blob,
-  pixelRatio: number,
+  factor: number,
 ): Promise<Blob> {
-  if (pixelRatio <= 1) return blob
-
-  const targetWidth = WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX * pixelRatio
-  const targetHeight =
-    WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX * pixelRatio
+  if (factor <= 1) return blob
 
   const bitmap = await createImageBitmap(blob)
   try {
+    const targetWidth = Math.round(bitmap.width * factor)
+    const targetHeight = Math.round(bitmap.height * factor)
     const canvas = document.createElement("canvas")
     canvas.width = targetWidth
     canvas.height = targetHeight
@@ -165,6 +165,81 @@ export async function upscaleScheduleSharePngBlob(
   }
 }
 
+/**
+ * Scale a schedule PNG to export pixel density (single step).
+ * Prefer {@link upscaleScheduleSharePngBlobProgressive} on iOS fallbacks.
+ */
+export async function upscaleScheduleSharePngBlob(
+  blob: Blob,
+  pixelRatio: number,
+): Promise<Blob> {
+  return upscaleScheduleSharePngBlobByFactor(blob, pixelRatio)
+}
+
+/** 1× → 2× → … → target for slightly sharper upscales than one 5× jump. */
+export async function upscaleScheduleSharePngBlobProgressive(
+  blob: Blob,
+  targetPixelRatio: number,
+): Promise<Blob> {
+  let current = blob
+  let currentRatio = 1
+  while (currentRatio < targetPixelRatio) {
+    const nextRatio = Math.min(currentRatio * 2, targetPixelRatio)
+    const step = nextRatio / currentRatio
+    current = await upscaleScheduleSharePngBlobByFactor(current, step)
+    currentRatio = nextRatio
+  }
+  return current
+}
+
+/**
+ * iOS: html-to-image at pixelRatio 5 drops data-URL images, but 1× capture works.
+ * Scale the live DOM with CSS, capture at 1× into a 5×-sized canvas (sharp + images).
+ */
+async function captureScheduleShareNodeWithCssScale(
+  node: HTMLElement,
+  scale: number,
+  options: ScheduleShareCaptureOptions,
+): Promise<Blob | null> {
+  const outW = WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX * scale
+  const outH = WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX * scale
+
+  const wrapper = document.createElement("div")
+  wrapper.className = WL_SCHEDULE_SHARE_MOBILE_CAPTURE_LAYER_CLASS
+  wrapper.style.width = `${outW}px`
+  wrapper.style.height = `${outH}px`
+  wrapper.style.overflow = "hidden"
+
+  const scaler = document.createElement("div")
+  scaler.style.width = `${WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX}px`
+  scaler.style.height = `${WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_HEIGHT_PX}px`
+  scaler.style.transform = `scale(${scale})`
+  scaler.style.transformOrigin = "top left"
+
+  const parent = node.parentElement
+  const nextSibling = node.nextSibling
+  scaler.appendChild(node)
+  wrapper.appendChild(scaler)
+  document.body.appendChild(wrapper)
+
+  try {
+    await waitForScheduleShareCaptureImages(node, 5000)
+    await scheduleShareDoubleRaf()
+    return await toBlob(wrapper, {
+      ...options,
+      pixelRatio: 1,
+      width: outW,
+      height: outH,
+    })
+  } finally {
+    if (parent) {
+      if (nextSibling) parent.insertBefore(node, nextSibling)
+      else parent.appendChild(node)
+    }
+    wrapper.remove()
+  }
+}
+
 export async function captureScheduleShareNodeToBlob(
   node: HTMLElement,
   options: ScheduleShareCaptureOptions,
@@ -179,9 +254,7 @@ export async function captureScheduleShareNodeToBlob(
     await waitForScheduleShareCaptureImages(node)
   }
 
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-  })
+  await scheduleShareDoubleRaf()
 
   const shouldInline =
     !assetsPreResolved &&
@@ -194,22 +267,47 @@ export async function captureScheduleShareNodeToBlob(
     shouldInline ? await inlineImagesForScheduleShareCapture(node) : () => {}
 
   const requestedPixelRatio = options.pixelRatio ?? 1
-  /**
-   * Legacy path only: proxied/blob artwork on iOS. Pre-resolved data URLs capture
-   * sharply at full pixelRatio (no 1× → upscale, which softens text and photos).
-   */
+  const useIosHiresPath =
+    assetsPreResolved &&
+    requestedPixelRatio > 1 &&
+    isScheduleShareCaptureIOSWebKit()
+
   const useIosLowCapture =
     !assetsPreResolved &&
     requestedPixelRatio > 1 &&
     isScheduleShareCaptureIOSWebKit()
-  const captureOptions: ScheduleShareCaptureOptions =
-    useIosLowCapture ? { ...options, pixelRatio: 1 } : options
 
   try {
+    if (useIosHiresPath) {
+      try {
+        const scaled = await captureScheduleShareNodeWithCssScale(
+          node,
+          requestedPixelRatio,
+          options,
+        )
+        if (scaled) return scaled
+      } catch (e) {
+        console.warn(
+          "Schedule share: CSS scale capture failed; using 1× + upscale",
+          e,
+        )
+      }
+
+      const lowBlob = await toBlob(node, { ...options, pixelRatio: 1 })
+      if (!lowBlob) return null
+      return upscaleScheduleSharePngBlobProgressive(
+        lowBlob,
+        requestedPixelRatio,
+      )
+    }
+
+    const captureOptions: ScheduleShareCaptureOptions =
+      useIosLowCapture ? { ...options, pixelRatio: 1 } : options
+
     const blob = await toBlob(node, captureOptions)
     if (!blob) return null
     if (!useIosLowCapture) return blob
-    return upscaleScheduleSharePngBlob(blob, requestedPixelRatio)
+    return upscaleScheduleSharePngBlobProgressive(blob, requestedPixelRatio)
   } finally {
     restore()
   }
