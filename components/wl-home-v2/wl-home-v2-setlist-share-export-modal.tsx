@@ -66,6 +66,7 @@ export function WlHomeV2SetlistShareExportModal({
   show,
   setlist,
   showPositionInTour,
+  canUploadShareImage = false,
 }: {
   open: boolean
   onOpenChange: (next: boolean) => void
@@ -73,6 +74,8 @@ export function WlHomeV2SetlistShareExportModal({
   show: Show
   setlist: SetlistEntry[]
   showPositionInTour: ShowPositionInTour | null
+  /** Admin-only: upload preview PNG to setlist-images storage. */
+  canUploadShareImage?: boolean
 }) {
   const { session } = useAuth()
   const isMobile = useIsMobile()
@@ -151,6 +154,7 @@ export function WlHomeV2SetlistShareExportModal({
 
   const handleGenerate = useCallback(
     async (withEntryCoachNotes: boolean) => {
+      if (!canUploadShareImage) return
       if (!session?.token) {
         setNotice("Sign in to upload setlist images.")
         return
@@ -182,7 +186,7 @@ export function WlHomeV2SetlistShareExportModal({
         setBusy(null)
       }
     },
-    [captureVariantPng, session?.token, show.show_id],
+    [canUploadShareImage, captureVariantPng, session?.token, show.show_id],
   )
 
   const handleDownloadFromStorage = useCallback(
@@ -285,19 +289,21 @@ export function WlHomeV2SetlistShareExportModal({
                         Copy image
                       </Button>
                     : null}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      disabled={actionsDisabled}
-                      onClick={() =>
-                        void handleGenerate(variant.showEntryCoachNotes)
-                      }
-                    >
-                      <UploadSimple className="size-3.5" aria-hidden />
-                      Generate
-                    </Button>
+                    {canUploadShareImage ?
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={actionsDisabled}
+                        onClick={() =>
+                          void handleGenerate(variant.showEntryCoachNotes)
+                        }
+                      >
+                        <UploadSimple className="size-3.5" aria-hidden />
+                        Generate
+                      </Button>
+                    : null}
                     {hasStoredFile && !storageCheckLoading ?
                       <Button
                         type="button"

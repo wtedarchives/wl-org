@@ -218,7 +218,7 @@ export function WlHomeV2UserMenu({
                         className="top-nav-dd-icon size-4 shrink-0"
                         aria-hidden
                       />
-                      Share schedule
+                      Share Schedule
                     </DropdownMenuItem>
                   : null}
                   <DropdownMenuSeparator className="top-nav-dd-sep" />

@@ -281,6 +281,7 @@ export function WlHomeV2SetlistPageClient() {
         show={show}
         setlist={setlist}
         showPositionInTour={showPositionInTour}
+        canUploadShareImage={showAdminUi}
       />
       <WlHomeV2SetlistRatingModal
         open={ratingModalOpen}
