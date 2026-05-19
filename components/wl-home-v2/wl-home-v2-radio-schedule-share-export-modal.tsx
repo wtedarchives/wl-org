@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Copy, Download } from "@phosphor-icons/react"
 import { toBlob } from "html-to-image"
 
@@ -26,9 +26,6 @@ import {
   WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX,
 } from "@/lib/wl-home-v2-radio-schedule-share-export-config"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { useSharePngMobilePreview } from "@/hooks/use-share-png-mobile-preview"
-import { withShareCaptureImagesInlined } from "@/lib/wl-home-v2-share-capture-inline-images"
 import { cn } from "@/lib/utils"
 
 const RADIO_SCHEDULE_SHARE_CAPTURE_OPTS = {
@@ -61,34 +58,6 @@ export function WlHomeV2RadioScheduleShareExportModal({
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
 
-  const isMobile = useIsMobile()
-
-  const scheduleCaptureSignature = useMemo(() => {
-    const slotSig = slots
-      .map(
-        (s) =>
-          `${s.event.event_id}|${s.event.start}|${s.event.playlist.name}|${s.wtedEpisode?.display_name ?? ""}`,
-      )
-      .join("~")
-    return `${scheduleDay.getTime()}|${backgroundSrc}|${loadError ?? ""}|${slotSig}`
-  }, [scheduleDay, backgroundSrc, loadError, slots])
-
-  const readyToCaptureSchedule = !scheduleLoading
-
-  const {
-    previewUrl: mobilePreviewUrl,
-    generating: mobilePreviewGenerating,
-    cachedRasterBlobRef: scheduleMobileRasterRef,
-  } = useSharePngMobilePreview({
-    open,
-    isMobile,
-    captureRef,
-    readyToCapture: readyToCaptureSchedule,
-    captureSignature: scheduleCaptureSignature,
-    toBlobOptions: RADIO_SCHEDULE_SHARE_CAPTURE_OPTS,
-    logPrefix: "[radio schedule share png]",
-  })
-
   useEffect(() => {
     if (!open) {
       setNotice(null)
@@ -111,27 +80,13 @@ export function WlHomeV2RadioScheduleShareExportModal({
     }
   }, [open])
 
-  const captureScheduleBlob = useCallback(async () => {
-    const node = captureRef.current
-    if (!node) return null
-    if (isMobile) {
-      const cached = scheduleMobileRasterRef.current
-      if (cached) return cached
-    }
-    return withShareCaptureImagesInlined(
-      node,
-      "[radio schedule share png]",
-      () => toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS),
-    )
-  }, [isMobile, scheduleMobileRasterRef])
-
   const handleDownload = useCallback(async () => {
     const node = captureRef.current
     if (!node) return
     setBusy("download")
     setNotice(null)
     try {
-      const blob = await captureScheduleBlob()
+      const blob = await toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -151,7 +106,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
     } finally {
       setBusy(null)
     }
-  }, [captureScheduleBlob, scheduleDay])
+  }, [scheduleDay])
 
   const handleCopy = useCallback(async () => {
     const node = captureRef.current
@@ -159,7 +114,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
     setBusy("copy")
     setNotice(null)
     try {
-      const blob = await captureScheduleBlob()
+      const blob = await toBlob(node, RADIO_SCHEDULE_SHARE_CAPTURE_OPTS)
       if (!blob) {
         setNotice("Could not create image.")
         return
@@ -180,11 +135,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
     } finally {
       setBusy(null)
     }
-  }, [captureScheduleBlob])
-
-  const mobileActionDisabled =
-    busy !== null ||
-    (isMobile && (scheduleLoading || mobilePreviewGenerating))
+  }, [])
 
   const exportWidthPx =
     WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_WIDTH_PX *
@@ -217,62 +168,8 @@ export function WlHomeV2RadioScheduleShareExportModal({
           </DialogDescription>
         </DialogHeader>
 
-        {isMobile ?
-          <div className="flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/25 p-3">
-            {scheduleLoading ?
-              <p className="text-center text-xs text-muted-foreground">
-                Loading schedule…
-              </p>
-            : null}
-            {!scheduleLoading && mobilePreviewGenerating ?
-              <p className="text-center text-xs text-muted-foreground">
-                Rendering image preview…
-              </p>
-            : null}
-            {!scheduleLoading && mobilePreviewUrl ?
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element -- blob: preview of rasterized export */}
-                <img
-                  src={mobilePreviewUrl}
-                  alt="WTED Radio schedule — same image as download"
-                  className="mx-auto max-h-[min(62vh,680px)] w-full max-w-full object-contain"
-                  draggable={false}
-                />
-              </>
-            : null}
-            {!scheduleLoading &&
-            !mobilePreviewGenerating &&
-            !mobilePreviewUrl &&
-            !loadError ?
-              <p className="text-center text-xs text-muted-foreground">
-                Could not build preview. Try Download PNG.
-              </p>
-            : null}
-            {loadError ?
-              <p className="text-center text-xs text-destructive">{loadError}</p>
-            : null}
-          </div>
-        : <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
-            <div className="flex w-full min-w-0 justify-center">
-              <div className="inline-block w-min min-w-min shrink-0">
-                <WlHomeV2RadioScheduleShareExportCard
-                  ref={captureRef}
-                  backgroundSrc={backgroundSrc}
-                  scheduleDay={scheduleDay}
-                  slots={slots}
-                  loading={scheduleLoading}
-                  error={loadError}
-                />
-              </div>
-            </div>
-          </div>
-        }
-
-        {isMobile ?
-          <div
-            className="pointer-events-none fixed top-0 left-[-12000px] z-0 opacity-100"
-            aria-hidden
-          >
+        <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-3">
+          <div className="flex w-full min-w-0 justify-center">
             <div className="inline-block w-min min-w-min shrink-0">
               <WlHomeV2RadioScheduleShareExportCard
                 ref={captureRef}
@@ -284,7 +181,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
               />
             </div>
           </div>
-        : null}
+        </div>
 
         {notice ?
           <p className="text-center text-xs text-muted-foreground">{notice}</p>
@@ -296,7 +193,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
             variant="outline"
             size="sm"
             className="gap-1.5"
-            disabled={mobileActionDisabled}
+            disabled={busy !== null}
             onClick={handleCopy}
           >
             <Copy className="size-3.5" aria-hidden />
@@ -306,7 +203,7 @@ export function WlHomeV2RadioScheduleShareExportModal({
             type="button"
             size="sm"
             className="gap-1.5"
-            disabled={mobileActionDisabled}
+            disabled={busy !== null}
             onClick={handleDownload}
           >
             <Download className="size-3.5" aria-hidden />

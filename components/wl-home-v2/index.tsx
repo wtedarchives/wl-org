@@ -51,7 +51,7 @@ const WELCOME_TICKER_COPY =
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
 /** Set to `false` before ship — when `true`, radio hub “Share schedule” is not admin-gated. */
-const TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE = true
+const TEMP_DISABLE_RADIO_SCHEDULE_SHARE_ADMIN_GATE = false
 
 function initialTickerPhraseQuadSeed(): readonly [string, string, string, string] {
   const w = WL_HOME_V2_TICKER_RANDOM_PHRASES
