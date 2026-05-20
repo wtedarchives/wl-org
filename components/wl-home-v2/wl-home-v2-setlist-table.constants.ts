@@ -4,7 +4,7 @@ export const SETLIST_HEADER_TOOLTIP_CONTENT = {
   sideOffset: 6,
 }
 
-/** Portaled row tooltips (Song stats, WTED, Last, personnel): same panel as `setlist-header-tooltip`. */
+/** Portaled row tooltips (Song/Rarity stats, WTED, Last, personnel): same panel as `setlist-header-tooltip`. */
 export const SETLIST_V2_ROW_TOOLTIP_CONTENT = {
   className: "setlist-header-tooltip",
   side: "top" as const,

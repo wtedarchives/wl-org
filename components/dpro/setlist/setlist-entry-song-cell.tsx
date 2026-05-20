@@ -6,18 +6,9 @@ import {
   jotyRoundDataAttr,
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entry-stats-tooltip"
 import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
-import {
-  entryHasSongStatsLines,
-  SetlistEntryStatsTooltipContent,
-} from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
 
 interface SetlistEntrySongCellProps {
   entry: SetlistEntry
@@ -145,29 +136,16 @@ export function SetlistEntrySongCell({
 
   const body = songContent
 
-  if (showStatsTooltip && entryHasSongStatsLines(entry)) {
+  if (showStatsTooltip) {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex w-full cursor-default flex-col gap-0.5 text-left">
-            {body}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent
-          className={cn(
-            "max-w-[280px] leading-tight",
-            statsTooltipWlV2Chrome && SETLIST_V2_ROW_TOOLTIP_CONTENT.className,
-          )}
-          {...(statsTooltipWlV2Chrome ?
-            {
-              side: SETLIST_V2_ROW_TOOLTIP_CONTENT.side,
-              sideOffset: SETLIST_V2_ROW_TOOLTIP_CONTENT.sideOffset,
-            }
-          : { side: "top" as const })}
-        >
-          <SetlistEntryStatsTooltipContent entry={entry} />
-        </TooltipContent>
-      </Tooltip>
+      <SetlistEntryStatsTooltip
+        entry={entry}
+        wlV2Chrome={statsTooltipWlV2Chrome}
+      >
+        <div className="flex w-full cursor-default flex-col gap-0.5 text-left">
+          {body}
+        </div>
+      </SetlistEntryStatsTooltip>
     )
   }
 

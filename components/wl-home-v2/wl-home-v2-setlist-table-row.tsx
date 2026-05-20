@@ -2,14 +2,14 @@
 
 import { useState, type CSSProperties } from "react"
 
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   getLastCountBadgeStyle,
   getSetlistEntrySongSpreadCategoryKey,
-  jotyRoundDataAttr,
-  shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
+import { SetlistEntrySongCell } from "@/components/dpro/setlist/setlist-entry-song-cell"
+import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entry-stats-tooltip"
+import { entryHasSongStatsLines } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
 import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-last-cell"
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
@@ -98,11 +98,6 @@ export function WlHomeV2SetlistTableRow({
   const rarityPillBackground = getRarityPillBackground(rarity || null)
   const rarityPillBorderColor = getRarityColor(rarity || null)
   const lastBadgeStyle = getLastCountBadgeStyle(entry.last_count)
-  const shortShown = shouldShowSetlistEntryShort(
-    entry.entry_song,
-    entry.entry_short,
-  )
-  const jotyAttr = entry.joty_round ? jotyRoundDataAttr(entry.joty_round) : null
 
   const entryIdsForRelease = hoveredReleaseId
     ? releaseToEntriesMap?.[hoveredReleaseId]
@@ -125,55 +120,6 @@ export function WlHomeV2SetlistTableRow({
 
   const shouldRowHighlight = shouldReleaseHighlight || shouldCategoryHighlight
   const shouldRowDim = shouldReleaseDim || shouldCategoryDim
-
-  const songCellInner = (
-    <div className="song-cell-inner">
-      <div className="song-cell-main">
-        {onSongClick ?
-          <button
-            type="button"
-            className="song-cell-song-hit"
-            onClick={() => onSongClick(entry)}
-          >
-            <SongDisplayName
-              song={entry.entry_song}
-              songDisplayName={entry.songs?.song_displayname}
-            />
-          </button>
-        : <SongDisplayName
-            song={entry.entry_song}
-            songDisplayName={entry.songs?.song_displayname}
-          />
-        }
-        {shortShown && entry.entry_short ?
-          <span className="short">{entry.entry_short}</span>
-        : null}
-        {entry.entry_segue ?
-          <span className="segue">
-            → {entry.entry_segue.replace(/^>\s*/, "").trim()}
-          </span>
-        : null}
-      </div>
-      {jotyAttr ?
-        <div className="song-cell-joty">
-          {onJotyBadgeClick ?
-            <button
-              type="button"
-              className="joty-pill"
-              data-joty-round={jotyAttr}
-              onClick={() => onJotyBadgeClick(entry)}
-              aria-label={`Jam of the Year: ${entry.joty_round}`}
-            >
-              {entry.joty_round}
-            </button>
-          : <span className="joty-pill" data-joty-round={jotyAttr}>
-              {entry.joty_round}
-            </span>
-          }
-        </div>
-      : null}
-    </div>
-  )
 
   return (
     <tr
@@ -221,7 +167,13 @@ export function WlHomeV2SetlistTableRow({
         className="song-cell"
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
-        {songCellInner}
+        <SetlistEntrySongCell
+          entry={entry}
+          onSongClick={onSongClick}
+          onJotyClick={onJotyBadgeClick}
+          showStatsTooltip={isDesktop}
+          statsTooltipWlV2Chrome
+        />
       </td>
       {showWtedColumn ?
         <td
@@ -272,17 +224,34 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           {rarity ?
-            <span
-              className="rare-pill"
-              style={
-                {
-                  "--setlist-rare-fill": rarityPillBackground,
-                  "--setlist-rare-border": rarityPillBorderColor,
-                } as CSSProperties
-              }
-            >
-              {rarity}
-            </span>
+            isDesktop ?
+              <SetlistEntryStatsTooltip entry={entry} wlV2Chrome>
+                <span
+                  className={cn(
+                    "rare-pill",
+                    entryHasSongStatsLines(entry) && "cursor-default",
+                  )}
+                  style={
+                    {
+                      "--setlist-rare-fill": rarityPillBackground,
+                      "--setlist-rare-border": rarityPillBorderColor,
+                    } as CSSProperties
+                  }
+                >
+                  {rarity}
+                </span>
+              </SetlistEntryStatsTooltip>
+            : <span
+                className="rare-pill"
+                style={
+                  {
+                    "--setlist-rare-fill": rarityPillBackground,
+                    "--setlist-rare-border": rarityPillBorderColor,
+                  } as CSSProperties
+                }
+              >
+                {rarity}
+              </span>
           : null}
         </td>
       : null}
