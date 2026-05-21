@@ -9,6 +9,7 @@
 import {
   clearStoredToken,
   getStoredToken,
+  notifySessionUpdated,
   storeToken,
 } from "@/lib/jwt"
 
@@ -73,10 +74,8 @@ export function isDevAuthMockSessionActive(): boolean {
   }
 }
 
-export function notifySessionRefresh(): void {
-  if (typeof window === "undefined") return
-  window.dispatchEvent(new Event("wl-session-updated"))
-}
+/** @deprecated Use {@link notifySessionUpdated} from `@/lib/jwt`. */
+export const notifySessionRefresh = notifySessionUpdated
 
 /** Turn on mock session (backs up any existing `wl_session` once). */
 export function enableDevAuthMock(): void {

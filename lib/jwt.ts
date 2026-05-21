@@ -92,12 +92,20 @@ export function tokenToSession(token: string): WysteriaSession | null {
   };
 }
 
+// ─── Notify AuthProvider (same tab) ───────────────────────────────────────────
+
+export function notifySessionUpdated(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("wl-session-updated"));
+}
+
 // ─── Store token ──────────────────────────────────────────────────────────────
 
 export function storeToken(token: string): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, token);
+    notifySessionUpdated();
   } catch {
     console.error("Failed to store session token");
   }
@@ -147,5 +155,6 @@ export function clearSession(): void {
   if (typeof window !== "undefined") {
     sessionStorage.removeItem("sso_nonce");
     sessionStorage.removeItem("sso_return_to");
+    notifySessionUpdated();
   }
 }
