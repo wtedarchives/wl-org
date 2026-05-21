@@ -25,6 +25,7 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 
 import {
   hasSilentAttempted,
+  markLogoutFlow,
   markSilentAttempted,
   redirectToLogin,
 } from "@/lib/sso"
@@ -134,6 +135,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signOut = () => {
     console.log("[Auth] Sign out — clearing WLC session")
+    markLogoutFlow()
+    markSilentAttempted()
     clearSession()
     setSession(null)
     void redirectToLogin("/", { logout: true })

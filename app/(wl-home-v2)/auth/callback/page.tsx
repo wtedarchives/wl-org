@@ -21,6 +21,7 @@ import {
   consumeLogoutFlow,
   decodeSsoPayload,
   hasSilentAttempted,
+  isLogoutFlowPending,
   isSsoFailedPayload,
   markSilentAttempted,
 } from "@/lib/sso"
@@ -58,6 +59,12 @@ export default function AuthCallbackPage() {
 
         // WLC returns failed=true inside the signed sso payload (or occasionally top-level)
         if (params.get("failed") === "true" || (sso && isSsoFailedPayload(sso))) {
+          finishWithoutSession()
+          return
+        }
+
+        // Logout often returns a bare callback URL with no sso/sig params
+        if ((!sso || !sig) && isLogoutFlowPending()) {
           finishWithoutSession()
           return
         }
