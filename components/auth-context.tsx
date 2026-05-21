@@ -23,7 +23,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react"
 
-import { redirectToLogin } from "@/lib/sso"
+import {
+  clearSilentAttempted,
+  hasSilentAttempted,
+  markSilentAttempted,
+  redirectToLogin,
+} from "@/lib/sso"
+import { isDevAuthMockSessionActive } from "@/lib/dev-auth-mock"
 import {
   getSession,
   clearSession,
@@ -58,11 +64,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [session, setSession] = useState<WysteriaSession | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // On mount — read JWT from localStorage
+  // On mount — read JWT from localStorage; attempt silent SSO if unauthenticated
   useEffect(() => {
     const existing = getSession()
-    setSession(existing)
-    setLoading(false)
+    if (existing) {
+      setSession(existing)
+      setLoading(false)
+      return
+    }
+
+    const { pathname, search } = window.location
+    if (pathname.startsWith("/auth/")) {
+      setLoading(false)
+      return
+    }
+
+    if (isDevAuthMockSessionActive()) {
+      setLoading(false)
+      return
+    }
+
+    if (hasSilentAttempted()) {
+      setLoading(false)
+      return
+    }
+
+    markSilentAttempted()
+    console.log("[Auth] Silent SSO check initiated")
+    const returnTo = `${pathname}${search}`
+    void redirectToLogin(returnTo, { promptNone: true })
   }, [])
 
   // Watch for storage events so logout in one tab propagates to others
@@ -93,20 +123,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // ─── Auth Actions ────────────────────────────────────────────────────────────
 
   const signIn = () => {
-    void redirectToLogin(window.location.pathname)
+    const returnTo = `${window.location.pathname}${window.location.search}`
+    void redirectToLogin(returnTo)
   }
 
   const signUp = () => {
     // Same SSO redirect as signIn — WLC handles the signup/login branching
-    void redirectToLogin(window.location.pathname)
+    const returnTo = `${window.location.pathname}${window.location.search}`
+    void redirectToLogin(returnTo)
   }
 
   const signOut = () => {
+    console.log("[Auth] Sign out — clearing WLC session")
+    clearSilentAttempted()
     clearSession()
     setSession(null)
-    // Optionally also log out of WLC to fully clear their session
-    // window.location.href = "https://community.wysterialane.org/logout"
-    window.location.href = "/"
+    void redirectToLogin("/", { logout: true })
   }
 
   const WLC_FORGOT_PASSWORD =

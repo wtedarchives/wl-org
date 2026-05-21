@@ -16,6 +16,10 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { storeToken } from "@/lib/jwt"
+import {
+  clearSilentAttempted,
+  hasSilentAttempted,
+} from "@/lib/sso"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SSO_CALLBACK_FUNCTION = `${SUPABASE_URL}/functions/v1/sso-callback`
@@ -31,8 +35,21 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     async function handleCallback() {
       try {
-        // Read sso and sig from the URL
         const params = new URLSearchParams(window.location.search)
+
+        // prompt=none with no WLC session — silent redirect back, no token exchange
+        if (params.get("failed") === "true") {
+          if (hasSilentAttempted()) {
+            console.log("[Auth] Silent SSO failed — user not logged into WLC")
+          }
+          sessionStorage.removeItem("sso_nonce")
+          const returnTo = sessionStorage.getItem("sso_return_to") ?? "/"
+          sessionStorage.removeItem("sso_return_to")
+          router.replace(returnTo)
+          return
+        }
+
+        // Read sso and sig from the URL
         const sso = params.get("sso")
         const sig = params.get("sig")
 
@@ -77,6 +94,10 @@ export default function AuthCallbackPage() {
 
         // Store the JWT
         storeToken(data.token)
+        if (hasSilentAttempted()) {
+          console.log("[Auth] Silent SSO succeeded — auto logged in")
+          clearSilentAttempted()
+        }
         setStatus("success")
 
         // Clear SSO sessionStorage items

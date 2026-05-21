@@ -61,9 +61,48 @@ async function signPayload(payload: string, secret: string): Promise<string> {
     .join("");
 }
 
+// ─── Silent SSO attempt flag (localStorage — shared across tabs) ───────────────
+
+const SSO_SILENT_ATTEMPTED_KEY = "sso_silent_attempted";
+
+export function hasSilentAttempted(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(SSO_SILENT_ATTEMPTED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markSilentAttempted(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(SSO_SILENT_ATTEMPTED_KEY, "1");
+  } catch {
+    console.error("Failed to mark silent SSO attempt");
+  }
+}
+
+export function clearSilentAttempted(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(SSO_SILENT_ATTEMPTED_KEY);
+  } catch {
+    console.error("Failed to clear silent SSO attempt flag");
+  }
+}
+
 // ─── Build the SSO redirect URL ───────────────────────────────────────────────
 
-export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
+export type SSORedirectOptions = {
+  promptNone?: boolean;
+  logout?: boolean;
+};
+
+export async function buildSSORedirectURL(
+  returnTo?: string,
+  options?: SSORedirectOptions,
+): Promise<string> {
   const secret = process.env.NEXT_PUBLIC_WLC_SSO_SECRET;
   if (!secret) {
     throw new Error("NEXT_PUBLIC_WLC_SSO_SECRET is not set");
@@ -79,11 +118,18 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
     sessionStorage.setItem("sso_return_to", returnTo ?? window.location.pathname);
   }
 
-  // Build the payload: nonce + return URL
-  const rawPayload = new URLSearchParams({
+  // Build the payload: nonce + return URL (+ optional prompt=none / logout)
+  const payloadParams = new URLSearchParams({
     nonce,
     return_sso_url: callbackUrl,
-  }).toString();
+  });
+  if (options?.promptNone) {
+    payloadParams.set("prompt", "none");
+  }
+  if (options?.logout) {
+    payloadParams.set("logout", "true");
+  }
+  const rawPayload = payloadParams.toString();
 
   // Base64 encode it
   const ssoPayload = btoa(rawPayload);
@@ -101,7 +147,13 @@ export async function buildSSORedirectURL(returnTo?: string): Promise<string> {
 
 // ─── Redirect to WLC for login ────────────────────────────────────────────────
 
-export async function redirectToLogin(returnTo?: string): Promise<void> {
-  const url = await buildSSORedirectURL(returnTo);
+export async function redirectToLogin(
+  returnTo?: string,
+  options?: SSORedirectOptions,
+): Promise<void> {
+  if (!options?.promptNone && !options?.logout) {
+    clearSilentAttempted();
+  }
+  const url = await buildSSORedirectURL(returnTo, options);
   window.location.href = url;
 }
