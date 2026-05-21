@@ -92,6 +92,43 @@ export function clearSilentAttempted(): void {
   }
 }
 
+const SSO_LOGOUT_FLOW_KEY = "sso_logout_flow";
+
+/** Set before redirecting to WLC with logout=true so callback can distinguish sign-out. */
+export function markLogoutFlow(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(SSO_LOGOUT_FLOW_KEY, "1");
+  } catch {
+    console.error("Failed to mark SSO logout flow");
+  }
+}
+
+export function consumeLogoutFlow(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const was = sessionStorage.getItem(SSO_LOGOUT_FLOW_KEY) === "1";
+    sessionStorage.removeItem(SSO_LOGOUT_FLOW_KEY);
+    return was;
+  } catch {
+    return false;
+  }
+}
+
+/** Decode the base64 SSO payload WLC returns on the callback URL. */
+export function decodeSsoPayload(sso: string): URLSearchParams | null {
+  try {
+    return new URLSearchParams(atob(sso));
+  } catch {
+    return null;
+  }
+}
+
+/** WLC signals no session via failed=true inside the signed sso payload (not always a top-level param). */
+export function isSsoFailedPayload(sso: string): boolean {
+  return decodeSsoPayload(sso)?.get("failed") === "true";
+}
+
 // ─── Build the SSO redirect URL ───────────────────────────────────────────────
 
 export type SSORedirectOptions = {
@@ -128,6 +165,7 @@ export async function buildSSORedirectURL(
   }
   if (options?.logout) {
     payloadParams.set("logout", "true");
+    markLogoutFlow();
   }
   const rawPayload = payloadParams.toString();
 

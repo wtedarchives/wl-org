@@ -18,7 +18,11 @@ import { useRouter } from "next/navigation"
 import { storeToken } from "@/lib/jwt"
 import {
   clearSilentAttempted,
+  consumeLogoutFlow,
+  decodeSsoPayload,
   hasSilentAttempted,
+  isSsoFailedPayload,
+  markSilentAttempted,
 } from "@/lib/sso"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -36,22 +40,27 @@ export default function AuthCallbackPage() {
     async function handleCallback() {
       try {
         const params = new URLSearchParams(window.location.search)
+        const sso = params.get("sso")
+        const sig = params.get("sig")
 
-        // prompt=none with no WLC session — silent redirect back, no token exchange
-        if (params.get("failed") === "true") {
-          if (hasSilentAttempted()) {
+        const finishWithoutSession = () => {
+          const wasLogout = consumeLogoutFlow()
+          if (!wasLogout && hasSilentAttempted()) {
             console.log("[Auth] Silent SSO failed — user not logged into WLC")
           }
+          // Prevent silent SSO from re-firing after logout or failed prompt=none
+          markSilentAttempted()
           sessionStorage.removeItem("sso_nonce")
           const returnTo = sessionStorage.getItem("sso_return_to") ?? "/"
           sessionStorage.removeItem("sso_return_to")
           router.replace(returnTo)
-          return
         }
 
-        // Read sso and sig from the URL
-        const sso = params.get("sso")
-        const sig = params.get("sig")
+        // WLC returns failed=true inside the signed sso payload (or occasionally top-level)
+        if (params.get("failed") === "true" || (sso && isSsoFailedPayload(sso))) {
+          finishWithoutSession()
+          return
+        }
 
         if (!sso || !sig) {
           setErrorMessage("Missing SSO parameters. Please try signing in again.")
@@ -62,9 +71,8 @@ export default function AuthCallbackPage() {
         // Verify the nonce to prevent CSRF attacks
         const storedNonce = sessionStorage.getItem("sso_nonce")
         if (storedNonce) {
-          const decodedPayload = atob(sso)
-          const payloadParams = new URLSearchParams(decodedPayload)
-          const returnedNonce = payloadParams.get("nonce")
+          const payloadParams = decodeSsoPayload(sso)
+          const returnedNonce = payloadParams?.get("nonce")
 
           if (returnedNonce !== storedNonce) {
             setErrorMessage("Session mismatch. Please try signing in again.")
