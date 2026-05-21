@@ -11,6 +11,7 @@ import {
   useState,
 } from "react"
 
+import { SongArchiveLengthBoxplot } from "@/components/archive-song/song-archive-length-boxplot"
 import {
   placementLegendRows,
   placementStatsForVerbatimBar,
@@ -356,6 +357,7 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
                 }}
                 onWtedPayloadClick={onPerfTableWtedPayloadClick}
               />
+              <SongArchiveLengthBoxplot performances={performances} />
             </div>
             {showWtedBesidePerformances ?
               <WlHomeV2SongArchiveDetailWtedAside

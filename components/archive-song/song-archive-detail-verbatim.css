@@ -103,6 +103,9 @@
 
 .song-archive-detail-vx .perf-wted-band__performances {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .song-archive-detail-vx .perf-wted-band__wted {
