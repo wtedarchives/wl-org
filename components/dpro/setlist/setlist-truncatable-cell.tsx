@@ -134,19 +134,22 @@ export function SetlistTruncatableCell({
     cn(COACH_BLOCK_TYPO, blockPlainClassName)
   const useCollapseHtml = variant === "block" && !!collapseHtml?.trim()
   const measureRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
   const [needsMore, setNeedsMore] = useState(false)
   const [expanded, setExpanded] = useState(defaultExpanded)
 
   const measure = useCallback(() => {
-    const el = measureRef.current
-    if (!el) return
+    const measureEl = measureRef.current
+    if (!measureEl) return
     if (variant === "pills") {
-      setNeedsMore(el.scrollWidth > el.clientWidth + 0.5)
+      setNeedsMore(measureEl.scrollWidth > measureEl.clientWidth + 0.5)
       return
     }
-    const inner = el.firstElementChild as HTMLElement | null
-    const box = inner ?? el
-    setNeedsMore(box.scrollWidth > box.clientWidth + 0.5)
+    const inner = measureEl.firstElementChild as HTMLElement | null
+    const box = inner ?? measureEl
+    const intrinsicWidth = box.scrollWidth
+    const visibleWidth = rootRef.current?.clientWidth ?? intrinsicWidth
+    setNeedsMore(intrinsicWidth > visibleWidth + 0.5)
   }, [variant])
 
   useLayoutEffect(() => {
@@ -154,10 +157,12 @@ export function SetlistTruncatableCell({
   }, [measureKey, measure, children, plainCollapsedText, collapseHtml, useCollapseHtml])
 
   useLayoutEffect(() => {
-    const el = measureRef.current
-    if (!el || typeof ResizeObserver === "undefined") return
+    if (typeof ResizeObserver === "undefined") return
     const ro = new ResizeObserver(() => measure())
-    ro.observe(el)
+    const measureEl = measureRef.current
+    const rootEl = rootRef.current
+    if (measureEl) ro.observe(measureEl)
+    if (rootEl) ro.observe(rootEl)
     return () => ro.disconnect()
   }, [measure])
 
@@ -185,12 +190,18 @@ export function SetlistTruncatableCell({
     maxHeight: SETLIST_TRUNC_COLLAPSED_ROW_PX,
   } as const
 
+  const fillColumnWidth =
+    variant === "block" ||
+    needsMore ||
+    (!useExternalExpand && expanded)
+
   return (
     <div
+      ref={rootRef}
       className={cn(
         "min-w-0",
         maxWidthClass,
-        needsMore || (!useExternalExpand && expanded) ? "w-full" : "w-max",
+        fillColumnWidth ? "w-full" : "w-max",
         className,
       )}
     >
@@ -261,7 +272,10 @@ export function SetlistTruncatableCell({
       : showFullInline ?
         useExternalExpand && useCollapseHtml ?
           <div
-            className={blockCollapseInlineClass}
+            className={cn(
+              blockCollapseInlineClass,
+              "overflow-hidden whitespace-nowrap text-clip [&_*]:!whitespace-nowrap",
+            )}
             dangerouslySetInnerHTML={{ __html: collapseHtml!.trim() }}
           />
         : <div
@@ -273,7 +287,16 @@ export function SetlistTruncatableCell({
           >
             {variant === "pills" ?
               withPersonnelNowrap(children, false)
-            : <div className="w-full min-w-0">{children}</div>}
+            : <div
+                className={cn(
+                  "w-full min-w-0",
+                  expanded ?
+                    "whitespace-normal break-words"
+                  : "overflow-hidden whitespace-nowrap text-clip [&_*]:!whitespace-nowrap",
+                )}
+              >
+                {children}
+              </div>}
           </div>
       : null}
     </div>

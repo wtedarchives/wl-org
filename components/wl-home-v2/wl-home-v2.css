@@ -12376,6 +12376,7 @@
 .wl-home-v2 .wl-home-v2-setlist .set-table th.set-table-coach-notes-head {
   padding-top: 1px;
   padding-bottom: 1px;
+  white-space: nowrap;
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.notes-cell {
   padding-top: 1px;
