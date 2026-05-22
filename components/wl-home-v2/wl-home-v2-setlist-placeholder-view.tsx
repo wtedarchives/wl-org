@@ -56,6 +56,7 @@ export function WlHomeV2SetlistPlaceholderView({
   show,
   showId,
   setlist,
+  songPairs,
   showAdminUi,
   adminLinkCopied,
   onAdminCopyShowId,
@@ -75,7 +76,9 @@ export function WlHomeV2SetlistPlaceholderView({
   releaseToEntriesMap,
   onJotyBadgeClick,
   onSongClick,
+  onPairSongClick,
   onWtedClick,
+  onPairWtedClick,
   averageRating,
   reviewCount,
   onRatingClick,
@@ -83,7 +86,6 @@ export function WlHomeV2SetlistPlaceholderView({
   attended,
   attendanceToggling,
   onAttendanceToggle,
-  canMarkAttendance,
   showLengthRank,
   showChanges,
   showChangesLoading,
@@ -95,6 +97,7 @@ export function WlHomeV2SetlistPlaceholderView({
   show: Show
   showId: string
   setlist: SetlistEntry[]
+  songPairs: import("@/types/song-pair").SongPair[]
   showAdminUi?: boolean
   adminLinkCopied?: boolean
   onAdminCopyShowId?: () => void
@@ -104,7 +107,12 @@ export function WlHomeV2SetlistPlaceholderView({
   onNumberClick?: (entryId: string) => void
   onJotyBadgeClick: (entry: SetlistEntry) => void
   onSongClick?: (entry: SetlistEntry) => void
+  onPairSongClick?: (
+    entries: SetlistEntry[],
+    pair: import("@/types/song-pair").SongPair,
+  ) => void
   onWtedClick?: (entry: SetlistEntry) => void
+  onPairWtedClick?: (entries: SetlistEntry[]) => void
   showPositionInTour: ShowPositionInTour | null
   tourShowNav: {
     prevShowId: string | null
@@ -125,7 +133,6 @@ export function WlHomeV2SetlistPlaceholderView({
   attended: boolean
   attendanceToggling: boolean
   onAttendanceToggle: () => void
-  canMarkAttendance: boolean
   showLengthRank: number | null
   showChanges: ShowChangeRow[]
   showChangesLoading: boolean
@@ -205,7 +212,6 @@ export function WlHomeV2SetlistPlaceholderView({
     reviewSummary,
     averageRating,
     attendeeCount,
-    canMarkAttendance,
     attended,
     attendanceToggling,
     onAttendanceToggle,
@@ -213,6 +219,8 @@ export function WlHomeV2SetlistPlaceholderView({
     showWlCommunityLink,
     wlCommunityHref,
   }
+
+  const showEgnAttribution = show.egn_sourced === true
 
   return (
     <div className="wl-home-v2-years-page wl-home-v2-setlist">
@@ -271,12 +279,15 @@ export function WlHomeV2SetlistPlaceholderView({
                 <WlHomeV2SetlistTable
                   show={show}
                   setlist={setlist}
+                  songPairs={songPairs}
                   showAdminUi={showAdminUi}
                   copiedEntryIds={copiedEntryIds}
                   onNumberClick={onNumberClick}
                   onJotyBadgeClick={onJotyBadgeClick}
                   onSongClick={onSongClick}
+                  onPairSongClick={onPairSongClick}
                   onWtedClick={onWtedClick}
+                  onPairWtedClick={onPairWtedClick}
                   hoveredReleaseId={hoveredReleaseId}
                   releaseToEntriesMap={releaseToEntriesMap}
                   hoveredCategory={hoveredCategory}
@@ -288,7 +299,7 @@ export function WlHomeV2SetlistPlaceholderView({
                     onReleaseHover={setHoveredReleaseId}
                   />
                 : null}
-                {show.egn_sourced === true ?
+                {!useCompactTools && showEgnAttribution ?
                   <SetlistEgnAttribution className="w-full shrink-0" />
                 : null}
               </div>
@@ -364,6 +375,11 @@ export function WlHomeV2SetlistPlaceholderView({
             <WlHomeV2SetlistShowBadgesTile show={show} />
           </div>
         </aside>
+        {useCompactTools && showEgnAttribution ?
+          <div className="wl-home-v2-setlist-egn-mobile-tail">
+            <SetlistEgnAttribution className="w-full shrink-0" />
+          </div>
+        : null}
         </div>
       </div>
     </div>

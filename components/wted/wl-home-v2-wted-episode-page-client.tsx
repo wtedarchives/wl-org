@@ -13,8 +13,8 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
 import { SetlistSongSpreadCard } from "@/components/dpro/setlist/setlist-song-spread-card"
-import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
+import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import {
   WlHomeV2ArchiveCrumbsShell,
@@ -46,6 +46,7 @@ type WtedEpisodeLayoutMode = "mobile" | "desktop" | null
 export function WlHomeV2WtedEpisodePageClient() {
   const router = useRouter()
   const { session } = useAuth()
+  const openLogin = useWlHomeV2OpenLogin()
   const wtedModalHeadingId = useId()
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [hoveredPerformanceYear, setHoveredPerformanceYear] = useState<
@@ -58,7 +59,6 @@ export function WlHomeV2WtedEpisodePageClient() {
   const [wtedModalEntry, setWtedModalEntry] = useState<SetlistEntry | null>(
     null,
   )
-  const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
   const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
   const [jotyDrawerYear, setJotyDrawerYear] = useState<number | null>(null)
   const [jotyDrawerHighlightedEntryId, setJotyDrawerHighlightedEntryId] =
@@ -110,7 +110,6 @@ export function WlHomeV2WtedEpisodePageClient() {
   useEffect(() => {
     setWtedModalOpen(false)
     setWtedModalEntry(null)
-    setWtedLoginRequiredOpen(false)
     setJotyDrawerOpen(false)
     setJotyDrawerYear(null)
     setJotyDrawerHighlightedEntryId(null)
@@ -155,13 +154,13 @@ export function WlHomeV2WtedEpisodePageClient() {
   const handleWtedClick = useCallback(
     (entry: SetlistEntry) => {
       if (!session) {
-        setWtedLoginRequiredOpen(true)
+        openLogin?.()
         return
       }
       setWtedModalEntry(entry)
       setWtedModalOpen(true)
     },
-    [session],
+    [session, openLogin],
   )
 
   const handleJotyClick = useCallback(
@@ -306,11 +305,6 @@ export function WlHomeV2WtedEpisodePageClient() {
                         />
                       </div>
                     </div>
-                    <SetlistWtedLoginRequiredDialog
-                      open={wtedLoginRequiredOpen}
-                      onOpenChange={setWtedLoginRequiredOpen}
-                      wlHomeV2
-                    />
                     <SetlistJotyDrawer
                       open={jotyDrawerOpen}
                       onOpenChange={setJotyDrawerOpen}

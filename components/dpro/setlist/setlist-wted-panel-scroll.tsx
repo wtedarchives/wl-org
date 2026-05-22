@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
+import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   DrawerClose,
   DrawerFooter,
@@ -51,6 +52,9 @@ export function SetlistWtedPanelScrollBody({
   submitError,
   requestWaitSeconds,
   onOpenChange,
+  wtedEntryOptions = null,
+  selectedEntryId = null,
+  onSelectEntryId,
 }: {
   variant: "drawer" | "modal"
   scrollClassName?: string
@@ -74,6 +78,9 @@ export function SetlistWtedPanelScrollBody({
   submitError: string | null
   requestWaitSeconds: number
   onOpenChange: (open: boolean) => void
+  wtedEntryOptions?: SetlistEntry[] | null
+  selectedEntryId?: string | null
+  onSelectEntryId?: (entryId: string) => void
 }) {
   const slotVisualVariant = variant === "modal" ? "wlHomeV2" : "drawer"
 
@@ -119,6 +126,59 @@ export function SetlistWtedPanelScrollBody({
             variant === "modal" ? "wl-home-v2-wted-modal-stack" : "space-y-3",
           )}
         >
+          {wtedEntryOptions && wtedEntryOptions.length > 1 ?
+            <div
+              className={cn(
+                variant === "modal" ?
+                  "wl-home-v2-wted-pair-picker"
+                : "rounded-lg border border-border/60 bg-muted/20 p-3",
+              )}
+            >
+              <p
+                className={cn(
+                  variant === "modal" ?
+                    "wl-home-v2-wted-pair-picker-label"
+                  : "mb-2 text-xs font-medium text-foreground",
+                )}
+              >
+                Choose a song to request
+              </p>
+              <div
+                className={cn(
+                  variant === "modal" ?
+                    "wl-home-v2-wted-pair-picker-options"
+                  : "flex flex-col gap-2",
+                )}
+              >
+                {wtedEntryOptions.map((option) => {
+                  const selected = option.entry_id === selectedEntryId
+                  return (
+                    <button
+                      key={option.entry_id}
+                      type="button"
+                      className={cn(
+                        variant === "modal" ?
+                          "wl-home-v2-wted-pair-picker-option"
+                        : "rounded-md border px-3 py-2 text-left text-xs",
+                        selected &&
+                          (variant === "modal" ?
+                            "wl-home-v2-wted-pair-picker-option--active"
+                          : "border-primary bg-primary/10"),
+                      )}
+                      aria-pressed={selected}
+                      onClick={() => onSelectEntryId?.(option.entry_id)}
+                    >
+                      <SongDisplayName
+                        as="span"
+                        song={option.entry_song}
+                        songDisplayName={option.songs?.song_displayname}
+                      />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          : null}
           {bannerAlreadyRequested ?
             <div
               className={cn(

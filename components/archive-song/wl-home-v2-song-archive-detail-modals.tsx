@@ -2,7 +2,6 @@
 
 import { SongsArchiveListSearchModal } from "@/components/archive-songs/wl-home-v2-songs-archive-list-modals"
 import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
-import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import type { SongsArchiveSong } from "@/hooks/use-songs-archive-data"
 import type { SetlistEntry } from "@/types/setlist"
@@ -17,8 +16,6 @@ export function WlHomeV2SongArchiveDetailModals({
   setSearchQuery,
   searchHits,
   searchInputRef,
-  perfTableWtedLoginRequiredOpen,
-  setPerfTableWtedLoginRequiredOpen,
   songPerfWtedModalOpen,
   closePerfTableWtedModal,
   songPerfWtedModal,
@@ -35,8 +32,6 @@ export function WlHomeV2SongArchiveDetailModals({
   setSearchQuery: Dispatch<SetStateAction<string>>
   searchHits: SongsArchiveSong[]
   searchInputRef: RefObject<HTMLInputElement | null>
-  perfTableWtedLoginRequiredOpen: boolean
-  setPerfTableWtedLoginRequiredOpen: (open: boolean) => void
   songPerfWtedModalOpen: boolean
   closePerfTableWtedModal: () => void
   songPerfWtedModal: SongArchivePerformanceWtedPayload | null
@@ -56,11 +51,6 @@ export function WlHomeV2SongArchiveDetailModals({
         setSearchQuery={setSearchQuery}
         searchHits={searchHits}
         searchInputRef={searchInputRef}
-      />
-      <SetlistWtedLoginRequiredDialog
-        open={perfTableWtedLoginRequiredOpen}
-        onOpenChange={setPerfTableWtedLoginRequiredOpen}
-        wlHomeV2
       />
       <WlHomeV2SetlistWtedModal
         open={songPerfWtedModalOpen}

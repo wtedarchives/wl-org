@@ -140,13 +140,11 @@ export function SetlistGameShows({ gameShows, loading }: SetlistGameShowsProps) 
               className={cn(
                 "text-center",
                 wlV2 ? sgWlV2.td : "px-2 py-0.5",
-                !wlV2 &&
-                  (show.show_scored && show.averageOverUnder != null
-                    ? getOverUnderTextColor(
-                        show.averageOverUnder,
-                        show.show_scored,
-                      )
-                    : "text-muted-foreground"),
+                getOverUnderTextColor(
+                  show.averageOverUnder,
+                  show.show_scored ?? false,
+                  wlV2,
+                ),
               )}
             >
               {formatOverUnderValue(

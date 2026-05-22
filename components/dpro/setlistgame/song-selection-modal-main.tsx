@@ -230,7 +230,7 @@ export function SongSelectionModalMain({
         : "grid grid-cols-1 gap-4 lg:grid-cols-[336px_minmax(0,1fr)]"
       }
     >
-      <div className={cn("order-1 flex flex-col gap-3", wlV2 && "gap-4")}>
+      <div className={cn("order-1 flex min-w-0 flex-col gap-3", wlV2 && "gap-4")}>
         <ShowInfoCard
           show={showForModal}
           viewMode={viewMode}
@@ -261,7 +261,7 @@ export function SongSelectionModalMain({
           wlHomeV2Chrome={wlV2}
         />
       </div>
-      <div className={cn("order-2 flex flex-col gap-3", wlV2 && "gap-4")}>
+      <div className={cn("order-2 flex min-w-0 flex-col gap-3", wlV2 && "gap-4")}>
         {wlV2 && !viewMode ?
           <div className="widget-panel song-selection-tour-panel song-selection-form-panel">
             <div className="wp-head song-selection-form-panel-head">

@@ -6,49 +6,59 @@ import {
   getLastCountBadgeStyle,
   getSetlistEntrySongSpreadCategoryKey,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
-import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
-import { SetlistEntrySongCell } from "@/components/dpro/setlist/setlist-entry-song-cell"
+import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-last-cell"
 import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entry-stats-tooltip"
 import { entryHasSongStatsLines } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
-import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-last-cell"
+import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
+import { SetlistExpandButton } from "@/components/dpro/setlist/setlist-expand-button"
 import {
   SetlistTruncatableCell,
   SetlistTruncatableHtmlCell,
 } from "@/components/dpro/setlist/setlist-truncatable-cell"
 import {
-  calculateRarity,
-  formatEntryLength,
+  buildPairCoachNotesCollapsedHtml,
+  mergePairGuests,
+  pairCombinedLength,
+  pairHasWted,
+  pairPlacementBarTokens,
+  pairSharedLastCount,
+  pairSharedRarity,
+  pairSharedTourCount,
+} from "@/lib/song-pairs"
+import {
   getRarityColor,
   getRarityPillBackground,
 } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 
-import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
-
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+import { WlHomeV2SetlistPairSongCell } from "@/components/wl-home-v2/wl-home-v2-setlist-pair-song-cell"
 import { railLabelForEntrySet } from "@/components/wl-home-v2/wl-home-v2-setlist-table.utils"
 import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
 import type { SetlistEntry } from "@/types/setlist"
+import type { SongPair } from "@/types/song-pair"
 
-/** One setlist row — `onDataCellPointerEnter` is desktop-only so iOS taps are not cancelled by a hover re-render. */
-export function WlHomeV2SetlistTableRow({
-  entry,
+export function WlHomeV2SetlistPairTableRow({
+  pair,
+  entries,
   displayNumber,
   showCanonColumns,
   showWtedColumn,
+  showTimeColumn,
+  showCoachColumn,
   isDesktop,
   isFirstOfRun,
   runSpan,
   isRowHovered,
   onDataCellPointerEnter,
   onSetRailPointerEnter,
+  onExpand,
+  onCoachNotesExpand,
   onJotyBadgeClick,
   onSongClick,
   onWtedClick,
-  showTimeColumn,
-  showCoachColumn,
   showAdminUi,
   copiedEntryIds,
   onNumberClick,
@@ -56,9 +66,9 @@ export function WlHomeV2SetlistTableRow({
   releaseToEntriesMap,
   hoveredCategory,
   showDiscographySetUi,
-  coachNotesExpanded = false,
 }: {
-  entry: SetlistEntry
+  pair: SongPair
+  entries: SetlistEntry[]
   displayNumber: number | null
   showCanonColumns: boolean
   showWtedColumn: boolean
@@ -70,65 +80,79 @@ export function WlHomeV2SetlistTableRow({
   isRowHovered: boolean
   onDataCellPointerEnter: () => void
   onSetRailPointerEnter: () => void
+  onExpand: () => void
+  onCoachNotesExpand: () => void
   onJotyBadgeClick?: (entry: SetlistEntry) => void
-  onSongClick?: (entry: SetlistEntry) => void
-  onWtedClick?: (entry: SetlistEntry) => void
+  onSongClick?: (entries: SetlistEntry[]) => void
+  onWtedClick?: (entries: SetlistEntry[]) => void
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: ReleaseToEntriesMap
   hoveredCategory?: string | null
-  /** Set rail, set-break rows, and # placement bar — off when `show.discography_display === false`. */
   showDiscographySetUi: boolean
-  coachNotesExpanded?: boolean
 }) {
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
 
+  const primaryEntry = entries[0]!
+  const mergedGuests = mergePairGuests(entries)
+  const coachCollapsedHtml = buildPairCoachNotesCollapsedHtml(entries)
+  const combinedLength = pairCombinedLength(entries)
+  const hasWted = pairHasWted(entries)
+  const wtedProxyEntry = entries.find((e) => e.radio_id) ?? primaryEntry
+
   const railClass = cn(
     "set-section-rail",
-    entry.entry_set?.startsWith("E") && "set-section-rail--encore",
+    primaryEntry.entry_set?.startsWith("E") && "set-section-rail--encore",
   )
-  const barPlacementToken = getPlacementBarCssToken(entry.entry_placement)
-  const isCopied = copiedEntryIds?.has(entry.entry_id) ?? false
+  const barPlacementTokens = pairPlacementBarTokens(entries)
+  const isCopied = entries.some((e) => copiedEntryIds?.has(e.entry_id))
   const canCopyNumber = !!(showAdminUi && onNumberClick)
-  const rarity = calculateRarity(
-    entry.times_played_num,
-    entry.shows_since_debut_num,
-  )
-  const rarityPillBackground = getRarityPillBackground(rarity || null)
-  const rarityPillBorderColor = getRarityColor(rarity || null)
-  const lastBadgeStyle = getLastCountBadgeStyle(entry.last_count)
 
   const entryIdsForRelease = hoveredReleaseId
     ? releaseToEntriesMap?.[hoveredReleaseId]
     : undefined
-  const isEntryOnHoveredRelease = !!entryIdsForRelease?.has(entry.entry_id)
-  const shouldReleaseHighlight =
-    !!hoveredReleaseId && isEntryOnHoveredRelease
-  const shouldReleaseDim =
-    !!hoveredReleaseId && !isEntryOnHoveredRelease
+  const isOnHoveredRelease = entries.some((e) =>
+    entryIdsForRelease?.has(e.entry_id),
+  )
+  const shouldReleaseHighlight = !!hoveredReleaseId && isOnHoveredRelease
+  const shouldReleaseDim = !!hoveredReleaseId && !isOnHoveredRelease
 
-  const entryCategory = getSetlistEntrySongSpreadCategoryKey(entry)
   const shouldCategoryHighlight =
     !hoveredReleaseId &&
     !!hoveredCategory &&
-    entryCategory === hoveredCategory
+    entries.some(
+      (e) => getSetlistEntrySongSpreadCategoryKey(e) === hoveredCategory,
+    )
   const shouldCategoryDim =
     !hoveredReleaseId &&
     !!hoveredCategory &&
-    entryCategory !== hoveredCategory
+    !entries.some(
+      (e) => getSetlistEntrySongSpreadCategoryKey(e) === hoveredCategory,
+    )
 
-  const shouldRowHighlight = shouldReleaseHighlight || shouldCategoryHighlight
-  const shouldRowDim = shouldReleaseDim || shouldCategoryDim
+  const guestProxyEntry: SetlistEntry = {
+    ...primaryEntry,
+    guests: mergedGuests,
+  }
+
+  const sharedLastCount = pairSharedLastCount(entries)
+  const sharedTourCount = pairSharedTourCount(entries)
+  const sharedRarity = pairSharedRarity(entries)
+  const lastBadgeStyle = getLastCountBadgeStyle(sharedLastCount)
+  const rarityPillBackground = getRarityPillBackground(sharedRarity)
+  const rarityPillBorderColor = getRarityColor(sharedRarity)
 
   return (
     <tr
       className={cn(
-        "song-row",
+        "song-row song-row--pair",
         isRowHovered && "song-row--row-hover",
-        shouldRowHighlight && "song-row--release-highlight",
-        shouldRowDim && "song-row--release-dim",
+        shouldReleaseHighlight && "song-row--release-highlight",
+        shouldReleaseDim && "song-row--release-dim",
+        shouldCategoryHighlight && "song-row--release-highlight",
+        shouldCategoryDim && "song-row--release-dim",
       )}
     >
       {showDiscographySetUi && isFirstOfRun ?
@@ -138,7 +162,7 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onSetRailPointerEnter : undefined}
         >
           <span className="set-section-rail-text">
-            {railLabelForEntrySet(entry.entry_set, runSpan)}
+            {railLabelForEntrySet(primaryEntry.entry_set, runSpan)}
           </span>
         </td>
       : null}
@@ -151,11 +175,24 @@ export function WlHomeV2SetlistTableRow({
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
         {showDiscographySetUi ?
-          <span className="bar" data-placement-bar={barPlacementToken} />
+          barPlacementTokens.length > 1 ?
+            <span className="bar bar--split" aria-hidden>
+              {barPlacementTokens.map((token, index) => (
+                <span
+                  key={`${token}-${index}`}
+                  className="bar-seg"
+                  data-placement-bar={token}
+                />
+              ))}
+            </span>
+          : <span
+              className="bar"
+              data-placement-bar={barPlacementTokens[0] ?? "none"}
+            />
         : null}
         <div className="setlist-cell-inner">
           <SetlistEntryNumberCell
-            entry={entry}
+            entry={primaryEntry}
             displayNumber={displayNumber}
             isCopied={isCopied}
             canCopyNumber={canCopyNumber}
@@ -167,12 +204,13 @@ export function WlHomeV2SetlistTableRow({
         className="song-cell"
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
-        <SetlistEntrySongCell
-          entry={entry}
+        <WlHomeV2SetlistPairSongCell
+          pair={pair}
+          entries={entries}
+          onExpand={onExpand}
           onSongClick={onSongClick}
           onJotyClick={onJotyBadgeClick}
-          showStatsTooltip={isDesktop}
-          statsTooltipWlV2Chrome
+          showTooltips={isDesktop}
         />
       </td>
       {showWtedColumn ?
@@ -181,12 +219,18 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            <SetlistEntryWtedCell
-              entry={entry}
-              onWtedClick={onWtedClick}
-              showTooltips={isDesktop}
-              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
-            />
+            {hasWted ?
+              <SetlistEntryWtedCell
+                entry={wtedProxyEntry}
+                onWtedClick={
+                  onWtedClick ?
+                    (_entry) => onWtedClick(entries)
+                  : undefined
+                }
+                showTooltips={isDesktop}
+                tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+              />
+            : null}
           </div>
         </td>
       : null}
@@ -195,9 +239,7 @@ export function WlHomeV2SetlistTableRow({
           className="time-cell"
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
-          <div className="setlist-cell-inner">
-            {formatEntryLength(entry.entry_length) ?? ""}
-          </div>
+          <div className="setlist-cell-inner">{combinedLength}</div>
         </td>
       : null}
       {showCanonColumns ?
@@ -206,13 +248,19 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            <SetlistEntryLastCell
-              entry={entry}
-              lastBadgeStyle={lastBadgeStyle}
-              showTooltips={isDesktop}
-              useWlHomeV2PillStyle
-              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
-            />
+            {sharedLastCount ?
+              <SetlistEntryLastCell
+                entry={{ ...primaryEntry, last_count: sharedLastCount }}
+                lastBadgeStyle={lastBadgeStyle}
+                showTooltips={isDesktop}
+                useWlHomeV2PillStyle
+                tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+              />
+            : <SetlistExpandButton
+                onClick={onExpand}
+                ariaLabel="Show Last stats for individual songs"
+              />
+            }
           </div>
         </td>
       : null}
@@ -222,7 +270,13 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            {entry.song_tour_count ?? ""}
+            {sharedTourCount ?
+              sharedTourCount
+            : <SetlistExpandButton
+                onClick={onExpand}
+                ariaLabel="Show Tour stats for individual songs"
+              />
+            }
           </div>
         </td>
       : null}
@@ -232,13 +286,13 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            {rarity ?
+            {sharedRarity ?
               isDesktop ?
-                <SetlistEntryStatsTooltip entry={entry} wlV2Chrome>
+                <SetlistEntryStatsTooltip entry={primaryEntry} wlV2Chrome>
                   <span
                     className={cn(
                       "rare-pill",
-                      entryHasSongStatsLines(entry) && "cursor-default",
+                      entryHasSongStatsLines(primaryEntry) && "cursor-default",
                     )}
                     style={
                       {
@@ -247,7 +301,7 @@ export function WlHomeV2SetlistTableRow({
                       } as CSSProperties
                     }
                   >
-                    {rarity}
+                    {sharedRarity}
                   </span>
                 </SetlistEntryStatsTooltip>
               : <span
@@ -259,9 +313,13 @@ export function WlHomeV2SetlistTableRow({
                     } as CSSProperties
                   }
                 >
-                  {rarity}
+                  {sharedRarity}
                 </span>
-            : null}
+            : <SetlistExpandButton
+                onClick={onExpand}
+                ariaLabel="Show Rarity stats for individual songs"
+              />
+            }
           </div>
         </td>
       : null}
@@ -272,16 +330,16 @@ export function WlHomeV2SetlistTableRow({
         )}
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
-        {entry.guests?.length ?
+        {mergedGuests.length ?
           <SetlistTruncatableCell
             maxWidthClass="max-w-[400px]"
             measureWidthClass="w-max max-w-[400px]"
-            measureKey={`${entry.entry_id}-personnel`}
+            measureKey={`${primaryEntry.entry_id}-pair-personnel`}
             expandLabel="Show all personnel"
             onTruncatedCollapsedChange={setPersonnelTruncCollapsed}
           >
             <SetlistEntryGuestsCell
-              entry={entry}
+              entry={guestProxyEntry}
               showTooltips={isDesktop}
               nowrap={false}
               useWlHomeV2PillStyle
@@ -296,15 +354,16 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            {entry.entry_coachnotes?.trim() ?
+            {coachCollapsedHtml ?
               <SetlistTruncatableHtmlCell
                 maxWidthClass="max-w-[400px]"
                 measureWidthClass="w-max max-w-[400px]"
-                measureKey={`${entry.entry_id}-coach`}
-                html={entry.entry_coachnotes.trim()}
-                defaultExpanded={coachNotesExpanded}
-                expandLabel="Show full coach notes"
-                htmlContentClassName="setlist-v2-notes-html"
+                measureKey={`${primaryEntry.entry_id}-pair-coach`}
+                html={coachCollapsedHtml}
+                onExpandClick={onCoachNotesExpand}
+                expandLabel="Show individual songs in this pair"
+                htmlContentClassName="setlist-v2-notes-html setlist-v2-notes-html--pair-collapsed"
+                collapsedHtmlContentClassName="setlist-v2-notes-html setlist-v2-notes-html--pair-collapsed"
                 blockPlainClassName="setlist-v2-notes-plain"
               />
             : null}

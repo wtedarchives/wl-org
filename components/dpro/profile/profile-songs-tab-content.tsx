@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useId } from "react"
 import { useSearchParams } from "next/navigation"
 import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { UserSongsCombined } from "@/components/dpro/profile/user-songs-combined"
-import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
 import { UserSongSpread } from "@/components/dpro/profile/user-song-spread"
+import { WlHomeV2UserSongModal } from "@/components/wl-home-v2/wl-home-v2-user-song-modal"
 import { useUserShows } from "@/hooks/use-user-shows"
 import { useUserSongsData } from "@/hooks/use-user-songs-data"
 import { useUserSongMatrix, type UserMatrixSortMode } from "@/hooks/use-user-song-matrix"
@@ -40,12 +40,14 @@ export function ProfileSongsTabContent({
 }: ProfileSongsTabContentProps) {
   const searchParams = useSearchParams()
 
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [sheetSongName, setSheetSongName] = useState<string | null>(null)
-  const [sheetSongDisplayName, setSheetSongDisplayName] = useState<
+  const [songModalOpen, setSongModalOpen] = useState(false)
+  const [songModalSongName, setSongModalSongName] = useState<string | null>(null)
+  const [songModalSongDisplayName, setSongModalSongDisplayName] = useState<
     string | null
   >(null)
-  const [sheetSongId, setSheetSongId] = useState<string | null>(null)
+  const [songModalSongId, setSongModalSongId] = useState<string | null>(null)
+  const userSongModalHeadingId = useId()
+  const userSongModalScopeLineId = useId()
 
   const [viewMode, setViewMode] = useState<"list" | "matrix">(() =>
     getViewFromParams(searchParams)
@@ -104,12 +106,12 @@ export function ProfileSongsTabContent({
     songDisplayName?: string | null,
     songId?: string
   ) => {
-    setSheetSongName(songName)
-    setSheetSongDisplayName(
+    setSongModalSongName(songName)
+    setSongModalSongDisplayName(
       songDisplayName ?? songDisplayNameMap[songName] ?? null
     )
-    setSheetSongId(songId ?? songIdMap[songName] ?? null)
-    setSheetOpen(true)
+    setSongModalSongId(songId ?? songIdMap[songName] ?? null)
+    setSongModalOpen(true)
   }
 
   const rootClass =
@@ -228,12 +230,14 @@ export function ProfileSongsTabContent({
         </div>
       </div>
 
-      <UserSongPerformancesSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        songName={sheetSongName}
-        songDisplayName={sheetSongDisplayName}
-        songId={sheetSongId}
+      <WlHomeV2UserSongModal
+        open={songModalOpen}
+        onClose={() => setSongModalOpen(false)}
+        headingId={userSongModalHeadingId}
+        scopeLineId={userSongModalScopeLineId}
+        songName={songModalSongName}
+        songDisplayName={songModalSongDisplayName}
+        songId={songModalSongId}
         userId={userId}
         attendedShowIds={attendedShowIds}
         isOwnProfile={isOwnProfile}

@@ -15,11 +15,14 @@ import {
 interface SetlistLoginRequiredDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Defaults to the rating copy for backward compatibility. */
+  description?: string
 }
 
 export function SetlistLoginRequiredDialog({
   open,
   onOpenChange,
+  description = "You must be logged in to rate this show.",
 }: SetlistLoginRequiredDialogProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -34,9 +37,7 @@ export function SetlistLoginRequiredDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Login Required</AlertDialogTitle>
-          <AlertDialogDescription>
-            You must be logged in to rate this show.
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>

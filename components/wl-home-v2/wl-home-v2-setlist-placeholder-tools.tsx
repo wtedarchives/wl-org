@@ -9,7 +9,6 @@ export type WlHomeV2SetlistPlaceholderToolsProps = {
   reviewSummary: string
   averageRating: number
   attendeeCount: number
-  canMarkAttendance: boolean
   attended: boolean
   attendanceToggling: boolean
   onAttendanceToggle: () => void
@@ -24,7 +23,6 @@ export function WlHomeV2SetlistPlaceholderRatingAttendees({
   reviewSummary,
   averageRating,
   attendeeCount,
-  canMarkAttendance,
   attended,
   attendanceToggling,
   onAttendanceToggle,
@@ -66,31 +64,29 @@ export function WlHomeV2SetlistPlaceholderRatingAttendees({
             aria-hidden
           />
         </div>
-        {canMarkAttendance ?
-          <button
-            type="button"
-            className={
-              "attend normal-case tracking-normal inline-flex items-center justify-center gap-1.5 " +
-              (attended ? "attended" : "")
-            }
-            id="attend-btn"
-            disabled={attendanceToggling}
-            onClick={onAttendanceToggle}
-          >
-            {attendanceToggling ?
-              "…"
-            : attended ?
-              <>
-                <Check className="size-4 shrink-0" weight="bold" aria-hidden />
-                attended
-              </>
-            : <>
-                <UserPlus className="size-4 shrink-0" aria-hidden />
-                i was there
-              </>
-            }
-          </button>
-        : null}
+        <button
+          type="button"
+          className={
+            "attend normal-case tracking-normal inline-flex items-center justify-center gap-1.5 " +
+            (attended ? "attended" : "")
+          }
+          id="attend-btn"
+          disabled={attendanceToggling}
+          onClick={onAttendanceToggle}
+        >
+          {attendanceToggling ?
+            "…"
+          : attended ?
+            <>
+              <Check className="size-4 shrink-0" weight="bold" aria-hidden />
+              attended
+            </>
+          : <>
+              <UserPlus className="size-4 shrink-0" aria-hidden />
+              i was there
+            </>
+          }
+        </button>
       </div>
     </>
   )

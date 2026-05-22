@@ -3,60 +3,74 @@
 import { Fragment, useMemo, useState } from "react"
 
 import {
-  computeDisplayNumbers,
   JOTY_ROUND_ORDER,
   SHORT_EXPLANATIONS,
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+  buildSetlistTableRows,
+  computeDisplayNumbersForTableRows,
+  tableRowEntryIds,
+  tableRowEntrySet,
+  tableRowPrimaryEntry,
+} from "@/lib/song-pairs"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
+import { useSetlistPairExpansion } from "@/hooks/use-setlist-pair-expansion"
 import { formatEntryLength, getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
 
-import {
-  SETLIST_HEADER_TOOLTIP_CONTENT,
-} from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 import { WlHomeV2SetlistCoachCallbacksFooter } from "@/components/wl-home-v2/wl-home-v2-setlist-coach-callbacks-footer"
-import {
-  WlHomeV2LastHeaderTooltipBody,
-  WlHomeV2SetlistSongHeaderTooltipBody,
-} from "@/components/wl-home-v2/wl-home-v2-setlist-table-header-tooltips"
+import { WlHomeV2SetlistPairTableRow } from "@/components/wl-home-v2/wl-home-v2-setlist-pair-table-row"
+import { WlHomeV2SetlistTableHead } from "@/components/wl-home-v2/wl-home-v2-setlist-table-head"
 import { WlHomeV2SetlistTableRow } from "@/components/wl-home-v2/wl-home-v2-setlist-table-row"
 
 import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
 import type { SetlistEntry, Show } from "@/types/setlist"
+import type { SongPair } from "@/types/song-pair"
 
 export function WlHomeV2SetlistTable({
   show,
   setlist,
+  songPairs,
   showAdminUi,
   copiedEntryIds,
   onNumberClick,
   onJotyBadgeClick,
   onSongClick,
+  onPairSongClick,
   onWtedClick,
+  onPairWtedClick,
   hoveredReleaseId,
   releaseToEntriesMap,
   hoveredCategory,
 }: {
   show: Show
   setlist: SetlistEntry[]
+  songPairs: SongPair[]
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
   onJotyBadgeClick?: (entry: SetlistEntry) => void
   onSongClick?: (entry: SetlistEntry) => void
+  onPairSongClick?: (
+    entries: SetlistEntry[],
+    pair: import("@/types/song-pair").SongPair,
+  ) => void
   onWtedClick?: (entry: SetlistEntry) => void
+  onPairWtedClick?: (entries: SetlistEntry[]) => void
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: ReleaseToEntriesMap
   hoveredCategory?: string | null
 }) {
   const [hoveredEntryId, setHoveredEntryId] = useState<string | null>(null)
+  const {
+    expandedPairKeys,
+    expandPair,
+    expandPairFromCoachNotes,
+    isCoachNotesExpanded,
+  } = useSetlistPairExpansion(show.show_id)
   const isDesktop = useIsDesktopContentLayout()
+
   const showCanonColumns = show.show_canonid != null
   const showWtedColumn = setlist.some((e) => !!e.radio_id)
   const showTimeColumn = setlist.some(
@@ -65,7 +79,14 @@ export function WlHomeV2SetlistTable({
   const showCoachColumn = setlist.some(
     (e) => !!e.entry_coachnotes?.trim(),
   )
-  const displayNumbers = computeDisplayNumbers(setlist)
+  const tableRows = useMemo(
+    () => buildSetlistTableRows(setlist, songPairs, expandedPairKeys),
+    [setlist, songPairs, expandedPairKeys],
+  )
+  const displayNumbers = useMemo(
+    () => computeDisplayNumbersForTableRows(tableRows),
+    [tableRows],
+  )
   const uniquePlacements = new Set(setlist.map((e) => e.entry_placement))
   const hasSinglePlacementType = uniquePlacements.size === 1
 
@@ -144,160 +165,139 @@ export function WlHomeV2SetlistTable({
               isDesktop ? () => setHoveredEntryId(null) : undefined
             }
           >
-          <thead>
-            <tr>
-              {showDiscographySetUi ?
-                <th
-                  className="set-section-rail-head"
-                  scope="col"
-                  aria-hidden={true}
-                />
-              : null}
-              <th className="center num-col">#</th>
-              <th>
-                {hasSongHeaderTooltipItems && isDesktop ?
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="setlist-th-help">Song</span>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className="setlist-header-tooltip"
-                      {...SETLIST_HEADER_TOOLTIP_CONTENT}
-                    >
-                      <WlHomeV2SetlistSongHeaderTooltipBody
-                        hasSegue={hasSegue}
-                        sortedShorts={sortedShorts}
-                        jotyRoundsInOrder={jotyRoundsInOrder}
-                        shortLabelByKey={shortLabelByKey}
-                      />
-                    </TooltipContent>
-                  </Tooltip>
-                : "Song"}
-              </th>
-              {showWtedColumn ?
-                <th className="center">
-                  {isDesktop ?
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="setlist-th-help">WTED</span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        className="setlist-header-tooltip setlist-header-tooltip--tight"
-                        {...SETLIST_HEADER_TOOLTIP_CONTENT}
-                      >
-                        Use the icons below to request songs on WTED Goose Radio.
-                      </TooltipContent>
-                    </Tooltip>
-                  : "WTED"}
-                </th>
-              : null}
-              {showTimeColumn ?
-                <th className="center">Time</th>
-              : null}
-              {showCanonColumns ?
-                <th className="center">
-                  {hasLastHeaderTooltip && isDesktop ?
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="setlist-th-help">Last</span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        className="setlist-header-tooltip setlist-header-tooltip--last"
-                        {...SETLIST_HEADER_TOOLTIP_CONTENT}
-                      >
-                        <WlHomeV2LastHeaderTooltipBody />
-                      </TooltipContent>
-                    </Tooltip>
-                  : "Last"}
-                </th>
-              : null}
-              {showCanonColumns ?
-                <th className="center">Tour</th>
-              : null}
-              {showCanonColumns ?
-                <th className="center">Rarity</th>
-              : null}
-              <th>Personnel</th>
-              {showCoachColumn ?
-                <th className="set-table-coach-notes-head">
-                  Coach&apos;s Notes
-                </th>
-              : null}
-            </tr>
-          </thead>
-          <tbody>
-            {setlist.map((entry, index) => {
-              const prevEntry = index > 0 ? setlist[index - 1]! : null
-              const showEncoreBar =
-                showDiscographySetUi &&
-                !hasSinglePlacementType &&
-                prevEntry &&
-                entry.entry_set?.startsWith("E") &&
-                (!prevEntry.entry_set?.startsWith("E") ||
-                  prevEntry.entry_set !== entry.entry_set) &&
-                !!getEncoreLabel(entry.entry_set)
-              const showSetBreakBar =
-                showDiscographySetUi &&
-                !hasSinglePlacementType &&
-                prevEntry &&
-                shouldShowSetBreak(prevEntry.entry_set, entry.entry_set)
+            <WlHomeV2SetlistTableHead
+              showDiscographySetUi={showDiscographySetUi}
+              showWtedColumn={showWtedColumn}
+              showTimeColumn={showTimeColumn}
+              showCanonColumns={showCanonColumns}
+              showCoachColumn={showCoachColumn}
+              isDesktop={isDesktop}
+              hasSongHeaderTooltipItems={hasSongHeaderTooltipItems}
+              hasSegue={hasSegue}
+              sortedShorts={sortedShorts}
+              jotyRoundsInOrder={jotyRoundsInOrder}
+              shortLabelByKey={shortLabelByKey}
+              hasLastHeaderTooltip={hasLastHeaderTooltip}
+            />
+            <tbody>
+              {tableRows.map((row, index) => {
+                const entry = tableRowPrimaryEntry(row)
+                const prevEntry =
+                  index > 0 ? tableRowPrimaryEntry(tableRows[index - 1]!) : null
+                const showEncoreBar =
+                  showDiscographySetUi &&
+                  !hasSinglePlacementType &&
+                  prevEntry &&
+                  entry.entry_set?.startsWith("E") &&
+                  (!prevEntry.entry_set?.startsWith("E") ||
+                    prevEntry.entry_set !== entry.entry_set) &&
+                  !!getEncoreLabel(entry.entry_set)
+                const showSetBreakBar =
+                  showDiscographySetUi &&
+                  !hasSinglePlacementType &&
+                  prevEntry &&
+                  shouldShowSetBreak(prevEntry.entry_set, entry.entry_set)
 
-              const isFirstOfRun =
-                index === 0 ||
-                setlist[index - 1]!.entry_set !== entry.entry_set
-              let runSpan = 1
-              if (isFirstOfRun) {
-                for (let j = index + 1; j < setlist.length; j++) {
-                  if (setlist[j]!.entry_set === entry.entry_set) runSpan++
-                  else break
+                const rowSet = tableRowEntrySet(row)
+                const isFirstOfRun =
+                  index === 0 ||
+                  tableRowEntrySet(tableRows[index - 1]!) !== rowSet
+                let runSpan = 1
+                if (isFirstOfRun) {
+                  for (let j = index + 1; j < tableRows.length; j++) {
+                    if (tableRowEntrySet(tableRows[j]!) === rowSet) runSpan++
+                    else break
+                  }
                 }
-              }
 
-              return (
-                <Fragment key={entry.entry_id}>
-                  {showEncoreBar ?
-                    <tr
-                      className="set-divider-row set-divider-row--encore"
-                      aria-hidden={true}
-                    >
-                      <td className="set-divider-cell" colSpan={fullColSpan} />
-                    </tr>
-                  : null}
-                  {showSetBreakBar ?
-                    <tr className="set-divider-row" aria-hidden={true}>
-                      <td className="set-divider-cell" colSpan={fullColSpan} />
-                    </tr>
-                  : null}
-                  <WlHomeV2SetlistTableRow
-                    entry={entry}
-                    displayNumber={displayNumbers[index] ?? null}
-                    showCanonColumns={showCanonColumns}
-                    showWtedColumn={showWtedColumn}
-                    showTimeColumn={showTimeColumn}
-                    showCoachColumn={showCoachColumn}
-                    isDesktop={isDesktop}
-                    isFirstOfRun={isFirstOfRun}
-                    runSpan={runSpan}
-                    isRowHovered={hoveredEntryId === entry.entry_id}
-                    onDataCellPointerEnter={() =>
-                      setHoveredEntryId(entry.entry_id)
+                const rowHoverIds = tableRowEntryIds(row)
+                const isRowHovered = rowHoverIds.includes(hoveredEntryId ?? "")
+                const rowKey =
+                  row.type === "single" ? row.entry.entry_id : row.expandKey
+
+                return (
+                  <Fragment key={rowKey}>
+                    {showEncoreBar ?
+                      <tr
+                        className="set-divider-row set-divider-row--encore"
+                        aria-hidden={true}
+                      >
+                        <td className="set-divider-cell" colSpan={fullColSpan} />
+                      </tr>
+                    : null}
+                    {showSetBreakBar ?
+                      <tr className="set-divider-row" aria-hidden={true}>
+                        <td className="set-divider-cell" colSpan={fullColSpan} />
+                      </tr>
+                    : null}
+                    {row.type === "pair" ?
+                      <WlHomeV2SetlistPairTableRow
+                        pair={row.pair}
+                        entries={row.entries}
+                        displayNumber={displayNumbers[index] ?? null}
+                        showCanonColumns={showCanonColumns}
+                        showWtedColumn={showWtedColumn}
+                        showTimeColumn={showTimeColumn}
+                        showCoachColumn={showCoachColumn}
+                        isDesktop={isDesktop}
+                        isFirstOfRun={isFirstOfRun}
+                        runSpan={runSpan}
+                        isRowHovered={isRowHovered}
+                        onDataCellPointerEnter={() =>
+                          setHoveredEntryId(row.entries[0]!.entry_id)
+                        }
+                        onSetRailPointerEnter={() => setHoveredEntryId(null)}
+                        onExpand={() => expandPair(row.expandKey)}
+                        onCoachNotesExpand={() =>
+                          expandPairFromCoachNotes(row.expandKey, row.entries)
+                        }
+                        onJotyBadgeClick={onJotyBadgeClick}
+                        onSongClick={onPairSongClick ?
+                            (entries) => onPairSongClick(entries, row.pair)
+                          : undefined}
+                        onWtedClick={onPairWtedClick}
+                        showAdminUi={showAdminUi}
+                        copiedEntryIds={copiedEntryIds}
+                        onNumberClick={onNumberClick}
+                        hoveredReleaseId={hoveredReleaseId}
+                        releaseToEntriesMap={releaseToEntriesMap}
+                        hoveredCategory={hoveredCategory}
+                        showDiscographySetUi={showDiscographySetUi}
+                      />
+                    : <WlHomeV2SetlistTableRow
+                        entry={row.entry}
+                        displayNumber={displayNumbers[index] ?? null}
+                        showCanonColumns={showCanonColumns}
+                        showWtedColumn={showWtedColumn}
+                        showTimeColumn={showTimeColumn}
+                        showCoachColumn={showCoachColumn}
+                        isDesktop={isDesktop}
+                        isFirstOfRun={isFirstOfRun}
+                        runSpan={runSpan}
+                        isRowHovered={isRowHovered}
+                        onDataCellPointerEnter={() =>
+                          setHoveredEntryId(row.entry.entry_id)
+                        }
+                        onSetRailPointerEnter={() => setHoveredEntryId(null)}
+                        onJotyBadgeClick={onJotyBadgeClick}
+                        onSongClick={onSongClick}
+                        onWtedClick={onWtedClick}
+                        showAdminUi={showAdminUi}
+                        copiedEntryIds={copiedEntryIds}
+                        onNumberClick={onNumberClick}
+                        hoveredReleaseId={hoveredReleaseId}
+                        releaseToEntriesMap={releaseToEntriesMap}
+                        hoveredCategory={hoveredCategory}
+                        showDiscographySetUi={showDiscographySetUi}
+                        coachNotesExpanded={isCoachNotesExpanded(
+                          row.entry.entry_id,
+                        )}
+                      />
                     }
-                    onSetRailPointerEnter={() => setHoveredEntryId(null)}
-                    onJotyBadgeClick={onJotyBadgeClick}
-                    onSongClick={onSongClick}
-                    onWtedClick={onWtedClick}
-                    showAdminUi={showAdminUi}
-                    copiedEntryIds={copiedEntryIds}
-                    onNumberClick={onNumberClick}
-                    hoveredReleaseId={hoveredReleaseId}
-                    releaseToEntriesMap={releaseToEntriesMap}
-                    hoveredCategory={hoveredCategory}
-                    showDiscographySetUi={showDiscographySetUi}
-                  />
-                </Fragment>
-              )
-            })}
-          </tbody>
+                  </Fragment>
+                )
+              })}
+            </tbody>
           </table>
         </div>
         <WlHomeV2SetlistCoachCallbacksFooter

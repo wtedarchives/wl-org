@@ -83,7 +83,7 @@ export function ShowHeader({
                 {totalPlayers === 1 ? "user" : "users"} playing
               </span>
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-col items-center gap-2">
               {show.show_scored ?
                 <span className="show-detail-pill bg-blue-600/90 text-white border border-white/10">
                   Game Completed

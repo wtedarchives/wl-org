@@ -1,19 +1,25 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect } from "react"
+import { Fragment, useEffect, useMemo } from "react"
+import { SetlistSongPerformancesMultiPanel } from "@/components/dpro/setlist/setlist-song-performances-multi-panel"
 import { SetlistSongPerformancesPanel } from "@/components/dpro/setlist/setlist-song-performances-panel"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { Button } from "@/components/ui/button"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { uniqueSongEntriesForPairModal } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
 
 type WlHomeV2SetlistSongModalProps = {
   open: boolean
   onClose: () => void
   entry: SetlistEntry | null
+  /** When set, render one performance section per entry (combined song pair row). */
+  entries?: SetlistEntry[]
+  /** Header label when `entries` is set (song pair alt_name). */
+  pairAltName?: string | null
   tourName: string | null
   headingId: string
   tourLineId: string
@@ -34,6 +40,8 @@ export function WlHomeV2SetlistSongModal({
   open,
   onClose,
   entry,
+  entries,
+  pairAltName,
   tourName,
   headingId,
   tourLineId,
@@ -52,10 +60,16 @@ export function WlHomeV2SetlistSongModal({
     return () => document.removeEventListener("keydown", onKey)
   }, [open, onClose])
 
-  const songName = songNameProp ?? entry?.entry_song ?? ""
-  const songId = songIdProp ?? entry?.song_id ?? null
+  const multiEntries = entries?.length ? entries : null
+  const uniqueMultiEntries = useMemo(
+    () => (multiEntries ? uniqueSongEntriesForPairModal(multiEntries) : []),
+    [multiEntries],
+  )
+  const activeEntry = multiEntries ? null : entry
+  const songName = songNameProp ?? activeEntry?.entry_song ?? ""
+  const songId = songIdProp ?? activeEntry?.song_id ?? null
   const headerDisplayName =
-    entry?.songs?.song_displayname ?? songDisplayNameProp ?? null
+    activeEntry?.songs?.song_displayname ?? songDisplayNameProp ?? null
 
   return (
     <WlHomeV2ModalPortal open={open}>
@@ -68,7 +82,10 @@ export function WlHomeV2SetlistSongModal({
         }}
       >
         <div
-          className="modal modal--wted-request modal--setlist-song"
+          className={
+            "modal modal--wted-request modal--setlist-song" +
+            (multiEntries ? " modal--setlist-song-multi" : "")
+          }
           role="dialog"
           aria-modal="true"
           aria-labelledby={headingId}
@@ -78,7 +95,57 @@ export function WlHomeV2SetlistSongModal({
           <div className="modal-request-head modal-setlist-song-head">
             <div className="modal-setlist-song-head-spacer" aria-hidden={true} />
             <div className="modal-setlist-song-head-center">
-              {songName ?
+              {multiEntries ?
+                <>
+                  <h3 id={headingId} className="modal-setlist-song-title">
+                    {pairAltName?.trim() ?
+                      pairAltName.trim()
+                    : <span className="modal-setlist-song-title-pair">
+                        {uniqueMultiEntries.map((sectionEntry, index) => (
+                          <Fragment key={sectionEntry.entry_id}>
+                            {index > 0 ?
+                              <span className="modal-setlist-song-title-sep">
+                                {" "}
+                                →{" "}
+                              </span>
+                            : null}
+                            {sectionEntry.song_id ?
+                              <Link
+                                href={getSongArchiveUrl(sectionEntry.song_id)}
+                                className="modal-setlist-song-title-link"
+                                onClick={() => onClose()}
+                              >
+                                <SongDisplayName
+                                  as="span"
+                                  song={sectionEntry.entry_song}
+                                  songDisplayName={
+                                    sectionEntry.songs?.song_displayname
+                                  }
+                                />
+                              </Link>
+                            : <SongDisplayName
+                                as="span"
+                                song={sectionEntry.entry_song}
+                                songDisplayName={
+                                  sectionEntry.songs?.song_displayname
+                                }
+                              />
+                            }
+                          </Fragment>
+                        ))}
+                      </span>
+                    }
+                  </h3>
+                  {tourName ?
+                    <p id={tourLineId} className="modal-setlist-song-tour">
+                      {tourName}
+                    </p>
+                  : <span id={tourLineId} className="sr-only">
+                      Performances on the same tour as this show.
+                    </span>
+                  }
+                </>
+              : songName ?
                 <>
                   <h3 id={headingId} className="modal-setlist-song-title">
                     <SongDisplayName
@@ -115,22 +182,31 @@ export function WlHomeV2SetlistSongModal({
             </div>
           </div>
           <div className="modal-request-body modal-setlist-song-body">
-            <SetlistSongPerformancesPanel
-              open={open}
-              onDismiss={onClose}
-              entry={entry}
-              tourName={tourName}
-              songName={songNameProp ?? undefined}
-              songDisplayName={songDisplayNameProp ?? undefined}
-              songId={songIdProp ?? undefined}
-              showHeader={false}
-              showFooter={false}
-              wlHomeV2YearsTable
-              className="flex min-h-0 flex-1 flex-col overflow-hidden text-xs"
-            />
+            {multiEntries ?
+              <SetlistSongPerformancesMultiPanel
+                open={open}
+                onDismiss={onClose}
+                entries={uniqueMultiEntries}
+                tourName={tourName}
+                className="flex min-h-0 flex-1 flex-col overflow-hidden text-xs"
+              />
+            : <SetlistSongPerformancesPanel
+                open={open}
+                onDismiss={onClose}
+                entry={activeEntry}
+                tourName={tourName}
+                songName={songNameProp ?? undefined}
+                songDisplayName={songDisplayNameProp ?? undefined}
+                songId={songIdProp ?? undefined}
+                showHeader={false}
+                showFooter={false}
+                wlHomeV2YearsTable
+                className="flex min-h-0 flex-1 flex-col overflow-hidden text-xs"
+              />
+            }
           </div>
           <div className="modal-setlist-song-footer">
-            {songId ?
+            {!multiEntries && songId ?
               <Button
                 type="button"
                 size="sm"

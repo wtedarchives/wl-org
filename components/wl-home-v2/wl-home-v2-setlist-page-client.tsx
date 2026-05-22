@@ -4,11 +4,10 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react"
 import { notFound } from "next/navigation"
 
 import { useAuth } from "@/components/auth-context"
-import { SetlistLoginRequiredDialog } from "@/components/dpro/setlist/setlist-login-required-dialog"
-import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import {
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
 } from "@/components/setlist-breadcrumb-context"
+import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { WlHomeV2SetlistJotyModal } from "@/components/wl-home-v2/wl-home-v2-setlist-joty-modal"
 import { WlHomeV2SetlistSongModal } from "@/components/wl-home-v2/wl-home-v2-setlist-song-modal"
@@ -37,13 +36,20 @@ import { useSetlistReleases } from "@/hooks/use-setlist-releases"
 import { useSetlistScan } from "@/hooks/use-setlist-scan"
 import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
+import { useSongPairs } from "@/hooks/use-song-pairs"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
+import { uniqueWtedEntriesFromPair } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
+import type { SongPair } from "@/types/song-pair"
+
+type SongModalMode = "single" | "multi-section"
 
 export function WlHomeV2SetlistPageClient() {
   const { session } = useAuth()
+  const openLogin = useWlHomeV2OpenLogin()
   const { showId, invalidParams } = useSetlistArchiveShowId()
   const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
+  const { songPairs, loading: songPairsLoading } = useSongPairs()
   const {
     showAdminUi,
     linkCopied,
@@ -74,13 +80,19 @@ export function WlHomeV2SetlistPageClient() {
   const [songModalEntry, setSongModalEntry] = useState<SetlistEntry | null>(
     null,
   )
+  const [songModalEntries, setSongModalEntries] = useState<SetlistEntry[]>([])
+  const [songModalMode, setSongModalMode] = useState<SongModalMode>("single")
+  const [songModalPairAltName, setSongModalPairAltName] = useState<
+    string | null
+  >(null)
   const [wtedModalOpen, setWtedModalOpen] = useState(false)
   const [wtedModalEntry, setWtedModalEntry] = useState<SetlistEntry | null>(
     null,
   )
-  const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
+  const [wtedModalEntryOptions, setWtedModalEntryOptions] = useState<
+    SetlistEntry[] | null
+  >(null)
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
-  const [loginRequiredOpen, setLoginRequiredOpen] = useState(false)
   const [jotyYear, setJotyYear] = useState<number | null>(null)
   const [jotyHighlightedEntryId, setJotyHighlightedEntryId] = useState<
     string | null
@@ -127,9 +139,20 @@ export function WlHomeV2SetlistPageClient() {
   )
 
   const onRatingClick = useCallback(() => {
-    if (session) setRatingModalOpen(true)
-    else setLoginRequiredOpen(true)
-  }, [session])
+    if (session) {
+      setRatingModalOpen(true)
+      return
+    }
+    openLogin?.()
+  }, [session, openLogin])
+
+  const onAttendanceClick = useCallback(() => {
+    if (!session) {
+      openLogin?.()
+      return
+    }
+    void toggle()
+  }, [session, toggle, openLogin])
 
   const handleNumberClick = useCallback(async (entryId: string) => {
     try {
@@ -159,30 +182,74 @@ export function WlHomeV2SetlistPageClient() {
 
   const onSongClick = useCallback((entry: SetlistEntry) => {
     setSongModalEntry(entry)
+    setSongModalEntries([entry])
+    setSongModalMode("single")
+    setSongModalPairAltName(null)
     setSongModalOpen(true)
   }, [])
+
+  const onPairSongClick = useCallback(
+    (entries: SetlistEntry[], pair: SongPair) => {
+      if (entries.length === 0) return
+      setSongModalEntry(null)
+      setSongModalEntries(entries)
+      setSongModalMode("multi-section")
+      setSongModalPairAltName(pair.alt_name?.trim() ?? null)
+      setSongModalOpen(true)
+    },
+    [],
+  )
 
   const onWtedClick = useCallback(
     (entry: SetlistEntry) => {
       if (!session) {
-        setWtedLoginRequiredOpen(true)
+        openLogin?.()
         return
       }
+      setWtedModalEntryOptions(null)
       setWtedModalEntry(entry)
       setWtedModalOpen(true)
     },
-    [session],
+    [session, openLogin],
+  )
+
+  const onPairWtedClick = useCallback(
+    (entries: SetlistEntry[]) => {
+      if (!session) {
+        openLogin?.()
+        return
+      }
+      const options = uniqueWtedEntriesFromPair(entries)
+      if (options.length === 0) return
+      if (options.length === 1) {
+        setWtedModalEntryOptions(null)
+        setWtedModalEntry(options[0]!)
+        setWtedModalOpen(true)
+        return
+      }
+      setWtedModalEntryOptions(options)
+      setWtedModalEntry(options[0]!)
+      setWtedModalOpen(true)
+    },
+    [session, openLogin],
   )
 
   const closeSongModal = useCallback(() => {
     setSongModalOpen(false)
     setSongModalEntry(null)
+    setSongModalEntries([])
+    setSongModalMode("single")
+    setSongModalPairAltName(null)
   }, [])
 
   const closeWtedModal = useCallback(() => {
     setWtedModalOpen(false)
     setWtedModalEntry(null)
+    setWtedModalEntryOptions(null)
   }, [])
+
+  const activeSongModalEntry =
+    songModalMode === "multi-section" ? null : songModalEntry
 
   const openShareExport = useCallback(() => {
     setShareExportBg(pickRandomShareBackground())
@@ -224,7 +291,7 @@ export function WlHomeV2SetlistPageClient() {
 
   if (invalidParams || !showId) notFound()
 
-  if (loading) {
+  if (loading || songPairsLoading) {
     return <WlHomeV2PageLoading message="Loading setlist…" />
   }
 
@@ -237,6 +304,7 @@ export function WlHomeV2SetlistPageClient() {
         show={show}
         showId={showId}
         setlist={setlist}
+        songPairs={songPairs}
         showAdminUi={showAdminUi}
         adminLinkCopied={showAdminUi ? linkCopied : false}
         onAdminCopyShowId={showAdminUi ? handleCopyLink : undefined}
@@ -246,7 +314,9 @@ export function WlHomeV2SetlistPageClient() {
         onNumberClick={showAdminUi ? handleNumberClick : undefined}
         onJotyBadgeClick={onJotyBadgeClick}
         onSongClick={onSongClick}
+        onPairSongClick={onPairSongClick}
         onWtedClick={onWtedClick}
+        onPairWtedClick={onPairWtedClick}
         showPositionInTour={showPositionInTour}
         tourShowNav={showPosition}
         onTourShowSelect={handleShowSelect}
@@ -263,8 +333,7 @@ export function WlHomeV2SetlistPageClient() {
         attendeeCount={attendeeCount}
         attended={attended}
         attendanceToggling={toggling}
-        onAttendanceToggle={toggle}
-        canMarkAttendance={!!session}
+        onAttendanceToggle={onAttendanceClick}
         showLengthRank={showLengthRank}
         showChanges={showChanges}
         showChangesLoading={showChangesLoading}
@@ -301,10 +370,6 @@ export function WlHomeV2SetlistPageClient() {
         onFetchReviews={fetchReviews}
         validateReview={validateReview}
       />
-      <SetlistLoginRequiredDialog
-        open={loginRequiredOpen}
-        onOpenChange={setLoginRequiredOpen}
-      />
       <WlHomeV2SetlistJotyModal
         open={jotyModalOpen}
         onClose={() => setJotyModalOpen(false)}
@@ -315,20 +380,20 @@ export function WlHomeV2SetlistPageClient() {
       <WlHomeV2SetlistSongModal
         open={songModalOpen}
         onClose={closeSongModal}
-        entry={songModalEntry}
+        entry={activeSongModalEntry}
+        entries={
+          songModalMode === "multi-section" ? songModalEntries : undefined
+        }
+        pairAltName={songModalPairAltName}
         tourName={show.show_tour}
         headingId={songModalHeadingId}
         tourLineId={songModalTourId}
-      />
-      <SetlistWtedLoginRequiredDialog
-        open={wtedLoginRequiredOpen}
-        onOpenChange={setWtedLoginRequiredOpen}
-        wlHomeV2
       />
       <WlHomeV2SetlistWtedModal
         open={wtedModalOpen}
         onClose={closeWtedModal}
         entry={wtedModalEntry}
+        wtedEntryOptions={wtedModalEntryOptions}
         setlist={setlist}
         show={wtedModalShow}
         fallbackReleaseArtwork={fallbackWtedArtwork}

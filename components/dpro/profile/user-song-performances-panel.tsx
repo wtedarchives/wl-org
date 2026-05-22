@@ -15,39 +15,54 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { useSongTourPerformances } from "@/hooks/use-song-tour-performances"
 import { SongDisplayName } from "@/components/dpro/song-display-name"
+import { useSongUserPerformances } from "@/hooks/use-song-user-performances"
 import { cn } from "@/lib/utils"
 
-import type { SetlistSongPerformancesPanelProps } from "@/components/dpro/setlist/setlist-song-performances-panel.props"
+import type { ReactNode } from "react"
 
-export type { SetlistSongPerformancesPanelProps } from "@/components/dpro/setlist/setlist-song-performances-panel.props"
+export interface UserSongPerformancesPanelProps {
+  /** When false, user-performance fetch stays idle. */
+  open: boolean
+  /** Called when a navigation link should close the shell (drawer/modal). */
+  onDismiss: () => void
+  songName: string | null
+  songDisplayName?: string | null
+  songId?: string | null
+  userId: string | null
+  attendedShowIds: string[]
+  /** e.g. "Your shows" or "Attended shows". Shown in header when `showHeader`. */
+  scopeLabel?: string | null
+  closeControl?: ReactNode
+  className?: string
+  showHeader?: boolean
+  showFooter?: boolean
+  wlHomeV2YearsTable?: boolean
+}
 
 /**
- * Tour performances table + header/footer — shared by {@link SetlistSongPerformancesSheet}
- * and WL Home v2 setlist song modal.
+ * Attended-show performances table — shared by profile song drawer/modal shells.
  */
-export function SetlistSongPerformancesPanel({
+export function UserSongPerformancesPanel({
   open,
   onDismiss,
-  entry,
-  tourName,
-  songName: songNameProp,
-  songDisplayName: songDisplayNameProp,
-  songId: songIdProp,
+  songName,
+  songDisplayName,
+  songId,
+  userId,
+  attendedShowIds,
+  scopeLabel,
   closeControl,
   className,
   showHeader = true,
   showFooter = true,
   wlHomeV2YearsTable = false,
-}: SetlistSongPerformancesPanelProps) {
-  const songName = songNameProp ?? entry?.entry_song ?? ""
-  const songId = songIdProp ?? entry?.song_id ?? null
-
-  const { performances, loading, error } = useSongTourPerformances(
+}: UserSongPerformancesPanelProps) {
+  const { performances, loading, error } = useSongUserPerformances(
     open,
-    songName || null,
-    tourName,
+    songName,
+    userId,
+    attendedShowIds,
   )
 
   return (
@@ -64,14 +79,12 @@ export function SetlistSongPerformancesPanel({
               <p className="text-sm font-medium text-foreground">
                 <SongDisplayName
                   song={songName}
-                  songDisplayName={
-                    songDisplayNameProp ?? entry?.songs?.song_displayname
-                  }
+                  songDisplayName={songDisplayName}
                 />
               </p>
-              {tourName ?
+              {scopeLabel ?
                 <p className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  {tourName}
+                  {scopeLabel}
                 </p>
               : null}
             </div>
@@ -101,7 +114,7 @@ export function SetlistSongPerformancesPanel({
               : "text-muted-foreground",
             )}
           >
-            Select a song in the setlist to view its tour performances.
+            Select a song to view its performances at attended shows.
           </p>
         : loading ?
           <div
@@ -122,7 +135,7 @@ export function SetlistSongPerformancesPanel({
               wlHomeV2YearsTable ? "text-white/55" : "text-muted-foreground",
             )}
           >
-            No performances of this song were found in this tour.
+            No performances of this song were found at attended shows.
           </p>
         : <div className="w-full overflow-x-auto">
             <Table

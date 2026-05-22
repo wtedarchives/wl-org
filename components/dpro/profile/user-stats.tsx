@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useId, useState, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
 
 import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { ProfileStatBox } from "@/components/dpro/profile/profile-stat-box"
-import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
+import { WlHomeV2UserSongModal } from "@/components/wl-home-v2/wl-home-v2-user-song-modal"
 import { useUserShows } from "@/hooks/use-user-shows"
 import { useUserStats } from "@/hooks/use-user-stats"
 import { getProfileUserStatCategoryClass } from "@/lib/profile-user-stat-wl-category"
@@ -34,12 +34,14 @@ export function UserStats({
   overviewColumnLayout = false,
 }: UserStatsProps) {
   const [username, setUsername] = useState<string | null>(null)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [sheetSongName, setSheetSongName] = useState<string | null>(null)
-  const [sheetSongDisplayName, setSheetSongDisplayName] = useState<
+  const [songModalOpen, setSongModalOpen] = useState(false)
+  const [songModalSongName, setSongModalSongName] = useState<string | null>(null)
+  const [songModalSongDisplayName, setSongModalSongDisplayName] = useState<
     string | null
   >(null)
-  const [sheetSongId, setSheetSongId] = useState<string | null>(null)
+  const [songModalSongId, setSongModalSongId] = useState<string | null>(null)
+  const userSongModalHeadingId = useId()
+  const userSongModalScopeLineId = useId()
 
   const { shows } = useUserShows(effectiveUserId)
   const attendedShowIds = useMemo(
@@ -52,10 +54,10 @@ export function UserStats({
     songDisplayName?: string | null,
     songId?: string,
   ) => {
-    setSheetSongName(songName)
-    setSheetSongDisplayName(songDisplayName ?? null)
-    setSheetSongId(songId ?? null)
-    setSheetOpen(true)
+    setSongModalSongName(songName)
+    setSongModalSongDisplayName(songDisplayName ?? null)
+    setSongModalSongId(songId ?? null)
+    setSongModalOpen(true)
   }
 
   const {
@@ -186,13 +188,15 @@ export function UserStats({
     )
   }
 
-  const sheet = (
-    <UserSongPerformancesSheet
-      open={sheetOpen}
-      onOpenChange={setSheetOpen}
-      songName={sheetSongName}
-      songDisplayName={sheetSongDisplayName}
-      songId={sheetSongId}
+  const songModal = (
+    <WlHomeV2UserSongModal
+      open={songModalOpen}
+      onClose={() => setSongModalOpen(false)}
+      headingId={userSongModalHeadingId}
+      scopeLineId={userSongModalScopeLineId}
+      songName={songModalSongName}
+      songDisplayName={songModalSongDisplayName}
+      songId={songModalSongId}
       userId={effectiveUserId}
       attendedShowIds={attendedShowIds}
       isOwnProfile={isOwnProfile}
@@ -228,7 +232,9 @@ export function UserStats({
               <ProfileStatBox
                 stat={stat}
                 showCopyButton={showCopyButton}
-                onSongClick={handleSongClick}
+                onSongClick={
+                  stat.type === "notSeenSongs" ? undefined : handleSongClick
+                }
                 variant="wlPanel"
                 isOwnProfile={isOwnProfile}
                 showCategorySwatch={!OVERVIEW_STAT_NO_SWATCH.has(stat.type)}
@@ -241,7 +247,7 @@ export function UserStats({
             </div>
           ))}
         </div>
-        {sheet}
+        {songModal}
       </>
     )
   }
@@ -260,12 +266,14 @@ export function UserStats({
             <ProfileStatBox
               stat={stat}
               showCopyButton={showCopyButton}
-              onSongClick={handleSongClick}
+              onSongClick={
+                stat.type === "notSeenSongs" ? undefined : handleSongClick
+              }
             />
           </div>
         ))}
       </div>
-      {sheet}
+      {songModal}
     </>
   )
 }

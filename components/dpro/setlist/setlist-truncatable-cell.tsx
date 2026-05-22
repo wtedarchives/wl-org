@@ -5,7 +5,6 @@ import {
   isValidElement,
   useCallback,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
   type ReactElement,
@@ -25,27 +24,8 @@ function withPersonnelNowrap(children: ReactNode, nowrap: boolean): ReactNode {
 }
 
 /**
- * One-line collapsed coach preview (no HTML). Rich markup stacks/wraps unpredictably; plain text
- * matches personnel’s single-line strip + fade + plus.
+ * One-line collapsed coach preview when `collapseHtml` is not used (plain text fallback).
  */
-function stripCoachNotesToPlainText(html: string): string {
-  let s = html
-  s = s.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-  s = s.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-  s = s.replace(/<br\s*\/?>/gi, " ")
-  s = s.replace(/<\/(p|div|h[1-6]|li|tr|blockquote)>/gi, " ")
-  s = s.replace(/<[^>]+>/g, "")
-  s = s
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
-    .replace(/&#x([\da-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
-  return s.replace(/\s+/g, " ").trim()
-}
-
 const COACH_COLLAPSED_PLAIN_TYPO =
   "block min-w-0 max-w-full text-[10px] leading-2.5 text-muted-foreground whitespace-nowrap break-normal text-clip"
 
@@ -92,15 +72,34 @@ type SetlistTruncatableCellProps = {
    * Merged with `COACH_COLLAPSED_PLAIN_TYPO` when `variant="block"` (collapsed strip + measure).
    */
   blockPlainClassName?: string
+  /** Classes for collapsed HTML strip (`collapseHtml`); defaults to coach block + `blockPlainClassName`. */
+  collapseHtmlClassName?: string
+  /** Classes for full-width inline collapsed HTML (external expand, no clip). */
+  collapseHtmlInlineClassName?: string
   /**
-   * When `variant="block"`, plain text for collapsed row + measure (HTML stripped). Expanded still uses `children`.
+   * When `variant="block"`, plain text for collapsed row + measure (HTML stripped). Ignored when
+   * `collapseHtml` is set — then collapsed strip renders HTML (preserves pills, links, markup).
    */
   plainCollapsedText?: string
+  /** When `variant="block"`, render this HTML in the collapsed strip (one-line clip) and for measure. */
+  collapseHtml?: string
   /**
    * Fires when the collapsed truncated state is active (`needsMore && !expanded`).
    * Parent table cells can switch `vertical-align` so the strip is centered in tall rows.
    */
   onTruncatedCollapsedChange?: (isTruncatedCollapsed: boolean) => void
+  /**
+   * When true, keep the collapsed preview (plain / `collapseHtml`) until the user expands,
+   * even if the content fits without horizontal truncation.
+   */
+  forceCollapsedPreview?: boolean
+  /**
+   * When set, the expand control calls this instead of revealing inline content
+   * (e.g. pair rows: split into individual song rows).
+   */
+  onExpandClick?: () => void
+  /** When true, render expanded content on first mount (e.g. after pair split from coach notes). */
+  defaultExpanded?: boolean
 }
 
 /**
@@ -117,12 +116,26 @@ export function SetlistTruncatableCell({
   className,
   blockPlainClassName,
   plainCollapsedText = "",
+  collapseHtml,
+  collapseHtmlClassName,
+  collapseHtmlInlineClassName,
   onTruncatedCollapsedChange,
+  forceCollapsedPreview = false,
+  onExpandClick,
+  defaultExpanded = false,
 }: SetlistTruncatableCellProps) {
+  const useExternalExpand = !!onExpandClick
   const blockPlain = cn(COACH_COLLAPSED_PLAIN_TYPO, blockPlainClassName)
+  const blockCollapseHtmlClass =
+    collapseHtmlClassName ??
+    cn(COACH_BLOCK_TYPO, blockPlainClassName, "whitespace-nowrap")
+  const blockCollapseInlineClass =
+    collapseHtmlInlineClassName ??
+    cn(COACH_BLOCK_TYPO, blockPlainClassName)
+  const useCollapseHtml = variant === "block" && !!collapseHtml?.trim()
   const measureRef = useRef<HTMLDivElement>(null)
   const [needsMore, setNeedsMore] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
   const measure = useCallback(() => {
     const el = measureRef.current
@@ -138,7 +151,7 @@ export function SetlistTruncatableCell({
 
   useLayoutEffect(() => {
     measure()
-  }, [measureKey, measure, children, plainCollapsedText])
+  }, [measureKey, measure, children, plainCollapsedText, collapseHtml, useCollapseHtml])
 
   useLayoutEffect(() => {
     const el = measureRef.current
@@ -148,14 +161,24 @@ export function SetlistTruncatableCell({
     return () => ro.disconnect()
   }, [measure])
 
-  const isTruncatedCollapsed = needsMore && !expanded
+  const isTruncatedCollapsed =
+    useExternalExpand ? needsMore : (needsMore || forceCollapsedPreview) && !expanded
   useLayoutEffect(() => {
     onTruncatedCollapsedChange?.(isTruncatedCollapsed)
   }, [isTruncatedCollapsed, onTruncatedCollapsedChange])
 
+  const showCollapsedPreview =
+    useExternalExpand ? needsMore : !expanded && (needsMore || forceCollapsedPreview)
+  const showExpandControl = showCollapsedPreview && needsMore
+  const showFullInline = useExternalExpand ? !needsMore : !showCollapsedPreview
+
   const expand = useCallback(() => {
+    if (onExpandClick) {
+      onExpandClick()
+      return
+    }
     setExpanded(true)
-  }, [])
+  }, [onExpandClick])
 
   const collapsedOuterStyle = {
     height: SETLIST_TRUNC_COLLAPSED_ROW_PX,
@@ -167,7 +190,7 @@ export function SetlistTruncatableCell({
       className={cn(
         "min-w-0",
         maxWidthClass,
-        needsMore ? "w-full" : "w-max",
+        needsMore || (!useExternalExpand && expanded) ? "w-full" : "w-max",
         className,
       )}
     >
@@ -181,16 +204,22 @@ export function SetlistTruncatableCell({
       >
         {variant === "pills" ?
           withPersonnelNowrap(children, true)
+        : useCollapseHtml ?
+          <div
+            className={blockCollapseHtmlClass}
+            dangerouslySetInnerHTML={{ __html: collapseHtml!.trim() }}
+          />
         : <div className={blockPlain}>{plainCollapsedText}</div>}
       </div>
 
-      {needsMore && !expanded ?
+      {showCollapsedPreview ?
         <div
           className={cn(
             "flex min-w-0 items-center gap-1 overflow-hidden transition-[max-height] duration-200 ease-out",
-            variant === "block" && "min-h-[24.5px]",
           )}
-          style={variant === "pills" ? collapsedOuterStyle : undefined}
+          style={
+            variant === "pills" ? collapsedOuterStyle : undefined
+          }
         >
           <div className="flex min-h-0 min-w-0 flex-1 items-center overflow-hidden">
             {variant === "pills" ?
@@ -200,6 +229,16 @@ export function SetlistTruncatableCell({
               >
                 {withPersonnelNowrap(children, true)}
               </div>
+            : useCollapseHtml ?
+              <div
+                className="max-h-[1lh] min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden"
+                style={COLLAPSED_RIGHT_FADE_MASK_STYLE}
+              >
+                <div
+                  className={blockCollapseHtmlClass}
+                  dangerouslySetInnerHTML={{ __html: collapseHtml!.trim() }}
+                />
+              </div>
             : <div
                 className="max-h-[1lh] min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden"
                 style={COLLAPSED_RIGHT_FADE_MASK_STYLE}
@@ -207,27 +246,36 @@ export function SetlistTruncatableCell({
                 <div className={blockPlain}>{plainCollapsedText}</div>
               </div>}
           </div>
-          <button
-            type="button"
-            className={EXPAND_BUTTON_CLASS}
-            onClick={expand}
-            aria-expanded={false}
-            aria-label={expandLabel}
+          {showExpandControl ?
+            <button
+              type="button"
+              className={EXPAND_BUTTON_CLASS}
+              onClick={expand}
+              aria-expanded={false}
+              aria-label={expandLabel}
+            >
+              <Plus className="size-3.5 text-black" weight="bold" aria-hidden />
+            </button>
+          : null}
+        </div>
+      : showFullInline ?
+        useExternalExpand && useCollapseHtml ?
+          <div
+            className={blockCollapseInlineClass}
+            dangerouslySetInnerHTML={{ __html: collapseHtml!.trim() }}
+          />
+        : <div
+            className={cn(
+              "transition-[max-height] duration-200 ease-out",
+              (needsMore || forceCollapsedPreview) && expanded && "min-h-0 py-0.75",
+              expanded && variant === "block" && "w-full min-w-0",
+            )}
           >
-            <Plus className="size-3.5 text-black" weight="bold" aria-hidden />
-          </button>
-        </div>
-      : <div
-          className={cn(
-            "transition-[max-height] duration-200 ease-out",
-            needsMore && expanded && "min-h-0 py-0.75",
-          )}
-        >
-          {variant === "pills" ?
-            withPersonnelNowrap(children, false)
-          : <div className="w-full min-w-0">{children}</div>}
-        </div>
-      }
+            {variant === "pills" ?
+              withPersonnelNowrap(children, false)
+            : <div className="w-full min-w-0">{children}</div>}
+          </div>
+      : null}
     </div>
   )
 }
@@ -238,25 +286,36 @@ export function SetlistTruncatableHtmlCell({
   measureWidthClass,
   measureKey,
   html,
+  collapsedHtml,
   expandLabel,
   className,
   htmlContentClassName,
+  collapsedHtmlContentClassName,
   blockPlainClassName,
+  plainCollapsedText,
+  forceCollapsedPreview,
+  onExpandClick,
+  defaultExpanded,
   onTruncatedCollapsedChange,
-}: Omit<SetlistTruncatableCellProps, "children" | "variant" | "plainCollapsedText"> & {
+}: Omit<SetlistTruncatableCellProps, "children" | "variant"> & {
   html: string
+  /** Collapsed one-line preview; defaults to `html` when omitted. */
+  collapsedHtml?: string
   /** Merged with the coach HTML block (e.g. `!text-sm` to match 14px body). */
   htmlContentClassName?: string
+  collapsedHtmlContentClassName?: string
 }) {
-  const plainCollapsedText = useMemo(
-    () => stripCoachNotesToPlainText(html),
-    [html],
-  )
+  const trimmedHtml = html.trim()
+  const trimmedCollapsedHtml = (collapsedHtml ?? html).trim()
+  const collapsedPlain = plainCollapsedText?.trim() ?? ""
+  const usePlainCollapsed = collapsedPlain.length > 0
+  const collapsedNotesClass =
+    collapsedHtmlContentClassName ?? htmlContentClassName
 
   const content = (
     <div
       className={cn(COACH_BLOCK_TYPO, htmlContentClassName)}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: trimmedHtml }}
     />
   )
 
@@ -269,8 +328,18 @@ export function SetlistTruncatableHtmlCell({
       variant="block"
       className={className}
       blockPlainClassName={blockPlainClassName}
-      plainCollapsedText={plainCollapsedText}
+      plainCollapsedText={collapsedPlain}
+      collapseHtml={usePlainCollapsed ? undefined : trimmedCollapsedHtml}
+      collapseHtmlClassName={cn(
+        COACH_BLOCK_TYPO,
+        collapsedNotesClass,
+        "whitespace-nowrap",
+      )}
+      collapseHtmlInlineClassName={cn(COACH_BLOCK_TYPO, collapsedNotesClass)}
       onTruncatedCollapsedChange={onTruncatedCollapsedChange}
+      forceCollapsedPreview={forceCollapsedPreview}
+      onExpandClick={onExpandClick}
+      defaultExpanded={defaultExpanded}
     >
       {content}
     </SetlistTruncatableCell>

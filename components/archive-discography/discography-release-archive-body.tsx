@@ -25,6 +25,7 @@ import {
   WlHomeV2ArchiveCrumbsTrail,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
+import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { DiscographyReleaseArchiveHero } from "@/components/archive-discography/discography-release-archive-hero"
 import { DiscographyReleaseArchiveLoading } from "@/components/archive-discography/discography-release-archive-loading"
 import { DiscographyReleaseArchiveTrackSection } from "@/components/archive-discography/discography-release-archive-track-section"
@@ -61,6 +62,7 @@ export function DiscographyReleaseArchiveBody({
   const router = useRouter()
   const { session } = useAuth()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
+  const openLogin = useWlHomeV2OpenLogin()
   const wtedModalHeadingId = useId()
   const [releaseArtworkFailed, setReleaseArtworkFailed] = useState(false)
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
@@ -196,7 +198,11 @@ export function DiscographyReleaseArchiveBody({
       router.push(getSongArchiveUrl(entry.song_id)),
     onWtedClick: (entry: SetlistEntry) => {
       if (!session) {
-        setWtedLoginRequiredOpen(true)
+        if (wlHomeV2Shell) {
+          openLogin?.()
+        } else {
+          setWtedLoginRequiredOpen(true)
+        }
         return
       }
       setWtedSheetEntry(entry)
@@ -227,11 +233,12 @@ export function DiscographyReleaseArchiveBody({
         onReleaseHover={setHoveredReleaseId}
       />
 
-      <SetlistWtedLoginRequiredDialog
-        open={wtedLoginRequiredOpen}
-        onOpenChange={setWtedLoginRequiredOpen}
-        wlHomeV2={wlHomeV2Shell}
-      />
+      {!wlHomeV2Shell ?
+        <SetlistWtedLoginRequiredDialog
+          open={wtedLoginRequiredOpen}
+          onOpenChange={setWtedLoginRequiredOpen}
+        />
+      : null}
       {wlHomeV2Shell ?
         <WlHomeV2SetlistWtedModal
           open={wtedSheetOpen}

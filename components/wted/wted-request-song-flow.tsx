@@ -4,6 +4,7 @@ import { useCallback, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
+import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { WtedRequestSongCustomPanel } from "@/components/wted/wted-request-song-custom-panel"
 import { useWtedRadioIdsCatalog } from "@/hooks/use-wted-radio-ids-catalog"
@@ -46,6 +47,7 @@ export function WtedRequestSongFlow({
   wlHomeV2LoginDialog?: boolean
 }) {
   const { session } = useAuth()
+  const openLogin = useWlHomeV2OpenLogin()
   const catalogQueryEnabled = catalogFetchEnabled
   const { rows, loading, error } = useWtedRadioIdsCatalog(catalogQueryEnabled)
   const catalogDeferred = !catalogFetchEnabled
@@ -65,7 +67,11 @@ export function WtedRequestSongFlow({
   const openRequestSheet = useCallback(
     async (row: WtedRadioIdRow) => {
       if (!session) {
-        setWtedLoginRequiredOpen(true)
+        if (wlHomeV2LoginDialog) {
+          openLogin?.()
+        } else {
+          setWtedLoginRequiredOpen(true)
+        }
         return
       }
       const art = wtedRadioIdsRowArtworkUrl(row)
@@ -110,7 +116,7 @@ export function WtedRequestSongFlow({
         setBusyRadioId(null)
       }
     },
-    [session],
+    [session, wlHomeV2LoginDialog, openLogin],
   )
 
   return (
@@ -131,11 +137,12 @@ export function WtedRequestSongFlow({
         />
       </div>
 
-      <SetlistWtedLoginRequiredDialog
-        open={wtedLoginRequiredOpen}
-        onOpenChange={setWtedLoginRequiredOpen}
-        wlHomeV2={wlHomeV2LoginDialog}
-      />
+      {!wlHomeV2LoginDialog ?
+        <SetlistWtedLoginRequiredDialog
+          open={wtedLoginRequiredOpen}
+          onOpenChange={setWtedLoginRequiredOpen}
+        />
+      : null}
       <SetlistWtedSheet
         open={wtedSheetOpen}
         onOpenChange={(open) => {

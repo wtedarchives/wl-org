@@ -33,6 +33,7 @@ import {
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
+import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { useSetlistData } from "@/hooks/use-setlist-data"
 import { useSongData } from "@/hooks/use-song-data"
@@ -47,6 +48,7 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
   const { session } = useAuth()
   const songPerfWtedModalHeadingId = useId()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
+  const openLogin = useWlHomeV2OpenLogin()
   const { songs: archiveSongs } = useSongsArchiveData()
 
   const {
@@ -72,9 +74,6 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
 
   const [songPerfWtedModal, setSongPerfWtedModal] =
     useState<SongArchivePerformanceWtedPayload | null>(null)
-  const [perfTableWtedLoginRequiredOpen, setPerfTableWtedLoginRequiredOpen] =
-    useState(false)
-
   const { setlist: perfTableWtedAnchorSetlist } = useSetlistData(
     songPerfWtedModal?.entry.entry_show,
   )
@@ -109,12 +108,12 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
   const onPerfTableWtedPayloadClick = useCallback(
     (payload: SongArchivePerformanceWtedPayload) => {
       if (!session) {
-        setPerfTableWtedLoginRequiredOpen(true)
+        openLogin?.()
         return
       }
       setSongPerfWtedModal(payload)
     },
-    [session],
+    [session, openLogin],
   )
 
   const closePerfTableWtedModal = useCallback(() => {
@@ -382,8 +381,6 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
         setSearchQuery={setSearchQuery}
         searchHits={searchHits}
         searchInputRef={searchInputRef}
-        perfTableWtedLoginRequiredOpen={perfTableWtedLoginRequiredOpen}
-        setPerfTableWtedLoginRequiredOpen={setPerfTableWtedLoginRequiredOpen}
         songPerfWtedModalOpen={songPerfWtedModalOpen}
         closePerfTableWtedModal={closePerfTableWtedModal}
         songPerfWtedModal={songPerfWtedModal}

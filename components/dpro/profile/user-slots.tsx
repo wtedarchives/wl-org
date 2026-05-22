@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useId, useState, type ReactNode } from "react"
 import { supabase } from "@/lib/supabase"
 import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
-import { UserSongPerformancesSheet } from "@/components/dpro/profile/user-song-performances-sheet"
+import { WlHomeV2UserSongModal } from "@/components/wl-home-v2/wl-home-v2-user-song-modal"
 import { useUserSlots } from "@/hooks/use-user-slots"
 import type { SlotShowData } from "@/types/tour"
 import {
@@ -36,12 +36,14 @@ export function UserSlots({
   isOwnProfile,
 }: UserSlotsProps) {
   const [username, setUsername] = useState<string | null>(null)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [sheetSongName, setSheetSongName] = useState<string | null>(null)
-  const [sheetSongDisplayName, setSheetSongDisplayName] = useState<
+  const [songModalOpen, setSongModalOpen] = useState(false)
+  const [songModalSongName, setSongModalSongName] = useState<string | null>(null)
+  const [songModalSongDisplayName, setSongModalSongDisplayName] = useState<
     string | null
   >(null)
-  const [sheetSongId, setSheetSongId] = useState<string | null>(null)
+  const [songModalSongId, setSongModalSongId] = useState<string | null>(null)
+  const userSongModalHeadingId = useId()
+  const userSongModalScopeLineId = useId()
 
   const {
     slots,
@@ -74,12 +76,12 @@ export function UserSlots({
     songName: string,
     songDisplayName?: string | null,
   ) => {
-    setSheetSongName(songName)
-    setSheetSongDisplayName(
+    setSongModalSongName(songName)
+    setSongModalSongDisplayName(
       songDisplayName ?? songDisplayNameMap[songName] ?? null,
     )
-    setSheetSongId(songIdMap[songName] ?? null)
-    setSheetOpen(true)
+    setSongModalSongId(songIdMap[songName] ?? null)
+    setSongModalOpen(true)
   }
 
   if (!effectiveUserId) {
@@ -124,12 +126,14 @@ export function UserSlots({
         />
       </div>
 
-      <UserSongPerformancesSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        songName={sheetSongName}
-        songDisplayName={sheetSongDisplayName}
-        songId={sheetSongId}
+      <WlHomeV2UserSongModal
+        open={songModalOpen}
+        onClose={() => setSongModalOpen(false)}
+        headingId={userSongModalHeadingId}
+        scopeLineId={userSongModalScopeLineId}
+        songName={songModalSongName}
+        songDisplayName={songModalSongDisplayName}
+        songId={songModalSongId}
         userId={effectiveUserId}
         attendedShowIds={attendedShowIds}
         isOwnProfile={isOwnProfile}

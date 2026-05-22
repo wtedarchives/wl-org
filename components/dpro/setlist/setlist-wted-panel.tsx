@@ -26,6 +26,8 @@ export interface SetlistWtedPanelProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   entry: SetlistEntry | null
+  /** When multiple unique WTED songs (e.g. song pair), user picks which to request. */
+  wtedEntryOptions?: SetlistEntry[] | null
   setlist: SetlistEntry[]
   show: SetlistWtedShowContext
   fallbackReleaseArtwork: string | null
@@ -39,17 +41,38 @@ export function SetlistWtedPanel({
   open,
   onOpenChange,
   entry,
+  wtedEntryOptions = null,
   setlist,
   show,
   fallbackReleaseArtwork,
   variant,
   scrollClassName,
 }: SetlistWtedPanelProps) {
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedEntryId(null)
+      return
+    }
+    if (wtedEntryOptions && wtedEntryOptions.length > 0) {
+      setSelectedEntryId(wtedEntryOptions[0]!.entry_id)
+    } else {
+      setSelectedEntryId(null)
+    }
+  }, [open, entry?.entry_id, wtedEntryOptions])
+
+  const activeEntry =
+    wtedEntryOptions && wtedEntryOptions.length > 1 ?
+      wtedEntryOptions.find((e) => e.entry_id === selectedEntryId) ??
+      wtedEntryOptions[0] ??
+      entry
+    : entry
   const groupEntries = useMemo(
-    () => getWtedEntriesForRadioGroup(setlist, entry),
-    [setlist, entry],
+    () => getWtedEntriesForRadioGroup(setlist, activeEntry),
+    [setlist, activeEntry],
   )
-  const artworkEntry = groupEntries[0] ?? entry
+  const artworkEntry = groupEntries[0] ?? activeEntry
   const { releaseArtwork, artworkLoading } = useWtedEntryReleaseArtwork(
     artworkEntry,
     open,
@@ -79,7 +102,7 @@ export function SetlistWtedPanel({
 
   useEffect(() => {
     setSuppressAlreadyRequestedBannerRadioId(null)
-  }, [entry?.radio_id])
+  }, [activeEntry?.radio_id])
 
   useEffect(() => {
     if (!open) {
@@ -132,15 +155,15 @@ export function SetlistWtedPanel({
     requests.map((r) => String(r.radio_id)),
   )
   const canRequestThisEntry =
-    entry &&
-    entry.radio_id &&
+    activeEntry &&
+    activeEntry.radio_id &&
     hasOpenSlot &&
-    !alreadyRequestedRadioIds.has(String(entry.radio_id)) &&
+    !alreadyRequestedRadioIds.has(String(activeEntry.radio_id)) &&
     canRequestByTime
   const requestWaitSeconds = Math.ceil(requestWaitMs / 1000)
 
   const handleRequest = useCallback(async () => {
-    if (!entry || !accessToken || !canRequestThisEntry) return
+    if (!activeEntry || !accessToken || !canRequestThisEntry) return
     setSubmitting(true)
     setSubmitError(null)
     try {
@@ -155,13 +178,13 @@ export function SetlistWtedPanel({
           Authorization: `Bearer ${accessToken}`,
           ...(anon ? { apikey: anon } : {}),
         },
-        body: JSON.stringify({ radio_id: String(entry.radio_id) }),
+        body: JSON.stringify({ radio_id: String(activeEntry.radio_id) }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         throw new Error(data.error ?? "Failed to submit request")
       }
-      setSuppressAlreadyRequestedBannerRadioId(String(entry.radio_id))
+      setSuppressAlreadyRequestedBannerRadioId(String(activeEntry.radio_id))
       setLastRequestTime(Date.now())
       await refetch()
     } catch (err) {
@@ -171,7 +194,7 @@ export function SetlistWtedPanel({
     } finally {
       setSubmitting(false)
     }
-  }, [entry, accessToken, canRequestThisEntry, refetch])
+  }, [activeEntry, accessToken, canRequestThisEntry, refetch])
 
   const buildSlots = (): WtedPanelSlot[] => {
     const slots: WtedPanelSlot[] = []
@@ -180,9 +203,9 @@ export function SetlistWtedPanel({
         slots.push({ type: "request", request: requests[i] })
       } else if (
         i === requests.length &&
-        entry?.radio_id &&
+        activeEntry?.radio_id &&
         hasOpenSlot &&
-        !alreadyRequestedRadioIds.has(String(entry.radio_id)) &&
+        !alreadyRequestedRadioIds.has(String(activeEntry.radio_id)) &&
         canRequestByTime
       ) {
         slots.push({ type: "pending", groupEntries })
@@ -209,10 +232,10 @@ export function SetlistWtedPanel({
 
   const bannerAlreadyRequested =
     !!(
-      entry &&
-      entry.radio_id &&
-      alreadyRequestedRadioIds.has(String(entry.radio_id)) &&
-      suppressAlreadyRequestedBannerRadioId !== String(entry.radio_id)
+      activeEntry &&
+      activeEntry.radio_id &&
+      alreadyRequestedRadioIds.has(String(activeEntry.radio_id)) &&
+      suppressAlreadyRequestedBannerRadioId !== String(activeEntry.radio_id)
     )
 
   const filteredSlots = slots.filter(
@@ -240,6 +263,9 @@ export function SetlistWtedPanel({
       submitError={submitError}
       requestWaitSeconds={requestWaitSeconds}
       onOpenChange={onOpenChange}
+      wtedEntryOptions={wtedEntryOptions}
+      selectedEntryId={selectedEntryId}
+      onSelectEntryId={setSelectedEntryId}
     />
   )
 

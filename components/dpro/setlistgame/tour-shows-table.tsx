@@ -151,6 +151,7 @@ export function TourShowsTable({ gameShows }: TourShowsTableProps) {
                 getOverUnderTextColor(
                   show.averageOverUnder,
                   show.show_scored ?? false,
+                  wlV2,
                 ),
               )}
             >

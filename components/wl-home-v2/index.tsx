@@ -39,6 +39,7 @@ import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
+import { WlHomeV2OpenLoginContext } from "./wl-home-v2-open-login-context"
 import {
   pickWlHomeTickerPhraseQuad,
   WL_HOME_V2_TICKER_RANDOM_PHRASES,
@@ -120,6 +121,10 @@ export function WlHomeV2({
 
   const openArchiveHub = useCallback(() => {
     setArchiveOpen(true)
+  }, [])
+
+  const openLogin = useCallback(() => {
+    setLoginOpen(true)
   }, [])
 
   const openRadioScheduleShare = useCallback(() => {
@@ -256,6 +261,7 @@ export function WlHomeV2({
 
   return (
     <SetlistBreadcrumbProvider>
+      <WlHomeV2OpenLoginContext.Provider value={openLogin}>
       <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
         <div className="wl-home-v2">
         <div className="wl-home-v2__stack">
@@ -413,6 +419,7 @@ export function WlHomeV2({
 
       </div>
         </WlHomeV2OpenArchiveHubContext.Provider>
+      </WlHomeV2OpenLoginContext.Provider>
     </SetlistBreadcrumbProvider>
   )
 }

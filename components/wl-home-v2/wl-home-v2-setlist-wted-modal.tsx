@@ -17,6 +17,8 @@ type WlHomeV2SetlistWtedModalProps = {
   open: boolean
   onClose: () => void
   entry: SetlistEntry | null
+  /** Unique WTED-linked entries when a song pair has multiple radio IDs. */
+  wtedEntryOptions?: SetlistEntry[] | null
   setlist: SetlistEntry[]
   show: SetlistWtedShowContext
   fallbackReleaseArtwork: string | null
@@ -31,6 +33,7 @@ export function WlHomeV2SetlistWtedModal({
   open,
   onClose,
   entry,
+  wtedEntryOptions = null,
   setlist,
   show,
   fallbackReleaseArtwork,
@@ -91,6 +94,7 @@ export function WlHomeV2SetlistWtedModal({
               open={open}
               onOpenChange={onOpenChange}
               entry={entry}
+              wtedEntryOptions={wtedEntryOptions}
               setlist={setlist}
               show={show}
               fallbackReleaseArtwork={fallbackReleaseArtwork}
