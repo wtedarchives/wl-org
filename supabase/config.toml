@@ -17,6 +17,10 @@ verify_jwt = false
 [functions.user-attendance]
 verify_jwt = false
 
+# Wysteria JWT verified inside the function (not a Supabase Auth token).
+[functions.ranking-engine]
+verify_jwt = false
+
 # Public image proxy with strict upstream allowlist (anon invoke via fetch + apikey headers).
 [functions.schedule-share-image-proxy]
 verify_jwt = false

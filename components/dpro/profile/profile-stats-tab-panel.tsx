@@ -11,6 +11,7 @@ import { UserSlots } from "@/components/dpro/profile/user-slots"
 import { UserPersonnel } from "@/components/dpro/profile/user-personnel"
 import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
 import { ProfileSongsTabContent } from "@/components/dpro/profile/profile-songs-tab-content"
+import { SongRankings } from "@/components/dpro/profile/song-rankings"
 import type { ProfileStatsTabSlug } from "@/components/dpro/profile/profile-stats-tab-config"
 
 import "./profile-overview-tab.css"
@@ -18,6 +19,7 @@ import "./profile-shows-tab.css"
 import "./profile-slots-tab.css"
 import "./profile-personnel-tab.css"
 import "./profile-loose-ends-tab.css"
+import "./profile-rankings-tab.css"
 
 export interface ProfileStatsTabPanelProps {
   tab: ProfileStatsTabSlug
@@ -132,6 +134,15 @@ export function ProfileStatsTabPanel({
         <div className="wl-home-v2-profile-loose-ends-tab">
           <div className="wl-home-v2-profile-loose-ends-tab__section">
             <LooseEndsContent userId={userId} isOwnProfile={isOwnProfile} />
+          </div>
+        </div>
+      )
+    case "rankings":
+      if (!userId) return null
+      return (
+        <div className="wl-home-v2-profile-rankings-tab">
+          <div className="wl-home-v2-profile-rankings-tab__section">
+            <SongRankings userId={userId} isOwnProfile={isOwnProfile} />
           </div>
         </div>
       )

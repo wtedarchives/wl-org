@@ -16,6 +16,7 @@
 /archive/profile/slots  /archive/profile?tab=slots  301
 /archive/profile/personnel  /archive/profile?tab=personnel  301
 /archive/profile/badges  /archive/profile?tab=badges  301
+/archive/profile/rankings  /archive/profile?tab=rankings  301
 /archive/profile/loose-ends  /archive/profile?tab=badges  301
 
 # Public profile — `/archive/user` → `/user` (query merged on Netlify)
@@ -28,6 +29,7 @@
 /archive/user/slots  /user?tab=slots  301
 /archive/user/personnel  /user?tab=personnel  301
 /archive/user/badges  /user?tab=badges  301
+/archive/user/rankings  /user?tab=rankings  301
 /archive/user/loose-ends  /user?tab=badges  301
 
 # Legacy path-style /user/{uuid} → query canonical (tab defaults in-app when omitted)

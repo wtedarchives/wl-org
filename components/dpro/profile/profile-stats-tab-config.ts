@@ -5,6 +5,7 @@ export const PROFILE_STATS_TABS = [
   { slug: "slots", label: "Slots" },
   { slug: "personnel", label: "Personnel" },
   { slug: "badges", label: "Badges" },
+  { slug: "rankings", label: "Rankings" },
 ] as const
 
 export type ProfileStatsTabSlug = (typeof PROFILE_STATS_TABS)[number]["slug"]
