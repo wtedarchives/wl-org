@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react"
 
 import {
-  fetchRankingSessionPoolSize,
   invokeRankingEngine,
   type RankingConfirmedRank,
   type RankingSongRef,
@@ -18,23 +17,18 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
   const [song2, setSong2] = useState<RankingSongRef | null>(null)
   const [confirmedRanks, setConfirmedRanks] = useState<RankingConfirmedRank[]>([])
   const [isComplete, setIsComplete] = useState(false)
-  const [totalSlots, setTotalSlots] = useState(0)
   const [restarting, setRestarting] = useState(false)
 
-  const applyResponse = useCallback(async (response: Awaited<ReturnType<typeof invokeRankingEngine>>) => {
-    setSessionId(response.session_id)
-    setSong1(response.song1)
-    setSong2(response.song2)
-    setConfirmedRanks(response.confirmedRanks ?? [])
-    setIsComplete(Boolean(response.isComplete))
-
-    const poolSize = await fetchRankingSessionPoolSize(response.session_id)
-    if (poolSize > 0) {
-      setTotalSlots(poolSize)
-    } else if (response.isComplete && response.confirmedRanks?.length) {
-      setTotalSlots(response.confirmedRanks.length)
-    }
-  }, [])
+  const applyResponse = useCallback(
+    (response: Awaited<ReturnType<typeof invokeRankingEngine>>) => {
+      setSessionId(response.session_id)
+      setSong1(response.song1)
+      setSong2(response.song2)
+      setConfirmedRanks(response.confirmedRanks ?? [])
+      setIsComplete(Boolean(response.isComplete))
+    },
+    [],
+  )
 
   const startSession = useCallback(async () => {
     if (!accessToken) return
@@ -45,7 +39,7 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
         action: "start_session",
         payload: {},
       })
-      await applyResponse(response)
+      applyResponse(response)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start ranking session")
     } finally {
@@ -71,7 +65,7 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
           action: "submit_vote",
           payload: { session_id: sessionId, winner_id: winnerId, loser_id: loserId },
         })
-        await applyResponse(response)
+        applyResponse(response)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to submit vote")
       } finally {
@@ -90,7 +84,7 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
         action: "restart_session",
         payload: {},
       })
-      await applyResponse(response)
+      applyResponse(response)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to restart ranking")
     } finally {
@@ -107,7 +101,6 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
     song2,
     confirmedRanks,
     isComplete,
-    totalSlots,
     submitVote,
     retry: startSession,
     restartRanking,

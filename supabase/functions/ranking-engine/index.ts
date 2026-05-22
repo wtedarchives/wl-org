@@ -1,8 +1,9 @@
 /**
- * Song Rankings state machine — winner-stays chain + tier resolution.
+ * Song Rankings — insertion-sort state machine.
  * Auth: Wysteria SSO JWT in `x-wysteria-authorization` (anon JWT in `Authorization`).
  *
  * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WYSTERIA_JWT_SECRET
+ * Optional: WYSTERIA_DEV_MOCK_ALLOWED=true for local dev mock JWTs (wl_dev_mock claim).
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
@@ -20,23 +21,11 @@ const UUID_RE =
 
 const SONG_POOL_CATEGORY = "Everything Must Go"
 
-type ActiveChain = {
-  champion: string
-  remaining: string[]
-  rankRange: [number, number]
-  defeated: string[]
-  defeatedBy?: Record<string, string>
-}
-
-type Tier = {
-  songs: string[]
-  rankRange: [number, number]
-}
-
 type RankingState = {
-  prefGraph: Record<string, string[]>
-  tierQueue: Tier[]
-  activeChain: ActiveChain | null
+  sortedList: string[]
+  remaining: string[]
+  currentSong: string
+  insertionIndex: number
 }
 
 type SongRef = {
@@ -46,10 +35,57 @@ type SongRef = {
 
 type ConfirmedRank = SongRef & { rank: number }
 
+type SupabaseClient = ReturnType<typeof createClient>
+
 function bearerToken(header: string | null): string | null {
   if (!header?.startsWith("Bearer ")) return null
   const token = header.slice(7).trim()
   return token !== "" ? token : null
+}
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".")
+    if (parts.length !== 3) return null
+    const segment = parts[1].replace(/-/g, "+").replace(/_/g, "/")
+    const padded = segment.padEnd(
+      segment.length + ((4 - (segment.length % 4)) % 4),
+      "=",
+    )
+    return JSON.parse(atob(padded)) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+function isDevMockJwtAllowed(): boolean {
+  return Deno.env.get("WYSTERIA_DEV_MOCK_ALLOWED") === "true"
+}
+
+async function resolveUserIdFromToken(
+  token: string,
+  jwtSecret: string,
+): Promise<string | null> {
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(jwtSecret),
+    )
+    const userId = payload.profile_id as string | undefined
+    if (userId && UUID_RE.test(userId)) return userId
+  } catch {
+    // Fall through to dev mock when enabled.
+  }
+
+  if (!isDevMockJwtAllowed()) return null
+
+  const decoded = decodeJwtPayload(token)
+  if (!decoded || decoded.wl_dev_mock !== true) return null
+
+  const userId = decoded.profile_id as string | undefined
+  if (!userId || !UUID_RE.test(userId)) return null
+
+  return userId
 }
 
 function jsonResponse(body: Record<string, unknown>, status: number) {
@@ -68,88 +104,86 @@ function shuffle<T>(items: T[]): T[] {
   return copy
 }
 
-function normalizeActiveChain(chain: ActiveChain | null | undefined): ActiveChain | null {
-  if (!chain?.champion) return null
-  return {
-    champion: chain.champion,
-    remaining: Array.isArray(chain.remaining) ? chain.remaining : [],
-    rankRange: chain.rankRange,
-    defeated: Array.isArray(chain.defeated) ? chain.defeated : [],
-    defeatedBy: chain.defeatedBy ?? {},
-  }
-}
-
-function normalizeState(raw: unknown): RankingState {
+function normalizeState(raw: unknown): RankingState | null {
   const state = (raw ?? {}) as Partial<RankingState>
+  if (
+    typeof state.currentSong !== "string" ||
+    !UUID_RE.test(state.currentSong) ||
+    !Array.isArray(state.sortedList) ||
+    !Array.isArray(state.remaining)
+  ) {
+    return null
+  }
+
   return {
-    prefGraph: state.prefGraph && typeof state.prefGraph === "object" ? state.prefGraph : {},
-    tierQueue: Array.isArray(state.tierQueue) ? state.tierQueue : [],
-    activeChain: normalizeActiveChain(state.activeChain as ActiveChain | null),
+    sortedList: state.sortedList.filter((id): id is string =>
+      typeof id === "string" && UUID_RE.test(id)
+    ),
+    remaining: state.remaining.filter((id): id is string =>
+      typeof id === "string" && UUID_RE.test(id)
+    ),
+    currentSong: state.currentSong,
+    insertionIndex: typeof state.insertionIndex === "number" &&
+        Number.isInteger(state.insertionIndex) &&
+        state.insertionIndex >= 0
+      ? state.insertionIndex
+      : 0,
   }
 }
 
-function getMatchup(chain: ActiveChain | null): { song1Id: string; song2Id: string } | null {
-  if (!chain || chain.remaining.length === 0) return null
-  return { song1Id: chain.champion, song2Id: chain.remaining[0] }
-}
-
-function addPrefEdge(prefGraph: Record<string, string[]>, winnerId: string, loserId: string) {
-  if (!prefGraph[winnerId]) prefGraph[winnerId] = []
-  if (!prefGraph[winnerId].includes(loserId)) {
-    prefGraph[winnerId].push(loserId)
-  }
-}
-
-function buildSubTiers(
-  defeated: string[],
-  defeatedBy: Record<string, string>,
-  confirmedRank: number,
-): Tier[] {
-  const beaterOrder: string[] = []
-  const groups = new Map<string, string[]>()
-
-  for (const songId of defeated) {
-    const beater = defeatedBy[songId]
-    if (!beater) continue
-    if (!groups.has(beater)) {
-      groups.set(beater, [])
-      beaterOrder.push(beater)
+function buildInitialState(songIds: string[]): RankingState {
+  if (songIds.length === 1) {
+    return {
+      sortedList: [songIds[0]],
+      remaining: [],
+      currentSong: songIds[0],
+      insertionIndex: 0,
     }
-    groups.get(beater)!.push(songId)
   }
 
-  let nextRank = confirmedRank + 1
-  const tiers: Tier[] = []
-
-  for (const beater of beaterOrder) {
-    const songs = groups.get(beater)!
-    const tierEnd = nextRank + songs.length - 1
-    tiers.push({ songs, rankRange: [nextRank, tierEnd] })
-    nextRank = tierEnd + 1
-  }
-
-  tiers.sort((a, b) => a.rankRange[0] - b.rankRange[0])
-  return tiers
-}
-
-function activateTier(tier: Tier): ActiveChain {
-  const shuffled = shuffle(tier.songs)
-  const [champion, ...remaining] = shuffled
   return {
-    champion,
-    remaining,
-    rankRange: tier.rankRange,
-    defeated: [],
-    defeatedBy: {},
+    sortedList: [songIds[0]],
+    currentSong: songIds[1],
+    remaining: songIds.slice(2),
+    insertionIndex: 0,
   }
 }
 
-function mergeTierQueue(queue: Tier[], newTiers: Tier[]): Tier[] {
-  return [...queue, ...newTiers].sort((a, b) => a.rankRange[0] - b.rankRange[0])
+function getMatchup(state: RankingState): { song1Id: string; song2Id: string } | null {
+  if (state.remaining.length === 0 && state.sortedList.includes(state.currentSong)) {
+    return null
+  }
+  const challengerId = state.sortedList[state.insertionIndex]
+  if (!challengerId || !state.currentSong) return null
+  return { song1Id: state.currentSong, song2Id: challengerId }
+}
+
+function advanceAfterInsert(state: RankingState): boolean {
+  if (state.remaining.length > 0) {
+    state.currentSong = state.remaining.shift()!
+    state.insertionIndex = 0
+    return false
+  }
+  return true
+}
+
+function applyInsertionVote(state: RankingState, currentSongWins: boolean): boolean {
+  if (currentSongWins) {
+    state.sortedList.splice(state.insertionIndex, 0, state.currentSong)
+    return advanceAfterInsert(state)
+  }
+
+  state.insertionIndex += 1
+  if (state.insertionIndex >= state.sortedList.length) {
+    state.sortedList.push(state.currentSong)
+    return advanceAfterInsert(state)
+  }
+
+  return false
 }
 
 async function fetchSongRefs(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   songIds: string[],
 ): Promise<Map<string, SongRef>> {
   const uniqueIds = [...new Set(songIds.filter((id) => UUID_RE.test(id)))]
@@ -172,7 +206,7 @@ async function fetchSongRefs(
 }
 
 async function fetchConfirmedRanks(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   sessionId: string,
 ): Promise<ConfirmedRank[]> {
   const { data, error } = await supabase
@@ -196,14 +230,31 @@ async function fetchConfirmedRanks(
   })
 }
 
-async function buildSessionResponse(
-  supabase: ReturnType<typeof createClient>,
+async function writeFinalRanks(
+  supabase: SupabaseClient,
   sessionId: string,
-  state: RankingState,
+  sortedList: string[],
+) {
+  const rows = sortedList.map((songId, index) => ({
+    session_id: sessionId,
+    song_id: songId,
+    rank: index + 1,
+  }))
+
+  const { error } = await supabase.from("ranking_results").insert(rows)
+  if (error) {
+    throw new Error("Failed to save confirmed ranks")
+  }
+}
+
+async function buildSessionResponse(
+  supabase: SupabaseClient,
+  sessionId: string,
+  state: RankingState | null,
   confirmedRanks: ConfirmedRank[],
   isComplete: boolean,
 ) {
-  const matchup = getMatchup(state.activeChain)
+  const matchup = state && !isComplete ? getMatchup(state) : null
   const songIds = matchup ? [matchup.song1Id, matchup.song2Id] : []
   const songMap = await fetchSongRefs(supabase, songIds)
 
@@ -218,61 +269,12 @@ async function buildSessionResponse(
     session_id: sessionId,
     song1,
     song2,
-    confirmedRanks,
+    confirmedRanks: isComplete ? confirmedRanks : [],
     isComplete,
   }
 }
 
-async function confirmRank(
-  supabase: ReturnType<typeof createClient>,
-  sessionId: string,
-  songId: string,
-  rank: number,
-) {
-  const { error } = await supabase.from("ranking_results").insert({
-    session_id: sessionId,
-    song_id: songId,
-    rank,
-  })
-  if (error) {
-    throw new Error("Failed to save confirmed rank")
-  }
-}
-
-async function resolveAutomaticChains(
-  supabase: ReturnType<typeof createClient>,
-  sessionId: string,
-  state: RankingState,
-): Promise<{ state: RankingState; isComplete: boolean }> {
-  while (state.activeChain && state.activeChain.remaining.length === 0) {
-    const chain = state.activeChain
-    const confirmedRank = chain.rankRange[0]
-
-    await confirmRank(supabase, sessionId, chain.champion, confirmedRank)
-
-    const subTiers = buildSubTiers(
-      chain.defeated,
-      chain.defeatedBy ?? {},
-      confirmedRank,
-    )
-    state.tierQueue = mergeTierQueue(state.tierQueue, subTiers)
-    state.activeChain = null
-
-    if (state.tierQueue.length === 0) {
-      return { state, isComplete: true }
-    }
-
-    const nextTier = state.tierQueue.shift()!
-    state.activeChain = activateTier(nextTier)
-  }
-
-  return { state, isComplete: false }
-}
-
-async function fetchLatestCompleteSession(
-  supabase: ReturnType<typeof createClient>,
-  userId: string,
-) {
+async function fetchLatestCompleteSession(supabase: SupabaseClient, userId: string) {
   const { data, error } = await supabase
     .from("ranking_sessions")
     .select("session_id, state")
@@ -289,28 +291,22 @@ async function fetchLatestCompleteSession(
 }
 
 async function sessionHasRankingProgress(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   sessionId: string,
 ): Promise<boolean> {
-  const [{ count: voteCount, error: voteError }, confirmedRanks] = await Promise.all([
-    supabase
-      .from("ranking_votes")
-      .select("vote_id", { count: "exact", head: true })
-      .eq("session_id", sessionId),
-    fetchConfirmedRanks(supabase, sessionId),
-  ])
+  const { count, error } = await supabase
+    .from("ranking_votes")
+    .select("vote_id", { count: "exact", head: true })
+    .eq("session_id", sessionId)
 
-  if (voteError) {
+  if (error) {
     throw new Error("Failed to load session progress")
   }
 
-  return (voteCount ?? 0) > 0 || confirmedRanks.length > 0
+  return (count ?? 0) > 0
 }
 
-async function createNewRankingSession(
-  supabase: ReturnType<typeof createClient>,
-  userId: string,
-) {
+async function createNewRankingSession(supabase: SupabaseClient, userId: string) {
   const { data: songs, error: songsError } = await supabase
     .from("songs")
     .select("song_id")
@@ -327,23 +323,14 @@ async function createNewRankingSession(
     return jsonResponse({ error: "No songs available for ranking" }, 400)
   }
 
-  const initialState: RankingState = {
-    prefGraph: {},
-    tierQueue: [],
-    activeChain: {
-      champion: songIds[0],
-      remaining: songIds.slice(1),
-      rankRange: [1, songIds.length],
-      defeated: [],
-      defeatedBy: {},
-    },
-  }
+  const initialState = buildInitialState(songIds)
+  const isSingleSong = songIds.length === 1
 
   const { data: inserted, error: insertError } = await supabase
     .from("ranking_sessions")
     .insert({
       user_id: userId,
-      status: "in_progress",
+      status: isSingleSong ? "complete" : "in_progress",
       song_pool: songIds,
       state: initialState,
     })
@@ -355,47 +342,28 @@ async function createNewRankingSession(
     return jsonResponse({ error: "Failed to create session" }, 500)
   }
 
-  let finalState = initialState
-  let isComplete = false
-
-  if (songIds.length === 1) {
-    await confirmRank(supabase, inserted.session_id, songIds[0], 1)
-    finalState = { prefGraph: {}, tierQueue: [], activeChain: null }
-    isComplete = true
-
-    const { error: updateError } = await supabase
-      .from("ranking_sessions")
-      .update({
-        state: finalState,
-        status: "complete",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("session_id", inserted.session_id)
-
-    if (updateError) {
-      console.error("ranking-engine single-song finalize error:", updateError)
-      return jsonResponse({ error: "Failed to finalize session" }, 500)
-    }
+  if (isSingleSong) {
+    await writeFinalRanks(supabase, inserted.session_id, initialState.sortedList)
   }
 
-  const confirmedRanks = await fetchConfirmedRanks(supabase, inserted.session_id)
+  const confirmedRanks = isSingleSong
+    ? await fetchConfirmedRanks(supabase, inserted.session_id)
+    : []
+
   const body = await buildSessionResponse(
     supabase,
     inserted.session_id,
-    finalState,
+    initialState,
     confirmedRanks,
-    isComplete,
+    isSingleSong,
   )
   return jsonResponse(body, 200)
 }
 
-async function handleStartSession(
-  supabase: ReturnType<typeof createClient>,
-  userId: string,
-) {
+async function handleStartSession(supabase: SupabaseClient, userId: string) {
   const { data: inProgress, error: inProgressError } = await supabase
     .from("ranking_sessions")
-    .select("session_id, user_id, status, song_pool, state")
+    .select("session_id, state")
     .eq("user_id", userId)
     .eq("status", "in_progress")
     .order("updated_at", { ascending: false })
@@ -409,14 +377,14 @@ async function handleStartSession(
 
   if (inProgress) {
     const hasProgress = await sessionHasRankingProgress(supabase, inProgress.session_id)
-    if (hasProgress) {
-      const state = normalizeState(inProgress.state)
-      const confirmedRanks = await fetchConfirmedRanks(supabase, inProgress.session_id)
+    const state = normalizeState(inProgress.state)
+
+    if (hasProgress && state) {
       const body = await buildSessionResponse(
         supabase,
         inProgress.session_id,
         state,
-        confirmedRanks,
+        [],
         false,
       )
       return jsonResponse(body, 200)
@@ -455,10 +423,7 @@ async function handleStartSession(
   return createNewRankingSession(supabase, userId)
 }
 
-async function handleRestartSession(
-  supabase: ReturnType<typeof createClient>,
-  userId: string,
-) {
+async function handleRestartSession(supabase: SupabaseClient, userId: string) {
   const { error: deleteError } = await supabase
     .from("ranking_sessions")
     .delete()
@@ -474,7 +439,7 @@ async function handleRestartSession(
 }
 
 async function handleSubmitVote(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   userId: string,
   payload: Record<string, unknown>,
 ) {
@@ -516,7 +481,11 @@ async function handleSubmitVote(
   }
 
   const state = normalizeState(session.state)
-  const matchup = getMatchup(state.activeChain)
+  if (!state) {
+    return jsonResponse({ error: "Invalid session state" }, 400)
+  }
+
+  const matchup = getMatchup(state)
   if (!matchup) {
     return jsonResponse({ error: "No active matchup" }, 400)
   }
@@ -541,22 +510,11 @@ async function handleSubmitVote(
     return jsonResponse({ error: "Failed to record vote" }, 500)
   }
 
-  addPrefEdge(state.prefGraph, winnerId, loserId)
+  const currentSongWins = winnerId === state.currentSong
+  const isComplete = applyInsertionVote(state, currentSongWins)
 
-  const chain = state.activeChain!
-  chain.champion = winnerId
-  chain.defeated.push(loserId)
-  chain.defeatedBy = chain.defeatedBy ?? {}
-  chain.defeatedBy[loserId] = winnerId
-  chain.remaining.shift()
-
-  let isComplete = false
-
-  if (chain.remaining.length > 0) {
-    state.activeChain = chain
-  } else {
-    const resolved = await resolveAutomaticChains(supabase, sessionId, state)
-    isComplete = resolved.isComplete
+  if (isComplete) {
+    await writeFinalRanks(supabase, sessionId, state.sortedList)
   }
 
   const { error: updateError } = await supabase
@@ -573,7 +531,10 @@ async function handleSubmitVote(
     return jsonResponse({ error: "Failed to update session" }, 500)
   }
 
-  const confirmedRanks = await fetchConfirmedRanks(supabase, sessionId)
+  const confirmedRanks = isComplete
+    ? await fetchConfirmedRanks(supabase, sessionId)
+    : []
+
   const body = await buildSessionResponse(
     supabase,
     sessionId,
@@ -607,16 +568,8 @@ serve(async (req) => {
     return jsonResponse({ error: "Server configuration error" }, 500)
   }
 
-  let jwtPayload: Record<string, unknown>
-  try {
-    const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
-    jwtPayload = payload as Record<string, unknown>
-  } catch {
-    return jsonResponse({ error: "Unauthorized" }, 401)
-  }
-
-  const userId = jwtPayload.profile_id as string | undefined
-  if (!userId || !UUID_RE.test(userId)) {
+  const userId = await resolveUserIdFromToken(token, jwtSecret)
+  if (!userId) {
     return jsonResponse({ error: "Unauthorized" }, 401)
   }
 

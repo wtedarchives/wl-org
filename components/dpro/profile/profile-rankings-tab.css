@@ -32,6 +32,10 @@
   gap: 1.75rem;
 }
 
+.song-rankings-interactive--complete {
+  gap: 1.25rem;
+}
+
 .song-rankings-message {
   box-sizing: border-box;
   width: 100%;
@@ -60,12 +64,12 @@
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
   transition: opacity 200ms ease-out;
 }
 
 .song-rankings-vote--loading {
-  opacity: 0.72;
+  opacity: 0.82;
 }
 
 .song-rankings-vote__prompt {
@@ -80,14 +84,13 @@
   display: grid;
   width: 100%;
   max-width: 52rem;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.625rem;
   align-items: stretch;
 }
 
 @media (min-width: 640px) {
   .song-rankings-vote__cards {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 1rem;
   }
 }
@@ -96,13 +99,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.75rem;
+  min-width: 1.75rem;
+  min-height: 5.5rem;
   font-family: "Geist Mono", ui-monospace, monospace;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.45);
+}
+
+@media (min-width: 640px) {
+  .song-rankings-vote__vs {
+    min-width: 2.25rem;
+    font-size: 0.75rem;
+  }
 }
 
 .song-rankings-vote__card {
@@ -112,7 +123,7 @@
   width: 100%;
   align-items: center;
   justify-content: center;
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 0.75rem;
   border-radius: 12px;
   border: 1px solid rgb(63, 65, 64);
   background: rgba(0, 0, 0, 0.5);
@@ -123,6 +134,12 @@
     border-color 180ms ease-out,
     background-color 180ms ease-out,
     transform 180ms ease-out;
+}
+
+@media (min-width: 640px) {
+  .song-rankings-vote__card {
+    padding: 1rem 1.25rem;
+  }
 }
 
 .song-rankings-vote__card:hover:not(:disabled),
@@ -137,72 +154,68 @@
 }
 
 .song-rankings-vote__card-label {
-  font-size: clamp(1rem, 2.8vw, 1.25rem);
+  font-size: clamp(0.9375rem, 2.6vw, 1.25rem);
   font-weight: 600;
   line-height: 1.25;
 }
 
-.song-rankings-vote__loading {
+.song-rankings-progress {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  min-height: 1.75rem;
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.55);
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    opacity 200ms ease-out,
-    transform 200ms ease-out;
-  pointer-events: none;
+  gap: 0.375rem;
+  min-height: 0.75rem;
+  padding-top: 0.25rem;
 }
 
-.song-rankings-vote__loading--visible {
-  opacity: 1;
-  transform: translateY(0);
+.song-rankings-progress__dot {
+  display: block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  animation: song-rankings-progress-pulse 1.4s ease-in-out infinite;
 }
 
-.song-rankings-complete {
-  width: 100%;
-  max-width: 42rem;
-  margin-inline: auto;
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  border: 1px solid rgb(63, 65, 64);
-  background: rgba(0, 0, 0, 0.45);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
+.song-rankings-progress__dot:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-.song-rankings-complete__message {
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
+.song-rankings-progress__dot:nth-child(3) {
+  animation-delay: 0.4s;
 }
 
-.song-rankings-chart-section {
-  display: flex;
+.song-rankings-progress--active .song-rankings-progress__dot {
+  background: rgba(255, 255, 255, 0.5);
+  animation-duration: 0.9s;
+}
+
+@keyframes song-rankings-progress-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.song-rankings-complete-section {
   width: 100%;
   min-width: 0;
-  flex-direction: column;
-  gap: 0.75rem;
 }
 
-.song-rankings-chart-section__title {
-  margin: 0;
-  font-family: "Geist Mono", ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
-  text-align: center;
+.song-rankings-complete-actions {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.song-rankings-complete-actions__button {
+  min-width: 7.5rem;
 }
 
 .song-rankings-chart {
@@ -224,22 +237,8 @@
   min-height: 2.75rem;
   padding: 0.625rem 0.875rem;
   border-radius: 8px;
-  border: 1px solid rgb(48, 50, 49);
-  transition:
-    background-color 200ms ease-out,
-    border-color 200ms ease-out,
-    opacity 200ms ease-out;
-}
-
-.song-rankings-chart__row--confirmed {
+  border: 1px solid rgb(63, 65, 64);
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgb(63, 65, 64);
-}
-
-.song-rankings-chart__row--pending {
-  background: rgba(0, 0, 0, 0.35);
-  border-color: rgb(40, 42, 41);
-  opacity: 0.55;
 }
 
 .song-rankings-chart__rank {
@@ -247,10 +246,6 @@
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.song-rankings-chart__row--confirmed .song-rankings-chart__rank {
   color: rgba(255, 255, 255, 0.78);
 }
 
@@ -261,8 +256,4 @@
   line-height: 1.3;
   color: rgba(255, 255, 255, 0.92);
   overflow-wrap: anywhere;
-}
-
-.song-rankings-chart__row--pending .song-rankings-chart__song {
-  color: rgba(255, 255, 255, 0.35);
 }

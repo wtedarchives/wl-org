@@ -26,7 +26,6 @@ function SongRankingsInteractive() {
     song2,
     confirmedRanks,
     isComplete,
-    totalSlots,
     submitVote,
     retry,
     restartRanking,
@@ -56,60 +55,43 @@ function SongRankingsInteractive() {
     )
   }
 
-  const slots =
-    totalSlots > 0 ? totalSlots
-    : isComplete ? confirmedRanks.length
-    : 0
-
-  return (
-    <div className="song-rankings-interactive">
-      {!isComplete ?
-        <SongRankingsVoteCards
-          song1={song1}
-          song2={song2}
-          voting={voting}
-          onPick={(winnerId, loserId) => void submitVote(winnerId, loserId)}
-        />
-      : null}
-
-      {isComplete ?
-        <div className="song-rankings-complete">
-          <p className="song-rankings-complete__message">
-            Congratulations — your Goose song ranking is complete!
-          </p>
+  if (isComplete) {
+    return (
+      <div className="song-rankings-interactive song-rankings-interactive--complete">
+        <section className="song-rankings-complete-section" aria-label="Your rankings">
+          <SongRankingsChart ranks={confirmedRanks} />
+        </section>
+        <div className="song-rankings-complete-actions">
           <button
             type="button"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "song-rankings-complete__restart",
+              "song-rankings-complete-actions__button",
             )}
             disabled={restarting}
             onClick={() => void restartRanking()}
           >
-            {restarting ? "Starting…" : "Rank again"}
+            {restarting ? "Starting…" : "Start Over"}
           </button>
         </div>
-      : null}
+      </div>
+    )
+  }
 
-      {slots > 0 ?
-        <section className="song-rankings-chart-section" aria-label="Ranking progress">
-          {!isComplete ?
-            <h2 className="song-rankings-chart-section__title">Your ranking so far</h2>
-          : null}
-          <SongRankingsChart
-            totalSlots={slots}
-            confirmedRanks={confirmedRanks}
-            showEmptySlots={!isComplete}
-          />
-        </section>
-      : null}
+  return (
+    <div className="song-rankings-interactive">
+      <SongRankingsVoteCards
+        song1={song1}
+        song2={song2}
+        voting={voting}
+        onPick={(winnerId, loserId) => void submitVote(winnerId, loserId)}
+      />
     </div>
   )
 }
 
 function SongRankingsReadonly({ userId }: { userId: string }) {
-  const { loading, ranks, hasResults, error, totalSlots } =
-    useSongRankingsReadonly(userId)
+  const { loading, ranks, hasResults, error } = useSongRankingsReadonly(userId)
 
   if (loading) {
     return (
@@ -137,11 +119,7 @@ function SongRankingsReadonly({ userId }: { userId: string }) {
 
   return (
     <div className="song-rankings-readonly">
-      <SongRankingsChart
-        totalSlots={totalSlots}
-        confirmedRanks={ranks}
-        showEmptySlots={false}
-      />
+      <SongRankingsChart ranks={ranks} />
     </div>
   )
 }

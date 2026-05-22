@@ -1,9 +1,9 @@
 "use client"
 
-import { Loader2 } from "lucide-react"
-
 import type { RankingSongRef } from "@/lib/ranking-engine-edge"
 import { cn } from "@/lib/utils"
+
+import { SongRankingsProgress } from "@/components/dpro/profile/song-rankings-progress"
 
 export interface SongRankingsVoteCardsProps {
   song1: RankingSongRef | null
@@ -50,16 +50,7 @@ export function SongRankingsVoteCards({
           <span className="song-rankings-vote__card-label">{song2.song}</span>
         </button>
       </div>
-      <div
-        className={cn(
-          "song-rankings-vote__loading",
-          voting && "song-rankings-vote__loading--visible",
-        )}
-        aria-hidden={!voting}
-      >
-        <Loader2 className="size-5 animate-spin" />
-        <span>Loading next matchup…</span>
-      </div>
+      <SongRankingsProgress active={voting} />
     </div>
   )
 }

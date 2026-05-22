@@ -1,6 +1,5 @@
 import { WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
-import { supabase } from "@/lib/supabase"
 
 export type RankingSongRef = {
   song_id: string
@@ -62,19 +61,4 @@ export async function invokeRankingEngine(
   }
 
   return payload
-}
-
-export async function fetchRankingSessionPoolSize(
-  sessionId: string,
-): Promise<number> {
-  if (!supabase) return 0
-
-  const { data, error } = await supabase
-    .from("ranking_sessions")
-    .select("song_pool")
-    .eq("session_id", sessionId)
-    .maybeSingle()
-
-  if (error || !data?.song_pool) return 0
-  return Array.isArray(data.song_pool) ? data.song_pool.length : 0
 }
