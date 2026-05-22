@@ -108,6 +108,8 @@ export function SetlistWtedPairPendingOptions({
   canRequestByTime: boolean
   visualVariant: WtedSlotVisualVariant
 }) {
+  if (!hasOpenSlot) return null
+
   const pendingEntries = entries.filter(
     (entry) =>
       entry.radio_id &&
