@@ -424,15 +424,50 @@ async function handleStartSession(supabase: SupabaseClient, userId: string) {
 }
 
 async function handleRestartSession(supabase: SupabaseClient, userId: string) {
-  const { error: deleteError } = await supabase
+  const { data: sessions, error: sessionsError } = await supabase
+    .from("ranking_sessions")
+    .select("session_id")
+    .eq("user_id", userId)
+
+  if (sessionsError) {
+    console.error("ranking-engine restart session lookup error:", sessionsError)
+    return jsonResponse({ error: "Failed to load ranking sessions for restart" }, 500)
+  }
+
+  const sessionIds = (sessions ?? [])
+    .map((row) => row.session_id)
+    .filter((id): id is string => typeof id === "string" && UUID_RE.test(id))
+
+  if (sessionIds.length > 0) {
+    const { error: votesError } = await supabase
+      .from("ranking_votes")
+      .delete()
+      .in("session_id", sessionIds)
+
+    if (votesError) {
+      console.error("ranking-engine restart votes delete error:", votesError)
+      return jsonResponse({ error: "Failed to delete ranking votes" }, 500)
+    }
+
+    const { error: resultsError } = await supabase
+      .from("ranking_results")
+      .delete()
+      .in("session_id", sessionIds)
+
+    if (resultsError) {
+      console.error("ranking-engine restart results delete error:", resultsError)
+      return jsonResponse({ error: "Failed to delete ranking results" }, 500)
+    }
+  }
+
+  const { error: sessionsDeleteError } = await supabase
     .from("ranking_sessions")
     .delete()
     .eq("user_id", userId)
-    .eq("status", "in_progress")
 
-  if (deleteError) {
-    console.error("ranking-engine restart delete error:", deleteError)
-    return jsonResponse({ error: "Failed to restart ranking" }, 500)
+  if (sessionsDeleteError) {
+    console.error("ranking-engine restart sessions delete error:", sessionsDeleteError)
+    return jsonResponse({ error: "Failed to delete ranking sessions" }, 500)
   }
 
   return createNewRankingSession(supabase, userId)
