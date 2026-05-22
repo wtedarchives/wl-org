@@ -26,7 +26,7 @@ export interface SetlistWtedPanelProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   entry: SetlistEntry | null
-  /** When multiple unique WTED songs (e.g. song pair), user picks which to request. */
+  /** Unique WTED-linked entries when a song pair has multiple radio IDs. */
   wtedEntryOptions?: SetlistEntry[] | null
   setlist: SetlistEntry[]
   show: SetlistWtedShowContext
@@ -48,33 +48,15 @@ export function SetlistWtedPanel({
   variant,
   scrollClassName,
 }: SetlistWtedPanelProps) {
-  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!open) {
-      setSelectedEntryId(null)
-      return
-    }
-    if (wtedEntryOptions && wtedEntryOptions.length > 0) {
-      setSelectedEntryId(wtedEntryOptions[0]!.entry_id)
-    } else {
-      setSelectedEntryId(null)
-    }
-  }, [open, entry?.entry_id, wtedEntryOptions])
-
-  const activeEntry =
-    wtedEntryOptions && wtedEntryOptions.length > 1 ?
-      wtedEntryOptions.find((e) => e.entry_id === selectedEntryId) ??
-      wtedEntryOptions[0] ??
-      entry
-    : entry
+  const isMultiPairMode = !!(wtedEntryOptions && wtedEntryOptions.length > 1)
+  const activeEntry = entry
   const groupEntries = useMemo(
     () => getWtedEntriesForRadioGroup(setlist, activeEntry),
     [setlist, activeEntry],
   )
   const artworkEntry = groupEntries[0] ?? activeEntry
   const { releaseArtwork, artworkLoading } = useWtedEntryReleaseArtwork(
-    artworkEntry,
+    isMultiPairMode ? null : artworkEntry,
     open,
     fallbackReleaseArtwork,
   )
@@ -93,8 +75,13 @@ export function SetlistWtedPanel({
   const { requests, loading, error, refetch } = useWtedRequests(accessToken, open)
 
   const [lastRequestTime, setLastRequestTime] = useState<number>(0)
-  const [submitting, setSubmitting] = useState(false)
+  const [submittingRadioId, setSubmittingRadioId] = useState<string | null>(
+    null,
+  )
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitErrorByRadioId, setSubmitErrorByRadioId] = useState<
+    Record<string, string>
+  >({})
   const [countdownMs, setCountdownMs] = useState<number>(0)
   const [requestWaitMs, setRequestWaitMs] = useState<number>(0)
   const [suppressAlreadyRequestedBannerRadioId, setSuppressAlreadyRequestedBannerRadioId] =
@@ -107,6 +94,8 @@ export function SetlistWtedPanel({
   useEffect(() => {
     if (!open) {
       setSubmitError(null)
+      setSubmitErrorByRadioId({})
+      setSubmittingRadioId(null)
       setSuppressAlreadyRequestedBannerRadioId(null)
     }
   }, [open])
@@ -162,39 +151,81 @@ export function SetlistWtedPanel({
     canRequestByTime
   const requestWaitSeconds = Math.ceil(requestWaitMs / 1000)
 
-  const handleRequest = useCallback(async () => {
-    if (!activeEntry || !accessToken || !canRequestThisEntry) return
-    setSubmitting(true)
-    setSubmitError(null)
-    try {
-      const base = process.env.NEXT_PUBLIC_SUPABASE_URL
-        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
-        : ""
-      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      const res = await fetch(`${base}/wted-request`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          ...(anon ? { apikey: anon } : {}),
-        },
-        body: JSON.stringify({ radio_id: String(activeEntry.radio_id) }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        throw new Error(data.error ?? "Failed to submit request")
+  const submitRequest = useCallback(
+    async (targetEntry: SetlistEntry) => {
+      if (!targetEntry.radio_id || !accessToken) return
+      const radioId = String(targetEntry.radio_id)
+      if (
+        !hasOpenSlot ||
+        alreadyRequestedRadioIds.has(radioId) ||
+        !canRequestByTime
+      ) {
+        return
       }
-      setSuppressAlreadyRequestedBannerRadioId(String(activeEntry.radio_id))
-      setLastRequestTime(Date.now())
-      await refetch()
-    } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : "Failed to submit request",
-      )
-    } finally {
-      setSubmitting(false)
-    }
-  }, [activeEntry, accessToken, canRequestThisEntry, refetch])
+
+      setSubmittingRadioId(radioId)
+      setSubmitError(null)
+      setSubmitErrorByRadioId((prev) => {
+        if (!(radioId in prev)) return prev
+        const next = { ...prev }
+        delete next[radioId]
+        return next
+      })
+
+      try {
+        const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
+          : ""
+        const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        const res = await fetch(`${base}/wted-request`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            ...(anon ? { apikey: anon } : {}),
+          },
+          body: JSON.stringify({ radio_id: radioId }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          throw new Error(data.error ?? "Failed to submit request")
+        }
+        setSuppressAlreadyRequestedBannerRadioId(radioId)
+        setLastRequestTime(Date.now())
+        await refetch()
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to submit request"
+        if (isMultiPairMode) {
+          setSubmitErrorByRadioId((prev) => ({ ...prev, [radioId]: message }))
+        } else {
+          setSubmitError(message)
+        }
+      } finally {
+        setSubmittingRadioId(null)
+      }
+    },
+    [
+      accessToken,
+      alreadyRequestedRadioIds,
+      canRequestByTime,
+      hasOpenSlot,
+      isMultiPairMode,
+      refetch,
+    ],
+  )
+
+  const handleRequest = useCallback(async () => {
+    if (!activeEntry || !canRequestThisEntry) return
+    await submitRequest(activeEntry)
+  }, [activeEntry, canRequestThisEntry, submitRequest])
+
+  const handleRequestEntry = useCallback(
+    async (targetEntry: SetlistEntry) => {
+      await submitRequest(targetEntry)
+    },
+    [submitRequest],
+  )
 
   const buildSlots = (): WtedPanelSlot[] => {
     const slots: WtedPanelSlot[] = []
@@ -203,6 +234,7 @@ export function SetlistWtedPanel({
         slots.push({ type: "request", request: requests[i] })
       } else if (
         i === requests.length &&
+        !isMultiPairMode &&
         activeEntry?.radio_id &&
         hasOpenSlot &&
         !alreadyRequestedRadioIds.has(String(activeEntry.radio_id)) &&
@@ -231,6 +263,7 @@ export function SetlistWtedPanel({
   const slots = buildSlots()
 
   const bannerAlreadyRequested =
+    !isMultiPairMode &&
     !!(
       activeEntry &&
       activeEntry.radio_id &&
@@ -259,13 +292,20 @@ export function SetlistWtedPanel({
       releaseArtwork={releaseArtwork}
       artworkLoading={artworkLoading}
       handleRequest={handleRequest}
-      submitting={submitting}
+      submitting={submittingRadioId === String(activeEntry?.radio_id ?? "")}
       submitError={submitError}
       requestWaitSeconds={requestWaitSeconds}
       onOpenChange={onOpenChange}
+      isMultiPairMode={isMultiPairMode}
       wtedEntryOptions={wtedEntryOptions}
-      selectedEntryId={selectedEntryId}
-      onSelectEntryId={setSelectedEntryId}
+      handleRequestEntry={handleRequestEntry}
+      submittingRadioId={submittingRadioId}
+      submitErrorByRadioId={submitErrorByRadioId}
+      alreadyRequestedRadioIds={alreadyRequestedRadioIds}
+      canRequestByTime={canRequestByTime}
+      setlist={setlist}
+      open={open}
+      fallbackReleaseArtwork={fallbackReleaseArtwork}
     />
   )
 

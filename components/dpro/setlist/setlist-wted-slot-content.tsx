@@ -188,6 +188,7 @@ export function WtedPendingSlotContent({
   submitting,
   submitError,
   waitSeconds,
+  requestDisabled = false,
   visualVariant = "drawer",
 }: {
   groupEntries: SetlistEntry[]
@@ -202,6 +203,8 @@ export function WtedPendingSlotContent({
   submitting: boolean
   submitError: string | null
   waitSeconds: number
+  /** When true, disable request (e.g. queue full) without changing button label. */
+  requestDisabled?: boolean
   visualVariant?: WtedSlotVisualVariant
 }) {
   const pills: { label: string; type: keyof typeof PILL_CLASSES }[] = [
@@ -217,6 +220,7 @@ export function WtedPendingSlotContent({
   ].filter(Boolean) as { label: string; type: keyof typeof PILL_CLASSES }[]
 
   const mustWait = waitSeconds > 0
+  const requestButtonDisabled = submitting || mustWait || requestDisabled
 
   const segments: WtedRequestEnrichedSegment[] = groupEntries.map((e) => ({
     song: e.songs?.song ?? e.entry_song,
@@ -323,7 +327,7 @@ export function WtedPendingSlotContent({
               "wl-home-v2-wted-request-track-btn",
             )}
             onClick={onRequest}
-            disabled={submitting || mustWait}
+            disabled={requestButtonDisabled}
           >
             {submitting
               ? "Requesting…"
@@ -337,10 +341,10 @@ export function WtedPendingSlotContent({
           className={cn(
             "shrink-0",
             mustWait && "text-sm",
-            !submitting && !mustWait && "animate-pulse-ring",
+            !requestButtonDisabled && "animate-pulse-ring",
           )}
           onClick={onRequest}
-          disabled={submitting || mustWait}
+          disabled={requestButtonDisabled}
         >
           {submitting
             ? "Requesting…"

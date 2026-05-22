@@ -42,7 +42,7 @@ export function WlHomeV2RequestModal({
             <div className="modal-request-head-text">
               <h3 id={headingId}>Request a Song</h3>
               <p id={subtextId} className="modal-request-sub">
-                Users can request four songs every 60 minutes.
+                Users can request four tracks every 60 minutes.
               </p>
             </div>
             <button
