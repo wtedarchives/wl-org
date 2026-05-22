@@ -269,37 +269,48 @@ async function resolveAutomaticChains(
   return { state, isComplete: false }
 }
 
-async function handleStartSession(
+async function fetchLatestCompleteSession(
   supabase: ReturnType<typeof createClient>,
   userId: string,
 ) {
-  const { data: existing, error: existingError } = await supabase
+  const { data, error } = await supabase
     .from("ranking_sessions")
-    .select("session_id, user_id, status, song_pool, state")
+    .select("session_id, state")
     .eq("user_id", userId)
-    .eq("status", "in_progress")
+    .eq("status", "complete")
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  if (existingError) {
-    console.error("ranking-engine start_session lookup error:", existingError)
-    return jsonResponse({ error: "Failed to load session" }, 500)
+  if (error) {
+    throw new Error("Failed to load completed session")
+  }
+  return data
+}
+
+async function sessionHasRankingProgress(
+  supabase: ReturnType<typeof createClient>,
+  sessionId: string,
+): Promise<boolean> {
+  const [{ count: voteCount, error: voteError }, confirmedRanks] = await Promise.all([
+    supabase
+      .from("ranking_votes")
+      .select("vote_id", { count: "exact", head: true })
+      .eq("session_id", sessionId),
+    fetchConfirmedRanks(supabase, sessionId),
+  ])
+
+  if (voteError) {
+    throw new Error("Failed to load session progress")
   }
 
-  if (existing) {
-    const state = normalizeState(existing.state)
-    const confirmedRanks = await fetchConfirmedRanks(supabase, existing.session_id)
-    const body = await buildSessionResponse(
-      supabase,
-      existing.session_id,
-      state,
-      confirmedRanks,
-      false,
-    )
-    return jsonResponse(body, 200)
-  }
+  return (voteCount ?? 0) > 0 || confirmedRanks.length > 0
+}
 
+async function createNewRankingSession(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+) {
   const { data: songs, error: songsError } = await supabase
     .from("songs")
     .select("song_id")
@@ -376,6 +387,90 @@ async function handleStartSession(
     isComplete,
   )
   return jsonResponse(body, 200)
+}
+
+async function handleStartSession(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+) {
+  const { data: inProgress, error: inProgressError } = await supabase
+    .from("ranking_sessions")
+    .select("session_id, user_id, status, song_pool, state")
+    .eq("user_id", userId)
+    .eq("status", "in_progress")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (inProgressError) {
+    console.error("ranking-engine start_session lookup error:", inProgressError)
+    return jsonResponse({ error: "Failed to load session" }, 500)
+  }
+
+  if (inProgress) {
+    const hasProgress = await sessionHasRankingProgress(supabase, inProgress.session_id)
+    if (hasProgress) {
+      const state = normalizeState(inProgress.state)
+      const confirmedRanks = await fetchConfirmedRanks(supabase, inProgress.session_id)
+      const body = await buildSessionResponse(
+        supabase,
+        inProgress.session_id,
+        state,
+        confirmedRanks,
+        false,
+      )
+      return jsonResponse(body, 200)
+    }
+
+    const { error: deleteError } = await supabase
+      .from("ranking_sessions")
+      .delete()
+      .eq("session_id", inProgress.session_id)
+
+    if (deleteError) {
+      console.error("ranking-engine abandon empty session error:", deleteError)
+      return jsonResponse({ error: "Failed to load session" }, 500)
+    }
+  }
+
+  try {
+    const completed = await fetchLatestCompleteSession(supabase, userId)
+    if (completed) {
+      const state = normalizeState(completed.state)
+      const confirmedRanks = await fetchConfirmedRanks(supabase, completed.session_id)
+      const body = await buildSessionResponse(
+        supabase,
+        completed.session_id,
+        state,
+        confirmedRanks,
+        true,
+      )
+      return jsonResponse(body, 200)
+    }
+  } catch (error) {
+    console.error("ranking-engine completed session lookup error:", error)
+    return jsonResponse({ error: "Failed to load session" }, 500)
+  }
+
+  return createNewRankingSession(supabase, userId)
+}
+
+async function handleRestartSession(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+) {
+  const { error: deleteError } = await supabase
+    .from("ranking_sessions")
+    .delete()
+    .eq("user_id", userId)
+    .eq("status", "in_progress")
+
+  if (deleteError) {
+    console.error("ranking-engine restart delete error:", deleteError)
+    return jsonResponse({ error: "Failed to restart ranking" }, 500)
+  }
+
+  return createNewRankingSession(supabase, userId)
 }
 
 async function handleSubmitVote(
@@ -540,6 +635,9 @@ serve(async (req) => {
   try {
     if (action === "start_session") {
       return await handleStartSession(supabase, userId)
+    }
+    if (action === "restart_session") {
+      return await handleRestartSession(supabase, userId)
     }
     if (action === "submit_vote") {
       return await handleSubmitVote(supabase, userId, payload)

@@ -19,6 +19,7 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
   const [confirmedRanks, setConfirmedRanks] = useState<RankingConfirmedRank[]>([])
   const [isComplete, setIsComplete] = useState(false)
   const [totalSlots, setTotalSlots] = useState(0)
+  const [restarting, setRestarting] = useState(false)
 
   const applyResponse = useCallback(async (response: Awaited<ReturnType<typeof invokeRankingEngine>>) => {
     setSessionId(response.session_id)
@@ -80,9 +81,27 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
     [accessToken, applyResponse, isComplete, sessionId, voting],
   )
 
+  const restartRanking = useCallback(async () => {
+    if (!accessToken) return
+    setRestarting(true)
+    setError(null)
+    try {
+      const response = await invokeRankingEngine(accessToken, {
+        action: "restart_session",
+        payload: {},
+      })
+      await applyResponse(response)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to restart ranking")
+    } finally {
+      setRestarting(false)
+    }
+  }, [accessToken, applyResponse])
+
   return {
     loading,
     voting,
+    restarting,
     error,
     song1,
     song2,
@@ -91,5 +110,6 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
     totalSlots,
     submitVote,
     retry: startSession,
+    restartRanking,
   }
 }

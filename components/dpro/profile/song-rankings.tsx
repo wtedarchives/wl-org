@@ -29,6 +29,8 @@ function SongRankingsInteractive() {
     totalSlots,
     submitVote,
     retry,
+    restartRanking,
+    restarting,
   } = useSongRankingsInteractive(session?.token)
 
   if (loading) {
@@ -75,6 +77,17 @@ function SongRankingsInteractive() {
           <p className="song-rankings-complete__message">
             Congratulations — your Goose song ranking is complete!
           </p>
+          <button
+            type="button"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "song-rankings-complete__restart",
+            )}
+            disabled={restarting}
+            onClick={() => void restartRanking()}
+          >
+            {restarting ? "Starting…" : "Rank again"}
+          </button>
         </div>
       : null}
 

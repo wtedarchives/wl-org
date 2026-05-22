@@ -22,6 +22,7 @@ export type RankingEngineResponse = {
 
 export type RankingEngineBody =
   | { action: "start_session"; payload?: Record<string, never> }
+  | { action: "restart_session"; payload?: Record<string, never> }
   | {
       action: "submit_vote"
       payload: { session_id: string; winner_id: string; loser_id: string }
