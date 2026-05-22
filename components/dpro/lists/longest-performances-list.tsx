@@ -25,7 +25,7 @@ import { useListContentLoading } from "./list-content-loading-context"
 import { WlHomeV2ListArchiveShowHeader } from "./wl-home-v2-list-archive-show-header"
 
 const COVER_SONGS_HEADER_IMAGE =
-  "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
+  "https://i.postimg.cc/T3CcwTqj/image.jpg"
 
 function LongestPerfCategoryThumb({ src }: { src: string }) {
   const [failed, setFailed] = useState(false)

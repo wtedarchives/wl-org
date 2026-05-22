@@ -30,7 +30,7 @@ import {
 import "./segues-list.css"
 
 const COVER_SONGS_HEADER_IMAGE =
-  "https://i.postimg.cc/1RMm2fpQ/Cover-Songs.jpg"
+  "https://i.postimg.cc/T3CcwTqj/image.jpg"
 
 interface SeguesListProps {
   listId: string
