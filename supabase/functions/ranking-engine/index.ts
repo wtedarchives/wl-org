@@ -2,6 +2,9 @@
  * Song Rankings — insertion-sort state machine.
  * Auth: Wysteria SSO JWT in `x-wysteria-authorization` (anon JWT in `Authorization`).
  *
+ * Song pool: played on a canonical show, not Cover Songs, not a placeholder,
+ * and linked to a release via setlist_entry_media.
+ *
  * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WYSTERIA_JWT_SECRET
  * Optional: WYSTERIA_DEV_MOCK_ALLOWED=true for local dev mock JWTs (wl_dev_mock claim).
  */
@@ -19,7 +22,9 @@ const corsHeaders = {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-const SONG_POOL_CATEGORY = "Everything Must Go"
+const RANKING_EXCLUDED_SONG_CATEGORY = "Cover Songs"
+
+const SONG_POOL_PAGE_SIZE = 1000
 
 type RankingState = {
   sortedList: string[]
@@ -191,20 +196,62 @@ function categoryArtworkFromRelation(
   return typeof url === "string" && url.trim() !== "" ? url.trim() : null
 }
 
-async function fetchSongPoolIds(supabase: SupabaseClient): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("songs")
-    .select("song_id")
-    .eq("song_category", SONG_POOL_CATEGORY)
-    .eq("song_placeholder", false)
+function isRankingPoolSong(row: {
+  song_category?: string | null
+  song_placeholder?: boolean | null
+}): boolean {
+  return row.song_placeholder !== true &&
+    (row.song_category ?? "") !== RANKING_EXCLUDED_SONG_CATEGORY
+}
 
-  if (error) {
-    throw new Error("Failed to load song pool")
+async function fetchSongPoolIds(supabase: SupabaseClient): Promise<string[]> {
+  const songIds = new Set<string>()
+  let from = 0
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("setlist_entries")
+      .select(
+        `
+        songs!inner (
+          song_id,
+          song_category,
+          song_placeholder
+        ),
+        shows!inner (
+          show_canonid
+        ),
+        setlist_entry_media!inner (
+          release_id
+        )
+      `,
+      )
+      .not("shows.show_canonid", "is", null)
+      .not("setlist_entry_media.release_id", "is", null)
+      .range(from, from + SONG_POOL_PAGE_SIZE - 1)
+
+    if (error) {
+      console.error("ranking-engine song pool error:", error)
+      throw new Error("Failed to load song pool")
+    }
+
+    const rows = data ?? []
+    for (const row of rows) {
+      const songsRel = row.songs as
+        | { song_id: string; song_category: string | null; song_placeholder: boolean }
+        | { song_id: string; song_category: string | null; song_placeholder: boolean }[]
+        | null
+      const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
+      if (!songRow?.song_id || !UUID_RE.test(songRow.song_id)) continue
+      if (!isRankingPoolSong(songRow)) continue
+      songIds.add(songRow.song_id)
+    }
+
+    if (rows.length < SONG_POOL_PAGE_SIZE) break
+    from += SONG_POOL_PAGE_SIZE
   }
 
-  return (data ?? [])
-    .map((row) => row.song_id)
-    .filter((id): id is string => typeof id === "string" && UUID_RE.test(id))
+  return [...songIds]
 }
 
 async function fetchSongRefs(

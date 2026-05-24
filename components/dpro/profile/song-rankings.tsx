@@ -78,7 +78,7 @@ function SongRankingsInteractive() {
   if (notStarted) {
     return (
       <RankingsPanel className="song-rankings-panel--message song-rankings-message">
-        <p>Click the button below to rank Goose&apos;s original songs.</p>
+        <p>Click the button below to rank released Goose songs.</p>
         <button
           type="button"
           className="song-rankings-pill-button"
