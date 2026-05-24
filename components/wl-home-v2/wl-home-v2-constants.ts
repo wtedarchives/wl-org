@@ -5,14 +5,14 @@ export const WL_HOME_V2_COMMUNITY_URL = "https://community.wysterialane.org"
 export const WL_HOME_V2_TICKER_RANDOM_PHRASES = [
   "Visions of members vast.",
   "So ready for this.",
-  "It's alright–don't sweat my friend.",
+  "It's alright – don't sweat my friend.",
   "Go everywhere, feel everything, see everyone.",
   "Keep it Ted!",
   "Just a little bit goes a long, long way.",
   "Down the pathway to the great beyond.",
   "Come and get some pancakes!",
   "Seep up all the light.",
-  "Is it all vision?",
+  "Is it all a vision?",
 ] as readonly string[]
 
 /** Pick uniformly at random, never identical to `previous` when more than one line exists. */

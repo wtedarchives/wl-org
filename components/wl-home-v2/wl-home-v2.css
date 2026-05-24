@@ -12378,19 +12378,31 @@
   padding-bottom: 1px;
   white-space: nowrap;
 }
+/* When a coach note is inline-expanded, hold the column at 400px instead of shrink-wrapping to shorter rows. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table:has(td.notes-cell [data-setlist-trunc-expanded="true"])
+  th.set-table-coach-notes-head,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table:has(td.notes-cell [data-setlist-trunc-expanded="true"])
+  td.notes-cell {
+  width: 400px;
+  min-width: 400px;
+}
 .wl-home-v2 .wl-home-v2-setlist .set-table td.notes-cell {
   padding-top: 1px;
   padding-bottom: 1px;
   font-size: 13px;
   color: rgba(255, 255, 255, 0.72);
-  line-height: 1.4;
+  line-height: 1.1;
   max-width: 400px;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.notes-cell .setlist-v2-notes-html,
 .wl-home-v2 .wl-home-v2-setlist .set-table td.notes-cell .setlist-v2-notes-plain {
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.25;
   color: rgba(255, 255, 255, 0.72);
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.notes-cell .setlist-v2-notes-plain {
@@ -12740,7 +12752,7 @@
   td.lp-list-notes-cell
   .setlist-v2-notes-plain {
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.1;
   color: rgba(255, 255, 255, 0.72);
 }
 .wl-home-v2

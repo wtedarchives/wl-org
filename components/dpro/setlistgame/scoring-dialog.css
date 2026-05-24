@@ -1,5 +1,10 @@
 /* Score Setlist Game — WL v2: same centered shell as Request a Song + setlist `Select` chrome */
 
+/* Portaled Radix Select from scoring modal (modal layer is z-index 10020). */
+.setlist-game-scoring-select-content[data-slot="select-content"] {
+  z-index: 10025;
+}
+
 .wl-home-v2 .modal.modal--wted-request.modal--setlist-game-scoring {
   max-width: min(560px, 96vw);
 }
@@ -13,6 +18,13 @@
   flex-direction: column;
   gap: 14px;
   padding: 16px 18px;
+}
+
+.wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-empty {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .wl-home-v2 .modal.modal--setlist-game-scoring .setlist-game-scoring-alert {

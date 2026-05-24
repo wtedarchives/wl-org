@@ -195,6 +195,8 @@ export function SetlistTruncatableCell({
     needsMore ||
     (!useExternalExpand && expanded)
 
+  const isInlineExpanded = !useExternalExpand && expanded
+
   return (
     <div
       ref={rootRef}
@@ -204,6 +206,9 @@ export function SetlistTruncatableCell({
         fillColumnWidth ? "w-full" : "w-max",
         className,
       )}
+      {...(isInlineExpanded ?
+        { "data-setlist-trunc-expanded": "true" as const }
+      : {})}
     >
       <div
         ref={measureRef}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useId, useState } from "react"
+import { useEffect, useId, useMemo, useState } from "react"
 import { Loader2 } from "lucide-react"
 import {
   Dialog,
@@ -53,6 +53,11 @@ export function ScoringDialog({
   const { isScoring, scoringComplete, scoringError, scoreSubmissions } =
     useSetlistScoring()
 
+  const scoreableShows = useMemo(
+    () => gameShows.filter((show) => show.show_scored !== true),
+    [gameShows],
+  )
+
   useWlHomeV2ScrollLock(open && wlHomeV2)
 
   useEffect(() => {
@@ -80,6 +85,9 @@ export function ScoringDialog({
 
   const onClose = () => onOpenChange(false)
 
+  const formatShowOption = (show: GameShow) =>
+    `${formatSetlistDate(show.show_date)} - [${show.show_canonid}] - ${show.show_subvenue}`
+
   const v2BodyInner =
     scoringComplete ?
       <div
@@ -96,6 +104,10 @@ export function ScoringDialog({
         <strong>Error</strong>
         <span>{scoringError}</span>
       </div>
+    : scoreableShows.length === 0 ?
+      <p className="setlist-game-scoring-empty" role="status">
+        No unscored shows are available for this league.
+      </p>
     : (
       <Select
         value={selectedShowToScore ?? ""}
@@ -110,14 +122,21 @@ export function ScoringDialog({
         >
           <SelectValue placeholder="Select a show…" />
         </SelectTrigger>
-        <SelectContent className={WL_HOME_V2_SETLIST_SELECT_CONTENT}>
-          {gameShows.map((show) => (
+        <SelectContent
+          className={cn(
+            WL_HOME_V2_SETLIST_SELECT_CONTENT,
+            "setlist-game-scoring-select-content",
+          )}
+          position="popper"
+          sideOffset={4}
+        >
+          {scoreableShows.map((show) => (
             <SelectItem
               key={show.show_id}
               value={show.show_id}
               className="text-xs font-medium tabular-nums"
             >
-              {`${formatSetlistDate(show.show_date)} - [${show.show_canonid}] - ${show.show_subvenue}`}
+              {formatShowOption(show)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -221,21 +240,31 @@ export function ScoringDialog({
                 Select a show to score all submissions for:
               </p>
 
-              <Select
-                value={selectedShowToScore ?? ""}
-                onValueChange={setSelectedShowToScore}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a show..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {gameShows.map((show) => (
-                    <SelectItem key={show.show_id} value={show.show_id}>
-                      {`${formatSetlistDate(show.show_date)} - [${show.show_canonid}] - ${show.show_subvenue}`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {scoreableShows.length === 0 ?
+                <p className="text-xs text-muted-foreground" role="status">
+                  No unscored shows are available for this league.
+                </p>
+              : (
+                <Select
+                  value={selectedShowToScore ?? ""}
+                  onValueChange={setSelectedShowToScore}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a show..." />
+                  </SelectTrigger>
+                  <SelectContent
+                    className="setlist-game-scoring-select-content"
+                    position="popper"
+                    sideOffset={4}
+                  >
+                    {scoreableShows.map((show) => (
+                      <SelectItem key={show.show_id} value={show.show_id}>
+                        {formatShowOption(show)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
               <div className="flex justify-end gap-2">
                 <Button

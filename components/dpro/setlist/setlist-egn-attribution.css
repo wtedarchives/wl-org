@@ -1,0 +1,9 @@
+.setlist-egn-attribution {
+  background-color: #7291ca;
+  border-color: #5a73a3;
+}
+
+.setlist-egn-attribution__text {
+  line-height: 1.15;
+  padding-block: 4px;
+}
