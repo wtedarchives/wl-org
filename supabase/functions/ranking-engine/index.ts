@@ -3,7 +3,7 @@
  * Auth: Wysteria SSO JWT in `x-wysteria-authorization` (anon JWT in `Authorization`).
  *
  * Song pool: songs.song_rankable = true (maintained by refresh_song_rankable() + daily pg_cron).
- * Insertion: first matchup vs middle of ranked list, then linear up/down until placed.
+ * Insertion: first matchup vs a random rank in the middle third of the list, then linear up/down until placed.
  *
  * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WYSTERIA_JWT_SECRET
  * Optional: WYSTERIA_DEV_MOCK_ALLOWED=true for local dev mock JWTs (wl_dev_mock claim).
@@ -146,14 +146,21 @@ function normalizeState(raw: unknown): RankingState | null {
   }
 }
 
-/** 1-based middle rank, 0-based index: #20 of 39 → index 19 */
-function middleInsertionIndex(sortedLength: number): number {
-  if (sortedLength <= 0) return 0
-  return Math.ceil(sortedLength / 2) - 1
+/** Random 0-based index in the middle third of a ranked list (e.g. #14–#26 of 39). */
+function middleThirdInsertionIndex(sortedLength: number): number {
+  if (sortedLength <= 1) return 0
+
+  const third = sortedLength / 3
+  const low = Math.floor(third)
+  const high = Math.ceil(2 * third) - 1
+  const min = Math.max(0, low)
+  const max = Math.min(sortedLength - 1, high)
+
+  return min + Math.floor(Math.random() * (max - min + 1))
 }
 
 function beginInsertionForCurrentSong(state: RankingState) {
-  state.insertionIndex = middleInsertionIndex(state.sortedList.length)
+  state.insertionIndex = middleThirdInsertionIndex(state.sortedList.length)
   state.insertionPhase = "probe"
 }
 
