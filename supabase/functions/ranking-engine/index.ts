@@ -3,6 +3,7 @@
  * Auth: Wysteria SSO JWT in `x-wysteria-authorization` (anon JWT in `Authorization`).
  *
  * Song pool: songs.song_rankable = true (maintained by refresh_song_rankable() + daily pg_cron).
+ * Insertion: first matchup vs middle of ranked list, then linear up/down until placed.
  *
  * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WYSTERIA_JWT_SECRET
  * Optional: WYSTERIA_DEV_MOCK_ALLOWED=true for local dev mock JWTs (wl_dev_mock claim).
@@ -23,11 +24,14 @@ const UUID_RE =
 
 const SONG_POOL_PAGE_SIZE = 1000
 
+type InsertionPhase = "probe" | "up" | "down"
+
 type RankingState = {
   sortedList: string[]
   remaining: string[]
   currentSong: string
   insertionIndex: number
+  insertionPhase?: InsertionPhase
 }
 
 type SongRef = {
@@ -118,6 +122,13 @@ function normalizeState(raw: unknown): RankingState | null {
     return null
   }
 
+  const insertionPhase =
+    state.insertionPhase === "probe" ||
+      state.insertionPhase === "up" ||
+      state.insertionPhase === "down"
+      ? state.insertionPhase
+      : undefined
+
   return {
     sortedList: state.sortedList.filter((id): id is string =>
       typeof id === "string" && UUID_RE.test(id)
@@ -131,7 +142,39 @@ function normalizeState(raw: unknown): RankingState | null {
         state.insertionIndex >= 0
       ? state.insertionIndex
       : 0,
+    insertionPhase,
   }
+}
+
+/** 1-based middle rank, 0-based index: #20 of 39 → index 19 */
+function middleInsertionIndex(sortedLength: number): number {
+  if (sortedLength <= 0) return 0
+  return Math.ceil(sortedLength / 2) - 1
+}
+
+function beginInsertionForCurrentSong(state: RankingState) {
+  state.insertionIndex = middleInsertionIndex(state.sortedList.length)
+  state.insertionPhase = "probe"
+}
+
+function insertCurrentSongAt(state: RankingState, index: number): boolean {
+  state.sortedList.splice(index, 0, state.currentSong)
+  return advanceAfterInsert(state)
+}
+
+function applyInsertionVoteLegacy(state: RankingState, currentSongWins: boolean): boolean {
+  if (currentSongWins) {
+    state.sortedList.splice(state.insertionIndex, 0, state.currentSong)
+    return advanceAfterInsert(state)
+  }
+
+  state.insertionIndex += 1
+  if (state.insertionIndex >= state.sortedList.length) {
+    state.sortedList.push(state.currentSong)
+    return advanceAfterInsert(state)
+  }
+
+  return false
 }
 
 function buildInitialState(songIds: string[]): RankingState {
@@ -144,12 +187,18 @@ function buildInitialState(songIds: string[]): RankingState {
     }
   }
 
-  return {
+  return prepareSongForInsertion({
     sortedList: [songIds[0]],
     currentSong: songIds[1],
     remaining: songIds.slice(2),
     insertionIndex: 0,
-  }
+    insertionPhase: "probe",
+  })
+}
+
+function prepareSongForInsertion(state: RankingState): RankingState {
+  beginInsertionForCurrentSong(state)
+  return state
 }
 
 function getMatchup(state: RankingState): { song1Id: string; song2Id: string } | null {
@@ -164,24 +213,62 @@ function getMatchup(state: RankingState): { song1Id: string; song2Id: string } |
 function advanceAfterInsert(state: RankingState): boolean {
   if (state.remaining.length > 0) {
     state.currentSong = state.remaining.shift()!
-    state.insertionIndex = 0
+    beginInsertionForCurrentSong(state)
     return false
   }
   return true
 }
 
 function applyInsertionVote(state: RankingState, currentSongWins: boolean): boolean {
-  if (currentSongWins) {
-    state.sortedList.splice(state.insertionIndex, 0, state.currentSong)
-    return advanceAfterInsert(state)
+  if (!state.insertionPhase) {
+    return applyInsertionVoteLegacy(state, currentSongWins)
   }
 
-  state.insertionIndex += 1
-  if (state.insertionIndex >= state.sortedList.length) {
+  const index = state.insertionIndex
+  const lastIndex = state.sortedList.length - 1
+
+  if (state.insertionPhase === "probe") {
+    if (currentSongWins) {
+      if (index === 0) {
+        return insertCurrentSongAt(state, 0)
+      }
+      state.insertionPhase = "up"
+      state.insertionIndex = index - 1
+      return false
+    }
+
+    if (index >= lastIndex) {
+      state.sortedList.push(state.currentSong)
+      return advanceAfterInsert(state)
+    }
+
+    state.insertionPhase = "down"
+    state.insertionIndex = index + 1
+    return false
+  }
+
+  if (state.insertionPhase === "up") {
+    if (currentSongWins) {
+      if (index === 0) {
+        return insertCurrentSongAt(state, 0)
+      }
+      state.insertionIndex = index - 1
+      return false
+    }
+
+    return insertCurrentSongAt(state, index + 1)
+  }
+
+  if (currentSongWins) {
+    return insertCurrentSongAt(state, index)
+  }
+
+  if (index >= lastIndex) {
     state.sortedList.push(state.currentSong)
     return advanceAfterInsert(state)
   }
 
+  state.insertionIndex = index + 1
   return false
 }
 
@@ -637,12 +724,13 @@ function buildRankNewSongsState(
     }
   }
 
-  return {
+  return prepareSongForInsertion({
     sortedList: [...rankedIds],
     remaining: shuffledNew.slice(1),
     currentSong: shuffledNew[0],
     insertionIndex: 0,
-  }
+    insertionPhase: "probe",
+  })
 }
 
 async function handleRankNewSongsSession(supabase: SupabaseClient, userId: string) {
