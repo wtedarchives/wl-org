@@ -1,38 +1,6 @@
 import type { RankingSongRef } from "@/lib/ranking-engine-edge"
 
-export const RANKING_EXCLUDED_SONG_CATEGORY = "Cover Songs"
-
 const PAGE_SIZE = 1000
-
-type SetlistEntryPoolRow = {
-  songs:
-    | {
-        song_id: string
-        song: string
-        song_category: string | null
-        song_placeholder: boolean
-        categories?:
-          | { category_artwork?: string | null }
-          | { category_artwork?: string | null }[]
-          | null
-      }
-    | {
-        song_id: string
-        song: string
-        song_category: string | null
-        song_placeholder: boolean
-        categories?:
-          | { category_artwork?: string | null }
-          | { category_artwork?: string | null }[]
-          | null
-      }[]
-    | null
-  shows: { show_canonid: number | null } | { show_canonid: number | null }[] | null
-  setlist_entry_media:
-    | { release_id: string | null }
-    | { release_id: string | null }[]
-    | null
-}
 
 function categoryArtworkFromRelation(
   relation:
@@ -46,68 +14,42 @@ function categoryArtworkFromRelation(
   return typeof url === "string" && url.trim() !== "" ? url.trim() : null
 }
 
-export function isRankingPoolSong(row: {
-  song_category?: string | null
-  song_placeholder?: boolean | null
-}): boolean {
-  return row.song_placeholder !== true &&
-    (row.song_category ?? "") !== RANKING_EXCLUDED_SONG_CATEGORY
-}
-
 export async function fetchRankingSongPool(
   supabase: NonNullable<(typeof import("@/lib/supabase"))["supabase"]>,
 ): Promise<RankingSongRef[]> {
-  const bySongId = new Map<string, RankingSongRef>()
+  const pool: RankingSongRef[] = []
   let from = 0
 
   while (true) {
     const { data, error } = await supabase
-      .from("setlist_entries")
-      .select(
-        `
-        songs!inner (
-          song_id,
-          song,
-          song_category,
-          song_placeholder,
-          categories:song_category(category_artwork)
-        ),
-        shows!inner (
-          show_canonid
-        ),
-        setlist_entry_media!inner (
-          release_id
-        )
-      `,
-      )
-      .not("shows.show_canonid", "is", null)
-      .not("setlist_entry_media.release_id", "is", null)
+      .from("songs")
+      .select("song_id, song, categories:song_category(category_artwork)")
+      .eq("song_rankable", true)
+      .order("song", { ascending: true })
       .range(from, from + PAGE_SIZE - 1)
 
     if (error) {
       throw new Error("Failed to load song pool")
     }
 
-    const rows = (data ?? []) as SetlistEntryPoolRow[]
+    const rows = data ?? []
     for (const row of rows) {
-      const songsRel = row.songs
-      const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
-      if (!songRow?.song_id || !isRankingPoolSong(songRow)) continue
-
-      if (!bySongId.has(songRow.song_id)) {
-        bySongId.set(songRow.song_id, {
-          song_id: songRow.song_id,
-          song: songRow.song,
-          categoryArtwork: categoryArtworkFromRelation(songRow.categories ?? null),
-        })
-      }
+      const categoriesRel = row.categories as
+        | { category_artwork?: string | null }
+        | { category_artwork?: string | null }[]
+        | null
+      pool.push({
+        song_id: row.song_id,
+        song: row.song,
+        categoryArtwork: categoryArtworkFromRelation(categoriesRel),
+      })
     }
 
     if (rows.length < PAGE_SIZE) break
     from += PAGE_SIZE
   }
 
-  return [...bySongId.values()].sort((a, b) => a.song.localeCompare(b.song))
+  return pool
 }
 
 export async function fetchRankingSongPoolIds(
