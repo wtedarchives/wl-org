@@ -1,0 +1,461 @@
+/* Dev/review — /rankings-visuals (container styling prototype for Rankings tab). */
+
+.rankings-visuals-page {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 1.25rem 0 3rem;
+}
+
+@media (min-width: 768px) {
+  .rankings-visuals-page {
+    padding: 2rem 0 4rem;
+  }
+}
+
+.rankings-visuals-page__intro {
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+.rankings-visuals-page__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.rankings-visuals-page__lede {
+  margin: 0;
+  max-width: 36rem;
+  margin-inline: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.rankings-visuals-page__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rankings-visuals-page__footer-note {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.rankings-visuals-page__footer-link {
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rankings-visuals-section {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.rankings-visuals-section__header {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgb(48, 50, 49);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rankings-visuals-section__title {
+  margin: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.rankings-visuals-section__description {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.rankings-visuals-section__preview {
+  padding: 1rem 0.875rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .rankings-visuals-section__preview {
+    padding: 1.25rem 1rem 1.5rem;
+  }
+}
+
+/* ── Prototype UI (port to profile-rankings-tab.css when approved) ── */
+
+.rankings-visuals-ui {
+  width: 100%;
+  min-width: 0;
+}
+
+.rankings-visuals-ui--in-profile-shell .wl-home-v2-profile-stats-tabs-chrome {
+  margin-bottom: 0;
+}
+
+.rankings-visuals-panel {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.rankings-visuals-panel--loading {
+  display: flex;
+  justify-content: center;
+  padding-block: 2rem;
+}
+
+.rankings-visuals-panel--message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem;
+  text-align: center;
+}
+
+.rankings-visuals-panel--message.widget-panel {
+  padding: 1.25rem 1.25rem;
+}
+
+.rankings-visuals-panel--vote {
+  padding-block: 1.25rem;
+  padding-inline: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .rankings-visuals-panel--vote {
+    padding-inline: 1.25rem;
+  }
+}
+
+.rankings-visuals-message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.rankings-visuals-pill-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  min-width: 7.5rem;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.95);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.rankings-visuals-pill-button:hover:not(:disabled) {
+  color: #fff;
+  border-color: rgb(123, 94, 63);
+  background: rgba(255, 122, 103, 0.22);
+}
+
+.rankings-visuals-pill-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.rankings-visuals-ui .song-rankings-interactive,
+.rankings-visuals-ui .song-rankings-readonly {
+  gap: 1.25rem;
+}
+
+.rankings-visuals-ui .song-rankings-chart {
+  gap: 0.375rem;
+}
+
+.rankings-visuals-ui .song-rankings-chart__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.375rem;
+  border-radius: 8px;
+  border: 1px solid rgb(44, 46, 45);
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.rankings-visuals-ui .song-rankings-chart__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.55);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.rankings-visuals-ui .song-rankings-chart__song {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.rankings-visuals-ui .song-rankings-vote__prompt {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.rankings-visuals-ui .song-rankings-vote__card {
+  min-height: 5.5rem;
+  border-radius: 10px;
+  border: 1px solid rgb(44, 46, 45);
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.rankings-visuals-ui .song-rankings-vote__card:hover:not(:disabled),
+.rankings-visuals-ui .song-rankings-vote__card:focus-visible {
+  border-color: rgb(123, 94, 63);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.rankings-visuals-ui .song-rankings-complete-actions {
+  padding-top: 0.25rem;
+}
+
+/* Vote cards with category artwork */
+.rankings-visuals-ui .song-rankings-visuals-vote__card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  min-height: 2.75rem;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-vote__art {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 6px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-vote__art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-vote__card .song-rankings-vote__card-label {
+  min-width: 0;
+  text-align: center;
+}
+
+.rankings-visuals-ui .song-rankings-vote--loading .song-rankings-visuals-vote__art-img {
+  filter: grayscale(100%);
+}
+
+/* Shared responsive column layout — items flow top-to-bottom per column */
+.rankings-visuals-ui .rankings-visuals-song-columns {
+  column-count: 1;
+  column-gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 480px) {
+  .rankings-visuals-ui .rankings-visuals-song-columns {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 768px) {
+  .rankings-visuals-ui .rankings-visuals-song-columns {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rankings-visuals-ui .rankings-visuals-song-columns {
+    column-count: 4;
+  }
+}
+
+.rankings-visuals-ui .rankings-visuals-song-columns__item {
+  break-inside: avoid;
+  margin-bottom: 0.375rem;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-rankings-grid__item {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.375rem;
+  border-radius: 8px;
+  border: 1px solid rgb(44, 46, 45);
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-align: left;
+}
+
+.rankings-visuals-ui .rankings-visuals-unranked__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.375rem;
+  border-radius: 8px;
+  border: 1px solid rgb(44, 46, 45);
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-align: left;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-rankings-grid__rank {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  padding: 0 0.375rem;
+  border-radius: 6px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.55);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.rankings-visuals-ui .song-rankings-visuals-rankings-grid__art {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 4px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-rankings-grid__art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rankings-visuals-ui .song-rankings-visuals-rankings-grid__song {
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Unranked songs section (below completed rankings) */
+.rankings-visuals-unranked {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgb(48, 50, 49);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rankings-visuals-unranked__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rankings-visuals-unranked__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.rankings-visuals-unranked__description {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.rankings-visuals-unranked__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rankings-visuals-unranked__art {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid rgb(63, 65, 64);
+}
+
+.rankings-visuals-unranked__song {
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.rankings-visuals-unranked__actions {
+  display: flex;
+  justify-content: center;
+}

@@ -4,6 +4,7 @@ import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 export type RankingSongRef = {
   song_id: string
   song: string
+  categoryArtwork?: string | null
 }
 
 export type RankingConfirmedRank = RankingSongRef & {
@@ -16,12 +17,14 @@ export type RankingEngineResponse = {
   song2: RankingSongRef | null
   confirmedRanks: RankingConfirmedRank[]
   isComplete?: boolean
+  notStarted?: boolean
   error?: string
 }
 
 export type RankingEngineBody =
-  | { action: "start_session"; payload?: Record<string, never> }
+  | { action: "start_session"; payload?: { begin?: boolean } }
   | { action: "restart_session"; payload?: Record<string, never> }
+  | { action: "rank_new_songs"; payload?: Record<string, never> }
   | {
       action: "submit_vote"
       payload: { session_id: string; winner_id: string; loser_id: string }
@@ -56,7 +59,7 @@ export async function invokeRankingEngine(
   if (payload.error) {
     throw new Error(payload.error)
   }
-  if (!payload.session_id) {
+  if (!payload.notStarted && !payload.session_id) {
     throw new Error("Invalid ranking response")
   }
 

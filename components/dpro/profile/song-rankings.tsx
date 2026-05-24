@@ -2,11 +2,11 @@
 
 import { useAuth } from "@/components/auth-context"
 import { SongRankingsChart } from "@/components/dpro/profile/song-rankings-chart"
+import { SongRankingsUnrankedSection } from "@/components/dpro/profile/song-rankings-unranked-section"
 import { SongRankingsVoteCards } from "@/components/dpro/profile/song-rankings-vote-cards"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useSongRankingsInteractive } from "@/hooks/use-song-rankings-interactive"
 import { useSongRankingsReadonly } from "@/hooks/use-song-rankings-readonly"
-import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import "./profile-rankings-tab.css"
@@ -14,6 +14,20 @@ import "./profile-rankings-tab.css"
 export interface SongRankingsProps {
   userId: string
   isOwnProfile: boolean
+}
+
+function RankingsPanel({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn("widget-panel song-rankings-panel", className)}>
+      {children}
+    </div>
+  )
 }
 
 function SongRankingsInteractive() {
@@ -26,48 +40,77 @@ function SongRankingsInteractive() {
     song2,
     confirmedRanks,
     isComplete,
+    notStarted,
+    unrankedSongs,
     submitVote,
     retry,
     restartRanking,
+    beginRanking,
+    rankNewSongs,
     restarting,
+    rankingNew,
+    starting,
   } = useSongRankingsInteractive(session?.token)
 
   if (loading) {
     return (
-      <div className="wl-home-v2-profile-rankings-tab__loading">
+      <RankingsPanel className="song-rankings-panel--loading">
         <WlHomeV2PageLoading message="Loading rankings…" />
-      </div>
+      </RankingsPanel>
     )
   }
 
   if (error) {
     return (
-      <div className="song-rankings-message song-rankings-message--error">
+      <RankingsPanel className="song-rankings-panel--message song-rankings-message song-rankings-message--error">
         <p>{error}</p>
         <button
           type="button"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          className="song-rankings-pill-button"
           onClick={() => void retry()}
         >
           Try again
         </button>
-      </div>
+      </RankingsPanel>
+    )
+  }
+
+  if (notStarted) {
+    return (
+      <RankingsPanel className="song-rankings-panel--message song-rankings-message">
+        <p>Click the button below to rank Goose&apos;s original songs.</p>
+        <button
+          type="button"
+          className="song-rankings-pill-button"
+          disabled={starting}
+          onClick={() => void beginRanking()}
+        >
+          {starting ? "Starting…" : "Start"}
+        </button>
+      </RankingsPanel>
     )
   }
 
   if (isComplete) {
     return (
       <div className="song-rankings-interactive song-rankings-interactive--complete">
+        {error ?
+          <div className="song-rankings-message song-rankings-message--error">
+            <p>{error}</p>
+          </div>
+        : null}
         <section className="song-rankings-complete-section" aria-label="Your rankings">
           <SongRankingsChart ranks={confirmedRanks} />
         </section>
+        <SongRankingsUnrankedSection
+          songs={unrankedSongs}
+          rankingNew={rankingNew}
+          onRankNewSongs={() => void rankNewSongs()}
+        />
         <div className="song-rankings-complete-actions">
           <button
             type="button"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "song-rankings-complete-actions__button",
-            )}
+            className="song-rankings-pill-button"
             disabled={restarting}
             onClick={() => void restartRanking()}
           >
@@ -79,14 +122,14 @@ function SongRankingsInteractive() {
   }
 
   return (
-    <div className="song-rankings-interactive">
+    <RankingsPanel className="song-rankings-panel--vote">
       <SongRankingsVoteCards
         song1={song1}
         song2={song2}
         voting={voting}
         onPick={(winnerId, loserId) => void submitVote(winnerId, loserId)}
       />
-    </div>
+    </RankingsPanel>
   )
 }
 
@@ -95,25 +138,25 @@ function SongRankingsReadonly({ userId }: { userId: string }) {
 
   if (loading) {
     return (
-      <div className="wl-home-v2-profile-rankings-tab__loading">
+      <RankingsPanel className="song-rankings-panel--loading">
         <WlHomeV2PageLoading message="Loading rankings…" />
-      </div>
+      </RankingsPanel>
     )
   }
 
   if (error) {
     return (
-      <div className="song-rankings-message song-rankings-message--error">
+      <RankingsPanel className="song-rankings-panel--message song-rankings-message song-rankings-message--error">
         <p>{error}</p>
-      </div>
+      </RankingsPanel>
     )
   }
 
   if (!hasResults) {
     return (
-      <div className="song-rankings-message">
-        <p>Hasn&apos;t ranked their songs yet.</p>
-      </div>
+      <RankingsPanel className="song-rankings-panel--message song-rankings-message">
+        <p>Hasn&apos;t ranked songs yet.</p>
+      </RankingsPanel>
     )
   }
 

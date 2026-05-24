@@ -31,6 +31,7 @@ type RankingState = {
 type SongRef = {
   song_id: string
   song: string
+  categoryArtwork?: string | null
 }
 
 type ConfirmedRank = SongRef & { rank: number }
@@ -182,6 +183,30 @@ function applyInsertionVote(state: RankingState, currentSongWins: boolean): bool
   return false
 }
 
+function categoryArtworkFromRelation(
+  relation: { category_artwork?: string | null } | { category_artwork?: string | null }[] | null,
+): string | null {
+  const row = Array.isArray(relation) ? relation[0] : relation
+  const url = row?.category_artwork
+  return typeof url === "string" && url.trim() !== "" ? url.trim() : null
+}
+
+async function fetchSongPoolIds(supabase: SupabaseClient): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("songs")
+    .select("song_id")
+    .eq("song_category", SONG_POOL_CATEGORY)
+    .eq("song_placeholder", false)
+
+  if (error) {
+    throw new Error("Failed to load song pool")
+  }
+
+  return (data ?? [])
+    .map((row) => row.song_id)
+    .filter((id): id is string => typeof id === "string" && UUID_RE.test(id))
+}
+
 async function fetchSongRefs(
   supabase: SupabaseClient,
   songIds: string[],
@@ -192,7 +217,7 @@ async function fetchSongRefs(
 
   const { data, error } = await supabase
     .from("songs")
-    .select("song_id, song")
+    .select("song_id, song, categories:song_category(category_artwork)")
     .in("song_id", uniqueIds)
 
   if (error) {
@@ -200,7 +225,15 @@ async function fetchSongRefs(
   }
 
   for (const row of data ?? []) {
-    map.set(row.song_id, { song_id: row.song_id, song: row.song })
+    const categoriesRel = row.categories as
+      | { category_artwork?: string | null }
+      | { category_artwork?: string | null }[]
+      | null
+    map.set(row.song_id, {
+      song_id: row.song_id,
+      song: row.song,
+      categoryArtwork: categoryArtworkFromRelation(categoriesRel),
+    })
   }
   return map
 }
@@ -211,7 +244,7 @@ async function fetchConfirmedRanks(
 ): Promise<ConfirmedRank[]> {
   const { data, error } = await supabase
     .from("ranking_results")
-    .select("song_id, rank, songs(song)")
+    .select("song_id, rank, songs(song, categories:song_category(category_artwork))")
     .eq("session_id", sessionId)
     .order("rank", { ascending: true })
 
@@ -220,12 +253,16 @@ async function fetchConfirmedRanks(
   }
 
   return (data ?? []).map((row) => {
-    const songsRel = row.songs as { song: string } | { song: string }[] | null
+    const songsRel = row.songs as
+      | { song: string; categories?: { category_artwork?: string | null } | { category_artwork?: string | null }[] | null }
+      | { song: string; categories?: { category_artwork?: string | null } | { category_artwork?: string | null }[] | null }[]
+      | null
     const songRow = Array.isArray(songsRel) ? songsRel[0] : songsRel
     return {
       song_id: row.song_id,
       song: songRow?.song ?? "",
       rank: row.rank,
+      categoryArtwork: categoryArtworkFromRelation(songRow?.categories ?? null),
     }
   })
 }
@@ -306,61 +343,60 @@ async function sessionHasRankingProgress(
   return (count ?? 0) > 0
 }
 
-async function createNewRankingSession(supabase: SupabaseClient, userId: string) {
-  const { data: songs, error: songsError } = await supabase
-    .from("songs")
-    .select("song_id")
-    .eq("song_category", SONG_POOL_CATEGORY)
-    .eq("song_placeholder", false)
-
-  if (songsError) {
-    console.error("ranking-engine song pool error:", songsError)
-    return jsonResponse({ error: "Failed to load song pool" }, 500)
-  }
-
-  const songIds = shuffle((songs ?? []).map((row) => row.song_id))
-  if (songIds.length === 0) {
-    return jsonResponse({ error: "No songs available for ranking" }, 400)
-  }
-
-  const initialState = buildInitialState(songIds)
-  const isSingleSong = songIds.length === 1
-
-  const { data: inserted, error: insertError } = await supabase
+async function deleteOtherUserSessions(
+  supabase: SupabaseClient,
+  userId: string,
+  keepSessionId: string,
+) {
+  const { data: sessions, error: sessionsError } = await supabase
     .from("ranking_sessions")
-    .insert({
-      user_id: userId,
-      status: isSingleSong ? "complete" : "in_progress",
-      song_pool: songIds,
-      state: initialState,
-    })
     .select("session_id")
-    .single()
+    .eq("user_id", userId)
 
-  if (insertError || !inserted) {
-    console.error("ranking-engine insert session error:", insertError)
-    return jsonResponse({ error: "Failed to create session" }, 500)
+  if (sessionsError) {
+    throw new Error("Failed to clean up ranking sessions")
   }
 
-  if (isSingleSong) {
-    await writeFinalRanks(supabase, inserted.session_id, initialState.sortedList)
+  const otherIds = (sessions ?? [])
+    .map((row) => row.session_id)
+    .filter((id): id is string =>
+      typeof id === "string" && UUID_RE.test(id) && id !== keepSessionId
+    )
+
+  if (otherIds.length === 0) return
+
+  const { error: votesError } = await supabase
+    .from("ranking_votes")
+    .delete()
+    .in("session_id", otherIds)
+
+  if (votesError) {
+    throw new Error("Failed to clean up ranking votes")
   }
 
-  const confirmedRanks = isSingleSong
-    ? await fetchConfirmedRanks(supabase, inserted.session_id)
-    : []
+  const { error: resultsError } = await supabase
+    .from("ranking_results")
+    .delete()
+    .in("session_id", otherIds)
 
-  const body = await buildSessionResponse(
-    supabase,
-    inserted.session_id,
-    initialState,
-    confirmedRanks,
-    isSingleSong,
-  )
-  return jsonResponse(body, 200)
+  if (resultsError) {
+    throw new Error("Failed to clean up ranking results")
+  }
+
+  const { error: deleteError } = await supabase
+    .from("ranking_sessions")
+    .delete()
+    .in("session_id", otherIds)
+
+  if (deleteError) {
+    throw new Error("Failed to clean up ranking sessions")
+  }
 }
 
-async function handleStartSession(supabase: SupabaseClient, userId: string) {
+async function abandonEmptyInProgressSession(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{ session_id: string; state: RankingState } | null> {
   const { data: inProgress, error: inProgressError } = await supabase
     .from("ranking_sessions")
     .select("session_id, state")
@@ -371,34 +407,109 @@ async function handleStartSession(supabase: SupabaseClient, userId: string) {
     .maybeSingle()
 
   if (inProgressError) {
-    console.error("ranking-engine start_session lookup error:", inProgressError)
-    return jsonResponse({ error: "Failed to load session" }, 500)
+    throw new Error("Failed to load session")
   }
 
-  if (inProgress) {
-    const hasProgress = await sessionHasRankingProgress(supabase, inProgress.session_id)
-    const state = normalizeState(inProgress.state)
+  if (!inProgress) return null
 
-    if (hasProgress && state) {
+  const hasProgress = await sessionHasRankingProgress(supabase, inProgress.session_id)
+  const state = normalizeState(inProgress.state)
+
+  if (hasProgress && state) {
+    return { session_id: inProgress.session_id, state }
+  }
+
+  const { error: deleteError } = await supabase
+    .from("ranking_sessions")
+    .delete()
+    .eq("session_id", inProgress.session_id)
+
+  if (deleteError) {
+    throw new Error("Failed to load session")
+  }
+
+  return null
+}
+
+function isStateComplete(state: RankingState): boolean {
+  return state.remaining.length === 0 && state.sortedList.includes(state.currentSong)
+}
+
+async function createRankingSessionWithState(
+  supabase: SupabaseClient,
+  userId: string,
+  songPool: string[],
+  initialState: RankingState,
+) {
+  const isComplete = songPool.length === 1 || isStateComplete(initialState)
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("ranking_sessions")
+    .insert({
+      user_id: userId,
+      status: isComplete ? "complete" : "in_progress",
+      song_pool: songPool,
+      state: initialState,
+    })
+    .select("session_id")
+    .single()
+
+  if (insertError || !inserted) {
+    console.error("ranking-engine insert session error:", insertError)
+    return jsonResponse({ error: "Failed to create session" }, 500)
+  }
+
+  if (isComplete) {
+    await writeFinalRanks(supabase, inserted.session_id, initialState.sortedList)
+    await deleteOtherUserSessions(supabase, userId, inserted.session_id)
+  }
+
+  const confirmedRanks = isComplete
+    ? await fetchConfirmedRanks(supabase, inserted.session_id)
+    : []
+
+  const body = await buildSessionResponse(
+    supabase,
+    inserted.session_id,
+    initialState,
+    confirmedRanks,
+    isComplete,
+  )
+  return jsonResponse(body, 200)
+}
+
+async function createNewRankingSession(supabase: SupabaseClient, userId: string) {
+  const songIds = shuffle(await fetchSongPoolIds(supabase))
+  if (songIds.length === 0) {
+    return jsonResponse({ error: "No songs available for ranking" }, 400)
+  }
+
+  const initialState = buildInitialState(songIds)
+  return createRankingSessionWithState(supabase, userId, songIds, initialState)
+}
+
+async function handleStartSession(
+  supabase: SupabaseClient,
+  userId: string,
+  payload: Record<string, unknown>,
+) {
+  const begin = payload.begin === true
+
+  try {
+    const resumed = await abandonEmptyInProgressSession(supabase, userId)
+    if (resumed) {
       const body = await buildSessionResponse(
         supabase,
-        inProgress.session_id,
-        state,
+        resumed.session_id,
+        resumed.state,
         [],
         false,
       )
       return jsonResponse(body, 200)
     }
-
-    const { error: deleteError } = await supabase
-      .from("ranking_sessions")
-      .delete()
-      .eq("session_id", inProgress.session_id)
-
-    if (deleteError) {
-      console.error("ranking-engine abandon empty session error:", deleteError)
-      return jsonResponse({ error: "Failed to load session" }, 500)
-    }
+  } catch (error) {
+    console.error("ranking-engine start_session in-progress error:", error)
+    return jsonResponse({ error: "Failed to load session" }, 500)
   }
 
   try {
@@ -420,7 +531,81 @@ async function handleStartSession(supabase: SupabaseClient, userId: string) {
     return jsonResponse({ error: "Failed to load session" }, 500)
   }
 
-  return createNewRankingSession(supabase, userId)
+  if (begin) {
+    return createNewRankingSession(supabase, userId)
+  }
+
+  return jsonResponse({
+    session_id: "",
+    song1: null,
+    song2: null,
+    confirmedRanks: [],
+    isComplete: false,
+    notStarted: true,
+  })
+}
+
+function buildRankNewSongsState(
+  rankedIds: string[],
+  unrankedIds: string[],
+): RankingState {
+  const shuffledNew = shuffle(unrankedIds)
+  if (shuffledNew.length === 1) {
+    return {
+      sortedList: [...rankedIds, shuffledNew[0]],
+      remaining: [],
+      currentSong: shuffledNew[0],
+      insertionIndex: 0,
+    }
+  }
+
+  return {
+    sortedList: [...rankedIds],
+    remaining: shuffledNew.slice(1),
+    currentSong: shuffledNew[0],
+    insertionIndex: 0,
+  }
+}
+
+async function handleRankNewSongsSession(supabase: SupabaseClient, userId: string) {
+  try {
+    const completed = await fetchLatestCompleteSession(supabase, userId)
+    if (!completed) {
+      return jsonResponse({ error: "Complete your rankings before ranking new songs" }, 400)
+    }
+
+    const confirmedRanks = await fetchConfirmedRanks(supabase, completed.session_id)
+    const rankedIds = [...confirmedRanks]
+      .sort((a, b) => a.rank - b.rank)
+      .map((row) => row.song_id)
+
+    const catalogIds = await fetchSongPoolIds(supabase)
+    const rankedSet = new Set(rankedIds)
+    const unrankedIds = catalogIds.filter((id) => !rankedSet.has(id))
+
+    if (unrankedIds.length === 0) {
+      return jsonResponse({ error: "No new songs to rank" }, 400)
+    }
+
+    const resumed = await abandonEmptyInProgressSession(supabase, userId)
+    if (resumed) {
+      const body = await buildSessionResponse(
+        supabase,
+        resumed.session_id,
+        resumed.state,
+        [],
+        false,
+      )
+      return jsonResponse(body, 200)
+    }
+
+    const initialState = buildRankNewSongsState(rankedIds, unrankedIds)
+    const songPool = [...rankedIds, ...unrankedIds]
+    return createRankingSessionWithState(supabase, userId, songPool, initialState)
+  } catch (error) {
+    console.error("ranking-engine rank_new_songs error:", error)
+    return jsonResponse({ error: "Failed to start ranking new songs" }, 500)
+  }
 }
 
 async function handleRestartSession(supabase: SupabaseClient, userId: string) {
@@ -550,6 +735,7 @@ async function handleSubmitVote(
 
   if (isComplete) {
     await writeFinalRanks(supabase, sessionId, state.sortedList)
+    await deleteOtherUserSessions(supabase, userId, sessionId)
   }
 
   const { error: updateError } = await supabase
@@ -622,7 +808,10 @@ serve(async (req) => {
 
   try {
     if (action === "start_session") {
-      return await handleStartSession(supabase, userId)
+      return await handleStartSession(supabase, userId, payload)
+    }
+    if (action === "rank_new_songs") {
+      return await handleRankNewSongsSession(supabase, userId)
     }
     if (action === "restart_session") {
       return await handleRestartSession(supabase, userId)

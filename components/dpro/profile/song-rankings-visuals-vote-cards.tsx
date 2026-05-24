@@ -2,16 +2,20 @@
 
 import Image from "next/image"
 
-import type { RankingSongRef } from "@/lib/ranking-engine-edge"
+import { SongRankingsProgress } from "@/components/dpro/profile/song-rankings-progress"
 import { cn } from "@/lib/utils"
 
-import { SongRankingsProgress } from "@/components/dpro/profile/song-rankings-progress"
+export type VisualRankingSong = {
+  song_id: string
+  song: string
+  categoryArtwork?: string | null
+}
 
-export interface SongRankingsVoteCardsProps {
-  song1: RankingSongRef | null
-  song2: RankingSongRef | null
+export interface SongRankingsVisualsVoteCardsProps {
+  song1: VisualRankingSong
+  song2: VisualRankingSong
   voting: boolean
-  onPick: (winnerId: string, loserId: string) => void
+  onPick?: (winnerId: string, loserId: string) => void
 }
 
 function VoteCard({
@@ -19,25 +23,25 @@ function VoteCard({
   disabled,
   onClick,
 }: {
-  song: RankingSongRef
+  song: VisualRankingSong
   disabled: boolean
   onClick: () => void
 }) {
   return (
     <button
       type="button"
-      className="song-rankings-vote__card"
+      className="song-rankings-vote__card song-rankings-visuals-vote__card"
       disabled={disabled}
       onClick={onClick}
     >
       {song.categoryArtwork ?
-        <span className="song-rankings-vote__art" aria-hidden>
+        <span className="song-rankings-visuals-vote__art" aria-hidden>
           <Image
             src={song.categoryArtwork}
             alt=""
             width={36}
             height={36}
-            className="song-rankings-vote__art-img"
+            className="song-rankings-visuals-vote__art-img"
             unoptimized
           />
         </span>
@@ -47,14 +51,12 @@ function VoteCard({
   )
 }
 
-export function SongRankingsVoteCards({
+export function SongRankingsVisualsVoteCards({
   song1,
   song2,
   voting,
   onPick,
-}: SongRankingsVoteCardsProps) {
-  if (!song1 || !song2) return null
-
+}: SongRankingsVisualsVoteCardsProps) {
   return (
     <div
       className={cn(
@@ -68,7 +70,7 @@ export function SongRankingsVoteCards({
         <VoteCard
           song={song1}
           disabled={voting}
-          onClick={() => onPick(song1.song_id, song2.song_id)}
+          onClick={() => onPick?.(song1.song_id, song2.song_id)}
         />
         <span className="song-rankings-vote__vs" aria-hidden>
           vs
@@ -76,7 +78,7 @@ export function SongRankingsVoteCards({
         <VoteCard
           song={song2}
           disabled={voting}
-          onClick={() => onPick(song2.song_id, song1.song_id)}
+          onClick={() => onPick?.(song2.song_id, song1.song_id)}
         />
       </div>
       {voting ?
