@@ -113,7 +113,7 @@ export function WlHomeV2SetlistPlaceholderCommunityLink({
           className="size-[22px] shrink-0 object-contain"
           unoptimized
         />
-        <span>Chat in the WTED Community</span>
+        <span>Chat in the Wysteria Lane Community</span>
       </span>
       <ArrowRight
         className="wbtn-icon size-4 shrink-0"
