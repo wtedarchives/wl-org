@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth-context"
 import { SongRankingsChart } from "@/components/dpro/profile/song-rankings-chart"
+import { SongRankingsProgressBar } from "@/components/dpro/profile/song-rankings-progress-bar"
 import { SongRankingsUnrankedSection } from "@/components/dpro/profile/song-rankings-unranked-section"
 import { SongRankingsVoteCards } from "@/components/dpro/profile/song-rankings-vote-cards"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
@@ -42,6 +43,8 @@ function SongRankingsInteractive() {
     isComplete,
     notStarted,
     unrankedSongs,
+    partialRanks,
+    progress,
     submitVote,
     retry,
     restartRanking,
@@ -122,14 +125,24 @@ function SongRankingsInteractive() {
   }
 
   return (
-    <RankingsPanel className="song-rankings-panel--vote">
-      <SongRankingsVoteCards
-        song1={song1}
-        song2={song2}
-        voting={voting}
-        onPick={(winnerId, loserId) => void submitVote(winnerId, loserId)}
-      />
-    </RankingsPanel>
+    <div className="song-rankings-interactive song-rankings-interactive--voting">
+      {progress ?
+        <SongRankingsProgressBar progress={progress} />
+      : null}
+      <RankingsPanel className="song-rankings-panel--vote">
+        <SongRankingsVoteCards
+          song1={song1}
+          song2={song2}
+          voting={voting}
+          onPick={(winnerId, loserId) => void submitVote(winnerId, loserId)}
+        />
+      </RankingsPanel>
+      {partialRanks.length > 0 ?
+        <section className="song-rankings-live-section" aria-label="Ranked so far">
+          <SongRankingsChart ranks={partialRanks} />
+        </section>
+      : null}
+    </div>
   )
 }
 

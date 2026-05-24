@@ -6,6 +6,7 @@ import { fetchUnrankedCatalogSongs } from "@/lib/ranking-unranked-songs"
 import {
   invokeRankingEngine,
   type RankingConfirmedRank,
+  type RankingProgress,
   type RankingSongRef,
 } from "@/lib/ranking-engine-edge"
 
@@ -17,6 +18,8 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
   const [song1, setSong1] = useState<RankingSongRef | null>(null)
   const [song2, setSong2] = useState<RankingSongRef | null>(null)
   const [confirmedRanks, setConfirmedRanks] = useState<RankingConfirmedRank[]>([])
+  const [partialRanks, setPartialRanks] = useState<RankingConfirmedRank[]>([])
+  const [progress, setProgress] = useState<RankingProgress | null>(null)
   const [isComplete, setIsComplete] = useState(false)
   const [notStarted, setNotStarted] = useState(false)
   const [restarting, setRestarting] = useState(false)
@@ -44,6 +47,8 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
       setSong1(response.song1)
       setSong2(response.song2)
       setConfirmedRanks(response.confirmedRanks ?? [])
+      setPartialRanks(response.partialRanks ?? [])
+      setProgress(response.progress ?? null)
       setIsComplete(Boolean(response.isComplete))
       setNotStarted(Boolean(response.notStarted))
 
@@ -162,6 +167,8 @@ export function useSongRankingsInteractive(accessToken: string | null | undefine
     song1,
     song2,
     confirmedRanks,
+    partialRanks,
+    progress,
     isComplete,
     notStarted,
     unrankedSongs,

@@ -300,6 +300,48 @@ async function writeFinalRanks(
   }
 }
 
+function computeRankingProgress(
+  state: RankingState | null,
+  totalSongs: number,
+  isComplete: boolean,
+) {
+  if (totalSongs <= 0) return null
+  if (isComplete) {
+    return {
+      placedSongs: totalSongs,
+      totalSongs,
+      percent: 100,
+    }
+  }
+  if (!state) return null
+
+  const placedSongs = Math.min(state.sortedList.length, totalSongs)
+  const percent = Math.round((placedSongs / totalSongs) * 1000) / 10
+
+  return {
+    placedSongs,
+    totalSongs,
+    percent,
+  }
+}
+
+async function fetchSessionPoolSize(
+  supabase: SupabaseClient,
+  sessionId: string,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from("ranking_sessions")
+    .select("song_pool")
+    .eq("session_id", sessionId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error("Failed to load session pool")
+  }
+
+  return Array.isArray(data?.song_pool) ? data.song_pool.length : 0
+}
+
 async function buildSessionResponse(
   supabase: SupabaseClient,
   sessionId: string,
@@ -307,9 +349,15 @@ async function buildSessionResponse(
   confirmedRanks: ConfirmedRank[],
   isComplete: boolean,
 ) {
+  const totalSongs = isComplete && confirmedRanks.length > 0
+    ? confirmedRanks.length
+    : await fetchSessionPoolSize(supabase, sessionId)
+
   const matchup = state && !isComplete ? getMatchup(state) : null
-  const songIds = matchup ? [matchup.song1Id, matchup.song2Id] : []
-  const songMap = await fetchSongRefs(supabase, songIds)
+  const matchupIds = matchup ? [matchup.song1Id, matchup.song2Id] : []
+  const partialList = !isComplete && state ? state.sortedList : []
+  const hydrateIds = [...new Set([...matchupIds, ...partialList])]
+  const songMap = await fetchSongRefs(supabase, hydrateIds)
 
   const song1 = matchup
     ? songMap.get(matchup.song1Id) ?? { song_id: matchup.song1Id, song: "" }
@@ -318,11 +366,25 @@ async function buildSessionResponse(
     ? songMap.get(matchup.song2Id) ?? { song_id: matchup.song2Id, song: "" }
     : null
 
+  const partialRanks = !isComplete && partialList.length > 0
+    ? partialList.map((songId, index) => {
+      const ref = songMap.get(songId) ?? { song_id: songId, song: "" }
+      return {
+        rank: index + 1,
+        song_id: ref.song_id,
+        song: ref.song,
+        categoryArtwork: ref.categoryArtwork ?? null,
+      }
+    })
+    : []
+
   return {
     session_id: sessionId,
     song1,
     song2,
     confirmedRanks: isComplete ? confirmedRanks : [],
+    partialRanks,
+    progress: computeRankingProgress(state, totalSongs, isComplete),
     isComplete,
   }
 }

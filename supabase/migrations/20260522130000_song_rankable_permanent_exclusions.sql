@@ -1,11 +1,4 @@
--- Rankable song pool: canonical show + release-linked setlist entry, not Cover Songs / placeholders.
--- Refreshed daily via pg_cron; ranking-engine reads songs.song_rankable = true.
-
-ALTER TABLE public.songs
-  ADD COLUMN IF NOT EXISTS song_rankable boolean NOT NULL DEFAULT false;
-
-COMMENT ON COLUMN public.songs.song_rankable IS
-  'Eligible for user song rankings. Maintained by refresh_song_rankable().';
+-- Permanent song_rankable exclusions (jams / one-offs), even if release-linked on a canonical show.
 
 CREATE OR REPLACE FUNCTION public.refresh_song_rankable()
 RETURNS integer
@@ -59,22 +52,4 @@ $$;
 COMMENT ON FUNCTION public.refresh_song_rankable() IS
   'Recompute songs.song_rankable from canonical-show + release-linked rules, minus permanent song-name exclusions.';
 
-CREATE INDEX IF NOT EXISTS songs_song_rankable_true_idx
-  ON public.songs (song_id)
-  WHERE song_rankable = true;
-
--- pg_cron: daily at 06:00 UTC (requires pg_cron on your Supabase plan).
-CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
-
-SELECT cron.unschedule(jobid)
-FROM cron.job
-WHERE jobname = 'refresh-song-rankable-daily';
-
-SELECT cron.schedule(
-  'refresh-song-rankable-daily',
-  '0 6 * * *',
-  $$SELECT public.refresh_song_rankable();$$
-);
-
--- Populate rankable flags on first deploy.
 SELECT public.refresh_song_rankable();

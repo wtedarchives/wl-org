@@ -11,11 +11,19 @@ export type RankingConfirmedRank = RankingSongRef & {
   rank: number
 }
 
+export type RankingProgress = {
+  placedSongs: number
+  totalSongs: number
+  percent: number
+}
+
 export type RankingEngineResponse = {
   session_id: string
   song1: RankingSongRef | null
   song2: RankingSongRef | null
   confirmedRanks: RankingConfirmedRank[]
+  partialRanks?: RankingConfirmedRank[]
+  progress?: RankingProgress | null
   isComplete?: boolean
   notStarted?: boolean
   error?: string
