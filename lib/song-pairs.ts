@@ -92,7 +92,8 @@ export function findSetlistSongPairRanges(
 }
 
 function isRepriseEntry(entry: SetlistEntry): boolean {
-  return entry.entry_short?.trim().toLowerCase() === "reprise"
+  if (entry.entry_short?.trim().toLowerCase() === "reprise") return true
+  return entry.entry_song?.trim().toLowerCase() === "teaprise"
 }
 
 /** Synthetic pair for reprise-combined rows (no DB alt_name; song cell lists both entries). */
@@ -106,9 +107,9 @@ export const REPRISE_COMBINED_PAIR: SongPair = {
 }
 
 /**
- * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`)
- * in the same set with sequential `entry_setnum` values. Skips indices already covered
- * by a song-pair match.
+ * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`
+ * reprise, or `entry_song` Teaprise) in the same set with sequential `entry_setnum`
+ * values. Skips indices already covered by a song-pair match.
  */
 export function findRepriseCombineRanges(
   setlist: SetlistEntry[],
