@@ -30,7 +30,7 @@ const COACH_COLLAPSED_PLAIN_TYPO =
   "block min-w-0 max-w-full text-[10px] leading-2.5 text-muted-foreground whitespace-nowrap break-normal text-clip"
 
 /** Collapsed strip height (row band; pills / control align inside). */
-export const SETLIST_TRUNC_COLLAPSED_ROW_PX = 24.5
+export const SETLIST_TRUNC_COLLAPSED_ROW_PX = 21.5
 
 /**
  * Coach notes (expanded + measure of full HTML). No `w-full` on this root — it breaks shrink-to-fit

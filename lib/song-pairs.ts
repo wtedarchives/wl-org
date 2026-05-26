@@ -91,9 +91,57 @@ export function findSetlistSongPairRanges(
   return ranges
 }
 
+const REPRISE_COMBINE_ENTRY_SONGS = new Set([
+  "teaprise",
+  "[trevor reads poetry]",
+])
+
+function isImprovJamEntry(entry: SetlistEntry): boolean {
+  return entry.entry_song?.trim() === INDEX_SKIP_SONG_IMPROV_JAM
+}
+
+/** True when `entry_segue` is `>` or segues into the next song (`> …`). */
+function hasSegueIntoNext(entry: SetlistEntry): boolean {
+  const segue = entry.entry_segue?.trim()
+  if (!segue) return false
+  return segue.startsWith(">")
+}
+
+function isConsecutiveInSameSet(
+  earlier: SetlistEntry,
+  later: SetlistEntry,
+): boolean {
+  return (
+    earlier.entry_set === later.entry_set &&
+    later.entry_setnum === earlier.entry_setnum + 1
+  )
+}
+
+function indexCoveredByEntryRanges(
+  index: number,
+  ranges: Map<number, SetlistEntry[]>,
+): boolean {
+  for (const [start, entries] of ranges) {
+    if (index >= start && index < start + entries.length) return true
+  }
+  return false
+}
+
+function indexCoveredByPairRanges(
+  index: number,
+  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>,
+): boolean {
+  for (const [start, range] of pairRanges) {
+    if (index >= start && index < start + range.entries.length) return true
+  }
+  return false
+}
+
 function isRepriseEntry(entry: SetlistEntry): boolean {
+  if (isImprovJamEntry(entry)) return false
   if (entry.entry_short?.trim().toLowerCase() === "reprise") return true
-  return entry.entry_song?.trim().toLowerCase() === "teaprise"
+  const song = entry.entry_song?.trim().toLowerCase()
+  return song != null && REPRISE_COMBINE_ENTRY_SONGS.has(song)
 }
 
 /** Synthetic pair for reprise-combined rows (no DB alt_name; song cell lists both entries). */
@@ -106,10 +154,64 @@ export const REPRISE_COMBINED_PAIR: SongPair = {
   alt_name: null,
 }
 
+function appendTrailingRepriseEntries(
+  setlist: SetlistEntry[],
+  startIndex: number,
+  entries: SetlistEntry[],
+): SetlistEntry[] {
+  if (entries.length === 0) return entries
+  const trailing: SetlistEntry[] = []
+  let last = entries[entries.length - 1]!
+  let j = startIndex
+  while (j < setlist.length) {
+    const next = setlist[j]!
+    if (!isRepriseEntry(next)) break
+    if (!isConsecutiveInSameSet(last, next)) break
+    trailing.push(next)
+    last = next
+    j++
+  }
+  return trailing.length > 0 ? [...entries, ...trailing] : entries
+}
+
+/** Extend DB song-pair rows with consecutive reprise entries immediately following the pair. */
+function extendPairRangesWithTrailingReprises(
+  setlist: SetlistEntry[],
+  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>,
+): Map<number, { pair: SongPair; entries: SetlistEntry[] }> {
+  const extended = new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
+  for (const [start, range] of pairRanges) {
+    extended.set(start, {
+      pair: range.pair,
+      entries: appendTrailingRepriseEntries(
+        setlist,
+        start + range.entries.length,
+        range.entries,
+      ),
+    })
+  }
+  return extended
+}
+
+/** Trailing reprise / Teaprise rows adjoined after a pair block (for alt_name display). */
+export function splitPairRowTrailingRepriseEntries(entries: SetlistEntry[]): {
+  coreEntries: SetlistEntry[]
+  trailingRepriseEntries: SetlistEntry[]
+} {
+  let splitAt = entries.length
+  while (splitAt > 0 && isRepriseEntry(entries[splitAt - 1]!)) {
+    splitAt--
+  }
+  return {
+    coreEntries: entries.slice(0, splitAt),
+    trailingRepriseEntries: entries.slice(splitAt),
+  }
+}
+
 /**
  * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`
- * reprise, or `entry_song` Teaprise) in the same set with sequential `entry_setnum`
- * values. Skips indices already covered by a song-pair match.
+ * reprise, or `entry_song` Teaprise / [Trevor Reads Poetry]) in the same set with
+ * sequential `entry_setnum` values. Skips indices already covered by a song-pair match.
  */
 export function findRepriseCombineRanges(
   setlist: SetlistEntry[],
@@ -124,8 +226,13 @@ export function findRepriseCombineRanges(
       continue
     }
 
+    if (indexCoveredByPairRanges(i, pairRanges)) {
+      i++
+      continue
+    }
+
     const prevIndex = i - 1
-    if (pairRanges.has(prevIndex)) {
+    if (indexCoveredByPairRanges(prevIndex, pairRanges)) {
       i++
       continue
     }
@@ -135,11 +242,7 @@ export function findRepriseCombineRanges(
       i++
       continue
     }
-    if (prevEntry.entry_set !== repriseEntry.entry_set) {
-      i++
-      continue
-    }
-    if (repriseEntry.entry_setnum !== prevEntry.entry_setnum + 1) {
+    if (!isConsecutiveInSameSet(prevEntry, repriseEntry)) {
       i++
       continue
     }
@@ -150,8 +253,7 @@ export function findRepriseCombineRanges(
       const next = setlist[j]!
       const last = entries[entries.length - 1]!
       if (!isRepriseEntry(next)) break
-      if (next.entry_set !== last.entry_set) break
-      if (next.entry_setnum !== last.entry_setnum + 1) break
+      if (!isConsecutiveInSameSet(last, next)) break
       entries.push(next)
       j++
     }
@@ -160,6 +262,189 @@ export function findRepriseCombineRanges(
     i = j
   }
   return ranges
+}
+
+function findImprovJamRuns(
+  setlist: SetlistEntry[],
+): { start: number; end: number }[] {
+  const runs: { start: number; end: number }[] = []
+  let i = 0
+  while (i < setlist.length) {
+    if (!isImprovJamEntry(setlist[i]!)) {
+      i++
+      continue
+    }
+    const runStart = i
+    const setId = setlist[i]!.entry_set
+    i++
+    while (i < setlist.length) {
+      const entry = setlist[i]!
+      if (!isImprovJamEntry(entry)) break
+      if (entry.entry_set !== setId) break
+      if (!isConsecutiveInSameSet(setlist[i - 1]!, entry)) break
+      i++
+    }
+    runs.push({ start: runStart, end: i - 1 })
+  }
+  return runs
+}
+
+type ImprovJamCombineGroup = { startIndex: number; entries: SetlistEntry[] }
+
+/** Left chain: anchor with `>` pulls consecutive Improvs while each prior link has `>`. */
+function buildImprovJamLeftChain(
+  anchor: SetlistEntry,
+  improvs: SetlistEntry[],
+): SetlistEntry[] {
+  if (!hasSegueIntoNext(anchor)) return []
+  const chain: SetlistEntry[] = [anchor]
+  for (const improv of improvs) {
+    const prev = chain[chain.length - 1]!
+    if (!hasSegueIntoNext(prev) || !isConsecutiveInSameSet(prev, improv)) break
+    chain.push(improv)
+  }
+  return chain.length >= 2 ? chain : []
+}
+
+/** Right chain: first remaining Improv with `>` pulls improvs then optional next song. */
+function buildImprovJamRightChain(
+  remainingImprovs: SetlistEntry[],
+  after: SetlistEntry | null,
+  suppressForwardToAfter: boolean,
+): SetlistEntry[] {
+  if (remainingImprovs.length === 0 || !hasSegueIntoNext(remainingImprovs[0]!)) {
+    return []
+  }
+
+  const chain: SetlistEntry[] = [remainingImprovs[0]!]
+  for (let k = 1; k < remainingImprovs.length; k++) {
+    const prev = chain[chain.length - 1]!
+    const improv = remainingImprovs[k]!
+    if (!hasSegueIntoNext(prev) || !isConsecutiveInSameSet(prev, improv)) break
+    chain.push(improv)
+  }
+
+  const last = chain[chain.length - 1]!
+  if (
+    !suppressForwardToAfter &&
+    after &&
+    hasSegueIntoNext(last) &&
+    isConsecutiveInSameSet(last, after)
+  ) {
+    chain.push(after)
+  }
+
+  return chain.length >= 2 ? chain : []
+}
+
+function findImprovJamGroupsForRun(
+  setlist: SetlistEntry[],
+  runStart: number,
+  runEnd: number,
+  isBlocked: (index: number) => boolean,
+): ImprovJamCombineGroup[] {
+  const improvs = setlist.slice(runStart, runEnd + 1)
+  const anchorIndex = runStart - 1
+  const anchor =
+    anchorIndex >= 0 &&
+    !isBlocked(anchorIndex) &&
+    !isImprovJamEntry(setlist[anchorIndex]!) &&
+    isConsecutiveInSameSet(setlist[anchorIndex]!, improvs[0]!)
+      ? setlist[anchorIndex]!
+      : null
+
+  const afterIndex = runEnd + 1
+  const after =
+    afterIndex < setlist.length &&
+    !isBlocked(afterIndex) &&
+    !isImprovJamEntry(setlist[afterIndex]!) &&
+    isConsecutiveInSameSet(setlist[runEnd]!, setlist[afterIndex]!)
+      ? setlist[afterIndex]!
+      : null
+
+  const leftChain = anchor ? buildImprovJamLeftChain(anchor, improvs) : []
+  const improvsInLeft = leftChain.length > 0 ? leftChain.length - 1 : 0
+  const remainingImprovs = improvs.slice(improvsInLeft)
+
+  const leftAbsorbedAllImprovs = improvsInLeft === improvs.length
+  const suppressForwardToAfter =
+    leftAbsorbedAllImprovs &&
+    leftChain.length > 0 &&
+    leftChain.every(hasSegueIntoNext) &&
+    after != null
+
+  const groups: ImprovJamCombineGroup[] = []
+
+  if (leftChain.length >= 2) {
+    groups.push({ startIndex: anchorIndex, entries: leftChain })
+  }
+
+  const rightChain = buildImprovJamRightChain(
+    remainingImprovs,
+    after,
+    suppressForwardToAfter,
+  )
+  if (rightChain.length >= 2) {
+    groups.push({
+      startIndex: runStart + improvsInLeft,
+      entries: rightChain,
+    })
+  }
+
+  return groups
+}
+
+/**
+ * `[Improv/Jam]` combines via `entry_segue` `>` chains in the same set:
+ * - Left: prior song with `>` pulls consecutive Improvs while each link has `>`.
+ * - Right: first unmatched Improv with `>` pulls later Improvs and optionally the
+ *   next non-Improv song — unless the left chain absorbed every Improv and every
+ *   entry in that left chain has `>` (then the following song stays separate).
+ */
+export function findImprovJamCombineRanges(
+  setlist: SetlistEntry[],
+  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>,
+  repriseRanges: Map<number, SetlistEntry[]>,
+): Map<number, SetlistEntry[]> {
+  const ranges = new Map<number, SetlistEntry[]>()
+  const isBlocked = (index: number) =>
+    indexCoveredByPairRanges(index, pairRanges) ||
+    indexCoveredByEntryRanges(index, repriseRanges) ||
+    indexCoveredByEntryRanges(index, ranges)
+
+  for (const { start, end } of findImprovJamRuns(setlist)) {
+    let runBlocked = false
+    for (let idx = start; idx <= end; idx++) {
+      if (isBlocked(idx)) {
+        runBlocked = true
+        break
+      }
+    }
+    if (runBlocked) continue
+
+    for (const group of findImprovJamGroupsForRun(
+      setlist,
+      start,
+      end,
+      isBlocked,
+    )) {
+      ranges.set(group.startIndex, group.entries)
+    }
+  }
+
+  return ranges
+}
+
+function mergeEntryRanges(
+  ...rangeMaps: Map<number, SetlistEntry[]>[]
+): Map<number, SetlistEntry[]> {
+  const merged = new Map<number, SetlistEntry[]>()
+  for (const map of rangeMaps) {
+    for (const [start, entries] of map) {
+      merged.set(start, entries)
+    }
+  }
+  return merged
 }
 
 export type SetlistTableRowItem =
@@ -181,11 +466,16 @@ export function buildSetlistTableRows(
   songPairs: SongPair[],
   expandedPairKeys: Set<string>,
 ): SetlistTableRowItem[] {
-  const pairRanges =
+  const basePairRanges =
     songPairs.length > 0 ?
       findSetlistSongPairRanges(setlist, songPairs)
     : new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
-  const repriseRanges = findRepriseCombineRanges(setlist, pairRanges)
+  const pairRanges = extendPairRangesWithTrailingReprises(setlist, basePairRanges)
+  const baseRepriseRanges = findRepriseCombineRanges(setlist, pairRanges)
+  const repriseRanges = mergeEntryRanges(
+    baseRepriseRanges,
+    findImprovJamCombineRanges(setlist, pairRanges, baseRepriseRanges),
+  )
 
   if (pairRanges.size === 0 && repriseRanges.size === 0) {
     return setlist.map((entry) => ({ type: "single", entry }))
