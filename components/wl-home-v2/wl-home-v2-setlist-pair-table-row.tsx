@@ -8,7 +8,7 @@ import {
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-last-cell"
 import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entry-stats-tooltip"
-import { entryHasSongStatsLines } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
+import { entriesHaveSongStatsLines } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
@@ -23,8 +23,8 @@ import {
   pairCombinedLength,
   pairHasWted,
   pairPlacementBarTokens,
+  pairCombinedRarity,
   pairSharedLastCount,
-  pairSharedRarity,
   pairSharedTourCount,
 } from "@/lib/song-pairs"
 import {
@@ -139,10 +139,10 @@ export function WlHomeV2SetlistPairTableRow({
 
   const sharedLastCount = pairSharedLastCount(entries)
   const sharedTourCount = pairSharedTourCount(entries)
-  const sharedRarity = pairSharedRarity(entries)
+  const combinedRarity = pairCombinedRarity(entries)
   const lastBadgeStyle = getLastCountBadgeStyle(sharedLastCount)
-  const rarityPillBackground = getRarityPillBackground(sharedRarity)
-  const rarityPillBorderColor = getRarityColor(sharedRarity)
+  const rarityPillBackground = getRarityPillBackground(combinedRarity)
+  const rarityPillBorderColor = getRarityColor(combinedRarity)
 
   return (
     <tr
@@ -286,13 +286,13 @@ export function WlHomeV2SetlistPairTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            {sharedRarity ?
+            {combinedRarity ?
               isDesktop ?
-                <SetlistEntryStatsTooltip entry={primaryEntry} wlV2Chrome>
+                <SetlistEntryStatsTooltip entries={entries} wlV2Chrome>
                   <span
                     className={cn(
                       "rare-pill",
-                      entryHasSongStatsLines(primaryEntry) && "cursor-default",
+                      entriesHaveSongStatsLines(entries) && "cursor-default",
                     )}
                     style={
                       {
@@ -301,7 +301,7 @@ export function WlHomeV2SetlistPairTableRow({
                       } as CSSProperties
                     }
                   >
-                    {sharedRarity}
+                    {combinedRarity}
                   </span>
                 </SetlistEntryStatsTooltip>
               : <span
@@ -313,7 +313,7 @@ export function WlHomeV2SetlistPairTableRow({
                     } as CSSProperties
                   }
                 >
-                  {sharedRarity}
+                  {combinedRarity}
                 </span>
             : <SetlistExpandButton
                 onClick={onExpand}

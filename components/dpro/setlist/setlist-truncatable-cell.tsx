@@ -176,6 +176,10 @@ export function SetlistTruncatableCell({
     useExternalExpand ? needsMore : !expanded && (needsMore || forceCollapsedPreview)
   const showExpandControl = showCollapsedPreview && needsMore
   const showFullInline = useExternalExpand ? !needsMore : !showCollapsedPreview
+  const useCollapsedStripHeight =
+    showCollapsedPreview &&
+    (variant === "pills" ||
+      (variant === "block" && showExpandControl))
 
   const expand = useCallback(() => {
     if (onExpandClick) {
@@ -233,9 +237,7 @@ export function SetlistTruncatableCell({
           className={cn(
             "flex min-w-0 items-center gap-1 overflow-hidden transition-[max-height] duration-200 ease-out",
           )}
-          style={
-            variant === "pills" ? collapsedOuterStyle : undefined
-          }
+          style={useCollapsedStripHeight ? collapsedOuterStyle : undefined}
         >
           <div className="flex min-h-0 min-w-0 flex-1 items-center overflow-hidden">
             {variant === "pills" ?
@@ -247,7 +249,10 @@ export function SetlistTruncatableCell({
               </div>
             : useCollapseHtml ?
               <div
-                className="max-h-[1lh] min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden"
+                className={cn(
+                  "min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden",
+                  useCollapsedStripHeight ? "max-h-full" : "max-h-[1lh]",
+                )}
                 style={COLLAPSED_RIGHT_FADE_MASK_STYLE}
               >
                 <div
@@ -256,7 +261,10 @@ export function SetlistTruncatableCell({
                 />
               </div>
             : <div
-                className="max-h-[1lh] min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden"
+                className={cn(
+                  "min-h-0 min-w-0 max-w-full overflow-x-hidden overflow-y-hidden",
+                  useCollapsedStripHeight ? "max-h-full" : "max-h-[1lh]",
+                )}
                 style={COLLAPSED_RIGHT_FADE_MASK_STYLE}
               >
                 <div className={blockPlain}>{plainCollapsedText}</div>

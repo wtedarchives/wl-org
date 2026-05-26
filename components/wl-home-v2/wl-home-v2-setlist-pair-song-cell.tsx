@@ -95,12 +95,12 @@ export function WlHomeV2SetlistPairSongCell({
         {jotyEntries.map((entry, index) => {
           const jotyAttr = jotyRoundDataAttr(entry.joty_round!)
           return (
-            <span key={entry.entry_id} className="inline-flex items-center">
+            <Fragment key={entry.entry_id}>
               {index > 0 ?
-                <span className="song-cell-joty-sep" aria-hidden>
-                  {" "}
-                  •{" "}
-                </span>
+                <>
+                  {"\u00A0"}
+                  {"\u00A0"}
+                </>
               : null}
               {onJotyClick ?
                 <button
@@ -115,7 +115,7 @@ export function WlHomeV2SetlistPairSongCell({
               : <span className="joty-pill" data-joty-round={jotyAttr}>
                   {entry.joty_round}
                 </span>}
-            </span>
+            </Fragment>
           )
         })}
       </div>

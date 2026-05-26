@@ -11979,11 +11979,11 @@
   gap: 6px;
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .song-cell-joty--pair {
-  margin-left: 0;
+  margin-left: 12px;
 }
-.wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .song-cell-joty-sep {
-  color: rgba(255, 255, 255, 0.45);
-  font-weight: 400;
+.wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .song-cell-joty--pair .joty-pill,
+.wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .song-cell-joty--pair button.joty-pill {
+  margin-left: 0;
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table td.last-cell.center,
 .wl-home-v2 .wl-home-v2-setlist .set-table td.tour-cell.center,
@@ -12037,6 +12037,23 @@
 }
 .wl-home-v2 .wl-home-v2-setlist .set-table .setlist-pair-coach-block + .setlist-pair-coach-block {
   margin-top: 0.35em;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  td.notes-cell
+  .setlist-v2-notes-html--pair-collapsed {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  td.notes-cell
+  .setlist-v2-notes-html--pair-collapsed
+  .setlist-pair-coach-song-label {
+  margin-bottom: 0;
 }
 .wl-home-v2
   .wl-home-v2-setlist

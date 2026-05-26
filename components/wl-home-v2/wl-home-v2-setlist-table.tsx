@@ -10,6 +10,7 @@ import {
 import {
   buildSetlistTableRows,
   computeDisplayNumbersForTableRows,
+  REPRISE_COMBINED_PAIR,
   tableRowEntryIds,
   tableRowEntrySet,
   tableRowPrimaryEntry,
@@ -214,6 +215,8 @@ export function WlHomeV2SetlistTable({
                 const isRowHovered = rowHoverIds.includes(hoveredEntryId ?? "")
                 const rowKey =
                   row.type === "single" ? row.entry.entry_id : row.expandKey
+                const combinedPair =
+                  row.type === "pair" ? row.pair : REPRISE_COMBINED_PAIR
 
                 return (
                   <Fragment key={rowKey}>
@@ -230,9 +233,9 @@ export function WlHomeV2SetlistTable({
                         <td className="set-divider-cell" colSpan={fullColSpan} />
                       </tr>
                     : null}
-                    {row.type === "pair" ?
+                    {row.type === "pair" || row.type === "reprise" ?
                       <WlHomeV2SetlistPairTableRow
-                        pair={row.pair}
+                        pair={combinedPair}
                         entries={row.entries}
                         displayNumber={displayNumbers[index] ?? null}
                         showCanonColumns={showCanonColumns}
@@ -253,7 +256,7 @@ export function WlHomeV2SetlistTable({
                         }
                         onJotyBadgeClick={onJotyBadgeClick}
                         onSongClick={onPairSongClick ?
-                            (entries) => onPairSongClick(entries, row.pair)
+                            (entries) => onPairSongClick(entries, combinedPair)
                           : undefined}
                         onWtedClick={onPairWtedClick}
                         showAdminUi={showAdminUi}

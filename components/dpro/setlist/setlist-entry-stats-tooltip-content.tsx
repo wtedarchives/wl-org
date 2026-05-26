@@ -15,11 +15,11 @@ export function entryHasSongStatsLines(entry: SetlistEntry): boolean {
   )
 }
 
-export function SetlistEntryStatsTooltipContent({
-  entry,
-}: {
-  entry: SetlistEntry
-}) {
+export function entriesHaveSongStatsLines(entries: SetlistEntry[]): boolean {
+  return entries.some(entryHasSongStatsLines)
+}
+
+function SetlistEntryStatsTooltipSongBlock({ entry }: { entry: SetlistEntry }) {
   return (
     <div className="space-y-1 text-left leading-tight">
       <div className="font-medium leading-tight">
@@ -55,6 +55,37 @@ export function SetlistEntryStatsTooltipContent({
           }}
         />
       ) : null}
+    </div>
+  )
+}
+
+export function SetlistEntryStatsTooltipContent({
+  entry,
+  entries,
+}: {
+  entry?: SetlistEntry
+  entries?: SetlistEntry[]
+}) {
+  const list = entries?.length ? entries : entry ? [entry] : []
+  if (list.length <= 1) {
+    const single = list[0]
+    if (!single) return null
+    return <SetlistEntryStatsTooltipSongBlock entry={single} />
+  }
+
+  return (
+    <div className="space-y-3 text-left leading-tight">
+      {list.map((sectionEntry, index) => (
+        <div key={sectionEntry.entry_id}>
+          {index > 0 ?
+            <div
+              className="mb-3 border-t border-white/15"
+              aria-hidden={true}
+            />
+          : null}
+          <SetlistEntryStatsTooltipSongBlock entry={sectionEntry} />
+        </div>
+      ))}
     </div>
   )
 }

@@ -91,11 +91,86 @@ export function findSetlistSongPairRanges(
   return ranges
 }
 
+function isRepriseEntry(entry: SetlistEntry): boolean {
+  return entry.entry_short?.trim().toLowerCase() === "reprise"
+}
+
+/** Synthetic pair for reprise-combined rows (no DB alt_name; song cell lists both entries). */
+export const REPRISE_COMBINED_PAIR: SongPair = {
+  uuid: "__reprise_combined__",
+  song_1: "",
+  song_2: "",
+  song_3: null,
+  song_4: null,
+  alt_name: null,
+}
+
+/**
+ * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`)
+ * in the same set with sequential `entry_setnum` values. Skips indices already covered
+ * by a song-pair match.
+ */
+export function findRepriseCombineRanges(
+  setlist: SetlistEntry[],
+  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>,
+): Map<number, SetlistEntry[]> {
+  const ranges = new Map<number, SetlistEntry[]>()
+  let i = 1
+  while (i < setlist.length) {
+    const repriseEntry = setlist[i]!
+    if (!isRepriseEntry(repriseEntry)) {
+      i++
+      continue
+    }
+
+    const prevIndex = i - 1
+    if (pairRanges.has(prevIndex)) {
+      i++
+      continue
+    }
+
+    const prevEntry = setlist[prevIndex]!
+    if (isRepriseEntry(prevEntry)) {
+      i++
+      continue
+    }
+    if (prevEntry.entry_set !== repriseEntry.entry_set) {
+      i++
+      continue
+    }
+    if (repriseEntry.entry_setnum !== prevEntry.entry_setnum + 1) {
+      i++
+      continue
+    }
+
+    const entries: SetlistEntry[] = [prevEntry, repriseEntry]
+    let j = i + 1
+    while (j < setlist.length) {
+      const next = setlist[j]!
+      const last = entries[entries.length - 1]!
+      if (!isRepriseEntry(next)) break
+      if (next.entry_set !== last.entry_set) break
+      if (next.entry_setnum !== last.entry_setnum + 1) break
+      entries.push(next)
+      j++
+    }
+
+    ranges.set(prevIndex, entries)
+    i = j
+  }
+  return ranges
+}
+
 export type SetlistTableRowItem =
   | { type: "single"; entry: SetlistEntry }
   | {
       type: "pair"
       pair: SongPair
+      entries: SetlistEntry[]
+      expandKey: string
+    }
+  | {
+      type: "reprise"
       entries: SetlistEntry[]
       expandKey: string
     }
@@ -105,34 +180,58 @@ export function buildSetlistTableRows(
   songPairs: SongPair[],
   expandedPairKeys: Set<string>,
 ): SetlistTableRowItem[] {
-  if (songPairs.length === 0) {
+  const pairRanges =
+    songPairs.length > 0 ?
+      findSetlistSongPairRanges(setlist, songPairs)
+    : new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
+  const repriseRanges = findRepriseCombineRanges(setlist, pairRanges)
+
+  if (pairRanges.size === 0 && repriseRanges.size === 0) {
     return setlist.map((entry) => ({ type: "single", entry }))
   }
 
-  const pairRanges = findSetlistSongPairRanges(setlist, songPairs)
   const items: SetlistTableRowItem[] = []
   let i = 0
   while (i < setlist.length) {
-    const range = pairRanges.get(i)
-    if (range) {
-      const expandKey = range.entries[0]!.entry_id
+    const pairRange = pairRanges.get(i)
+    if (pairRange) {
+      const expandKey = pairRange.entries[0]!.entry_id
       if (expandedPairKeys.has(expandKey)) {
-        for (const entry of range.entries) {
+        for (const entry of pairRange.entries) {
           items.push({ type: "single", entry })
         }
       } else {
         items.push({
           type: "pair",
-          pair: range.pair,
-          entries: range.entries,
+          pair: pairRange.pair,
+          entries: pairRange.entries,
           expandKey,
         })
       }
-      i += range.entries.length
-    } else {
-      items.push({ type: "single", entry: setlist[i]! })
-      i++
+      i += pairRange.entries.length
+      continue
     }
+
+    const repriseEntries = repriseRanges.get(i)
+    if (repriseEntries) {
+      const expandKey = repriseEntries[0]!.entry_id
+      if (expandedPairKeys.has(expandKey)) {
+        for (const entry of repriseEntries) {
+          items.push({ type: "single", entry })
+        }
+      } else {
+        items.push({
+          type: "reprise",
+          entries: repriseEntries,
+          expandKey,
+        })
+      }
+      i += repriseEntries.length
+      continue
+    }
+
+    items.push({ type: "single", entry: setlist[i]! })
+    i++
   }
   return items
 }
@@ -290,32 +389,40 @@ function pairSharedScalar<T>(
     value == null || value === "",
 ): T | null {
   if (entries.length === 0) return null
-  const shared = getValue(entries[0]!)
-  if (!entries.every((entry) => getValue(entry) === shared)) return null
-  if (isEmpty(shared)) return null
+
+  const nonEmpty = entries
+    .map(getValue)
+    .filter((value) => !isEmpty(value))
+  if (nonEmpty.length === 0) return null
+
+  const shared = nonEmpty[0]!
+  if (!nonEmpty.every((value) => value === shared)) return null
   return shared
 }
 
-/** When every entry shares the same Last badge text, return it for collapsed pair rows. */
+/** When entries share the same Last badge text (ignoring blanks), return it for collapsed pair rows. */
 export function pairSharedLastCount(entries: SetlistEntry[]): string | null {
   return pairSharedScalar(entries, (entry) => entry.last_count ?? "")
 }
 
-/** When every entry shares the same Tour count, return it for collapsed pair rows. */
+/** When entries share the same Tour count (ignoring blanks), return it for collapsed pair rows. */
 export function pairSharedTourCount(entries: SetlistEntry[]): string | null {
   return pairSharedScalar(entries, (entry) => entry.song_tour_count ?? "")
 }
 
-/** When every entry shares the same computed rarity, return it for collapsed pair rows. */
-export function pairSharedRarity(entries: SetlistEntry[]): string | null {
-  return pairSharedScalar(
-    entries,
-    (entry) =>
-      calculateRarity(
-        entry.times_played_num,
-        entry.shows_since_debut_num,
-      ) ?? "",
-  )
+/** Combined rarity for collapsed pair rows: Σ times_played_num ÷ Σ shows_since_debut_num. */
+export function pairCombinedRarity(entries: SetlistEntry[]): string {
+  let timesPlayedTotal = 0
+  let showsSinceDebutTotal = 0
+  for (const entry of entries) {
+    if (entry.times_played_num != null) {
+      timesPlayedTotal += entry.times_played_num
+    }
+    if (entry.shows_since_debut_num != null) {
+      showsSinceDebutTotal += entry.shows_since_debut_num
+    }
+  }
+  return calculateRarity(timesPlayedTotal, showsSinceDebutTotal)
 }
 
 /** Ordered non-`none` placement tokens for pair rows (consecutive duplicates collapsed). */

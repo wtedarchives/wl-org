@@ -11,6 +11,7 @@ import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-
 import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 import {
+  entriesHaveSongStatsLines,
   entryHasSongStatsLines,
   SetlistEntryStatsTooltipContent,
 } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
@@ -18,14 +19,24 @@ import {
 /** Per-row song stats panel (times played, shows since debut, rarity copy). */
 export function SetlistEntryStatsTooltip({
   entry,
+  entries,
   wlV2Chrome = false,
   children,
 }: {
-  entry: SetlistEntry
+  entry?: SetlistEntry
+  entries?: SetlistEntry[]
   wlV2Chrome?: boolean
   children: ReactElement
 }) {
-  if (!entryHasSongStatsLines(entry)) {
+  const list = entries?.length ? entries : entry ? [entry] : []
+  const hasStats =
+    list.length > 1 ?
+      entriesHaveSongStatsLines(list)
+    : list[0] ?
+      entryHasSongStatsLines(list[0])
+    : false
+
+  if (!hasStats) {
     return children
   }
 
@@ -44,7 +55,10 @@ export function SetlistEntryStatsTooltip({
           }
         : { side: "top" as const })}
       >
-        <SetlistEntryStatsTooltipContent entry={entry} />
+        <SetlistEntryStatsTooltipContent
+          entry={list.length === 1 ? list[0] : undefined}
+          entries={list.length > 1 ? list : undefined}
+        />
       </TooltipContent>
     </Tooltip>
   )
