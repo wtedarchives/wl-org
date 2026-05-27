@@ -62,9 +62,7 @@ export function WlHomeV2SetlistPageClient() {
         adminLinkCopied={state.showAdminUi ? state.linkCopied : false}
         setlistTextCopied={state.setlistTextCopied}
         onAdminCopyShowId={state.showAdminUi ? state.handleCopyLink : undefined}
-        onCopySetlistText={
-          state.showAdminUi ? state.handleCopySetlistText : undefined
-        }
+        onCopySetlistText={state.handleCopySetlistText}
         onAdminEditShow={state.showAdminUi ? state.handleEditShow : undefined}
         onShareSetlistImage={state.showAdminUi ? state.openShareExport : undefined}
         copiedEntryIds={state.showAdminUi ? state.copiedEntryIds : undefined}

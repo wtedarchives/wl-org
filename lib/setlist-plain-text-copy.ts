@@ -18,6 +18,28 @@ export function stripHtmlToPlainText(html: string): string {
   ).trim()
 }
 
+/** Like {@link stripHtmlToPlainText}, but `<br>` / `<br />` become newlines. */
+function stripHtmlToPlainTextPreserveLineBreaks(html: string): string {
+  const trimmed = html.trim()
+  if (!trimmed) return ""
+
+  const withBreaks = trimmed.replace(/<br\s*\/?>/gi, "\n")
+
+  if (typeof document !== "undefined") {
+    const el = document.createElement("div")
+    el.innerHTML = withBreaks
+    return (el.textContent ?? withBreaks).trim()
+  }
+
+  return decodeHtmlEntitiesForDisplay(
+    withBreaks.replace(/<[^>]*>/g, ""),
+  ).trim()
+}
+
+function boldItalicPlainText(text: string): string {
+  return `**_${text}_**`
+}
+
 function entrySongDisplayName(entry: SetlistEntry): string {
   return entry.songs?.song_displayname?.trim() || entry.entry_song.trim()
 }
@@ -37,7 +59,7 @@ export function formatSetlistEntryPlainTextLine(entry: SetlistEntry): string {
   return line
 }
 
-/** Clipboard body: bold show header, em dash, then one song per line (sets also separated by em dash). */
+/** Clipboard body: bold/italic header, setlist, optional callbacks notes. */
 export function buildSetlistPlainTextCopy(
   show: Show,
   setlist: SetlistEntry[],
@@ -48,10 +70,10 @@ export function buildSetlistPlainTextCopy(
 
   const headerLines: string[] = []
   const titleParts: string[] = []
-  if (date) titleParts.push(`**${date}**`)
-  if (group) titleParts.push(`**${group}**`)
+  if (date) titleParts.push(boldItalicPlainText(date))
+  if (group) titleParts.push(boldItalicPlainText(group))
   if (titleParts.length > 0) headerLines.push(titleParts.join(" · "))
-  if (location) headerLines.push(`**${location}**`)
+  if (location) headerLines.push(boldItalicPlainText(location))
 
   const setlistLines: string[] = []
   for (let i = 0; i < setlist.length; i++) {
@@ -62,5 +84,15 @@ export function buildSetlistPlainTextCopy(
     setlistLines.push(formatSetlistEntryPlainTextLine(entry))
   }
 
-  return [...headerLines, "—", ...setlistLines].join("\n")
+  const parts: string[] = [...headerLines, "", ...setlistLines]
+
+  const callbacks = show.show_callbacks?.trim()
+  if (callbacks) {
+    const callbacksPlain = stripHtmlToPlainTextPreserveLineBreaks(callbacks)
+    if (callbacksPlain) {
+      parts.push("", "Notes:", callbacksPlain)
+    }
+  }
+
+  return parts.join("\n")
 }
