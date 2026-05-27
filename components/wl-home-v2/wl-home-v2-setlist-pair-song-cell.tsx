@@ -24,6 +24,17 @@ type WlHomeV2SetlistPairSongCellProps = {
   showTooltips?: boolean
 }
 
+function entrySegueDisplayText(entry: SetlistEntry | null | undefined): string {
+  if (!entry?.entry_segue?.trim()) return ""
+  return entry.entry_segue.replace(/^>\s*/, "").trim()
+}
+
+function EntrySegue({ entry }: { entry: SetlistEntry | null | undefined }) {
+  if (!entry?.entry_segue?.trim()) return null
+  const text = entrySegueDisplayText(entry)
+  return <span className="segue">→ {text}</span>
+}
+
 function PairSongSequence({
   entries,
   onSongClick,
@@ -38,9 +49,6 @@ function PairSongSequence({
       entry.entry_song,
       entry.entry_short,
     )
-    const segueText = entry.entry_segue ?
-      entry.entry_segue.replace(/^>\s*/, "").trim()
-    : ""
 
     return (
       <Fragment key={entry.entry_id}>
@@ -68,9 +76,7 @@ function PairSongSequence({
         {shortShown && entry.entry_short ?
           <span className="short">{entry.entry_short}</span>
         : null}
-        {entry.entry_segue ?
-          <span className="segue">→ {segueText}</span>
-        : null}
+        <EntrySegue entry={entry} />
       </Fragment>
     )
   })
@@ -85,7 +91,10 @@ export function WlHomeV2SetlistPairSongCell({
   showTooltips = false,
 }: WlHomeV2SetlistPairSongCellProps) {
   const altName = pair.alt_name?.trim()
-  const { trailingRepriseEntries } = splitPairRowTrailingRepriseEntries(entries)
+  const { coreEntries, trailingRepriseEntries } =
+    splitPairRowTrailingRepriseEntries(entries)
+  const lastCoreEntry = coreEntries[coreEntries.length - 1]
+  const lastCoreHasSegue = !!lastCoreEntry?.entry_segue?.trim()
   const jotyEntries = entries.filter((e) => e.joty_round)
 
   const altNameHit =
@@ -101,20 +110,42 @@ export function WlHomeV2SetlistPairSongCell({
       : <SongDisplayName song={altName} />
     : null
 
-  const songMainInner =
-    altName && trailingRepriseEntries.length > 0 ?
+  const altNameBlock =
+    altName ?
       <>
         {altNameHit}
-        <span className="segue" aria-hidden>
-          →
-        </span>
+        <EntrySegue entry={lastCoreEntry} />
+      </>
+    : null
+
+  const trailingRepriseBlock =
+    trailingRepriseEntries.length > 0 ?
+      <>
+        {!lastCoreHasSegue ?
+          <span className="segue" aria-hidden>
+            →
+          </span>
+        : null}
         <PairSongSequence
           entries={trailingRepriseEntries}
           onSongClick={onSongClick}
         />
       </>
+    : null
+
+  const songMainInner =
+    altName && trailingRepriseEntries.length > 0 ?
+      <>
+        {altNameBlock}
+        {trailingRepriseBlock}
+      </>
     : altName ?
-      altNameHit
+      altNameBlock
+    : trailingRepriseEntries.length > 0 ?
+      <>
+        <PairSongSequence entries={coreEntries} onSongClick={onSongClick} />
+        {trailingRepriseBlock}
+      </>
     : <PairSongSequence entries={entries} onSongClick={onSongClick} />
 
   const songMain = (

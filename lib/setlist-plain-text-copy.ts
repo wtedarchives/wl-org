@@ -23,12 +23,13 @@ function entrySongDisplayName(entry: SetlistEntry): string {
 }
 
 export function formatSetlistEntryPlainTextLine(entry: SetlistEntry): string {
-  let line = entrySongDisplayName(entry)
+  const song = entrySongDisplayName(entry)
+  let line = `**${song}**`
 
   const short = entry.entry_short?.trim()
   if (short) line += ` [${short}]`
 
-  if (entry.entry_segue?.trim()) line += " >"
+  if (entry.entry_segue?.trim()) line += " →"
 
   const notes = entry.entry_coachnotes?.trim()
   if (notes) line += ` (${stripHtmlToPlainText(notes)})`
@@ -45,7 +46,12 @@ export function buildSetlistPlainTextCopy(
   const group = show.show_group?.trim() ?? ""
   const location = show.show_venue_location?.trim() ?? ""
 
-  const headerLines = [`${date} · ${group}`, location].filter(Boolean)
+  const headerLines: string[] = []
+  const titleParts: string[] = []
+  if (date) titleParts.push(`_${date}_`)
+  if (group) titleParts.push(`_${group}_`)
+  if (titleParts.length > 0) headerLines.push(titleParts.join(" · "))
+  if (location) headerLines.push(`_${location}_`)
 
   const setlistLines: string[] = []
   for (let i = 0; i < setlist.length; i++) {
