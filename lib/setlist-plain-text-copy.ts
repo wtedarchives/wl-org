@@ -37,7 +37,7 @@ export function formatSetlistEntryPlainTextLine(entry: SetlistEntry): string {
   return line
 }
 
-/** Clipboard body: show header + blank line + one song per line, sets separated by em dash. */
+/** Clipboard body: bold show header, em dash, then one song per line (sets also separated by em dash). */
 export function buildSetlistPlainTextCopy(
   show: Show,
   setlist: SetlistEntry[],
@@ -48,10 +48,10 @@ export function buildSetlistPlainTextCopy(
 
   const headerLines: string[] = []
   const titleParts: string[] = []
-  if (date) titleParts.push(`_${date}_`)
-  if (group) titleParts.push(`_${group}_`)
+  if (date) titleParts.push(`**${date}**`)
+  if (group) titleParts.push(`**${group}**`)
   if (titleParts.length > 0) headerLines.push(titleParts.join(" · "))
-  if (location) headerLines.push(`_${location}_`)
+  if (location) headerLines.push(`**${location}**`)
 
   const setlistLines: string[] = []
   for (let i = 0; i < setlist.length; i++) {
@@ -62,5 +62,5 @@ export function buildSetlistPlainTextCopy(
     setlistLines.push(formatSetlistEntryPlainTextLine(entry))
   }
 
-  return [...headerLines, "", ...setlistLines].join("\n")
+  return [...headerLines, "—", ...setlistLines].join("\n")
 }
