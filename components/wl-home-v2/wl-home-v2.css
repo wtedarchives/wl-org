@@ -12395,7 +12395,15 @@
   padding-bottom: 1px;
   white-space: nowrap;
 }
-/* When a coach note is inline-expanded, hold the column at 400px instead of shrink-wrapping to shorter rows. */
+/* When personnel or coach notes are inline-expanded, hold the column at 400px instead of shrink-wrapping to shorter rows. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table:has(td.personnel-cell [data-setlist-trunc-expanded="true"])
+  th.set-table-personnel-head,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table:has(td.personnel-cell [data-setlist-trunc-expanded="true"])
+  td.personnel-cell,
 .wl-home-v2
   .wl-home-v2-setlist
   .set-table:has(td.notes-cell [data-setlist-trunc-expanded="true"])

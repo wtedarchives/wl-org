@@ -194,7 +194,7 @@ export function DisplaySetlistTableHeader({
           className={cn(
             hdrPad,
             wlHdr ?
-              cn("max-w-[400px] whitespace-normal")
+              cn("set-table-personnel-head max-w-[400px] whitespace-normal")
             : cn("h-8 w-max max-w-[300px] text-muted-foreground"),
           )}
         >

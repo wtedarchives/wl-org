@@ -119,7 +119,7 @@ export function WtedEpisodeSetlistTableHead({
         className={cn(
           hdrPad,
           wl ?
-            "max-w-[400px] whitespace-normal"
+            "set-table-personnel-head max-w-[400px] whitespace-normal"
           : cn("h-8 w-max max-w-[300px] text-muted-foreground"),
         )}
       >

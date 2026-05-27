@@ -110,7 +110,7 @@ export function WlHomeV2SetlistTableHead({
         {showCanonColumns ?
           <th className="center">Rarity</th>
         : null}
-        <th>Personnel</th>
+        <th className="set-table-personnel-head">Personnel</th>
         {showCoachColumn ?
           <th className="set-table-coach-notes-head">Coach&apos;s Notes</th>
         : null}
