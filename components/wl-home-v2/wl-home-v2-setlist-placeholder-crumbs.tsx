@@ -28,7 +28,9 @@ export type WlHomeV2SetlistPlaceholderCrumbsBarProps = {
   openArchiveHub: (() => void) | undefined
   showAdminUi?: boolean
   adminLinkCopied?: boolean
+  setlistTextCopied?: boolean
   onAdminCopyShowId?: () => void
+  onCopySetlistText?: () => void
   onAdminEditShow?: () => void
   /** Opens share-image modal (admin toolbar upload icon). */
   onShareSetlistImage?: () => void
@@ -45,7 +47,9 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
   openArchiveHub,
   showAdminUi,
   adminLinkCopied,
+  setlistTextCopied,
   onAdminCopyShowId,
+  onCopySetlistText,
   onAdminEditShow,
   onShareSetlistImage,
 }: WlHomeV2SetlistPlaceholderCrumbsBarProps) {
@@ -62,33 +66,40 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
       }
       selectors={
         <>
-          {onShareSetlistImage || onAdminCopyShowId || onAdminEditShow ?
+          {onShareSetlistImage ||
+          onAdminCopyShowId ||
+          onCopySetlistText ||
+          onAdminEditShow ?
             <WlHomeV2SetlistAdminToolbar
               linkCopied={adminLinkCopied ?? false}
+              setlistTextCopied={setlistTextCopied ?? false}
               onCopyShowId={onAdminCopyShowId}
+              onCopySetlistText={onCopySetlistText}
               onEditInAdmin={onAdminEditShow}
               onShareSetlistImage={onShareSetlistImage}
             />
           : null}
-          <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
-            <SetlistTourDropdown
-              tours={tours}
-              currentTourId={show.tour_id ?? ""}
-              currentTourName={show.show_tour}
-              onTourSelect={onTourSelect}
-              triggerClassName={WL_HOME_V2_SETLIST_SELECT_TRIGGER}
-              contentClassName={WL_HOME_V2_SETLIST_SELECT_CONTENT}
-            />
-          </div>
-          <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
-            <SetlistShowsDropdown
-              showDates={showDates}
-              currentShowId={showId}
-              currentLabel={formatSetlistDate(show.show_date)}
-              onShowSelect={onTourShowSelect}
-              triggerClassName={WL_HOME_V2_SETLIST_SELECT_TRIGGER}
-              contentClassName={WL_HOME_V2_SETLIST_SELECT_CONTENT}
-            />
+          <div className="wl-home-v2-setlist-crumbs-selectors-dropdowns min-w-0">
+            <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
+              <SetlistTourDropdown
+                tours={tours}
+                currentTourId={show.tour_id ?? ""}
+                currentTourName={show.show_tour}
+                onTourSelect={onTourSelect}
+                triggerClassName={WL_HOME_V2_SETLIST_SELECT_TRIGGER}
+                contentClassName={WL_HOME_V2_SETLIST_SELECT_CONTENT}
+              />
+            </div>
+            <div className="wl-home-v2-setlist-crumbs-selectors-cell min-w-0">
+              <SetlistShowsDropdown
+                showDates={showDates}
+                currentShowId={showId}
+                currentLabel={formatSetlistDate(show.show_date)}
+                onShowSelect={onTourShowSelect}
+                triggerClassName={WL_HOME_V2_SETLIST_SELECT_TRIGGER}
+                contentClassName={WL_HOME_V2_SETLIST_SELECT_CONTENT}
+              />
+            </div>
           </div>
         </>
       }

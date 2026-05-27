@@ -38,6 +38,7 @@ import { useShowChanges } from "@/hooks/use-setlist-show-changes"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useSongPairs } from "@/hooks/use-song-pairs"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
+import { buildSetlistPlainTextCopy } from "@/lib/setlist-plain-text-copy"
 import { uniqueWtedEntriesFromPair } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
 import type { SongPair } from "@/types/song-pair"
@@ -98,6 +99,7 @@ export function WlHomeV2SetlistPageClient() {
     string | null
   >(null)
   const [copiedEntryIds, setCopiedEntryIds] = useState<Set<string>>(new Set())
+  const [setlistTextCopied, setSetlistTextCopied] = useState(false)
   const [setlistScanModalOpen, setSetlistScanModalOpen] = useState(false)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [shareExportOpen, setShareExportOpen] = useState(false)
@@ -256,6 +258,19 @@ export function WlHomeV2SetlistPageClient() {
     setShareExportOpen(true)
   }, [])
 
+  const handleCopySetlistText = useCallback(async () => {
+    if (!show) return
+    try {
+      await navigator.clipboard.writeText(
+        buildSetlistPlainTextCopy(show, setlist),
+      )
+      setSetlistTextCopied(true)
+      setTimeout(() => setSetlistTextCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy setlist text:", err)
+    }
+  }, [show, setlist])
+
   useEffect(() => {
     if (!wtedModalOpen) return
     function onKey(e: KeyboardEvent) {
@@ -307,7 +322,9 @@ export function WlHomeV2SetlistPageClient() {
         songPairs={songPairs}
         showAdminUi={showAdminUi}
         adminLinkCopied={showAdminUi ? linkCopied : false}
+        setlistTextCopied={setlistTextCopied}
         onAdminCopyShowId={showAdminUi ? handleCopyLink : undefined}
+        onCopySetlistText={showAdminUi ? handleCopySetlistText : undefined}
         onAdminEditShow={showAdminUi ? handleEditShow : undefined}
         onShareSetlistImage={showAdminUi ? openShareExport : undefined}
         copiedEntryIds={showAdminUi ? copiedEntryIds : undefined}

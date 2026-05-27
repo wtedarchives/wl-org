@@ -59,7 +59,9 @@ export function WlHomeV2SetlistPlaceholderView({
   songPairs,
   showAdminUi,
   adminLinkCopied,
+  setlistTextCopied,
   onAdminCopyShowId,
+  onCopySetlistText,
   onAdminEditShow,
   onShareSetlistImage,
   copiedEntryIds,
@@ -100,7 +102,9 @@ export function WlHomeV2SetlistPlaceholderView({
   songPairs: import("@/types/song-pair").SongPair[]
   showAdminUi?: boolean
   adminLinkCopied?: boolean
+  setlistTextCopied?: boolean
   onAdminCopyShowId?: () => void
+  onCopySetlistText?: () => void
   onAdminEditShow?: () => void
   onShareSetlistImage?: () => void
   copiedEntryIds?: Set<string>
@@ -235,7 +239,9 @@ export function WlHomeV2SetlistPlaceholderView({
         openArchiveHub={openArchiveHub ?? undefined}
         showAdminUi={showAdminUi}
         adminLinkCopied={adminLinkCopied}
+        setlistTextCopied={setlistTextCopied}
         onAdminCopyShowId={onAdminCopyShowId}
+        onCopySetlistText={onCopySetlistText}
         onAdminEditShow={onAdminEditShow}
         onShareSetlistImage={onShareSetlistImage}
       />

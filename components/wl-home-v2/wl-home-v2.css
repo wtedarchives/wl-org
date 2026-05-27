@@ -10743,6 +10743,30 @@
   .wl-home-v2-years-tile-inner {
   padding: 0;
 }
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-selectors-dropdowns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+@media (max-width: 767px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-selectors {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-crumbs-selectors-dropdowns {
+    order: 1;
+    justify-content: center;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-admin-toolbar {
+    order: 2;
+    justify-content: center;
+  }
+}
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-crumbs-selectors-cell {
   flex: 0 1 auto;
   width: max-content;

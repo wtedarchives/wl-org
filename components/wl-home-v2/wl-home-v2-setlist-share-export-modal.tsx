@@ -251,12 +251,7 @@ export function WlHomeV2SetlistShareExportModal({
         </DialogHeader>
 
         <div className="max-h-[min(62vh,680px)] w-full min-w-0 overflow-x-auto overflow-y-auto rounded-lg border border-white/10 bg-black/25 p-2 sm:p-4">
-          <div
-            className={cn(
-              "flex min-w-0 flex-col items-stretch gap-6",
-              "md:flex-row md:items-start md:justify-center",
-            )}
-          >
+          <div className="flex w-max min-w-full flex-row flex-nowrap items-start justify-start gap-6">
             {SHARE_VARIANTS.map((variant) => {
               const storageKey =
                 variant.showEntryCoachNotes ? "withCoachNotes" : "withoutCoachNotes"
@@ -267,12 +262,12 @@ export function WlHomeV2SetlistShareExportModal({
               return (
                 <section
                   key={variant.id}
-                  className="flex min-w-0 flex-col items-center gap-2"
+                  className="flex shrink-0 flex-col items-start gap-2"
                   aria-labelledby={`wl-setlist-share-variant-${variant.id}`}
                 >
                   <h3
                     id={`wl-setlist-share-variant-${variant.id}`}
-                    className="w-full text-center text-xs font-medium text-muted-foreground"
+                    className="w-full text-left text-xs font-medium text-muted-foreground"
                   >
                     {variant.label}
                   </h3>
@@ -286,7 +281,7 @@ export function WlHomeV2SetlistShareExportModal({
                       showEntryCoachNotes={variant.showEntryCoachNotes}
                     />
                   </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
+                  <div className="flex flex-wrap items-center justify-start gap-2">
                     {!isMobile ?
                       <Button
                         type="button"
