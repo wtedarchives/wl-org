@@ -632,7 +632,7 @@
     flex-shrink: 0;
   }
   .wl-home-v2 .wl-home-v2-archive-subnav--drawer .wl-home-v2-archive-subnav-row--years {
-    row-gap: 2px;
+    row-gap: 1px;
   }
   .wl-home-v2 .wl-home-v2-archive-subnav--drawer .wl-home-v2-archive-subnav-row--sections {
     justify-content: center;
@@ -656,6 +656,9 @@
     justify-content: center;
     gap: 4px 2px;
     min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-archive-subnav-row--years {
+    row-gap: 1px;
   }
   .wl-home-v2 .wl-home-v2-archive-subnav-row--sections {
     gap: 6px;
@@ -689,16 +692,14 @@
       min-width: 0;
     }
   }
-  .wl-home-v2 .wl-home-v2-archive-subnav-year-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
   .wl-home-v2 .wl-home-v2-archive-subnav-sep {
     font-size: 9px;
     color: rgba(255, 255, 255, 0.35);
     user-select: none;
     padding: 0 1px;
+  }
+  .wl-home-v2 .wl-home-v2-archive-subnav-sep--hidden {
+    display: none;
   }
   .wl-home-v2 .wl-home-v2-archive-subnav-link--year {
     font-size: 11px;
@@ -7813,6 +7814,102 @@
     .wl-home-v2 .modal-archive-hub-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+  }
+  .wl-home-v2 .modal-archive-hub-years {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgb(39, 42, 40);
+    background: rgba(49, 58, 52, 0.85);
+    min-width: 0;
+  }
+  @media (min-width: 901px) {
+    .wl-home-v2 .modal-archive-hub-years--above-grid {
+      display: flex;
+      flex-shrink: 0;
+    }
+  }
+  @media (max-width: 900px) {
+    .wl-home-v2 .modal-archive-hub-years--in-grid {
+      display: flex;
+      grid-column: 1 / -1;
+    }
+  }
+  .wl-home-v2 .modal-archive-hub-years-title {
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--wl-white);
+    line-height: 1.2;
+  }
+  .wl-home-v2 .modal-archive-hub-years-desc {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.32;
+    color: rgba(255, 255, 255, 0.68);
+  }
+  .wl-home-v2 .modal-archive-hub-years-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 10px;
+    row-gap: 8px;
+    align-items: start;
+    min-width: 0;
+  }
+  .wl-home-v2 .modal-archive-hub-years-heading {
+    display: contents;
+  }
+  .wl-home-v2 .modal-archive-hub-years-title {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .wl-home-v2 .modal-archive-hub-years-icon {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .wl-home-v2 .modal-archive-hub-years-desc {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  @media (min-width: 901px) {
+    .wl-home-v2 .modal-archive-hub-years-head {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .wl-home-v2 .modal-archive-hub-years-heading {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .wl-home-v2 .modal-archive-hub-years-title {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .wl-home-v2 .modal-archive-hub-years-desc {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .wl-home-v2 .modal-archive-hub-years-icon {
+      grid-column: auto;
+      grid-row: auto;
+      flex-shrink: 0;
+    }
+  }
+  .wl-home-v2 .modal-archive-hub-years .wl-home-v2-archive-subnav-row--years {
+    justify-content: center;
+    padding-top: 2px;
   }
   .wl-home-v2 .modal-archive-tile {
     display: flex;

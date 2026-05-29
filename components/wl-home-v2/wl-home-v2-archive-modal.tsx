@@ -22,10 +22,12 @@ import {
   ARCHIVE_INTRO,
   type ArchiveEntry,
 } from "@/app/(main)/old/archive/content"
+import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
+import { cn } from "@/lib/utils"
 
 type PhosphorTileIcon = ComponentType<{
   className?: string
@@ -59,6 +61,35 @@ type WlHomeV2ArchiveModalProps = {
   headingId: string
 }
 
+const YEARS_ENTRY = ARCHIVE_ENTRIES.find((entry) => entry.title === "Years")
+
+function ArchiveModalYearsRow({
+  onClose,
+  className,
+}: {
+  onClose: () => void
+  className?: string
+}) {
+  if (!YEARS_ENTRY) return null
+
+  return (
+    <div className={cn("modal-archive-hub-years", className)}>
+      <div className="modal-archive-hub-years-head">
+        <div className="modal-archive-hub-years-heading">
+          <span className="modal-archive-hub-years-title">{YEARS_ENTRY.title}</span>
+          <p className="modal-archive-hub-years-desc">{YEARS_ENTRY.description}</p>
+        </div>
+        <Calendar
+          className="modal-archive-tile-icon modal-archive-hub-years-icon"
+          {...ICON_PROPS}
+          aria-hidden
+        />
+      </div>
+      <WlHomeV2ArchiveYearsSelector onNavigate={onClose} />
+    </div>
+  )
+}
+
 function ArchiveModalTile({
   entry,
   myStatsProfile,
@@ -75,7 +106,10 @@ function ArchiveModalTile({
     !myStatsProfile.profilePhotoLoadFailed
 
   return (
-    <Link href={archiveV2NavHref(entry.href)} className="modal-archive-tile">
+    <Link
+      href={archiveV2NavHref(entry.href)}
+      className="modal-archive-tile"
+    >
       <span className="modal-archive-tile-top">
         <span className="modal-archive-tile-title">{entry.title}</span>
         {isMyStats && myStatsProfile ?
@@ -153,18 +187,26 @@ export function WlHomeV2ArchiveModal({
             </button>
           </div>
           <div className="modal-request-body modal-archive-hub-body">
+            <ArchiveModalYearsRow
+              className="modal-archive-hub-years--above-grid"
+              onClose={onClose}
+            />
             <div className="modal-archive-hub-grid">
-              {ARCHIVE_ENTRIES.filter((entry) => entry.title !== "Submit").map(
-                (entry) => (
-                  <ArchiveModalTile
-                    key={entry.title}
-                    entry={entry}
-                    myStatsProfile={
-                      entry.title === "My Stats" ? myStatsProfile : null
-                    }
-                  />
-                ),
-              )}
+              <ArchiveModalYearsRow
+                className="modal-archive-hub-years--in-grid"
+                onClose={onClose}
+              />
+              {ARCHIVE_ENTRIES.filter(
+                (entry) => entry.title !== "Submit" && entry.title !== "Years",
+              ).map((entry) => (
+                <ArchiveModalTile
+                  key={entry.title}
+                  entry={entry}
+                  myStatsProfile={
+                    entry.title === "My Stats" ? myStatsProfile : null
+                  }
+                />
+              ))}
             </div>
             <div className="modal-archive-hub-submit">
               <p className="modal-archive-hub-submit-text">

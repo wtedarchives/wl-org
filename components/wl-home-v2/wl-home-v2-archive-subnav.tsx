@@ -3,13 +3,10 @@
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 
-import {
-  NAV_YEARS,
-  SETLIST_ARCHIVE_SUB,
-} from "@/components/app-sidebar.constants"
+import { SETLIST_ARCHIVE_SUB } from "@/components/app-sidebar.constants"
+import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
 import { cn } from "@/lib/utils"
-import { getYearArchiveUrl } from "@/lib/year-archive-url"
 
 function useArchiveSubmitHref(): string {
   const pathname = usePathname()
@@ -58,39 +55,13 @@ export function WlHomeV2ArchiveSubnavContent({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const submitHref = useArchiveSubmitHref()
-  const currentYearId = searchParams.get("id")?.trim() ?? ""
 
   return (
     <nav
       className={cn("wl-home-v2-archive-subnav", className)}
       aria-label="Archive sections"
     >
-      <div className="wl-home-v2-archive-subnav-row wl-home-v2-archive-subnav-row--years">
-        {NAV_YEARS.map((year, index) => {
-          const href = getYearArchiveUrl(year.year_id)
-          const isActive =
-            pathname === "/archive/years" && currentYearId === year.year_id
-          return (
-            <span key={year.year_id} className="wl-home-v2-archive-subnav-year-item">
-              {index > 0 ?
-                <span className="wl-home-v2-archive-subnav-sep" aria-hidden>
-                  •
-                </span>
-              : null}
-              <Link
-                href={href}
-                className={cn(
-                  "wl-home-v2-archive-subnav-link wl-home-v2-archive-subnav-link--year",
-                  isActive && "wl-home-v2-archive-subnav-link--active",
-                )}
-                onClick={onNavigate}
-              >
-                {year.year}
-              </Link>
-            </span>
-          )
-        })}
-      </div>
+      <WlHomeV2ArchiveYearsSelector onNavigate={onNavigate} />
       <div className="wl-home-v2-archive-subnav-row wl-home-v2-archive-subnav-row--sections">
         {SETLIST_ARCHIVE_SUB.map((item) => {
           const isSubmit = item.title === "Submit"
