@@ -20,6 +20,9 @@ verify_jwt = false
 [functions.user-profile-preferences]
 verify_jwt = false
 
+[functions.show-rating]
+verify_jwt = false
+
 # Wysteria JWT verified inside the function (not a Supabase Auth token).
 [functions.ranking-engine]
 verify_jwt = false

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { invokeSubmitShowRating } from "@/lib/show-rating-edge"
 import { supabase } from "@/lib/supabase"
 import type { WysteriaSession } from "@/lib/jwt"
 
@@ -120,46 +121,24 @@ export function useSetlistRating(showId: string | undefined, session: WysteriaSe
 
   const submitRating = useCallback(
     async (rating: number, review: string) => {
-      if (!showId || !session || !supabase) return
-      const client = supabase
+      if (!showId || !session?.token) return
       const r = Math.min(5, Math.max(1, Math.round(rating)))
       const rev = review.trim() || null
       setSubmitting(true)
       try {
-        const { data: existing } = await client
-          .from("show_ratings")
-          .select("uuid")
-          .eq("show_id", showId)
-          .eq("user_id", session?.profileId)
-          .maybeSingle()
-        if (existing && (existing as { uuid: string }).uuid) {
-          await client
-            .from("show_ratings")
-            .update({ rating: r, review: rev })
-            .eq("show_id", showId)
-            .eq("user_id", session?.profileId)
-        } else {
-          await client.from("show_ratings").insert({
-            show_id: showId,
-            user_id: session?.profileId,
-            rating: r,
-            review: rev,
-          })
+        const result = await invokeSubmitShowRating(session.token, {
+          show_id: showId,
+          rating: r,
+          review: rev,
+        })
+        if (!result.ok) {
+          console.error("Error submitting rating:", result.error)
+          return
         }
-        setUserRating(r)
-        setUserReview(rev)
-        const { data: all } = await client
-          .from("show_ratings")
-          .select("rating")
-          .eq("show_id", showId)
-        const rows = (all ?? []) as { rating: number }[]
-        if (rows.length > 0) {
-          const sum = rows.reduce((s, row) => s + row.rating, 0)
-          setAverageRating(Math.round((sum / rows.length) * 100) / 100)
-          setReviewCount(rows.length)
-        } else {
-          setReviewCount(0)
-        }
+        setUserRating(result.user_rating)
+        setUserReview(result.user_review)
+        setAverageRating(result.average_rating)
+        setReviewCount(result.review_count)
         fetchReviews()
       } catch (err) {
         console.error("Error submitting rating:", err)
@@ -167,7 +146,7 @@ export function useSetlistRating(showId: string | undefined, session: WysteriaSe
         setSubmitting(false)
       }
     },
-    [showId, session, fetchReviews]
+    [showId, session?.token, fetchReviews],
   )
 
   const validateReview = useCallback((text: string): string | null => {
