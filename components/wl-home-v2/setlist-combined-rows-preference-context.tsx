@@ -33,7 +33,7 @@ export function SetlistCombinedRowsPreferenceProvider({
     saveExpandCombinedOnLoad,
     loading,
     saving,
-  } = useSetlistCombinedRowsPreference(profileId)
+  } = useSetlistCombinedRowsPreference(profileId, session?.token)
 
   return (
     <SetlistCombinedRowsPreferenceContext.Provider

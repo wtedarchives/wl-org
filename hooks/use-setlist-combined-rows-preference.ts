@@ -2,9 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react"
 
+import { invokeUserProfilePreferences } from "@/lib/user-profile-preferences-edge"
 import { supabase } from "@/lib/supabase"
 
-export function useSetlistCombinedRowsPreference(profileId: string | undefined) {
+export function useSetlistCombinedRowsPreference(
+  profileId: string | undefined,
+  accessToken: string | undefined,
+) {
   const [expandCombinedOnLoad, setExpandCombinedOnLoad] = useState(false)
   const [loading, setLoading] = useState(Boolean(profileId))
   const [saving, setSaving] = useState(false)
@@ -43,18 +47,17 @@ export function useSetlistCombinedRowsPreference(profileId: string | undefined) 
 
   const saveExpandCombinedOnLoad = useCallback(
     async (next: boolean) => {
-      if (!profileId || !supabase) return false
+      if (!profileId || !accessToken) return false
       setSaving(true)
-      const { error } = await supabase
-        .from("profiles")
-        .update({ setlist_combined_rows_expanded_by_default: next })
-        .eq("id", profileId)
+      const result = await invokeUserProfilePreferences(accessToken, {
+        setlist_combined_rows_expanded_by_default: next,
+      })
       setSaving(false)
-      if (error) return false
+      if (!result.ok) return false
       setExpandCombinedOnLoad(next)
       return true
     },
-    [profileId],
+    [profileId, accessToken],
   )
 
   return {
