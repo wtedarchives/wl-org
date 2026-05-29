@@ -23,15 +23,15 @@ type PersistentRadioContextValue = {
   /** Index `/` only: measure target on the Goose Radio tile (header slots stay unmounted). */
   setHomepageTopNode: (el: HTMLDivElement | null) => void
   /**
-   * Index `/`: set true after the Goose Radio schedule UI has settled (!loading).
-   * Hides/skips positioning the floating iframe until layout is stable — avoids stray placement on first paint.
+   * Index `/`: set true once the Goose Radio tile anchor is mounted.
+   * Hides/skips positioning the floating iframe until the slot exists — avoids measuring a missing node.
    */
   setHomepageRadioTileScheduleReady: (ready: boolean) => void
   homeNode: HTMLDivElement | null
   sidebarNode: HTMLDivElement | null
   mobileNode: HTMLDivElement | null
   homepageTopNode: HTMLDivElement | null
-  /** `/` Goose Radio tile: true once schedule hook has settled (floating embed anchors). */
+  /** `/` Goose Radio tile: true once the tile anchor is mounted (floating embed anchors). */
   homepageRadioTileScheduleReady: boolean
   homeEmbedPulseGen: number
   bumpHomeEmbedPulse: () => void
@@ -54,7 +54,7 @@ export function useBumpHomeRadioEmbedPulse() {
   return ctx?.bumpHomeEmbedPulse ?? (() => {})
 }
 
-/** Goose Radio homepage tile only: defer floating embed positioning until schedule fetch finishes. */
+/** Goose Radio homepage tile only: signal when the tile anchor is mounted for floating embed positioning. */
 export function usePersistentRadioTileScheduleGate() {
   const ctx = useContext(PersistentRadioContext)
   if (!ctx) {
@@ -214,7 +214,7 @@ export function PersistentRadioRoot({
   const [homepageTopNode, setHomepageTopNode] = useState<
     HTMLDivElement | null
   >(null)
-  /** `/` Goose Radio tile: wait for schedule hook `loading === false` before anchoring the embed */
+  /** `/` Goose Radio tile: wait for tile anchor mount before anchoring the embed */
   const [homepageRadioTileScheduleReady, setHomepageRadioTileScheduleReady] =
     useState(false)
   const [homeEmbedPulseGen, setHomeEmbedPulseGen] = useState(0)

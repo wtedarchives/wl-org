@@ -63,13 +63,22 @@ export function PersistentRadioBodyShell({
     sync()
   }, [sync])
 
-  /** Homepage defers anchoring until schedule layout settles — re-sync on first non-null measure pass. */
+  /** Re-sync when the anchor first appears and while ON AIR content settles layout. */
   useLayoutEffect(() => {
     if (!measureTarget) return
+    sync()
     const rafId = requestAnimationFrame(() => {
       requestAnimationFrame(() => sync())
     })
-    return () => cancelAnimationFrame(rafId)
+    const t1 = window.setTimeout(() => sync(), 120)
+    const t2 = window.setTimeout(() => sync(), 400)
+    const t3 = window.setTimeout(() => sync(), 800)
+    return () => {
+      cancelAnimationFrame(rafId)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+    }
   }, [measureTarget, sync])
 
   useEffect(() => {

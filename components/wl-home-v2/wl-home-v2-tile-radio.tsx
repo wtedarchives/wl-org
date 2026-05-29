@@ -26,10 +26,11 @@ export function WlHomeV2TileRadio({
   const { slots, loading, error } = useRadioSchedule()
   const setRadioTileScheduleReady = usePersistentRadioTileScheduleGate()
 
+  /** Anchor the persistent player as soon as the tile mounts; ResizeObserver re-syncs when ON AIR fills in. */
   useLayoutEffect(() => {
-    setRadioTileScheduleReady(!loading)
+    setRadioTileScheduleReady(true)
     return () => setRadioTileScheduleReady(false)
-  }, [loading, setRadioTileScheduleReady])
+  }, [setRadioTileScheduleReady])
 
   return (
     <section

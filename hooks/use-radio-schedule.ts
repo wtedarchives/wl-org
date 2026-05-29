@@ -12,6 +12,52 @@ import {
 const RADIO_SCHEDULE_URL =
   "https://public.radio.co/stations/s3c11c85d6/embed/schedule"
 
+const SCHEDULE_FETCH_TIMEOUT_MS = 12_000
+const SCHEDULE_FETCH_MAX_ATTEMPTS = 3
+const SCHEDULE_FETCH_RETRY_DELAY_MS = 1_500
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+async function fetchRadioScheduleResponse(): Promise<RadioScheduleResponse> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    SCHEDULE_FETCH_TIMEOUT_MS,
+  )
+  try {
+    const res = await fetch(RADIO_SCHEDULE_URL, { signal: controller.signal })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return (await res.json()) as RadioScheduleResponse
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("Schedule request timed out")
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+async function fetchRadioScheduleWithRetry(): Promise<RadioScheduleResponse> {
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt < SCHEDULE_FETCH_MAX_ATTEMPTS; attempt++) {
+    try {
+      return await fetchRadioScheduleResponse()
+    } catch (err) {
+      lastError =
+        err instanceof Error ? err : new Error("Failed to load schedule")
+      if (attempt < SCHEDULE_FETCH_MAX_ATTEMPTS - 1) {
+        await delay(SCHEDULE_FETCH_RETRY_DELAY_MS * (attempt + 1))
+      }
+    }
+  }
+  throw lastError ?? new Error("Failed to load schedule")
+}
+
 export interface RadioScheduleEvent {
   start: string
   end: string
@@ -245,13 +291,17 @@ export function useRadioSchedule() {
   useEffect(() => {
     let cancelled = false
 
-    async function fetchSchedule() {
+    async function fetchSchedule(isInitialLoad: boolean) {
+      if (isInitialLoad) setLoading(true)
       try {
-        const res = await fetch(RADIO_SCHEDULE_URL)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const json: RadioScheduleResponse = await res.json()
-        if (!cancelled && json.data) {
+        const json = await fetchRadioScheduleWithRetry()
+        if (cancelled) return
+        if (json.data?.length) {
           setSlots(parseScheduleData(json.data))
+          setError(null)
+        } else {
+          setSlots([])
+          setError(null)
         }
       } catch (err) {
         if (!cancelled) {
@@ -263,10 +313,12 @@ export function useRadioSchedule() {
       }
     }
 
-    fetchSchedule()
+    void fetchSchedule(true)
 
-    // Refresh every 5 minutes
-    const interval = setInterval(fetchSchedule, 5 * 60 * 1000)
+    // Refresh every 5 minutes (retries again if the prior fetch failed)
+    const interval = setInterval(() => {
+      void fetchSchedule(false)
+    }, 5 * 60 * 1000)
     return () => {
       cancelled = true
       clearInterval(interval)
