@@ -10,6 +10,7 @@ import {
 import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entry-stats-tooltip"
 import { entriesHaveSongStatsLines } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
 import { SetlistExpandButton } from "@/components/dpro/setlist/setlist-expand-button"
+import { WlHomeV2SetlistAltNameDisplay } from "@/components/wl-home-v2/wl-home-v2-setlist-alt-name-display"
 import { splitPairRowTrailingRepriseEntries } from "@/lib/song-pairs"
 import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
@@ -99,15 +100,10 @@ export function WlHomeV2SetlistPairSongCell({
 
   const altNameHit =
     altName ?
-      onSongClick ?
-        <button
-          type="button"
-          className="song-cell-song-hit"
-          onClick={() => onSongClick(entries)}
-        >
-          <SongDisplayName song={altName} />
-        </button>
-      : <SongDisplayName song={altName} />
+      <WlHomeV2SetlistAltNameDisplay
+        altName={altName}
+        onClick={onSongClick ? () => onSongClick(entries) : undefined}
+      />
     : null
 
   const altNameBlock =

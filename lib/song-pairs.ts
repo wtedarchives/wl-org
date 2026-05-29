@@ -208,6 +208,39 @@ export function splitPairRowTrailingRepriseEntries(entries: SetlistEntry[]): {
   }
 }
 
+export type AltNameSegment =
+  | { type: "text"; value: string }
+  | { type: "paren"; value: string }
+
+/** Split alt_name into plain text and parenthetical segments for pill rendering. */
+export function parseAltNameSegments(altName: string): AltNameSegment[] {
+  const segments: AltNameSegment[] = []
+  const re = /\(([^)]+)\)/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  while ((match = re.exec(altName)) !== null) {
+    if (match.index > lastIndex) {
+      const text = altName.slice(lastIndex, match.index).replace(/\s+$/, "")
+      if (text) segments.push({ type: "text", value: text })
+    }
+    const inner = match[1]?.trim()
+    if (inner) segments.push({ type: "paren", value: inner })
+    lastIndex = match.index + match[0].length
+  }
+
+  if (lastIndex < altName.length) {
+    const text = altName.slice(lastIndex).replace(/^\s+/, "")
+    if (text) segments.push({ type: "text", value: text })
+  }
+
+  return segments
+}
+
+export function altNameHasParentheticalSegments(altName: string): boolean {
+  return parseAltNameSegments(altName).some((segment) => segment.type === "paren")
+}
+
 /**
  * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`
  * reprise, or `entry_song` Teaprise / [Trevor Reads Poetry]) in the same set with
