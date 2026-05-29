@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAdminStatus } from "@/hooks/use-admin-status"
+import { useWlHomeV2OpenSettings } from "@/components/wl-home-v2/wl-home-v2-open-settings-context"
 import { useBugCount } from "@/hooks/use-bug-count"
 import {
   Broadcast,
@@ -34,6 +35,7 @@ import {
   MagnifyingGlass,
   SignIn,
   SignOut,
+  SlidersHorizontal,
   User,
 } from "@phosphor-icons/react"
 
@@ -62,13 +64,18 @@ export function WlHomeV2UserMenu({
   onOpenLogin,
   onOpenSignup,
   onOpenShareSchedule,
+  onOpenSettings,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
   /** Admin-only: opens schedule image export modal. */
   onOpenShareSchedule?: () => void
+  /** Signed-in: opens account settings modal. */
+  onOpenSettings?: () => void
 }) {
   const { session, signOut } = useAuth()
+  const openSettingsFromContext = useWlHomeV2OpenSettings()
+  const openSettings = onOpenSettings ?? openSettingsFromContext ?? undefined
   const { isAdmin } = useAdminStatus(session)
   const openBugCount = useBugCount()
   const router = useRouter()
@@ -233,6 +240,18 @@ export function WlHomeV2UserMenu({
                   My Show Stats
                 </Link>
               </DropdownMenuItem>
+              {openSettings ?
+                <DropdownMenuItem
+                  className="top-nav-dd-item flex cursor-pointer items-center gap-2"
+                  onClick={openSettings}
+                >
+                  <SlidersHorizontal
+                    className="top-nav-dd-icon size-4 shrink-0"
+                    aria-hidden
+                  />
+                  Settings
+                </DropdownMenuItem>
+              : null}
               <DropdownMenuSeparator className="top-nav-dd-sep" />
               <DropdownMenuItem
                 className="top-nav-dd-item"

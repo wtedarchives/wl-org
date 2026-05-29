@@ -23,11 +23,11 @@ export function UnfinishedWlPanel({ rows }: { rows: UnfinishedRow[] }) {
   }
 
   return (
-    <div className="widget-panel w-full min-w-0 flex-1">
+    <div className="widget-panel w-full min-w-0 flex-1 overflow-hidden">
       <div className="wp-head wl-home-v2-years-shows-wp-head">
         <span className="min-w-0 truncate">Most Common Unfinished</span>
       </div>
-      <div className="min-w-0">
+      <div className="wl-home-v2-years-table-scroll min-w-0 overflow-x-auto">
         <table
           className="w-full min-w-max border-collapse text-[11px] leading-3 wl-home-v2-years-table wl-home-v2-top-slots-stats-table"
         >
@@ -108,11 +108,11 @@ export function ReprisesWlPanel({
   }
 
   return (
-    <div className="widget-panel w-full min-w-0 flex-1">
+    <div className="widget-panel w-full min-w-0 flex-1 overflow-hidden">
       <div className="wp-head wl-home-v2-years-shows-wp-head">
         <span className="min-w-0 truncate">Most Common Reprises</span>
       </div>
-      <div className="min-w-0">
+      <div className="wl-home-v2-years-table-scroll min-w-0 overflow-x-auto">
         <table
           className="wl-home-v2-unfinished-reprised-reprises-table w-full min-w-max border-collapse text-[11px] wl-home-v2-years-table wl-home-v2-top-slots-stats-table"
         >
@@ -129,7 +129,7 @@ export function ReprisesWlPanel({
                   )}
                 >
                   <td className="wl-home-v2-top-slots-stats-cell">
-                    <div className="flex max-h-[22.5px] min-h-0 min-w-0 items-center gap-1.5 overflow-hidden">
+                    <div className="flex min-w-0 items-center gap-1.5">
                       {displayRank != null ?
                         <span
                           className="w-4 shrink-0 text-right text-[10px] tabular-nums text-white/55"
@@ -141,7 +141,7 @@ export function ReprisesWlPanel({
                       <button
                         type="button"
                         onClick={() => onSandwichClick(row)}
-                        className="min-w-0 max-w-full cursor-pointer truncate text-left font-medium text-white/88 hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded"
+                        className="min-w-0 cursor-pointer whitespace-nowrap text-left font-medium text-white/88 hover:underline focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-1 rounded"
                       >
                         {row.songs.map((s, j) => (
                           <span key={`${s.song_id}-${j}`}>
@@ -149,6 +149,7 @@ export function ReprisesWlPanel({
                               <span className="text-destructive"> → </span>
                             )}
                             <SongDisplayName
+                              compactInline
                               song={s.song_name}
                               songDisplayName={s.song_displayname}
                             />

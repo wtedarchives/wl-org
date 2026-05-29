@@ -17,6 +17,7 @@ import {
 } from "@/lib/song-pairs"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { useIsDesktopContentLayout } from "@/hooks/use-mobile"
+import { useSetlistCombinedRowsPreferenceContext } from "@/components/wl-home-v2/setlist-combined-rows-preference-context"
 import { useSetlistPairExpansion } from "@/hooks/use-setlist-pair-expansion"
 import { formatEntryLength, getEncoreLabel, shouldShowSetBreak } from "@/lib/setlist-utils"
 
@@ -64,12 +65,17 @@ export function WlHomeV2SetlistTable({
   hoveredCategory?: string | null
 }) {
   const [hoveredEntryId, setHoveredEntryId] = useState<string | null>(null)
+  const { expandCombinedOnLoad } = useSetlistCombinedRowsPreferenceContext()
   const {
     expandedPairKeys,
     expandPair,
     expandPairFromCoachNotes,
     isCoachNotesExpanded,
-  } = useSetlistPairExpansion(show.show_id)
+  } = useSetlistPairExpansion(show.show_id, {
+    expandCombinedOnLoad,
+    setlist,
+    songPairs,
+  })
   const isDesktop = useIsDesktopContentLayout()
 
   const showCanonColumns = show.show_canonid != null

@@ -6136,6 +6136,18 @@
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgb(49, 51, 49);
   }
+  /* Multi-song sequences (reprise lookup): one flowing line that wraps naturally. */
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-song
+    .modal-setlist-song-tour.modal-setlist-song-tour--flow {
+    display: inline-block;
+    width: auto;
+    max-width: 100%;
+    white-space: normal;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 1.4;
+  }
   /* Same chrome as `.modal-setlist-song-tour`; instrument keeps accent fill + `--wl-orange` text. */
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-song .modal-setlist-song-instrument {
     display: inline-flex;
@@ -8037,6 +8049,15 @@
   .wl-home-v2 .modal.modal--login {
     max-width: min(440px, 92vw);
     padding: 20px 20px 18px;
+    isolation: isolate;
+  }
+  .wl-home-v2 .modal.modal--settings {
+    max-width: min(480px, 94vw);
+    max-height: min(88vh, 680px);
+    padding: 20px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     isolation: isolate;
   }
   .wl-home-v2 .modal.modal--signup {

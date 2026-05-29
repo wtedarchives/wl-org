@@ -68,7 +68,6 @@ export function WlHomeV2SetlistPageModals({
             state.songModalEntries
           : undefined
         }
-        pairAltName={state.songModalPairAltName}
         tourName={show.show_tour}
         headingId={state.songModalHeadingId}
         tourLineId={state.songModalTourId}

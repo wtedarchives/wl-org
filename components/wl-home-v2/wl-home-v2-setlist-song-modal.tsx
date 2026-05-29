@@ -18,8 +18,6 @@ type WlHomeV2SetlistSongModalProps = {
   entry: SetlistEntry | null
   /** When set, render one performance section per entry (combined song pair row). */
   entries?: SetlistEntry[]
-  /** Header label when `entries` is set (song pair alt_name). */
-  pairAltName?: string | null
   tourName: string | null
   headingId: string
   tourLineId: string
@@ -41,7 +39,6 @@ export function WlHomeV2SetlistSongModal({
   onClose,
   entry,
   entries,
-  pairAltName,
   tourName,
   headingId,
   tourLineId,
@@ -98,43 +95,40 @@ export function WlHomeV2SetlistSongModal({
               {multiEntries ?
                 <>
                   <h3 id={headingId} className="modal-setlist-song-title">
-                    {pairAltName?.trim() ?
-                      pairAltName.trim()
-                    : <span className="modal-setlist-song-title-pair">
-                        {uniqueMultiEntries.map((sectionEntry, index) => (
-                          <Fragment key={sectionEntry.entry_id}>
-                            {index > 0 ?
-                              <span className="modal-setlist-song-title-sep">
-                                {" "}
-                                →{" "}
-                              </span>
-                            : null}
-                            {sectionEntry.song_id ?
-                              <Link
-                                href={getSongArchiveUrl(sectionEntry.song_id)}
-                                className="modal-setlist-song-title-link"
-                                onClick={() => onClose()}
-                              >
-                                <SongDisplayName
-                                  as="span"
-                                  song={sectionEntry.entry_song}
-                                  songDisplayName={
-                                    sectionEntry.songs?.song_displayname
-                                  }
-                                />
-                              </Link>
-                            : <SongDisplayName
+                    <span className="modal-setlist-song-title-pair">
+                      {uniqueMultiEntries.map((sectionEntry, index) => (
+                        <Fragment key={sectionEntry.entry_id}>
+                          {index > 0 ?
+                            <span className="modal-setlist-song-title-sep">
+                              {" "}
+                              →{" "}
+                            </span>
+                          : null}
+                          {sectionEntry.song_id ?
+                            <Link
+                              href={getSongArchiveUrl(sectionEntry.song_id)}
+                              className="modal-setlist-song-title-link"
+                              onClick={() => onClose()}
+                            >
+                              <SongDisplayName
                                 as="span"
                                 song={sectionEntry.entry_song}
                                 songDisplayName={
                                   sectionEntry.songs?.song_displayname
                                 }
                               />
-                            }
-                          </Fragment>
-                        ))}
-                      </span>
-                    }
+                            </Link>
+                          : <SongDisplayName
+                              as="span"
+                              song={sectionEntry.entry_song}
+                              songDisplayName={
+                                sectionEntry.songs?.song_displayname
+                              }
+                            />
+                          }
+                        </Fragment>
+                      ))}
+                    </span>
                   </h3>
                   {tourName ?
                     <p id={tourLineId} className="modal-setlist-song-tour">

@@ -1,16 +1,26 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 
 import {
   coversSongGridColumnCountForViewport,
   tilesColumnCountForViewportWidth,
 } from "@/components/archive-songs/songs-archive-categories-grid-math"
 
-export function useCoverSongEightGridColumns(): number {
-  const [cols, setCols] = useState(1)
+function readCategoryGridColumns(): number {
+  if (typeof window === "undefined") return 1
+  return tilesColumnCountForViewportWidth(window.innerWidth)
+}
 
-  useEffect(() => {
+function readCoverSongGridColumns(): number {
+  if (typeof window === "undefined") return 1
+  return coversSongGridColumnCountForViewport(window.innerWidth)
+}
+
+export function useCoverSongEightGridColumns(): number {
+  const [cols, setCols] = useState(readCoverSongGridColumns)
+
+  useLayoutEffect(() => {
     function read() {
       setCols(coversSongGridColumnCountForViewport(window.innerWidth))
     }
@@ -22,15 +32,10 @@ export function useCoverSongEightGridColumns(): number {
   return cols
 }
 
-export function useSongsArchiveCategoryGridColumns(): {
-  cols: number
-  hydrated: boolean
-} {
-  const [hydrated, setHydrated] = useState(false)
-  const [cols, setCols] = useState(1)
+export function useSongsArchiveCategoryGridColumns(): number {
+  const [cols, setCols] = useState(readCategoryGridColumns)
 
-  useEffect(() => {
-    setHydrated(true)
+  useLayoutEffect(() => {
     function read() {
       setCols(tilesColumnCountForViewportWidth(window.innerWidth))
     }
@@ -39,5 +44,5 @@ export function useSongsArchiveCategoryGridColumns(): {
     return () => window.removeEventListener("resize", read)
   }, [])
 
-  return { cols, hydrated }
+  return cols
 }

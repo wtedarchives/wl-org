@@ -34,8 +34,7 @@ export function SongsArchiveCategoriesGrid({
   songsByCategory: Record<string, SongsArchiveSong[]>
 }) {
   const reactId = useId()
-  const { cols: gridColumnCount, hydrated: gridColumnsHydrated } =
-    useSongsArchiveCategoryGridColumns()
+  const gridColumnCount = useSongsArchiveCategoryGridColumns()
 
   return (
     <>
@@ -53,16 +52,14 @@ export function SongsArchiveCategoriesGrid({
           key === "side"
         const headingId = `${reactId}-${key}`
         const fillerCount =
-          gridColumnsHydrated ?
-            key === "covers" ||
-            key === "miscCovers" ||
-            usesLegacyMulticolLayout ?
-              0
-            : trailingEmptySlotsInCategoryGrid(
-                sectionCats.length,
-                gridColumnCount,
-              )
-          : 0
+          key === "covers" ||
+          key === "miscCovers" ||
+          usesLegacyMulticolLayout ?
+            0
+          : trailingEmptySlotsInCategoryGrid(
+              sectionCats.length,
+              gridColumnCount,
+            )
         const tilesForGrid =
           key === "covers" || key === "miscCovers" || usesLegacyMulticolLayout ?
             [...sectionCats]

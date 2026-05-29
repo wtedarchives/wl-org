@@ -494,6 +494,31 @@ export type SetlistTableRowItem =
       expandKey: string
     }
 
+/** Expand keys for every combined pair/reprise row on a show (for “expanded on load” preference). */
+export function getSetlistCombinedRowExpandKeys(
+  setlist: SetlistEntry[],
+  songPairs: SongPair[],
+): Set<string> {
+  const keys = new Set<string>()
+  const basePairRanges =
+    songPairs.length > 0 ?
+      findSetlistSongPairRanges(setlist, songPairs)
+    : new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
+  const pairRanges = extendPairRangesWithTrailingReprises(setlist, basePairRanges)
+  const baseRepriseRanges = findRepriseCombineRanges(setlist, pairRanges)
+  const repriseRanges = mergeEntryRanges(
+    baseRepriseRanges,
+    findImprovJamCombineRanges(setlist, pairRanges, baseRepriseRanges),
+  )
+  for (const range of pairRanges.values()) {
+    keys.add(range.entries[0]!.entry_id)
+  }
+  for (const entries of repriseRanges.values()) {
+    keys.add(entries[0]!.entry_id)
+  }
+  return keys
+}
+
 export function buildSetlistTableRows(
   setlist: SetlistEntry[],
   songPairs: SongPair[],

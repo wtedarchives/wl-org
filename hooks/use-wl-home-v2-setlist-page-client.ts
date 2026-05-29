@@ -67,9 +67,6 @@ export function useWlHomeV2SetlistPageClient() {
   )
   const [songModalEntries, setSongModalEntries] = useState<SetlistEntry[]>([])
   const [songModalMode, setSongModalMode] = useState<SongModalMode>("single")
-  const [songModalPairAltName, setSongModalPairAltName] = useState<
-    string | null
-  >(null)
   const [wtedModalOpen, setWtedModalOpen] = useState(false)
   const [wtedModalEntry, setWtedModalEntry] = useState<SetlistEntry | null>(
     null,
@@ -170,17 +167,15 @@ export function useWlHomeV2SetlistPageClient() {
     setSongModalEntry(entry)
     setSongModalEntries([entry])
     setSongModalMode("single")
-    setSongModalPairAltName(null)
     setSongModalOpen(true)
   }, [])
 
   const onPairSongClick = useCallback(
-    (entries: SetlistEntry[], pair: SongPair) => {
+    (entries: SetlistEntry[], _pair: SongPair) => {
       if (entries.length === 0) return
       setSongModalEntry(null)
       setSongModalEntries(entries)
       setSongModalMode("multi-section")
-      setSongModalPairAltName(pair.alt_name?.trim() ?? null)
       setSongModalOpen(true)
     },
     [],
@@ -225,7 +220,6 @@ export function useWlHomeV2SetlistPageClient() {
     setSongModalEntry(null)
     setSongModalEntries([])
     setSongModalMode("single")
-    setSongModalPairAltName(null)
   }, [])
 
   const closeWtedModal = useCallback(() => {
@@ -345,7 +339,6 @@ export function useWlHomeV2SetlistPageClient() {
     activeSongModalEntry,
     songModalEntries,
     songModalMode,
-    songModalPairAltName,
     songModalHeadingId,
     songModalTourId,
     wtedModalOpen,

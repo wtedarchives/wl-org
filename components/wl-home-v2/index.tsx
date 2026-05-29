@@ -22,8 +22,10 @@ import { WlHomeV2ArchiveSubnav } from "./wl-home-v2-archive-subnav"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
 import { WlHomeV2Header } from "./wl-home-v2-header"
 import { WlHomeV2HomeTicker } from "./wl-home-v2-home-ticker"
+import { SetlistCombinedRowsPreferenceProvider } from "./setlist-combined-rows-preference-context"
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import { WlHomeV2OpenLoginContext } from "./wl-home-v2-open-login-context"
+import { WlHomeV2OpenSettingsContext } from "./wl-home-v2-open-settings-context"
 import { WlHomeV2ShellModals } from "./wl-home-v2-shell-modals"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
 
@@ -76,6 +78,9 @@ export function WlHomeV2({
   const [followUsOpen, setFollowUsOpen] = useState(false)
   const followUsHeadingId = useId()
 
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsHeadingId = useId()
+
   const closeArchiveModal = useCallback(() => {
     setArchiveOpen(false)
     if (pathname === "/archive") {
@@ -89,6 +94,10 @@ export function WlHomeV2({
 
   const openLogin = useCallback(() => {
     setLoginOpen(true)
+  }, [])
+
+  const openSettings = useCallback(() => {
+    setSettingsOpen(true)
   }, [])
 
   const openRadioScheduleShare = useCallback(() => {
@@ -112,7 +121,8 @@ export function WlHomeV2({
       !archiveOpen &&
       !radioOpen &&
       !followUsOpen &&
-      !radioScheduleShareOpen
+      !radioScheduleShareOpen &&
+      !settingsOpen
     )
       return
     function onKey(e: KeyboardEvent) {
@@ -128,6 +138,7 @@ export function WlHomeV2({
       setRadioOpen(false)
       setFollowUsOpen(false)
       setRadioScheduleShareOpen(false)
+      setSettingsOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
@@ -143,12 +154,15 @@ export function WlHomeV2({
     radioOpen,
     followUsOpen,
     radioScheduleShareOpen,
+    settingsOpen,
     closeArchiveModal,
   ])
 
   return (
     <SetlistBreadcrumbProvider>
+      <SetlistCombinedRowsPreferenceProvider>
       <WlHomeV2OpenLoginContext.Provider value={openLogin}>
+      <WlHomeV2OpenSettingsContext.Provider value={openSettings}>
       <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
         <div className="wl-home-v2">
         <div className="wl-home-v2__stack">
@@ -225,11 +239,16 @@ export function WlHomeV2({
         followUsOpen={followUsOpen}
         setFollowUsOpen={setFollowUsOpen}
         followUsHeadingId={followUsHeadingId}
+        settingsOpen={settingsOpen}
+        setSettingsOpen={setSettingsOpen}
+        settingsHeadingId={settingsHeadingId}
       />
 
       </div>
         </WlHomeV2OpenArchiveHubContext.Provider>
+      </WlHomeV2OpenSettingsContext.Provider>
       </WlHomeV2OpenLoginContext.Provider>
+      </SetlistCombinedRowsPreferenceProvider>
     </SetlistBreadcrumbProvider>
   )
 }

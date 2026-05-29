@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useId } from "react"
+import { Fragment, useEffect, useId } from "react"
 import { Loader2 } from "lucide-react"
 
 import {
@@ -88,15 +88,19 @@ export function WlHomeV2RepriseSandwichModal({
               </h3>
               {sandwich?.songs.length ?
                 <>
-                  <p id={subLineId} className="modal-setlist-song-tour">
+                  <p
+                    id={subLineId}
+                    className="modal-setlist-song-tour modal-setlist-song-tour--flow"
+                  >
                     {sandwich.songs.map((s, j) => (
-                      <span key={`${s.song_id}-${j}`}>
+                      <Fragment key={`${s.song_id}-${j}`}>
                         {j > 0 && <span className="text-destructive"> → </span>}
                         <SongDisplayName
+                          compactInline
                           song={s.song_name}
                           songDisplayName={s.song_displayname}
                         />
-                      </span>
+                      </Fragment>
                     ))}
                   </p>
                   <p className="modal-request-sub">{countLabel}</p>
@@ -130,8 +134,8 @@ export function WlHomeV2RepriseSandwichModal({
                 <p className="py-2 text-muted-foreground">
                   No performances found.
                 </p>
-              : <div className="overflow-x-auto">
-                  <Table className="min-w-full text-xs">
+              : <div className="min-w-0 overflow-x-auto [-webkit-overflow-scrolling:touch]">
+                  <Table className="min-w-max text-xs">
                     <TableHeader>
                       <TableRow className="border-border hover:bg-transparent">
                         <TableHead className="text-center font-medium">

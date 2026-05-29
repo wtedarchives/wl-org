@@ -1,21 +1,54 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
+import { getSetlistCombinedRowExpandKeys } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
+import type { SongPair } from "@/types/song-pair"
 
-export function useSetlistPairExpansion(showId: string) {
+export function useSetlistPairExpansion(
+  showId: string,
+  options: {
+    expandCombinedOnLoad: boolean
+    setlist: SetlistEntry[]
+    songPairs: SongPair[]
+  },
+) {
+  const { expandCombinedOnLoad, setlist, songPairs } = options
   const [expandedPairKeys, setExpandedPairKeys] = useState<Set<string>>(
     () => new Set(),
   )
   const [expandedCoachNoteEntryIds, setExpandedCoachNoteEntryIds] = useState<
     Set<string>
   >(() => new Set())
+  const seededShowIdRef = useRef<string | null>(null)
 
   useEffect(() => {
+    seededShowIdRef.current = null
     setExpandedPairKeys(new Set())
     setExpandedCoachNoteEntryIds(new Set())
   }, [showId])
+
+  useEffect(() => {
+    if (seededShowIdRef.current === showId) return
+    if (setlist.length === 0) return
+    seededShowIdRef.current = showId
+    setExpandedPairKeys(
+      expandCombinedOnLoad ?
+        getSetlistCombinedRowExpandKeys(setlist, songPairs)
+      : new Set(),
+    )
+    setExpandedCoachNoteEntryIds(new Set())
+  }, [showId, setlist, songPairs, expandCombinedOnLoad])
+
+  useEffect(() => {
+    if (seededShowIdRef.current !== showId || setlist.length === 0) return
+    setExpandedPairKeys(
+      expandCombinedOnLoad ?
+        getSetlistCombinedRowExpandKeys(setlist, songPairs)
+      : new Set(),
+    )
+  }, [expandCombinedOnLoad, showId, setlist, songPairs])
 
   const expandPair = useCallback((expandKey: string) => {
     setExpandedPairKeys((prev) => {

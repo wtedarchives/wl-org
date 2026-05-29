@@ -95,7 +95,7 @@ export function DiscographyArchiveCategoriesGrid({
   byCategory: Map<string, DiscographyArchiveIndexRow[]>
 }) {
   const headingId = useId()
-  const { cols: gridColumnCount } = useSongsArchiveCategoryGridColumns()
+  const gridColumnCount = useSongsArchiveCategoryGridColumns()
   const categories = [...DISCOGRAPHY_PUBLIC_CATEGORIES]
   const columns = balanceFlowSectionIntoColumns(categories, gridColumnCount)
 

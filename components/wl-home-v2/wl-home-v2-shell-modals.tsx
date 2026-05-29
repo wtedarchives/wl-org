@@ -12,6 +12,7 @@ import { WlHomeV2RadioModal } from "./wl-home-v2-radio-modal"
 import { WlHomeV2RadioScheduleShareExportModal } from "./wl-home-v2-radio-schedule-share-export-modal"
 import { WlHomeV2RequestModal } from "./wl-home-v2-request-modal"
 import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
+import { WlHomeV2SettingsModal } from "./wl-home-v2-settings-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
 import { WlHomeV2ThisDayHistoryModal } from "./wl-home-v2-this-day-history-modal"
 import { WlHomeV2TourScheduleModal } from "./wl-home-v2-tour-schedule-modal"
@@ -51,6 +52,9 @@ export type WlHomeV2ShellModalsProps = {
   followUsOpen: boolean
   setFollowUsOpen: (open: boolean) => void
   followUsHeadingId: string
+  settingsOpen: boolean
+  setSettingsOpen: (open: boolean) => void
+  settingsHeadingId: string
 }
 
 export function WlHomeV2ShellModals({
@@ -88,6 +92,9 @@ export function WlHomeV2ShellModals({
   followUsOpen,
   setFollowUsOpen,
   followUsHeadingId,
+  settingsOpen,
+  setSettingsOpen,
+  settingsHeadingId,
 }: WlHomeV2ShellModalsProps) {
   return (
     <>
@@ -131,6 +138,11 @@ export function WlHomeV2ShellModals({
         open={followUsOpen}
         onClose={() => setFollowUsOpen(false)}
         headingId={followUsHeadingId}
+      />
+      <WlHomeV2SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        headingId={settingsHeadingId}
       />
       <Suspense fallback={null}>
         <SubmitModalHandler />
