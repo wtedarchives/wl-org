@@ -704,7 +704,19 @@ async function handleAction(
         show.show_venue_location as string | null | undefined,
         event,
       )
-      const pushResult = await sendSetlistPushNotifications(db, pushPayload)
+      let pushResult
+      try {
+        pushResult = await sendSetlistPushNotifications(db, pushPayload)
+      } catch (pushErr) {
+        console.error("setlist_discourse_show_event push:", pushErr)
+        pushResult = {
+          attempted: 0,
+          sent: 0,
+          failed: 0,
+          removed: 0,
+          skipped: "push send crashed",
+        }
+      }
       return {
         data: {
           message,
@@ -753,7 +765,19 @@ async function handleAction(
         Number(entry.entry_setnum),
         entry.entry_song as string | null | undefined,
       )
-      const pushResult = await sendSetlistPushNotifications(db, pushPayload)
+      let pushResult
+      try {
+        pushResult = await sendSetlistPushNotifications(db, pushPayload)
+      } catch (pushErr) {
+        console.error("setlist_discourse_now_playing push:", pushErr)
+        pushResult = {
+          attempted: 0,
+          sent: 0,
+          failed: 0,
+          removed: 0,
+          skipped: "push send crashed",
+        }
+      }
       return {
         data: {
           message,

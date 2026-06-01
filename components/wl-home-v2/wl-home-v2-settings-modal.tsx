@@ -212,10 +212,6 @@ export function WlHomeV2SettingsModal({
                       wlV2Chrome
                     />
                   </div>
-                  <p className="wl-home-v2-settings-preview__caption">
-                    Example — Title: ♫ Now Playing: Arcadia · Body: 06.23.24 (Charlotte, NC)
-                    then Encore, Song 1 on the next line.
-                  </p>
                 </>
               }
             </section>

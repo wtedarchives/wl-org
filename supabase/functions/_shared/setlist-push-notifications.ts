@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
-import webpush from "npm:web-push@3.6.7"
+import * as webpush from "jsr:@negrel/webpush@0.5.0"
 import {
   buildSetlistNowPlayingSetSongLine,
   formatShowDateVenueLine,
@@ -56,7 +56,80 @@ type PushSubscriptionRow = {
   auth: string
 }
 
-function configureWebPush(): { ok: true } | { ok: false; error: string } {
+function decodeBase64Url(value: string): Uint8Array {
+  const padding = "=".repeat((4 - (value.length % 4)) % 4)
+  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/")
+  const binary = atob(base64)
+  const out = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i += 1) {
+    out[i] = binary.charCodeAt(i)
+  }
+  return out
+}
+
+function encodeBase64Url(bytes: Uint8Array): string {
+  let binary = ""
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "")
+}
+
+/** Import VAPID keys produced by `npx web-push generate-vapid-keys` (base64url). */
+async function importWebPushVapidKeyPair(
+  publicKeyB64: string,
+  privateKeyB64: string,
+): Promise<CryptoKeyPair> {
+  const publicKeyRaw = decodeBase64Url(publicKeyB64)
+  const publicKey = await crypto.subtle.importKey(
+    "raw",
+    publicKeyRaw,
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["verify"],
+  )
+
+  const privateKeyRaw = decodeBase64Url(privateKeyB64)
+  let privateKey: CryptoKey
+
+  if (privateKeyRaw.byteLength <= 32) {
+    const x = publicKeyRaw.slice(1, 33)
+    const y = publicKeyRaw.slice(33, 65)
+    privateKey = await crypto.subtle.importKey(
+      "jwk",
+      {
+        kty: "EC",
+        crv: "P-256",
+        x: encodeBase64Url(x),
+        y: encodeBase64Url(y),
+        d: encodeBase64Url(privateKeyRaw),
+      },
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["sign"],
+    )
+  } else {
+    privateKey = await crypto.subtle.importKey(
+      "pkcs8",
+      privateKeyRaw,
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["sign"],
+    )
+  }
+
+  return { publicKey, privateKey }
+}
+
+let cachedAppServer: webpush.ApplicationServer | null = null
+
+async function getApplicationServer(): Promise<
+  { ok: true; server: webpush.ApplicationServer } | { ok: false; error: string }
+> {
+  if (cachedAppServer) {
+    return { ok: true, server: cachedAppServer }
+  }
+
   const publicKey = Deno.env.get("VAPID_PUBLIC_KEY")?.trim()
   const privateKey = Deno.env.get("VAPID_PRIVATE_KEY")?.trim()
   const subject = Deno.env.get("VAPID_SUBJECT")?.trim()
@@ -66,8 +139,21 @@ function configureWebPush(): { ok: true } | { ok: false; error: string } {
       error: "Missing VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, or VAPID_SUBJECT.",
     }
   }
-  webpush.setVapidDetails(subject, publicKey, privateKey)
-  return { ok: true }
+
+  try {
+    const vapidKeys = await importWebPushVapidKeyPair(publicKey, privateKey)
+    cachedAppServer = await webpush.ApplicationServer.new({
+      contactInformation: subject,
+      vapidKeys,
+    })
+    return { ok: true, server: cachedAppServer }
+  } catch (err) {
+    console.error("VAPID / ApplicationServer init failed:", err)
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to initialize push server.",
+    }
+  }
 }
 
 export type SendSetlistPushResult = {
@@ -78,93 +164,103 @@ export type SendSetlistPushResult = {
   skipped?: string
 }
 
-/** Sends a push to every opted-in subscriber. Does not throw on partial failure. */
+/** Sends a push to every opted-in subscriber. Never throws. */
 export async function sendSetlistPushNotifications(
   db: SupabaseClient,
   payload: SetlistPushPayload,
 ): Promise<SendSetlistPushResult> {
-  const configured = configureWebPush()
-  if (!configured.ok) {
-    console.warn("setlist push skipped:", configured.error)
-    return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: configured.error }
-  }
-
-  const { data: enabledProfiles, error: profilesError } = await db
-    .from("profiles")
-    .select("id")
-    .eq("push_notifications_enabled", true)
-
-  if (profilesError) {
-    console.error("setlist push profiles query:", profilesError)
-    return {
-      attempted: 0,
-      sent: 0,
-      failed: 0,
-      removed: 0,
-      skipped: profilesError.message,
+  try {
+    const app = await getApplicationServer()
+    if (!app.ok) {
+      console.warn("setlist push skipped:", app.error)
+      return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: app.error }
     }
-  }
 
-  const profileIds = (enabledProfiles ?? []).map((row) => row.id as string)
-  if (profileIds.length === 0) {
-    return { attempted: 0, sent: 0, failed: 0, removed: 0 }
-  }
+    const { data: enabledProfiles, error: profilesError } = await db
+      .from("profiles")
+      .select("id")
+      .eq("push_notifications_enabled", true)
 
-  const { data: subscriptions, error: subsError } = await db
-    .from("push_subscriptions")
-    .select("endpoint, p256dh, auth")
-    .in("profile_id", profileIds)
-
-  if (subsError) {
-    console.error("setlist push subscriptions query:", subsError)
-    return {
-      attempted: 0,
-      sent: 0,
-      failed: 0,
-      removed: 0,
-      skipped: subsError.message,
+    if (profilesError) {
+      console.error("setlist push profiles query:", profilesError)
+      return {
+        attempted: 0,
+        sent: 0,
+        failed: 0,
+        removed: 0,
+        skipped: profilesError.message,
+      }
     }
-  }
 
-  const rows = (subscriptions ?? []) as PushSubscriptionRow[]
-  if (rows.length === 0) {
-    return { attempted: 0, sent: 0, failed: 0, removed: 0 }
-  }
+    const profileIds = (enabledProfiles ?? []).map((row) => row.id as string)
+    if (profileIds.length === 0) {
+      return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: "no opted-in profiles" }
+    }
 
-  const pushBody = JSON.stringify({
-    title: payload.title,
-    body: payload.body,
-    url: payload.url,
-  })
+    const { data: subscriptions, error: subsError } = await db
+      .from("push_subscriptions")
+      .select("endpoint, p256dh, auth")
+      .in("profile_id", profileIds)
 
-  let sent = 0
-  let failed = 0
-  let removed = 0
+    if (subsError) {
+      console.error("setlist push subscriptions query:", subsError)
+      return {
+        attempted: 0,
+        sent: 0,
+        failed: 0,
+        removed: 0,
+        skipped: subsError.message,
+      }
+    }
 
-  for (const row of rows) {
-    try {
-      await webpush.sendNotification(
-        {
+    const rows = (subscriptions ?? []) as PushSubscriptionRow[]
+    if (rows.length === 0) {
+      return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: "no subscriptions" }
+    }
+
+    const pushBody = JSON.stringify({
+      title: payload.title,
+      body: payload.body,
+      url: payload.url,
+    })
+
+    let sent = 0
+    let failed = 0
+    let removed = 0
+
+    for (const row of rows) {
+      try {
+        const subscriber = app.server.subscribe({
           endpoint: row.endpoint,
           keys: { p256dh: row.p256dh, auth: row.auth },
-        },
-        pushBody,
-        { TTL: 60 * 60 * 24 },
-      )
-      sent += 1
-    } catch (err: unknown) {
-      failed += 1
-      const status = (err as { statusCode?: number })?.statusCode
-      if (status === 404 || status === 410) {
-        const { error: deleteError } = await db
-          .from("push_subscriptions")
-          .delete()
-          .eq("endpoint", row.endpoint)
-        if (!deleteError) removed += 1
+        })
+        await subscriber.pushMessage(pushBody, {
+          urgency: webpush.Urgency.High,
+          ttl: 60 * 60 * 24,
+        })
+        sent += 1
+      } catch (err: unknown) {
+        failed += 1
+        if (err instanceof webpush.PushMessageError && err.isGone()) {
+          const { error: deleteError } = await db
+            .from("push_subscriptions")
+            .delete()
+            .eq("endpoint", row.endpoint)
+          if (!deleteError) removed += 1
+        }
+        console.warn("setlist push send failed:", row.endpoint, err)
       }
-      console.warn("setlist push send failed:", row.endpoint, err)
+    }
+
+    return { attempted: rows.length, sent, failed, removed }
+  } catch (err) {
+    console.error("setlist push unexpected error:", err)
+    return {
+      attempted: 0,
+      sent: 0,
+      failed: 0,
+      removed: 0,
+      skipped: err instanceof Error ? err.message : "unexpected push error",
     }
   }
-
-  return { attempted: rows.length, sent, failed, removed }
 }
