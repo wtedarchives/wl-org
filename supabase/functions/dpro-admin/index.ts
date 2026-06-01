@@ -15,6 +15,7 @@ import {
   buildSetlistShowEventPushNotification,
   sendSetlistPushNotifications,
 } from "../_shared/setlist-push-notifications.ts"
+import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
 
 function httpErr(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -786,6 +787,14 @@ async function handleAction(
           push: pushResult,
         },
       }
+    }
+
+    case "setlist_game_score_show": {
+      const show_id = body.show_id as string | undefined
+      if (!show_id) return { error: "Missing show_id" }
+      const scored = await scoreSetlistGameShow(db, show_id)
+      if (scored.error) return { error: scored.error }
+      return { data: true }
     }
 
     default:
