@@ -5,7 +5,8 @@ import { corsHeaders } from "../_shared/cors.ts"
 import { syncWtedRadioIds } from "../_shared/wted-radio-ids-sync.ts"
 import {
   BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
-  buildSetlistOnstageDiscourseMessage,
+  buildSetlistShowEventDiscourseMessage,
+  isSetlistDiscourseShowEvent,
   postBrainsDiscourseChatMessage,
 } from "../_shared/discourse-brains-chat.ts"
 
@@ -666,9 +667,13 @@ async function handleAction(
       return { data: true }
     }
 
-    case "setlist_discourse_onstage": {
+    case "setlist_discourse_show_event": {
       const show_id = body.show_id as string | undefined
+      const event = body.event as string | undefined
       if (!show_id) return { error: "Missing show_id" }
+      if (!event || !isSetlistDiscourseShowEvent(event)) {
+        return { error: "Invalid event" }
+      }
       const { data: show, error: showErr } = await db
         .from("shows")
         .select("show_date, show_venue_location")
@@ -676,16 +681,18 @@ async function handleAction(
         .maybeSingle()
       if (showErr) return { error: showErr.message }
       if (!show) return { error: "Show not found" }
-      const message = buildSetlistOnstageDiscourseMessage(
+      const message = buildSetlistShowEventDiscourseMessage(
+        show_id,
         String(show.show_date ?? ""),
         show.show_venue_location as string | null | undefined,
+        event,
       )
       const posted = await postBrainsDiscourseChatMessage(
         BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
         message,
       )
       if (!posted.ok) return { error: posted.error }
-      return { data: { message, channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID } }
+      return { data: { message, channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID, event } }
     }
 
     default:

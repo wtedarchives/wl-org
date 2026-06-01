@@ -11,10 +11,10 @@ import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type { ShowData } from "@/types/admin"
 
 const SETLIST_SHOW_EVENT_ACTIONS = [
-  "Onstage",
-  "Set Break",
-  "Encore Break",
-  "End Show",
+  { label: "Onstage", event: "onstage" },
+  { label: "Set Break", event: "set_break" },
+  { label: "Encore Break", event: "encore_break" },
+  { label: "End Show", event: "end_show" },
 ] as const
 
 type SetlistShowEventAction = (typeof SETLIST_SHOW_EVENT_ACTIONS)[number]
@@ -28,9 +28,11 @@ export function SetlistShowEventActions({
   selectedShow,
 }: SetlistShowEventActionsProps) {
   const { session } = useAuth()
-  const [sending, setSending] = useState<SetlistShowEventAction | null>(null)
+  const [sending, setSending] = useState<SetlistShowEventAction["label"] | null>(
+    null,
+  )
 
-  const handleOnstage = async () => {
+  const handleSend = async ({ label, event }: SetlistShowEventAction) => {
     if (!selectedShow) {
       toast.error("Select a show first.")
       return
@@ -47,37 +49,36 @@ export function SetlistShowEventActions({
       return
     }
 
-    setSending("Onstage")
+    setSending(label)
     try {
       const { error } = await invokeDproAdmin(token, {
-        action: "setlist_discourse_onstage",
+        action: "setlist_discourse_show_event",
         show_id: selectedShow.show_id,
+        event,
       })
       if (error) throw new Error(error)
-      toast.success("Onstage message sent to Discourse.")
+      toast.success(`${label} message sent to Discourse.`)
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Failed to send Onstage message.",
+        err instanceof Error ?
+          err.message
+        : `Failed to send ${label} message.`,
       )
     } finally {
       setSending(null)
     }
   }
 
-  const handleClick = (label: SetlistShowEventAction) => {
-    if (label === "Onstage") void handleOnstage()
-  }
-
   return (
     <div className="wl-home-v2-admin-setlist-show-events">
-      {SETLIST_SHOW_EVENT_ACTIONS.map((label) => (
+      {SETLIST_SHOW_EVENT_ACTIONS.map(({ label, event }) => (
         <Button
           key={label}
           type="button"
           variant="ghost"
           size="sm"
           disabled={!selectedShow || sending !== null}
-          onClick={() => handleClick(label)}
+          onClick={() => void handleSend({ label, event })}
           className="wl-home-v2-tours-header-pill wl-home-v2-admin-setlist-show-events__btn"
         >
           {sending === label ? "Sending…" : label}

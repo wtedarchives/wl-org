@@ -1,4 +1,5 @@
 const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
+const SETLIST_ARCHIVE_ORIGIN = "https://dripfield.pro"
 
 /** Format `shows.show_date` as MM.DD.YY (UTC date-only). */
 export function formatShowDateMmDdYy(dateString: string): string {
@@ -10,13 +11,38 @@ export function formatShowDateMmDdYy(dateString: string): string {
   return `${month}.${day}.${year}`
 }
 
-export function buildSetlistOnstageDiscourseMessage(
+export function getSetlistShowDiscourseUrl(showId: string): string {
+  return `${SETLIST_ARCHIVE_ORIGIN}/setlist/${encodeURIComponent(showId.trim())}`
+}
+
+export const SETLIST_DISCOURSE_SHOW_EVENT_LINES = {
+  onstage: "(band onstage)",
+  set_break: "(set break)",
+  encore_break: "(encore break)",
+  end_show: "(end of show)",
+} as const
+
+export type SetlistDiscourseShowEvent =
+  keyof typeof SETLIST_DISCOURSE_SHOW_EVENT_LINES
+
+export function isSetlistDiscourseShowEvent(
+  value: string,
+): value is SetlistDiscourseShowEvent {
+  return value in SETLIST_DISCOURSE_SHOW_EVENT_LINES
+}
+
+/** Discourse markdown: linked show date + venue, then event parenthetical on line 2. */
+export function buildSetlistShowEventDiscourseMessage(
+  showId: string,
   showDate: string,
   venueLocation: string | null | undefined,
+  event: SetlistDiscourseShowEvent,
 ): string {
   const date = formatShowDateMmDdYy(showDate)
   const location = (venueLocation ?? "").trim() || "Unknown"
-  return `**${date}** (${location})\n(band onstage)`
+  const linkText = `**${date}** (${location})`
+  const url = getSetlistShowDiscourseUrl(showId)
+  return `[${linkText}](${url})\n${SETLIST_DISCOURSE_SHOW_EVENT_LINES[event]}`
 }
 
 /** POST to Discourse chat using BRAINS_API_KEY / BRAINS_USERNAME secrets. */
@@ -65,5 +91,5 @@ export async function postBrainsDiscourseChatMessage(
   return { ok: true }
 }
 
-/** Onstage announcements — verified channel for wted-brains test chat. */
+/** Show-event announcements — verified channel for wted-brains test chat. */
 export const BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID = 3
