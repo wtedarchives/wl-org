@@ -9,6 +9,10 @@ import { toast } from "sonner"
 import { useAuth } from "@/components/auth-context"
 import { isDevAuthMockSessionActive } from "@/lib/dev-auth-mock"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
+import {
+  formatSetlistPushAdminToast,
+  type SendSetlistPushResult,
+} from "@/lib/setlist-push-admin-toast"
 import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
 
@@ -58,12 +62,16 @@ export function SetlistEntryDiscourseBrain({
 
     setStatus("sending")
     try {
-      const { error } = await invokeDproAdmin(token, {
+      const { data, error } = await invokeDproAdmin<{
+        push?: SendSetlistPushResult
+      }>(token, {
         action: "setlist_discourse_now_playing",
         entry_id: entry.entry_id,
       })
       if (error) throw new Error(error)
       setOutcomeWithReset("success")
+      const pushMessage = formatSetlistPushAdminToast(data?.push)
+      if (pushMessage) toast.message(pushMessage)
     } catch (err) {
       setOutcomeWithReset("error")
       toast.error(

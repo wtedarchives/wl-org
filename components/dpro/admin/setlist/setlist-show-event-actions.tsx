@@ -9,6 +9,10 @@ import { useAuth } from "@/components/auth-context"
 import { Button } from "@/components/ui/button"
 import { isDevAuthMockSessionActive } from "@/lib/dev-auth-mock"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
+import {
+  formatSetlistPushAdminToast,
+  type SendSetlistPushResult,
+} from "@/lib/setlist-push-admin-toast"
 import { cn } from "@/lib/utils"
 import type { ShowData } from "@/types/admin"
 
@@ -80,13 +84,17 @@ export function SetlistShowEventActions({
 
     setButtonStatus((prev) => ({ ...prev, [label]: "sending" }))
     try {
-      const { error } = await invokeDproAdmin(token, {
+      const { data, error } = await invokeDproAdmin<{
+        push?: SendSetlistPushResult
+      }>(token, {
         action: "setlist_discourse_show_event",
         show_id: selectedShow.show_id,
         event,
       })
       if (error) throw new Error(error)
       setOutcomeWithReset(label, "success")
+      const pushMessage = formatSetlistPushAdminToast(data?.push)
+      if (pushMessage) toast.message(pushMessage)
     } catch (err) {
       setOutcomeWithReset(label, "error")
       toast.error(

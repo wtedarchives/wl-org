@@ -80,21 +80,49 @@ async function importWebPushVapidKeyPair(
   publicKeyB64: string,
   privateKeyB64: string,
 ): Promise<CryptoKeyPair> {
-  const publicKeyRaw = decodeBase64Url(publicKeyB64)
-  const publicKey = await crypto.subtle.importKey(
-    "raw",
-    publicKeyRaw,
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["verify"],
-  )
+  const publicKeyBytes = decodeBase64Url(publicKeyB64)
+  const privateKeyBytes = decodeBase64Url(privateKeyB64)
 
-  const privateKeyRaw = decodeBase64Url(privateKeyB64)
+  let publicKey: CryptoKey
+  try {
+    // web-push generate-vapid-keys uses SPKI DER for the public key.
+    publicKey = await crypto.subtle.importKey(
+      "spki",
+      publicKeyBytes,
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["verify"],
+    )
+  } catch {
+    // Fallback: uncompressed raw P-256 point (65 bytes, 0x04 prefix).
+    publicKey = await crypto.subtle.importKey(
+      "raw",
+      publicKeyBytes,
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["verify"],
+    )
+  }
+
   let privateKey: CryptoKey
-
-  if (privateKeyRaw.byteLength <= 32) {
-    const x = publicKeyRaw.slice(1, 33)
-    const y = publicKeyRaw.slice(33, 65)
+  try {
+    // web-push generate-vapid-keys uses PKCS#8 DER for the private key.
+    privateKey = await crypto.subtle.importKey(
+      "pkcs8",
+      privateKeyBytes,
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["sign"],
+    )
+  } catch {
+    if (privateKeyBytes.byteLength !== 32) {
+      throw new Error("Unsupported VAPID private key format.")
+    }
+    const rawPublic = publicKeyBytes.byteLength === 65 ?
+      publicKeyBytes
+    : new Uint8Array(await crypto.subtle.exportKey("raw", publicKey))
+    const x = rawPublic.slice(1, 33)
+    const y = rawPublic.slice(33, 65)
     privateKey = await crypto.subtle.importKey(
       "jwk",
       {
@@ -102,16 +130,8 @@ async function importWebPushVapidKeyPair(
         crv: "P-256",
         x: encodeBase64Url(x),
         y: encodeBase64Url(y),
-        d: encodeBase64Url(privateKeyRaw),
+        d: encodeBase64Url(privateKeyBytes),
       },
-      { name: "ECDSA", namedCurve: "P-256" },
-      false,
-      ["sign"],
-    )
-  } else {
-    privateKey = await crypto.subtle.importKey(
-      "pkcs8",
-      privateKeyRaw,
       { name: "ECDSA", namedCurve: "P-256" },
       false,
       ["sign"],
@@ -162,6 +182,7 @@ export type SendSetlistPushResult = {
   failed: number
   removed: number
   skipped?: string
+  lastError?: string
 }
 
 /** Sends a push to every opted-in subscriber. Never throws. */
@@ -227,6 +248,7 @@ export async function sendSetlistPushNotifications(
     let sent = 0
     let failed = 0
     let removed = 0
+    let lastError: string | undefined
 
     for (const row of rows) {
       try {
@@ -234,13 +256,14 @@ export async function sendSetlistPushNotifications(
           endpoint: row.endpoint,
           keys: { p256dh: row.p256dh, auth: row.auth },
         })
-        await subscriber.pushMessage(pushBody, {
+        await subscriber.pushTextMessage(pushBody, {
           urgency: webpush.Urgency.High,
           ttl: 60 * 60 * 24,
         })
         sent += 1
       } catch (err: unknown) {
         failed += 1
+        lastError = err instanceof Error ? err.message : String(err)
         if (err instanceof webpush.PushMessageError && err.isGone()) {
           const { error: deleteError } = await db
             .from("push_subscriptions")
@@ -252,7 +275,7 @@ export async function sendSetlistPushNotifications(
       }
     }
 
-    return { attempted: rows.length, sent, failed, removed }
+    return { attempted: rows.length, sent, failed, removed, lastError }
   } catch (err) {
     console.error("setlist push unexpected error:", err)
     return {
