@@ -15,6 +15,18 @@ export function getSetlistShowDiscourseUrl(showId: string): string {
   return `${SETLIST_ARCHIVE_ORIGIN}/setlist/${encodeURIComponent(showId.trim())}`
 }
 
+export function buildSetlistShowDiscourseLinkLine(
+  showId: string,
+  showDate: string,
+  venueLocation: string | null | undefined,
+): string {
+  const date = formatShowDateMmDdYy(showDate)
+  const location = (venueLocation ?? "").trim() || "Unknown"
+  const linkText = `**${date}** (${location})`
+  const url = getSetlistShowDiscourseUrl(showId)
+  return `[${linkText}](${url})`
+}
+
 export const SETLIST_DISCOURSE_SHOW_EVENT_LINES = {
   onstage: "(band onstage)",
   set_break: "(set break)",
@@ -38,11 +50,43 @@ export function buildSetlistShowEventDiscourseMessage(
   venueLocation: string | null | undefined,
   event: SetlistDiscourseShowEvent,
 ): string {
-  const date = formatShowDateMmDdYy(showDate)
-  const location = (venueLocation ?? "").trim() || "Unknown"
-  const linkText = `**${date}** (${location})`
-  const url = getSetlistShowDiscourseUrl(showId)
-  return `[${linkText}](${url})\n${SETLIST_DISCOURSE_SHOW_EVENT_LINES[event]}`
+  const linkLine = buildSetlistShowDiscourseLinkLine(
+    showId,
+    showDate,
+    venueLocation,
+  )
+  return `${linkLine}\n${SETLIST_DISCOURSE_SHOW_EVENT_LINES[event]}`
+}
+
+/** Line 2 for “now playing” — encore sets use Encore / 2nd Encore / 3rd Encore. */
+export function buildSetlistNowPlayingSetSongLine(
+  entrySet: string | null | undefined,
+  entrySetnum: number,
+): string {
+  const setKey = (entrySet ?? "").trim()
+  if (setKey === "E1") return `Encore, Song ${entrySetnum}`
+  if (setKey === "E2") return `2nd Encore, Song ${entrySetnum}`
+  if (setKey === "E3") return `3rd Encore, Song ${entrySetnum}`
+  const setLabel = setKey || "—"
+  return `Set ${setLabel}, Song ${entrySetnum}`
+}
+
+export function buildSetlistNowPlayingDiscourseMessage(
+  showId: string,
+  showDate: string,
+  venueLocation: string | null | undefined,
+  entrySet: string | null | undefined,
+  entrySetnum: number,
+  entrySong: string | null | undefined,
+): string {
+  const linkLine = buildSetlistShowDiscourseLinkLine(
+    showId,
+    showDate,
+    venueLocation,
+  )
+  const setSongLine = buildSetlistNowPlayingSetSongLine(entrySet, entrySetnum)
+  const songName = (entrySong ?? "").trim() || "—"
+  return `${linkLine}\n${setSongLine}\n♫ Now Playing: **${songName}**`
 }
 
 /** POST to Discourse chat using BRAINS_API_KEY / BRAINS_USERNAME secrets. */

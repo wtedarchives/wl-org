@@ -1,0 +1,68 @@
+/* Setlist admin — per-row Discourse “now playing” brain control. */
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgb(49, 51, 49);
+  background: rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  touch-action: manipulation;
+  overflow: hidden;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain:hover:not(:disabled) {
+  border-color: rgb(123, 94, 63);
+  background: rgba(255, 122, 103, 0.12);
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain__icon {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain--success {
+  border-color: rgb(72, 140, 90);
+  background: rgba(72, 140, 90, 0.22);
+  color: rgb(190, 235, 200);
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain--error {
+  border-color: rgb(168, 72, 68);
+  background: rgba(168, 72, 68, 0.22);
+  color: rgb(255, 190, 185);
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain-cell {
+  width: 31px;
+  padding-inline: 6px !important;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-discourse-brain-head {
+  width: 31px;
+  padding-inline: 6px !important;
+}

@@ -5,6 +5,7 @@ import { corsHeaders } from "../_shared/cors.ts"
 import { syncWtedRadioIds } from "../_shared/wted-radio-ids-sync.ts"
 import {
   BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+  buildSetlistNowPlayingDiscourseMessage,
   buildSetlistShowEventDiscourseMessage,
   isSetlistDiscourseShowEvent,
   postBrainsDiscourseChatMessage,
@@ -693,6 +694,45 @@ async function handleAction(
       )
       if (!posted.ok) return { error: posted.error }
       return { data: { message, channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID, event } }
+    }
+
+    case "setlist_discourse_now_playing": {
+      const entry_id = body.entry_id as string | undefined
+      if (!entry_id) return { error: "Missing entry_id" }
+      const { data: entry, error: entryErr } = await db
+        .from("setlist_entries")
+        .select("entry_id, entry_show, entry_set, entry_setnum, entry_song")
+        .eq("entry_id", entry_id)
+        .maybeSingle()
+      if (entryErr) return { error: entryErr.message }
+      if (!entry) return { error: "Setlist entry not found" }
+      const { data: show, error: showErr } = await db
+        .from("shows")
+        .select("show_date, show_venue_location")
+        .eq("show_id", entry.entry_show)
+        .maybeSingle()
+      if (showErr) return { error: showErr.message }
+      if (!show) return { error: "Show not found" }
+      const message = buildSetlistNowPlayingDiscourseMessage(
+        String(entry.entry_show),
+        String(show.show_date ?? ""),
+        show.show_venue_location as string | null | undefined,
+        entry.entry_set as string | null | undefined,
+        Number(entry.entry_setnum),
+        entry.entry_song as string | null | undefined,
+      )
+      const posted = await postBrainsDiscourseChatMessage(
+        BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+        message,
+      )
+      if (!posted.ok) return { error: posted.error }
+      return {
+        data: {
+          message,
+          channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+          entry_id,
+        },
+      }
     }
 
     default:

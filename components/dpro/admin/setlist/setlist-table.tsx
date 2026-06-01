@@ -13,20 +13,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SetlistEntryDiscourseBrain } from "./setlist-entry-discourse-brain"
 
 interface SetlistTableProps {
   setlistEntries: AdminSetlistEntryData[]
+  showId: string
   onEntrySelect: (entry: AdminSetlistEntryData) => void
 }
 
 export function SetlistTable({
   setlistEntries,
+  showId,
   onEntrySelect,
 }: SetlistTableProps) {
   return (
     <Table className="set-table wl-home-v2-admin-setlist-entry-table">
       <TableHeader>
           <TableRow>
+            <TableHead
+              className="wl-home-v2-admin-setlist-discourse-brain-head text-center text-sm"
+              aria-label="Discourse"
+            />
             <TableHead className="w-8 text-center text-sm">S</TableHead>
             <TableHead className="w-8 text-center text-sm">#</TableHead>
             <TableHead className="text-left text-sm">Song</TableHead>
@@ -44,6 +51,9 @@ export function SetlistTable({
               className="cursor-pointer text-[0.625rem]"
               onClick={() => onEntrySelect(entry)}
             >
+              <TableCell className="wl-home-v2-admin-setlist-discourse-brain-cell">
+                <SetlistEntryDiscourseBrain entry={entry} showId={showId} />
+              </TableCell>
               <TableCell className="text-center text-xs">{entry.entry_set}</TableCell>
               <TableCell className="text-center text-xs">{entry.entry_setnum}</TableCell>
               <TableCell className="text-xs font-medium">{entry.entry_song}</TableCell>

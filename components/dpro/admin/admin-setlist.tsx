@@ -113,6 +113,7 @@ export function AdminSetlist() {
             <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
               <SetlistTable
                 setlistEntries={setlistEntries}
+                showId={selectedShow.show_id}
                 onEntrySelect={handleEntrySelect}
               />
             </div>
