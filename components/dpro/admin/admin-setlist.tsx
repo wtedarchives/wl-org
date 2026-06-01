@@ -6,6 +6,7 @@ import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
 import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { MainHeader } from "./setlist/main-header"
 import { ShowHeader } from "./setlist/show-header"
+import { SetlistShowEventActions } from "./setlist/setlist-show-event-actions"
 import { SetlistTable } from "./setlist/setlist-table"
 
 import { SetlistEntryModal } from "./setlist-entry-modal"
@@ -115,6 +116,7 @@ export function AdminSetlist() {
                 onEntrySelect={handleEntrySelect}
               />
             </div>
+            <SetlistShowEventActions selectedShow={selectedShow as ShowData} />
           </div>
         : <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
             <ShowHeader
@@ -124,6 +126,7 @@ export function AdminSetlist() {
             <div className="px-1 py-6 text-center text-xs text-white/65">
               <p className="m-0">No setlist entries found for this show.</p>
             </div>
+            <SetlistShowEventActions selectedShow={selectedShow as ShowData} />
           </div>
 
       : <div className="widget-panel wl-home-v2-admin-setlist-empty flex flex-col gap-3">

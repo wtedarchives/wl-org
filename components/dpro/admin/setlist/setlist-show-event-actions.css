@@ -1,0 +1,32 @@
+/* Setlist admin — show timing action buttons below entry table.
+   Scoped under `.wl-home-v2-archive-admin-root--panel` (see css-structure-no-inline.mdc). */
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-block: 8px;
+  padding-inline: 0.5rem;
+  border-top: 1px solid rgb(29, 32, 30);
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
+    padding-inline: 0.75rem;
+  }
+}
+
+.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn {
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  touch-action: manipulation;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn {
+    min-height: 0;
+  }
+}

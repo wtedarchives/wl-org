@@ -3,6 +3,11 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 import { syncWtedRadioIds } from "../_shared/wted-radio-ids-sync.ts"
+import {
+  BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+  buildSetlistOnstageDiscourseMessage,
+  postBrainsDiscourseChatMessage,
+} from "../_shared/discourse-brains-chat.ts"
 
 function httpErr(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -661,6 +666,28 @@ async function handleAction(
       return { data: true }
     }
 
+    case "setlist_discourse_onstage": {
+      const show_id = body.show_id as string | undefined
+      if (!show_id) return { error: "Missing show_id" }
+      const { data: show, error: showErr } = await db
+        .from("shows")
+        .select("show_date, show_venue_location")
+        .eq("show_id", show_id)
+        .maybeSingle()
+      if (showErr) return { error: showErr.message }
+      if (!show) return { error: "Show not found" }
+      const message = buildSetlistOnstageDiscourseMessage(
+        String(show.show_date ?? ""),
+        show.show_venue_location as string | null | undefined,
+      )
+      const posted = await postBrainsDiscourseChatMessage(
+        BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+        message,
+      )
+      if (!posted.ok) return { error: posted.error }
+      return { data: { message, channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID } }
+    }
+
     default:
       return { error: `Unknown action: ${action}` }
   }
@@ -676,11 +703,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders })
   if (req.method !== "POST") return httpErr("Method not allowed", 405)
 
-  /** Gateway accepts project JWT in `Authorization`; Wysteria SSO lives here (see `lib/dpro-admin-edge.ts`). */
-  const token =
-    bearerToken(req.headers.get("x-wysteria-authorization")) ??
-    bearerToken(req.headers.get("authorization"))
-  if (!token) return httpErr("Unauthorized", 401)
+  /** Wysteria SSO JWT only — never verify the anon Supabase JWT in `Authorization`. */
+  const token = bearerToken(req.headers.get("x-wysteria-authorization"))
+  if (!token) return httpErr("Missing Wysteria session", 401)
 
   const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
   const supabaseUrl = Deno.env.get("SUPABASE_URL")
@@ -694,7 +719,7 @@ serve(async (req) => {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
     jwtPayload = payload as Record<string, unknown>
   } catch {
-    return httpErr("Unauthorized", 401)
+    return httpErr("Invalid or expired Wysteria session", 401)
   }
 
   if (jwtPayload.is_admin !== true) return httpErr("Forbidden", 403)

@@ -5,7 +5,7 @@ import Image from "next/image"
 import type { CSSProperties } from "react"
 
 import { decodeHtmlEntitiesForDisplay } from "@/lib/decode-html-entities"
-import { FLODOWN_EVENTS } from "@/lib/flodown-events"
+// import { FLODOWN_EVENTS } from "@/lib/flodown-events"
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import type { DiscourseFeaturedTopic } from "@/hooks/use-discourse-featured-topics"
 
@@ -92,6 +92,7 @@ export function WlHomeV2TileCommunity({
             })}
         </div>
 
+        {/* Upcoming Community Events — hidden for now
         <div className="widget-panel widget-panel--community-events">
           <div className="wp-head">
             <span>Upcoming Community Events</span>
@@ -124,6 +125,7 @@ export function WlHomeV2TileCommunity({
             )
           })}
         </div>
+        */}
       </div>
 
       <div className="tile-body">
