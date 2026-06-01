@@ -111,7 +111,7 @@ export function SetlistShowEventActions({
             disabled={!selectedShow || isAnySending}
             onClick={() => void handleSend(action)}
             className={cn(
-              "wl-home-v2-tours-header-pill wl-home-v2-admin-setlist-show-events__btn",
+              "wl-home-v2-admin-setlist-show-events__btn",
               status === "success" &&
                 "wl-home-v2-admin-setlist-show-events__btn--success",
               status === "error" &&
