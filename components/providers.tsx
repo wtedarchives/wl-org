@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import { DevAuthMockBar } from "@/components/dev-auth-mock-bar"
+import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AuthProvider } from "@/components/auth-context"
 
@@ -12,6 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <AuthProvider>
         {children}
         <DevAuthMockBar />
+        <Toaster richColors closeButton position="top-center" />
       </AuthProvider>
     </TooltipProvider>
   )

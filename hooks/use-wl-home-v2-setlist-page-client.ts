@@ -21,7 +21,6 @@ import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useMaxShowCanonId } from "@/hooks/use-max-show-canonid"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useSongPairs } from "@/hooks/use-song-pairs"
-import { buildSetlistPlainTextCopy } from "@/lib/setlist-plain-text-copy"
 import { uniqueWtedEntriesFromPair } from "@/lib/song-pairs"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import type { SetlistEntry } from "@/types/setlist"
@@ -80,7 +79,6 @@ export function useWlHomeV2SetlistPageClient() {
     string | null
   >(null)
   const [copiedEntryIds, setCopiedEntryIds] = useState<Set<string>>(new Set())
-  const [setlistTextCopied, setSetlistTextCopied] = useState(false)
   const [setlistScanModalOpen, setSetlistScanModalOpen] = useState(false)
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [shareExportOpen, setShareExportOpen] = useState(false)
@@ -236,19 +234,6 @@ export function useWlHomeV2SetlistPageClient() {
     setShareExportOpen(true)
   }, [])
 
-  const handleCopySetlistText = useCallback(async () => {
-    if (!show) return
-    try {
-      await navigator.clipboard.writeText(
-        buildSetlistPlainTextCopy(show, setlist),
-      )
-      setSetlistTextCopied(true)
-      setTimeout(() => setSetlistTextCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy setlist text:", err)
-    }
-  }, [show, setlist])
-
   useEffect(() => {
     if (!wtedModalOpen) return
     function onKey(e: KeyboardEvent) {
@@ -318,8 +303,6 @@ export function useWlHomeV2SetlistPageClient() {
     onWtedClick,
     onPairWtedClick,
     copiedEntryIds,
-    setlistTextCopied,
-    handleCopySetlistText,
     hoveredCategory,
     setHoveredCategory,
     shareExportOpen,

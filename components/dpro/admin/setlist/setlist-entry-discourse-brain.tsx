@@ -71,7 +71,7 @@ export function SetlistEntryDiscourseBrain({
       if (error) throw new Error(error)
       setOutcomeWithReset("success")
       const pushMessage = formatSetlistPushAdminToast(data?.push)
-      if (pushMessage) toast.message(pushMessage)
+      if (pushMessage) toast.success(pushMessage)
     } catch (err) {
       setOutcomeWithReset("error")
       toast.error(

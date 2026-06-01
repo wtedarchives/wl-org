@@ -94,7 +94,7 @@ export function SetlistShowEventActions({
       if (error) throw new Error(error)
       setOutcomeWithReset(label, "success")
       const pushMessage = formatSetlistPushAdminToast(data?.push)
-      if (pushMessage) toast.message(pushMessage)
+      if (pushMessage) toast.success(pushMessage)
     } catch (err) {
       setOutcomeWithReset(label, "error")
       toast.error(

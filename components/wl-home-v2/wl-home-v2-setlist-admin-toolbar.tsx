@@ -1,16 +1,13 @@
 "use client"
 
-import { Copy, LinkSimple, PencilSimple, UploadSimple } from "@phosphor-icons/react"
+import { LinkSimple, PencilSimple, UploadSimple } from "@phosphor-icons/react"
 
 import { cn } from "@/lib/utils"
 
 export type WlHomeV2SetlistAdminToolbarProps = {
   linkCopied?: boolean
-  setlistTextCopied?: boolean
   /** Admin-only: copy show ID. */
   onCopyShowId?: () => void
-  /** Copy formatted setlist plain text. */
-  onCopySetlistText?: () => void
   /** Admin-only: open setlist in admin panel. */
   onEditInAdmin?: () => void
   /** Available to all signed-in users viewing a setlist. */
@@ -19,9 +16,7 @@ export type WlHomeV2SetlistAdminToolbarProps = {
 
 export function WlHomeV2SetlistAdminToolbar({
   linkCopied = false,
-  setlistTextCopied = false,
   onCopyShowId,
-  onCopySetlistText,
   onEditInAdmin,
   onShareSetlistImage,
 }: WlHomeV2SetlistAdminToolbarProps) {
@@ -67,22 +62,6 @@ export function WlHomeV2SetlistAdminToolbar({
           title="Edit setlist in admin"
         >
           <PencilSimple className="size-3.5" weight="bold" aria-hidden />
-        </button>
-      : null}
-      {onCopySetlistText ?
-        <button
-          type="button"
-          className={cn(
-            "wl-home-v2-setlist-admin-toolbar__btn",
-            setlistTextCopied && "wl-home-v2-setlist-admin-toolbar__btn--copied",
-          )}
-          onClick={onCopySetlistText}
-          aria-label={
-            setlistTextCopied ? "Setlist copied" : "Copy setlist as plain text"
-          }
-          title={setlistTextCopied ? "Copied" : "Copy setlist text"}
-        >
-          <Copy className="size-3.5" weight="bold" aria-hidden />
         </button>
       : null}
     </div>

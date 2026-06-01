@@ -28,9 +28,7 @@ export type WlHomeV2SetlistPlaceholderCrumbsBarProps = {
   openArchiveHub: (() => void) | undefined
   showAdminUi?: boolean
   adminLinkCopied?: boolean
-  setlistTextCopied?: boolean
   onAdminCopyShowId?: () => void
-  onCopySetlistText?: () => void
   onAdminEditShow?: () => void
   /** Opens share-image modal (admin toolbar upload icon). */
   onShareSetlistImage?: () => void
@@ -47,9 +45,7 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
   openArchiveHub,
   showAdminUi,
   adminLinkCopied,
-  setlistTextCopied,
   onAdminCopyShowId,
-  onCopySetlistText,
   onAdminEditShow,
   onShareSetlistImage,
 }: WlHomeV2SetlistPlaceholderCrumbsBarProps) {
@@ -68,13 +64,10 @@ export function WlHomeV2SetlistPlaceholderCrumbsBar({
         <>
           {onShareSetlistImage ||
           onAdminCopyShowId ||
-          onCopySetlistText ||
           onAdminEditShow ?
             <WlHomeV2SetlistAdminToolbar
               linkCopied={adminLinkCopied ?? false}
-              setlistTextCopied={setlistTextCopied ?? false}
               onCopyShowId={onAdminCopyShowId}
-              onCopySetlistText={onCopySetlistText}
               onEditInAdmin={onAdminEditShow}
               onShareSetlistImage={onShareSetlistImage}
             />
