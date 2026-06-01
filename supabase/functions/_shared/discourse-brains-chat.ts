@@ -86,7 +86,7 @@ export function buildSetlistNowPlayingDiscourseMessage(
   )
   const setSongLine = buildSetlistNowPlayingSetSongLine(entrySet, entrySetnum)
   const songName = (entrySong ?? "").trim() || "—"
-  return `${linkLine}\n${setSongLine}\n♫ Now Playing: **${songName}**`
+  return `${linkLine}\n${setSongLine}\n♫ Now Playing:  **${songName}**`
 }
 
 /** POST to Discourse chat using BRAINS_API_KEY / BRAINS_USERNAME secrets. */
