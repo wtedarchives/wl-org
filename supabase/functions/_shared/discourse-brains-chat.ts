@@ -1,6 +1,13 @@
 const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
 const SETLIST_ARCHIVE_ORIGIN = "https://dripfield.pro"
 
+/** Public site origin for push notification deep links (override via Edge secret). */
+export function getPublicSiteOrigin(): string {
+  const fromEnv = Deno.env.get("PUBLIC_SITE_ORIGIN")?.trim()
+  if (fromEnv) return fromEnv.replace(/\/$/, "")
+  return SETLIST_ARCHIVE_ORIGIN
+}
+
 /** Format `shows.show_date` as MM.DD.YY (UTC date-only). */
 export function formatShowDateMmDdYy(dateString: string): string {
   const date = new Date(`${dateString}T00:00:00Z`)
@@ -13,6 +20,22 @@ export function formatShowDateMmDdYy(dateString: string): string {
 
 export function getSetlistShowDiscourseUrl(showId: string): string {
   return `${SETLIST_ARCHIVE_ORIGIN}/setlist/${encodeURIComponent(showId.trim())}`
+}
+
+/** Plain-text show context line shared by Discourse-adjacent push copy. */
+export function formatShowDateVenueLine(
+  showDate: string,
+  venueLocation: string | null | undefined,
+): string {
+  const date = formatShowDateMmDdYy(showDate)
+  const location = (venueLocation ?? "").trim() || "Unknown"
+  return `${date} (${location})`
+}
+
+/** Absolute setlist archive URL for Web Push click-through. */
+export function getSetlistArchiveAbsoluteUrl(showId: string): string {
+  const origin = getPublicSiteOrigin()
+  return `${origin}/archive/setlist?id=${encodeURIComponent(showId.trim())}`
 }
 
 export function buildSetlistShowDiscourseLinkLine(

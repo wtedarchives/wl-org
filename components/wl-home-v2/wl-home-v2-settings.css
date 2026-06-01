@@ -105,6 +105,10 @@
   color: rgb(255 255 255 / 0.45);
 }
 
+.wl-home-v2 .modal.modal--settings .wl-home-v2-settings-status--error {
+  color: rgb(255 190 185 / 0.95);
+}
+
 .wl-home-v2-settings-section {
   display: flex;
   flex-direction: column;

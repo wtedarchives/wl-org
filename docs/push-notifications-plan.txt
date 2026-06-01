@@ -1,0 +1,211 @@
+WTED / Dripfield Archive — Browser Push Notifications Plan
+============================================================
+Saved for later implementation. Context: static Next.js export on Netlify,
+client-side Supabase, server logic in Supabase Edge Functions.
+
+
+================================================================================
+CURRENT STATE
+================================================================================
+
+Nothing is built for browser/desktop push today:
+  - No Notification API usage (requestPermission, new Notification, etc.)
+  - No service worker (public/sw.js or similar)
+  - No web app manifest / PWA setup
+  - No Web Push / VAPID / push subscription storage
+  - No Supabase Realtime subscriptions driving alerts
+
+What exists instead:
+  - In-app toasts via Sonner (components/ui/sonner.tsx) — inside the tab only
+  - Push notifications UI in a component example only (form-example-menu.tsx),
+    not a real feature
+
+Architecture does NOT block push:
+  - HTTPS on Netlify: yes
+  - Static export: not a blocker (service worker = static file in public/)
+  - No blocking CSP / Permissions-Policy in public/_headers
+  - Backend for sending: Supabase Edge Functions work (no Next.js API routes needed)
+
+
+================================================================================
+TWO OPTIONS
+================================================================================
+
+OPTION 1 — Simple: Notifications API (tab open or backgrounded)
+---------------------------------------------------------------
+While the user has your site loaded in a tab (even if not focused):
+  1. Ask permission after a user gesture (e.g. click "Enable notifications")
+  2. Call new Notification("Title", { body: "..." }) from client-side JS
+
+Works with current stack as-is. No backend changes required.
+
+Limitation: If the user closes the tab or quits the browser, you cannot notify them.
+Something in the page must be running to fire the notification.
+
+Good for: Setlist game results while browsing elsewhere, radio track changes,
+realtime updates while tab stays open (poll or Supabase Realtime).
+
+
+OPTION 2 — Full push: Service Worker + Web Push (true background push)
+----------------------------------------------------------------------
+For notifications when the site is NOT open:
+  1. Register a service worker (static file in public/)
+  2. User grants notification permission
+  3. Subscribe via PushManager; store subscription in Supabase (per user)
+  4. Server sends push payloads via Web Push + VAPID keys
+
+Server side fits architecture:
+  - Supabase Edge Function with VAPID keys in Edge env vars
+  - Static Next.js app does not need API routes
+
+Also compatible with static export on Netlify.
+
+Limitation: More moving parts (subscription lifecycle, permission UX, unsubscribe,
+iOS/PWA quirks below).
+
+
+================================================================================
+ARCHITECTURE FIT
+================================================================================
+
+Requirement              | Your site
+-------------------------|------------------------------------------
+HTTPS                    | Yes (Netlify)
+Client-side JS           | Yes
+Static export            | Not a blocker
+Backend for push sending | Supabase Edge Functions
+Blocking headers         | None in public/_headers
+
+Static export rules (no API routes, no middleware) do NOT prevent notifications.
+
+
+================================================================================
+BROWSER / PLATFORM CAVEATS
+================================================================================
+
+  - Chrome / Edge / Firefox (desktop): Solid support for both simple and Web Push.
+  - Safari (macOS): Web Push supported (Safari 16+); user must allow for your origin.
+  - iOS Safari: Web Push only for installed PWAs (Add to Home Screen), iOS 16.4+.
+    Regular Safari tabs do not get background push like native apps.
+  - Permission UX: Browsers require a user gesture to request permission; prompting
+    on first load often gets blocked.
+  - User control: Users can revoke permission in browser settings; need clear
+    opt-in/opt-out in site settings.
+
+
+================================================================================
+WHAT YOU'D NEED TO BUILD (CONCEPTUAL)
+================================================================================
+
+Minimal (tab must stay open):
+  - Settings toggle + permission request flow
+  - Client code to show Notification when an event happens
+    (poll, Realtime, or user action)
+
+Full background push:
+  - Service worker in public/
+  - Optional web manifest (helpful for PWA / iOS)
+  - DB table for push subscriptions tied to user profiles
+  - Edge Function to send pushes when events occur
+    (setlist updates, game results, etc.)
+  - UI to enable/disable; handle denied/blocked states
+
+
+================================================================================
+COSTS
+================================================================================
+
+Direct monetary costs:
+  - Browser push (Chrome/Firefox/Safari): $0 — no per-message fee
+  - VAPID keys: $0 — you generate them
+  - Service worker on Netlify: ~$0 — another static file
+  - Supabase DB (store subscriptions): ~$0 — tiny rows per user
+  - Supabase Edge Function (send push): usage-based — one invocation per send batch/event
+
+No required paid third-party (OneSignal, Firebase, etc.) unless you choose one
+for convenience.
+
+What drives cost:
+  - How often you SEND, not how many users visit
+  - 1 event → 1 Edge Function run → N push sends to subscribed users
+  - Example: 500 subscribers, 10 setlist-game alerts/day → ~10 function runs/day
+
+Pro plan headroom (from usage snapshot):
+  - Edge Function invocations: ~7K of 2M included — push is not a near-term concern
+  - Even 1,000 alerts/day ≈ 30K invocations/month — still well under 2M
+
+Optional paid extras (not required):
+  - OneSignal / similar — free tier exists
+  - Supabase Pro — only if exceeding free limits elsewhere
+
+Main "cost" is implementation and maintenance, not per-notification billing.
+
+
+================================================================================
+SUPABASE QUOTAS (PUSH vs OTHER LIMITS)
+================================================================================
+
+Full push is unlikely to be what bumps you into Supabase limits.
+
+Quotas you'd hit BEFORE edge function invocations (2M/month on Pro):
+  1. Egress (~250 GB) — most likely; client-side JSON fetching scales with traffic
+  2. Database disk (8 GB) — slow burn as archive grows
+  3. Realtime — only if heavy live features added (push doesn't need much Realtime)
+  4. Edge function invocations — last at current scale
+
+Push adds: small DB rows per subscriber, tiny egress per send payload.
+
+
+================================================================================
+SUGGESTED IMPLEMENTATION OUTLINE (WHEN READY)
+================================================================================
+
+Phase A — Permission + simple notifications (optional first step)
+  - User settings: "Enable notifications"
+  - Notification.requestPermission() on button click
+  - Show Notification from client when event detected (tab open)
+  - Handle granted / denied / default states in UI
+
+Phase B — Service worker + subscription storage
+  - public/sw.js — push event handler, notificationclick routing
+  - public/manifest.webmanifest (optional, for PWA/iOS)
+  - Client: register SW, subscribe, POST subscription to Supabase
+  - Migration: push_subscriptions table (user_id, endpoint, keys, created_at)
+  - RLS: users can insert/delete own subscription only
+
+Phase C — Edge Function sender
+  - supabase/functions/push-notify/ (or similar)
+  - VAPID keys in Edge env vars
+  - web-push library (or fetch to push endpoints)
+  - Accept authenticated trigger or internal service-role call
+  - Batch sends in one invocation (one run per event, loop subscribers)
+
+Phase D — Event triggers
+  - Wire to product events: setlist game scored, show added, etc.
+  - Prefer event-driven (DB trigger → Edge, webhook, scheduled job)
+  - Avoid polling
+
+Phase E — UX polish
+  - Unsubscribe / disable in profile settings
+  - Cleanup expired subscriptions on send failure (410 Gone)
+  - Deep links: notificationclick opens relevant archive URL
+
+Deploy reminder (when Edge Functions are added/edited):
+  supabase functions deploy <function-folder-name>
+  (Static Next.js app does not deploy functions — CLI or Dashboard required.)
+
+
+================================================================================
+BOTTOM LINE
+================================================================================
+
+Yes, browser/desktop push is possible on this stack.
+
+  - Simple notifications while tab is open → small client-only addition
+  - True desktop push when closed → service worker + subscriptions + Edge Function
+
+Starting from zero today. Choose tier based on use case:
+  - "Notify while browsing" → Option 1
+  - "Notify when site is closed" → Option 2
+
+See also: docs/egress-reduction-plan.txt (separate concern)

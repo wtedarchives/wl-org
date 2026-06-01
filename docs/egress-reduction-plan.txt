@@ -1,0 +1,353 @@
+WTED / Dripfield Archive — Supabase Egress Reduction Plan
+==========================================================
+Saved for later implementation. Context: static Next.js export, client-side Supabase
+queries, Pro plan (~10 GB egress/month of 250 GB included, ~7K edge invocations of 2M).
+
+Assumed archive scale (approximate): ~2,000 shows, ~50,000 setlist entries, ~600 songs.
+
+
+================================================================================
+EGRESS AUDIT (RANKED BY IMPACT)
+================================================================================
+
+Egress = JSON (and other data) leaving Supabase to the browser. The app does heavy
+client-side fetching with paginated "fetch everything" loops, select("*"), fat nested
+joins, duplicate hooks, and refetch-on-tab-focus in admin.
+
+Existing good patterns to copy:
+  - get_venues_with_show_counts RPC (hooks/use-venues-data.ts)
+  - get_most_common_not_played_songs RPC (hooks/use-stats-data.ts)
+  - Session cache in lib/loose-ends-cache.ts
+
+
+TIER 1 — Fix these first
+----------------------
+
+1. useStatsData + lib/stats/stats-data-utils.ts + show-stats-utils.ts +
+   fetch-stats-song-spread-shows.ts
+   Where: /archive/stats
+   Per visit: Very large (~20–80+ MB for all-time)
+   On load fires ~9 parallel fetches, most scanning full setlist_entries with nested joins:
+     - Top songs, show openers, set openers, set closers, encores, longest songs,
+       liberated songs — each a separate full-table pass
+     - fetchShowStatsData — all Goose canon shows with nested setlist_entries(entry_length)
+     - fetchStatsSongSpreadShows — another full setlist_entries pass
+   Only get_most_common_not_played_songs uses an RPC today.
+   Fix: One RPC or materialized view per stat block; or one Edge Function returning
+        pre-aggregated JSON.
+
+2. useSongsArchiveData
+   Where: /archive/songs, song detail (alphabet nav)
+   Per visit: ~10–20 MB
+   Loads all songs (select("*")) + EVERY setlist_entries row to build performerBySong.
+   Fix: DB view/RPC for performer groups; build-time JSON for song catalog; drop select("*").
+
+3. useShowsData + useWlHomeThisDayInHistoryShows
+   Where: Home (v1 + v2), community section
+   Per visit: ~1–3 MB per hook instance
+   "This Day in History" paginates ALL shows (1900-MM-DD … 2099-MM-DD), filters client-side.
+   Traffic multiplier:
+     - Legacy home: useShowsData() in HomeStatsColumn AND MostRecentShowCard → 2× fetches
+     - community-archive-section.tsx may add a 3rd instance
+     - v2: useWlHomeThisDayInHistoryShows is lazy (better) but same bad query when opened
+   Fix: Filter by month/day in SQL; share one cached hook/context on home.
+
+
+TIER 2 — High for signed-in users
+---------------------------------
+
+4. useUserStats (especially fetchNotSeenSongs)
+   Where: Profile overview (/user, /archive/profile)
+   Per visit: ~15–40 MB for active users
+   7 parallel fetches over user's setlist entries with heavy nested joins.
+   fetchNotSeenSongs then scans ENTIRE setlist_entries table again for 8 "not seen" results.
+   Fix: RPC per stat; SQL anti-join for not-seen; merge queries.
+
+5. useVenueMapData
+   Where: /archive/venues
+   Per visit: ~1–2 MB
+   Paginates all shows + all venues every visit.
+   Fix: Build-time JSON or cached static artifact.
+
+6. useAverageSetlist
+   Where: Year pages, tour pages
+   Per visit: ~0.5–5 MB depending on slice
+   Fix: RPC returning computed average setlist; cache per year/tour.
+
+
+TIER 3 — Lower traffic or already scoped
+----------------------------------------
+
+7. useShowData — Admin only; select("*") on all shows; refetch on tab focus.
+8. useAttendanceStats + useUserShows — Duplicate user_attended_shows fetches across profile.
+9. useLooseEndsData — Moderate but has session cache (good pattern).
+
+
+SUMMARY RANKING TABLE
+---------------------
+Rank | Hook / area              | Est. per visit | Traffic        | Quick win
+-----|--------------------------|----------------|----------------|---------------------------
+  1  | Archive stats chain      | 20–80+ MB      | Medium         | RPCs / one endpoint
+  2  | Songs index              | 10–20 MB       | High           | Stop scanning all entries
+  3  | Home "This Day"          | 1–3 MB × inst. | Very high      | SQL date filter; dedupe
+  4  | Profile stats            | 15–40 MB       | Medium (auth)  | Kill global scan in not-seen
+  5  | Venues map               | 1–2 MB         | Medium         | Static JSON
+  6  | Average setlist          | 0.5–5 MB       | Medium         | RPC per year/tour
+  7  | Admin show data          | 1–2 MB         | Low            | Cache + narrow select
+
+
+TOP THREE IF YOU ONLY DO THREE THINGS
+-------------------------------------
+1. Archive stats — replace repeated full-table client scans with DB aggregation.
+2. Songs index — stop downloading all setlist_entries for performer grouping.
+3. Home "This Day in History" — filter by month/day in Postgres + dedupe useShowsData().
+
+
+GENERAL EGRESS REDUCTION TACTICS (REFERENCE)
+--------------------------------------------
+Quick wins:
+  - Narrow select() columns (replace select("*"))
+  - Stop refetching on every tab focus; use TTL
+  - Client cache with staleTime (React Query / SWR)
+  - Fetch only what the page needs
+  - Deduplicate shared lookups via context
+
+Medium wins:
+  - Postgres RPCs / views (expand get_venues_with_show_counts pattern)
+  - Materialized views for heavy stats
+  - Edge Functions returning compact JSON (response size = egress)
+
+Bigger wins:
+  - Build-time static JSON for slow-changing catalogs (Netlify CDN = zero Supabase egress)
+  - Incremental rebuild / webhook on setlist change
+
+Won't help much:
+  - Smaller .range() page sizes (same total bytes, more requests)
+
+
+================================================================================
+IMPLEMENTATION PLAN (PHASED)
+================================================================================
+
+Phased so each phase ships independently. Measure Supabase egress after each phase.
+
+
+PHASE 0 — No DB changes (1–2 days)
+Goal: ~30–50% cut on home traffic, minimal risk.
+
+0a. Fix "This Day in History" query (highest ROI per line of code)
+    Problem: useShowsData and useWlHomeThisDayInHistoryShows paginate all shows,
+             filter client-side.
+    Fix: show_date is YYYY-MM-DD — use suffix match:
+         .like("show_date", `%-${month}-${day}`)
+    Files:
+      - hooks/use-shows-data.ts — replace historical while(hasMore) loop
+      - hooks/use-wl-home-this-day-in-history-shows.ts — same; drop startDate/endDate hack
+    Verify: Home "This Day in History" matches current results on several dates.
+    Est. savings: ~1–3 MB → ~5–20 KB per hook instance per home visit.
+
+0b. Deduplicate useShowsData() on legacy home
+    Problem: HomeStatsColumn and MostRecentShowCard each call useShowsData().
+    Fix: Pass props from parent OR ShowsDataProvider context.
+    Files:
+      - components/home-stats-column.tsx — single useShowsData(); pass props to card
+      - components/home-stats-column/most-recent-show-card.tsx — accept props; remove hook
+      - components/community-archive-section.tsx — shared provider if same page mounts both
+    Verify: Network tab shows one fetch set per home load.
+    Est. savings: 2× on affected home loads.
+
+0c. Client cache (copy loose-ends pattern)
+    Add @tanstack/react-query with staleTime 5–15 min for:
+      - Songs list metadata
+      - Venues map data
+      - Admin reference data in use-show-data
+    Files:
+      - package.json — add @tanstack/react-query
+      - app layout — QueryClientProvider
+      - hooks/use-songs-archive-data.ts — useQuery key ['songs-archive']
+      - hooks/use-venue-map-data.ts — useQuery key ['venue-map']
+      - hooks/use-show-data.ts — cache; remove or gate visibilitychange refetch
+    Verify: Navigate away and back within stale window → no Supabase requests.
+
+
+PHASE 1 — Small SQL migrations (2–4 days)
+Goal: Kill two worst full-table scans with RPCs.
+
+1a. Songs index — performer groups RPC
+    Problem: useSongsArchiveData downloads all setlist_entries for performerBySong.
+    DB: New migration e.g. supabase/migrations/YYYYMMDD_get_song_performer_groups.sql
+    Example:
+      CREATE OR REPLACE FUNCTION public.get_song_performer_groups()
+      RETURNS TABLE (song_id uuid, performers text[])
+      LANGUAGE sql STABLE AS $$
+        SELECT se.entry_song AS song_id,
+               array_agg(DISTINCT s.show_group ORDER BY s.show_group) AS performers
+        FROM setlist_entries se
+        JOIN shows s ON s.show_id = se.entry_show
+        WHERE s.show_group IN ('Goose','Vasudo', ...)  -- mirror SONGS_LIST_PERFORMER_GROUPS
+        GROUP BY se.entry_song;
+      $$;
+    Files:
+      - New migration
+      - hooks/use-songs-archive-data.ts — rpc + narrow song select
+      - lib/songs-performer-groups.ts — keep for tests / adapter
+    Verify: /archive/songs — same performer pills; no setlist_entries pagination in network.
+    Est. savings: ~10–15 MB per songs index visit.
+
+1b. This Day RPC (optional polish)
+    get_shows_on_calendar_day(p_month int, p_day int) if .like() needs index tuning.
+    Phase 0 may make this unnecessary.
+
+
+PHASE 2 — Archive stats bundle (4–7 days)
+Goal: One RPC replaces ~9 parallel full scans.
+
+2a. New function: get_archive_stats_bundle(selected_year text)
+    Returns JSON matching useStatsData needs:
+      top_songs, show_openers, set_openers, set_closers, encores,
+      longest_songs, liberated_songs,
+      longest_shows, lowest_rarity_shows, highest_gap_shows,
+      highest_attended_shows, highest_rated_shows,
+      song_spread_shows (or precomputed spread inputs)
+
+    Strategy:
+      1. Port aggregation from lib/stats/stats-data-utils.ts and show-stats-utils.ts into SQL.
+      2. Reuse skip-short rules as SQL WHERE entry_short NOT IN (...).
+      3. Keep get_most_common_not_played_songs for year-specific not-played.
+
+    Alternative: Materialized view archive_stats_by_year + refresh on setlist change.
+
+    Files:
+      - New migration (RPC and/or MV)
+      - hooks/use-stats-data.ts — single rpc call
+      - lib/stats/stats-data-utils.ts, show-stats-utils.ts, fetch-stats-song-spread-shows.ts
+        — keep for tests or remove after parity
+
+    Verify: /archive/stats for 2024, all-time, year switch — stats match UI.
+    Est. savings: ~20–80 MB → ~50–200 KB per stats page load.
+
+
+PHASE 3 — Profile stats (3–5 days)
+Goal: Remove global setlist_entries scan; collapse parallel fetches.
+
+3a. get_user_stats_overview(user_id uuid)
+    Returns: top_songs (8), longest_performances (8), show_openers, set_openers,
+             set_closers, encores (8 each), not_seen_songs (8).
+    Not-seen: SQL anti-join (canon Goose songs minus user's attended shows), LIMIT 8.
+    Files:
+      - New migration
+      - hooks/use-user-stats.ts — one RPC replaces Promise.all([...])
+      - components/dpro/profile/user-stats.tsx — unchanged if hook shape unchanged
+
+3b. Shared attended-shows context
+    ProfileShowsProvider or React Query key ['user-shows', userId] shared across tabs.
+    Files:
+      - New hooks/use-user-attended-show-ids.ts
+      - hooks/use-user-shows.ts, use-user-stats.ts, use-attendance-stats.ts
+
+    Est. savings: ~15–40 MB → ~20–100 KB per profile overview load.
+
+
+PHASE 4 — Build-time static JSON (2–3 days)
+Goal: Zero Supabase egress for rarely-changing catalogs.
+
+    Asset              | Source hook           | Refresh
+    -------------------|-----------------------|---------------------------
+    Song catalog       | useSongsArchiveData   | Netlify rebuild / webhook
+    Venue map payload  | useVenueMapData       | Same
+    Performer groups   | Phase 1 RPC output    | Baked at build
+
+    Files:
+      - scripts/generate-static-catalogs.ts (use lib/build-supabase.ts)
+      - public/data/songs-catalog.json, venues-map.json
+      - hooks — fetch JSON first; fallback to live RPC
+      - build script — run generator before next build
+
+    Verify: Production reads JSON; rebuild after admin setlist change updates artifacts.
+
+
+PHASE 5 — Average setlist + admin polish (as needed)
+    - hooks/use-average-setlist.ts → RPC get_average_setlist(show_ids uuid[])
+    - hooks/use-show-data.ts → narrow select(); no refetch on focus
+    - hooks/use-attendance-stats.ts → RPC get_attendance_stats(user_id)
+
+
+RECOMMENDED ORDER
+-----------------
+  Phase 0a → 0b → 0c     (quick wins, no schema)
+  Phase 1a               (songs index)
+  Phase 2                (stats page — biggest absolute savings)
+  Phase 3                (signed-in profile)
+  Phase 4                (CDN catalogs — complements 1a)
+  Phase 5                (when metrics justify it)
+
+
+SUGGESTED FIRST PR
+------------------
+Scope: Phase 0 only (This Day .like() + dedupe useShowsData + React Query shell).
+Small diff, easy review, immediate homepage egress drop, sets up caching for later.
+
+
+PER-PHASE VERIFICATION
+----------------------
+After each phase:
+  1. Functional: Compare UI on home, /archive/songs, /archive/stats, profile overview.
+  2. Network: DevTools → filter supabase.co/rest → response sizes before/after.
+  3. Dashboard: Supabase Usage → Egress; compare week-over-week (allow lag).
+
+
+SCHEMA / DEPLOY CHECKLIST
+-------------------------
+Each new RPC:
+  1. Migration in supabase/migrations/
+  2. Apply: supabase db push or Dashboard SQL
+  3. RLS: Match get_venues_with_show_counts pattern; SECURITY DEFINER only if needed
+  4. No Edge Function deploy unless choosing Edge aggregation instead of RPC
+
+User-stats RPC: validate user_id matches JWT profile_id (like user-profile-preferences).
+
+
+EFFORT VS IMPACT
+----------------
+Phase              | Effort | Egress impact      | Risk
+-------------------|--------|--------------------|------------------
+0a This Day fix    | S      | High (home)        | Low
+0b Dedupe hooks    | S      | Medium             | Low
+0c Client cache    | M      | Medium (repeat)      | Low
+1a Songs RPC       | M      | High (songs page)  | Low
+2 Stats bundle     | L      | Very high          | Medium (stat parity)
+3 Profile RPC      | L      | High (signed-in)   | Medium
+4 Build JSON       | M      | High (songs/venues)| Low (stale until rebuild)
+
+
+KEY FILES REFERENCE
+-------------------
+Hooks (heavy fetch):
+  hooks/use-shows-data.ts
+  hooks/use-wl-home-this-day-in-history-shows.ts
+  hooks/use-songs-archive-data.ts
+  hooks/use-stats-data.ts
+  hooks/use-user-stats.ts
+  hooks/use-venue-map-data.ts
+  hooks/use-average-setlist.ts
+  hooks/use-show-data.ts
+  hooks/use-attendance-stats.ts
+  hooks/use-user-shows.ts
+
+Stats libs:
+  lib/stats/stats-data-utils.ts
+  lib/stats/show-stats-utils.ts
+  lib/stats/fetch-stats-song-spread-shows.ts
+
+Components (duplicate hooks):
+  components/home-stats-column.tsx
+  components/home-stats-column/most-recent-show-card.tsx
+  components/community-archive-section.tsx
+
+Good patterns:
+  hooks/use-venues-data.ts
+  hooks/use-loose-ends-data.ts + lib/loose-ends-cache.ts
+  lib/build-supabase.ts
+  lib/songs-performer-groups.ts
+
+See also: docs/push-notifications-plan.txt (separate concern)

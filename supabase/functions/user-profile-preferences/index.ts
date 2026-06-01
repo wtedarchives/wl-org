@@ -26,6 +26,31 @@ function jsonResponse(body: Record<string, unknown>, status: number) {
   })
 }
 
+type PushSubscriptionInput = {
+  endpoint?: unknown
+  p256dh?: unknown
+  auth?: unknown
+}
+
+function parsePushSubscription(
+  raw: unknown,
+): { endpoint: string; p256dh: string; auth: string } | null {
+  if (!raw || typeof raw !== "object") return null
+  const row = raw as PushSubscriptionInput
+  if (
+    typeof row.endpoint !== "string" ||
+    typeof row.p256dh !== "string" ||
+    typeof row.auth !== "string"
+  ) {
+    return null
+  }
+  const endpoint = row.endpoint.trim()
+  const p256dh = row.p256dh.trim()
+  const auth = row.auth.trim()
+  if (!endpoint || !p256dh || !auth) return null
+  return { endpoint, p256dh, auth }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -65,28 +90,94 @@ serve(async (req) => {
     return jsonResponse({ error: "Unauthorized" }, 401)
   }
 
-  let body: { setlist_combined_rows_expanded_by_default?: unknown }
+  let body: {
+    setlist_combined_rows_expanded_by_default?: unknown
+    push_notifications_enabled?: unknown
+    push_subscription?: unknown
+  }
   try {
     body = await req.json()
   } catch {
     return jsonResponse({ error: "Invalid request body" }, 400)
   }
 
-  const expanded = body.setlist_combined_rows_expanded_by_default
-  if (typeof expanded !== "boolean") {
-    return jsonResponse(
-      { error: "setlist_combined_rows_expanded_by_default must be a boolean" },
-      400,
-    )
+  const hasSetlistPref = "setlist_combined_rows_expanded_by_default" in body
+  const hasPushPref = "push_notifications_enabled" in body
+
+  if (!hasSetlistPref && !hasPushPref) {
+    return jsonResponse({ error: "No preference fields provided" }, 400)
+  }
+
+  const profilePatch: Record<string, unknown> = {}
+
+  if (hasSetlistPref) {
+    const expanded = body.setlist_combined_rows_expanded_by_default
+    if (typeof expanded !== "boolean") {
+      return jsonResponse(
+        { error: "setlist_combined_rows_expanded_by_default must be a boolean" },
+        400,
+      )
+    }
+    profilePatch.setlist_combined_rows_expanded_by_default = expanded
+  }
+
+  if (hasPushPref) {
+    const pushEnabled = body.push_notifications_enabled
+    if (typeof pushEnabled !== "boolean") {
+      return jsonResponse(
+        { error: "push_notifications_enabled must be a boolean" },
+        400,
+      )
+    }
+    profilePatch.push_notifications_enabled = pushEnabled
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  if (hasPushPref && body.push_notifications_enabled === true) {
+    const subscription = parsePushSubscription(body.push_subscription)
+    if (!subscription) {
+      return jsonResponse(
+        { error: "push_subscription is required when enabling push notifications" },
+        400,
+      )
+    }
+
+    const userAgent = req.headers.get("user-agent")
+    const { error: upsertError } = await supabase.from("push_subscriptions").upsert(
+      {
+        profile_id: profileId,
+        endpoint: subscription.endpoint,
+        p256dh: subscription.p256dh,
+        auth: subscription.auth,
+        user_agent: userAgent,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "endpoint" },
+    )
+
+    if (upsertError) {
+      console.error("push_subscriptions upsert error:", upsertError)
+      return jsonResponse({ error: "Failed to save push subscription" }, 500)
+    }
+  }
+
+  if (hasPushPref && body.push_notifications_enabled === false) {
+    const { error: deleteError } = await supabase
+      .from("push_subscriptions")
+      .delete()
+      .eq("profile_id", profileId)
+    if (deleteError) {
+      console.error("push_subscriptions delete error:", deleteError)
+      return jsonResponse({ error: "Failed to remove push subscription" }, 500)
+    }
+  }
+
   const { data, error } = await supabase
     .from("profiles")
-    .update({ setlist_combined_rows_expanded_by_default: expanded })
+    .update(profilePatch)
     .eq("id", profileId)
-    .select("setlist_combined_rows_expanded_by_default")
+    .select("setlist_combined_rows_expanded_by_default, push_notifications_enabled")
     .maybeSingle()
 
   if (error) {
@@ -102,6 +193,7 @@ serve(async (req) => {
       success: true,
       setlist_combined_rows_expanded_by_default:
         data.setlist_combined_rows_expanded_by_default === true,
+      push_notifications_enabled: data.push_notifications_enabled === true,
     },
     200,
   )

@@ -10,6 +10,11 @@ import {
   isSetlistDiscourseShowEvent,
   postBrainsDiscourseChatMessage,
 } from "../_shared/discourse-brains-chat.ts"
+import {
+  buildSetlistNowPlayingPushNotification,
+  buildSetlistShowEventPushNotification,
+  sendSetlistPushNotifications,
+} from "../_shared/setlist-push-notifications.ts"
 
 function httpErr(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -693,7 +698,21 @@ async function handleAction(
         message,
       )
       if (!posted.ok) return { error: posted.error }
-      return { data: { message, channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID, event } }
+      const pushPayload = buildSetlistShowEventPushNotification(
+        show_id,
+        String(show.show_date ?? ""),
+        show.show_venue_location as string | null | undefined,
+        event,
+      )
+      const pushResult = await sendSetlistPushNotifications(db, pushPayload)
+      return {
+        data: {
+          message,
+          channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+          event,
+          push: pushResult,
+        },
+      }
     }
 
     case "setlist_discourse_now_playing": {
@@ -726,11 +745,21 @@ async function handleAction(
         message,
       )
       if (!posted.ok) return { error: posted.error }
+      const pushPayload = buildSetlistNowPlayingPushNotification(
+        String(entry.entry_show),
+        String(show.show_date ?? ""),
+        show.show_venue_location as string | null | undefined,
+        entry.entry_set as string | null | undefined,
+        Number(entry.entry_setnum),
+        entry.entry_song as string | null | undefined,
+      )
+      const pushResult = await sendSetlistPushNotifications(db, pushPayload)
       return {
         data: {
           message,
           channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
           entry_id,
+          push: pushResult,
         },
       }
     }
