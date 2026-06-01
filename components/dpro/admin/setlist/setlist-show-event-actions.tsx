@@ -71,17 +71,17 @@ export function SetlistShowEventActions({
 
   return (
     <div className="wl-home-v2-admin-setlist-show-events">
-      {SETLIST_SHOW_EVENT_ACTIONS.map(({ label, event }) => (
+      {SETLIST_SHOW_EVENT_ACTIONS.map((action) => (
         <Button
-          key={label}
+          key={action.label}
           type="button"
           variant="ghost"
           size="sm"
           disabled={!selectedShow || sending !== null}
-          onClick={() => void handleSend({ label, event })}
+          onClick={() => void handleSend(action)}
           className="wl-home-v2-tours-header-pill wl-home-v2-admin-setlist-show-events__btn"
         >
-          {sending === label ? "Sending…" : label}
+          {sending === action.label ? "Sending…" : action.label}
         </Button>
       ))}
     </div>
