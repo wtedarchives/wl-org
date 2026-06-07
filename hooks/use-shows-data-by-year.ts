@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 import { useAuth } from "@/components/auth-context"
 
 export interface YearShow {
@@ -116,7 +117,7 @@ export function useShowsDataByYear(currentYear: string) {
 
         if (error) throw error
 
-        const rows = (data ?? []) as ShowResponse[]
+        const rows = excludeRecordingSessionShows((data ?? []) as ShowResponse[])
         const processed =
           rows.map((show) => ({
             ...show,

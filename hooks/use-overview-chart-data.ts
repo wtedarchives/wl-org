@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionShow } from "@/lib/show-recording-session-filter"
 
 export interface ShowByYear {
   year: string
@@ -67,7 +68,11 @@ export function useOverviewChartData(userId: string | null) {
           showIdChunks.push(showIds.slice(i, i + CHUNK_SIZE))
         }
 
-        const allShowDetails: { show_date?: string; show_group?: string }[] = []
+        const allShowDetails: {
+          show_date?: string
+          show_group?: string
+          show_detail?: string | null
+        }[] = []
 
         for (const chunk of showIdChunks) {
           let chunkPage = 0
@@ -75,7 +80,7 @@ export function useOverviewChartData(userId: string | null) {
           while (chunkHasMore) {
             const { data: showData, error } = await sb
               .from("shows")
-              .select("show_date, show_group")
+              .select("show_date, show_group, show_detail")
               .in("show_id", chunk)
               .range(chunkPage * PAGE_SIZE, (chunkPage + 1) * PAGE_SIZE - 1)
 
@@ -96,7 +101,7 @@ export function useOverviewChartData(userId: string | null) {
         > = {}
 
         allShowDetails.forEach((show) => {
-          if (!show.show_date) return
+          if (!show.show_date || isRecordingSessionShow(show)) return
           const year = new Date(show.show_date).getFullYear().toString()
           if (!yearData[year]) {
             yearData[year] = { gooseCount: 0, otherCount: 0 }

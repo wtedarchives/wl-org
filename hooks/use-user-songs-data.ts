@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionShow } from "@/lib/show-recording-session-filter"
 
 const BATCH_SIZE = 1000
 const CHUNK_SIZE = 200
@@ -183,7 +184,11 @@ export function useUserSongsData(userId: string | null) {
               })
             })
 
-            let allShowsData: Array<{ show_id: string; show_date: string }> = []
+            let allShowsData: Array<{
+              show_id: string
+              show_date: string
+              show_detail?: string | null
+            }> = []
 
             for (const chunk of showIdChunks) {
               page = 0
@@ -192,7 +197,7 @@ export function useUserSongsData(userId: string | null) {
               while (hasMore) {
                 const { data, error } = await supabase
                   .from("shows")
-                  .select("show_id, show_date")
+                  .select("show_id, show_date, show_detail")
                   .in("show_id", chunk)
                   .range(page * BATCH_SIZE, (page + 1) * BATCH_SIZE - 1)
 
@@ -210,10 +215,23 @@ export function useUserSongsData(userId: string | null) {
 
             const showDates: Record<string, string> = {}
             allShowsData.forEach((s) => {
+              if (isRecordingSessionShow(s)) return
               showDates[s.show_id] = s.show_date
             })
 
-            const songNames = [...new Set(validEntries.map((e) => e.entry_song))]
+            const recordingSessionShowIds = new Set(
+              allShowsData
+                .filter((s) => isRecordingSessionShow(s))
+                .map((s) => s.show_id),
+            )
+
+            const songNames = [
+              ...new Set(
+                validEntries
+                  .filter((e) => !recordingSessionShowIds.has(e.entry_show))
+                  .map((e) => e.entry_song),
+              ),
+            ]
             const songNameToId: Record<string, string> = {}
             const songsData = allSongsData
             songNames.forEach((name) => {
@@ -227,6 +245,7 @@ export function useUserSongsData(userId: string | null) {
             > = {}
 
             validEntries.forEach((entry) => {
+              if (recordingSessionShowIds.has(entry.entry_show)) return
               const songId = songNameToId[entry.entry_song]
               if (songId) {
                 if (!songCounts[songId]) {

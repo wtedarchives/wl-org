@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 import { timeToSeconds } from "@/lib/stats/tour-utils"
 
 const EXCLUDED_SHORTS = ["fake", "tease", "reprise", "aborted", "partial"]
@@ -74,6 +75,7 @@ export function useLongestPerformancesList(isShortest: boolean) {
                 show_subvenue,
                 show_subvenue_venue,
                 show_venue_location,
+                show_detail,
                 subvenues:show_subvenue(
                   venues:subvenue_venue(
                     venue_id
@@ -101,7 +103,8 @@ export function useLongestPerformancesList(isShortest: boolean) {
 
         const filtered = allEntries.filter((e) => {
           const short = (e.entry_short ?? "").toLowerCase().trim()
-          return !short || !EXCLUDED_SHORTS.includes(short)
+          if (short && EXCLUDED_SHORTS.includes(short)) return false
+          return !isRecordingSessionEmbedShow(e.shows)
         })
 
         const bySong = new Map<

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 
+import { isRecordingSessionShow } from "@/lib/show-recording-session-filter"
 import { supabase } from "@/lib/supabase"
 
 /** Same “past shows” cutoff as {@link useShowsData} (local calendar tomorrow). */
@@ -101,7 +102,9 @@ export function useWlHomeMostRecentShow() {
             (entryRows ?? []).map((e) => e.entry_show as string),
           )
 
-          const row = shows.find((s) => withSetlist.has(s.show_id))
+          const row = shows.find(
+            (s) => withSetlist.has(s.show_id) && !isRecordingSessionShow(s),
+          )
           if (row) {
             const sub =
               typeof row.show_subvenue === "string" ?

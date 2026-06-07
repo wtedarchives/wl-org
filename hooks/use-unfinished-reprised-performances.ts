@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 
 export interface UnfinishedReprisedPerformance {
   entry_id: string
@@ -55,6 +56,7 @@ export function useUnfinishedReprisedPerformances(
               show_subvenue,
               show_subvenue_venue,
               show_venue_location,
+              show_detail,
               subvenues:show_subvenue(
                 venues:subvenue_venue(
                   venue_id
@@ -70,7 +72,14 @@ export function useUnfinishedReprisedPerformances(
         if (cancelled) return
         if (fetchErr) throw fetchErr
 
-        const rows = (data ?? []).map((e: any) => {
+        const rows = (data ?? [])
+          .filter(
+            (e: { shows?: unknown }) =>
+              !isRecordingSessionEmbedShow(
+                e.shows as { show_detail?: string | null } | Array<{ show_detail?: string | null }> | null,
+              ),
+          )
+          .map((e: any) => {
           const show = Array.isArray(e.shows) ? e.shows[0] : e.shows
           const sub = Array.isArray(show?.subvenues) ? show?.subvenues[0] : show?.subvenues
           const ven = Array.isArray(sub?.venues) ? sub?.venues?.[0] : sub?.venues

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionShow } from "@/lib/show-recording-session-filter"
 
 export interface AttendedShow {
   id: string
@@ -200,7 +201,9 @@ export async function fetchAttendedShows(
 
   onProgress?.(90)
 
-  const sorted = combinedData.sort((a, b) => {
+  const sorted = combinedData
+    .filter((attended) => !isRecordingSessionShow(attended.show))
+    .sort((a, b) => {
     const aDate = a.show?.show_date
     const bDate = b.show?.show_date
     if (!aDate || !bDate) return 0

@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase"
 import { SKIP_SHORTS } from "@/lib/utils/user-stats-utils"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 import type {
   TopSong,
   ShowOpener,
@@ -15,6 +16,17 @@ function isExcludedArchiveStatsEntryShort(
   return (SKIP_SHORTS as readonly string[]).includes(
     entryShort.toLowerCase().trim()
   )
+}
+
+function isExcludedArchiveStatsEntry(row: Record<string, unknown>): boolean {
+  if (
+    isRecordingSessionEmbedShow(
+      row.shows as { show_detail?: string | null } | Array<{ show_detail?: string | null }> | null,
+    )
+  ) {
+    return true
+  }
+  return isExcludedArchiveStatsEntryShort(row.entry_short as string | null)
 }
 
 const BATCH_SIZE = 100_000
@@ -72,7 +84,8 @@ export async function fetchTopSongsData(
         shows!inner(
           show_date,
           show_group,
-          show_canonid
+          show_canonid,
+          show_detail
         )
       `
       )
@@ -83,8 +96,7 @@ export async function fetchTopSongsData(
   })
 
   const countedRows = allData.filter(
-    (row) =>
-      !isExcludedArchiveStatsEntryShort(row.entry_short as string | null)
+    (row) => !isExcludedArchiveStatsEntry(row as Record<string, unknown>),
   )
 
   const songShowCounts = countedRows.reduce(
@@ -157,7 +169,8 @@ async function fetchPlacementData(
         shows!inner(
           show_date,
           show_group,
-          show_canonid
+          show_canonid,
+          show_detail
         )
       `
       )
@@ -173,8 +186,7 @@ async function fetchPlacementData(
   })
 
   const placementRows = allData.filter(
-    (row) =>
-      !isExcludedArchiveStatsEntryShort(row.entry_short as string | null)
+    (row) => !isExcludedArchiveStatsEntry(row as Record<string, unknown>),
   )
 
   const counts = placementRows.reduce(
@@ -272,7 +284,8 @@ export async function fetchLongestSongsData(
           show_date,
           show_group,
           show_canonid,
-          show_venue_location
+          show_venue_location,
+          show_detail
         )
       `
       )
@@ -284,6 +297,7 @@ export async function fetchLongestSongsData(
   })
 
   const sortedData = allData
+    .filter((row) => !isExcludedArchiveStatsEntry(row as Record<string, unknown>))
     .sort((a: { entry_length: string }, b: { entry_length: string }) => {
       const aSeconds = timeToSeconds(a.entry_length)
       const bSeconds = timeToSeconds(b.entry_length)
@@ -341,7 +355,8 @@ export async function fetchLiberatedSongsData(
           show_date,
           show_group,
           show_canonid,
-          show_venue_location
+          show_venue_location,
+          show_detail
         )
       `
       )
@@ -354,6 +369,7 @@ export async function fetchLiberatedSongsData(
   })
 
   return allData
+    .filter((entry) => !isExcludedArchiveStatsEntry(entry as Record<string, unknown>))
     .map((entry: Record<string, unknown>) => {
       const songs = entry.songs as { song_id?: string; song_displayname?: string | null; categories?: { category_artwork?: string } }
       const shows = entry.shows as { show_date?: string; show_venue_location?: string }

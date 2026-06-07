@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 import type { TourSongSpreadShowInput } from "@/lib/stats/tour-song-spread-compute"
 
 const BATCH_SIZE = 100_000
@@ -80,7 +81,8 @@ export async function fetchStatsSongSpreadShows(
         shows!inner(
           show_id,
           show_group,
-          show_canonid
+          show_canonid,
+          show_detail
         )
       `,
       )
@@ -99,13 +101,15 @@ export async function fetchStatsSongSpreadShows(
   for (const row of allRows) {
     const showRaw = row.shows
     const show = firstOf(
-      showRaw as { show_id?: string } | { show_id?: string }[] | null,
+      showRaw as
+        | { show_id?: string; show_detail?: string | null }
+        | { show_id?: string; show_detail?: string | null }[]
+        | null,
     )
-    const showId = show?.show_id
-    if (!showId) continue
-    const list = byShow.get(showId) ?? []
+    if (!show?.show_id || isRecordingSessionEmbedShow(show)) continue
+    const list = byShow.get(show.show_id) ?? []
     list.push(normalizeEntry(row))
-    byShow.set(showId, list)
+    byShow.set(show.show_id, list)
   }
 
   return Array.from(byShow.entries()).map(([show_id, setlist_entries]) => ({

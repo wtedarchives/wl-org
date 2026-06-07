@@ -1,4 +1,8 @@
 import { supabase } from "@/lib/supabase"
+import {
+  excludeRecordingSessionShows,
+  isRecordingSessionShow,
+} from "@/lib/show-recording-session-filter"
 import type { ShowStat } from "@/lib/types/stats"
 import { timeToSeconds } from "./tour-utils"
 
@@ -92,6 +96,7 @@ async function fetchYearShows(
     show_gap,
     show_canonid,
     show_setlistcomplete,
+    show_detail,
     setlist_entries (
       entry_length
     ),
@@ -123,7 +128,7 @@ async function fetchYearShows(
       if (!data || data.length < BATCH_SIZE) hasMore = false
       else from += BATCH_SIZE
     }
-    return allShowsData
+    return excludeRecordingSessionShows(allShowsData)
   }
 
   const year =
@@ -143,7 +148,7 @@ async function fetchYearShows(
     if (!data || data.length < BATCH_SIZE) hasMore = false
     else from += BATCH_SIZE
   }
-  return allShowsData
+  return excludeRecordingSessionShows(allShowsData)
 }
 
 function processShowsWithLength(
@@ -278,12 +283,18 @@ async function fetchShowLengthRanks(): Promise<Record<string, number>> {
   while (hasMore) {
     const { data, error } = await client
       .from("shows")
-      .select("show_id, show_length")
+      .select("show_id, show_length, show_detail")
       .not("show_canonid", "is", null)
       .not("show_length", "is", null)
       .range(from, from + BATCH_SIZE - 1)
     if (error) throw error
-    if (data) allCanonicalShows.push(...(data as { show_id: string; show_length: string | null }[]))
+    if (data) {
+      allCanonicalShows.push(
+        ...(data as { show_id: string; show_length: string | null; show_detail?: string | null }[]).filter(
+          (s) => !isRecordingSessionShow(s),
+        ),
+      )
+    }
     if (!data || data.length < BATCH_SIZE) hasMore = false
     else from += BATCH_SIZE
   }

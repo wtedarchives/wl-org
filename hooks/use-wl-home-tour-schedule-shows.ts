@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useState } from "react"
 
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 import { supabase } from "@/lib/supabase"
 
 /** YYYY-MM-DD in the user's local timezone. */
@@ -108,8 +109,8 @@ const SHOW_COLUMNS = `
   )
 ` as const
 
-const OVERSAMPLE_PAST = 24
-const OVERSAMPLE_UPCOMING = 24
+const OVERSAMPLE_PAST = 48
+const OVERSAMPLE_UPCOMING = 48
 const PAST_DISPLAY = 5
 const UPCOMING_DISPLAY = 5
 
@@ -212,7 +213,7 @@ export function useWlHomeTourScheduleShows(enabled: boolean) {
     const nowMs = Date.now()
     const todayStr = localCalendarDateString(new Date())
 
-    const mapped = rawRows.map((show) => ({
+    const mapped = excludeRecordingSessionShows(rawRows).map((show) => ({
       row: show,
       segment: segmentForShow(
         show.show_date,

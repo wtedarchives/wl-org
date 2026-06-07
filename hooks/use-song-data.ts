@@ -7,6 +7,10 @@ function getAlaskaDateString(): string {
   })
 }
 import { supabase } from "@/lib/supabase"
+import {
+  isRecordingSessionEmbedShow,
+  isRecordingSessionShow,
+} from "@/lib/show-recording-session-filter"
 import type {
   SongData,
   SongPerformance,
@@ -26,6 +30,7 @@ type SongEmbedShow = {
   show_venue_location: string
   show_tour: string | null
   show_canonid?: number | null
+  show_detail?: string | null
   show_subvenue_venue?: string | null
   subvenues?: unknown
 }
@@ -125,6 +130,7 @@ export function useSongData(songId: string | undefined) {
               show_tour,
               show_id,
               show_canonid,
+              show_detail,
               subvenues:show_subvenue(
                 venues:subvenue_venue(
                   venue_id
@@ -147,7 +153,14 @@ export function useSongData(songId: string | undefined) {
 
         if (performanceError) throw performanceError
 
-        const processedPerformances = (performanceData ?? []).map(
+        const processedPerformances = (performanceData ?? [])
+          .filter((perf: Record<string, unknown>) => {
+            const showsRel = normalizeSongEmbedShow(
+              perf.shows as SongEmbedShow | SongEmbedShow[] | undefined,
+            )
+            return !isRecordingSessionShow(showsRel)
+          })
+          .map(
           (perf: Record<string, unknown>) => {
             const showsRel = normalizeSongEmbedShow(
               perf.shows as SongEmbedShow | SongEmbedShow[] | undefined,
@@ -275,17 +288,20 @@ export function useSongData(songId: string | undefined) {
       const alaskaDate = getAlaskaDateString()
 
       const { data: mostRecentShow, error: maxError } = await client
-        .from("shows")
-        .select("show_canonid, show_date")
-        .not("show_canonid", "is", null)
-        .lte("show_date", alaskaDate)
-        .order("show_date", { ascending: false })
-        .order("show_canonid", { ascending: false })
-        .order("show_group", { ascending: true })
-        .limit(1)
-        .single()
+          .from("shows")
+          .select("show_canonid, show_date, show_detail")
+          .not("show_canonid", "is", null)
+          .lte("show_date", alaskaDate)
+          .order("show_date", { ascending: false })
+          .order("show_canonid", { ascending: false })
+          .order("show_group", { ascending: true })
+          .limit(20)
 
-      if (maxError || !mostRecentShow) {
+      const mostRecentNonSession = (mostRecentShow ?? []).find(
+        (s) => !isRecordingSessionShow(s),
+      )
+
+      if (maxError || !mostRecentNonSession) {
         return {
           groupCounts,
           rarity: "",
@@ -294,7 +310,7 @@ export function useSongData(songId: string | undefined) {
         }
       }
 
-      const maxCanonId = mostRecentShow.show_canonid as number
+      const maxCanonId = mostRecentNonSession.show_canonid as number
       const showRange = maxCanonId - minCanonId + 1
       const uniqueShowCount = showsWithCanonIds.length
       const rarityPercentage = (uniqueShowCount / showRange) * 100
@@ -324,13 +340,14 @@ export function useSongData(songId: string | undefined) {
           })
         }
 
-        const { data: canonPerformances, error } = await client
+        const { data: canonPerformancesRaw, error } = await client
           .from("setlist_entries")
           .select(
             `
             entry_placement,
             shows!inner (
-              show_canonid
+              show_canonid,
+              show_detail
             )
           `,
           )
@@ -338,6 +355,13 @@ export function useSongData(songId: string | undefined) {
           .not("shows.show_canonid", "is", null)
 
         if (error) throw error
+
+        const canonPerformances = (canonPerformancesRaw ?? []).filter(
+          (perf: { shows?: unknown }) =>
+            !isRecordingSessionEmbedShow(
+              perf.shows as { show_detail?: string | null } | Array<{ show_detail?: string | null }> | null,
+            ),
+        )
 
         if (!canonPerformances || canonPerformances.length === 0) {
           setPlacementStats([])
@@ -371,23 +395,26 @@ export function useSongData(songId: string | undefined) {
       try {
         const alaskaDate = getAlaskaDateString()
 
-        const { data: mostRecentShow, error: recentError } = await client
+        const { data: mostRecentShowRows, error: recentError } = await client
           .from("shows")
-          .select("show_canonid, show_date")
+          .select("show_canonid, show_date, show_detail")
           .not("show_canonid", "is", null)
           .lte("show_date", alaskaDate)
           .order("show_date", { ascending: false })
           .order("show_canonid", { ascending: false })
           .order("show_group", { ascending: true })
-          .limit(1)
-          .single()
+          .limit(20)
+
+        const mostRecentShow = (mostRecentShowRows ?? []).find(
+          (s) => !isRecordingSessionShow(s),
+        )
 
         if (recentError || !mostRecentShow) {
           setLastPlayed(null)
           return
         }
 
-        const { data: lastPerformance, error: lastError } = await client
+        const { data: lastPerformanceRows, error: lastError } = await client
           .from("setlist_entries")
           .select(
             `
@@ -395,17 +422,26 @@ export function useSongData(songId: string | undefined) {
             shows!inner (
               show_id,
               show_date,
-              show_canonid
+              show_canonid,
+              show_detail
             )
           `,
           )
           .eq("entry_song", songName)
           .not("shows.show_canonid", "is", null)
           .order("shows(show_canonid)", { ascending: false })
-          .limit(1)
-          .single()
+          .limit(20)
 
-        if (lastError || !lastPerformance) {
+        if (lastError || !lastPerformanceRows?.length) {
+          setLastPlayed(null)
+          return
+        }
+
+        const lastPerformance = lastPerformanceRows.find(
+          (row) => !isRecordingSessionEmbedShow(row.shows),
+        )
+
+        if (!lastPerformance) {
           setLastPlayed(null)
           return
         }

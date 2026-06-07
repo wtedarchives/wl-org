@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 
 const PAGE_SIZE = 1000
 const CHUNK_SIZE = 200
@@ -78,7 +79,7 @@ export function useUserShows(userId: string | null) {
           while (hasMore) {
             const { data, error } = await supabase
               .from("shows")
-              .select("show_id, show_date")
+              .select("show_id, show_date, show_detail")
               .in("show_id", chunk)
               .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
               .order("show_date", { ascending: true })
@@ -86,7 +87,10 @@ export function useUserShows(userId: string | null) {
             if (error) throw error
 
             if (data && data.length > 0) {
-              allShowsData = [...allShowsData, ...data]
+              allShowsData = [
+                ...allShowsData,
+                ...excludeRecordingSessionShows(data),
+              ]
               page++
               const progressPerChunk = 25 / showIdChunks.length
               const chunkProgress = (i / showIdChunks.length) * 25

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 import { totalSetlistLength } from "@/lib/setlist-utils"
 
 export interface SeguePerformance {
@@ -65,6 +66,7 @@ export function useSeguePerformances(
                 show_venue_location,
                 show_group,
                 show_canonid,
+                show_detail,
                 subvenues:show_subvenue(
                   venues:subvenue_venue(venue_id)
                 )
@@ -99,6 +101,7 @@ export function useSeguePerformances(
           { show: any; entry_show: string; entry_set: string; entry_setnum: number }[]
         >()
         for (const e of allEntries) {
+          if (isRecordingSessionEmbedShow(e.shows)) continue
           const show = Array.isArray(e.shows) ? e.shows[0] : e.shows
           const key = `${e.entry_show}|${e.entry_set ?? ""}`
           if (!showSetMap.has(key)) {

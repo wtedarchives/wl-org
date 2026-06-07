@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 import type { ListShow } from "./use-list-show-data"
 
 function timeToSeconds(timeStr: string): number {
@@ -62,10 +63,10 @@ export function useLongestShowsList() {
           .not("show_canonid", "is", null)
           .not("show_length", "is", null)
           .order("show_length", { ascending: false })
-          .limit(50)
+          .limit(100)
 
         if (fetchError) throw fetchError
-        const allShows = rawData ?? []
+        const allShows = excludeRecordingSessionShows(rawData ?? [])
 
         const withSeconds = allShows
           .filter((s) => s.show_length)

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 
 export interface VenueDetail {
   venue: string
@@ -177,7 +178,9 @@ export function useVenueData(venueId: string | undefined) {
           }
         }
 
-        const processedShows: VenueShow[] = allShowsData.map((s) => {
+        const processedShows: VenueShow[] = excludeRecordingSessionShows(
+          allShowsData,
+        ).map((s) => {
           const sub = Array.isArray(s.subvenues) ? s.subvenues[0] : s.subvenues
           const ven = Array.isArray(sub?.venues) ? sub?.venues?.[0] : sub?.venues
           return {

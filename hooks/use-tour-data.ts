@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import { useAuth } from "@/components/auth-context"
 import { useAttendeeData } from "@/hooks/use-attendee-data"
@@ -187,7 +188,9 @@ export function useTourData(tourId: string | undefined): UseTourDataResult {
 
         if (showsError) throw showsError
 
-        const rawShows = (showsData ?? []) as RawShowRow[]
+        const rawShows = excludeRecordingSessionShows(
+          (showsData ?? []) as RawShowRow[],
+        )
         const showIds = rawShows.map((s) => s.show_id)
 
         let attendedShowIds: string[] = []

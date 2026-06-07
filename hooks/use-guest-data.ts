@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 
 export interface GuestInfo {
   guest: string
@@ -106,6 +107,7 @@ export function useGuestData(guestId: string | undefined) {
               show_subvenue: string
               show_venue_location: string
               show_tour: string | null
+              show_detail?: string | null
               tour_id?: string | null
               subvenues?: { venues?: { venue_id?: string } } | null
             }
@@ -137,9 +139,10 @@ export function useGuestData(guestId: string | undefined) {
                   show_date,
                   show_group,
                   show_subvenue,
-                  show_venue_location,
-                  show_tour,
-                  subvenues:show_subvenue(
+              show_venue_location,
+              show_tour,
+              show_detail,
+              subvenues:show_subvenue(
                     venues:subvenue_venue(
                       venue_id
                     )
@@ -163,11 +166,16 @@ export function useGuestData(guestId: string | undefined) {
 
         setProgress((2 / GUEST_LOAD_STEPS) * 100)
 
+        const visibleEntries = allEntries.filter((item) => {
+          const show = item.setlist_entries?.shows
+          return !isRecordingSessionEmbedShow(show)
+        })
+
         const [processedPerformances, processedSongData, processedSongShowMap] =
           await Promise.all([
-            processPerformances(allEntries),
-            processSongData(allEntries, client),
-            processSongShowMap(allEntries),
+            processPerformances(visibleEntries),
+            processSongData(visibleEntries, client),
+            processSongShowMap(visibleEntries),
           ])
 
         setPerformances(processedPerformances)
@@ -222,7 +230,7 @@ function processPerformances(
   for (const item of allEntries) {
     const entry = item.setlist_entries
     const show = entry?.shows
-    if (!show) continue
+    if (!show || isRecordingSessionEmbedShow(show as { show_detail?: string | null })) continue
 
     const subvenuesVal = show.subvenues
     const venueId =

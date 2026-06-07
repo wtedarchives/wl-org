@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useState } from "react"
 
+import { isRecordingSessionShowDetail } from "@/lib/show-recording-session-filter"
 import { supabase } from "@/lib/supabase"
 
 /** YYYY-MM-DD in the user's local timezone (matches old home “This Day in Goose History”). */
@@ -31,6 +32,7 @@ const HIST_COLUMNS = `
   show_venue_location,
   show_wl_link,
   show_canonid,
+  show_detail,
   subvenues:show_subvenue(
     venues:subvenue_venue(
       venue_id
@@ -110,17 +112,24 @@ export function useWlHomeThisDayInHistoryShows(enabled: boolean) {
 
           if (rows.length > 0) {
             allRows.push(
-              ...rows.map((show) => ({
-                show_id: show.show_id as string,
-                show_date: show.show_date as string,
-                show_group: show.show_group as string,
-                show_venue_location: show.show_venue_location as string,
-                show_wl_link:
-                  typeof show.show_wl_link === "string" ?
-                    show.show_wl_link
-                  : null,
-                venue_id: show.subvenues?.venues?.venue_id ?? null,
-              })),
+              ...rows
+                .filter(
+                  (show) =>
+                    !isRecordingSessionShowDetail(
+                      show.show_detail as string | null | undefined,
+                    ),
+                )
+                .map((show) => ({
+                  show_id: show.show_id as string,
+                  show_date: show.show_date as string,
+                  show_group: show.show_group as string,
+                  show_venue_location: show.show_venue_location as string,
+                  show_wl_link:
+                    typeof show.show_wl_link === "string" ?
+                      show.show_wl_link
+                    : null,
+                  venue_id: show.subvenues?.venues?.venue_id ?? null,
+                })),
             )
             page += 1
             hasMore = rows.length === PAGE_SIZE

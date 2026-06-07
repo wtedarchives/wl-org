@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { isRecordingSessionEmbedShow } from "@/lib/show-recording-session-filter"
 
 export interface PlacementRow {
   song_name: string
@@ -64,7 +65,8 @@ async function fetchPlacement(
         shows!inner(
           show_date,
           show_group,
-          show_canonid
+          show_canonid,
+          show_detail
         )
       `,
       )
@@ -88,7 +90,9 @@ async function fetchPlacement(
     }
   }
 
-  const counts = allData.reduce(
+  const counts = allData
+    .filter((entry) => !isRecordingSessionEmbedShow(entry.shows))
+    .reduce(
     (acc: Record<string, PlacementRow>, entry: any) => {
       const songName = entry.entry_song
       const songsRel = Array.isArray(entry.songs) ? entry.songs[0] : entry.songs

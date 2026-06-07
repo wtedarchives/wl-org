@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 
 const PAGE_SIZE = 1000
 const CHUNK_SIZE = 200
@@ -164,8 +165,8 @@ export function useUserCanonicalBookendShows(userId: string | null) {
         const rows = await fetchShowRows(attendedIds)
         if (cancelled) return
 
-        const canon = rows.filter(
-          (s) => s.show_group === "Goose" && s.show_canonid,
+        const canon = excludeRecordingSessionShows(
+          rows.filter((s) => s.show_group === "Goose" && s.show_canonid),
         )
         const tomorrow = localTomorrowDateString()
         const past = canon.filter((s) => s.show_date < tomorrow)

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
+import { excludeRecordingSessionShows } from "@/lib/show-recording-session-filter"
 import type { ListShow } from "./use-list-show-data"
 
 type CompleteType = "category" | "jive" | "dripfield"
@@ -104,7 +105,7 @@ function useCompleteShowsList(type: CompleteType) {
         })
 
         if (fetchError) throw fetchError
-        setShows((data ?? []).map(mapShow))
+        setShows(excludeRecordingSessionShows(data ?? []).map(mapShow))
         setProgress(100)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load shows")
