@@ -11,6 +11,7 @@ import {
   wlHomeSetlistPillClass,
 } from "@/hooks/use-wl-home-most-recent-show"
 import type { WlHomeMostRecentShow } from "@/hooks/use-wl-home-most-recent-show"
+import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home-v2-archive-random-show-button"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
@@ -54,6 +55,9 @@ export function WlHomeV2TileArchive({
       </div>
 
       <div className="tile-widget">
+        <div className="tile-archive-random-row">
+          <WlHomeV2ArchiveRandomShowButton variant="tile" />
+        </div>
         <div
           className={[
             "widget-panel",

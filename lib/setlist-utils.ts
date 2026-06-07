@@ -139,6 +139,30 @@ export function formatSetlistDate(dateInput: string | number | null | undefined)
 }
 
 /**
+ * UTC weekday name for a show date (e.g. YYYY-MM-DD → "WEDNESDAY").
+ * Matches {@link formatSetlistDate} calendar-day parsing (date-only strings use UTC).
+ */
+export function formatShowWeekday(
+  dateInput: string | number | null | undefined,
+): string {
+  if (dateInput == null) return ""
+  if (typeof dateInput === "number") {
+    const date = new Date(dateInput)
+    if (Number.isNaN(date.getTime())) return ""
+    return date
+      .toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })
+      .toUpperCase()
+  }
+  const s = String(dateInput).trim()
+  if (!s) return ""
+  const date = new Date(s.includes("T") ? s : `${s}T00:00:00Z`)
+  if (Number.isNaN(date.getTime())) return ""
+  return date
+    .toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })
+    .toUpperCase()
+}
+
+/**
  * Show date as MM.DD.YYYY (four-digit year), UTC — for WTED catalog and similar.
  */
 export function formatShowDateLongYear(

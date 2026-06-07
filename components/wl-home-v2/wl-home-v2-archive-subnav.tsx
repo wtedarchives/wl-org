@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 
 import { SETLIST_ARCHIVE_SUB } from "@/components/app-sidebar.constants"
+import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home-v2-archive-random-show-button"
 import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
 import { cn } from "@/lib/utils"
@@ -86,6 +87,10 @@ export function WlHomeV2ArchiveSubnavContent({
             </Link>
           )
         })}
+        <WlHomeV2ArchiveRandomShowButton
+          variant="subnav"
+          onNavigate={onNavigate}
+        />
       </div>
     </nav>
   )

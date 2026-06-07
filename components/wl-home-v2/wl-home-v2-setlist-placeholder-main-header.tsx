@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import type { Show } from "@/types/setlist"
 import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
-import { formatSetlistDate } from "@/lib/setlist-utils"
+import { formatSetlistDate, formatShowWeekday } from "@/lib/setlist-utils"
 
 import {
   WlHomeV2SetlistPlaceholderCommunityLink,
@@ -65,6 +65,8 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
       </span>
     : null
 
+  const showWeekdayLabel = formatShowWeekday(show.show_date)
+
   return (
     <div
       className={cn(
@@ -72,6 +74,14 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
       )}
     >
       <div className="show-header">
+        {showWeekdayLabel ?
+          <div className="show-header-weekday-rail" aria-hidden="true">
+            <span className="show-header-weekday-rail-text">
+              {showWeekdayLabel}
+            </span>
+          </div>
+        : null}
+        <div className="show-header-main">
         <div className="left">
           <div
             className={cn(
@@ -205,6 +215,7 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
