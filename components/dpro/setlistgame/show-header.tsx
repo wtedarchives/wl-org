@@ -32,7 +32,7 @@ export function ShowHeader({
 
   if (wlV2) {
     return (
-      <div className="show-header">
+      <div className="show-header setlist-game-show-header">
         <div className="left">
           <div className="show-header-title-row">
             <h1 className="show-header-heading">
