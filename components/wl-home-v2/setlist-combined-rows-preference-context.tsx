@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth-context"
 import { useSetlistCombinedRowsPreference } from "@/hooks/use-setlist-combined-rows-preference"
 
 type SetlistCombinedRowsPreferenceContextValue = {
-  /** When true, combined pair/reprise rows start expanded on each setlist load (signed-in only). */
+  /** When true, pair/reprise rows start expanded on each setlist load (default; condensed is opt-in). */
   expandCombinedOnLoad: boolean
   preferenceLoading: boolean
   preferenceSaving: boolean
@@ -15,7 +15,7 @@ type SetlistCombinedRowsPreferenceContextValue = {
 
 const SetlistCombinedRowsPreferenceContext =
   createContext<SetlistCombinedRowsPreferenceContextValue>({
-    expandCombinedOnLoad: false,
+    expandCombinedOnLoad: true,
     preferenceLoading: false,
     preferenceSaving: false,
     saveExpandCombinedOnLoad: async () => false,
@@ -38,7 +38,7 @@ export function SetlistCombinedRowsPreferenceProvider({
   return (
     <SetlistCombinedRowsPreferenceContext.Provider
       value={{
-        expandCombinedOnLoad: profileId ? expandCombinedOnLoad : false,
+        expandCombinedOnLoad,
         preferenceLoading: Boolean(profileId) && loading,
         preferenceSaving: saving,
         saveExpandCombinedOnLoad,

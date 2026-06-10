@@ -192,7 +192,7 @@ serve(async (req) => {
     {
       success: true,
       setlist_combined_rows_expanded_by_default:
-        data.setlist_combined_rows_expanded_by_default === true,
+        data.setlist_combined_rows_expanded_by_default !== false,
       push_notifications_enabled: data.push_notifications_enabled === true,
     },
     200,

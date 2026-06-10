@@ -9,13 +9,13 @@ export function useSetlistCombinedRowsPreference(
   profileId: string | undefined,
   accessToken: string | undefined,
 ) {
-  const [expandCombinedOnLoad, setExpandCombinedOnLoad] = useState(false)
+  const [expandCombinedOnLoad, setExpandCombinedOnLoad] = useState(true)
   const [loading, setLoading] = useState(Boolean(profileId))
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!profileId || !supabase) {
-      setExpandCombinedOnLoad(false)
+      setExpandCombinedOnLoad(true)
       setLoading(false)
       return
     }
@@ -29,13 +29,14 @@ export function useSetlistCombinedRowsPreference(
       .then(({ data, error }) => {
         if (cancelled) return
         if (error || !data) {
-          setExpandCombinedOnLoad(false)
+          setExpandCombinedOnLoad(true)
         } else {
           const row = data as {
             setlist_combined_rows_expanded_by_default?: boolean | null
           }
+          // Condensed is opt-in: only explicit false keeps rows on one line.
           setExpandCombinedOnLoad(
-            row.setlist_combined_rows_expanded_by_default === true,
+            row.setlist_combined_rows_expanded_by_default !== false,
           )
         }
         setLoading(false)

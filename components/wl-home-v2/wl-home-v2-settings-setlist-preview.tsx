@@ -192,8 +192,8 @@ export function WlHomeV2SettingsSetlistPreview({
       className="wl-home-v2-settings-preview"
       aria-label={
         expandedByDefault ?
-          "Preview: combined rows open as separate songs on load"
-        : "Preview: combined rows stay on one line on load"
+          "Preview: song pairs, reprises, and suites open as separate songs on load"
+        : "Preview: song pairs, reprises, and suites stay on one condensed line on load"
       }
     >
       <div className="wl-home-v2-setlist wl-home-v2-settings-preview__setlist">

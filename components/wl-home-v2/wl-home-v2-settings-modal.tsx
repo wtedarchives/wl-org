@@ -168,15 +168,15 @@ export function WlHomeV2SettingsModal({
                 Setlist Preferences
               </h4>
               <p className="wl-home-v2-settings-section-desc">
-                Song pairs, reprises, and suites can appear as one combined row or as separate
-                song rows. Choose how they look when you open a setlist.
+                Song pairs, reprises, and suites can appear as separate song rows or as one
+                condensed row. Choose how they look when you open a setlist.
               </p>
               <div className="wl-home-v2-settings-toggle-row">
                 <ToggleSwitch
-                  showActualSetlist={draftExpanded}
-                  setShowActualSetlist={setDraftExpanded}
-                  leftLabel="Combined"
-                  rightLabel="Expanded"
+                  showActualSetlist={!draftExpanded}
+                  setShowActualSetlist={(condensed) => setDraftExpanded(!condensed)}
+                  leftLabel="Expanded"
+                  rightLabel="Condensed"
                   wlV2Chrome
                 />
               </div>
