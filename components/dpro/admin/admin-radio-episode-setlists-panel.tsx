@@ -66,7 +66,7 @@ export function AdminRadioEpisodeSetlistsPanel() {
           </div>
           <div className="wl-home-v2-admin-radio-tab-description-wrap">
             <p className="wl-home-v2-admin-radio-tab-description">
-              Same layout as Program Director. Click an episode to attach
+              Same layout as Episodes. Click an episode to attach
               setlist songs (uses{" "}
               <code className="wl-home-v2-admin-radio-tab-code">radio_id</code>{" "}
               in{" "}

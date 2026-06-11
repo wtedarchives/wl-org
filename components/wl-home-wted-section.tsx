@@ -58,7 +58,7 @@ function WtedExploreRadioNavInner() {
         href="/wted/program-director"
         className="flex w-full min-w-0 items-center justify-center rounded-lg bg-wl-dark-green px-3 py-1 text-center text-xs font-semibold leading-tight text-wl-white transition-colors hover:bg-[#3d4842]"
       >
-        Program Director
+        Episodes
       </Link>
       <Link
         href="/wted/about"
@@ -271,7 +271,7 @@ export function WlHomeWtedSection({
             href="/wted/program-director"
             className="flex flex-1 items-center justify-center px-4 py-2 text-center text-xs font-semibold text-wl-white transition-colors hover:bg-[#3d4842]"
           >
-            Program Director
+            Episodes
           </Link>
           <Link
             href="/wted/about"

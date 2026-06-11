@@ -194,7 +194,6 @@ export function WlHomeV2({
               <WlHomeV2Tiles
                 onOpenRequest={() => setRequestOpen(true)}
                 onOpenLogin={() => setLoginOpen(true)}
-                onOpenSchedule={() => setScheduleOpen(true)}
                 onOpenTourSchedule={() => setTourScheduleOpen(true)}
                 onOpenThisDayInHistory={() => setThisDayHistoryOpen(true)}
               />

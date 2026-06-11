@@ -54,10 +54,10 @@ export function ProgramDirectorContent({
   if (loading) {
     if (isV2) {
       return (
-        <WlHomeV2PageLoading message="Loading program director data…" />
+        <WlHomeV2PageLoading message="Loading episodes…" />
       )
     }
-    return <LoadingPageCard message="Loading program director data…" />
+    return <LoadingPageCard message="Loading episodes…" />
   }
 
   if (error) {
@@ -66,7 +66,7 @@ export function ProgramDirectorContent({
         <div className="flex flex-1 flex-col px-4 py-10 sm:px-6 lg:px-8">
           <div className="widget-panel py-10 text-center">
             <p className="text-sm text-white/65">
-              Could not load Program Director data. Please reload the page.
+              Could not load episodes. Please reload the page.
             </p>
           </div>
         </div>
@@ -76,7 +76,7 @@ export function ProgramDirectorContent({
       <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 rounded-b-none md:rounded-b-xl overflow-hidden">
         <div className="flex flex-1 items-center justify-center py-12">
           <p className="text-center text-sm text-muted-foreground">
-            Could not load Program Director data. Please reload the page.
+            Could not load episodes. Please reload the page.
           </p>
         </div>
       </div>
@@ -156,7 +156,7 @@ export function ProgramDirectorContent({
 
       {isV2 ?
         <header className="wl-home-v2-page-lede">
-          <h1>WTED Radio Program Director</h1>
+          <h1>WTED Radio Episodes</h1>
           <div className="wl-home-v2-page-lede-body">
             <p>{PROGRAM_DIRECTOR_LEDE_P1}</p>
             <p>
@@ -183,7 +183,7 @@ export function ProgramDirectorContent({
             <div className="bg-muted/60 flex min-w-0 flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <div className="flex min-w-0 items-center gap-2">
                 <h1 className="shrink-0 text-sm font-semibold">
-                  WTED Radio Program Director
+                  WTED Radio Episodes
                 </h1>
               </div>
             </div>

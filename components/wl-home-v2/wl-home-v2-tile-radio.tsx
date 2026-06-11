@@ -5,20 +5,18 @@ import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
 
-import { useRadioSchedule } from "@/hooks/use-radio-schedule"
+import { useRadioScheduleWeek } from "@/hooks/use-radio-schedule"
 
 import { WlHomeV2OnAirPill } from "./wl-home-v2-on-air-pill"
 
 export function WlHomeV2TileRadio({
   onWtedRadioTileClick,
   onOpenRequest,
-  onOpenSchedule,
 }: {
   onWtedRadioTileClick: () => void
   onOpenRequest: () => void
-  onOpenSchedule: () => void
 }) {
-  const { slots, loading, error } = useRadioSchedule()
+  const { days, loading, error } = useRadioScheduleWeek()
 
   return (
     <section
@@ -26,7 +24,7 @@ export function WlHomeV2TileRadio({
       style={{ "--tile-bg": "url('/newbg.png')" } as CSSProperties}
       onClick={(e) => {
         const el = e.target as HTMLElement | null
-        if (el?.closest(".tile-widget")) return
+        if (el?.closest(".tile-widget, .tile-widget-store-badges")) return
         onWtedRadioTileClick()
       }}
     >
@@ -51,10 +49,9 @@ export function WlHomeV2TileRadio({
       </div>
 
       <div className="tile-widget">
-        <div className="wl-home-v2-radio-tile-on-air-card">
+        <div className="widget-panel wl-home-v2-radio-tile-on-air-card">
           <WlHomeV2OnAirPill
-            onOpenSchedule={onOpenSchedule}
-            slots={slots}
+            days={days}
             loading={loading}
             error={error}
           />
@@ -74,7 +71,7 @@ export function WlHomeV2TileRadio({
             <MusicNote className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </button>
           <Link className="wbtn wbtn--app-store" href="/wted/program-director">
-            <span className="wbtn-text">Program Director</span>
+            <span className="wbtn-text">Episodes</span>
             <ListNumbers className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </Link>
           <Link className="wbtn wbtn--app-store" href="/wted/about">
@@ -86,6 +83,30 @@ export function WlHomeV2TileRadio({
             <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
           </Link>
         </div>
+      </div>
+
+      <div className="tile-body">
+        <h2>
+          WTED
+          <br />
+          Goose Radio
+        </h2>
+        <span className="tile-radio-attribution-pill">
+          Powered by Wysteria Lane
+        </span>
+        <p>
+          Listen to Goose on demand, 24/7 — live streams, historic sets, and
+          listener requests.
+        </p>
+        <span className="cta">
+          <span className="cta-label">Tune in</span>
+          <ArrowRight
+            className="arrow"
+            size={16}
+            weight="regular"
+            aria-hidden
+          />
+        </span>
         <div className="tile-widget-store-badges">
           <a
             className="tile-widget-store-badge-link tile-widget-store-badge-link--ios focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(88,200,174)]"
@@ -116,30 +137,6 @@ export function WlHomeV2TileRadio({
             />
           </a>
         </div>
-      </div>
-
-      <div className="tile-body">
-        <h2>
-          WTED
-          <br />
-          Goose Radio
-        </h2>
-        <span className="tile-radio-attribution-pill">
-          Powered by Wysteria Lane
-        </span>
-        <p>
-          Listen to Goose on demand, 24/7 — live streams, historic sets, and
-          listener requests.
-        </p>
-        <span className="cta">
-          <span className="cta-label">Tune in</span>
-          <ArrowRight
-            className="arrow"
-            size={16}
-            weight="regular"
-            aria-hidden
-          />
-        </span>
       </div>
     </section>
   )

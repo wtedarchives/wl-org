@@ -3,11 +3,21 @@
 import { useEffect, useState } from "react"
 
 import {
+  buildRadioScheduleDays,
+  getRadioScheduleSlotsForLocalDay,
+  radioScheduleDaySlotsToLegacySlots,
+  type RadioScheduleDay,
+  type RadioScheduleEvent,
+} from "@/lib/radio-schedule-day-slots"
+import {
   extractRadioCoPlaylistIdFromArtworkUrl,
   fetchWtedEpisodeScheduleLookupsByNames,
   fetchWtedEpisodeScheduleLookupsByRadioIds,
   type WtedEpisodeScheduleLookup,
 } from "@/lib/wted-episodes-schedule-lookup"
+
+export type { RadioScheduleDay, RadioScheduleEvent } from "@/lib/radio-schedule-day-slots"
+export { RADIO_SCHEDULE_WEEK_DAY_COUNT } from "@/lib/radio-schedule-day-slots"
 
 const RADIO_SCHEDULE_URL =
   "https://public.radio.co/stations/s3c11c85d6/embed/schedule"
@@ -56,19 +66,6 @@ async function fetchRadioScheduleWithRetry(): Promise<RadioScheduleResponse> {
     }
   }
   throw lastError ?? new Error("Failed to load schedule")
-}
-
-export interface RadioScheduleEvent {
-  start: string
-  end: string
-  event_id: number
-  playlist: {
-    name: string
-    colour: string
-    artist: string
-    title: string
-    artwork: string
-  }
 }
 
 interface RadioScheduleResponse {
@@ -171,6 +168,7 @@ function sameLocalCalendarDay(a: Date, b: Date): boolean {
   )
 }
 
+/** @deprecated Prefer {@link getRadioScheduleSlotsForLocalDay} (start or end on local day). */
 export function filterRadioEventsStartingOnLocalDay(
   events: RadioScheduleEvent[],
   day: Date,
@@ -198,20 +196,8 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
       return { slots: [], error: null }
     }
 
-    const filtered = filterRadioEventsStartingOnLocalDay(json.data, day)
-
-    const rawSlots: RadioScheduleSlot[] = filtered.map((event) => ({
-      event,
-      isNowPlaying: false,
-    }))
-    const merged = mergeBackToBackSameTitleSlotsCore(rawSlots)
-
-    const slotsBase = merged.map((slot) => ({
-      ...slot,
-      isNowPlaying:
-        nowMs >= new Date(slot.event.start).getTime() &&
-        nowMs < new Date(slot.event.end).getTime(),
-    }))
+    const daySlots = getRadioScheduleSlotsForLocalDay(json.data, day, nowMs)
+    const slotsBase = radioScheduleDaySlotsToLegacySlots(daySlots)
 
     const episodeKeys = slotsBase.map((s) => s.event.playlist.name?.trim() ?? "")
     const episodeMap = await fetchWtedEpisodeScheduleLookupsByNames(episodeKeys)
@@ -326,4 +312,59 @@ export function useRadioSchedule() {
   }, [])
 
   return { slots, loading, error }
+}
+
+function useRadioScheduleFetch<T>(
+  parse: (data: RadioScheduleEvent[]) => T,
+  initial: T,
+) {
+  const [value, setValue] = useState<T>(initial)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchSchedule(isInitialLoad: boolean) {
+      if (isInitialLoad) setLoading(true)
+      try {
+        const json = await fetchRadioScheduleWithRetry()
+        if (cancelled) return
+        if (json.data?.length) {
+          setValue(parse(json.data))
+          setError(null)
+        } else {
+          setValue(parse([]))
+          setError(null)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load schedule")
+          setValue(parse([]))
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    void fetchSchedule(true)
+
+    const interval = setInterval(() => {
+      void fetchSchedule(false)
+    }, 5 * 60 * 1000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [parse])
+
+  return { value, loading, error }
+}
+
+export function useRadioScheduleWeek() {
+  const { value: days, loading, error } = useRadioScheduleFetch(
+    buildRadioScheduleDays,
+    buildRadioScheduleDays([]),
+  )
+  return { days, loading, error }
 }

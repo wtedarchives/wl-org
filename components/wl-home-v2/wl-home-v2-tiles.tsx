@@ -22,15 +22,12 @@ import { groupTileSetlistBySet } from "@/components/wl-home-v2/wl-home-v2-tiles.
 export function WlHomeV2Tiles({
   onOpenRequest,
   onOpenLogin,
-  onOpenSchedule,
   onOpenTourSchedule,
   onOpenThisDayInHistory,
 }: {
   onOpenRequest: () => void
   /** Same as nav “Sign In” — opens the home login modal (credentials form). */
   onOpenLogin: () => void
-  /** Full Radio.co schedule embed (homepage radio tile pill). */
-  onOpenSchedule: () => void
   /** Goose past + upcoming shows (archive widget). */
   onOpenTourSchedule: () => void
   /** Same-day calendar shows across years (matches legacy homepage). */
@@ -95,7 +92,6 @@ export function WlHomeV2Tiles({
       <WlHomeV2TileRadio
         onWtedRadioTileClick={onWtedRadioTileClick}
         onOpenRequest={onOpenRequest}
-        onOpenSchedule={onOpenSchedule}
       />
       <WlHomeV2TileCommunity
         featuredTopics={featuredTopics}

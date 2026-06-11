@@ -203,7 +203,7 @@ export function WlHomeV2WtedEpisodePageClient() {
               href="/wted/program-director"
               className="font-medium text-wl-orange underline underline-offset-2 hover:text-white"
             >
-              Program Director
+              Episodes
             </Link>
             .
           </p>

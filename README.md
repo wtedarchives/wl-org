@@ -26,7 +26,7 @@ Modals on the homepage handle login, signup, password reset, radio schedule, tou
 ### WTED Radio (`/wted/...`)
 
 - **About** (`/wted/about`) — Mission, FAQ, and how the station works.
-- **Program Director** (`/wted/program-director`) — Episode catalog and show pages.
+- **Episodes** (`/wted/program-director`) — Episode catalog and show pages.
 - **GORPs** (`/wted/gorps`) — Goose Obsessed Radio Personalities and contributors.
 
 ### Setlist Archive (`/archive/...`)
