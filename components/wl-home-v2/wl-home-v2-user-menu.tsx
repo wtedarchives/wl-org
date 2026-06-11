@@ -134,19 +134,19 @@ export function WlHomeV2UserMenu({
       type="button"
       className="top-nav-user-trigger"
       aria-haspopup="menu"
+      aria-label={isLoggedIn ? "Account menu" : "Sign in menu"}
     >
-      <Avatar className="top-nav-user-trigger-avatar">
-        <AvatarImage
-          src={isLoggedIn ? (profilePicture ?? undefined) : undefined}
-          alt=""
-        />
-        <AvatarFallback className="top-nav-user-trigger-fallback">
-          {displayName.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <span className="top-nav-user-trigger-label">
-        {isLoggedIn ? "Profile" : "Log in"}
-      </span>
+      {isLoggedIn ?
+        <Avatar className="top-nav-user-trigger-avatar">
+          <AvatarImage src={profilePicture ?? undefined} alt="" />
+          <AvatarFallback className="top-nav-user-trigger-fallback">
+            {displayName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      : <span className="top-nav-user-trigger-guest" aria-hidden>
+          <User className="top-nav-user-trigger-guest-icon" size={18} weight="regular" />
+        </span>
+      }
       <CaretDown className="top-nav-user-chevron" aria-hidden />
     </button>
   )

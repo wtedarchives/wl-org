@@ -4,12 +4,7 @@ import { ArrowRight, Info, ListNumbers, MusicNote, Users } from "@phosphor-icons
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
-import { useLayoutEffect } from "react"
 
-import {
-  RadioHomepageTopSlot,
-  usePersistentRadioTileScheduleGate,
-} from "@/components/persistent-radio"
 import { useRadioSchedule } from "@/hooks/use-radio-schedule"
 
 import { WlHomeV2OnAirPill } from "./wl-home-v2-on-air-pill"
@@ -24,13 +19,6 @@ export function WlHomeV2TileRadio({
   onOpenSchedule: () => void
 }) {
   const { slots, loading, error } = useRadioSchedule()
-  const setRadioTileScheduleReady = usePersistentRadioTileScheduleGate()
-
-  /** Anchor the persistent player as soon as the tile mounts; ResizeObserver re-syncs when ON AIR fills in. */
-  useLayoutEffect(() => {
-    setRadioTileScheduleReady(true)
-    return () => setRadioTileScheduleReady(false)
-  }, [setRadioTileScheduleReady])
 
   return (
     <section
@@ -63,13 +51,7 @@ export function WlHomeV2TileRadio({
       </div>
 
       <div className="tile-widget">
-        <div
-          id="wl-home-v2-radio-tile-player-anchor"
-          className="wl-home-v2-radio-tile-on-air-card"
-        >
-          <div className="wl-home-v2-radio-tile-on-air-card__embed radio-embed-wrap">
-            <RadioHomepageTopSlot className="radio-embed min-h-[66px] w-full" />
-          </div>
+        <div className="wl-home-v2-radio-tile-on-air-card">
           <WlHomeV2OnAirPill
             onOpenSchedule={onOpenSchedule}
             slots={slots}

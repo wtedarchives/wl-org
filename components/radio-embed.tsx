@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 const RADIO_EMBED_SRC =
-  "https://www.coreyterrell.com/assets/external/radio.html"
+  "https://wtedradio.com/radio-player/player-markup.html"
 const MAX_EMBED_LOAD_ATTEMPTS = 3
 const EMBED_LOAD_TIMEOUT_MS = 15_000
 
@@ -58,7 +58,7 @@ export function RadioEmbed({
       src={src}
       title="WTED Radio"
       className={`w-full rounded-md border-0 ${className}`}
-      style={{ height: "66px", ...style }}
+      style={{ height: "76px", ...style }}
       onLoad={onLoad}
       onError={onError}
     />

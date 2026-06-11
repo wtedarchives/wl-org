@@ -21,7 +21,8 @@ import "./wl-home-v2.css"
 import { WlHomeV2ArchiveSubnav } from "./wl-home-v2-archive-subnav"
 import { WlHomeV2Footer } from "./wl-home-v2-footer"
 import { WlHomeV2Header } from "./wl-home-v2-header"
-import { WlHomeV2HomeTicker } from "./wl-home-v2-home-ticker"
+// Homepage marquee ticker — disabled for now; uncomment import + JSX below to restore.
+// import { WlHomeV2HomeTicker } from "./wl-home-v2-home-ticker"
 import { SetlistCombinedRowsPreferenceProvider } from "./setlist-combined-rows-preference-context"
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import { WlHomeV2OpenLoginContext } from "./wl-home-v2-open-login-context"
@@ -189,7 +190,7 @@ export function WlHomeV2({
         >
           {children == null ?
             <>
-              <WlHomeV2HomeTicker onOpenSchedule={() => setScheduleOpen(true)} />
+              {/* <WlHomeV2HomeTicker onOpenSchedule={() => setScheduleOpen(true)} /> */}
               <WlHomeV2Tiles
                 onOpenRequest={() => setRequestOpen(true)}
                 onOpenLogin={() => setLoginOpen(true)}

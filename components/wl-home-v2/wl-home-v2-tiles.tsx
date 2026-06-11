@@ -68,16 +68,7 @@ export function WlHomeV2Tiles({
 
   const bumpHomeRadioEmbedPulse = useBumpHomeRadioEmbedPulse()
   const onWtedRadioTileClick = useCallback(() => {
-    const bump = bumpHomeRadioEmbedPulse
-    const anchor = document.getElementById(
-      "wl-home-v2-radio-tile-player-anchor",
-    )
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "center" })
-      globalThis.setTimeout(bump, 450)
-      return
-    }
-    scrollMainInsetToTopThenPulse(bump)
+    scrollMainInsetToTopThenPulse(bumpHomeRadioEmbedPulse)
   }, [bumpHomeRadioEmbedPulse])
 
   const openArchiveHub = useWlHomeV2OpenArchiveHub()

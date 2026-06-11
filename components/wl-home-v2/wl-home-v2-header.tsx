@@ -20,12 +20,24 @@ import {
   WL_HOME_V2_COMMUNITY_URL,
   WL_HOME_V2_TOP_NAV_PANEL_ID,
 } from "./wl-home-v2-constants"
+import { WlHomeV2HeaderPhraseRotator } from "./wl-home-v2-header-phrase-rotator"
 import { WlHomeV2UserMenu } from "./wl-home-v2-user-menu"
 
-function TopNavPrimaryImage({ src }: { src: string }) {
+function TopNavPrimaryImage({
+  src,
+  className,
+}: {
+  src: string
+  className?: string
+}) {
   return (
     <span
-      className="top-nav-primary-icon top-nav-primary-icon--img"
+      className={[
+        "top-nav-primary-icon top-nav-primary-icon--img",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-hidden
     >
       <Image
@@ -34,7 +46,7 @@ function TopNavPrimaryImage({ src }: { src: string }) {
         width={80}
         height={80}
         className="top-nav-primary-img"
-        sizes="(max-width: 1343px) 20px, 22px"
+        sizes="22px"
       />
     </span>
   )
@@ -120,8 +132,6 @@ export function WlHomeV2Header({
     [onOpenRadio, closeMobileNav],
   )
 
-  const isHomeIndex = pathname === "/"
-
   const isArchiveRoute =
     pathname === "/archive" || pathname.startsWith("/archive/")
 
@@ -135,23 +145,14 @@ export function WlHomeV2Header({
   }, [mobileNavOpen, closeMobileNav])
 
   return (
-    <header
-      className={[
-        "top",
-        isHomeIndex ? "top--home-main-radio" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {!isHomeIndex ?
-        <div className="top-embed-row">
-          <div className="radio-embed-wrap radio-embed-wrap--header">
-            {isBelowXl ?
-              <RadioMobileSlot className="radio-embed min-h-[66px] w-full" />
-            : <RadioHomeSlot className="radio-embed min-h-[66px] w-full" />}
-          </div>
+    <header className="top">
+      <div className="top-embed-row">
+        <div className="radio-embed-wrap radio-embed-wrap--header">
+          {isBelowXl ?
+            <RadioMobileSlot className="radio-embed min-h-[66px] w-full" />
+          : <RadioHomeSlot className="radio-embed min-h-[66px] w-full" />}
         </div>
-      : null}
+      </div>
 
       <button
         type="button"
@@ -179,8 +180,8 @@ export function WlHomeV2Header({
             <Image
               src="/WL.png"
               alt=""
-              width={26}
-              height={26}
+              width={30}
+              height={30}
               className="h-[72%] w-[72%] object-contain"
             />
           </div>
@@ -189,36 +190,7 @@ export function WlHomeV2Header({
             <span className="dotorg">Powered by Wysteria Lane</span>
           </div>
         </Link>
-      </div>
-
-      <nav
-        id={mobileNavId}
-        className={[
-          "top-nav",
-          mobileNavOpen ? "top-nav--mobile-open" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        aria-label="Primary"
-      >
-        <div className="top-nav-primary-row">
-          <a href="/wted/program-director" onClick={onRadioNavClick}>
-            <TopNavPrimaryImage src="/WTED2.png" />
-            Radio
-          </a>
-          <a
-            href={WL_HOME_V2_COMMUNITY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={closeMobileNav}
-          >
-            <TopNavPrimaryImage src="/WL.png" />
-            Community
-          </a>
-          <a href="/archive" onClick={onArchivesNavClick}>
-            <TopNavPrimaryImage src="/wted-sa-cropped-2.png" />
-            Archives
-          </a>
+        <div className="top-brand-cluster-actions">
           <Link href="/support" onClick={closeMobileNav}>
             <MoneyWavy
               className="top-nav-primary-icon"
@@ -242,23 +214,92 @@ export function WlHomeV2Header({
             Follow Us
           </a>
         </div>
-        {isArchiveRoute ?
-          <Suspense fallback={null}>
-            <WlHomeV2ArchiveSubnavContent
-              className="wl-home-v2-archive-subnav--drawer md:hidden"
-              onNavigate={closeMobileNav}
-            />
-          </Suspense>
-        : null}
-      </nav>
+      </div>
 
-      <div className="top-user-cluster">
-        <div className="top-user-menu">
-          <WlHomeV2UserMenu
-            onOpenLogin={onOpenLogin}
-            onOpenSignup={onOpenSignup}
-            onOpenShareSchedule={onOpenShareSchedule}
-          />
+      <div className="top-header-controls">
+        <div className="top-header-controls-stack">
+          <div className="top-header-controls-top-row">
+            <nav
+              id={mobileNavId}
+              className={[
+                "top-nav",
+                mobileNavOpen ? "top-nav--mobile-open" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-label="Primary"
+            >
+              <div className="top-nav-primary-row">
+                <a href="/wted/program-director" onClick={onRadioNavClick}>
+                  <TopNavPrimaryImage
+                    src="/WTED.png"
+                    className="top-nav-radio-img--desktop"
+                  />
+                  <TopNavPrimaryImage
+                    src="/WTED2.png"
+                    className="top-nav-radio-img--mobile"
+                  />
+                  Radio
+                </a>
+                <a
+                  href={WL_HOME_V2_COMMUNITY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={closeMobileNav}
+                >
+                  <TopNavPrimaryImage src="/WL.png" />
+                  Community
+                </a>
+                <a href="/archive" onClick={onArchivesNavClick}>
+                  <TopNavPrimaryImage src="/wted-sa-cropped-2.png" />
+                  Archives
+                </a>
+              </div>
+              <div className="top-nav-secondary-row">
+                <Link href="/support" onClick={closeMobileNav}>
+                  <MoneyWavy
+                    className="top-nav-primary-icon"
+                    size={18}
+                    weight="regular"
+                    aria-hidden
+                  />
+                  Support
+                </Link>
+                <a
+                  href="#"
+                  aria-haspopup="dialog"
+                  onClick={onFollowUsNavClick}
+                >
+                  <ArrowRight
+                    className="top-nav-primary-icon"
+                    size={18}
+                    weight="regular"
+                    aria-hidden
+                  />
+                  Follow Us
+                </a>
+              </div>
+              {isArchiveRoute ?
+                <Suspense fallback={null}>
+                  <WlHomeV2ArchiveSubnavContent
+                    className="wl-home-v2-archive-subnav--drawer md:hidden"
+                    onNavigate={closeMobileNav}
+                  />
+                </Suspense>
+              : null}
+            </nav>
+
+            <div className="top-user-cluster">
+              <div className="top-user-menu">
+                <WlHomeV2UserMenu
+                  onOpenLogin={onOpenLogin}
+                  onOpenSignup={onOpenSignup}
+                  onOpenShareSchedule={onOpenShareSchedule}
+                />
+              </div>
+            </div>
+          </div>
+          <WlHomeV2HeaderPhraseRotator />
         </div>
       </div>
     </header>

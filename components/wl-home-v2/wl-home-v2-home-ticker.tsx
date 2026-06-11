@@ -15,7 +15,7 @@ import {
 import { useWtedRadioNowPlaying } from "@/hooks/use-wted-radio-now-playing"
 
 const WELCOME_TICKER_COPY =
-  "Welcome to Wysteria Lane, built by Goose fans, for Goose fans."
+  "Welcome to WTED Radio, powered by Wysteria Lane. Built by Goose fans, for Goose fans."
 
 const NOW_PLAYING_TICKER_PREFIX = "Now playing on WTED Goose Radio:  "
 
