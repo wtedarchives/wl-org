@@ -198,12 +198,22 @@
     ".top-brand-cluster-actions > a:hover { background: rgb(245, 155, 112); }",
     ".top-brand-cluster-actions > a .top-nav-primary-icon {",
     "  flex-shrink: 0;",
+    "  width: 18px;",
+    "  height: 18px;",
     "  color: #000000;",
     "  opacity: 1;",
     "}",
+    ".top-nav-primary-icon--svg {",
+    "  display: inline-flex;",
+    "  align-items: center;",
+    "  justify-content: center;",
+    "  width: 18px;",
+    "  height: 18px;",
+    "  flex-shrink: 0;",
+    "}",
     ".top-nav-primary-icon--svg img {",
-    "  width: 100%;",
-    "  height: 100%;",
+    "  width: 18px;",
+    "  height: 18px;",
     "  display: block;",
     "}",
 
@@ -464,6 +474,11 @@
     "  }",
     "  header.top nav.top-nav .top-nav-secondary-row > a { padding: 6px; }",
     "  header.top nav.top-nav .top-nav-primary-icon { width: 16px; height: 16px; }",
+    "  header.top nav.top-nav .top-nav-primary-icon--svg,",
+    "  header.top nav.top-nav .top-nav-primary-icon--svg img {",
+    "    width: 16px;",
+    "    height: 16px;",
+    "  }",
     "  header.top nav.top-nav .top-nav-primary-icon.top-nav-primary-icon--img {",
     "    width: auto; height: 22px;",
     "  }",
@@ -590,7 +605,7 @@
       '<span class="top-nav-primary-icon top-nav-primary-icon--svg" aria-hidden="true">' +
       '<img src="' +
       src +
-      '" alt="">' +
+      '" alt="" width="18" height="18">' +
       "</span>"
     );
   }
