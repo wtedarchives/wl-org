@@ -1079,6 +1079,41 @@
     padding-block: 4px;
   }
 
+  /* Narrow viewports: icon-only random button (no hover label expand). */
+  @media (max-width: 1023px) {
+    .wl-home-v2 .wl-home-v2-archive-subnav-random-btn:hover,
+    .wl-home-v2 .wl-home-v2-archive-subnav-random-btn:focus-visible {
+      max-width: 32px;
+      gap: 0;
+      padding: 5px 8px;
+    }
+    .wl-home-v2
+      .wl-home-v2-archive-subnav-random-btn:hover
+      .wl-home-v2-archive-random-btn__label,
+    .wl-home-v2
+      .wl-home-v2-archive-subnav-random-btn:focus-visible
+      .wl-home-v2-archive-random-btn__label {
+      max-width: 0;
+      opacity: 0;
+    }
+    .wl-home-v2 .wl-home-v2-archive-random-btn--tile:hover,
+    .wl-home-v2 .wl-home-v2-archive-random-btn--tile:focus-visible {
+      max-width: 38px;
+      gap: 0;
+      padding: 8px 10px;
+      transform: none;
+    }
+    .wl-home-v2
+      .wl-home-v2-archive-random-btn--tile:hover
+      .wl-home-v2-archive-random-btn__label,
+    .wl-home-v2
+      .wl-home-v2-archive-random-btn--tile:focus-visible
+      .wl-home-v2-archive-random-btn__label {
+      max-width: 0;
+      opacity: 0;
+    }
+  }
+
   .wl-home-v2 .live-pill {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 11px; border-radius: 999px;
