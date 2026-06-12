@@ -5,6 +5,12 @@ export const WTED_RADIO_STATUS_URL = `https://public.radio.co/stations/${WTED_RA
 /** Match Radio.co cache (max-age≈3s); align with {@link WtedRecentlyPlayedCard}. */
 export const WTED_RADIO_STATUS_POLL_MS = 15_000
 
+export const WTED_RECENTLY_PLAYED_LIMIT = 20
+
+export const WTED_RADIO_HISTORY_URL = `https://public.radio.co/stations/${WTED_RADIO_CO_STATION_ID}/history`
+
+export const WTED_RADIO_SCHEDULE_URL = `https://public.radio.co/stations/${WTED_RADIO_CO_STATION_ID}/embed/schedule`
+
 export type RadioCoStatusTitleEntry = { title?: string }
 
 export type RadioCoStatusResponse = {

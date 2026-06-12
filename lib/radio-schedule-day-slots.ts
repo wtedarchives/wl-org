@@ -2,6 +2,7 @@ import {
   addLocalCalendarDays,
   startOfLocalCalendarDay,
 } from "@/lib/wl-home-v2-radio-schedule-share-export-days"
+import type { WtedEpisodeScheduleLookup } from "@/lib/wted-episodes-schedule-lookup"
 
 export interface RadioScheduleEvent {
   start: string
@@ -27,6 +28,8 @@ export type RadioScheduleDaySlot = {
   displayEnd: string
   isNowPlaying: boolean
   slotKey: string
+  /** Matched from Radio.co `playlist.name` → `wted_episodes.episode` (when loaded). */
+  wtedEpisode?: WtedEpisodeScheduleLookup | null
 }
 
 export type RadioScheduleDay = {

@@ -62,6 +62,7 @@ export function SetlistWtedPanelScrollBody({
   setlist,
   open,
   fallbackReleaseArtwork,
+  onRequestAnother,
 }: {
   variant: "drawer" | "modal"
   scrollClassName?: string
@@ -95,8 +96,16 @@ export function SetlistWtedPanelScrollBody({
   setlist?: SetlistEntry[]
   open?: boolean
   fallbackReleaseArtwork?: string | null
+  onRequestAnother?: () => void
 }) {
   const slotVisualVariant = variant === "modal" ? "wlHomeV2" : "drawer"
+  const handleRequestAnother = () => {
+    if (onRequestAnother) {
+      onRequestAnother()
+    } else {
+      onOpenChange(false)
+    }
+  }
 
   return (
     <div
@@ -243,7 +252,7 @@ export function SetlistWtedPanelScrollBody({
                         size="sm"
                         variant="default"
                         className="wl-home-v2-wted-request-track-btn"
-                        onClick={() => onOpenChange(false)}
+                        onClick={handleRequestAnother}
                       >
                         Request another song
                       </Button>
@@ -314,7 +323,7 @@ export function SetlistWtedPanelScrollBody({
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => onOpenChange(false)}
+                      onClick={handleRequestAnother}
                     >
                       Request another song
                     </Button>

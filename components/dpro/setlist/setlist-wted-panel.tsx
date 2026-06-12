@@ -35,6 +35,8 @@ export interface SetlistWtedPanelProps {
   variant: "drawer" | "modal"
   /** Extra classes on the scroll region (e.g. modal flex child). */
   scrollClassName?: string
+  /** When set, "Request another song" calls this instead of `onOpenChange(false)`. */
+  onRequestAnother?: () => void
 }
 
 export function SetlistWtedPanel({
@@ -47,6 +49,7 @@ export function SetlistWtedPanel({
   fallbackReleaseArtwork,
   variant,
   scrollClassName,
+  onRequestAnother,
 }: SetlistWtedPanelProps) {
   const isMultiPairMode = !!(wtedEntryOptions && wtedEntryOptions.length > 1)
   const activeEntry = entry
@@ -306,6 +309,7 @@ export function SetlistWtedPanel({
       setlist={setlist}
       open={open}
       fallbackReleaseArtwork={fallbackReleaseArtwork}
+      onRequestAnother={onRequestAnother}
     />
   )
 

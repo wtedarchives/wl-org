@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, Info, ListNumbers, MusicNote, Users } from "@phosphor-icons/react"
+import { ArrowRight, Info, ListNumbers, MusicNote, Play, Users } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties } from "react"
@@ -12,9 +12,11 @@ import { WlHomeV2OnAirPill } from "./wl-home-v2-on-air-pill"
 export function WlHomeV2TileRadio({
   onWtedRadioTileClick,
   onOpenRequest,
+  onOpenRecentlyPlayed,
 }: {
   onWtedRadioTileClick: () => void
   onOpenRequest: () => void
+  onOpenRecentlyPlayed: () => void
 }) {
   const { days, loading, error } = useRadioScheduleWeek()
 
@@ -57,31 +59,48 @@ export function WlHomeV2TileRadio({
           />
         </div>
         <div className="tile-widget-actions">
-          <button
-            type="button"
-            className="wbtn wbtn--app-store"
-            id="btn-request"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onOpenRequest()
-            }}
-          >
-            <span className="wbtn-text">Request a Song</span>
-            <MusicNote className="wbtn-icon" size={18} weight="regular" aria-hidden />
-          </button>
-          <Link className="wbtn wbtn--app-store" href="/wted/program-director">
-            <span className="wbtn-text">Episodes</span>
-            <ListNumbers className="wbtn-icon" size={18} weight="regular" aria-hidden />
-          </Link>
-          <Link className="wbtn wbtn--app-store" href="/wted/about">
-            <span className="wbtn-text">About Us</span>
-            <Info className="wbtn-icon" size={18} weight="regular" aria-hidden />
-          </Link>
-          <Link className="wbtn wbtn--app-store" href="/wted/gorps">
-            <span className="wbtn-text">GORPs</span>
-            <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
-          </Link>
+          <div className="tile-widget-actions-row">
+            <button
+              type="button"
+              className="wbtn wbtn--app-store"
+              id="btn-request"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onOpenRequest()
+              }}
+            >
+              <span className="wbtn-text">Request a Song</span>
+              <MusicNote className="wbtn-icon" size={18} weight="regular" aria-hidden />
+            </button>
+            <button
+              type="button"
+              className="wbtn wbtn--app-store"
+              id="btn-recently-played"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onOpenRecentlyPlayed()
+              }}
+            >
+              <span className="wbtn-text">Recently Played</span>
+              <Play className="wbtn-icon" size={18} weight="regular" aria-hidden />
+            </button>
+          </div>
+          <div className="tile-widget-actions-row tile-widget-actions-row--triple">
+            <Link className="wbtn wbtn--app-store" href="/wted/about">
+              <span className="wbtn-text">About Us</span>
+              <Info className="wbtn-icon" size={18} weight="regular" aria-hidden />
+            </Link>
+            <Link className="wbtn wbtn--app-store" href="/wted/gorps">
+              <span className="wbtn-text">GORPs</span>
+              <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
+            </Link>
+            <Link className="wbtn wbtn--app-store" href="/wted/program-director">
+              <span className="wbtn-text">Episodes</span>
+              <ListNumbers className="wbtn-icon" size={18} weight="regular" aria-hidden />
+            </Link>
+          </div>
         </div>
       </div>
 

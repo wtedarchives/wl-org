@@ -47,6 +47,9 @@ export function WlHomeV2({
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
 
+  const [recentlyPlayedOpen, setRecentlyPlayedOpen] = useState(false)
+  const recentlyPlayedHeadingId = useId()
+
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const scheduleHeadingId = useId()
 
@@ -113,6 +116,7 @@ export function WlHomeV2({
   useEffect(() => {
     if (
       !requestOpen &&
+      !recentlyPlayedOpen &&
       !scheduleOpen &&
       !tourScheduleOpen &&
       !thisDayHistoryOpen &&
@@ -129,6 +133,7 @@ export function WlHomeV2({
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return
       setRequestOpen(false)
+      setRecentlyPlayedOpen(false)
       setScheduleOpen(false)
       setTourScheduleOpen(false)
       setThisDayHistoryOpen(false)
@@ -145,6 +150,7 @@ export function WlHomeV2({
     return () => document.removeEventListener("keydown", onKey)
   }, [
     requestOpen,
+    recentlyPlayedOpen,
     scheduleOpen,
     tourScheduleOpen,
     thisDayHistoryOpen,
@@ -193,6 +199,7 @@ export function WlHomeV2({
               {/* <WlHomeV2HomeTicker onOpenSchedule={() => setScheduleOpen(true)} /> */}
               <WlHomeV2Tiles
                 onOpenRequest={() => setRequestOpen(true)}
+                onOpenRecentlyPlayed={() => setRecentlyPlayedOpen(true)}
                 onOpenLogin={() => setLoginOpen(true)}
                 onOpenTourSchedule={() => setTourScheduleOpen(true)}
                 onOpenThisDayInHistory={() => setThisDayHistoryOpen(true)}
@@ -208,6 +215,9 @@ export function WlHomeV2({
         requestOpen={requestOpen}
         setRequestOpen={setRequestOpen}
         requestHeadingId={requestHeadingId}
+        recentlyPlayedOpen={recentlyPlayedOpen}
+        setRecentlyPlayedOpen={setRecentlyPlayedOpen}
+        recentlyPlayedHeadingId={recentlyPlayedHeadingId}
         scheduleOpen={scheduleOpen}
         setScheduleOpen={setScheduleOpen}
         scheduleHeadingId={scheduleHeadingId}

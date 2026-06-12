@@ -10,11 +10,10 @@ import {
   type RadioScheduleEvent,
 } from "@/lib/radio-schedule-day-slots"
 import {
-  extractRadioCoPlaylistIdFromArtworkUrl,
-  fetchWtedEpisodeScheduleLookupsByNames,
-  fetchWtedEpisodeScheduleLookupsByRadioIds,
+  attachWtedEpisodesToSlots,
   type WtedEpisodeScheduleLookup,
 } from "@/lib/wted-episodes-schedule-lookup"
+import { preloadImageUrls } from "@/lib/preload-image-urls"
 
 export type { RadioScheduleDay, RadioScheduleEvent } from "@/lib/radio-schedule-day-slots"
 export { RADIO_SCHEDULE_WEEK_DAY_COUNT } from "@/lib/radio-schedule-day-slots"
@@ -199,30 +198,7 @@ export async function fetchRadioScheduleMergedSlotsForLocalDay(
     const daySlots = getRadioScheduleSlotsForLocalDay(json.data, day, nowMs)
     const slotsBase = radioScheduleDaySlotsToLegacySlots(daySlots)
 
-    const episodeKeys = slotsBase.map((s) => s.event.playlist.name?.trim() ?? "")
-    const episodeMap = await fetchWtedEpisodeScheduleLookupsByNames(episodeKeys)
-
-    const radioIdsFromArtwork = slotsBase
-      .map((s) =>
-        extractRadioCoPlaylistIdFromArtworkUrl(s.event.playlist.artwork ?? ""),
-      )
-      .filter((id): id is string => Boolean(id))
-    const uniqueRadioIds = [...new Set(radioIdsFromArtwork)]
-
-    const radioMap =
-      await fetchWtedEpisodeScheduleLookupsByRadioIds(uniqueRadioIds)
-
-    const slots: RadioScheduleSlot[] = slotsBase.map((s) => {
-      const key = s.event.playlist.name?.trim()
-      const byEpisode = key ? episodeMap.get(key) ?? null : null
-      const rid = extractRadioCoPlaylistIdFromArtworkUrl(
-        s.event.playlist.artwork ?? "",
-      )
-      const byRadioId =
-        byEpisode ? null : (rid ? radioMap.get(rid) ?? null : null)
-      const wtedEpisode = byEpisode ?? byRadioId ?? null
-      return { ...s, wtedEpisode }
-    })
+    const slots = await attachWtedEpisodesToSlots(slotsBase)
 
     return { slots, error: null }
   } catch (err) {
@@ -314,11 +290,10 @@ export function useRadioSchedule() {
   return { slots, loading, error }
 }
 
-function useRadioScheduleFetch<T>(
-  parse: (data: RadioScheduleEvent[]) => T,
-  initial: T,
-) {
-  const [value, setValue] = useState<T>(initial)
+export function useRadioScheduleWeek() {
+  const [days, setDays] = useState<RadioScheduleDay[]>(() =>
+    buildRadioScheduleDays([]),
+  )
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -331,16 +306,30 @@ function useRadioScheduleFetch<T>(
         const json = await fetchRadioScheduleWithRetry()
         if (cancelled) return
         if (json.data?.length) {
-          setValue(parse(json.data))
+          const baseDays = buildRadioScheduleDays(json.data)
+          const allSlots = baseDays.flatMap((day) => day.slots)
+          const enrichedSlots = await attachWtedEpisodesToSlots(allSlots)
+          let slotIndex = 0
+          const enrichedDays = baseDays.map((day) => ({
+            ...day,
+            slots: day.slots.map(() => enrichedSlots[slotIndex++]!),
+          }))
+          const artworkUrls = enrichedSlots.map((s) => s.wtedEpisode?.artwork)
+          if (isInitialLoad) {
+            await preloadImageUrls(artworkUrls)
+          } else {
+            void preloadImageUrls(artworkUrls)
+          }
+          setDays(enrichedDays)
           setError(null)
         } else {
-          setValue(parse([]))
+          setDays(buildRadioScheduleDays([]))
           setError(null)
         }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load schedule")
-          setValue(parse([]))
+          setDays(buildRadioScheduleDays([]))
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -356,15 +345,7 @@ function useRadioScheduleFetch<T>(
       cancelled = true
       clearInterval(interval)
     }
-  }, [parse])
+  }, [])
 
-  return { value, loading, error }
-}
-
-export function useRadioScheduleWeek() {
-  const { value: days, loading, error } = useRadioScheduleFetch(
-    buildRadioScheduleDays,
-    buildRadioScheduleDays([]),
-  )
   return { days, loading, error }
 }

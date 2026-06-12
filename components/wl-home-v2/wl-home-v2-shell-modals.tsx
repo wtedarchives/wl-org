@@ -10,6 +10,7 @@ import { WlHomeV2ForgotPasswordModal } from "./wl-home-v2-forgot-password-modal"
 import { WlHomeV2LoginModal } from "./wl-home-v2-login-modal"
 import { WlHomeV2RadioModal } from "./wl-home-v2-radio-modal"
 import { WlHomeV2RadioScheduleShareExportModal } from "./wl-home-v2-radio-schedule-share-export-modal"
+import { WlHomeV2RecentlyPlayedModal } from "./wl-home-v2-recently-played-modal"
 import { WlHomeV2RequestModal } from "./wl-home-v2-request-modal"
 import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
 import { WlHomeV2SettingsModal } from "./wl-home-v2-settings-modal"
@@ -21,6 +22,9 @@ export type WlHomeV2ShellModalsProps = {
   requestOpen: boolean
   setRequestOpen: (open: boolean) => void
   requestHeadingId: string
+  recentlyPlayedOpen: boolean
+  setRecentlyPlayedOpen: (open: boolean) => void
+  recentlyPlayedHeadingId: string
   scheduleOpen: boolean
   setScheduleOpen: (open: boolean) => void
   scheduleHeadingId: string
@@ -61,6 +65,9 @@ export function WlHomeV2ShellModals({
   requestOpen,
   setRequestOpen,
   requestHeadingId,
+  recentlyPlayedOpen,
+  setRecentlyPlayedOpen,
+  recentlyPlayedHeadingId,
   scheduleOpen,
   setScheduleOpen,
   scheduleHeadingId,
@@ -102,6 +109,11 @@ export function WlHomeV2ShellModals({
         open={requestOpen}
         onClose={() => setRequestOpen(false)}
         headingId={requestHeadingId}
+      />
+      <WlHomeV2RecentlyPlayedModal
+        open={recentlyPlayedOpen}
+        onClose={() => setRecentlyPlayedOpen(false)}
+        headingId={recentlyPlayedHeadingId}
       />
       <WlHomeV2ScheduleModal
         open={scheduleOpen}

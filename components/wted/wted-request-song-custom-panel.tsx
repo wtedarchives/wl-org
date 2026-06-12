@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import Image from "next/image"
 import { useVirtualizer } from "@tanstack/react-virtual"
@@ -124,6 +125,7 @@ export function WtedRequestSongCustomPanel({
   onPickTrack,
   busyRadioId,
   className,
+  aboveListSlot,
 }: {
   rows: WtedRadioIdRow[]
   loading: boolean
@@ -132,6 +134,8 @@ export function WtedRequestSongCustomPanel({
   /** While resolving setlist context for this `radio_id`, the row button shows a spinner. */
   busyRadioId?: string | null
   className?: string
+  /** Rendered between the search field and the scrollable track list. */
+  aboveListSlot?: ReactNode
 }) {
   const [query, setQuery] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -202,6 +206,8 @@ export function WtedRequestSongCustomPanel({
           : null}
         </div>
       </div>
+
+      {aboveListSlot}
 
       <div
         ref={scrollRef}

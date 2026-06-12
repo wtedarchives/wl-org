@@ -1,8 +1,9 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
+import { SetlistWtedPanel } from "@/components/dpro/setlist/setlist-wted-panel"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
 import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
@@ -30,6 +31,15 @@ export const HOME_WTED_SHEET_SHOW: WtedSheetShowProps = {
   show_group: null,
 }
 
+function resetWtedSelectionState() {
+  return {
+    entry: null as SetlistEntry | null,
+    setlist: [] as SetlistEntry[],
+    show: HOME_WTED_SHEET_SHOW,
+    fallbackArtwork: null as string | null,
+  }
+}
+
 /**
  * Catalog search + WTED request sheet + login gate (same behavior as {@link WtedRequestSongCard} body).
  */
@@ -52,19 +62,48 @@ export function WtedRequestSongFlow({
   const { rows, loading, error } = useWtedRadioIdsCatalog(catalogQueryEnabled)
   const catalogDeferred = !catalogFetchEnabled
   const panelLoading = loading || catalogDeferred
+  const inlineInRequestModal = wlHomeV2LoginDialog
 
   const [wtedSheetOpen, setWtedSheetOpen] = useState(false)
-  const [wtedSheetEntry, setWtedSheetEntry] = useState<SetlistEntry | null>(
-    null,
-  )
-  const [wtedSheetSetlist, setWtedSheetSetlist] = useState<SetlistEntry[]>([])
-  const [wtedSheetShow, setWtedSheetShow] =
+  const [selectedEntry, setSelectedEntry] = useState<SetlistEntry | null>(null)
+  const [selectedSetlist, setSelectedSetlist] = useState<SetlistEntry[]>([])
+  const [selectedShow, setSelectedShow] =
     useState<WtedSheetShowProps>(HOME_WTED_SHEET_SHOW)
   const [fallbackArtwork, setFallbackArtwork] = useState<string | null>(null)
   const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
   const [busyRadioId, setBusyRadioId] = useState<string | null>(null)
 
-  const openRequestSheet = useCallback(
+  const clearSelection = useCallback(() => {
+    const reset = resetWtedSelectionState()
+    setSelectedEntry(reset.entry)
+    setSelectedSetlist(reset.setlist)
+    setSelectedShow(reset.show)
+    setFallbackArtwork(reset.fallbackArtwork)
+  }, [])
+
+  useEffect(() => {
+    if (!catalogFetchEnabled) {
+      clearSelection()
+      setWtedSheetOpen(false)
+    }
+  }, [catalogFetchEnabled, clearSelection])
+
+  const applyResolvedSelection = useCallback(
+    (
+      entry: SetlistEntry,
+      setlist: SetlistEntry[],
+      show: WtedSheetShowProps,
+      artwork: string | null,
+    ) => {
+      setFallbackArtwork(artwork)
+      setSelectedEntry(entry)
+      setSelectedSetlist(setlist)
+      setSelectedShow(show)
+    },
+    [],
+  )
+
+  const pickTrack = useCallback(
     async (row: WtedRadioIdRow) => {
       if (!session) {
         if (wlHomeV2LoginDialog) {
@@ -75,13 +114,20 @@ export function WtedRequestSongFlow({
         return
       }
       const art = wtedRadioIdsRowArtworkUrl(row)
+
+      const finishPick = (
+        entry: SetlistEntry,
+        setlist: SetlistEntry[],
+        show: WtedSheetShowProps,
+        artwork: string | null,
+      ) => {
+        applyResolvedSelection(entry, setlist, show, artwork)
+        if (!inlineInRequestModal) setWtedSheetOpen(true)
+      }
+
       if (!supabase) {
-        setFallbackArtwork(art)
         const syn = setlistEntryFromWtedRadioRow(row)
-        setWtedSheetEntry(syn)
-        setWtedSheetSetlist([syn])
-        setWtedSheetShow(HOME_WTED_SHEET_SHOW)
-        setWtedSheetOpen(true)
+        finishPick(syn, [syn], HOME_WTED_SHEET_SHOW, art)
         return
       }
 
@@ -93,31 +139,35 @@ export function WtedRequestSongFlow({
           art,
         )
         if (resolved) {
-          setFallbackArtwork(resolved.fallbackReleaseArtwork)
-          setWtedSheetEntry(resolved.entry)
-          setWtedSheetSetlist(resolved.setlist)
-          setWtedSheetShow(resolved.show)
+          finishPick(
+            resolved.entry,
+            resolved.setlist,
+            resolved.show,
+            resolved.fallbackReleaseArtwork,
+          )
         } else {
-          setFallbackArtwork(art)
           const syn = setlistEntryFromWtedRadioRow(row)
-          setWtedSheetEntry(syn)
-          setWtedSheetSetlist([syn])
-          setWtedSheetShow(HOME_WTED_SHEET_SHOW)
+          finishPick(syn, [syn], HOME_WTED_SHEET_SHOW, art)
         }
-        setWtedSheetOpen(true)
       } catch {
-        setFallbackArtwork(art)
         const syn = setlistEntryFromWtedRadioRow(row)
-        setWtedSheetEntry(syn)
-        setWtedSheetSetlist([syn])
-        setWtedSheetShow(HOME_WTED_SHEET_SHOW)
-        setWtedSheetOpen(true)
+        finishPick(syn, [syn], HOME_WTED_SHEET_SHOW, art)
       } finally {
         setBusyRadioId(null)
       }
     },
-    [session, wlHomeV2LoginDialog, openLogin],
+    [
+      session,
+      wlHomeV2LoginDialog,
+      openLogin,
+      inlineInRequestModal,
+      applyResolvedSelection,
+    ],
   )
+
+  const panelOpen = inlineInRequestModal
+    ? catalogFetchEnabled && selectedEntry != null
+    : wtedSheetOpen
 
   return (
     <>
@@ -131,9 +181,28 @@ export function WtedRequestSongFlow({
           rows={rows}
           loading={panelLoading}
           error={error}
-          onPickTrack={openRequestSheet}
+          onPickTrack={pickTrack}
           busyRadioId={busyRadioId}
           className={cn("min-h-0 flex-1 rounded-b-xl", panelClassName)}
+          aboveListSlot={
+            inlineInRequestModal && selectedEntry ?
+              <div className="wted-request-inline-panel shrink-0">
+                <SetlistWtedPanel
+                  open={panelOpen}
+                  onOpenChange={(open) => {
+                    if (!open) clearSelection()
+                  }}
+                  onRequestAnother={clearSelection}
+                  entry={selectedEntry}
+                  setlist={selectedSetlist}
+                  show={selectedShow}
+                  fallbackReleaseArtwork={fallbackArtwork}
+                  variant="modal"
+                  scrollClassName="wted-request-inline-panel-scroll"
+                />
+              </div>
+            : null
+          }
         />
       </div>
 
@@ -143,22 +212,19 @@ export function WtedRequestSongFlow({
           onOpenChange={setWtedLoginRequiredOpen}
         />
       : null}
-      <SetlistWtedSheet
-        open={wtedSheetOpen}
-        onOpenChange={(open) => {
-          setWtedSheetOpen(open)
-          if (!open) {
-            setWtedSheetEntry(null)
-            setWtedSheetSetlist([])
-            setWtedSheetShow(HOME_WTED_SHEET_SHOW)
-            setFallbackArtwork(null)
-          }
-        }}
-        entry={wtedSheetEntry}
-        setlist={wtedSheetSetlist}
-        show={wtedSheetShow}
-        fallbackReleaseArtwork={fallbackArtwork}
-      />
+      {!inlineInRequestModal ?
+        <SetlistWtedSheet
+          open={wtedSheetOpen}
+          onOpenChange={(open) => {
+            setWtedSheetOpen(open)
+            if (!open) clearSelection()
+          }}
+          entry={selectedEntry}
+          setlist={selectedSetlist}
+          show={selectedShow}
+          fallbackReleaseArtwork={fallbackArtwork}
+        />
+      : null}
     </>
   )
 }

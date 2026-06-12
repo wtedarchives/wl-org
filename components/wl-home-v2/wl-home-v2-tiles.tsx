@@ -21,11 +21,13 @@ import { groupTileSetlistBySet } from "@/components/wl-home-v2/wl-home-v2-tiles.
 
 export function WlHomeV2Tiles({
   onOpenRequest,
+  onOpenRecentlyPlayed,
   onOpenLogin,
   onOpenTourSchedule,
   onOpenThisDayInHistory,
 }: {
   onOpenRequest: () => void
+  onOpenRecentlyPlayed: () => void
   /** Same as nav “Sign In” — opens the home login modal (credentials form). */
   onOpenLogin: () => void
   /** Goose past + upcoming shows (archive widget). */
@@ -92,6 +94,7 @@ export function WlHomeV2Tiles({
       <WlHomeV2TileRadio
         onWtedRadioTileClick={onWtedRadioTileClick}
         onOpenRequest={onOpenRequest}
+        onOpenRecentlyPlayed={onOpenRecentlyPlayed}
       />
       <WlHomeV2TileCommunity
         featuredTopics={featuredTopics}
