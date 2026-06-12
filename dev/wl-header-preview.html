@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>wl-header embed preview</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #1a1f1c;
+        color: #d4d8d5;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+
+      .demo-content {
+        padding: 1.5rem;
+        max-width: 42rem;
+        line-height: 1.5;
+      }
+
+      .demo-content h1 {
+        margin: 0 0 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+
+      .demo-content p {
+        margin: 0 0 0.75rem;
+        font-size: 0.9375rem;
+        color: #a8b0ab;
+      }
+
+      .demo-content code {
+        font-size: 0.8125rem;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <wl-header></wl-header>
+
+    <div class="demo-content">
+      <h1>wl-header embed preview</h1>
+      <p>
+        Dummy host-page content below the header. Resize the window to check
+        mobile nav (hamburger) vs desktop layout.
+      </p>
+      <p>
+        Script source:
+        <code id="script-src-label"></code>
+      </p>
+    </div>
+
+    <!--
+      Preview modes (pick one script src):
+
+      1. Production embed (default) — open this file directly in a browser.
+      2. Local embed — run `npm run dev`, uncomment the localhost script below,
+         and comment out the production script.
+    -->
+    <script src="http://localhost:3000/embed/wl-header.js"></script>
+    <!-- <script src="http://localhost:3000/embed/wl-header.js"></script> -->
+
+    <script>
+      var script = document.querySelector("script[src*='wl-header.js']");
+      if (script) {
+        document.getElementById("script-src-label").textContent = script.src;
+      }
+    </script>
+  </body>
+</html>
