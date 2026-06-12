@@ -170,50 +170,53 @@ export function WlHomeV2Header({
       </button>
 
       <div className="top-brand-cluster">
-        <Link
-          href="/"
-          className="brand"
-          aria-label="Wysteria Lane home"
-          onClick={closeMobileNav}
-        >
-          <div className="brand-mark">
-            <Image
-              src="/WL.png"
-              alt=""
-              width={30}
-              height={30}
-              className="h-[72%] w-[72%] object-contain"
-            />
-          </div>
-          <div className="brand-text">
-            <span className="wl">WTED Radio</span>
-            <span className="dotorg">Powered by Wysteria Lane</span>
-          </div>
-        </Link>
-        <div className="top-brand-cluster-actions">
-          <Link href="/support" onClick={closeMobileNav}>
-            <MoneyWavy
-              className="top-nav-primary-icon"
-              size={18}
-              weight="regular"
-              aria-hidden
-            />
-            Support
-          </Link>
-          <a
-            href="#"
-            aria-haspopup="dialog"
-            onClick={onFollowUsNavClick}
+        <div className="top-brand-cluster-top">
+          <Link
+            href="/"
+            className="brand"
+            aria-label="Wysteria Lane home"
+            onClick={closeMobileNav}
           >
-            <ArrowRight
-              className="top-nav-primary-icon"
-              size={18}
-              weight="regular"
-              aria-hidden
-            />
-            Follow Us
-          </a>
+            <div className="brand-mark">
+              <Image
+                src="/WL.png"
+                alt=""
+                width={30}
+                height={30}
+                className="h-[72%] w-[72%] object-contain"
+              />
+            </div>
+            <div className="brand-text">
+              <span className="wl">WTED Radio</span>
+              <span className="dotorg">Powered by Wysteria Lane</span>
+            </div>
+          </Link>
+          <div className="top-brand-cluster-actions">
+            <Link href="/support" onClick={closeMobileNav}>
+              <MoneyWavy
+                className="top-nav-primary-icon"
+                size={18}
+                weight="regular"
+                aria-hidden
+              />
+              Support
+            </Link>
+            <a
+              href="#"
+              aria-haspopup="dialog"
+              onClick={onFollowUsNavClick}
+            >
+              <ArrowRight
+                className="top-nav-primary-icon"
+                size={18}
+                weight="regular"
+                aria-hidden
+              />
+              Follow Us
+            </a>
+          </div>
         </div>
+        <WlHomeV2HeaderPhraseRotator />
       </div>
 
       <div className="top-header-controls">
@@ -299,7 +302,6 @@ export function WlHomeV2Header({
               </div>
             </div>
           </div>
-          <WlHomeV2HeaderPhraseRotator />
         </div>
       </div>
     </header>

@@ -39,15 +39,17 @@ export function WlHomeV2TileRadio({
           onWtedRadioTileClick()
         }}
       />
-      <div className="icon-wrap">
-        <div className="icon-bg" />
-        <Image
-          src="/WTED3.png"
-          alt=""
-          width={110}
-          height={110}
-          className="h-full w-full object-contain"
-        />
+      <div className="tile-icon-stack">
+        <div className="icon-wrap">
+          <div className="icon-bg" />
+          <Image
+            src="/WTED3.png"
+            alt=""
+            width={110}
+            height={110}
+            className="w-full h-auto object-contain"
+          />
+        </div>
       </div>
 
       <div className="tile-widget">
@@ -113,20 +115,21 @@ export function WlHomeV2TileRadio({
         <span className="tile-radio-attribution-pill">
           Powered by Wysteria Lane
         </span>
-        <p>
-          Listen to Goose on demand, 24/7 — live streams, historic sets, and
-          listener requests.
-        </p>
-        <span className="cta">
-          <span className="cta-label">Tune in</span>
-          <ArrowRight
-            className="arrow"
-            size={16}
-            weight="regular"
-            aria-hidden
-          />
-        </span>
-        <div className="tile-widget-store-badges">
+        <div className="tile-body-copy">
+          <p>
+            Listen to Goose on demand, 24/7 — live streams, historic sets, and
+            listener requests.
+          </p>
+          <span className="cta">
+            <span className="cta-label">Tune in</span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
+          </span>
+          <div className="tile-widget-store-badges">
           <a
             className="tile-widget-store-badge-link tile-widget-store-badge-link--ios focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(88,200,174)]"
             href="https://apps.apple.com/us/app/wted-goose-radio/id6476207418"
@@ -155,6 +158,7 @@ export function WlHomeV2TileRadio({
               className="tile-widget-store-badge-img"
             />
           </a>
+        </div>
         </div>
       </div>
     </section>

@@ -94,7 +94,28 @@
     gap: 14px;
     min-width: 0;
   }
-  .wl-home-v2 header.top .top-header-controls-phrase {
+  .wl-home-v2 header.top .top-brand-cluster {
+    grid-area: brand;
+    justify-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+    max-width: 360px;
+    width: 100%;
+  }
+  .wl-home-v2 header.top .top-brand-cluster-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    width: 100%;
+  }
+  .wl-home-v2 header.top .top-brand-cluster-top .top-brand-cluster-actions {
+    margin-left: auto;
+  }
+  .wl-home-v2 header.top .top-brand-cluster-phrase {
     display: none;
     margin: 0;
     padding: 0;
@@ -105,18 +126,18 @@
     letter-spacing: 0.04em;
     line-height: 1.25;
     color: rgba(255, 255, 255, 0.75);
-    text-align: left;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     opacity: 1;
     transition: opacity 0.4s ease;
   }
-  .wl-home-v2 header.top .top-header-controls-phrase--hiding {
+  .wl-home-v2 header.top .top-brand-cluster-phrase--hiding {
     opacity: 0;
   }
   @media (prefers-reduced-motion: reduce) {
-    .wl-home-v2 header.top .top-header-controls-phrase {
+    .wl-home-v2 header.top .top-brand-cluster-phrase {
       transition: none;
     }
   }
@@ -129,16 +150,6 @@
   }
   .wl-home-v2 header.top .top-mobile-nav-toggle {
     display: none;
-  }
-  .wl-home-v2 header.top .top-brand-cluster {
-    grid-area: brand;
-    justify-self: start;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    min-width: 0;
-    max-width: 360px;
-    width: 100%;
   }
   .wl-home-v2 .top-brand-cluster-actions {
     display: none;
@@ -166,10 +177,13 @@
     padding: 3px 10px;
     border-radius: 8px;
     background: rgb(255, 170, 129);
-    transition: background 0.15s;
+    border: 1px solid rgb(210, 125, 88);
+    box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.85);
+    transition: background 0.15s, border-color 0.15s;
   }
   .wl-home-v2 .top-brand-cluster-actions > a:hover {
     background: rgb(245, 155, 112);
+    border-color: rgb(198, 118, 84);
   }
   .wl-home-v2 .top-brand-cluster-actions > a .top-nav-primary-icon {
     flex-shrink: 0;
@@ -301,7 +315,9 @@
       > a {
       color: #000000;
       background: rgb(255, 170, 129);
-      transition: background 0.15s;
+      border: 1px solid rgb(210, 125, 88);
+      box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.85);
+      transition: background 0.15s, border-color 0.15s;
     }
     .wl-home-v2
       header.top
@@ -311,6 +327,7 @@
       > a:hover {
       color: #000000;
       background: rgb(245, 155, 112);
+      border-color: rgb(198, 118, 84);
     }
     .wl-home-v2 .top-brand-cluster-actions {
       display: flex;
@@ -323,12 +340,10 @@
       > a {
       padding: 3px 6px;
     }
-    .wl-home-v2 header.top .top-header-controls-phrase {
+    .wl-home-v2 header.top .top-brand-cluster-phrase {
       display: block;
-      grid-area: auto;
-      width: auto;
-      margin: 0;
-      text-align: left;
+      width: 100%;
+      max-width: 360px;
     }
   }
   .wl-home-v2 .top-nav-user-trigger {
@@ -457,10 +472,19 @@
       width: 100%;
       margin-bottom: 0;
     }
-    .wl-home-v2 header.top .top-header-controls-phrase {
+    .wl-home-v2 header.top .top-brand-cluster {
+      display: contents;
+    }
+    .wl-home-v2 header.top .top-brand-cluster-top {
+      grid-area: brand;
+      justify-self: center;
+      align-self: center;
+    }
+    .wl-home-v2 header.top .top-brand-cluster-phrase {
       display: block;
       grid-area: phrase;
       width: 100%;
+      max-width: 100%;
       box-sizing: border-box;
       margin-top: 6px;
       margin-bottom: 10px;
@@ -475,10 +499,6 @@
       grid-area: menu;
       justify-self: start;
       align-self: center;
-    }
-    .wl-home-v2 header.top .top-brand-cluster {
-      grid-area: brand;
-      justify-self: center;
     }
     .wl-home-v2
       nav.top-nav
@@ -568,7 +588,8 @@
       color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
       background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgb(49, 51, 49);
+      border: 1px solid rgb(65, 68, 66);
+      box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.85);
       transition: background 0.18s, border-color 0.18s, color 0.15s,
         transform 0.18s;
     }
@@ -612,6 +633,19 @@
 
   /* Primary nav drawer: < md — 3-col seamless row; edge-to-edge (100vw breakout). */
   @media (max-width: 767px) {
+    .wl-home-v2 header.top .top-brand-cluster-top {
+      justify-content: center;
+      align-items: center;
+      width: auto;
+      max-width: calc(100vw - 120px);
+    }
+    .wl-home-v2 header.top .top-brand-cluster-top .brand {
+      justify-content: center;
+    }
+    .wl-home-v2 header.top .top-brand-cluster-top .brand-text {
+      align-items: center;
+      text-align: center;
+    }
     .wl-home-v2 header.top nav.top-nav.top-nav--mobile-open {
       box-sizing: border-box;
       padding-top: 0;
@@ -2977,19 +3011,28 @@
     }
   }
 
-  /* 2x2 grid — grows with content; expands within main when the viewport is taller */
+  /* 2x2 grid — each row sizes to its tallest tile; rows do not share height */
   .wl-home-v2 .grid {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    align-content: start;
     gap: 0;
     width: 100%;
     min-height: 0;
   }
   /*
-   * Personnel archive index: rows size to their own content — top row (current/former)
-   * height does not stretch to match bottom row (guests/groups) or vice versa.
+   * Homepage tile grid: top row(s) stay content-sized; bottom row grows to fill
+   * leftover height in main on tall viewports.
+   */
+  .wl-home-v2-main--homepage #tileGrid.grid {
+    flex: 1 1 auto;
+    grid-template-rows: auto 1fr;
+    align-content: stretch;
+  }
+  /*
+   * Personnel archive index: same auto row sizing (explicit for clarity alongside span rules).
    */
   .wl-home-v2 .wl-home-v2-personnel-archive-page #tileGrid.grid {
     grid-template-rows: auto auto;
@@ -3312,16 +3355,18 @@
     .wl-home-v2 .tile{ grid-template-columns: minmax(0, 1fr) minmax(0, 240px); padding: 24px; gap: 14px 18px; }
   }
   /*
-   * Goose Radio tile desktop only: widen widget column to fit 400px on-air card (base tile cap is 320px).
+   * Radio + Archives tiles desktop: widen widget column to fit 400px panels (base tile cap is 320px).
    * Homepage uses 1356px; other `#tileGrid` (e.g. personnel) stays at 1344px.
    */
   @media (min-width: 1344px) {
-    .wl-home-v2 main:not(.wl-home-v2-main--homepage) #tileGrid .tile.tile-radio {
+    .wl-home-v2 main:not(.wl-home-v2-main--homepage) #tileGrid .tile.tile-radio,
+    .wl-home-v2 main:not(.wl-home-v2-main--homepage) #tileGrid .tile.tile-archive {
       grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
     }
   }
   @media (min-width: 1356px) {
-    .wl-home-v2-main--homepage #tileGrid .tile.tile-radio {
+    .wl-home-v2-main--homepage #tileGrid .tile.tile-radio,
+    .wl-home-v2-main--homepage #tileGrid .tile.tile-archive {
       grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
     }
   }
@@ -3354,11 +3399,6 @@
       max-width: 100%;
       align-self: stretch;
     }
-    .wl-home-v2 #tileGrid .tile.tile-radio .tile-body,
-    .wl-home-v2 #tileGrid .tile.tile-archive .tile-body {
-      align-items: flex-start;
-      text-align: left;
-    }
   }
   @media (min-width: 1344px) and (max-width: 1355px) {
     .wl-home-v2-main--homepage .tile {
@@ -3383,14 +3423,17 @@
       max-width: 100%;
       align-self: stretch;
     }
-    .wl-home-v2-main--homepage #tileGrid .tile.tile-radio .tile-body,
-    .wl-home-v2-main--homepage #tileGrid .tile.tile-archive .tile-body {
+  }
+  /*
+   * Below wide tile inner layout (<1356px): h2, description, and CTA left-aligned
+   * in the copy column (stacked layout) or left column (1344–1355 non-homepage).
+   */
+  @media (max-width: 1355px) {
+    .wl-home-v2 #tileGrid .tile .tile-body,
+    .wl-home-v2 #tileGrid .tile .tile-body-copy {
       align-items: flex-start;
       text-align: left;
     }
-  }
-  .wl-home-v2 .grid > .tile {
-    min-height: 468px;
   }
 
   /* About / FAQ tiles — full-area prose (no icon + widget grid) */
@@ -3453,8 +3496,10 @@
       align-content: start;
       flex: 0 1 auto;
     }
-    .wl-home-v2 .grid > .tile {
-      min-height: 0;
+    .wl-home-v2-main--homepage #tileGrid.grid {
+      flex: 1 1 auto;
+      grid-template-rows: repeat(3, auto) 1fr;
+      align-content: stretch;
     }
   }
 
@@ -3476,6 +3521,7 @@
   }
   /* things that should be clickable on their own terms, above the tile-link */
   .wl-home-v2 .tile .icon-wrap,
+  .wl-home-v2 .tile .tile-icon-stack,
   .wl-home-v2 .tile .tile-widget,
   .wl-home-v2 .tile .tile-body,
   .wl-home-v2 .tile .mono-meta {
@@ -4112,6 +4158,59 @@
     display: flex; flex-direction: column; justify-content: flex-end;
     min-width: 0; min-height: 0;
   }
+  .wl-home-v2 .tile-body-copy {
+    min-width: 0;
+  }
+  /*
+   * Wide tile inner layout (≥1356px): icon alone on row 1; h2 (+ pill) on rows 2–3;
+   * description + CTA on row 4 (1fr) so copy sits at the bottom-left on every tile.
+   * Below 1356px, h2 and pill remain in `.tile-body` above the copy (stacked / narrow layout).
+   */
+  @media (min-width: 1356px) {
+    .wl-home-v2 #tileGrid .tile {
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+    }
+    .wl-home-v2 #tileGrid .tile .tile-icon-stack {
+      grid-column: 1;
+      grid-row: 1;
+      gap: 0;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-body {
+      display: contents;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-body h2,
+    .wl-home-v2 #tileGrid .tile .tile-body .tile-radio-attribution-pill,
+    .wl-home-v2 #tileGrid .tile .tile-body .tile-archive-attribution-pill,
+    .wl-home-v2 #tileGrid .tile .tile-body-copy {
+      position: relative;
+      z-index: 2;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-body-copy {
+      pointer-events: none;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-body h2 {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-body .tile-radio-attribution-pill,
+    .wl-home-v2 #tileGrid .tile .tile-body .tile-archive-attribution-pill {
+      grid-column: 1;
+      grid-row: 3;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-body-copy {
+      grid-column: 1;
+      grid-row: 4;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-width: 0;
+      min-height: 0;
+    }
+    .wl-home-v2 #tileGrid .tile .tile-widget {
+      grid-column: 2;
+      grid-row: 1 / -1;
+    }
+  }
   .wl-home-v2 .tile h2 {
     font-size: clamp(24px, 2.6vw, 34px);
     font-weight: 700; letter-spacing: -0.02em;
@@ -4147,19 +4246,33 @@
   }
   .wl-home-v2 .tile:hover .cta .arrow{ transform: translateX(6px); }
 
-  /* Icon — the scale-on-hover target; top-left of the tile grid */
+  /* Icon + title stack — top-left of the tile grid */
+  .wl-home-v2 .tile .tile-icon-stack {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    align-self: start;
+    justify-self: start;
+  }
+
+  /* Icon — the scale-on-hover target */
   .wl-home-v2 .tile .icon-wrap {
     position: relative;
-    grid-column: 1; grid-row: 1;
     justify-self: start;
     align-self: start;
-    width: 110px; height: 110px;
-    display: grid; place-items: center;
+    width: 110px;
+    height: auto;
+    display: block;
     transition: transform .5s cubic-bezier(.2,.7,.2,1);
     transform-origin: center center;
   }
   @media (max-width: 1180px) {
-    .wl-home-v2 .tile .icon-wrap{ width: 88px; height: 88px; }
+    .wl-home-v2 .tile .icon-wrap{ width: 88px; }
   }
   /* top-left label cell */
   .wl-home-v2 .tile > .label{ grid-column: 1; grid-row: 1; align-self: start; }
@@ -4167,11 +4280,14 @@
     transform: scale(1.28) rotate(-3deg);
   }
   .wl-home-v2 .tile .icon-wrap img {
-    width: 100%; height: 100%;
+    display: block;
+    width: 100%;
+    height: auto;
     object-fit: contain;
     filter: drop-shadow(0 8px 22px rgba(0,0,0,0.45));
   }
   .wl-home-v2 .tile .icon-wrap img.wl-home-v2-tile-profile-photo {
+    aspect-ratio: 1;
     object-fit: cover;
     border-radius: 50%;
     box-shadow:
@@ -4188,7 +4304,7 @@
   /* Tile-specific accents */
   .wl-home-v2 .tile.tile-community:hover{ box-shadow: inset 0 0 0 1px rgba(88,200,174,0.55), 0 18px 50px -20px rgba(0,0,0,0.55); }
   /* Community: `pointer-events` is not inherited — panel children must be none so clicks fall through to `.tile-link`. */
-  .wl-home-v2 .tile.tile-community .icon-wrap {
+  .wl-home-v2 .tile.tile-community .tile-icon-stack {
     pointer-events: none;
   }
   .wl-home-v2 .tile.tile-community .tile-widget * {
@@ -4206,7 +4322,7 @@
     pointer-events: none;
   }
   /* Guest profile tile: full-area hit target sits last in DOM; let clicks reach it */
-  .wl-home-v2 .tile.tile-profile.tile-profile--guest .icon-wrap,
+  .wl-home-v2 .tile.tile-profile.tile-profile--guest .tile-icon-stack,
   .wl-home-v2 .tile.tile-profile.tile-profile--guest .tile-body {
     pointer-events: none;
   }
@@ -4255,7 +4371,8 @@
   .wl-home-v2 .tile-widget-actions-row--triple {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .wl-home-v2 .tile-widget-actions .wbtn {
+  .wl-home-v2 .tile-widget-actions .wbtn,
+  .wl-home-v2 .tile-widget-actions .wl-home-v2-archive-random-btn--tile-action {
     width: 100%;
     min-width: 0;
   }
@@ -4571,12 +4688,6 @@
     background: rgba(88, 200, 174, 0.18);
     border-color: rgb(52, 109, 95);
     transform: translateY(-1px);
-  }
-  .wl-home-v2 .tile-archive-random-row {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    min-width: 0;
   }
   .wl-home-v2 .wl-home-v2-archive-random-btn {
     display: inline-flex;
@@ -4975,6 +5086,12 @@
     letter-spacing: 0.07em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.86);
+  }
+  @media (min-width: 1356px) {
+    .wl-home-v2 #tileGrid .tile.tile-radio .tile-radio-attribution-pill,
+    .wl-home-v2 #tileGrid .tile.tile-archive .tile-archive-attribution-pill {
+      margin-top: 0;
+    }
   }
   .wl-home-v2
     #tileGrid

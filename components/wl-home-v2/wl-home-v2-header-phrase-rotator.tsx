@@ -49,8 +49,8 @@ export function WlHomeV2HeaderPhraseRotator() {
   return (
     <p
       className={[
-        "top-header-controls-phrase",
-        visible ? "" : "top-header-controls-phrase--hiding",
+        "top-brand-cluster-phrase",
+        visible ? "" : "top-brand-cluster-phrase--hiding",
       ]
         .filter(Boolean)
         .join(" ")}

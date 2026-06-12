@@ -30,15 +30,17 @@ export function WlHomeV2TileCommunity({
         target="_blank"
         rel="noopener noreferrer"
       />
-      <div className="icon-wrap">
-        <div className="icon-bg" />
-        <Image
-          src="/WL.png"
-          alt=""
-          width={110}
-          height={110}
-          className="h-full w-full object-contain"
-        />
+      <div className="tile-icon-stack">
+        <div className="icon-wrap">
+          <div className="icon-bg" />
+          <Image
+            src="/WL.png"
+            alt=""
+            width={110}
+            height={110}
+            className="w-full h-auto object-contain"
+          />
+        </div>
       </div>
 
       <div className="tile-widget">
@@ -134,18 +136,20 @@ export function WlHomeV2TileCommunity({
           <br />
           Community
         </h2>
-        <p>
-          A home made for Goose fans, by Goose fans. Discuss the band and join the couch tour.
-        </p>
-        <span className="cta">
-          <span className="cta-label">Join the community</span>
-          <ArrowRight
-            className="arrow"
-            size={16}
-            weight="regular"
-            aria-hidden
-          />
-        </span>
+        <div className="tile-body-copy">
+          <p>
+            A home made for Goose fans, by Goose fans. Discuss the band and join the couch tour.
+          </p>
+          <span className="cta">
+            <span className="cta-label">Join the community</span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
+          </span>
+        </div>
       </div>
     </section>
   )

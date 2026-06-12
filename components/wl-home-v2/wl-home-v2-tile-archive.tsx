@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, CalendarBlank, ClockCounterClockwise } from "@phosphor-icons/react"
+import { ArrowRight, CalendarBlank, ClockCounterClockwise, Trophy } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties, MouseEvent } from "react"
@@ -13,6 +13,7 @@ import {
 import type { WlHomeMostRecentShow } from "@/hooks/use-wl-home-most-recent-show"
 import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home-v2-archive-random-show-button"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { getSetlistGameArchiveIndexUrl } from "@/lib/setlist-game-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
 export function WlHomeV2TileArchive({
@@ -43,21 +44,20 @@ export function WlHomeV2TileArchive({
         aria-label="Open Wysteria Lane Archives"
         onClick={onArchiveTileLinkClick}
       />
-      <div className="icon-wrap">
-        <div className="icon-bg" />
-        <Image
-          src="/wted-sa-cropped-2.png"
-          alt=""
-          width={110}
-          height={110}
-          className="h-full w-full object-contain"
-        />
+      <div className="tile-icon-stack">
+        <div className="icon-wrap">
+          <div className="icon-bg" />
+          <Image
+            src="/wted-sa-cropped-2.png"
+            alt=""
+            width={110}
+            height={110}
+            className="w-full h-auto object-contain"
+          />
+        </div>
       </div>
 
       <div className="tile-widget">
-        <div className="tile-archive-random-row">
-          <WlHomeV2ArchiveRandomShowButton variant="tile" />
-        </div>
         <div
           className={[
             "widget-panel",
@@ -143,32 +143,49 @@ export function WlHomeV2TileArchive({
           }
         </div>
         <div className="tile-widget-actions">
-          <button
-            type="button"
-            className="wbtn wbtn--app-store"
-            onClick={onOpenTourSchedule}
-          >
-            <span className="wbtn-text">Tour Schedule</span>
-            <CalendarBlank
-              className="wbtn-icon"
-              size={18}
-              weight="regular"
-              aria-hidden
-            />
-          </button>
-          <button
-            type="button"
-            className="wbtn wbtn--app-store"
-            onClick={onOpenThisDayInHistory}
-          >
-            <span className="wbtn-text">Today in History</span>
-            <ClockCounterClockwise
-              className="wbtn-icon"
-              size={18}
-              weight="regular"
-              aria-hidden
-            />
-          </button>
+          <div className="tile-widget-actions-row">
+            <button
+              type="button"
+              className="wbtn wbtn--app-store"
+              onClick={onOpenTourSchedule}
+            >
+              <span className="wbtn-text">Tour Schedule</span>
+              <CalendarBlank
+                className="wbtn-icon"
+                size={18}
+                weight="regular"
+                aria-hidden
+              />
+            </button>
+            <button
+              type="button"
+              className="wbtn wbtn--app-store"
+              onClick={onOpenThisDayInHistory}
+            >
+              <span className="wbtn-text">Today in History</span>
+              <ClockCounterClockwise
+                className="wbtn-icon"
+                size={18}
+                weight="regular"
+                aria-hidden
+              />
+            </button>
+          </div>
+          <div className="tile-widget-actions-row">
+            <WlHomeV2ArchiveRandomShowButton variant="tile-action" />
+            <Link
+              href={getSetlistGameArchiveIndexUrl()}
+              className="wbtn wbtn--app-store"
+            >
+              <span className="wbtn-text">Setlist Game</span>
+              <Trophy
+                className="wbtn-icon"
+                size={18}
+                weight="regular"
+                aria-hidden
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -181,19 +198,21 @@ export function WlHomeV2TileArchive({
         <span className="tile-archive-attribution-pill">
           Powered by dripfield.pro
         </span>
-        <p>
-          The comprehensive show archive — setlists, stats, tours, and
-          this-day-in-Goose history.
-        </p>
-        <span className="cta">
-          <span className="cta-label">Dive in</span>
-          <ArrowRight
-            className="arrow"
-            size={16}
-            weight="regular"
-            aria-hidden
-          />
-        </span>
+        <div className="tile-body-copy">
+          <p>
+            The comprehensive show archive — setlists, stats, tours, and
+            this-day-in-Goose history.
+          </p>
+          <span className="cta">
+            <span className="cta-label">Dive in</span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
+          </span>
+        </div>
       </div>
     </section>
   )

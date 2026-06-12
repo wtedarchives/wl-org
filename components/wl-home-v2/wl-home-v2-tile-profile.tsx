@@ -51,25 +51,27 @@ export function WlHomeV2TileProfile({
           aria-label="View your show stats"
         />
       : null}
-      <div className="icon-wrap">
-        <div className="icon-bg" />
-        {profileSignedIn && profilePicture && !profilePhotoLoadFailed ?
-          <img
-            src={profilePicture}
-            alt={profilePhotoAlt}
-            className="wl-home-v2-tile-profile-photo h-full w-full"
-            width={110}
-            height={110}
-            decoding="async"
-            onError={() => setProfilePhotoLoadFailed(true)}
-          />
-        : <Image
-            src="/icon-myprofile.png"
-            alt=""
-            width={110}
-            height={110}
-            className="h-full w-full object-contain"
-          />}
+      <div className="tile-icon-stack">
+        <div className="icon-wrap">
+          <div className="icon-bg" />
+          {profileSignedIn && profilePicture && !profilePhotoLoadFailed ?
+            <img
+              src={profilePicture}
+              alt={profilePhotoAlt}
+              className="wl-home-v2-tile-profile-photo w-full h-auto"
+              width={110}
+              height={110}
+              decoding="async"
+              onError={() => setProfilePhotoLoadFailed(true)}
+            />
+          : <Image
+              src="/icon-myprofile.png"
+              alt=""
+              width={110}
+              height={110}
+              className="w-full h-auto object-contain"
+            />}
+        </div>
       </div>
 
       {profileSignedIn ?
@@ -141,21 +143,23 @@ export function WlHomeV2TileProfile({
           <br />
           Show Stats
         </h2>
-        <p>
-          Shows attended, badges earned, songs tracked, predictions logged.
-          Your Goose story.
-        </p>
-        <span className="cta">
-          <span className="cta-label">
-            {profileSignedIn ? "View show stats" : "Sign In"}
+        <div className="tile-body-copy">
+          <p>
+            Shows attended, badges earned, songs tracked, predictions logged.
+            Your Goose story.
+          </p>
+          <span className="cta">
+            <span className="cta-label">
+              {profileSignedIn ? "View show stats" : "Sign In"}
+            </span>
+            <ArrowRight
+              className="arrow"
+              size={16}
+              weight="regular"
+              aria-hidden
+            />
           </span>
-          <ArrowRight
-            className="arrow"
-            size={16}
-            weight="regular"
-            aria-hidden
-          />
-        </span>
+        </div>
       </div>
 
       {!profileSignedIn ?

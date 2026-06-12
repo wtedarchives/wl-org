@@ -27,7 +27,13 @@ const DICE_ICONS = [
 
 const DICE_CYCLE_MS = 420
 
-function RotatingDiceIcon({ size }: { size: number }) {
+function RotatingDiceIcon({
+  size,
+  className,
+}: {
+  size: number
+  className?: string
+}) {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -40,7 +46,7 @@ function RotatingDiceIcon({ size }: { size: number }) {
   const Icon = DICE_ICONS[index]
   return (
     <Icon
-      className="wl-home-v2-archive-random-btn__icon"
+      className={cn("wl-home-v2-archive-random-btn__icon", className)}
       size={size}
       weight="regular"
       aria-hidden
@@ -52,13 +58,15 @@ export function WlHomeV2ArchiveRandomShowButton({
   variant = "tile",
   onNavigate,
 }: {
-  variant?: "tile" | "subnav"
+  variant?: "tile" | "tile-action" | "subnav"
   /** Close mobile menu after navigation (header drawer). */
   onNavigate?: () => void
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const iconSize = variant === "subnav" ? 14 : 18
+  const iconSize =
+    variant === "subnav" ? 14
+    : 18
 
   const handleClick = useCallback(async () => {
     if (loading) return
@@ -73,6 +81,28 @@ export function WlHomeV2ArchiveRandomShowButton({
       setLoading(false)
     }
   }, [loading, onNavigate, router])
+
+  if (variant === "tile-action") {
+    return (
+      <button
+        type="button"
+        className="wbtn wbtn--app-store wl-home-v2-archive-random-btn--tile-action"
+        onClick={() => void handleClick()}
+        disabled={loading}
+        aria-label="Random Show"
+      >
+        <span className="wbtn-text">Random Show</span>
+        {loading ?
+          <CircleNotch
+            className="wbtn-icon wl-home-v2-archive-random-btn__icon--spin"
+            size={iconSize}
+            weight="bold"
+            aria-hidden
+          />
+        : <RotatingDiceIcon size={iconSize} className="wbtn-icon" />}
+      </button>
+    )
+  }
 
   return (
     <button
