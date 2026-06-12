@@ -1,0 +1,39 @@
+/* Shared B&W home tile backdrop for static inner pages (Privacy, Links). */
+.wl-home-v2 .wted-inner-page-bg {
+  position: relative;
+  isolation: isolate;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
+
+.wl-home-v2 .wted-inner-page-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/newbg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.26;
+  filter: grayscale(100%) brightness(0.72);
+}
+
+.wl-home-v2 .wted-inner-page-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.42) 0%,
+    rgba(0, 0, 0, 0.78) 88%
+  );
+}
+
+.wl-home-v2 .wted-inner-page-bg > * {
+  position: relative;
+  z-index: 2;
+}

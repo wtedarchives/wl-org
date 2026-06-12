@@ -7,6 +7,15 @@ import type { AttendanceStatsData } from "@/types/attendance"
 const PAGE_SIZE = 1000
 const CHUNK_SIZE = 200
 
+/** YYYY-MM-DD in the user's local timezone. */
+function localTodayDateString(): string {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${y}-${m}-${day}`
+}
+
 async function fetchAll<T>(
   table: string,
   select: string,
@@ -84,6 +93,7 @@ export function useAttendanceStats(
 ) {
   const [data, setData] = useState<AttendanceStatsData>({
     showsCount: 0,
+    upcomingShowsCount: 0,
     venuesCount: 0,
     songsCount: 0,
     tourCounts: [],
@@ -119,6 +129,7 @@ export function useAttendanceStats(
           if (!cancelled) {
             setData({
               showsCount: 0,
+              upcomingShowsCount: 0,
               venuesCount: 0,
               songsCount: 0,
               tourCounts: [],
@@ -145,9 +156,14 @@ export function useAttendanceStats(
           "show_id"
         )
 
-        const filteredShows = showDetails.filter(
+        const todayLocal = localTodayDateString()
+        const canonShows = showDetails.filter(
           (s) => s.show_group === "Goose" && s.show_canonid
         )
+        const filteredShows = canonShows.filter((s) => s.show_date <= todayLocal)
+        const upcomingShowsCount = canonShows.filter(
+          (s) => s.show_date > todayLocal
+        ).length
         let firstCanonicalShowYear: number | null = null
         for (const s of filteredShows) {
           const y = new Date(`${s.show_date}T00:00:00`).getFullYear()
@@ -231,6 +247,7 @@ export function useAttendanceStats(
         if (!cancelled) {
           setData({
             showsCount: filteredIds.length,
+            upcomingShowsCount,
             venuesCount: uniqueVenues.size,
             songsCount: uniqueSongs.size,
             tourCounts: sortedTours,

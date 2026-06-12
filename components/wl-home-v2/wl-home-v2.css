@@ -9084,6 +9084,18 @@
     min-width: 0;
     text-align: right;
   }
+  .wl-home-v2 footer.foot .foot-link {
+    display: inline-block;
+    padding: 8px 4px;
+    margin: -8px -4px;
+    color: rgba(255, 255, 255, 0.45);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s ease-out;
+  }
+  .wl-home-v2 footer.foot .foot-link:hover {
+    color: var(--wl-light-orange);
+  }
   @media (max-width: 1023px) {
     .wl-home-v2 footer.foot {
       grid-template-columns: 1fr;

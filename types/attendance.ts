@@ -7,6 +7,8 @@ export interface TourCount {
 
 export interface AttendanceStatsData {
   showsCount: number
+  /** Canonical Goose shows marked attended with show_date after today (local). */
+  upcomingShowsCount: number
   venuesCount: number
   songsCount: number
   tourCounts: TourCount[]

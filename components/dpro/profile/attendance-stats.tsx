@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { Ticket } from "@phosphor-icons/react"
 import { Calendar, Building2, Music } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
@@ -106,6 +107,20 @@ export function AttendanceStats({
               {data.showsCount}
             </span>
           </li>
+          {data.upcomingShowsCount > 0 ?
+            <li>
+              <span className="wl-home-v2-profile-shows-stats-list-label">
+                <Ticket
+                  className="wl-home-v2-profile-shows-stats-list-icon"
+                  aria-hidden
+                />
+                Upcoming Shows
+              </span>
+              <span className="wl-home-v2-profile-shows-stat-pill">
+                {data.upcomingShowsCount}
+              </span>
+            </li>
+          : null}
           <li>
             <span className="wl-home-v2-profile-shows-stats-list-label">
               <Building2
