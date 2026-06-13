@@ -4,7 +4,7 @@ export function WlHomeV2Footer() {
   return (
     <footer className="foot">
       <span className="foot-copy">
-        © 2026 WTEDRADIO.COM · NON-COMMERCIAL FAN SITE ·{" "}
+        © 2026 Wysteria Lane LLC · NON-COMMERCIAL FAN SITE ·{" "}
         <Link href="/privacy" className="foot-link">
           Privacy
         </Link>

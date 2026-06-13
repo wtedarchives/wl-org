@@ -642,9 +642,9 @@
     .wl-home-v2 header.top .top-brand-cluster-top .brand {
       justify-content: center;
     }
-    .wl-home-v2 header.top .top-brand-cluster-top .brand-text {
-      align-items: center;
-      text-align: center;
+    .wl-home-v2 header.top .top-brand-cluster-top .brand-text .wl {
+      align-self: flex-start;
+      text-align: left;
     }
     .wl-home-v2 header.top nav.top-nav.top-nav--mobile-open {
       box-sizing: border-box;
@@ -9226,6 +9226,7 @@
     -webkit-backdrop-filter: blur(4px);
     font-family: "Geist Mono", monospace; font-size: 10px;
     color: rgba(255,255,255,0.45); letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .wl-home-v2 footer.foot .foot-copy {
     justify-self: start;
