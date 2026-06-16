@@ -21,6 +21,12 @@
   display: none;
 }
 
+@media (max-width: 599px) {
+  .wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
+    justify-content: flex-start;
+  }
+}
+
 @media (min-width: 640px) {
   .wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
     padding-inline: 0.75rem;

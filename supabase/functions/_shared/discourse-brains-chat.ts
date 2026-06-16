@@ -1,5 +1,5 @@
 const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
-const SETLIST_ARCHIVE_ORIGIN = "https://dripfield.pro"
+const SETLIST_ARCHIVE_ORIGIN = "https://wted-org.netlify.app"
 
 /** Public site origin for push notification deep links (override via Edge secret). */
 export function getPublicSiteOrigin(): string {
@@ -19,7 +19,7 @@ export function formatShowDateMmDdYy(dateString: string): string {
 }
 
 export function getSetlistShowDiscourseUrl(showId: string): string {
-  return `${SETLIST_ARCHIVE_ORIGIN}/setlist/${encodeURIComponent(showId.trim())}`
+  return `/archive/setlist?id=${encodeURIComponent(showId.trim())}`
 }
 
 /** Plain-text show context line shared by Discourse-adjacent push copy. */

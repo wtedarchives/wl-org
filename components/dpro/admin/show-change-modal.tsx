@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Save,
   Edit,
@@ -14,6 +14,10 @@ import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 import type { ShowChangeData } from "@/types/admin"
+import {
+  AdminHtmlLinkInserters,
+  insertTextAtTextareaCursor,
+} from "./admin-html-link-inserters"
 import {
   Dialog,
   DialogClose,
@@ -54,6 +58,7 @@ export function ShowChangeModal({
   const [changeTypes, setChangeTypes] = useState<{ change: string }[]>([])
   const [songs, setSongs] = useState<{ song: string; song_id: string }[]>([])
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
+  const changeTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (supabase) {
@@ -94,20 +99,15 @@ export function ShowChangeModal({
     setEditedChange({ ...editedChange, change_order: next })
   }
 
-  const handleSongSelect = (songId: string) => {
-    if (!editedChange || !songId) return
-    const selectedSong = songs.find((s) => s.song_id === songId)
-    if (!selectedSong) return
-    const songLink = `<a href="https://dripfield.pro/song/${selectedSong.song_id}">${selectedSong.song}</a>`
-    setEditedChange({
-      ...editedChange,
-      change: editedChange.change + songLink,
-    })
-  }
-
-  const handleInsertArrow = () => {
+  const insertChangeAtCursor = (text: string, cursorOffset?: number) => {
     if (!editedChange) return
-    setEditedChange({ ...editedChange, change: editedChange.change + "→" })
+    insertTextAtTextareaCursor(
+      changeTextareaRef.current,
+      text,
+      editedChange.change ?? "",
+      (newValue) => setEditedChange({ ...editedChange, change: newValue }),
+      cursorOffset,
+    )
   }
 
   const toggleEdit = () => {
@@ -329,42 +329,16 @@ export function ShowChangeModal({
             <div className="mb-0.5 flex items-center justify-between">
               <label className="block text-xs font-medium">Change</label>
               {!isReadOnly && (
-                <div className="flex gap-2">
-                  <Select
-                    value="__placeholder__"
-                    onValueChange={(value) => {
-                      if (value && value !== "__placeholder__") {
-                        handleSongSelect(value)
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-48 text-xs">
-                      <SelectValue placeholder="Add song link..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__placeholder__">
-                        Add song link...
-                      </SelectItem>
-                      {songs.map((s) => (
-                        <SelectItem key={s.song_id} value={s.song_id}>
-                          {s.song}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleInsertArrow}
-                    title="Insert arrow"
-                  >
-                    →
-                  </Button>
-                </div>
+                <AdminHtmlLinkInserters
+                  songs={songs}
+                  onInsert={insertChangeAtCursor}
+                  showInsertShow={false}
+                  showInsertArrow
+                />
               )}
             </div>
             <textarea
+              ref={changeTextareaRef}
               name="change"
               value={editedChange?.change ?? ""}
               onChange={handleInputChange}

@@ -147,6 +147,7 @@ export function AdminSetlist() {
         onSave={handleSaveEntry}
         onSaveStatusUpdate={handleSaveStatusUpdate}
         isNewEntry={isNewEntry}
+        allShows={shows}
       />
     </AdminTabShell>
   )

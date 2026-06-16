@@ -2,10 +2,14 @@
 
 import { useRef, useState, useEffect } from "react"
 import { Save, Edit, X, Trash2, Check, Loader2 } from "lucide-react"
-import type { AdminSetlistEntryData } from "@/types/admin"
+import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
 import { useSetlistOptions } from "@/hooks/use-setlist-options"
 import { useSetlistEntryForm } from "@/hooks/use-setlist-entry-form"
 import { useSetlistEntryActions } from "@/hooks/use-setlist-entry-actions"
+import {
+  AdminHtmlLinkInserters,
+  insertTextAtTextareaCursor,
+} from "./admin-html-link-inserters"
 import { BasicInfoSection } from "./setlist/basic-info-section"
 import { SongSection } from "./setlist/song-section"
 import { SongDetailsSection } from "./setlist/song-details-section"
@@ -29,6 +33,7 @@ interface SetlistEntryModalProps {
     status: "idle" | "processing" | "done" | "error"
   ) => void
   isNewEntry?: boolean
+  allShows: ShowData[]
 }
 
 export function SetlistEntryModal({
@@ -38,8 +43,10 @@ export function SetlistEntryModal({
   onSave,
   onSaveStatusUpdate,
   isNewEntry = false,
+  allShows,
 }: SetlistEntryModalProps) {
   const dialogContentRef = useRef<HTMLDivElement>(null)
+  const coachNotesTextareaRef = useRef<HTMLTextAreaElement>(null)
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false)
   const [isGuestSectionExpanded, setIsGuestSectionExpanded] = useState(false)
   const [guestSearchTerm, setGuestSearchTerm] = useState("")
@@ -106,6 +113,24 @@ export function SetlistEntryModal({
   }
 
   if (!isOpen || !entry) return null
+
+  const insertCoachNotesAtCursor = (
+    text: string,
+    cursorOffset?: number,
+  ) => {
+    if (!editedEntry) return
+    insertTextAtTextareaCursor(
+      coachNotesTextareaRef.current,
+      text,
+      editedEntry.entry_coachnotes ?? "",
+      (newValue) => {
+        handleInputChange({
+          target: { name: "entry_coachnotes", value: newValue },
+        } as React.ChangeEvent<HTMLTextAreaElement>)
+      },
+      cursorOffset,
+    )
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -237,16 +262,26 @@ export function SetlistEntryModal({
             }
           />
           <div className="md:col-span-6">
-            <label className="mb-0.5 block text-xs font-medium">
-              Coach&apos;s Notes
-            </label>
+            <div className="mb-0.5 flex flex-wrap items-center justify-between gap-2">
+              <label className="block text-xs font-medium">
+                Coach&apos;s Notes
+              </label>
+              {(isEditing || isNewEntry) ?
+                <AdminHtmlLinkInserters
+                  allShows={allShows}
+                  songs={songs}
+                  onInsert={insertCoachNotesAtCursor}
+                />
+              : null}
+            </div>
             <textarea
+              ref={coachNotesTextareaRef}
               name="entry_coachnotes"
               value={editedEntry?.entry_coachnotes ?? ""}
               onChange={handleInputChange}
               readOnly={!isEditing && !isNewEntry}
               rows={4}
-              className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+              className="w-full rounded-md border border-input bg-background px-2 py-1 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
             />
           </div>
           <div className="md:col-span-6">
