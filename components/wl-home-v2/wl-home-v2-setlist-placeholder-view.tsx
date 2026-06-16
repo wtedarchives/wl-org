@@ -37,10 +37,9 @@ import { cn } from "@/lib/utils"
 import { WlHomeV2SetlistAsideAccent } from "@/components/wl-home-v2/wl-home-v2-setlist-aside-accent"
 import { WlHomeV2SetlistPlaceholderCrumbsBar } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-crumbs"
 import { WlHomeV2SetlistPlaceholderMainHeader } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-main-header"
-import {
-  WlHomeV2SetlistPlaceholderCommunityLink,
-  WlHomeV2SetlistPlaceholderRatingAttendees,
-} from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
+import { WlHomeV2SetlistPlaceholderRatingAttendees } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
+import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
+import { isValidWlCommunityTopicUrl } from "@/lib/wl-community-topic-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
 import { SetlistEgnAttribution } from "@/components/dpro/setlist/setlist-egn-attribution"
 
@@ -155,7 +154,7 @@ export function WlHomeV2SetlistPlaceholderView({
       averageRating.toFixed(2)
     : "0.00"
   const wlCommunityHref = show.show_wl_link?.trim() ?? ""
-  const showWlCommunityLink = wlCommunityHref.length > 0
+  const showWlTopPosts = isValidWlCommunityTopicUrl(wlCommunityHref)
   const reviewSummary =
     reviewCount > 0 ?
       `${reviewCount.toLocaleString("en-US")} ${reviewCount === 1 ? "review" : "reviews"}`
@@ -182,12 +181,13 @@ export function WlHomeV2SetlistPlaceholderView({
     onOpenSetlistScan,
   )
 
-  /** Strip between tools and next tile only when a block actually follows (avoids a trailing accent). */
+  /** Strip between tools and next tile when a block follows (stats bundle or WL posts). */
   const setlistAsideHasBlocksBelowTools =
     asideStatsVisible ||
     asideSongSpreadVisible ||
     asideShowChangesVisible ||
-    asideBadgesVisible
+    asideBadgesVisible ||
+    showWlTopPosts
 
   const showGroupLabel = show.show_group?.trim() ?? ""
   const venueLocation = show.show_venue_location?.trim() ?? ""
@@ -216,8 +216,6 @@ export function WlHomeV2SetlistPlaceholderView({
     attendanceToggling,
     onAttendanceToggle,
     onRatingClick,
-    showWlCommunityLink,
-    wlCommunityHref,
   }
 
   const showEgnAttribution = show.egn_sourced === true
@@ -328,11 +326,6 @@ export function WlHomeV2SetlistPlaceholderView({
                 <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
                   <div className="wl-home-v2-setlist-tools-panel">
                     <WlHomeV2SetlistPlaceholderRatingAttendees {...toolsProps} />
-                    {showWlCommunityLink ?
-                      <WlHomeV2SetlistPlaceholderCommunityLink
-                        wlCommunityHref={wlCommunityHref}
-                      />
-                    : null}
                   </div>
                 </div>
               </section>
@@ -342,7 +335,13 @@ export function WlHomeV2SetlistPlaceholderView({
           {!useCompactTools && setlistAsideHasBlocksBelowTools ?
             <WlHomeV2SetlistAsideAccent showId={showId} slot={1} />
           : null}
-          <div className="wl-home-v2-setlist-aside-stats-tiles">
+          <div
+            className={cn(
+              "wl-home-v2-setlist-aside-stats-tiles",
+              showWlTopPosts &&
+                "wl-home-v2-setlist-aside-stats-tiles--with-wl-posts",
+            )}
+          >
             <WlHomeV2SetlistShowStatsTile
               show={show}
               setlist={setlist}
@@ -373,6 +372,16 @@ export function WlHomeV2SetlistPlaceholderView({
               <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
             : null}
             <WlHomeV2SetlistShowBadgesTile show={show} />
+            {showWlTopPosts &&
+            (asideStatsVisible ||
+              asideSongSpreadVisible ||
+              asideShowChangesVisible ||
+              asideBadgesVisible) ?
+              <WlHomeV2SetlistAsideAccent showId={showId} slot={5} />
+            : null}
+            {showWlTopPosts ?
+              <WLTopPosts wlLink={wlCommunityHref} />
+            : null}
           </div>
         </aside>
         {useCompactTools && showEgnAttribution ?

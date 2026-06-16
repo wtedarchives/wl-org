@@ -11552,9 +11552,31 @@
 .wl-home-v2
   .wl-home-v2-setlist-aside
   > .wl-home-v2-setlist-aside-stats-tiles
-  > section.wl-home-v2-years-tile:last-of-type {
+  > section.wl-home-v2-years-tile:last-of-type:not(.wl-top-posts) {
   flex: 1 1 auto;
   min-height: 0;
+}
+/* WL community posts: fill aside slack below tiles; close column with main-matching hairline. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts {
+  flex: 1 1 auto;
+  border-bottom: 1px solid rgb(34, 37, 35);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts
+  > section.wl-top-posts {
+  flex: 0 0 auto;
+  border-bottom: none;
+}
+@media (min-width: 768px) and (max-width: 1343px) {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts
+    > section.wl-top-posts {
+    grid-column: 1 / -1;
+  }
 }
 /* Bundle for Show Stats / Song Spread / Show Changes / Show Badges (compact + desktop aside). */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-stats-tiles {

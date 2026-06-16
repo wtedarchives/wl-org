@@ -1,5 +1,4 @@
-import Image from "next/image"
-import { ArrowRight, Check, UserPlus, Users } from "@phosphor-icons/react"
+import { Check, UserPlus, Users } from "@phosphor-icons/react"
 
 import { SetlistRatingStarsRow } from "@/components/dpro/setlist/setlist-rating-card"
 
@@ -13,8 +12,6 @@ export type WlHomeV2SetlistPlaceholderToolsProps = {
   attendanceToggling: boolean
   onAttendanceToggle: () => void
   onRatingClick: () => void
-  showWlCommunityLink: boolean
-  wlCommunityHref: string
 }
 
 export function WlHomeV2SetlistPlaceholderRatingAttendees({
@@ -27,10 +24,7 @@ export function WlHomeV2SetlistPlaceholderRatingAttendees({
   attendanceToggling,
   onAttendanceToggle,
   onRatingClick,
-}: Omit<
-  WlHomeV2SetlistPlaceholderToolsProps,
-  "showWlCommunityLink" | "wlCommunityHref"
->) {
+}: WlHomeV2SetlistPlaceholderToolsProps) {
   return (
     <>
       <button
@@ -89,37 +83,5 @@ export function WlHomeV2SetlistPlaceholderRatingAttendees({
         </button>
       </div>
     </>
-  )
-}
-
-export function WlHomeV2SetlistPlaceholderCommunityLink({
-  wlCommunityHref,
-}: {
-  wlCommunityHref: string
-}) {
-  return (
-    <a
-      href={wlCommunityHref}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="wl-home-v2-setlist-tools-panel__chat wbtn green"
-    >
-      <span className="wbtn-text inline-flex min-w-0 items-center gap-2">
-        <Image
-          src="/WL.png"
-          alt=""
-          width={22}
-          height={22}
-          className="size-[22px] shrink-0 object-contain"
-          unoptimized
-        />
-        <span>Chat in the Wysteria Lane Community</span>
-      </span>
-      <ArrowRight
-        className="wbtn-icon size-4 shrink-0"
-        weight="bold"
-        aria-hidden
-      />
-    </a>
   )
 }

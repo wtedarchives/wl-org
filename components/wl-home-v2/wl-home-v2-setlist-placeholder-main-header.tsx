@@ -10,7 +10,6 @@ import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import { formatSetlistDate, formatShowWeekday } from "@/lib/setlist-utils"
 
 import {
-  WlHomeV2SetlistPlaceholderCommunityLink,
   WlHomeV2SetlistPlaceholderRatingAttendees,
   type WlHomeV2SetlistPlaceholderToolsProps,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
@@ -223,11 +222,6 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
         <div className="wl-home-v2-setlist-main-tools-cards">
           <div className="wl-home-v2-setlist-tools-panel wl-home-v2-setlist-tools-panel--mobile-below-header">
             <WlHomeV2SetlistPlaceholderRatingAttendees {...toolsProps} />
-            {toolsProps.showWlCommunityLink ?
-              <WlHomeV2SetlistPlaceholderCommunityLink
-                wlCommunityHref={toolsProps.wlCommunityHref}
-              />
-            : null}
           </div>
         </div>
       : null}
