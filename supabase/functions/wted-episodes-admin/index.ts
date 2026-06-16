@@ -73,16 +73,21 @@ function ok(body: unknown) {
   })
 }
 
+function bearerToken(header: string | null): string | null {
+  if (!header?.startsWith("Bearer ")) return null
+  const token = header.slice(7).trim()
+  return token || null
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders })
   if (req.method !== "POST") return err("Method not allowed", 405)
 
-  // Auth
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
-  if (!token) return err("Unauthorized", 401)
+  /** Wysteria SSO JWT only — never verify the anon Supabase JWT in `Authorization`. */
+  const token = bearerToken(req.headers.get("x-wysteria-authorization"))
+  if (!token) return err("Missing Wysteria session", 401)
 
   const jwtSecret = Deno.env.get("WYSTERIA_JWT_SECRET")
   const supabaseUrl = Deno.env.get("SUPABASE_URL")
@@ -97,7 +102,7 @@ serve(async (req) => {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret))
     jwtPayload = payload as Record<string, unknown>
   } catch {
-    return err("Unauthorized", 401)
+    return err("Invalid or expired Wysteria session", 401)
   }
 
   if (!jwtPayload.is_admin) return err("Forbidden", 403)

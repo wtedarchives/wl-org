@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { RefreshCwIcon } from "lucide-react"
+import { WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
 import { getSession } from "@/lib/jwt"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 import {
@@ -27,14 +28,16 @@ async function callAdminEpisodes(
   if (!session?.token) throw new Error("Sign in again to perform this action.")
 
   const base = getSupabaseFunctionsUrl()
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+  if (!anon) throw new Error("Missing Supabase anon key.")
 
   const res = await fetch(`${base}/wted-episodes-admin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${session.token}`,
-      ...(anon ? { apikey: anon } : {}),
+      Authorization: `Bearer ${anon}`,
+      apikey: anon,
+      [WYSTERIA_AUTH_HEADER]: `Bearer ${session.token}`,
     },
     body: JSON.stringify({ action, ...body }),
   })

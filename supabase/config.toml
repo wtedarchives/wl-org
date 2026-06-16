@@ -14,6 +14,9 @@ verify_jwt = true
 [functions.dpro-admin]
 verify_jwt = false
 
+[functions.wted-episodes-admin]
+verify_jwt = false
+
 # Wysteria JWT in Authorization is verified inside the function (not a Supabase Auth token).
 [functions.setlist-game-submission]
 verify_jwt = false
