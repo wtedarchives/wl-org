@@ -23,6 +23,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: "#000000",
 };
 
 export const metadata: Metadata = {
@@ -35,6 +36,19 @@ export const metadata: Metadata = {
     template: "%s – WTEDRadio.com",
   },
   description: "WTEDRadio.com",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/192.png", sizes: "192x192", type: "image/png" },
+      { url: "/512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/180.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: "WTED",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
