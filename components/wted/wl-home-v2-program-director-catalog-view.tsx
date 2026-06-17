@@ -75,7 +75,7 @@ export function WlHomeV2ProgramDirectorCatalogView() {
                 Select a row for episodes and song archive.
               </p>
               <p>
-                <Link href="/wted/program-director">Back to Episodes</Link>
+                <Link href="/wted/episodes">Back to Episodes</Link>
               </p>
             </div>
           </header>

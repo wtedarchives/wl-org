@@ -6,5 +6,5 @@ import { redirect } from "next/navigation"
  * `@/app/(main)/wted/shows/content` for future reuse.
  */
 export default function WtedShowsPage() {
-  redirect("/wted/program-director")
+  redirect("/wted/episodes")
 }

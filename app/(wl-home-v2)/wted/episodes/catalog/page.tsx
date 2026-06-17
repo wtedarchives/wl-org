@@ -8,6 +8,6 @@ export const metadata: Metadata = {
     "Performances chosen for WTED Goose Radio shows (catalog preview — full listing coming soon).",
 }
 
-export default function WtedProgramDirectorCatalogPage() {
+export default function WtedEpisodesCatalogPage() {
   return <WlHomeV2ProgramDirectorCatalogView />
 }

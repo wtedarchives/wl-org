@@ -122,8 +122,8 @@ export function WtedEpisodePageClientLegacy() {
     )
     const showLabel = wtedShow?.show ?? episode.show
     setSetlistBreadcrumbs([
-      { label: "WTED Radio", href: "/wted/program-director" },
-      { label: showLabel, href: "/wted/program-director" },
+      { label: "WTED Radio", href: "/wted/episodes" },
+      { label: showLabel, href: "/wted/episodes" },
       {
         label: displayName,
         href: getWtedOldEpisodeUrl(episode.uuid),
@@ -161,7 +161,7 @@ export function WtedEpisodePageClientLegacy() {
         <p className="text-center text-sm text-muted-foreground">
           Missing or invalid episode. Open an episode from{" "}
           <Link
-            href="/wted/program-director"
+            href="/wted/episodes"
             className="font-medium text-foreground underline"
           >
             WTED Radio
@@ -186,7 +186,7 @@ export function WtedEpisodePageClientLegacy() {
         </p>
         <p className="text-center">
           <Link
-            href="/wted/program-director"
+            href="/wted/episodes"
             className="text-sm font-medium text-foreground underline"
           >
             Back to WTED Radio

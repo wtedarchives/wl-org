@@ -8,6 +8,6 @@ export const metadata: Metadata = {
     "WTED Radio shows and episodes with links to published track listings.",
 }
 
-export default function WtedProgramDirectorPage() {
+export default function WtedEpisodesPage() {
   return <WlHomeV2ProgramDirectorView />
 }

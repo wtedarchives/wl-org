@@ -10,7 +10,7 @@ export type NavMainItem = {
 export const navMainItems: readonly NavMainItem[] = []
 
 export const WTED_RADIO_SUB = [
-  { title: "Episodes", url: "/wted/program-director" },
+  { title: "Episodes", url: "/wted/episodes" },
   { title: "About Us and FAQ", url: "/wted/about" },
   { title: "GORPs and Contributors", url: "/wted/gorps" },
 ] as const

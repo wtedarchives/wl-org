@@ -200,7 +200,7 @@ export function WlHomeV2WtedEpisodePageClient() {
           <p className="text-sm text-white/65">
             Missing or invalid episode. Open an episode from{" "}
             <Link
-              href="/wted/program-director"
+              href="/wted/episodes"
               className="font-medium text-wl-orange underline underline-offset-2 hover:text-white"
             >
               Episodes
@@ -227,7 +227,7 @@ export function WlHomeV2WtedEpisodePageClient() {
           </p>
           <p className="mt-3">
             <Link
-              href="/wted/program-director"
+              href="/wted/episodes"
               className="text-sm font-medium text-wl-orange underline underline-offset-2 hover:text-white"
             >
               Back to WTED Radio
@@ -252,8 +252,8 @@ export function WlHomeV2WtedEpisodePageClient() {
         trail={
           <WlHomeV2ArchiveCrumbsTrail
             items={[
-              { label: "WTED Radio", href: "/wted/program-director" },
-              { label: showName, href: "/wted/program-director" },
+              { label: "WTED Radio", href: "/wted/episodes" },
+              { label: showName, href: "/wted/episodes" },
               {
                 label: displayName,
                 href: getWtedEpisodeUrl(episode.uuid),

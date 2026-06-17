@@ -98,7 +98,7 @@ export function WlHomeV2TileRadio({
               <span className="wbtn-text">GORPs</span>
               <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
             </Link>
-            <Link className="wbtn wbtn--app-store" href="/wted/program-director">
+            <Link className="wbtn wbtn--app-store" href="/wted/episodes">
               <span className="wbtn-text">Episodes</span>
               <ListNumbers className="wbtn-icon" size={18} weight="regular" aria-hidden />
             </Link>

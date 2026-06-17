@@ -95,7 +95,7 @@ export function WlHomeV2RadioModal({
               </button>
 
               <Link
-                href="/wted/program-director"
+                href="/wted/episodes"
                 className="modal-archive-tile"
                 onClick={onClose}
               >

@@ -61,8 +61,8 @@ const PATH_LABELS: Record<string, string> = {
   "wted/gorps": "GORPs and Contributors",
   "wted/shows": "Shows and More",
   "wted/about": "About Us and FAQ",
-  "wted/program-director": "Episodes",
-  "wted/program-director/catalog": "Performance Catalog",
+  "wted/episodes": "Episodes",
+  "wted/episodes/catalog": "Performance Catalog",
   "old/support": "Support WTED",
   support: "Support Wysteria Lane",
   archive: WTED_ARCHIVES_BREADCRUMB_ROOT.label,
@@ -116,7 +116,7 @@ function pathnameToBreadcrumbs(
         : explicitLabel ??
           (isUuidLikeSegment(segment) ? "…" : segment.charAt(0).toUpperCase() + segment.slice(1))
     const itemHref =
-      segment === "wted" ? "/wted/program-director" : href
+      segment === "wted" ? "/wted/episodes" : href
     items.push({ label, href: itemHref })
   }
   return items

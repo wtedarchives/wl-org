@@ -233,7 +233,7 @@ export function WlHomeV2Header({
               aria-label="Primary"
             >
               <div className="top-nav-primary-row">
-                <a href="/wted/program-director" onClick={onRadioNavClick}>
+                <a href="/wted/episodes" onClick={onRadioNavClick}>
                   <TopNavPrimaryImage
                     src="/WTED.png"
                     className="top-nav-radio-img--desktop"
