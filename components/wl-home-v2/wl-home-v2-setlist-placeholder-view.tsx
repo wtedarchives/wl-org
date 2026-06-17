@@ -37,7 +37,9 @@ import { cn } from "@/lib/utils"
 import { WlHomeV2SetlistAsideAccent } from "@/components/wl-home-v2/wl-home-v2-setlist-aside-accent"
 import { WlHomeV2SetlistPlaceholderCrumbsBar } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-crumbs"
 import { WlHomeV2SetlistPlaceholderMainHeader } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-main-header"
-import { WlHomeV2SetlistPlaceholderRatingAttendees } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
+import type { WlHomeV2SetlistPlaceholderToolsProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
+import { WlHomeV2SetlistToolsPanel } from "@/components/wl-home-v2/wl-home-v2-setlist-tools-panel"
+import type { UserAttendedGooseCanonNavState } from "@/hooks/use-user-attended-goose-canon-nav"
 import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
 import { isValidWlCommunityTopicUrl } from "@/lib/wl-community-topic-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
@@ -85,6 +87,8 @@ export function WlHomeV2SetlistPlaceholderView({
   attended,
   attendanceToggling,
   onAttendanceToggle,
+  attendedGooseCanonNav,
+  onAttendedShowSelect,
   showLengthRank,
   showChanges,
   showChangesLoading,
@@ -132,6 +136,8 @@ export function WlHomeV2SetlistPlaceholderView({
   attended: boolean
   attendanceToggling: boolean
   onAttendanceToggle: () => void
+  attendedGooseCanonNav: UserAttendedGooseCanonNavState
+  onAttendedShowSelect: (showId: string) => void
   showLengthRank: number | null
   showChanges: ShowChangeRow[]
   showChangesLoading: boolean
@@ -181,13 +187,16 @@ export function WlHomeV2SetlistPlaceholderView({
     onOpenSetlistScan,
   )
 
-  /** Strip between tools and next tile when a block follows (stats bundle or WL posts). */
+  /** Strip between tools and next tile when a block follows (stats bundle; WL posts on mobile only). */
   const setlistAsideHasBlocksBelowTools =
     asideStatsVisible ||
     asideSongSpreadVisible ||
     asideShowChangesVisible ||
     asideBadgesVisible ||
-    showWlTopPosts
+    (useCompactTools && showWlTopPosts)
+
+  const showDesktopBelowTableRow =
+    !useCompactTools && (releases.length > 0 || showWlTopPosts)
 
   const showGroupLabel = show.show_group?.trim() ?? ""
   const venueLocation = show.show_venue_location?.trim() ?? ""
@@ -206,7 +215,7 @@ export function WlHomeV2SetlistPlaceholderView({
     (show.show_tour?.length ?? 0) > 24 &&
     showPositionInTour != null
 
-  const toolsProps = {
+  const toolsProps: WlHomeV2SetlistPlaceholderToolsProps = {
     hasAverageRating,
     ratingValueDisplay,
     reviewSummary,
@@ -271,6 +280,8 @@ export function WlHomeV2SetlistPlaceholderView({
                 tourShowNav={tourShowNav}
                 onTourShowSelect={onTourShowSelect}
                 toolsProps={toolsProps}
+                attendedGooseCanonNav={attendedGooseCanonNav}
+                onAttendedShowSelect={onAttendedShowSelect}
               />
 
               <div className="wl-home-v2-setlist-main-fill flex min-h-0 min-w-0 flex-1 flex-col gap-4">
@@ -290,7 +301,24 @@ export function WlHomeV2SetlistPlaceholderView({
                   releaseToEntriesMap={releaseToEntriesMap}
                   hoveredCategory={hoveredCategory}
                 />
-                {releases.length > 0 ?
+                {showDesktopBelowTableRow ?
+                  <div className="wl-home-v2-setlist-below-table-row">
+                    {releases.length > 0 ?
+                      <div className="wl-home-v2-setlist-below-table-media">
+                        <SetlistMediaSection
+                          releases={releases}
+                          visualVariant="wl-home-v2"
+                          onReleaseHover={setHoveredReleaseId}
+                        />
+                      </div>
+                    : null}
+                    {showWlTopPosts ?
+                      <div className="wl-home-v2-setlist-below-table-wl">
+                        <WLTopPosts wlLink={wlCommunityHref} />
+                      </div>
+                    : null}
+                  </div>
+                : releases.length > 0 ?
                   <SetlistMediaSection
                     releases={releases}
                     visualVariant="wl-home-v2"
@@ -324,9 +352,12 @@ export function WlHomeV2SetlistPlaceholderView({
                 }
               >
                 <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
-                  <div className="wl-home-v2-setlist-tools-panel">
-                    <WlHomeV2SetlistPlaceholderRatingAttendees {...toolsProps} />
-                  </div>
+                  <WlHomeV2SetlistToolsPanel
+                    toolsProps={toolsProps}
+                    attendedNav={attendedGooseCanonNav}
+                    currentShowId={showId}
+                    onAttendedShowSelect={onAttendedShowSelect}
+                  />
                 </div>
               </section>
             </>
@@ -338,7 +369,8 @@ export function WlHomeV2SetlistPlaceholderView({
           <div
             className={cn(
               "wl-home-v2-setlist-aside-stats-tiles",
-              showWlTopPosts &&
+              useCompactTools &&
+                showWlTopPosts &&
                 "wl-home-v2-setlist-aside-stats-tiles--with-wl-posts",
             )}
           >
@@ -372,14 +404,14 @@ export function WlHomeV2SetlistPlaceholderView({
               <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
             : null}
             <WlHomeV2SetlistShowBadgesTile show={show} />
-            {showWlTopPosts &&
+            {useCompactTools && showWlTopPosts &&
             (asideStatsVisible ||
               asideSongSpreadVisible ||
               asideShowChangesVisible ||
               asideBadgesVisible) ?
               <WlHomeV2SetlistAsideAccent showId={showId} slot={5} />
             : null}
-            {showWlTopPosts ?
+            {useCompactTools && showWlTopPosts ?
               <WLTopPosts wlLink={wlCommunityHref} />
             : null}
           </div>

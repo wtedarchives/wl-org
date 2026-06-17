@@ -60,6 +60,11 @@ function getOrdinalSuffix(n: number): string {
   return "th"
 }
 
+/** e.g. 1 → "1st", 12 → "12th", 21 → "21st" */
+export function formatOrdinal(n: number): string {
+  return `${n}${getOrdinalSuffix(n)}`
+}
+
 /** Tooltip text for show length rank (e.g. "Longest Goose show of all-time."). */
 export function getLengthRankTooltipText(rank: number): string {
   if (rank <= 0 || rank > 25) return ""

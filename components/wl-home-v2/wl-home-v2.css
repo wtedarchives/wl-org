@@ -11438,6 +11438,76 @@
   min-height: 0;
   min-width: 0;
 }
+/* Desktop (`xl+`): media + WLC side by side under setlist table; embed expands in media column only. */
+@media (min-width: 1344px) {
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-below-table-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-below-table-media {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-row
+    .wl-home-v2-setlist-media-shell {
+    margin-bottom: 0;
+  }
+  .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-below-table-wl {
+    flex: 0 0 336px;
+    width: 336px;
+    margin-left: auto;
+    align-self: flex-start;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-top-posts {
+    --tile-bg: none;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.63);
+    border-radius: 10px;
+    border: 1px solid rgb(63, 65, 64);
+    border-bottom: 1px solid rgb(63, 65, 64);
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 14px 16px 16px;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-top-posts::before,
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-top-posts::after {
+    content: none;
+    display: none;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-top-posts
+    .wl-home-v2-years-tile-inner {
+    padding: 0;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-top-posts
+    .side-card {
+    background: transparent;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
 /* Compact setlist: ElGoose.Net attribution trails stats / song spread / aside tiles. */
 @media (max-width: 1343px) {
   .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-egn-mobile-tail {
@@ -11471,10 +11541,10 @@
     min-width: 0;
   }
   .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-compact-header-row .wl-home-v2-setlist-main-tools-cards {
-    flex: 0 1 316px;
+    flex: 0 1 336px;
     align-self: stretch;
     width: auto;
-    max-width: min(316px, 100%);
+    max-width: min(336px, 100%);
   }
 }
 .wl-home-v2
@@ -11535,7 +11605,7 @@
 }
 /* Main / aside use `.wl-home-v2-years-tile` + `.wl-home-v2-years-tile-inner` (same as years). */
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-years-aside {
-  width: 316px;
+  width: 336px;
 }
 @media (max-width: 1343px) {
   /* Stacked `.wl-home-v2-years-columns`: fixed sidebar width leaves empty gutters on phones/tablets */
@@ -14049,6 +14119,133 @@
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel button.attend:disabled {
   cursor: wait;
   opacity: 0.75;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attended-nav-shell {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  border-top: 1px solid transparent;
+  transition:
+    grid-template-rows 0.22s ease-out,
+    opacity 0.22s ease-out,
+    border-color 0.22s ease-out;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attended-nav-shell--visible {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  border-top-color: rgb(63, 65, 64);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attended-nav-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+.wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-attended-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.22);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-attended-nav
+  .meta-tour {
+  text-align: center;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-attended-nav
+  .wl-home-v2-setlist-attended-nav-label {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-attended-nav
+  .wl-home-v2-setlist-attended-nav-label
+  .setlist-alt-name-pill {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: #fff;
+  background: rgba(88, 200, 174, 0.15);
+  border: 1px solid rgb(44, 91, 79);
+  flex-shrink: 0;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-attended-nav
+  .nav-btn {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+}
+/* Attended-nav ordinal pill as Select trigger (matches static `.setlist-alt-name-pill`). */
+.wl-home-v2-setlist-attended-nav-pill-trigger {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 2px 4px !important;
+  gap: 2px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgb(44, 91, 79) !important;
+  background: rgba(88, 200, 174, 0.15) !important;
+  color: #fff !important;
+  font-family: "Geist Mono", ui-monospace, monospace !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.35 !important;
+  box-shadow: none !important;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+.wl-home-v2-setlist-attended-nav-pill-trigger:hover {
+  background: rgba(88, 200, 174, 0.32) !important;
+  border-color: rgb(62, 120, 105) !important;
+  color: #fff !important;
+}
+.wl-home-v2-setlist-attended-nav-pill-trigger:focus-visible {
+  outline: 2px solid var(--wl-green);
+  outline-offset: 2px;
+}
+.wl-home-v2-setlist-attended-nav-pill-trigger > span[aria-hidden="true"] {
+  display: none !important;
+}
+.wl-home-v2-setlist-attended-nav-pill-trigger [data-slot="select-value"] {
+  line-height: 1.35 !important;
 }
 .wl-home-v2 .wl-home-v2-setlist .wbtn {
   display: flex;

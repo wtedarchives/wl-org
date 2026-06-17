@@ -17,6 +17,7 @@ import {
   useShowPosition,
 } from "@/hooks/use-setlist-display"
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
+import { useUserAttendedGooseCanonNav } from "@/hooks/use-user-attended-goose-canon-nav"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
 import { useMaxShowCanonId } from "@/hooks/use-max-show-canonid"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
@@ -117,6 +118,12 @@ export function useWlHomeV2SetlistPageClient() {
     showId,
     session,
     setAttendeeCount,
+  )
+  const attendedGooseCanonNav = useUserAttendedGooseCanonNav(
+    session?.profileId,
+    showId,
+    show ?? null,
+    attended,
   )
 
   const onRatingClick = useCallback(() => {
@@ -294,6 +301,7 @@ export function useWlHomeV2SetlistPageClient() {
     validateReview,
     attended,
     toggling,
+    attendedGooseCanonNav,
     onRatingClick,
     onAttendanceClick,
     handleNumberClick,

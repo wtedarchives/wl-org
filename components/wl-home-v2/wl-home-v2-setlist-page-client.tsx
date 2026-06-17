@@ -87,6 +87,8 @@ export function WlHomeV2SetlistPageClient() {
         attended={state.attended}
         attendanceToggling={state.toggling}
         onAttendanceToggle={state.onAttendanceClick}
+        attendedGooseCanonNav={state.attendedGooseCanonNav}
+        onAttendedShowSelect={state.handleShowSelect}
         showLengthRank={state.showLengthRank}
         showChanges={state.showChanges}
         showChangesLoading={state.showChangesLoading}

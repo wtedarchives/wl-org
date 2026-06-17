@@ -10,9 +10,10 @@ import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import { formatSetlistDate, formatShowWeekday } from "@/lib/setlist-utils"
 
 import {
-  WlHomeV2SetlistPlaceholderRatingAttendees,
   type WlHomeV2SetlistPlaceholderToolsProps,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
+import { WlHomeV2SetlistToolsPanel } from "@/components/wl-home-v2/wl-home-v2-setlist-tools-panel"
+import type { UserAttendedGooseCanonNavState } from "@/hooks/use-user-attended-goose-canon-nav"
 
 export type WlHomeV2SetlistPlaceholderMainHeaderProps = {
   useCompactTools: boolean
@@ -32,6 +33,8 @@ export type WlHomeV2SetlistPlaceholderMainHeaderProps = {
   } | null
   onTourShowSelect: (showId: string) => void
   toolsProps: WlHomeV2SetlistPlaceholderToolsProps
+  attendedGooseCanonNav: UserAttendedGooseCanonNavState
+  onAttendedShowSelect: (showId: string) => void
 }
 
 export function WlHomeV2SetlistPlaceholderMainHeader({
@@ -49,6 +52,8 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
   tourShowNav,
   onTourShowSelect,
   toolsProps,
+  attendedGooseCanonNav,
+  onAttendedShowSelect,
 }: WlHomeV2SetlistPlaceholderMainHeaderProps) {
   /** Mobile: two lines whenever both subvenue and city exist (ignore show_detail). Desktop: stacked only when there's no show_detail. */
   const stackSubvenueLocation =
@@ -220,9 +225,13 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
 
       {useCompactTools ?
         <div className="wl-home-v2-setlist-main-tools-cards">
-          <div className="wl-home-v2-setlist-tools-panel wl-home-v2-setlist-tools-panel--mobile-below-header">
-            <WlHomeV2SetlistPlaceholderRatingAttendees {...toolsProps} />
-          </div>
+          <WlHomeV2SetlistToolsPanel
+            toolsProps={toolsProps}
+            attendedNav={attendedGooseCanonNav}
+            currentShowId={show.show_id}
+            onAttendedShowSelect={onAttendedShowSelect}
+            panelClassName="wl-home-v2-setlist-tools-panel--mobile-below-header"
+          />
         </div>
       : null}
     </div>
