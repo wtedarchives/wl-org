@@ -2,13 +2,15 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useId, useState } from "react"
+import { useEffect, useState } from "react"
 
 import {
   formatRadioScheduleTimeRange,
   type RadioScheduleDay,
 } from "@/hooks/use-radio-schedule"
 import { cn } from "@/lib/utils"
+
+const WL_HOME_V2_ON_AIR_TABLIST_ID = "wl-home-v2-on-air-schedule-tabs"
 
 function WlHomeV2OnAirScheduleRowArt({
   artwork,
@@ -132,7 +134,7 @@ export function WlHomeV2OnAirPill({
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [panelVisible, setPanelVisible] = useState(true)
-  const tabListId = useId()
+  const tabListId = WL_HOME_V2_ON_AIR_TABLIST_ID
 
   useEffect(() => {
     setPanelVisible(false)

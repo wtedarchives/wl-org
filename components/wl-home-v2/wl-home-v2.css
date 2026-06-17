@@ -4,6 +4,8 @@
     100% { box-shadow: 0 0 0 0 rgba(255,122,103,0); }
   }
 
+@import "./wl-home-v2-themes.css";
+
 /* Scoped for / (WlHomeV2) — generated from WTED.org 2/Homepage-source.html */
 
   
@@ -14,21 +16,13 @@
     font-feature-settings: "tnum" 1;
     overflow-x: hidden;
     background:
-      linear-gradient(180deg, rgba(49,58,52,0.35) 0%, rgba(40,91,78,0.92) 80%),
+      linear-gradient(
+        180deg,
+        var(--theme-page-gradient-top) 0%,
+        var(--theme-page-gradient-mid) 80%
+      ),
       var(--wl-deep-green);
     background-attachment: fixed;
-    --wl-green: oklch(0.76 0.06 163);
-    --wl-dark-green: oklch(0.43 0.03 161);
-    --wl-deep-green: #285b4e;
-    --wl-light-green: oklch(0.68 0.04 160);
-    --wl-orange: oklch(0.72 0.15 25);
-    --wl-light-orange: oklch(0.82 0.10 55);
-    --wl-white: #ffffff;
-    --wl-off-white: #effefa;
-    --wl-grey: oklch(0.55 0.02 260);
-    --wl-dark-grey: #1f1f1f;
-    --panel-bg: #313a34;
-    --panel-border: rgb(24, 25, 24);
   }
   .wl-home-v2,
   .wl-home-v2 * {
@@ -49,7 +43,7 @@
     align-items: center;
     column-gap: 24px;
     padding: 8px 28px;
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
   }
   .wl-home-v2 header.top .top-embed-row {
     grid-area: radio;
@@ -241,7 +235,12 @@
     overflow: hidden;
     transition: background 0.18s ease, border-color 0.18s ease;
   }
-  .wl-home-v2 .brand-mark img{ width: 72%; height: 72%; object-fit: contain; }
+  .wl-home-v2 .brand-mark img,
+  .wl-home-v2 .brand-mark-img {
+    width: 72%;
+    height: 72%;
+    object-fit: contain;
+  }
   .wl-home-v2 .brand-text{ display: flex; flex-direction: column; line-height: 1; }
   .wl-home-v2 .brand-text .wl{ font-weight: 700; letter-spacing: -0.01em; font-size: 15px; }
   .wl-home-v2 .brand-text .dotorg{ font-family: "Geist Mono", ui-monospace, monospace; font-size: 10px; color: rgba(255,255,255,0.55); margin-top: 3px; letter-spacing: 0.04em; }
@@ -868,7 +867,7 @@
   .wl-home-v2 .wl-home-v2-archive-subnav {
     flex-shrink: 0;
     width: 100%;
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -882,7 +881,7 @@
   }
   .wl-home-v2 .wl-home-v2-archive-subnav.wl-home-v2-archive-subnav--drawer {
     /* Match desktop archive strip: bg, blur, bottom hairline. */
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -1435,7 +1434,7 @@
   .wl-home-v2 .wl-home-v2-page-lede {
     flex-shrink: 0;
     width: 100%;
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
     background: rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -2841,8 +2840,8 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid rgb(34, 37, 35);
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-right: 1px solid var(--theme-divider);
+    border-bottom: 1px solid var(--theme-divider);
     background: rgba(49, 58, 52, 0.75);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -2947,7 +2946,7 @@
   .wl-home-v2 .wl-home-v2-ticker {
     flex-shrink: 0;
     width: 100%;
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
     background: rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -3379,8 +3378,8 @@
     background: rgba(49,58,52,0.75);
     backdrop-filter: blur(6px);
     border: 0;
-    border-right: 1px solid rgb(34, 37, 35);
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-right: 1px solid var(--theme-divider);
+    border-bottom: 1px solid var(--theme-divider);
     overflow: hidden;
     text-decoration: none; color: inherit;
     transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .25s;
@@ -3571,7 +3570,7 @@
   .wl-home-v2 .grid .tile:nth-child(2n){ border-right: 0; }
   .wl-home-v2 .grid .tile:nth-child(n+3){ border-bottom: 0; }
   @media (max-width: 1023px) {
-    .wl-home-v2 .grid .tile{ border-right: 0; border-bottom: 1px solid rgb(34, 37, 35); }
+    .wl-home-v2 .grid .tile{ border-right: 0; border-bottom: 1px solid var(--theme-divider); }
     .wl-home-v2 .grid .tile:last-child{ border-bottom: 0; }
   }
 
@@ -3611,7 +3610,7 @@
       min-height: 0;
       border: 0;
       border-right: 0;
-      border-bottom: 1px solid rgb(34, 37, 35);
+      border-bottom: 1px solid var(--theme-divider);
     }
     .wl-home-v2 .grid.grid--about-faq-3x2 > .tile:last-child {
       border-bottom: 0;
@@ -3630,8 +3629,8 @@
     .wl-home-v2 .grid.grid--about-faq-3x2 > .tile {
       min-height: 0;
       border: 0;
-      border-right: 1px solid rgb(34, 37, 35);
-      border-bottom: 1px solid rgb(34, 37, 35);
+      border-right: 1px solid var(--theme-divider);
+      border-bottom: 1px solid var(--theme-divider);
     }
     .wl-home-v2 .grid.grid--about-faq-3x2 .tile-about--q1 {
       grid-column: 1;
@@ -3672,8 +3671,8 @@
     .wl-home-v2 .grid.grid--about-faq-3x2 > .tile {
       min-height: 0;
       border: 0;
-      border-right: 1px solid rgb(34, 37, 35);
-      border-bottom: 1px solid rgb(34, 37, 35);
+      border-right: 1px solid var(--theme-divider);
+      border-bottom: 1px solid var(--theme-divider);
     }
     .wl-home-v2 .grid.grid--about-faq-3x2 .tile-about--q1 {
       grid-column: 1;
@@ -3722,8 +3721,8 @@
   .wl-home-v2 .grid.grid--gorps > .tile {
     min-height: 0;
     border: 0;
-    border-right: 1px solid rgb(34, 37, 35);
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-right: 1px solid var(--theme-divider);
+    border-bottom: 1px solid var(--theme-divider);
   }
   .wl-home-v2 .grid.grid--gorps > .tile:last-child {
     border-bottom: 0;
@@ -3795,7 +3794,7 @@
     min-height: 0;
     border: 0;
     border-right: 0;
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
   }
   @media (max-width: 767px) {
     .wl-home-v2 .grid.grid--stats-4 > .tile:last-child {
@@ -3807,8 +3806,8 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .wl-home-v2 .grid.grid--stats-4 > .tile {
-      border-right: 1px solid rgb(34, 37, 35);
-      border-bottom: 1px solid rgb(34, 37, 35);
+      border-right: 1px solid var(--theme-divider);
+      border-bottom: 1px solid var(--theme-divider);
     }
     .wl-home-v2 .grid.grid--stats-4 > .tile:nth-child(2n) {
       border-right: 0;
@@ -3822,8 +3821,8 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     .wl-home-v2 .grid.grid--stats-4 > .tile {
-      border-right: 1px solid rgb(34, 37, 35);
-      border-bottom: 1px solid rgb(34, 37, 35);
+      border-right: 1px solid var(--theme-divider);
+      border-bottom: 1px solid var(--theme-divider);
     }
     .wl-home-v2 .grid.grid--stats-4 > .tile:nth-child(3n) {
       border-right: 0;
@@ -3837,8 +3836,8 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     .wl-home-v2 .grid.grid--stats-4 > .tile {
-      border-right: 1px solid rgb(34, 37, 35);
-      border-bottom: 1px solid rgb(34, 37, 35);
+      border-right: 1px solid var(--theme-divider);
+      border-bottom: 1px solid var(--theme-divider);
     }
     .wl-home-v2 .grid.grid--stats-4 > .tile:nth-child(4n) {
       border-right: 0;
@@ -7963,7 +7962,7 @@
     border-width: 0;
     border-right-width: 1px;
     border-bottom-width: 1px;
-    border-color: rgb(34, 37, 35);
+    border-color: var(--theme-divider);
     background: rgba(49, 58, 52, 0.88);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -8224,7 +8223,7 @@
     border-width: 0;
     border-right-width: 1px;
     border-bottom-width: 1px;
-    border-color: rgb(34, 37, 35);
+    border-color: var(--theme-divider);
     background: rgba(49, 58, 52, 0.88);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -8321,7 +8320,7 @@
     border-width: 0;
     border-right-width: 1px;
     border-bottom-width: 1px;
-    border-color: rgb(34, 37, 35);
+    border-color: var(--theme-divider);
     background: rgba(49, 58, 52, 0.88);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -8399,7 +8398,7 @@
     }
   }
   .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-item {
-    border-top: 1px solid rgb(34, 37, 35);
+    border-top: 1px solid var(--theme-divider);
   }
   .wl-home-v2 .tile.tile-personnel-catalog .tile-personnel-catalog-item:first-child {
     border-top: none;
@@ -9272,9 +9271,6 @@
    * to match .wl-home-v2 (Geist, frosted panel, orange accents).
    */
   .wl-home-v2-user-dropdown[data-slot="dropdown-menu-content"] {
-    --wl-light-orange: oklch(0.82 0.10 55);
-    --wl-white: #ffffff;
-    --panel-bg: #313a34;
     width: min(17rem, calc(100vw - 24px));
     min-width: 13.5rem;
     border-radius: 12px !important;
@@ -9550,7 +9546,7 @@
     min-width: 0;
     min-height: 0;
     background: rgba(49, 58, 52, 0.95);
-    border-bottom: 1px solid rgb(34, 37, 35);
+    border-bottom: 1px solid var(--theme-divider);
   }
   .wl-home-v2 .wl-home-v2-years-tile::before {
     content: "";
@@ -10269,7 +10265,7 @@
     gap: 1px;
     width: 100%;
     box-sizing: border-box;
-    background: rgb(34, 37, 35);
+    background: var(--theme-divider);
   }
   @media (min-width: 795px) {
     .wl-home-v2 .songs-archive-category-tiles-grid {
@@ -10304,7 +10300,7 @@
     gap: 1px;
     width: 100%;
     box-sizing: border-box;
-    background: rgb(34, 37, 35);
+    background: var(--theme-divider);
   }
   .wl-home-v2 .songs-archive-category-tiles-multicol__col {
     flex: 1 1 0;
@@ -10729,7 +10725,7 @@
   .wl-home-v2
     .wl-home-v2-years-columns--desktop
     .wl-home-v2-years-tile--main {
-    border-right: 1px solid rgb(34, 37, 35);
+    border-right: 1px solid var(--theme-divider);
   }
   .wl-home-v2 .wl-home-v2-years-tile-inner {
     position: relative;
@@ -11388,7 +11384,7 @@
     border-width: 0;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: rgb(34, 37, 35);
+    border-bottom-color: var(--theme-divider);
     background-color: transparent !important;
   }
   .wl-home-v2
@@ -11631,7 +11627,7 @@
   .wl-home-v2-setlist
   .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts {
   flex: 1 1 auto;
-  border-bottom: 1px solid rgb(34, 37, 35);
+  border-bottom: 1px solid var(--theme-divider);
 }
 .wl-home-v2
   .wl-home-v2-setlist
@@ -11752,7 +11748,7 @@
   flex-shrink: 0;
   overflow: hidden;
   background: rgba(49, 58, 52, 0.95);
-  border-bottom: 1px solid rgb(34, 37, 35);
+  border-bottom: 1px solid var(--theme-divider);
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-aside-top-accent::before {
   content: "";

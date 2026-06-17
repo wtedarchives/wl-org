@@ -76,7 +76,7 @@
   margin: -12px -16px 10px -16px;
   padding: 6px 16px;
   box-sizing: border-box;
-  background: #285b4e;
+  background: var(--wl-deep-green);
   border-top: 1px solid rgb(34, 37, 35);
   border-bottom: 1px solid rgb(34, 37, 35);
   flex-shrink: 0;

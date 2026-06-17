@@ -14,6 +14,7 @@ import { useAuth } from "@/components/auth-context"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
+import { useWlHomeV2VisualTheme } from "@/hooks/use-wl-home-v2-visual-theme"
 import { cn } from "@/lib/utils"
 
 import "./wl-home-v2.css"
@@ -165,13 +166,15 @@ export function WlHomeV2({
     closeArchiveModal,
   ])
 
+  const { theme: visualTheme } = useWlHomeV2VisualTheme()
+
   return (
     <SetlistBreadcrumbProvider>
       <SetlistCombinedRowsPreferenceProvider>
       <WlHomeV2OpenLoginContext.Provider value={openLogin}>
       <WlHomeV2OpenSettingsContext.Provider value={openSettings}>
       <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
-        <div className="wl-home-v2">
+        <div className="wl-home-v2" data-theme={visualTheme}>
         <div className="wl-home-v2__stack">
           <WlHomeV2Header
             onOpenLogin={() => setLoginOpen(true)}

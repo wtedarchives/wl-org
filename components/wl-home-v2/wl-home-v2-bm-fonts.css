@@ -1,0 +1,32 @@
+/*
+ * BM theme fonts — loaded for v2 shell; families used via --bm-font-* in bm theme only.
+ *
+ * Files: public/fonts/bm/
+ *   bm-main.otf         — CookConthic (display / headings)
+ *   bm-mono.otf         — Nimbus Mono bold
+ *   bm-mono-italic.otf  — Nimbus Mono bold oblique
+ */
+
+@font-face {
+  font-family: "bm-main";
+  src: url("/fonts/bm/bm-main.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "bm-mono";
+  src: url("/fonts/bm/bm-mono.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "bm-mono-italic";
+  src: url("/fonts/bm/bm-mono-italic.otf") format("opentype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

@@ -1,13 +1,14 @@
 "use client"
 
 import { ArrowRight } from "@phosphor-icons/react"
-import Image from "next/image"
 import type { CSSProperties } from "react"
 
 import { decodeHtmlEntitiesForDisplay } from "@/lib/decode-html-entities"
+import { WL_HOME_V2_BM_LOGO_PATHS } from "@/lib/wl-home-v2-bm-images"
 // import { FLODOWN_EVENTS } from "@/lib/flodown-events"
 import { WL_HOME_V2_COMMUNITY_URL } from "./wl-home-v2-constants"
 import type { DiscourseFeaturedTopic } from "@/hooks/use-discourse-featured-topics"
+import { WlHomeV2TileBmIcon } from "./wl-home-v2-tile-bm-icon"
 
 export function WlHomeV2TileCommunity({
   featuredTopics,
@@ -33,12 +34,10 @@ export function WlHomeV2TileCommunity({
       <div className="tile-icon-stack">
         <div className="icon-wrap">
           <div className="icon-bg" />
-          <Image
-            src="/WL.png"
-            alt=""
-            width={110}
-            height={110}
-            className="w-full h-auto object-contain"
+          <WlHomeV2TileBmIcon
+            defaultSrc="/WL.png"
+            bmYellowSrc={WL_HOME_V2_BM_LOGO_PATHS.yellow}
+            bmPinkSrc={WL_HOME_V2_BM_LOGO_PATHS.pink}
           />
         </div>
       </div>

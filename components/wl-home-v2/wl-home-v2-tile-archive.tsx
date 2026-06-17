@@ -1,7 +1,6 @@
 "use client"
 
 import { ArrowRight, CalendarBlank, ClockCounterClockwise, Trophy } from "@phosphor-icons/react"
-import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties, MouseEvent } from "react"
 
@@ -15,6 +14,9 @@ import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSetlistGameArchiveIndexUrl } from "@/lib/setlist-game-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
+import { WL_HOME_V2_BM_ARCHIVE_ICON_PATHS } from "@/lib/wl-home-v2-bm-images"
+
+import { WlHomeV2TileBmIcon } from "./wl-home-v2-tile-bm-icon"
 
 export function WlHomeV2TileArchive({
   onArchiveTileLinkClick,
@@ -47,12 +49,10 @@ export function WlHomeV2TileArchive({
       <div className="tile-icon-stack">
         <div className="icon-wrap">
           <div className="icon-bg" />
-          <Image
-            src="/wted-sa-cropped-2.png"
-            alt=""
-            width={110}
-            height={110}
-            className="w-full h-auto object-contain"
+          <WlHomeV2TileBmIcon
+            defaultSrc="/wted-sa-cropped-2.png"
+            bmYellowSrc={WL_HOME_V2_BM_ARCHIVE_ICON_PATHS.yellow}
+            bmPinkSrc={WL_HOME_V2_BM_ARCHIVE_ICON_PATHS.pink}
           />
         </div>
       </div>
