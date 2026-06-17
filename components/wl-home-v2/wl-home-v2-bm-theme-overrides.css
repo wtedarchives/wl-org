@@ -3,6 +3,21 @@
  * Imported from wl-home-v2-themes.css — keep WTED Default untouched.
  */
 
+/* BM-only markup: hidden by default; big-modern rules below re-enable. */
+.wl-home-v2 .top-nav-radio-img--bm-wrap,
+.wl-home-v2 .top-nav-community-img--bm-wrap,
+.wl-home-v2 .top-nav-archives-img--bm-wrap,
+.wl-home-v2 .brand-mark-img--bm-default,
+.wl-home-v2 .brand-mark-img--bm-hover,
+.wl-home-v2 .tile.tile-radio .tile-icon-img--bm-default,
+.wl-home-v2 .tile.tile-radio .tile-icon-img--bm-hover,
+.wl-home-v2 .tile.tile-community .tile-icon-img--bm-default,
+.wl-home-v2 .tile.tile-community .tile-icon-img--bm-hover,
+.wl-home-v2 .tile.tile-archive .tile-icon-img--bm-default,
+.wl-home-v2 .tile.tile-archive .tile-icon-img--bm-hover {
+  display: none !important;
+}
+
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top,
 .wl-home-v2[data-theme="big-modern"] header.top {
   background: var(--bm-yellow);
@@ -51,6 +66,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .brand-mark-img--bm-d
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .brand-mark-img--bm-hover,
 .wl-home-v2[data-theme="big-modern"] header.top .brand-mark-img--bm-default,
 .wl-home-v2[data-theme="big-modern"] header.top .brand-mark-img--bm-hover {
+  display: block !important;
   grid-area: 1 / 1;
   width: 72%;
   height: 72%;
@@ -168,7 +184,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-radio-link:h
 
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-radio-link .top-nav-radio-img--bm-wrap,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-radio-link .top-nav-radio-img--bm-wrap {
-  display: inline-grid;
+  display: inline-grid !important;
   place-items: center;
   width: auto;
   height: 22px;
@@ -178,6 +194,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-radio-link .
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-radio-link .top-nav-radio-img--bm-hover,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-radio-link .top-nav-radio-img--bm-default,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-radio-link .top-nav-radio-img--bm-hover {
+  display: block !important;
   grid-area: 1 / 1;
   width: auto;
   height: 22px;
@@ -250,7 +267,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-community-li
 
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-community-link .top-nav-community-img--bm-wrap,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-community-link .top-nav-community-img--bm-wrap {
-  display: inline-grid;
+  display: inline-grid !important;
   place-items: center;
   width: auto;
   height: 22px;
@@ -260,6 +277,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-community-li
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-community-link .top-nav-community-img--bm-hover,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-community-link .top-nav-community-img--bm-default,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-community-link .top-nav-community-img--bm-hover {
+  display: block !important;
   grid-area: 1 / 1;
   width: auto;
   height: 22px;
@@ -332,7 +350,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-archives-lin
 
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-archives-link .top-nav-archives-img--bm-wrap,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-archives-link .top-nav-archives-img--bm-wrap {
-  display: inline-grid;
+  display: inline-grid !important;
   place-items: center;
   width: auto;
   height: 22px;
@@ -342,6 +360,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-archives-lin
 html[data-wl-v2-theme="big-modern"] .wl-home-v2 header.top .top-nav-archives-link .top-nav-archives-img--bm-hover,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-archives-link .top-nav-archives-img--bm-default,
 .wl-home-v2[data-theme="big-modern"] header.top .top-nav-archives-link .top-nav-archives-img--bm-hover {
+  display: block !important;
   grid-area: 1 / 1;
   width: auto;
   height: 22px;
@@ -580,6 +599,7 @@ html[data-wl-v2-theme="big-modern"] .wl-home-v2 .tile.tile-archive .icon-wrap .t
 .wl-home-v2[data-theme="big-modern"] .tile.tile-community .icon-wrap .tile-icon-img--bm-hover,
 .wl-home-v2[data-theme="big-modern"] .tile.tile-archive .icon-wrap .tile-icon-img--bm-default,
 .wl-home-v2[data-theme="big-modern"] .tile.tile-archive .icon-wrap .tile-icon-img--bm-hover {
+  display: block !important;
   grid-area: 1 / 1;
   width: 100%;
   height: auto;
