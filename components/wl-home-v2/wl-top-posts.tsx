@@ -14,10 +14,7 @@ import {
   useDiscourseTopicTopPosts,
   type DiscourseTopicTopPost,
 } from "@/hooks/use-discourse-topic-top-posts"
-import {
-  describeWlTopPostDisplay,
-  logWlTopPostCardRender,
-} from "@/lib/wl-top-posts-display-debug"
+import { describeWlTopPostDisplay } from "@/lib/wl-top-posts-display-debug"
 import {
   resolveWlTopPostAvatarUrl,
   WL_TOP_POSTS_DEFAULT_AVATAR,
@@ -64,18 +61,6 @@ function WlTopPostCard({
   const isImageOnly = decision.displayMode === "image-only"
   const isTextOnly = decision.displayMode === "text-only"
   const isTextAndImage = decision.displayMode === "text-and-image"
-
-  useEffect(() => {
-    logWlTopPostCardRender(post, decision)
-  }, [
-    decision.displayMode,
-    decision.plainText,
-    decision.postId,
-    decision.previewImageUrl,
-    decision.showPlainText,
-    decision.showPreviewImage,
-    post,
-  ])
 
   return (
     <button

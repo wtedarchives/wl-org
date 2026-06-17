@@ -1,4 +1,4 @@
-/** Shared display diagnostics for WLTopPosts (browser console). */
+/** Shared display helpers for WLTopPosts. */
 
 export type WlTopPostDisplayMode =
   | "text-and-image"
@@ -127,90 +127,5 @@ export function describeWlTopPostDisplay(
     textCharacterCount: plainText.length,
     serverDisplayMode: post.display_mode,
     renderPlan,
-  }
-}
-
-function logExtractionPipeline(debug: WlTopPostExtractionDebug): void {
-  console.group("[WLTopPosts] cooked → display pipeline")
-  console.log("cooked preview:", debug.cookedPreview)
-  console.log("cooked length:", debug.cookedLength)
-  debug.pipeline.forEach((entry, index) => {
-    console.log(`${index + 1}. ${entry.step}`, entry.summary, entry.data ?? "")
-  })
-  console.log("image URLs found:", debug.imageUrls)
-  console.log("preview image chosen:", debug.previewImageUrl ?? "(none)")
-  console.log("text after HTML strip:", debug.rawPlainText || "(empty)")
-  console.log("text after metadata clean:", debug.plainText || "(empty)")
-  console.log("display_mode:", debug.displayMode)
-  console.log("render plan:", debug.renderPlan)
-  console.groupEnd()
-}
-
-export function logWlTopPostsDisplayDecisions(
-  posts: WlTopPostDisplayInput[],
-  context: { wlLink: string; topicId: number | null },
-): void {
-  console.group(
-    `[WLTopPosts] display decisions (topic ${context.topicId ?? "?"})`,
-  )
-  console.log("wlLink:", context.wlLink)
-  console.log("postCount:", posts.length)
-
-  posts.forEach((post, index) => {
-    const decision = describeWlTopPostDisplay(post)
-    console.group(
-      `#${index + 1} post ${decision.postNumber} (${decision.username})`,
-    )
-    console.log("client decision:", {
-      displayMode: decision.displayMode,
-      serverDisplayMode: decision.serverDisplayMode ?? "(not provided)",
-      showPreviewImage: decision.showPreviewImage,
-      showPlainText: decision.showPlainText,
-      previewImageUrl: decision.previewImageUrl,
-      plainText: decision.plainText || "(no plain text)",
-      renderPlan: decision.renderPlan,
-    })
-    if (post.extraction_debug) {
-      logExtractionPipeline(post.extraction_debug)
-    } else {
-      console.warn(
-        "No extraction_debug on post — redeploy discourse-topic-top-posts for full cooked pipeline logs.",
-      )
-    }
-    if (
-      decision.serverDisplayMode &&
-      decision.serverDisplayMode !== decision.displayMode
-    ) {
-      console.warn("Server display_mode differs from client-derived mode.", {
-        server: decision.serverDisplayMode,
-        client: decision.displayMode,
-      })
-    }
-    console.groupEnd()
-  })
-
-  console.groupEnd()
-}
-
-export function logWlTopPostCardRender(
-  post: WlTopPostDisplayInput,
-  decision: WlTopPostDisplayDecision,
-): void {
-  console.log(
-    `[WLTopPosts] render post ${decision.postNumber} (${decision.username})`,
-    {
-      displayMode: decision.displayMode,
-      showPreviewImage: decision.showPreviewImage,
-      showPlainText: decision.showPlainText,
-      plainText: decision.plainText || "(no plain text)",
-      previewImageUrl: decision.previewImageUrl,
-      renderPlan: decision.renderPlan,
-    },
-  )
-  if (decision.displayMode === "empty") {
-    console.warn(
-      "[WLTopPosts] rendering empty body — no plain text and no preview image.",
-      post.extraction_debug ?? "missing extraction_debug",
-    )
   }
 }

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import { parseWlCommunityTopicId } from "@/lib/wl-community-topic-url"
 import {
   computeWlTopPostDisplayMode,
-  logWlTopPostsDisplayDecisions,
   type WlTopPostDisplayMode,
   type WlTopPostExtractionDebug,
 } from "@/lib/wl-top-posts-display-debug"
@@ -154,10 +153,6 @@ export function useDiscourseTopicTopPosts(
               normalizeTopPost(t as DiscourseTopicTopPost),
             )
             setPosts(normalized)
-            logWlTopPostsDisplayDecisions(normalized, {
-              wlLink: trimmed,
-              topicId,
-            })
             setEmpty(false)
           }
           setFailed(false)
