@@ -1,7 +1,7 @@
 "use client"
 
 import { useId } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { useWlHomeV2LoginAction } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
@@ -29,15 +29,14 @@ export function SetlistWtedLoginRequiredDialog({
   onOpenChange,
   wlHomeV2 = false,
 }: SetlistWtedLoginRequiredDialogProps) {
-  const router = useRouter()
-  const pathname = usePathname()
+  const openLogin = useWlHomeV2LoginAction()
   const headingId = useId()
   const subtextId = useId()
   useWlHomeV2ScrollLock(open && wlHomeV2)
 
   const handleLogin = () => {
     onOpenChange(false)
-    router.push(`/login?from=${encodeURIComponent(pathname || "/")}`)
+    openLogin()
   }
 
   if (wlHomeV2) {

@@ -21,7 +21,7 @@ import {
   ARCHIVE_ENTRIES,
   ARCHIVE_INTRO,
   type ArchiveEntry,
-} from "@/app/(main)/old/archive/content"
+} from "@/lib/archive-hub-content"
 import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"

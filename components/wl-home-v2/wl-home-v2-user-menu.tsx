@@ -58,7 +58,7 @@ function WlHomeV2AdminNavIcon({
 }
 
 /**
- * Same account actions as {@link NavUser}; menu styled for the home page (see `.wl-home-v2-user-dropdown`).
+ * Same account actions as the former sidebar user menu; styled for the home page.
  */
 export function WlHomeV2UserMenu({
   onOpenLogin,

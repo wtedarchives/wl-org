@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-/** Matches `id` on the scrollable region in `app/(main)/layout.tsx`. */
+/** Legacy main-inset scroll id (unused on v2; kept for scroll helper compatibility). */
 export const MAIN_INSET_SCROLL_ID = "main-inset-scroll"
 
 export const HOME_BG_ROTATION_MS = 5000

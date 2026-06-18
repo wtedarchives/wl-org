@@ -30,8 +30,7 @@ export const metadata: Metadata = {
   title: {
     default: "WTEDRadio.com",
     /**
-     * `(main)` and other segments: child titles omit the suffix; this adds it.
-     * Homepage and future peers live under `(wl-home-v2)` with `— WTEDRadio.com` (see that layout).
+     * All routes use `(wl-home-v2)`; child titles omit the suffix except the homepage group.
      */
     template: "%s – WTEDRadio.com",
   },

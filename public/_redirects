@@ -36,5 +36,14 @@
 /archive/user/rankings  /user?tab=rankings  301
 /archive/user/loose-ends  /user?tab=badges  301
 
+# Legacy auth routes → homepage auth modals
+/login  /?signin=1  301
+/signup  /?signup=1  301
+/reset-password  /?forgot=1  301
+/update-password  https://community.wysterialane.org/my/preferences/account  301
+
+# WTED index → About
+/wted  /wted/about  301
+
 # Legacy path-style /user/{uuid} → query canonical (tab defaults in-app when omitted)
 /user/*  /user?id=:splat  301

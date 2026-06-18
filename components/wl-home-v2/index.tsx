@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useMemo,
   useState,
   type ReactNode,
 } from "react"
@@ -25,7 +26,8 @@ import { WlHomeV2Header } from "./wl-home-v2-header"
 // import { WlHomeV2HomeTicker } from "./wl-home-v2-home-ticker"
 import { SetlistCombinedRowsPreferenceProvider } from "./setlist-combined-rows-preference-context"
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
-import { WlHomeV2OpenLoginContext } from "./wl-home-v2-open-login-context"
+import { WlHomeV2AuthQuerySync } from "./wl-home-v2-auth-query-sync"
+import { WlHomeV2AuthModalsContext } from "./wl-home-v2-open-login-context"
 import { WlHomeV2OpenSettingsContext } from "./wl-home-v2-open-settings-context"
 import { WlHomeV2ShellModals } from "./wl-home-v2-shell-modals"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
@@ -100,6 +102,25 @@ export function WlHomeV2({
     setLoginOpen(true)
   }, [])
 
+  const openSignup = useCallback(() => {
+    setLoginOpen(false)
+    setSignupOpen(true)
+  }, [])
+
+  const openForgotPassword = useCallback(() => {
+    setLoginOpen(false)
+    setForgotOpen(true)
+  }, [])
+
+  const authModals = useMemo(
+    () => ({
+      openLogin,
+      openSignup,
+      openForgotPassword,
+    }),
+    [openLogin, openSignup, openForgotPassword],
+  )
+
   const openSettings = useCallback(() => {
     setSettingsOpen(true)
   }, [])
@@ -168,7 +189,7 @@ export function WlHomeV2({
   return (
     <SetlistBreadcrumbProvider>
       <SetlistCombinedRowsPreferenceProvider>
-      <WlHomeV2OpenLoginContext.Provider value={openLogin}>
+      <WlHomeV2AuthModalsContext.Provider value={authModals}>
       <WlHomeV2OpenSettingsContext.Provider value={openSettings}>
       <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
         <div className="wl-home-v2">
@@ -211,7 +232,15 @@ export function WlHomeV2({
         <WlHomeV2Footer />
       </div>
 
-      <WlHomeV2ShellModals
+        <Suspense fallback={null}>
+          <WlHomeV2AuthQuerySync
+            onOpenLogin={openLogin}
+            onOpenSignup={openSignup}
+            onOpenForgotPassword={openForgotPassword}
+          />
+        </Suspense>
+
+        <WlHomeV2ShellModals
         requestOpen={requestOpen}
         setRequestOpen={setRequestOpen}
         requestHeadingId={requestHeadingId}
@@ -257,7 +286,7 @@ export function WlHomeV2({
       </div>
         </WlHomeV2OpenArchiveHubContext.Provider>
       </WlHomeV2OpenSettingsContext.Provider>
-      </WlHomeV2OpenLoginContext.Provider>
+      </WlHomeV2AuthModalsContext.Provider>
       </SetlistCombinedRowsPreferenceProvider>
     </SetlistBreadcrumbProvider>
   )

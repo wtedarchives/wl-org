@@ -19,6 +19,7 @@ import {
   WL_HOME_V2_PROFILE_MY_STATS_CRUMB_ITEMS,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
+import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import {
   WlHomeV2ProfileArchiveShell,
@@ -87,6 +88,7 @@ export function WlHomeV2ArchiveProfileLayoutClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
+  const openLogin = useWlHomeV2OpenLogin()
   const clientMounted = useClientMounted()
 
   const tabRaw = useMemo(
@@ -107,13 +109,9 @@ export function WlHomeV2ArchiveProfileLayoutClient() {
   const displayTab = useHydratedProfileStatsTab(resolvedTabForHydration)
 
   useEffect(() => {
-    if (authLoading) return
-    if (!session) {
-      router.replace(
-        `/login?from=${encodeURIComponent("/archive/profile?tab=overview")}`,
-      )
-    }
-  }, [session, authLoading, router])
+    if (authLoading || session) return
+    openLogin?.()
+  }, [session, authLoading, openLogin])
 
   useEffect(() => {
     if (authLoading || !session) return

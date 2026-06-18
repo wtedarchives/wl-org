@@ -16,7 +16,7 @@ type WlHomeV2LoginModalProps = {
 }
 
 /**
- * Same shell as {@link WlHomeV2RequestModal}; form matches `/login` via {@link LoginCredentialsForm}.
+ * Same shell as {@link WlHomeV2RequestModal}; uses {@link LoginCredentialsForm}.
  */
 export function WlHomeV2LoginModal({
   open,

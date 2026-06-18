@@ -1,6 +1,8 @@
 "use client"
 
-import Link from "next/link"
+import {
+  useWlHomeV2LoginAction,
+} from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -25,6 +27,7 @@ export function ShowPicksSection({
   onMakePicks,
 }: ShowPicksSectionProps) {
   const wlV2 = useSetlistGameWlV2Chrome()
+  const openLogin = useWlHomeV2LoginAction()
 
   const inner = (
     <div
@@ -64,13 +67,15 @@ export function ShowPicksSection({
                 {userSubmission ? "Edit Picks" : "Make Picks"}
               </Button>
           : wlV2 ?
-              <Link href="/login" className="nav-btn no-underline hover:no-underline">
+              <button
+                type="button"
+                className="nav-btn"
+                onClick={() => openLogin()}
+              >
                 Login to Play
-              </Link>
-            : <Button variant="outline" size="sm" asChild>
-                <Link href="/login" className="no-underline hover:underline">
-                  Login to Play
-                </Link>
+              </button>
+            : <Button variant="outline" size="sm" onClick={() => openLogin()}>
+                Login to Play
               </Button>}
         </>}
     </div>

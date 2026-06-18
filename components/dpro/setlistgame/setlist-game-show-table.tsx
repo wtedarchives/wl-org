@@ -20,6 +20,7 @@ import { sgWlV2 } from "@/components/dpro/setlistgame/setlist-game-wl-v2-chrome"
 import "@/components/dpro/tours/tour-shows-stat-pill.css"
 import "@/components/dpro/setlistgame/setlist-game-stat-pills.css"
 import { AdminShowTimeCell } from "./admin-show-time-cell"
+import { useWlHomeV2LoginAction } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import type { WysteriaSession } from "@/lib/jwt"
 
 function StatPillButton({
@@ -71,6 +72,7 @@ export function SetlistGameShowTable({
   onShowTimeSaved,
 }: SetlistGameShowTableProps) {
   const urlShell = useSetlistGameArchiveUrlShell()
+  const openLogin = useWlHomeV2LoginAction()
   const showAdminShowTime = Boolean(isAdminUser && onShowTimeSaved)
   const v2 = embeddedInWlPanel
 
@@ -179,12 +181,13 @@ export function SetlistGameShowTable({
         )
       }
       return (
-        <Link
-          href="/login"
-          className="tour-shows-stat-pill setlist-game-pill-picks setlist-game-pill-picks--neutral inline-block no-underline"
+        <button
+          type="button"
+          className="tour-shows-stat-pill setlist-game-pill-picks setlist-game-pill-picks--neutral inline-block"
+          onClick={() => openLogin()}
         >
           Login to Play
-        </Link>
+        </button>
       )
     }
 
@@ -220,10 +223,8 @@ export function SetlistGameShowTable({
         >
           {show.submission_id ? "Edit Picks" : "Make Picks"}
         </Button>
-      : <Button variant="outline" size="xs" asChild>
-          <Link href="/login" className="no-underline hover:underline">
-            Login to Play
-          </Link>
+      : <Button variant="outline" size="xs" onClick={() => openLogin()}>
+          Login to Play
         </Button>
   }
 

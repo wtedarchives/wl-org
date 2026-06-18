@@ -1,14 +1,19 @@
 "use client"
 
-import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   SetlistGameWlV2Panel,
   useSetlistGameWlV2Chrome,
 } from "@/components/dpro/setlistgame/setlist-game-wl-v2-chrome"
+import {
+  useWlHomeV2LoginAction,
+  useWlHomeV2SignupAction,
+} from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 
 export function LoginPrompt() {
   const wlV2 = useSetlistGameWlV2Chrome()
+  const openLogin = useWlHomeV2LoginAction()
+  const openSignup = useWlHomeV2SignupAction()
 
   const inner = (
     <p
@@ -17,27 +22,42 @@ export function LoginPrompt() {
       }
     >
       You need to be logged in to participate in Setlist Game.{" "}
-      <Link
-        href="/login"
-        className={
-          wlV2 ?
-            "font-medium text-[var(--wl-light-orange)] no-underline hover:underline"
-          : "font-medium no-underline hover:underline"
-        }
-      >
-        Log in
-      </Link>{" "}
-      or{" "}
-      <Link
-        href="/signup"
-        className={
-          wlV2 ?
-            "font-medium text-[var(--wl-light-orange)] no-underline hover:underline"
-          : "font-medium no-underline hover:underline"
-        }
-      >
-        sign up
-      </Link>{" "}
+      {wlV2 ?
+        <>
+          <button
+            type="button"
+            className="font-medium text-[var(--wl-light-orange)] hover:underline"
+            onClick={() => openLogin()}
+          >
+            Log in
+          </button>{" "}
+          or{" "}
+          <button
+            type="button"
+            className="font-medium text-[var(--wl-light-orange)] hover:underline"
+            onClick={() => openSignup()}
+          >
+            sign up
+          </button>{" "}
+        </>
+      : <>
+          <button
+            type="button"
+            className="font-medium hover:underline"
+            onClick={() => openLogin()}
+          >
+            Log in
+          </button>{" "}
+          or{" "}
+          <button
+            type="button"
+            className="font-medium hover:underline"
+            onClick={() => openSignup()}
+          >
+            sign up
+          </button>{" "}
+        </>
+      }
       to start playing!
     </p>
   )

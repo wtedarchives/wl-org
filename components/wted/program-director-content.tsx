@@ -13,7 +13,7 @@ import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-po
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useProgramDirectorData } from "@/hooks/use-program-director-data"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
-import { SHOWS_INTRO } from "@/app/(main)/wted/shows/content"
+import { SHOWS_INTRO } from "@/lib/wted-shows-content"
 import { Card, CardContent } from "@/components/ui/card"
 import { ProgramDirectorShowsSection } from "@/components/wted/program-director-shows-section"
 import { WTED_PROGRAM_DIRECTOR_CATALOG_PATH } from "@/lib/wted-program-director-catalog-url"

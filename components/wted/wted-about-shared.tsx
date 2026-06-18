@@ -1,4 +1,3 @@
-import type { ReactNode } from "react"
 import Link from "next/link"
 
 import { Separator } from "@/components/ui/separator"
@@ -7,15 +6,6 @@ export const WTED_ABOUT_LAST_UPDATED = "November 25, 2025"
 
 const linkClass =
   "font-medium text-wl-orange underline hover:text-wl-light-orange"
-
-/** Shared link/paragraph styling for legacy page */
-export function WtedAboutProseLegacy({ children }: { children: ReactNode }) {
-  return (
-    <div className="space-y-6 text-left text-sm leading-[1.25rem] text-wl-white [&_a]:font-medium [&_a]:text-wl-orange [&_a]:underline [&_a]:hover:text-wl-light-orange">
-      {children}
-    </div>
-  )
-}
 
 export function WtedAboutSectionWhatIs() {
   return (
@@ -193,22 +183,5 @@ export function WtedAboutSectionContact() {
         <a href="mailto:wted@wtedradio.com">wted@wtedradio.com</a>.
       </p>
     </section>
-  )
-}
-
-/** Legacy: all sections with orange separators (unchanged order). */
-export function WtedAboutLegacyBody() {
-  return (
-    <WtedAboutProseLegacy>
-      <WtedAboutSectionWhatIs />
-      <Separator className="my-4 bg-wl-orange" />
-      <WtedAboutSectionWhereMusic />
-      <Separator className="my-4 bg-wl-orange" />
-      <WtedAboutSectionHowPaidFor />
-      <Separator className="my-4 bg-wl-orange" />
-      <WtedAboutSectionGorp />
-      <Separator className="my-4 bg-wl-orange" />
-      <WtedAboutSectionContact />
-    </WtedAboutProseLegacy>
   )
 }

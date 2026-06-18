@@ -1,6 +1,8 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation"
+import {
+  useWlHomeV2LoginAction,
+} from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,12 +26,11 @@ export function SetlistLoginRequiredDialog({
   onOpenChange,
   description = "You must be logged in to rate this show.",
 }: SetlistLoginRequiredDialogProps) {
-  const router = useRouter()
-  const pathname = usePathname()
+  const openLogin = useWlHomeV2LoginAction()
 
   const handleLogin = () => {
     onOpenChange(false)
-    router.push(`/login?from=${encodeURIComponent(pathname || "/")}`)
+    openLogin()
   }
 
   return (
