@@ -28,6 +28,17 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
       />
     )
   }
+  if (key === "vinyl") {
+    return (
+      <Image
+        src="/vinyl.png"
+        alt=""
+        width={14}
+        height={14}
+        className="shrink-0 rounded-sm object-contain"
+      />
+    )
+  }
   if (key === "youtube") {
     return (
       <YoutubeLogo

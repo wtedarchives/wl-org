@@ -10,6 +10,7 @@ import {
   type SetlistReleaseEmbedVisualVariant,
 } from "./setlist-release-embed-card"
 import {
+  compareServiceSectionKeys,
   groupReleasesByService,
   OTHER_SERVICE_KEY,
   releaseServiceSectionLabel,
@@ -153,9 +154,7 @@ export function SetlistMediaSection({
     : "flex flex-wrap gap-3"
 
   const grouped = groupReleasesByService(releases)
-  const serviceSectionKeys = [...grouped.keys()].sort((a, b) =>
-    a.localeCompare(b, undefined, { sensitivity: "base" }),
-  )
+  const serviceSectionKeys = [...grouped.keys()].sort(compareServiceSectionKeys)
 
   const mediaHeadingAndTiles = (
     <>

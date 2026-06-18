@@ -14,7 +14,31 @@ export const KNOWN_SERVICE_LABELS: Record<string, string> = {
   discogs: "Discogs",
   nugs: "Nugs",
   spotify: "Spotify",
+  vinyl: "Vinyl",
   youtube: "YouTube",
+}
+
+/** Display order for media sections (top → bottom). Other is always last. */
+export const SERVICE_SECTION_ORDER: readonly string[] = [
+  "vinyl",
+  "bandcamp",
+  "nugs",
+  "spotify",
+  "youtube",
+  "discogs",
+]
+
+export function compareServiceSectionKeys(a: string, b: string): number {
+  const rank = (key: string) => {
+    if (key === OTHER_SERVICE_KEY) return Number.MAX_SAFE_INTEGER
+    const idx = SERVICE_SECTION_ORDER.indexOf(key)
+    if (idx >= 0) return idx
+    return SERVICE_SECTION_ORDER.length
+  }
+  const ra = rank(a)
+  const rb = rank(b)
+  if (ra !== rb) return ra - rb
+  return a.localeCompare(b, undefined, { sensitivity: "base" })
 }
 
 export function isEmbeddableService(service: string | null): boolean {
