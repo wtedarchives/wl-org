@@ -15,12 +15,6 @@ import { usePathname } from "next/navigation"
 import { RadioHomeSlot, RadioMobileSlot } from "@/components/persistent-radio"
 import { useIsBelowXl } from "@/hooks/use-mobile"
 
-import {
-  WL_HOME_V2_BM_ARCHIVE_ICON_PATHS,
-  WL_HOME_V2_BM_LOGO_PATHS,
-  WL_HOME_V2_BM_RADIO_ICON_PATHS,
-} from "@/lib/wl-home-v2-bm-images"
-
 import { WlHomeV2ArchiveSubnavContent } from "./wl-home-v2-archive-subnav"
 import {
   WL_HOME_V2_COMMUNITY_URL,
@@ -189,21 +183,7 @@ export function WlHomeV2Header({
                 alt=""
                 width={30}
                 height={30}
-                className="brand-mark-img brand-mark-img--default"
-              />
-              <Image
-                src={WL_HOME_V2_BM_LOGO_PATHS.yellow}
-                alt=""
-                width={30}
-                height={30}
-                className="brand-mark-img brand-mark-img--bm-default"
-              />
-              <Image
-                src={WL_HOME_V2_BM_LOGO_PATHS.pink}
-                alt=""
-                width={30}
-                height={30}
-                className="brand-mark-img brand-mark-img--bm-hover"
+                className="brand-mark-img"
               />
             </div>
             <div className="brand-text">
@@ -260,33 +240,12 @@ export function WlHomeV2Header({
                 >
                   <TopNavPrimaryImage
                     src="/WTED.png"
-                    className="top-nav-radio-img--desktop top-nav-radio-img--default"
+                    className="top-nav-radio-img--desktop"
                   />
                   <TopNavPrimaryImage
                     src="/WTED2.png"
-                    className="top-nav-radio-img--mobile top-nav-radio-img--default"
+                    className="top-nav-radio-img--mobile"
                   />
-                  <span
-                    className="top-nav-primary-icon top-nav-primary-icon--img top-nav-radio-img--bm-wrap"
-                    aria-hidden
-                  >
-                    <Image
-                      src={WL_HOME_V2_BM_RADIO_ICON_PATHS.yellow}
-                      alt=""
-                      width={80}
-                      height={80}
-                      className="top-nav-primary-img top-nav-radio-img--bm-default"
-                      sizes="22px"
-                    />
-                    <Image
-                      src={WL_HOME_V2_BM_RADIO_ICON_PATHS.pink}
-                      alt=""
-                      width={80}
-                      height={80}
-                      className="top-nav-primary-img top-nav-radio-img--bm-hover"
-                      sizes="22px"
-                    />
-                  </span>
                   Radio
                 </a>
                 <a
@@ -298,29 +257,8 @@ export function WlHomeV2Header({
                 >
                   <TopNavPrimaryImage
                     src="/WL.png"
-                    className="top-nav-community-img--default"
+                    className="top-nav-community-img"
                   />
-                  <span
-                    className="top-nav-primary-icon top-nav-primary-icon--img top-nav-community-img--bm-wrap"
-                    aria-hidden
-                  >
-                    <Image
-                      src={WL_HOME_V2_BM_LOGO_PATHS.yellow}
-                      alt=""
-                      width={80}
-                      height={80}
-                      className="top-nav-primary-img top-nav-community-img--bm-default"
-                      sizes="22px"
-                    />
-                    <Image
-                      src={WL_HOME_V2_BM_LOGO_PATHS.pink}
-                      alt=""
-                      width={80}
-                      height={80}
-                      className="top-nav-primary-img top-nav-community-img--bm-hover"
-                      sizes="22px"
-                    />
-                  </span>
                   Community
                 </a>
                 <a
@@ -330,29 +268,8 @@ export function WlHomeV2Header({
                 >
                   <TopNavPrimaryImage
                     src="/wted-sa-cropped-2.png"
-                    className="top-nav-archives-img--default"
+                    className="top-nav-archives-img"
                   />
-                  <span
-                    className="top-nav-primary-icon top-nav-primary-icon--img top-nav-archives-img--bm-wrap"
-                    aria-hidden
-                  >
-                    <Image
-                      src={WL_HOME_V2_BM_ARCHIVE_ICON_PATHS.yellow}
-                      alt=""
-                      width={80}
-                      height={80}
-                      className="top-nav-primary-img top-nav-archives-img--bm-default"
-                      sizes="22px"
-                    />
-                    <Image
-                      src={WL_HOME_V2_BM_ARCHIVE_ICON_PATHS.pink}
-                      alt=""
-                      width={80}
-                      height={80}
-                      className="top-nav-primary-img top-nav-archives-img--bm-hover"
-                      sizes="22px"
-                    />
-                  </span>
                   Archives
                 </a>
               </div>

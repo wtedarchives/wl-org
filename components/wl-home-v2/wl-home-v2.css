@@ -4,12 +4,26 @@
     100% { box-shadow: 0 0 0 0 rgba(255,122,103,0); }
   }
 
-@import "./wl-home-v2-themes.css";
-
 /* Scoped for / (WlHomeV2) — generated from WTED.org 2/Homepage-source.html */
 
   
   .wl-home-v2 {
+    --wl-green: oklch(0.76 0.06 163);
+    --wl-dark-green: oklch(0.43 0.03 161);
+    --wl-deep-green: #285b4e;
+    --wl-light-green: oklch(0.68 0.04 160);
+    --wl-orange: oklch(0.72 0.15 25);
+    --wl-light-orange: oklch(0.82 0.1 55);
+    --wl-white: #ffffff;
+    --wl-off-white: #effefa;
+    --wl-grey: oklch(0.55 0.02 260);
+    --wl-dark-grey: #1f1f1f;
+    --panel-bg: #313a34;
+    --panel-border: rgb(24, 25, 24);
+    --theme-page-gradient-top: rgba(49, 58, 52, 0.35);
+    --theme-page-gradient-mid: rgba(40, 91, 78, 0.92);
+    --theme-header-border: rgb(34, 37, 35);
+    --theme-divider: rgb(34, 37, 35);
     color: var(--wl-white);
     font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
     font-variant-numeric: tabular-nums;
