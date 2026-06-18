@@ -936,7 +936,7 @@
     gap: 6px;
     margin-top: 8px;
   }
-  @media (min-width: 1600px) {
+  @media (min-width: 1660px) {
     .wl-home-v2
       .wl-home-v2-archive-subnav:not(.wl-home-v2-archive-subnav--drawer) {
       display: flex;
@@ -3556,6 +3556,7 @@
     position: absolute; inset: 0; z-index: 1;
     text-decoration: none; color: inherit;
     display: block;
+    cursor: pointer;
   }
   .wl-home-v2 button.tile-link {
     border: 0;
@@ -3576,9 +3577,13 @@
     position: relative;
     z-index: 2;
   }
-  /* body text/icons don't eat clicks; cta + store badges do */
+  /* body text/icons don't eat clicks; store badges stay interactive */
   .wl-home-v2 .tile .tile-body{ pointer-events: none; }
-  .wl-home-v2 .tile .tile-body .cta,
+  .wl-home-v2 .tile .tile-body .cta {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
   .wl-home-v2 .tile .tile-body .tile-widget-store-badges{ pointer-events: auto; }
   /* drop the rightmost column's right border and bottom row's bottom border — the header/footer dividers frame the edge */
   .wl-home-v2 .grid .tile:nth-child(2n){ border-right: 0; }
@@ -4361,13 +4366,6 @@
   .wl-home-v2 .tile.tile-community .tile-widget a.topic-row,
   .wl-home-v2 .tile.tile-community .tile-widget a.community-event-row {
     pointer-events: auto;
-  }
-  .wl-home-v2 .tile.tile-community .tile-body .cta {
-    pointer-events: none;
-  }
-  /* Archives: same as community — “Dive in” is decorative; primary click opens hub via `.tile-link`. */
-  .wl-home-v2 .tile.tile-archive .tile-body .cta {
-    pointer-events: none;
   }
   /* Guest profile tile: full-area hit target sits last in DOM; let clicks reach it */
   .wl-home-v2 .tile.tile-profile.tile-profile--guest .tile-icon-stack,
