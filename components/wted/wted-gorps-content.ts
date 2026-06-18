@@ -16,7 +16,7 @@ export const GORPS_INTRO = {
 export const GORPS_ENTRIES: GorpEntry[] = [
   {
     image: {
-      src: "https://wtedradio.com/img/basty.jpg",
+      src: "/wted/gorps/basty.jpg",
       alt: "Michael Basty",
     },
     name: 'Michael "Mjbasty1" Basty',
@@ -34,7 +34,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       'Saw Goose live in February 2020 as my first time hearing the band. Very impressed. Followed a little bit during the pandemic. Mission Spotify release got me listening again at the end of 2021. Saw my second show in February 2022 and can pinpoint the exact moment during set one that I "got it". The hook was fully set. Immediately started consuming every soundboard upon release as well as most of the back catalog. Beyond the music, the community surrounding Goose and the friendships I\'ve made because of them are unrivaled in my life so far.',
   },
   {
-    image: { src: "https://wtedradio.com/img/tug.jpeg", alt: "Tug Martin" },
+    image: { src: "/wted/gorps/tug.jpeg", alt: "Tug Martin" },
     name: 'Tug "OldManRising" Martin',
     bio: [
       "Tug is a Wysteria Lane Community site moderator, Goose Jockey, contributor of Goose lore, and dispenser of sage old man wisdom. He and his family live in Virginia after having spent a long stint in the Denver, Colorado area. When not conversing on the WTED community chat, he enjoys music, baseball, mountain sports, boating, guitar, beach-time, and discovering more happiness through less.",
@@ -43,7 +43,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       "Found my way to Goose via Nugs.net back in early 2019. Happened upon them on a lark when I was getting bored with all of the other stuff. Kicking myself for not realizing they played close by a few times and not going to see them. Can't really pinpoint a moment or song that hooked me. But I was definitely hooked. Went back to the beginning of their stuff on Nugs and have listened to every soundboard released at least once. I am unabashedly in this band's pocket and will follow them wherever they take us. No other band that I've listened to over the years gives me so much joy. If we are all individual tuning forks, Goose has hit my frequency with greater force than any other thing out there.",
   },
   {
-    image: { src: "https://wtedradio.com/img/brett.jpg", alt: "Brett Dunkin" },
+    image: { src: "/wted/gorps/brett.jpg", alt: "Brett Dunkin" },
     name: 'Brett "Grateful Goose Gizzard Biscuits" Dunkin',
     bio: [
       "Brett is a Wysteria Lane Community moderator and Goose Jockey for WTED Goose Radio. He's a huge live music fan, having been to more than 350 concerts, festivals, and other shows, starting when he was eight years old and his dad took him to see R.E.M. at the Hollywood Bowl. He lives in Los Angeles and enjoys that California Magic.",
@@ -52,7 +52,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       "My first introduction to the jam band world was the Fare Thee Well shows in San Francisco in 2015, though I didn't really become a true \"fan\" of the Grateful Dead until my sophomore year of college, when I listened to Europe '72 on a long drive back to school after a weekend hometown visit. My first introduction to Goose was watching the 2019 Peach Fest set. After hearing the cover of Mississippi Half-Step and that ripping Madhuvan, I knew these guys were something special. My first Goose show was at the Greek Theatre in Los Angeles in August of 2022 with my dad, and I've seen them nine more times (and counting) since then!\n\nI am super excited to be a part of this wonderful radio station and cannot wait to see it grow into something magical. Thanks for listening!",
   },
   {
-    image: { src: "https://wtedradio.com/img/sim.jpg", alt: "Simeon Turner" },
+    image: { src: "/wted/gorps/sim.jpg", alt: "Simeon Turner" },
     name: 'Simeon "SimTurner" Turner',
     bio: [
       "Sim is a frequent Goose Jockey and the executive assistant and tour companion to the Wysteria Lane Program Director. When he isn't making snide comments in the chat here on Wysteria Lane, he is probably hanging out with his wife, his daughter (known around these parts as Little Yeti), or trying to figure out where to hang yet another Goose poster on the walls of his basement. Born and raised in Colorado, Sim is happy to contribute to CO attendance bias for Goose any time.",
@@ -61,7 +61,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       "Goose grabbed me in 2023 and I am so grateful for it. The community here at WL is something wholesome and special, a rare find on the internet nowadays, and I am so thankful to be a part of it, and I'm equally thankful for the band and their music that has drawn us all together here. Having a bad day? Go listen to San Diego Madhuvan! 😜",
   },
   {
-    image: { src: "https://wtedradio.com/img/ben.jpg", alt: "Ben McDermott" },
+    image: { src: "/wted/gorps/ben.jpg", alt: "Ben McDermott" },
     name: 'Ben "BenChasingSatellites" McDermott',
     bio: [
       "Ben is a Midwestern transplant residing in the desert Southwest with his wife and two children where he is living out the idyllic themes of a classic western ballad by Marty Robbins. Ben is a certified GORP master even though he would vehemently disagree with that assessment, but that's ok because he remains, as ever, in the hands of the team of evil druids that control space and time and the internet which, incidentally, is made of a series of tubes.",
@@ -70,7 +70,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       "We are good people attracting good people. I am beyond grateful to be part of a team and community that brings out the best in us. Thank you for listening, we are glad you are here.",
   },
   {
-    image: { src: "https://wtedradio.com/img/shawna.jpg", alt: "Shawna Boynton" },
+    image: { src: "/wted/gorps/shawna.jpg", alt: "Shawna Boynton" },
     name: 'Shawna "ShawnaLee" Boynton',
     bio: [
       'Shawna is our "Best Social Media Director in the History of fan-run Goose Radio Stations" and GORP. She\'s the one behind the screen, cranking out goofy posts and thriving on community involvement. She\'s especially passionate about supporting and lifting up other women in the scene, and striving to ensure every fan\'s voice has a place here. Based in the scenic Finger Lakes region of NY, she shares her home with her husband, dogs, and ducks, balancing her digital work with passions like gardening, hiking, baking, and various art projects.',
@@ -79,7 +79,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       "I truly had no idea I was a 'jam band' fan until 2016, when friends took me to a three-night Phish run. My mind expanded ten sizes that weekend, and I never looked back. Those same friends insisted I'd love Goose, and they were absolutely right! I started following the band more closely in 2019, but my true obsession status wasn't achieved until I listened to the 2023 Live at the Salt Shed album about 4,000 times.",
   },
   {
-    image: { src: "https://wtedradio.com/img/kyle.jpg", alt: "Kyle French" },
+    image: { src: "/wted/gorps/kyle.jpg", alt: "Kyle French" },
     name: 'Kyle "WysteriaLane" French',
     bio: [
       'Kyle lives in Bedford, TX (a suburb of Dallas/Fort Worth) with his wife since 2009 and his daughter, their only child, born in 2015. He once wrote, in as brief a way as possible, about their lives and relationship with the band for the El Goose Times, featured in the STTF/EGT collaboration issue. Kyle also hosts his primary Goose blog space at <a href="https://WysteriaLane.org" target="_blank" rel="noopener noreferrer" class="font-medium text-wl-orange underline hover:text-wl-light-orange">WysteriaLane.org</a>.',
@@ -89,7 +89,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
       "At the very heart of my being is finding what keeps things balanced. Balance is key. This community, surrounding this music, with this certain ethos that I believe in, it helps me find balance. I will never stop pursuing that balance for all the wonderful people that join me on this journey, known and unknown. Thank you all for the support over the years.",
   },
   {
-    image: { src: "https://wtedradio.com/img/corey.jpg", alt: "Corey Terrell" },
+    image: { src: "/wted/gorps/corey.jpg", alt: "Corey Terrell" },
     name: 'Corey "BeefofAges" Terrell',
     bio: [
       'Corey is a <a href="https://community.WysteriaLane.org" target="_blank" rel="noopener noreferrer" class="font-medium text-wl-orange underline hover:text-wl-light-orange">Wysteria Lane Community</a> administrator, station manager for WTED Goose Radio, and profoundly silly person. He handles all of the gory, behind-the-scenes technical details that make Wysteria Lane, the Community, WTED Radio, and the Goosemas Night Zero livestream run smoothly. And when they don\'t run smoothly, it\'s probably because he did something real dumb, for which he proactively apologizes.',
@@ -97,5 +97,16 @@ export const GORPS_ENTRIES: GorpEntry[] = [
     ],
     quote:
       "Is this thing on? Who did this? Why is that sticky? Where's my hammer?",
+  },
+  {
+    image: { src: "/wted/gorps/brian.jpg", alt: "Brian Watson" },
+    name: 'Brian "watsonbriant" Watson',
+    bio: [
+      "Brian is the curator behind WTED Archives and a perpetual technical tinkerer. Based in Concord, NC, he stumbled upon Goose via YouTube when his algorithm recommended Radio City's Arcadia with Trey Anastasio, and has been hooked ever since.",
+      "He founded and created Dripfield.pro, a setlist archive dedicated to Goose, which now has a new home here at WTEDRadio.com after joining the Wysteria Lane team in 2026.",
+      "When he's not entering setlists, refactoring Edge Functions, or rebuilding the auth layer for the third time, you can find him attending shows from his home base in the Carolinas and cheering on his beloved Carolina Hurricanes.",
+    ],
+    quote:
+      "(satellite) is a song, just as much as oranges are orange.",
   },
 ]
