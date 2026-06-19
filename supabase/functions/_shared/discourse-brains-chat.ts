@@ -1,12 +1,4 @@
 const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
-const SETLIST_ARCHIVE_ORIGIN = "https://wted-org.netlify.app"
-
-/** Public site origin for push notification deep links (override via Edge secret). */
-export function getPublicSiteOrigin(): string {
-  const fromEnv = Deno.env.get("PUBLIC_SITE_ORIGIN")?.trim()
-  if (fromEnv) return fromEnv.replace(/\/$/, "")
-  return SETLIST_ARCHIVE_ORIGIN
-}
 
 /** Format `shows.show_date` as MM.DD.YY (UTC date-only). */
 export function formatShowDateMmDdYy(dateString: string): string {
@@ -18,8 +10,23 @@ export function formatShowDateMmDdYy(dateString: string): string {
   return `${month}.${day}.${year}`
 }
 
+/**
+ * Absolute setlist show URL — shared by Discourse chat links and Web Push deep links.
+ * Swap the active return when wtedradio.com goes live.
+ */
+export function getSetlistShowAbsoluteUrl(showId: string): string {
+  const id = encodeURIComponent(showId.trim())
+
+  // Live — dripfield.pro
+  return `https://dripfield.pro/setlist/${id}`
+
+  // Future — wtedradio.com (uncomment and remove dripfield line above)
+  // return `https://wtedradio.com/archive/setlist?id=${id}`
+}
+
+/** Discourse requires absolute URLs (not site-relative paths). */
 export function getSetlistShowDiscourseUrl(showId: string): string {
-  return `/archive/setlist?id=${encodeURIComponent(showId.trim())}`
+  return getSetlistShowAbsoluteUrl(showId)
 }
 
 /** Plain-text show context line shared by Discourse-adjacent push copy. */
@@ -34,8 +41,7 @@ export function formatShowDateVenueLine(
 
 /** Absolute setlist archive URL for Web Push click-through. */
 export function getSetlistArchiveAbsoluteUrl(showId: string): string {
-  const origin = getPublicSiteOrigin()
-  return `${origin}/archive/setlist?id=${encodeURIComponent(showId.trim())}`
+  return getSetlistShowAbsoluteUrl(showId)
 }
 
 export function buildSetlistShowDiscourseLinkLine(
