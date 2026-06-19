@@ -20,6 +20,8 @@ const RADIO_CO_REQUEST_URL =
   "https://public.radio.co/stations/s3c11c85d6/requests"
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
 const MAX_REQUESTS_PER_WINDOW = 4
+/** Per user: up to MAX_REQUESTS_PER_WINDOW distinct requests per RATE_LIMIT_WINDOW_MS;
+ *  the same radio_id may be requested again once that window has passed. */
 
 const WTED_ERROR_MESSAGES: Record<number, string> = {
   403: "Requests for WTED Goose Radio have been disabled.",
@@ -141,6 +143,19 @@ serve(async (req) => {
 
   const requests = recentRequests ?? []
 
+  const alreadyRequestedThisHour = requests.some(
+    (r) => String(r.radio_id) === radioId,
+  )
+  if (alreadyRequestedThisHour) {
+    return new Response(
+      JSON.stringify({
+        error:
+          "You have already requested this track. Stay tuned to WTED Goose Radio to hear it!",
+      }),
+      { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+
   if (requests.length >= MAX_REQUESTS_PER_WINDOW) {
     const oldest = requests[0]
     const oldestTime = new Date(oldest.requested_at).getTime()
@@ -152,17 +167,6 @@ serve(async (req) => {
         nextAvailableAt: nextAvailable.toISOString(),
       }),
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    )
-  }
-
-  const alreadyRequested = requests.some((r) => String(r.radio_id) === radioId)
-  if (alreadyRequested) {
-    return new Response(
-      JSON.stringify({
-        error:
-          "You have already requested this track. Stay tuned to WTED Goose Radio to hear it!",
-      }),
-      { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )
   }
 
@@ -202,6 +206,7 @@ serve(async (req) => {
   })
 
   if (insertError) {
+    console.error("wted_requests insert failed:", insertError)
     return new Response(
       JSON.stringify({
         error:
