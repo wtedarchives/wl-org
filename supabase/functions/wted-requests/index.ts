@@ -1,9 +1,22 @@
+/**
+ * List recent WTED song requests for the signed-in user.
+ * Client sends anon JWT in Authorization and Wysteria token in x-wysteria-authorization
+ * (see lib/wted-request-edge.ts).
+ *
+ * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WYSTERIA_JWT_SECRET
+ */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
+
+function bearerToken(h: string | null): string | null {
+  if (!h?.startsWith("Bearer ")) return null
+  const t = h.slice(7).trim()
+  return t !== "" ? t : null
+}
 
 type SongRow = {
   song_displayname: string | null
@@ -50,8 +63,10 @@ serve(async (req) => {
     )
   }
 
-  const authHeader = req.headers.get("authorization")
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  /** Gateway accepts project JWT in `Authorization`; Wysteria SSO in `x-wysteria-authorization`. */
+  const token =
+    bearerToken(req.headers.get("x-wysteria-authorization")) ??
+    bearerToken(req.headers.get("authorization"))
   if (!token) {
     return new Response(
       JSON.stringify({ error: "Unauthorized" }),

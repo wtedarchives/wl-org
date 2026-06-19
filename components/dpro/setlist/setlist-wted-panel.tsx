@@ -18,6 +18,7 @@ import {
 export type { SetlistWtedShowContext }
 import { useWtedRequests } from "@/hooks/use-wted-requests"
 import { useWtedEntryReleaseArtwork } from "@/hooks/use-wted-entry-release-artwork"
+import { submitWtedRequest } from "@/lib/wted-request-edge"
 import { getWtedEntriesForRadioGroup } from "@/lib/wted-group-entries"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -176,23 +177,7 @@ export function SetlistWtedPanel({
       })
 
       try {
-        const base = process.env.NEXT_PUBLIC_SUPABASE_URL
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/functions/v1`
-          : ""
-        const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        const res = await fetch(`${base}/wted-request`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-            ...(anon ? { apikey: anon } : {}),
-          },
-          body: JSON.stringify({ radio_id: radioId }),
-        })
-        const data = await res.json().catch(() => ({}))
-        if (!res.ok) {
-          throw new Error(data.error ?? "Failed to submit request")
-        }
+        await submitWtedRequest(accessToken, radioId)
         setSuppressAlreadyRequestedBannerRadioId(radioId)
         setLastRequestTime(Date.now())
         await refetch()
