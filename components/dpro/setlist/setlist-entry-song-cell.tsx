@@ -7,6 +7,7 @@ import {
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entry-stats-tooltip"
+import { WlHomeV2SetlistAltNameDisplay } from "@/components/wl-home-v2/wl-home-v2-setlist-alt-name-display"
 import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -18,6 +19,8 @@ interface SetlistEntrySongCellProps {
   showStatsTooltip?: boolean
   /** Match WL Home v2 setlist row (markup, pills, header tooltip panel when stats tooltip is on). */
   statsTooltipWlV2Chrome?: boolean
+  /** WL Home v2: alt_name-style song label from coach-note intro fragments. */
+  songAltName?: string | null
 }
 
 export function SetlistEntrySongCell({
@@ -26,6 +29,7 @@ export function SetlistEntrySongCell({
   onJotyClick,
   showStatsTooltip = false,
   statsTooltipWlV2Chrome = false,
+  songAltName = null,
 }: SetlistEntrySongCellProps) {
   const jotyAttr = entry.joty_round ? jotyRoundDataAttr(entry.joty_round) : null
   const shortShown = shouldShowSetlistEntryShort(
@@ -77,25 +81,33 @@ export function SetlistEntrySongCell({
         </span>
     : null
 
+  const wlV2SongName =
+    songAltName ?
+      <WlHomeV2SetlistAltNameDisplay
+        altName={songAltName}
+        onClick={onSongClick ? () => onSongClick(entry) : undefined}
+      />
+    : onSongClick ?
+      <button
+        type="button"
+        className="song-cell-song-hit"
+        onClick={() => onSongClick(entry)}
+      >
+        <SongDisplayName
+          song={entry.entry_song}
+          songDisplayName={entry.songs?.song_displayname}
+        />
+      </button>
+    : <SongDisplayName
+        song={entry.entry_song}
+        songDisplayName={entry.songs?.song_displayname}
+      />
+
   const songContent =
     statsTooltipWlV2Chrome ?
       <div className="song-cell-inner">
         <div className="song-cell-main">
-          {onSongClick ?
-            <button
-              type="button"
-              className="song-cell-song-hit"
-              onClick={() => onSongClick(entry)}
-            >
-              <SongDisplayName
-                song={entry.entry_song}
-                songDisplayName={entry.songs?.song_displayname}
-              />
-            </button>
-          : <SongDisplayName
-              song={entry.entry_song}
-              songDisplayName={entry.songs?.song_displayname}
-            />}
+          {wlV2SongName}
           {shortShown && entry.entry_short ?
             <span className="short">{entry.entry_short}</span>
           : null}

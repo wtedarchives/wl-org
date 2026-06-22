@@ -10,6 +10,7 @@ import {
 import {
   buildSetlistTableRows,
   computeDisplayNumbersForTableRows,
+  getSetlistCombinedEntryIds,
   REPRISE_COMBINED_PAIR,
   tableRowEntryIds,
   tableRowEntrySet,
@@ -93,6 +94,10 @@ export function WlHomeV2SetlistTable({
   const displayNumbers = useMemo(
     () => computeDisplayNumbersForTableRows(tableRows),
     [tableRows],
+  )
+  const combinedEntryIds = useMemo(
+    () => getSetlistCombinedEntryIds(setlist, songPairs),
+    [setlist, songPairs],
   )
   const uniquePlacements = new Set(setlist.map((e) => e.entry_placement))
   const hasSinglePlacementType = uniquePlacements.size === 1
@@ -276,6 +281,9 @@ export function WlHomeV2SetlistTable({
                     : <WlHomeV2SetlistTableRow
                         entry={row.entry}
                         displayNumber={displayNumbers[index] ?? null}
+                        applyCoachIntroDisplay={
+                          !combinedEntryIds.has(row.entry.entry_id)
+                        }
                         showCanonColumns={showCanonColumns}
                         showWtedColumn={showWtedColumn}
                         showTimeColumn={showTimeColumn}

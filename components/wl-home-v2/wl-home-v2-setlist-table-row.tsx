@@ -25,6 +25,7 @@ import {
 } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 
+import { getCoachIntroDisplay } from "@/lib/setlist-coach-intro-display"
 import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
@@ -57,6 +58,7 @@ export function WlHomeV2SetlistTableRow({
   hoveredCategory,
   showDiscographySetUi,
   coachNotesExpanded = false,
+  applyCoachIntroDisplay = true,
 }: {
   entry: SetlistEntry
   displayNumber: number | null
@@ -82,8 +84,16 @@ export function WlHomeV2SetlistTableRow({
   /** Set rail, set-break rows, and # placement bar — off when `show.discography_display === false`. */
   showDiscographySetUi: boolean
   coachNotesExpanded?: boolean
+  /** Off for entries that belong to pair/reprise/improv combine rows (including expanded). */
+  applyCoachIntroDisplay?: boolean
 }) {
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
+  const coachIntroDisplay =
+    applyCoachIntroDisplay ? getCoachIntroDisplay(entry) : null
+  const coachNotesHtml =
+    coachIntroDisplay ?
+      coachIntroDisplay.displayCoachNotes
+    : entry.entry_coachnotes?.trim() ?? null
 
   const railClass = cn(
     "set-section-rail",
@@ -173,6 +183,7 @@ export function WlHomeV2SetlistTableRow({
           onJotyClick={onJotyBadgeClick}
           showStatsTooltip={isDesktop}
           statsTooltipWlV2Chrome
+          songAltName={coachIntroDisplay?.songAltName ?? null}
         />
       </td>
       {showWtedColumn ?
@@ -296,12 +307,12 @@ export function WlHomeV2SetlistTableRow({
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">
-            {entry.entry_coachnotes?.trim() ?
+            {coachNotesHtml ?
               <SetlistTruncatableHtmlCell
                 maxWidthClass="max-w-[400px]"
                 measureWidthClass="w-max max-w-[400px]"
                 measureKey={`${entry.entry_id}-coach`}
-                html={entry.entry_coachnotes.trim()}
+                html={coachNotesHtml}
                 defaultExpanded={coachNotesExpanded}
                 expandLabel="Show full coach notes"
                 htmlContentClassName="setlist-v2-notes-html"

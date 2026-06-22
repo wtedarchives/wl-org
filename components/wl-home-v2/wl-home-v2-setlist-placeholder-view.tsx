@@ -7,39 +7,25 @@ import {
   type CSSProperties,
 } from "react"
 
-import { type BreadcrumbItem } from "@/components/setlist-breadcrumb-context"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
-import type { Tour } from "@/hooks/use-setlist-data"
-import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
-import type { SetlistEntry, Show, ShowDate } from "@/types/setlist"
 import { SetlistMediaSection } from "@/components/dpro/setlist/setlist-media-section"
 import {
-  WlHomeV2SetlistShowBadgesTile,
-  WlHomeV2SetlistShowStatsTile,
   isWlHomeV2SetlistShowBadgesTileVisible,
   isWlHomeV2SetlistShowStatsTileVisible,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-show-meta-tile"
 import { WlHomeV2SetlistTable } from "@/components/wl-home-v2/wl-home-v2-setlist-table"
-import type {
-  ReleaseToEntriesMap,
-  ShowRelease,
-} from "@/hooks/use-setlist-releases"
-import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import {
-  WlHomeV2SetlistShowChangesSection,
   isWlHomeV2SetlistShowChangesSectionVisible,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-show-changes-section"
 import {
-  SetlistSongSpreadCard,
   isSetlistSongSpreadAsideVisible,
 } from "@/components/dpro/setlist/setlist-song-spread-card"
 import { cn } from "@/lib/utils"
-import { WlHomeV2SetlistAsideAccent } from "@/components/wl-home-v2/wl-home-v2-setlist-aside-accent"
+import { WlHomeV2SetlistPlaceholderAside } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-aside"
 import { WlHomeV2SetlistPlaceholderCrumbsBar } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-crumbs"
 import { WlHomeV2SetlistPlaceholderMainHeader } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-main-header"
 import type { WlHomeV2SetlistPlaceholderToolsProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
-import { WlHomeV2SetlistToolsPanel } from "@/components/wl-home-v2/wl-home-v2-setlist-tools-panel"
-import type { UserAttendedGooseCanonNavState } from "@/hooks/use-user-attended-goose-canon-nav"
+import type { WlHomeV2SetlistPlaceholderViewProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view.types"
 import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
 import { isValidWlCommunityTopicUrl } from "@/lib/wl-community-topic-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
@@ -95,56 +81,7 @@ export function WlHomeV2SetlistPlaceholderView({
   onOpenSetlistScan,
   hoveredCategory,
   onCategoryHover,
-}: {
-  breadcrumbs: BreadcrumbItem[] | null
-  show: Show
-  showId: string
-  setlist: SetlistEntry[]
-  songPairs: import("@/types/song-pair").SongPair[]
-  showAdminUi?: boolean
-  adminLinkCopied?: boolean
-  onAdminCopyShowId?: () => void
-  onAdminEditShow?: () => void
-  onShareSetlistImage?: () => void
-  copiedEntryIds?: Set<string>
-  onNumberClick?: (entryId: string) => void
-  onJotyBadgeClick: (entry: SetlistEntry) => void
-  onSongClick?: (entry: SetlistEntry) => void
-  onPairSongClick?: (
-    entries: SetlistEntry[],
-    pair: import("@/types/song-pair").SongPair,
-  ) => void
-  onWtedClick?: (entry: SetlistEntry) => void
-  onPairWtedClick?: (entries: SetlistEntry[]) => void
-  showPositionInTour: ShowPositionInTour | null
-  tourShowNav: {
-    prevShowId: string | null
-    nextShowId: string | null
-  } | null
-  onTourShowSelect: (showId: string) => void
-  tours: Tour[]
-  showDates: ShowDate[]
-  onTourSelect: (tourId: string) => void
-  maxShowCanonId: number | null
-  maxShowCanonIdLoading: boolean
-  releases: ShowRelease[]
-  releaseToEntriesMap: ReleaseToEntriesMap
-  averageRating: number
-  reviewCount: number
-  onRatingClick: () => void
-  attendeeCount: number
-  attended: boolean
-  attendanceToggling: boolean
-  onAttendanceToggle: () => void
-  attendedGooseCanonNav: UserAttendedGooseCanonNavState
-  onAttendedShowSelect: (showId: string) => void
-  showLengthRank: number | null
-  showChanges: ShowChangeRow[]
-  showChangesLoading: boolean
-  onOpenSetlistScan?: () => void
-  hoveredCategory: string | null
-  onCategoryHover: (category: string | null) => void
-}) {
+}: WlHomeV2SetlistPlaceholderViewProps) {
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const [layoutMode, setLayoutMode] = useState<SetlistLayoutMode>(null)
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(
@@ -332,95 +269,33 @@ export function WlHomeV2SetlistPlaceholderView({
             </div>
           </section>
 
-        <aside
-          className="wl-home-v2-years-aside wl-home-v2-setlist-aside"
-          aria-label="Show tools"
-        >
-          {!useCompactTools ?
-            <>
-              <WlHomeV2SetlistAsideAccent showId={showId} slot={0} />
-              <section
-                className={cn(
-                  "wl-home-v2-years-tile",
-                  !setlistAsideHasBlocksBelowTools &&
-                    "wl-home-v2-setlist-tools-tile--aside-tail",
-                )}
-                style={
-                  {
-                    "--tile-bg": "url('/newbg.png')",
-                  } as CSSProperties
-                }
-              >
-                <div className="wl-home-v2-years-tile-inner flex flex-col gap-3">
-                  <WlHomeV2SetlistToolsPanel
-                    toolsProps={toolsProps}
-                    attendedNav={attendedGooseCanonNav}
-                    currentShowId={showId}
-                    onAttendedShowSelect={onAttendedShowSelect}
-                  />
-                </div>
-              </section>
-            </>
+          <WlHomeV2SetlistPlaceholderAside
+            useCompactTools={useCompactTools}
+            showId={showId}
+            setlistAsideHasBlocksBelowTools={setlistAsideHasBlocksBelowTools}
+            toolsProps={toolsProps}
+            attendedGooseCanonNav={attendedGooseCanonNav}
+            onAttendedShowSelect={onAttendedShowSelect}
+            show={show}
+            setlist={setlist}
+            showLengthRank={showLengthRank}
+            asideStatsVisible={asideStatsVisible}
+            asideSongSpreadVisible={asideSongSpreadVisible}
+            asideShowChangesVisible={asideShowChangesVisible}
+            asideBadgesVisible={asideBadgesVisible}
+            hoveredCategory={hoveredCategory}
+            onCategoryHover={onCategoryHover}
+            showChanges={showChanges}
+            showChangesLoading={showChangesLoading}
+            onOpenSetlistScan={onOpenSetlistScan}
+            showWlTopPosts={showWlTopPosts}
+            wlCommunityHref={wlCommunityHref}
+          />
+          {useCompactTools && showEgnAttribution ?
+            <div className="wl-home-v2-setlist-egn-mobile-tail">
+              <SetlistEgnAttribution className="w-full shrink-0" />
+            </div>
           : null}
-
-          {!useCompactTools && setlistAsideHasBlocksBelowTools ?
-            <WlHomeV2SetlistAsideAccent showId={showId} slot={1} />
-          : null}
-          <div
-            className={cn(
-              "wl-home-v2-setlist-aside-stats-tiles",
-              useCompactTools &&
-                showWlTopPosts &&
-                "wl-home-v2-setlist-aside-stats-tiles--with-wl-posts",
-            )}
-          >
-            <WlHomeV2SetlistShowStatsTile
-              show={show}
-              setlist={setlist}
-              showLengthRank={showLengthRank}
-            />
-            {asideStatsVisible &&
-            (asideSongSpreadVisible ||
-              asideShowChangesVisible ||
-              asideBadgesVisible) ?
-              <WlHomeV2SetlistAsideAccent showId={showId} slot={2} />
-            : null}
-            <SetlistSongSpreadCard
-              setlist={setlist}
-              hoveredCategory={hoveredCategory}
-              onCategoryHover={onCategoryHover}
-              visualVariant="wl-home-v2"
-            />
-            {asideSongSpreadVisible &&
-            (asideShowChangesVisible || asideBadgesVisible) ?
-              <WlHomeV2SetlistAsideAccent showId={showId} slot={3} />
-            : null}
-            <WlHomeV2SetlistShowChangesSection
-              changes={showChanges}
-              loading={showChangesLoading}
-              onOpenScan={onOpenSetlistScan}
-            />
-            {asideShowChangesVisible && asideBadgesVisible ?
-              <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
-            : null}
-            <WlHomeV2SetlistShowBadgesTile show={show} />
-            {useCompactTools && showWlTopPosts &&
-            (asideStatsVisible ||
-              asideSongSpreadVisible ||
-              asideShowChangesVisible ||
-              asideBadgesVisible) ?
-              <WlHomeV2SetlistAsideAccent showId={showId} slot={5} />
-            : null}
-            {useCompactTools && showWlTopPosts ?
-              <WLTopPosts wlLink={wlCommunityHref} />
-            : null}
-          </div>
-        </aside>
-        {useCompactTools && showEgnAttribution ?
-          <div className="wl-home-v2-setlist-egn-mobile-tail">
-            <SetlistEgnAttribution className="w-full shrink-0" />
-          </div>
-        : null}
         </div>
       </div>
     </div>

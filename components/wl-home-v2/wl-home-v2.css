@@ -13176,7 +13176,7 @@
   border: 1px solid rgb(140, 88, 32);
   vertical-align: middle;
 }
-/* Pair alt_name: parenthetical segments — coach-label shell; green default, blue for Suite */
+/* Pair alt_name: parenthetical segments — TD shell for default, neutral white shell for Suite */
 .wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .setlist-alt-name-segments {
   display: inline-flex;
   align-items: center;
@@ -13201,21 +13201,25 @@
   line-height: 1.35;
   padding: 0 4px;
   border-radius: 4px;
-  color: oklch(0.86 0.14 158);
-  background: rgba(60, 210, 120, 0.2);
-  border: 1px solid rgb(40, 130, 80);
+  color: oklch(0.84 0.09 150);
+  background: rgba(110, 135, 118, 0.15);
+  border: 1px solid rgb(60, 78, 66);
   flex-shrink: 0;
   margin-bottom: 0;
   vertical-align: middle;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
 }
 .wl-home-v2
   .wl-home-v2-setlist
   .set-table
   td.song-cell
   .setlist-alt-name-pill[data-alt-name-pill="suite"] {
-  color: oklch(0.88 0.15 252);
-  background: rgba(65, 145, 255, 0.22);
-  border-color: rgb(45, 105, 210);
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgb(100, 102, 100);
 }
 .wl-home-v2
   .wl-home-v2-setlist

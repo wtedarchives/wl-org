@@ -241,6 +241,16 @@ export function altNameHasParentheticalSegments(altName: string): boolean {
   return parseAltNameSegments(altName).some((segment) => segment.type === "paren")
 }
 
+/** Suite pill styling (`data-alt-name-pill="suite"`) for legacy `(Suite)` and `(Name Suite)` segments. */
+export function altNameSegmentPillVariant(
+  segmentValue: string,
+): "suite" | undefined {
+  const normalized = segmentValue.trim().toLowerCase()
+  if (normalized === "suite") return "suite"
+  if (normalized.endsWith(" suite")) return "suite"
+  return undefined
+}
+
 /**
  * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`
  * reprise, or `entry_song` Teaprise / [Trevor Reads Poetry]) in the same set with
@@ -519,11 +529,13 @@ export function getSetlistCombinedRowExpandKeys(
   return keys
 }
 
-export function buildSetlistTableRows(
+function getSetlistCombineRanges(
   setlist: SetlistEntry[],
   songPairs: SongPair[],
-  expandedPairKeys: Set<string>,
-): SetlistTableRowItem[] {
+): {
+  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>
+  repriseRanges: Map<number, SetlistEntry[]>
+} {
   const basePairRanges =
     songPairs.length > 0 ?
       findSetlistSongPairRanges(setlist, songPairs)
@@ -533,6 +545,37 @@ export function buildSetlistTableRows(
   const repriseRanges = mergeEntryRanges(
     baseRepriseRanges,
     findImprovJamCombineRanges(setlist, pairRanges, baseRepriseRanges),
+  )
+  return { pairRanges, repriseRanges }
+}
+
+/** Entry IDs that belong to a song pair, reprise, or improv/jam combine row. */
+export function getSetlistCombinedEntryIds(
+  setlist: SetlistEntry[],
+  songPairs: SongPair[],
+): Set<string> {
+  const { pairRanges, repriseRanges } = getSetlistCombineRanges(
+    setlist,
+    songPairs,
+  )
+  const ids = new Set<string>()
+  for (const { entries } of pairRanges.values()) {
+    for (const entry of entries) ids.add(entry.entry_id)
+  }
+  for (const entries of repriseRanges.values()) {
+    for (const entry of entries) ids.add(entry.entry_id)
+  }
+  return ids
+}
+
+export function buildSetlistTableRows(
+  setlist: SetlistEntry[],
+  songPairs: SongPair[],
+  expandedPairKeys: Set<string>,
+): SetlistTableRowItem[] {
+  const { pairRanges, repriseRanges } = getSetlistCombineRanges(
+    setlist,
+    songPairs,
   )
 
   if (pairRanges.size === 0 && repriseRanges.size === 0) {

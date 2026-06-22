@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
+import { SetlistWtedPanelDrawerChrome } from "@/components/dpro/setlist/setlist-wted-panel-drawer-chrome"
 import {
-  SetlistWtedPanelDrawerChrome,
   SetlistWtedPanelScrollBody,
   type WtedPanelSlot,
 } from "@/components/dpro/setlist/setlist-wted-panel-scroll"

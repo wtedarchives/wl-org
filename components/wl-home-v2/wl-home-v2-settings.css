@@ -224,11 +224,59 @@
   table-layout: fixed;
 }
 
-.wl-home-v2-settings-preview .set-table td.song-cell {
+.wl-home-v2 .wl-home-v2-settings-preview .wl-home-v2-setlist .set-table td.song-cell {
   font-size: 12px;
+  white-space: normal;
+  vertical-align: top;
+  padding: 4px 8px;
 }
 
-/* Match live setlist `.setlist-alt-name-pill` (green + Geist Mono). */
+.wl-home-v2
+  .wl-home-v2-settings-preview
+  .wl-home-v2-setlist
+  .set-table
+  td.song-cell
+  .song-cell-inner {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 4px;
+  height: auto;
+}
+
+.wl-home-v2
+  .wl-home-v2-settings-preview
+  .wl-home-v2-setlist
+  .set-table
+  td.song-cell
+  .song-cell-main {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.wl-home-v2
+  .wl-home-v2-settings-preview
+  .wl-home-v2-setlist
+  .set-table
+  td.song-cell
+  .song-cell-inner--pair
+  .song-cell-pair-trailing {
+  align-self: flex-start;
+  margin-left: auto;
+}
+
+.wl-home-v2
+  .wl-home-v2-settings-preview
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row
+  > td.song-cell {
+  height: auto;
+}
+
+/* Match live setlist `.setlist-alt-name-pill` (TD + Geist Mono). */
 .wl-home-v2-settings-preview .setlist-alt-name-pill {
   display: inline-flex;
   align-items: center;
@@ -239,16 +287,20 @@
   line-height: 1.35;
   padding: 0 4px;
   border-radius: 4px;
-  color: oklch(0.86 0.14 158);
-  background: rgba(60, 210, 120, 0.2);
-  border: 1px solid rgb(40, 130, 80);
+  color: oklch(0.84 0.09 150);
+  background: rgba(110, 135, 118, 0.15);
+  border: 1px solid rgb(60, 78, 66);
   flex-shrink: 0;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
 }
 
 .wl-home-v2-settings-preview .setlist-alt-name-pill[data-alt-name-pill="suite"] {
-  color: oklch(0.88 0.15 252);
-  background: rgba(65, 145, 255, 0.22);
-  border-color: rgb(45, 105, 210);
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgb(100, 102, 100);
 }
 
 .wl-home-v2-settings-preview .short {

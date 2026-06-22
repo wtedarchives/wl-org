@@ -19,11 +19,13 @@ function PreviewCombinedInterludeRow({
   interlude,
   song,
   songFirst = false,
+  showSegue = true,
 }: {
   interlude: string
   song: string
   /** When true, song name precedes the pill (e.g. SOS + dawn). */
   songFirst?: boolean
+  showSegue?: boolean
 }) {
   const pill = <PreviewInterludeShort label={interlude} />
   const songName = <span>{song}</span>
@@ -42,9 +44,11 @@ function PreviewCombinedInterludeRow({
                 {songName}
               </>
             }
-            <span className="segue" aria-hidden>
-              →
-            </span>
+            {showSegue ?
+              <span className="segue" aria-hidden>
+                →
+              </span>
+            : null}
           </div>
           <span className="song-cell-pair-trailing">
             <span
@@ -67,10 +71,14 @@ function PreviewExpandedInterludeRows({
   interlude,
   song,
   songFirst = false,
+  showSegueOnFirst = true,
+  showSegueOnSecond = true,
 }: {
   interlude: string
   song: string
   songFirst?: boolean
+  showSegueOnFirst?: boolean
+  showSegueOnSecond?: boolean
 }) {
   const firstLabel = songFirst ? song : interlude
   const secondLabel = songFirst ? interlude : song
@@ -81,9 +89,11 @@ function PreviewExpandedInterludeRows({
           <div className="song-cell-inner">
             <div className="song-cell-main">
               <span>{firstLabel}</span>
-              <span className="segue" aria-hidden>
-                →
-              </span>
+              {showSegueOnFirst ?
+                <span className="segue" aria-hidden>
+                  →
+                </span>
+              : null}
             </div>
           </div>
         </td>
@@ -93,9 +103,11 @@ function PreviewExpandedInterludeRows({
           <div className="song-cell-inner">
             <div className="song-cell-main">
               <span>{secondLabel}</span>
-              <span className="segue" aria-hidden>
-                →
-              </span>
+              {showSegueOnSecond ?
+                <span className="segue" aria-hidden>
+                  →
+                </span>
+              : null}
             </div>
           </div>
         </td>
@@ -104,10 +116,10 @@ function PreviewExpandedInterludeRows({
   )
 }
 
-function PreviewSuitePill() {
+function PreviewSuitePill({ label }: { label: string }) {
   return (
     <span className="setlist-alt-name-pill" data-alt-name-pill="suite">
-      Suite
+      {label}
     </span>
   )
 }
@@ -122,8 +134,7 @@ function PreviewAutumnMadhuvanCombinedRow() {
       <td className="song-cell">
         <div className="song-cell-inner song-cell-inner--pair">
           <div className="song-cell-main">
-            <span>Autumn Crossing</span>
-            <PreviewSuitePill />
+            <PreviewSuitePill label="Jive Suite" />
             <span className="segue" aria-hidden>
               →
             </span>
@@ -150,9 +161,11 @@ function PreviewAutumnMadhuvanCombinedRow() {
 function PreviewExpandedSongRow({
   song,
   showReprise = false,
+  showSegue = true,
 }: {
   song: string
   showReprise?: boolean
+  showSegue?: boolean
 }) {
   return (
     <tr className="song-row">
@@ -161,9 +174,11 @@ function PreviewExpandedSongRow({
           <div className="song-cell-main">
             <span>{song}</span>
             {showReprise ? <PreviewRepriseShort /> : null}
-            <span className="segue" aria-hidden>
-              →
-            </span>
+            {showSegue ?
+              <span className="segue" aria-hidden>
+                →
+              </span>
+            : null}
           </div>
         </div>
       </td>
@@ -171,18 +186,19 @@ function PreviewExpandedSongRow({
   )
 }
 
-function PreviewAutumnCrossingExpandedRows() {
+function PreviewJiveSuiteExpandedRows() {
   return (
     <>
-      <PreviewExpandedSongRow song="Travelers" />
-      <PreviewExpandedSongRow song="Elmeg the Wise" />
-      <PreviewExpandedSongRow song="Madhuvan" showReprise />
+      <PreviewExpandedSongRow song="Jive I" />
+      <PreviewExpandedSongRow song="Jive II" />
+      <PreviewExpandedSongRow song="Jive Lee" />
+      <PreviewExpandedSongRow song="Madhuvan" showReprise showSegue={false} />
     </>
   )
 }
 
 /**
- * Static setlist excerpt (interlude pairs + Autumn Crossing suite).
+ * Static setlist excerpt (interlude pairs + Jive suite).
  */
 export function WlHomeV2SettingsSetlistPreview({
   expandedByDefault,
@@ -202,25 +218,29 @@ export function WlHomeV2SettingsSetlistPreview({
             {expandedByDefault ?
               <>
                 <PreviewExpandedInterludeRows
-                  interlude="Interlude II"
-                  song="Jive I"
+                  interlude="(begin)"
+                  song="Big Modern!"
+                  showSegueOnSecond={false}
                 />
                 <PreviewExpandedInterludeRows
                   interlude="(dawn)"
                   song="SOS"
                   songFirst
+                  showSegueOnSecond={false}
                 />
-                <PreviewAutumnCrossingExpandedRows />
+                <PreviewJiveSuiteExpandedRows />
               </>
             : <>
                 <PreviewCombinedInterludeRow
-                  interlude="Interlude II"
-                  song="Jive I"
+                  interlude="begin"
+                  song="Big Modern!"
+                  showSegue={false}
                 />
                 <PreviewCombinedInterludeRow
                   interlude="dawn"
                   song="SOS"
                   songFirst
+                  showSegue={false}
                 />
                 <PreviewAutumnMadhuvanCombinedRow />
               </>

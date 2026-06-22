@@ -45,19 +45,21 @@ export function WlHomeV2ListArchiveShowHeader({
 
   return (
     <div className="show-header">
-      <div className="left">
-        <div className="wl-home-v2-list-archive-header-text-wrap">
-          {rotating}
-          <div className="show-header-title-row">
-            <h1 className="show-header-heading">
-              <span className="date">{listName}</span>
-            </h1>
-          </div>
-          {desc ?
-            <div className="venue wl-home-v2-list-header-desc">
-              <span className="venue-subvenue-text">{desc}</span>
+      <div className="show-header-main">
+        <div className="left">
+          <div className="wl-home-v2-list-archive-header-text-wrap">
+            {rotating}
+            <div className="show-header-title-row">
+              <h1 className="show-header-heading">
+                <span className="date">{listName}</span>
+              </h1>
             </div>
-          : null}
+            {desc ?
+              <div className="venue wl-home-v2-list-header-desc">
+                <span className="venue-subvenue-text">{desc}</span>
+              </div>
+            : null}
+          </div>
         </div>
       </div>
     </div>

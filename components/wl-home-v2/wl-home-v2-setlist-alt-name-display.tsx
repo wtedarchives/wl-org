@@ -3,6 +3,7 @@
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import {
   altNameHasParentheticalSegments,
+  altNameSegmentPillVariant,
   parseAltNameSegments,
 } from "@/lib/song-pairs"
 
@@ -24,9 +25,7 @@ function AltNameSegments({ altName }: { altName: string }) {
         : <span
             key={`paren-${index}`}
             className="setlist-alt-name-pill"
-            data-alt-name-pill={
-              segment.value.trim().toLowerCase() === "suite" ? "suite" : undefined
-            }
+            data-alt-name-pill={altNameSegmentPillVariant(segment.value)}
           >
             {segment.value}
           </span>,
