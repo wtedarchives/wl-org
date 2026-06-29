@@ -13173,17 +13173,17 @@
 .wl-home-v2 .wl-home-v2-setlist .set-table .setlist-pair-coach-song-label {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
-  padding: 0 4px;
+  line-height: 1;
+  padding: 2px 4px;
   margin-right: 0.25rem;
   border-radius: 4px;
   color: rgb(0, 0, 0);
   background: rgb(234, 179, 8);
-  vertical-align: middle;
 }
 /* Pair alt_name: parenthetical segments — TD shell for default, neutral white shell for Suite */
 .wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .setlist-alt-name-segments {
@@ -13203,19 +13203,19 @@
 .wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .setlist-alt-name-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
-  padding: 0 4px;
+  line-height: 1;
+  padding: 2px 4px;
   border-radius: 4px;
   color: oklch(0.84 0.09 150);
   background: rgba(110, 135, 118, 0.15);
   border: 1px solid rgb(60, 78, 66);
   flex-shrink: 0;
   margin-bottom: 0;
-  vertical-align: middle;
   letter-spacing: -0.01em;
   text-transform: none;
   font-variant-ligatures: none;
@@ -13297,7 +13297,7 @@
   .setlist-v2-notes-html--pair-collapsed
   .setlist-pair-coach-song-label {
   margin-bottom: 0;
-  line-height: 1.25;
+  line-height: 1;
 }
 .wl-home-v2
   .wl-home-v2-setlist
@@ -13560,19 +13560,19 @@
 .wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell .short {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   margin-left: 0;
   margin-bottom: 0;
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1;
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0, "calt" 0;
-  padding: 0 4px;
+  padding: 2px 4px;
   border-radius: 4px;
   flex-shrink: 0;
-  vertical-align: middle;
   letter-spacing: -0.01em;
   text-transform: none;
   background: rgba(200, 88, 108, 0.15);
@@ -14259,13 +14259,14 @@
   .setlist-alt-name-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   padding: 2px 4px;
   border-radius: 6px;
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1;
   letter-spacing: 0.05em;
   text-transform: none;
   color: #fff;
@@ -14298,7 +14299,7 @@
   font-size: 10px !important;
   font-weight: 500 !important;
   letter-spacing: 0.05em !important;
-  line-height: 1.35 !important;
+  line-height: 1 !important;
   box-shadow: none !important;
   transition:
     background 0.18s ease,
@@ -14317,7 +14318,7 @@
   display: none !important;
 }
 .wl-home-v2-setlist-attended-nav-pill-trigger [data-slot="select-value"] {
-  line-height: 1.35 !important;
+  line-height: 1 !important;
 }
 .wl-home-v2 .wl-home-v2-setlist .wbtn {
   display: flex;

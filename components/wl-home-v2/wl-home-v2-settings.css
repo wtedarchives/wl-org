@@ -280,12 +280,13 @@
 .wl-home-v2-settings-preview .setlist-alt-name-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
-  padding: 0 4px;
+  line-height: 1;
+  padding: 2px 4px;
   border-radius: 4px;
   color: rgb(0, 0, 0);
   background: rgb(234, 179, 8);
@@ -309,19 +310,19 @@
 .wl-home-v2-settings-preview .short {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   margin-left: 0;
   margin-bottom: 0;
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 10px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1;
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0, "calt" 0;
-  padding: 0 4px;
+  padding: 2px 4px;
   border-radius: 4px;
   flex-shrink: 0;
-  vertical-align: middle;
   letter-spacing: -0.01em;
   text-transform: none;
   background: rgba(200, 88, 108, 0.15);
