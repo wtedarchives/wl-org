@@ -215,7 +215,9 @@ export function altNameSegmentPillVariant(
 /**
  * Preceding non-reprise entry plus one or more consecutive reprise rows (`entry_short`
  * reprise, or `entry_song` Teaprise / [Trevor Reads Poetry]) in the same set with
- * sequential `entry_setnum` values. Skips indices already covered by a song-pair match.
+ * sequential `entry_setnum` values. Skips indices already covered by a song-pair match,
+ * except when a reprise row *starts* a pair: then the prior song is the tree parent and
+ * the whole pair plus any following reprises in the chain are its children.
  */
 export function findRepriseCombineRanges(
   setlist: SetlistEntry[],
@@ -231,6 +233,33 @@ export function findRepriseCombineRanges(
     }
 
     if (indexCoveredByPairRanges(i, pairRanges)) {
+      const pairAtStart = pairRanges.get(i)
+      if (
+        pairAtStart &&
+        isRepriseEntry(repriseEntry) &&
+        i > 0 &&
+        !indexCoveredByPairRanges(i - 1, pairRanges)
+      ) {
+        const prevEntry = setlist[i - 1]!
+        if (
+          !isRepriseEntry(prevEntry) &&
+          isConsecutiveInSameSet(prevEntry, repriseEntry)
+        ) {
+          const entries: SetlistEntry[] = [prevEntry, ...pairAtStart.entries]
+          let j = i + pairAtStart.entries.length
+          while (j < setlist.length) {
+            const next = setlist[j]!
+            const last = entries[entries.length - 1]!
+            if (!isRepriseEntry(next)) break
+            if (!isConsecutiveInSameSet(last, next)) break
+            entries.push(next)
+            j++
+          }
+          ranges.set(i - 1, entries)
+          i = j
+          continue
+        }
+      }
       i++
       continue
     }
@@ -521,6 +550,8 @@ function collectSetlistTreeGroups(
   }
 
   for (const [start, range] of pairRanges) {
+    if (isRepriseEntry(range.entries[0]!)) continue
+
     const coreEndIndex = start + range.entries.length - 1
     const trailing = findTrailingRepriseEntriesAfterIndex(setlist, coreEndIndex)
     if (trailing.length === 0) continue
@@ -576,6 +607,28 @@ function buildTreeChromeMap(
   return { byEntryId, byPairExpandKey }
 }
 
+function resolveChildTreeChromeForEntryIds(
+  entryIds: string[],
+  byEntryId: Map<string, SetlistTreeChrome>,
+): SetlistTreeChrome | undefined {
+  const childChromes = entryIds
+    .map((entryId) => byEntryId.get(entryId))
+    .filter(
+      (chrome): chrome is Extract<SetlistTreeChrome, { role: "child" }> =>
+        chrome?.role === "child",
+    )
+  if (childChromes.length === 0) return undefined
+
+  const first = childChromes[0]!
+  const last = childChromes[childChromes.length - 1]!
+  return {
+    role: "child",
+    siblingIndex: first.siblingIndex,
+    siblingCount: first.siblingCount,
+    isLastSibling: last.isLastSibling,
+  }
+}
+
 function attachTreeChromeToRows(
   rows: SetlistTableRowItem[],
   treeMaps: ReturnType<typeof buildTreeChromeMap>,
@@ -585,8 +638,14 @@ function attachTreeChromeToRows(
 
   return rows.map((row) => {
     if (row.type === "pair") {
-      const treeChrome = byPairExpandKey.get(row.expandKey)
-      return treeChrome ? { ...row, treeChrome } : row
+      const parentChrome = byPairExpandKey.get(row.expandKey)
+      if (parentChrome) return { ...row, treeChrome: parentChrome }
+
+      const childChrome = resolveChildTreeChromeForEntryIds(
+        row.entries.map((entry) => entry.entry_id),
+        byEntryId,
+      )
+      return childChrome ? { ...row, treeChrome: childChrome } : row
     }
 
     const treeChrome = byEntryId.get(row.entry.entry_id)

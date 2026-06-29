@@ -158,6 +158,13 @@ export function WlHomeV2SetlistPairTableRow({
         shouldCategoryHighlight && "song-row--release-highlight",
         shouldCategoryDim && "song-row--release-dim",
         treeChrome?.role === "parent" && "song-row--tree-parent",
+        treeChrome?.role === "child" && "song-row--tree-child",
+        treeChrome?.role === "child" &&
+          treeChrome.siblingIndex === 0 &&
+          "song-row--tree-child-first",
+        treeChrome?.role === "child" &&
+          treeChrome.isLastSibling &&
+          "song-row--tree-child-last",
       )}
     >
       {showDiscographySetUi && isFirstOfRun ?
