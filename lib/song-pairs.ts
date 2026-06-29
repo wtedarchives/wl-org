@@ -30,6 +30,42 @@ function multisetContains(haystack: string[], needle: string[]): boolean {
   return true
 }
 
+const DAWN_PAIR_SONG = "(dawn)"
+
+function pairContainsDawn(pair: SongPair): boolean {
+  return songPairSongNames(pair).some((song) => song.trim() === DAWN_PAIR_SONG)
+}
+
+/**
+ * `(dawn)` interlude pairs require setlist order to match `song_1`, `song_2`, … and
+ * `entry_segue` on the first song in that order (e.g. SOS → (dawn), not reversed).
+ */
+function matchDawnPairAtIndex(
+  setlist: SetlistEntry[],
+  startIndex: number,
+  pair: SongPair,
+  pairSongs: string[],
+): { pair: SongPair; entries: SetlistEntry[]; endIndex: number } | null {
+  const start = setlist[startIndex]
+  if (!start || start.entry_song !== pairSongs[0]) return null
+  if (!start.entry_segue?.trim()) return null
+
+  const setId = start.entry_set
+  const entries: SetlistEntry[] = []
+  for (let k = 0; k < pairSongs.length; k++) {
+    const entry = setlist[startIndex + k]
+    if (!entry || entry.entry_set !== setId) return null
+    if (entry.entry_song !== pairSongs[k]) return null
+    entries.push(entry)
+  }
+
+  return {
+    pair,
+    entries,
+    endIndex: startIndex + entries.length - 1,
+  }
+}
+
 export function findSongPairMatchAtIndex(
   setlist: SetlistEntry[],
   startIndex: number,
@@ -49,6 +85,17 @@ export function findSongPairMatchAtIndex(
 
     const pairSongSet = new Set(pairSongs)
     if (!pairSongSet.has(start.entry_song)) continue
+
+    if (pairContainsDawn(pair)) {
+      const dawnMatch = matchDawnPairAtIndex(
+        setlist,
+        startIndex,
+        pair,
+        pairSongs,
+      )
+      if (dawnMatch) return dawnMatch
+      continue
+    }
 
     const entries: SetlistEntry[] = []
     for (let j = startIndex; j < setlist.length; j++) {

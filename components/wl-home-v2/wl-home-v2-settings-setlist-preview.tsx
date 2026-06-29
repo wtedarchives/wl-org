@@ -1,15 +1,11 @@
 "use client"
 
 import { Plus } from "@phosphor-icons/react"
-import type { ReactNode } from "react"
 
 import { SETLIST_EXPAND_BUTTON_CLASS } from "@/components/dpro/setlist/setlist-expand-button"
-import { WlHomeV2SetlistSongTreeChrome } from "@/components/wl-home-v2/wl-home-v2-setlist-song-tree-chrome"
-import type { SetlistTreeChrome } from "@/lib/song-pairs"
 import { cn } from "@/lib/utils"
 
 import "./wl-home-v2-settings.css"
-import "./wl-home-v2-setlist-tree.css"
 
 type WlHomeV2SettingsSetlistPreviewProps = {
   expandedByDefault: boolean
@@ -132,80 +128,32 @@ function PreviewRepriseShort() {
   return <span className="short">reprise</span>
 }
 
-function PreviewTreeSongCell({
-  treeChrome,
-  children,
-}: {
-  treeChrome?: SetlistTreeChrome
-  children: ReactNode
-}) {
+function PreviewAutumnMadhuvanCondensedRow() {
   return (
-    <WlHomeV2SetlistSongTreeChrome treeChrome={treeChrome}>
-      {children}
-    </WlHomeV2SetlistSongTreeChrome>
-  )
-}
-
-function PreviewAutumnMadhuvanCondensedRows() {
-  const firstChildChrome: SetlistTreeChrome = {
-    role: "child",
-    siblingIndex: 0,
-    siblingCount: 2,
-    isLastSibling: false,
-  }
-  const lastChildChrome: SetlistTreeChrome = {
-    role: "child",
-    siblingIndex: 1,
-    siblingCount: 2,
-    isLastSibling: true,
-  }
-
-  return (
-    <>
-      <tr className="song-row song-row--pair song-row--tree-parent">
-        <td className="song-cell">
-          <div className="song-cell-inner song-cell-inner--pair">
-            <div className="song-cell-main">
-              <PreviewSuitePill label="Jive Suite" />
-              <span className="segue" aria-hidden>
-                →
-              </span>
-              <span>Madhuvan</span>
-            </div>
-            <span className="song-cell-pair-trailing">
-              <span
-                className={cn(
-                  SETLIST_EXPAND_BUTTON_CLASS,
-                  "wl-home-v2-settings-preview__expand",
-                )}
-                aria-hidden
-              >
-                <Plus className="size-3.5 text-black" weight="bold" />
-              </span>
+    <tr className="song-row song-row--pair">
+      <td className="song-cell">
+        <div className="song-cell-inner song-cell-inner--pair">
+          <div className="song-cell-main">
+            <PreviewSuitePill label="Jive Suite" />
+            <span className="segue" aria-hidden>
+              →
             </span>
+            <span>Madhuvan</span>
           </div>
-        </td>
-      </tr>
-      <tr className="song-row song-row--tree-child song-row--tree-child-first">
-        <td className="song-cell">
-          <PreviewTreeSongCell treeChrome={firstChildChrome}>
-            <div className="song-cell-main">
-              <span>Trevor Reads Poetry</span>
-            </div>
-          </PreviewTreeSongCell>
-        </td>
-      </tr>
-      <tr className="song-row song-row--tree-child song-row--tree-child-last">
-        <td className="song-cell">
-          <PreviewTreeSongCell treeChrome={lastChildChrome}>
-            <div className="song-cell-main">
-              <span>Madhuvan</span>
-              <PreviewRepriseShort />
-            </div>
-          </PreviewTreeSongCell>
-        </td>
-      </tr>
-    </>
+          <span className="song-cell-pair-trailing">
+            <span
+              className={cn(
+                SETLIST_EXPAND_BUTTON_CLASS,
+                "wl-home-v2-settings-preview__expand",
+              )}
+              aria-hidden
+            >
+              <Plus className="size-3.5 text-black" weight="bold" />
+            </span>
+          </span>
+        </div>
+      </td>
+    </tr>
   )
 }
 
@@ -293,7 +241,7 @@ export function WlHomeV2SettingsSetlistPreview({
                   songFirst
                   showSegue={false}
                 />
-                <PreviewAutumnMadhuvanCondensedRows />
+                <PreviewAutumnMadhuvanCondensedRow />
               </>
             }
           </tbody>
