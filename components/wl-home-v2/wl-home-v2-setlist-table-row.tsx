@@ -29,8 +29,10 @@ import { getCoachIntroDisplay } from "@/lib/setlist-coach-intro-display"
 import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
+import { WlHomeV2SetlistSongTreeChrome } from "@/components/wl-home-v2/wl-home-v2-setlist-song-tree-chrome"
 import { railLabelForEntrySet } from "@/components/wl-home-v2/wl-home-v2-setlist-table.utils"
 import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
+import type { SetlistTreeChrome } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
 
 /** One setlist row — `onDataCellPointerEnter` is desktop-only so iOS taps are not cancelled by a hover re-render. */
@@ -59,6 +61,7 @@ export function WlHomeV2SetlistTableRow({
   showDiscographySetUi,
   coachNotesExpanded = false,
   applyCoachIntroDisplay = true,
+  treeChrome,
 }: {
   entry: SetlistEntry
   displayNumber: number | null
@@ -86,6 +89,7 @@ export function WlHomeV2SetlistTableRow({
   coachNotesExpanded?: boolean
   /** Off for entries that belong to pair/reprise/improv combine rows (including expanded). */
   applyCoachIntroDisplay?: boolean
+  treeChrome?: SetlistTreeChrome
 }) {
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
   const coachIntroDisplay =
@@ -139,6 +143,14 @@ export function WlHomeV2SetlistTableRow({
         isRowHovered && "song-row--row-hover",
         shouldRowHighlight && "song-row--release-highlight",
         shouldRowDim && "song-row--release-dim",
+        treeChrome?.role === "parent" && "song-row--tree-parent",
+        treeChrome?.role === "child" && "song-row--tree-child",
+        treeChrome?.role === "child" &&
+          treeChrome.siblingIndex === 0 &&
+          "song-row--tree-child-first",
+        treeChrome?.role === "child" &&
+          treeChrome.isLastSibling &&
+          "song-row--tree-child-last",
       )}
     >
       {showDiscographySetUi && isFirstOfRun ?
@@ -177,14 +189,16 @@ export function WlHomeV2SetlistTableRow({
         className="song-cell"
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
-        <SetlistEntrySongCell
-          entry={entry}
-          onSongClick={onSongClick}
-          onJotyClick={onJotyBadgeClick}
-          showStatsTooltip={isDesktop}
-          statsTooltipWlV2Chrome
-          songAltName={coachIntroDisplay?.songAltName ?? null}
-        />
+        <WlHomeV2SetlistSongTreeChrome treeChrome={treeChrome}>
+          <SetlistEntrySongCell
+            entry={entry}
+            onSongClick={onSongClick}
+            onJotyClick={onJotyBadgeClick}
+            showStatsTooltip={isDesktop}
+            statsTooltipWlV2Chrome
+            songAltName={coachIntroDisplay?.songAltName ?? null}
+          />
+        </WlHomeV2SetlistSongTreeChrome>
       </td>
       {showWtedColumn ?
         <td

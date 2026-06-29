@@ -11,7 +11,6 @@ import { SetlistEntryStatsTooltip } from "@/components/dpro/setlist/setlist-entr
 import { entriesHaveSongStatsLines } from "@/components/dpro/setlist/setlist-entry-stats-tooltip-content"
 import { SetlistExpandButton } from "@/components/dpro/setlist/setlist-expand-button"
 import { WlHomeV2SetlistAltNameDisplay } from "@/components/wl-home-v2/wl-home-v2-setlist-alt-name-display"
-import { splitPairRowTrailingRepriseEntries } from "@/lib/song-pairs"
 import { cn } from "@/lib/utils"
 import type { SetlistEntry } from "@/types/setlist"
 import type { SongPair } from "@/types/song-pair"
@@ -92,10 +91,7 @@ export function WlHomeV2SetlistPairSongCell({
   showTooltips = false,
 }: WlHomeV2SetlistPairSongCellProps) {
   const altName = pair.alt_name?.trim()
-  const { coreEntries, trailingRepriseEntries } =
-    splitPairRowTrailingRepriseEntries(entries)
-  const lastCoreEntry = coreEntries[coreEntries.length - 1]
-  const lastCoreHasSegue = !!lastCoreEntry?.entry_segue?.trim()
+  const lastEntry = entries[entries.length - 1]
   const jotyEntries = entries.filter((e) => e.joty_round)
 
   const altNameHit =
@@ -110,38 +106,13 @@ export function WlHomeV2SetlistPairSongCell({
     altName ?
       <>
         {altNameHit}
-        <EntrySegue entry={lastCoreEntry} />
-      </>
-    : null
-
-  const trailingRepriseBlock =
-    trailingRepriseEntries.length > 0 ?
-      <>
-        {!lastCoreHasSegue ?
-          <span className="segue" aria-hidden>
-            →
-          </span>
-        : null}
-        <PairSongSequence
-          entries={trailingRepriseEntries}
-          onSongClick={onSongClick}
-        />
+        <EntrySegue entry={lastEntry} />
       </>
     : null
 
   const songMainInner =
-    altName && trailingRepriseEntries.length > 0 ?
-      <>
-        {altNameBlock}
-        {trailingRepriseBlock}
-      </>
-    : altName ?
+    altName ?
       altNameBlock
-    : trailingRepriseEntries.length > 0 ?
-      <>
-        <PairSongSequence entries={coreEntries} onSongClick={onSongClick} />
-        {trailingRepriseBlock}
-      </>
     : <PairSongSequence entries={entries} onSongClick={onSongClick} />
 
   const songMain = (

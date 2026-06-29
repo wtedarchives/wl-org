@@ -168,8 +168,9 @@ export function WlHomeV2SettingsModal({
                 Setlist Preferences
               </h4>
               <p className="wl-home-v2-settings-section-desc">
-                Song pairs, reprises, and suites can appear as separate song rows or as one
-                condensed row. Choose how they look when you open a setlist.
+                Song pairs can appear as separate song rows or as one condensed row.
+                Reprises, Teaprise, Trevor Reads Poetry, and Improv/Jam segments branch
+                beneath their parent in condensed view. Choose how pairs look when you open a setlist.
               </p>
               <div className="wl-home-v2-settings-toggle-row">
                 <ToggleSwitch

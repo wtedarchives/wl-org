@@ -11,7 +11,6 @@ import {
   buildSetlistTableRows,
   computeDisplayNumbersForTableRows,
   getSetlistCombinedEntryIds,
-  REPRISE_COMBINED_PAIR,
   tableRowEntryIds,
   tableRowEntrySet,
   tableRowPrimaryEntry,
@@ -87,9 +86,13 @@ export function WlHomeV2SetlistTable({
   const showCoachColumn = setlist.some(
     (e) => !!e.entry_coachnotes?.trim(),
   )
+  const useRepriseTreeLayout = !expandCombinedOnLoad
   const tableRows = useMemo(
-    () => buildSetlistTableRows(setlist, songPairs, expandedPairKeys),
-    [setlist, songPairs, expandedPairKeys],
+    () =>
+      buildSetlistTableRows(setlist, songPairs, expandedPairKeys, {
+        useRepriseTreeLayout,
+      }),
+    [setlist, songPairs, expandedPairKeys, useRepriseTreeLayout],
   )
   const displayNumbers = useMemo(
     () => computeDisplayNumbersForTableRows(tableRows),
@@ -226,8 +229,6 @@ export function WlHomeV2SetlistTable({
                 const isRowHovered = rowHoverIds.includes(hoveredEntryId ?? "")
                 const rowKey =
                   row.type === "single" ? row.entry.entry_id : row.expandKey
-                const combinedPair =
-                  row.type === "pair" ? row.pair : REPRISE_COMBINED_PAIR
 
                 return (
                   <Fragment key={rowKey}>
@@ -244,9 +245,9 @@ export function WlHomeV2SetlistTable({
                         <td className="set-divider-cell" colSpan={fullColSpan} />
                       </tr>
                     : null}
-                    {row.type === "pair" || row.type === "reprise" ?
+                    {row.type === "pair" ?
                       <WlHomeV2SetlistPairTableRow
-                        pair={combinedPair}
+                        pair={row.pair}
                         entries={row.entries}
                         displayNumber={displayNumbers[index] ?? null}
                         showCanonColumns={showCanonColumns}
@@ -267,7 +268,7 @@ export function WlHomeV2SetlistTable({
                         }
                         onJotyBadgeClick={onJotyBadgeClick}
                         onSongClick={onPairSongClick ?
-                            (entries) => onPairSongClick(entries, combinedPair)
+                            (entries) => onPairSongClick(entries, row.pair)
                           : undefined}
                         onWtedClick={onPairWtedClick}
                         showAdminUi={showAdminUi}
@@ -277,6 +278,7 @@ export function WlHomeV2SetlistTable({
                         releaseToEntriesMap={releaseToEntriesMap}
                         hoveredCategory={hoveredCategory}
                         showDiscographySetUi={showDiscographySetUi}
+                        treeChrome={row.treeChrome}
                       />
                     : <WlHomeV2SetlistTableRow
                         entry={row.entry}
@@ -309,6 +311,7 @@ export function WlHomeV2SetlistTable({
                         coachNotesExpanded={isCoachNotesExpanded(
                           row.entry.entry_id,
                         )}
+                        treeChrome={row.treeChrome}
                       />
                     }
                   </Fragment>

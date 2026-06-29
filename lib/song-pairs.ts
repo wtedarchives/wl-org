@@ -144,7 +144,7 @@ function isRepriseEntry(entry: SetlistEntry): boolean {
   return song != null && REPRISE_COMBINE_ENTRY_SONGS.has(song)
 }
 
-/** Synthetic pair for reprise-combined rows (no DB alt_name; song cell lists both entries). */
+/** Synthetic pair for reprise-combined rows (legacy; pairs no longer absorb trailing reprises). */
 export const REPRISE_COMBINED_PAIR: SongPair = {
   uuid: "__reprise_combined__",
   song_1: "",
@@ -154,46 +154,7 @@ export const REPRISE_COMBINED_PAIR: SongPair = {
   alt_name: null,
 }
 
-function appendTrailingRepriseEntries(
-  setlist: SetlistEntry[],
-  startIndex: number,
-  entries: SetlistEntry[],
-): SetlistEntry[] {
-  if (entries.length === 0) return entries
-  const trailing: SetlistEntry[] = []
-  let last = entries[entries.length - 1]!
-  let j = startIndex
-  while (j < setlist.length) {
-    const next = setlist[j]!
-    if (!isRepriseEntry(next)) break
-    if (!isConsecutiveInSameSet(last, next)) break
-    trailing.push(next)
-    last = next
-    j++
-  }
-  return trailing.length > 0 ? [...entries, ...trailing] : entries
-}
-
-/** Extend DB song-pair rows with consecutive reprise entries immediately following the pair. */
-function extendPairRangesWithTrailingReprises(
-  setlist: SetlistEntry[],
-  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>,
-): Map<number, { pair: SongPair; entries: SetlistEntry[] }> {
-  const extended = new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
-  for (const [start, range] of pairRanges) {
-    extended.set(start, {
-      pair: range.pair,
-      entries: appendTrailingRepriseEntries(
-        setlist,
-        start + range.entries.length,
-        range.entries,
-      ),
-    })
-  }
-  return extended
-}
-
-/** Trailing reprise / Teaprise rows adjoined after a pair block (for alt_name display). */
+/** Trailing reprise / Teaprise rows adjoined after a pair block (legacy helper). */
 export function splitPairRowTrailingRepriseEntries(entries: SetlistEntry[]): {
   coreEntries: SetlistEntry[]
   trailingRepriseEntries: SetlistEntry[]
@@ -478,91 +439,180 @@ export function findImprovJamCombineRanges(
   return ranges
 }
 
-function mergeEntryRanges(
-  ...rangeMaps: Map<number, SetlistEntry[]>[]
-): Map<number, SetlistEntry[]> {
-  const merged = new Map<number, SetlistEntry[]>()
-  for (const map of rangeMaps) {
-    for (const [start, entries] of map) {
-      merged.set(start, entries)
+export type SetlistTreeChrome =
+  | { role: "parent"; childCount: number }
+  | {
+      role: "child"
+      siblingIndex: number
+      siblingCount: number
+      isLastSibling: boolean
     }
-  }
-  return merged
-}
 
 export type SetlistTableRowItem =
-  | { type: "single"; entry: SetlistEntry }
+  | { type: "single"; entry: SetlistEntry; treeChrome?: SetlistTreeChrome }
   | {
       type: "pair"
       pair: SongPair
       entries: SetlistEntry[]
       expandKey: string
-    }
-  | {
-      type: "reprise"
-      entries: SetlistEntry[]
-      expandKey: string
+      treeChrome?: SetlistTreeChrome
     }
 
-/** Expand keys for every combined pair/reprise row on a show (for “expanded on load” preference). */
+function getSetlistPairRanges(
+  setlist: SetlistEntry[],
+  songPairs: SongPair[],
+): Map<number, { pair: SongPair; entries: SetlistEntry[] }> {
+  return songPairs.length > 0 ?
+      findSetlistSongPairRanges(setlist, songPairs)
+    : new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
+}
+
+function findTrailingRepriseEntriesAfterIndex(
+  setlist: SetlistEntry[],
+  anchorIndex: number,
+): SetlistEntry[] {
+  const trailing: SetlistEntry[] = []
+  let last = setlist[anchorIndex]!
+  let j = anchorIndex + 1
+  while (j < setlist.length) {
+    const next = setlist[j]!
+    if (!isRepriseEntry(next)) break
+    if (!isConsecutiveInSameSet(last, next)) break
+    trailing.push(next)
+    last = next
+    j++
+  }
+  return trailing
+}
+
+type SetlistTreeGroup = {
+  parentEntryId: string | null
+  parentPairExpandKey: string | null
+  childEntryIds: string[]
+}
+
+function collectSetlistTreeGroups(
+  setlist: SetlistEntry[],
+  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>,
+  expandedPairKeys: Set<string>,
+): SetlistTreeGroup[] {
+  const groups: SetlistTreeGroup[] = []
+  const baseRepriseRanges = findRepriseCombineRanges(setlist, pairRanges)
+  const improvRanges = findImprovJamCombineRanges(
+    setlist,
+    pairRanges,
+    baseRepriseRanges,
+  )
+
+  for (const entries of baseRepriseRanges.values()) {
+    groups.push({
+      parentEntryId: entries[0]!.entry_id,
+      parentPairExpandKey: null,
+      childEntryIds: entries.slice(1).map((entry) => entry.entry_id),
+    })
+  }
+
+  for (const entries of improvRanges.values()) {
+    groups.push({
+      parentEntryId: entries[0]!.entry_id,
+      parentPairExpandKey: null,
+      childEntryIds: entries.slice(1).map((entry) => entry.entry_id),
+    })
+  }
+
+  for (const [start, range] of pairRanges) {
+    const coreEndIndex = start + range.entries.length - 1
+    const trailing = findTrailingRepriseEntriesAfterIndex(setlist, coreEndIndex)
+    if (trailing.length === 0) continue
+
+    const expandKey = range.entries[0]!.entry_id
+    if (expandedPairKeys.has(expandKey)) {
+      groups.push({
+        parentEntryId: range.entries[range.entries.length - 1]!.entry_id,
+        parentPairExpandKey: null,
+        childEntryIds: trailing.map((entry) => entry.entry_id),
+      })
+    } else {
+      groups.push({
+        parentEntryId: null,
+        parentPairExpandKey: expandKey,
+        childEntryIds: trailing.map((entry) => entry.entry_id),
+      })
+    }
+  }
+
+  return groups.filter((group) => group.childEntryIds.length > 0)
+}
+
+function buildTreeChromeMap(
+  groups: SetlistTreeGroup[],
+): {
+  byEntryId: Map<string, SetlistTreeChrome>
+  byPairExpandKey: Map<string, SetlistTreeChrome>
+} {
+  const byEntryId = new Map<string, SetlistTreeChrome>()
+  const byPairExpandKey = new Map<string, SetlistTreeChrome>()
+
+  for (const group of groups) {
+    const childCount = group.childEntryIds.length
+    const parentChrome: SetlistTreeChrome = { role: "parent", childCount }
+
+    if (group.parentPairExpandKey) {
+      byPairExpandKey.set(group.parentPairExpandKey, parentChrome)
+    } else if (group.parentEntryId) {
+      byEntryId.set(group.parentEntryId, parentChrome)
+    }
+
+    group.childEntryIds.forEach((entryId, siblingIndex) => {
+      byEntryId.set(entryId, {
+        role: "child",
+        siblingIndex,
+        siblingCount: childCount,
+        isLastSibling: siblingIndex === childCount - 1,
+      })
+    })
+  }
+
+  return { byEntryId, byPairExpandKey }
+}
+
+function attachTreeChromeToRows(
+  rows: SetlistTableRowItem[],
+  treeMaps: ReturnType<typeof buildTreeChromeMap>,
+): SetlistTableRowItem[] {
+  const { byEntryId, byPairExpandKey } = treeMaps
+  if (byEntryId.size === 0 && byPairExpandKey.size === 0) return rows
+
+  return rows.map((row) => {
+    if (row.type === "pair") {
+      const treeChrome = byPairExpandKey.get(row.expandKey)
+      return treeChrome ? { ...row, treeChrome } : row
+    }
+
+    const treeChrome = byEntryId.get(row.entry.entry_id)
+    return treeChrome ? { ...row, treeChrome } : row
+  })
+}
+
+/** Expand keys for every combined song-pair row on a show (for “expanded on load” preference). */
 export function getSetlistCombinedRowExpandKeys(
   setlist: SetlistEntry[],
   songPairs: SongPair[],
 ): Set<string> {
   const keys = new Set<string>()
-  const basePairRanges =
-    songPairs.length > 0 ?
-      findSetlistSongPairRanges(setlist, songPairs)
-    : new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
-  const pairRanges = extendPairRangesWithTrailingReprises(setlist, basePairRanges)
-  const baseRepriseRanges = findRepriseCombineRanges(setlist, pairRanges)
-  const repriseRanges = mergeEntryRanges(
-    baseRepriseRanges,
-    findImprovJamCombineRanges(setlist, pairRanges, baseRepriseRanges),
-  )
-  for (const range of pairRanges.values()) {
+  for (const range of getSetlistPairRanges(setlist, songPairs).values()) {
     keys.add(range.entries[0]!.entry_id)
-  }
-  for (const entries of repriseRanges.values()) {
-    keys.add(entries[0]!.entry_id)
   }
   return keys
 }
 
-function getSetlistCombineRanges(
-  setlist: SetlistEntry[],
-  songPairs: SongPair[],
-): {
-  pairRanges: Map<number, { pair: SongPair; entries: SetlistEntry[] }>
-  repriseRanges: Map<number, SetlistEntry[]>
-} {
-  const basePairRanges =
-    songPairs.length > 0 ?
-      findSetlistSongPairRanges(setlist, songPairs)
-    : new Map<number, { pair: SongPair; entries: SetlistEntry[] }>()
-  const pairRanges = extendPairRangesWithTrailingReprises(setlist, basePairRanges)
-  const baseRepriseRanges = findRepriseCombineRanges(setlist, pairRanges)
-  const repriseRanges = mergeEntryRanges(
-    baseRepriseRanges,
-    findImprovJamCombineRanges(setlist, pairRanges, baseRepriseRanges),
-  )
-  return { pairRanges, repriseRanges }
-}
-
-/** Entry IDs that belong to a song pair, reprise, or improv/jam combine row. */
+/** Entry IDs that belong to a collapsed song-pair row (core pair entries only). */
 export function getSetlistCombinedEntryIds(
   setlist: SetlistEntry[],
   songPairs: SongPair[],
 ): Set<string> {
-  const { pairRanges, repriseRanges } = getSetlistCombineRanges(
-    setlist,
-    songPairs,
-  )
   const ids = new Set<string>()
-  for (const { entries } of pairRanges.values()) {
-    for (const entry of entries) ids.add(entry.entry_id)
-  }
-  for (const entries of repriseRanges.values()) {
+  for (const { entries } of getSetlistPairRanges(setlist, songPairs).values()) {
     for (const entry of entries) ids.add(entry.entry_id)
   }
   return ids
@@ -572,59 +622,63 @@ export function buildSetlistTableRows(
   setlist: SetlistEntry[],
   songPairs: SongPair[],
   expandedPairKeys: Set<string>,
+  options: { useRepriseTreeLayout?: boolean } = {},
 ): SetlistTableRowItem[] {
-  const { pairRanges, repriseRanges } = getSetlistCombineRanges(
-    setlist,
-    songPairs,
-  )
+  const useRepriseTreeLayout = options.useRepriseTreeLayout ?? false
+  const pairRanges = getSetlistPairRanges(setlist, songPairs)
 
-  if (pairRanges.size === 0 && repriseRanges.size === 0) {
-    return setlist.map((entry) => ({ type: "single", entry }))
-  }
+  let items: SetlistTableRowItem[]
 
-  const items: SetlistTableRowItem[] = []
-  let i = 0
-  while (i < setlist.length) {
-    const pairRange = pairRanges.get(i)
-    if (pairRange) {
-      const expandKey = pairRange.entries[0]!.entry_id
-      if (expandedPairKeys.has(expandKey)) {
-        for (const entry of pairRange.entries) {
+  if (pairRanges.size === 0) {
+    items = setlist.map((entry) => ({ type: "single", entry }))
+  } else {
+    items = []
+    let i = 0
+    while (i < setlist.length) {
+      const pairRange = pairRanges.get(i)
+      if (pairRange) {
+        const expandKey = pairRange.entries[0]!.entry_id
+        const trailingReprises = findTrailingRepriseEntriesAfterIndex(
+          setlist,
+          i + pairRange.entries.length - 1,
+        )
+        const blockLength = pairRange.entries.length + trailingReprises.length
+
+        if (expandedPairKeys.has(expandKey)) {
+          for (const entry of pairRange.entries) {
+            items.push({ type: "single", entry })
+          }
+        } else {
+          items.push({
+            type: "pair",
+            pair: pairRange.pair,
+            entries: pairRange.entries,
+            expandKey,
+          })
+        }
+
+        for (const entry of trailingReprises) {
           items.push({ type: "single", entry })
         }
-      } else {
-        items.push({
-          type: "pair",
-          pair: pairRange.pair,
-          entries: pairRange.entries,
-          expandKey,
-        })
-      }
-      i += pairRange.entries.length
-      continue
-    }
 
-    const repriseEntries = repriseRanges.get(i)
-    if (repriseEntries) {
-      const expandKey = repriseEntries[0]!.entry_id
-      if (expandedPairKeys.has(expandKey)) {
-        for (const entry of repriseEntries) {
-          items.push({ type: "single", entry })
-        }
-      } else {
-        items.push({
-          type: "reprise",
-          entries: repriseEntries,
-          expandKey,
-        })
+        i += blockLength
+        continue
       }
-      i += repriseEntries.length
-      continue
-    }
 
-    items.push({ type: "single", entry: setlist[i]! })
-    i++
+      items.push({ type: "single", entry: setlist[i]! })
+      i++
+    }
   }
+
+  if (useRepriseTreeLayout) {
+    const treeGroups = collectSetlistTreeGroups(
+      setlist,
+      pairRanges,
+      expandedPairKeys,
+    )
+    items = attachTreeChromeToRows(items, buildTreeChromeMap(treeGroups))
+  }
+
   return items
 }
 

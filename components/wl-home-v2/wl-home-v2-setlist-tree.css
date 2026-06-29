@@ -1,0 +1,120 @@
+/* Condensed setlist: terminal-style parent/child connectors in the song column. */
+.wl-home-v2 .wl-home-v2-setlist {
+  --setlist-tree-line: rgb(120, 132, 124);
+  --setlist-tree-offset: 0.1rem;
+  --setlist-tree-branch-width: 0.55rem;
+  --setlist-tree-text-gap: 0.375rem;
+  --setlist-tree-line-x: calc(14px + var(--setlist-tree-offset));
+  --setlist-tree-gutter-width: calc(
+    var(--setlist-tree-offset) + var(--setlist-tree-branch-width) +
+      var(--setlist-tree-text-gap)
+  );
+  --setlist-tree-overlap: 12px;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .set-table td.song-cell {
+  overflow: visible;
+}
+
+/* Hide row dividers within a parent → children group. */
+.wl-home-v2 .wl-home-v2-setlist .set-table tr.song-row--tree-parent td,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child:not(.song-row--tree-child-last)
+  td {
+  border-bottom-color: transparent;
+}
+
+/* Child rows: trunk + branch on the cell so lines span row gaps. */
+.wl-home-v2 .wl-home-v2-setlist .set-table tr.song-row--tree-child td.song-cell {
+  position: relative;
+}
+
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child
+  td.song-cell::before {
+  content: "";
+  position: absolute;
+  left: var(--setlist-tree-line-x);
+  border-left: 1px solid var(--setlist-tree-line);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* First child (not last): trunk starts at parent row bottom. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child-first:not(.song-row--tree-child-last)
+  td.song-cell::before {
+  top: 0;
+  bottom: calc(-1 * var(--setlist-tree-overlap));
+}
+
+/* Middle children: bridge rows above and below. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child:not(.song-row--tree-child-first):not(
+    .song-row--tree-child-last
+  )
+  td.song-cell::before {
+  top: calc(-1 * var(--setlist-tree-overlap));
+  bottom: calc(-1 * var(--setlist-tree-overlap));
+}
+
+/* Last child (not first): corner branch from prior trunk. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child-last:not(.song-row--tree-child-first)
+  td.song-cell::before {
+  top: calc(-1 * var(--setlist-tree-overlap));
+  height: calc(50% + var(--setlist-tree-overlap));
+}
+
+/* Only child: trunk from parent bottom to branch. */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child-first.song-row--tree-child-last
+  td.song-cell::before {
+  top: 0;
+  height: 50%;
+}
+
+.wl-home-v2
+  .wl-home-v2-setlist
+  .set-table
+  tr.song-row--tree-child
+  td.song-cell::after {
+  content: "";
+  position: absolute;
+  left: var(--setlist-tree-line-x);
+  top: 50%;
+  width: var(--setlist-tree-branch-width);
+  border-top: 1px solid var(--setlist-tree-line);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Indent child song text; lines are drawn on the cell. */
+.wl-home-v2 .wl-home-v2-setlist .setlist-song-tree {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .setlist-song-tree__gutter {
+  flex-shrink: 0;
+  width: var(--setlist-tree-gutter-width);
+}
+
+.wl-home-v2 .wl-home-v2-setlist .setlist-song-tree__content {
+  min-width: 0;
+  flex: 1 1 auto;
+}

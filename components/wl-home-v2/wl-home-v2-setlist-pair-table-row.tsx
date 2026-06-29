@@ -35,8 +35,10 @@ import { cn } from "@/lib/utils"
 
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 import { WlHomeV2SetlistPairSongCell } from "@/components/wl-home-v2/wl-home-v2-setlist-pair-song-cell"
+import { WlHomeV2SetlistSongTreeChrome } from "@/components/wl-home-v2/wl-home-v2-setlist-song-tree-chrome"
 import { railLabelForEntrySet } from "@/components/wl-home-v2/wl-home-v2-setlist-table.utils"
 import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
+import type { SetlistTreeChrome } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
 import type { SongPair } from "@/types/song-pair"
 
@@ -66,6 +68,7 @@ export function WlHomeV2SetlistPairTableRow({
   releaseToEntriesMap,
   hoveredCategory,
   showDiscographySetUi,
+  treeChrome,
 }: {
   pair: SongPair
   entries: SetlistEntry[]
@@ -92,6 +95,7 @@ export function WlHomeV2SetlistPairTableRow({
   releaseToEntriesMap?: ReleaseToEntriesMap
   hoveredCategory?: string | null
   showDiscographySetUi: boolean
+  treeChrome?: SetlistTreeChrome
 }) {
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
 
@@ -153,6 +157,7 @@ export function WlHomeV2SetlistPairTableRow({
         shouldReleaseDim && "song-row--release-dim",
         shouldCategoryHighlight && "song-row--release-highlight",
         shouldCategoryDim && "song-row--release-dim",
+        treeChrome?.role === "parent" && "song-row--tree-parent",
       )}
     >
       {showDiscographySetUi && isFirstOfRun ?
@@ -204,14 +209,16 @@ export function WlHomeV2SetlistPairTableRow({
         className="song-cell"
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
-        <WlHomeV2SetlistPairSongCell
-          pair={pair}
-          entries={entries}
-          onExpand={onExpand}
-          onSongClick={onSongClick}
-          onJotyClick={onJotyBadgeClick}
-          showTooltips={isDesktop}
-        />
+        <WlHomeV2SetlistSongTreeChrome treeChrome={treeChrome}>
+          <WlHomeV2SetlistPairSongCell
+            pair={pair}
+            entries={entries}
+            onExpand={onExpand}
+            onSongClick={onSongClick}
+            onJotyClick={onJotyBadgeClick}
+            showTooltips={isDesktop}
+          />
+        </WlHomeV2SetlistSongTreeChrome>
       </td>
       {showWtedColumn ?
         <td
