@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, List, MoneyWavy, X } from "@phosphor-icons/react"
+import { ArrowRight, CurrencyDollar, List, X } from "@phosphor-icons/react"
 import {
   Suspense,
   useCallback,
@@ -193,13 +193,13 @@ export function WlHomeV2Header({
           </Link>
           <div className="top-brand-cluster-actions">
             <Link href="/support" onClick={closeMobileNav}>
-              <MoneyWavy
+              <CurrencyDollar
                 className="top-nav-primary-icon"
                 size={18}
                 weight="regular"
                 aria-hidden
               />
-              Support
+              Support Us
             </Link>
             <a
               href="#"
@@ -275,13 +275,13 @@ export function WlHomeV2Header({
               </div>
               <div className="top-nav-secondary-row">
                 <Link href="/support" onClick={closeMobileNav}>
-                  <MoneyWavy
+                  <CurrencyDollar
                     className="top-nav-primary-icon"
                     size={18}
                     weight="regular"
                     aria-hidden
                   />
-                  Support
+                  Support Us
                 </Link>
                 <a
                   href="#"

@@ -101,7 +101,7 @@ export function WlHomeV2RadioModal({
               >
                 <span className="modal-archive-tile-top">
                   <span className="modal-archive-tile-title">
-                    Episodes
+                    Shows
                   </span>
                   <ListNumbers
                     className="modal-archive-tile-icon"

@@ -203,7 +203,7 @@ export function WlHomeV2WtedEpisodePageClient() {
               href="/wted/episodes"
               className="font-medium text-wl-orange underline underline-offset-2 hover:text-white"
             >
-              Episodes
+              Shows
             </Link>
             .
           </p>

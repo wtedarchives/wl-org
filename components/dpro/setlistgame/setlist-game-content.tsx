@@ -26,7 +26,7 @@ import { useSetlistGameArchiveUrlShell } from "@/components/dpro/setlistgame/set
 import { buildSetlistGameIndexBreadcrumbs } from "@/components/dpro/setlistgame/setlist-game-breadcrumb-items"
 import { SetlistGameWlV2ArchiveCrumbs } from "@/components/dpro/setlistgame/setlist-game-wl-v2-archive-crumbs"
 
-const ACTIVE_LEAGUE = "2026 Summer [First Leg]"
+const ACTIVE_LEAGUE = "2026 Summer [Second Leg]"
 
 interface SubmissionDetails {
   totalScore: number
