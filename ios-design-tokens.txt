@@ -1,0 +1,211 @@
+WTED / Wysteria Lane — Design Tokens for iOS
+=============================================
+Source: app/globals.css, app/layout.tsx, components/wl-home-v2/wl-home-v2.css
+Generated for building an iOS equivalent of WTEDRadio.com / wl-org.
+
+
+FONTS
+-----
+
+The site uses three font families. For iOS, bundle Geist and Geist Mono (free from
+Vercel: https://vercel.com/font). Fraunces is only used on the Goose101 page.
+
+  Primary UI     Geist
+                 Body, headings, buttons, nav, most archive UI.
+                 iOS: Font.custom("Geist", size: ...)
+
+  Mono / data    Geist Mono
+                 Setlist # cells, stat labels, timestamps, uppercase panel headers,
+                 ".org" branding sublabel.
+                 iOS: Font.custom("GeistMono", size: ...)
+
+  Display serif  Fraunces (weights 400, 500, 600, 700)
+                 Goose101 hero headings only. Optional unless you port Goose101.
+                 iOS: Font.custom("Fraunces", size: ...)
+
+Web fallback stack: ui-sans-serif, system-ui, -apple-system, sans-serif
+On iOS, SF Pro is a reasonable fallback if you skip bundling Geist, but it won't
+match exactly.
+
+Typography behavior:
+  - Tabular numbers are used site-wide (font-variant-numeric: tabular-nums).
+    Use .monospacedDigit() or Geist tabular figures for stats, setlists, clocks.
+  - Common sizes: 9–12pt for dense UI; 14–17pt for nav/brand; 20–24pt for sections.
+
+Typical pairings:
+  - Panel section headers → Geist Mono, 11pt, medium, uppercase, letter-spacing ~0.08em
+  - Body / table text      → Geist, 11–12pt
+  - Setlist track numbers  → Geist Mono
+  - Brand ".org" sublabel  → Geist Mono, 10pt, muted white
+
+To add fonts in Xcode:
+  1. Add Geist .otf/.ttf files to the target.
+  2. List them under Info.plist → "Fonts provided by application".
+
+
+COLOR SCHEMES
+-------------
+
+The app is essentially one dark "Wysteria Lane" theme: deep green background,
+frosted dark panels, mint/orange accents. Light shadcn tokens exist in
+globals.css but are not the main user-facing experience.
+
+
+1. BRAND PALETTE (core — put these in Asset Catalog)
+----------------------------------------------------
+
+  Token              Hex       Usage
+  -----              ---       -----
+  WLGreen            #58C8AE   Primary accent, links, live indicators
+  WLDarkGreen        #285B4E   Page background base, brand green (same as WLDeepGreen)
+  WLDeepGreen        #285B4E   Page background base
+  WLLightGreen       #5AAA96   Secondary green accents
+  WLOrange           #FF7A67   Live dot, CTAs, emphasis
+  WLLightOrange      #FFB999   Hover states, focus rings, secondary accent text
+  WLWhite            #FFFFFF   Primary text
+  WLOffWhite         #EFFEFA   Soft text on dark background
+  WLGrey             #70798A   Muted neutral
+  WLDarkGrey         #1F1F1F   Dark surfaces
+  WLBlack            #000000   Status bar / theme color
+
+
+2. SHELL / PAGE BACKGROUND (homepage + archive)
+------------------------------------------------
+
+  Page gradient top:  rgba(49, 58, 52, 0.35)  — hex base #313A34 at 35% opacity
+  Page gradient mid:  rgba(40, 91, 78, 0.92)   — hex base #285B4E at 92% opacity
+  Solid fallback:     #285B4E
+
+  CSS equivalent:
+    linear-gradient(180deg, rgba(49,58,52,0.35) 0%, rgba(40,91,78,0.92) 80%),
+    #285B4E
+
+  SwiftUI: linear gradient from #313A34 (35% alpha) to #285B4E (92% alpha) over #285B4E.
+
+
+3. PANEL / CARD CHROME (.widget-panel)
+---------------------------------------
+
+  Panel background:   rgba(0, 0, 0, 0.38)   — frosted card fill
+  Panel border:       #2C2E2D                 — card outline
+  Alt panel bg:       #313A34                 — solid panel surfaces
+  Alt panel border:   #181918 or #3A3E3A     — structural borders
+  Header / divider:   #222523                 — top bar, row dividers
+  Archive shell border: #353836
+
+  Corner radius:      10pt on panels and cards
+  Global base radius: 10pt (0.625rem on web)
+
+  Text on panels:
+    Primary body:     #FFFFFF at 85% opacity  (rgba 255,255,255,0.85)
+    Muted labels:     #FFFFFF at 55% opacity  (panel headers, uppercase mono labels)
+    Meta / secondary: #FFFFFF at 50% opacity
+    Song / link text: #FFFFFF at 88% opacity
+
+
+4. INTERACTIVE / CTA COLORS
+----------------------------
+
+  Orange CTA fill:    #FFAA81   rgb(255, 170, 129)
+  Orange CTA border:  #D27D58   rgb(210, 125, 88)
+  Orange CTA hover:   #F59B70   rgb(245, 155, 112)
+  Focus ring:         #FFB999   (2pt outline — same as WLLightOrange)
+  Live pulse dot:     #FF7A67   (same as WLOrange)
+
+
+5. SETLIST / STATS CATEGORY COLORS
+-----------------------------------
+
+  Used for placement pills, top-slots swatches, profile stat categories.
+
+  Show openers:       #047857
+  Set openers:        #10B981
+  Set closers:        #3B82F6
+  Encores:            #BE123C
+  Encore 2/3:         #F43F5E
+  Set 1 closer:       #1E40AF
+  Slot index 0:       #006400
+  Slot index 1:       #019B7A
+  Slot index 2:       #E17401
+  Slot index 3:       #7C2128
+  Fallback:           #059669
+
+
+6. CHART SCALE (green family)
+------------------------------
+
+  Chart 1:  #58C8AE  (WLGreen)
+  Chart 2:  #5AAA96  (WLLightGreen)
+  Chart 3:  mid green (between chart 2 and 4)
+  Chart 4:  darker green
+  Chart 5:  #285B4E  (WLDarkGreen)
+
+
+7. SEMANTIC / STATUS COLORS
+----------------------------
+
+  Success text:   #A7F3D0
+  Error text:     #FECACA
+  Destructive:    red in ~#DC2626 range (delete / danger actions)
+
+
+8. iOS CHROME (from app/layout.tsx)
+------------------------------------
+
+  Theme color:    #000000
+  Status bar:     black-translucent (light content on dark background)
+  PWA title:      WTED
+
+
+SUGGESTED XCODE ASSET CATALOG STRUCTURE
+----------------------------------------
+
+  Brand/
+    WLGreen, WLDarkGreen, WLLightGreen, WLOrange, WLLightOrange
+    WLWhite, WLOffWhite, WLGrey, WLDarkGrey
+
+  Surface/
+    WLPageBackground       #285B4E
+    WLPanelBackground      #000000 @ 38% opacity
+    WLPanelBorder          #2C2E2D
+    WLPanelSolid           #313A34
+
+  Text/
+    WLTextPrimary          #FFFFFF @ 85%
+    WLTextSecondary        #FFFFFF @ 55%
+    WLTextMuted            #FFFFFF @ 50%
+
+  Category/
+    WLShowOpener, WLSetOpener, WLSetCloser, WLEncore, etc.
+
+
+SWIFTUI REFERENCE SNIPPET
+--------------------------
+
+  extension Color {
+      static let wlGreen = Color(red: 0x58/255, green: 0xC8/255, blue: 0xAE/255)
+      static let wlDeepGreen = Color(red: 0x28/255, green: 0x5B/255, blue: 0x4E/255)
+      static let wlOrange = Color(red: 0xFF/255, green: 0x7A/255, blue: 0x67/255)
+      static let wlLightOrange = Color(red: 0xFF/255, green: 0xB9/255, blue: 0x99/255)
+      static let wlPanelBorder = Color(red: 0x2C/255, green: 0x2E/255, blue: 0x2D/255)
+  }
+
+  extension Font {
+      static func wlBody(_ size: CGFloat = 12) -> Font {
+          .custom("Geist-Regular", size: size)
+      }
+      static func wlMono(_ size: CGFloat = 11) -> Font {
+          .custom("GeistMono-Medium", size: size)
+      }
+  }
+
+
+PRIORITY CHECKLIST FOR VISUAL PARITY
+-------------------------------------
+
+  [ ] Background: deep green gradient (#285B4E family), not flat black
+  [ ] Panels: semi-transparent black + subtle blur + #2C2E2D border
+  [ ] Accents: mint green (#58C8AE) + coral orange (#FF7A67 / #FFB999)
+  [ ] Fonts: Geist + Geist Mono with tabular numbers for setlists/stats
+  [ ] Corner radius: 10pt on cards
+  [ ] Focus rings: light orange (#FFB999), 2pt

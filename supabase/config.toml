@@ -41,3 +41,7 @@ verify_jwt = false
 # Wysteria admin JWT verified inside the function; PNG body is raw image/png bytes.
 [functions.radio-schedule-share-upload]
 verify_jwt = false
+
+# Custom API keys validated inside the function (not Supabase Auth JWTs).
+[functions.bot-read-api]
+verify_jwt = false

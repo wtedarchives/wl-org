@@ -1,0 +1,456 @@
+Setlist Archive Page Checklist (/archive/setlist?id=)
+=====================================================
+Source: wted-org web app (WL Home v2)
+Purpose: Exhaustive parity spec for iOS app implementation
+URL: /archive/setlist?id={show_uuid} (canonical); legacy ?show_id= accepted
+
+Generated for Claude Code — implement sections in order or by priority.
+
+
+0. PAGE SHELL & ROUTING
+-----------------------
+[ ] URL: /archive/setlist?id={show_uuid} (canonical)
+[ ] Legacy ?show_id= accepted and replaced client-side with ?id=
+[ ] Invalid/missing ID → 404 / not found
+[ ] Loading state: "Loading setlist…" while show + setlist + song pairs load
+[ ] Document title: {MM.DD.YY} ({group} - {venue}) – WTEDRadio.com (or subsets)
+[ ] Layout: two-column on xl+ (main + aside); compact/mobile stacks tools under header
+[ ] Shell: site header/footer, archive hub, login modal context
+
+
+1. TOP BAR (BREADCRUMBS + SELECTORS + ADMIN)
+--------------------------------------------
+
+Breadcrumb trail:
+[ ] Home / Setlist Archive → Year (e.g. 2025) → Tour name → Date – city (current page)
+[ ] "Setlist Archive" crumb opens archive hub modal when tapped
+
+Tour / show selectors:
+[ ] Tour dropdown: all tours (tour, tour_canonid, tour_id); selecting navigates to first show on that tour
+[ ] Show date dropdown: all shows on current tour, sorted by date (canon-id tiebreak)
+[ ] Each show row in dropdown: formatted date + ShowDate metadata
+[ ] Current tour highlighted in tour dropdown
+[ ] Current show highlighted in show dropdown
+
+Admin toolbar (admin users only):
+[ ] Copy show ID (clipboard); brief "copied" feedback
+[ ] Edit in admin (opens admin panel)
+[ ] Generate setlist share image (opens share export modal)
+
+
+2. MAIN HEADER (SHOW IDENTITY)
+------------------------------
+
+Primary title block:
+[ ] Weekday rail (vertical label, e.g. "Tuesday") when derivable from show_date
+[ ] H1 date: formatted MM.DD.YY
+[ ] Group after date (show_group, e.g. "Goose") with · divider
+[ ] Subvenue (show_subvenue) — links to venue archive when venue_id or show_subvenue_venue exists
+[ ] City/location (show_venue_location) — inline or stacked with subvenue depending on layout/detail
+[ ] Show detail pill (show_detail, e.g. festival day label) when present
+[ ] Show alert pill (show_alert, role=alert) when present — e.g. cancellations, notes
+
+Canon position pill:
+[ ] "SHOW {n} OF {m}" when show_canonid exists and max canon ID loaded
+[ ] Desktop: in nav block; mobile: beside title row
+
+Tour navigation block:
+[ ] Tour name (show_tour)
+[ ] "Show X of Y" within tour (showPositionInTour: position + total on same tour)
+[ ] Prev / Next tour show buttons (prevShowId / nextShowId); disabled at ends
+[ ] Long tour names on mobile may stack tour name and position on separate lines
+
+
+3. TOOLS PANEL (RATING + ATTENDANCE + ATTENDED-SHOW NAV)
+--------------------------------------------------------
+Desktop: aside top tile. Mobile: two cards below main header.
+
+Rating card (tap opens rating modal; unsigned → login):
+[ ] Label: "Rating"
+[ ] Star row (5 stars, partial fill from averageRating)
+[ ] Numeric average (averageRating.toFixed(2), or 0.00)
+[ ] Review count ("N reviews" / "No reviews yet")
+
+Attendees card:
+[ ] Label: "attendees"
+[ ] Attendee count (total users who marked attended)
+[ ] "I was there" / "attended" toggle (signed-in only; unsigned → login)
+[ ] Loading/disabled state while toggling (attendanceToggling)
+
+Attended Goose show navigator (signed-in + attended + Goose canon show only):
+[ ] Prev / Next among user's attended Goose canon shows (excludes recording sessions)
+[ ] "Your {dropdown} Goose Show" — position in attended list; dropdown lists all attended Goose shows
+[ ] Hidden when user hasn't marked this show attended or show isn't Goose canon
+
+
+4. SETLIST TABLE (CORE CONTENT)
+-------------------------------
+
+Table visibility / empty states:
+[ ] If no entries but show has coach notes and/or callbacks → render only footer notes block (no table)
+[ ] If no entries and no notes → table area empty/hidden
+
+Dynamic columns (shown only when data exists):
+  Set rail     — discography_display !== false
+  #            — always
+  Song         — always
+  WTED         — any entry has radio_id
+  Time         — any entry has formattable entry_length
+  Last         — show_canonid != null
+  Tour         — show_canonid != null
+  Rarity       — show_canonid != null
+  Personnel    — always (may be empty per row)
+  Coach's Notes — any entry has entry_coachnotes
+
+Column headers & header tooltips (desktop on web; use tap/long-press on iOS):
+[ ] Song header tooltip when segues, shorts, or JOTY rounds exist
+    - Explains segue arrow
+    - Explains each [short] type: fake, tease, aborted, partial, abridged, reprise, unfinished
+    - Explains JOTY round badges: JOTY, 2nd, F4, E8, S16, R32, R64
+[ ] WTED tooltip: "Request this song on WTED Goose Radio"
+[ ] Last tooltip when any row has Debut/TD/LIB:
+    - Debut: first known time song played by Goose
+    - TD (Tour Debut): first time in current tour
+    - LIB (Liberation): first time in more than a calendar year
+[ ] Time, Tour, Rarity, Personnel, Coach's Notes: plain labels
+
+Set structure UI (discography_display !== false):
+[ ] Set rail (left column): label per set (1, 2, E1, etc.) spanning consecutive rows in same set
+[ ] Encore divider row when entering encore set (E1, E2, …)
+[ ] Set break divider row between main sets
+[ ] Placement color bar in # column from entry_placement (opener/closer/encore styling)
+
+Per-row: # column
+[ ] Display number (1, 2, 3…)
+[ ] Skipped for: [Improv/Jam], shorts fake/tease/reprise/aborted, duplicate song names (first only)
+[ ] Admin: tap number copies entry_id to clipboard; checkmark feedback
+
+Per-row: Song column
+[ ] Song name — default song_displayname, canonical song on hover/long-press
+[ ] Tap song → song modal (tour performances)
+[ ] [entry_short] pill when applicable (hidden for: Charge, First Call, Happy Birthday to You, [Trevor Reads Poetry])
+[ ] Segue → {target song} when entry_segue set
+[ ] Coach-intro alt name — alternate display from coach-note intro parsing
+[ ] JOTY badge (joty_round: JOTY, 2nd, F4, E8, S16, R32, R64) — tap opens JOTY bracket modal, highlights entry
+[ ] Stats tooltip: times_played, shows_since_debut, song_rarity_percentage (HTML content)
+[ ] Reprise tree chrome — parent/child row styling for reprise sandwich layout when pairs collapsed
+
+Per-row: WTED column
+[ ] WTED icon when radio_id present
+[ ] Tap → WTED request modal (login required)
+[ ] Tooltip: "Request this song on WTED Goose Radio"
+
+Per-row: Time column
+[ ] Formatted entry_length (H:MM:SS or similar)
+
+Per-row: Last column (canon shows only)
+[ ] last_count text (Debut / TD / LIB / other) with color-coded pill
+[ ] Link to previous performance show when last_show_id set
+[ ] Tooltip: previous show date, location, tour
+
+Per-row: Tour column
+[ ] song_tour_count (times played on current tour)
+
+Per-row: Rarity column
+[ ] Computed rarity % pill from times_played_num / shows_since_debut_num
+[ ] Color scales with rarity value
+[ ] Stats tooltip on hover (desktop)
+
+Per-row: Personnel column
+[ ] Guest pills: guest_display_name, sorted by display rules
+[ ] Color by guest_category: Goose (current), Goose (former), Group, Guest
+[ ] Link to personnel archive (guest_id)
+[ ] Tooltip: guest_instrument
+[ ] Truncation with "Show all personnel" expand when many guests
+
+Per-row: Coach's Notes column
+[ ] HTML coach notes (entry_coachnotes), truncatable with expand
+[ ] Coach-intro display may replace/combine with raw notes for single rows
+
+Combined / pair rows (song_pairs table):
+[ ] Collapsed row shows pair alt_name or song_1 → song_2 → … sequence
+[ ] Expand button reveals individual entries (or auto-expand via user preference)
+[ ] Combined: merged guests, shared/combined last count, combined tour count, combined rarity, combined length, split placement bars
+[ ] Tap pair song area → multi-section song modal
+[ ] WTED on pair when any entry has radio_id; may offer multiple radio IDs
+[ ] Expand from coach notes when notes reference pair
+
+Cross-row highlighting:
+[ ] Song spread hover: hovering category in aside dims non-matching rows
+[ ] Media hover: hovering release dims entries not on that release (setlist_entry_media mapping)
+[ ] Row hover highlight (desktop pointer)
+
+
+5. TABLE FOOTER (SHOW-LEVEL NOTES)
+----------------------------------
+[ ] Coach's Notes (show_coachnotes, HTML) — shown when non-empty
+[ ] Callbacks (show_callbacks, HTML) — shown when non-empty
+[ ] Side-by-side when both present; divider above when table exists above
+
+
+6. BELOW TABLE (MAIN COLUMN)
+----------------------------
+
+Media section (when releases_shows has rows):
+[ ] Heading: Media
+[ ] Grouped by service: Vinyl, Bandcamp, Nugs, Spotify, YouTube, Discogs, Other
+[ ] Per release tile:
+    - release_displayname
+    - release_artwork
+    - release_service + icon
+    - release_link (external) or embed trigger
+[ ] Bandcamp / YouTube: inline Now Playing embed (Bandcamp via edge function album ID lookup)
+[ ] Hover release → highlight matching setlist rows
+[ ] Desktop xl+: media + WL posts may sit in a row below table; otherwise media stacks under table
+
+WL Top Posts (when show_wl_link is valid Discourse topic URL):
+[ ] Carousel of top community posts (avatar, username, text/image)
+[ ] Tap opens post in new tab/browser
+[ ] Desktop xl+: beside media; mobile: in aside below stats tiles
+
+ElGoose.Net attribution:
+[ ] Shown when egn_sourced === true
+[ ] Link to elgoose.net with logo + attribution copy
+[ ] Desktop: below table in main column; mobile: tail below aside columns
+
+
+7. ASIDE PANELS (STATS STACK)
+-----------------------------
+
+Show Stats tile (visible when length, rarity, or gap exists):
+[ ] Show Length
+    - Total from show_length or summed entry lengths
+    - Rank pill #N (top 25 longest canon shows only) → links to longest-shows list
+    - Per-set breakdown when multiple sets and canon show (Set 1, Set 2, Encore times)
+[ ] Show Rarity — show_rarity as XX.XX% with color pill
+[ ] Average Show Gap — show_gap with color pill
+
+Song Spread tile (visible when spread categories exist):
+[ ] Bar chart by song category (song_category / categories.category)
+[ ] Per category: artwork icon, count, proportional bar
+[ ] Tooltip: list of songs in category (display names; covers append [artist])
+[ ] Excludes: [Improv/Jam], shorts aborted/fake/reprise/tease; dedupes by song name
+[ ] Hover/tap category → highlight matching table rows
+
+Show Changes tile (visible when loading, changes exist, or scan available):
+[ ] Loading: "Loading…"
+[ ] Setlist Scan button (when show_setlists.setlist_url exists) → scan modal
+[ ] Change list from show_changes:
+    - change_type icon: move, replace, add, swap, cut, pick
+    - change HTML text
+[ ] Empty: "No changes from original setlist."
+
+Show Badges tile (visible when any badge flag set):
+[ ] Category complete — show_listcategorycomplete (e.g. full "Arcadia" performance) → list archive link + category artwork
+[ ] Jive complete — show_jivecomplete → Jive Suite list
+[ ] Dripfield complete — show_dripfieldcomplete → Dripfield Suite list (rotating artwork)
+
+
+8. MODALS / SHEETS
+------------------
+
+Rating modal:
+[ ] Header: show date + venue
+[ ] Summary: average stars, numeric avg, review count
+[ ] Your rating: 1–5 star picker (saves on tap)
+[ ] Write/Edit review toggle
+[ ] Review textarea with validation (alphanumeric + limited punctuation)
+[ ] All reviews list: username, stars, review text (lazy-loaded)
+[ ] Submit states / errors
+
+Song modal (single entry):
+[ ] Title: song display name (link to song archive)
+[ ] Subtitle: tour name
+[ ] Tour performances table for this song on this tour:
+    - Date (link to setlist)
+    - Placement bar
+    - Venue (link)
+    - Short / segue indicators
+    - Length
+    - Coach notes
+[ ] Loading / empty / error states
+[ ] "View full song history" → song archive
+[ ] Close / backdrop dismiss
+
+Song modal (pair / multi-section):
+[ ] Title: Song A → Song B → … with links
+[ ] One performance section per unique song in pair
+[ ] Same table columns per section
+
+JOTY modal:
+[ ] Title: "Jam of the Year {year}"
+[ ] Sponsor logos (AAT, nugs)
+[ ] Bracket description
+[ ] Full bracket UI with rounds, matchups, results
+[ ] Highlight row for tapped entry (highlightedEntryId)
+[ ] Links to setlists/songs in bracket
+
+WTED request modal:
+[ ] Title: WTED Goose Radio
+[ ] Subtext: rate limit ("4 tracks every 60 minutes")
+[ ] Show context: date, location, group
+[ ] Release artwork for track
+[ ] Request slots (up to 4): pending / filled / waiting states
+[ ] Submit request per radio_id
+[ ] Pair mode: pick among multiple WTED-linked entries
+[ ] Banners: already requested, cooldown countdown, next available time
+[ ] Login required
+
+Setlist Scan modal:
+[ ] Scan image from show_setlists.setlist_url (fallback if broken)
+[ ] Actual setlist column: group, long date, subvenue, city
+[ ] Simplified setlist list with placement bars, song links, shorts, segues
+[ ] Setlist Changes list (same as aside)
+[ ] Set dividers on set changes
+
+Share export modal (admin):
+[ ] Random background picker
+[ ] Variants: with / without entry coach notes
+[ ] Preview card: date, venue, tour position, setlist content
+[ ] Upload PNG to storage (admin)
+[ ] Generate/download/copy (currently feature-flagged off on web)
+
+
+9. AUTH-GATED & ADMIN-ONLY BEHAVIOR
+-----------------------------------
+
+Feature              | Signed out    | Signed in | Admin
+---------------------|---------------|-----------|-------
+Rate/review          | Login prompt  | Full      | Full
+Mark attended        | Login prompt  | Toggle    | Toggle
+Attended show nav    | Hidden        | When attended + Goose canon | Same
+WTED request         | Login prompt  | Full      | Full
+Copy entry ID        | Hidden        | Hidden    | Yes
+Admin toolbar        | Hidden        | Hidden    | Yes
+Share image modal    | Hidden        | Hidden    | Yes
+
+
+10. DATA MODEL REFERENCE (FETCH CHECKLIST)
+------------------------------------------
+
+Show (shows + joins):
+  show_id, show_date, show_group, show_tour, tour_id, show_subvenue,
+  show_venue_location, show_detail, show_alert, show_coachnotes, show_callbacks,
+  show_canonid, show_wl_link, show_subvenue_venue, venue_id, show_rarity,
+  show_gap, show_length, show_listcategorycomplete, show_jivecomplete,
+  show_dripfieldcomplete, discography_display, egn_sourced, rating_visibility,
+  tour_showfields
+
+Setlist entry (setlist_entries + song/guest joins):
+  entry_id, entry_set, entry_setnum, entry_setorder, entry_song, entry_short,
+  entry_segue, entry_length, entry_placement, entry_coachnotes, entry_show,
+  radio_id, song_id, song_tour_count, last_count, last_show_id, last_show_date,
+  last_show_tour, last_venue, last_venue_location, joty_round, times_played,
+  shows_since_debut, song_rarity_percentage, times_played_num,
+  shows_since_debut_num, song_category, category_canonid,
+  guests[] (guest_display_name, guest_id, guest_canonid, guest_instrument, guest_category),
+  songs.{song, song_displayname, song_category, song_originalartist,
+         categories.category_artwork}
+
+Supporting tables:
+[ ] song_pairs — combine rows
+[ ] releases_shows + releases — media
+[ ] setlist_entry_media — release ↔ entry mapping
+[ ] show_changes — setlist diffs
+[ ] show_setlists — scan image URL
+[ ] show_ratings — ratings/reviews
+[ ] user_attended_shows — attendance + attendee count
+[ ] JOTY bracket data (use-joty-data hook)
+[ ] Discourse topic posts (via show_wl_link)
+[ ] WTED request queue (edge function)
+
+
+11. NAVIGATION TARGETS (DEEP LINKS)
+----------------------------------
+[ ] Archive hub
+[ ] Year archive: /archive/years?id={year_uuid}
+[ ] Tour archive: /archive/tours?id={tour_uuid}
+[ ] Another setlist (dropdown, prev/next, attended nav, performance modal dates)
+[ ] Venue archive: /archive/venue?id={venue_id or slug}
+[ ] Song archive: /archive/song?id={song_uuid}
+[ ] Personnel archive: /archive/personnel?id={guest_uuid}
+[ ] List archive (badges, length rank): /archive/lists?id={list_uuid}
+[ ] External: release links, Discourse posts, ElGoose.Net, JOTY sponsors
+
+
+12. CONDITIONAL VISIBILITY SUMMARY
+----------------------------------
+
+Block                  | Hidden when
+-----------------------|--------------------------------------------------
+Set rail / dividers /  | discography_display === false
+  placement bars       |
+WTED column            | no radio_id on any entry
+Time column            | no entry lengths
+Last / Tour / Rarity   | no show_canonid
+Coach column           | no entry coach notes
+Show Stats tile        | no length, rarity, or gap
+Length rank pill       | rank > 25 or not in top 25
+Song Spread            | no categories after filters
+Show Changes           | no changes, no scan URL, not loading
+Show Badges            | no category/jive/dripfield flags
+Media                  | no releases
+WL Top Posts           | invalid/missing show_wl_link
+EGN attribution        | egn_sourced !== true
+Attended nav           | not signed in, not attended, or non-Goose-canon show
+Scan button            | no setlist_url in show_setlists
+
+
+13. iOS-SPECIFIC NOTES
+----------------------
+- Row hover/tooltips are desktop-only on web; on iOS use tap/long-press or inline
+  affordances for stats, Last prev-show info, personnel instrument, header legend.
+- Song display name: show song_displayname by default; reveal canonical song on interaction.
+- Combined pair rows and reprise tree are non-trivial — port buildSetlistTableRows /
+  song-pairs logic for parity (see lib/song-pairs.ts, wl-home-v2-setlist-tree.css).
+- Coach notes and callbacks contain HTML — need rich-text or WebView strategy.
+- Rating/review/attendance/WTED require auth tokens and Supabase/edge-function calls.
+
+
+14. KEY WEB SOURCE FILES (for reference when porting)
+-----------------------------------------------------
+Page entry:
+  app/(wl-home-v2)/archive/setlist/page.tsx
+  components/wl-home-v2/wl-home-v2-setlist-page-client.tsx
+  hooks/use-wl-home-v2-setlist-page-client.ts
+
+Layout / sections:
+  components/wl-home-v2/wl-home-v2-setlist-placeholder-view.tsx
+  components/wl-home-v2/wl-home-v2-setlist-placeholder-main-header.tsx
+  components/wl-home-v2/wl-home-v2-setlist-placeholder-aside.tsx
+  components/wl-home-v2/wl-home-v2-setlist-placeholder-crumbs.tsx
+  components/wl-home-v2/wl-home-v2-setlist-table.tsx
+  components/wl-home-v2/wl-home-v2-setlist-table-row.tsx
+  components/wl-home-v2/wl-home-v2-setlist-pair-table-row.tsx
+  components/wl-home-v2/wl-home-v2-setlist-show-meta-tile.tsx
+  components/wl-home-v2/wl-home-v2-setlist-show-changes-section.tsx
+  components/dpro/setlist/setlist-song-spread-card.tsx
+  components/dpro/setlist/setlist-media-section.tsx
+
+Modals:
+  components/wl-home-v2/wl-home-v2-setlist-page-modals.tsx
+  components/wl-home-v2/wl-home-v2-setlist-rating-modal.tsx
+  components/wl-home-v2/wl-home-v2-setlist-song-modal.tsx
+  components/wl-home-v2/wl-home-v2-setlist-joty-modal.tsx
+  components/wl-home-v2/wl-home-v2-setlist-wted-modal.tsx
+  components/wl-home-v2/wl-home-v2-setlist-scan-modal.tsx
+  components/wl-home-v2/wl-home-v2-setlist-share-export-modal.tsx
+
+Data hooks:
+  hooks/use-setlist-data.ts
+  hooks/use-setlist-releases.ts
+  hooks/use-setlist-show-changes.ts
+  hooks/use-setlist-rating.ts
+  hooks/use-setlist-attendance.ts
+  hooks/use-setlist-scan.ts
+  hooks/use-song-pairs.ts
+  hooks/use-user-attended-goose-canon-nav.ts
+
+Types:
+  types/setlist.ts
+  types/song-pair.ts
+
+Constants / display logic:
+  components/dpro/setlist/display-setlist-table.constants.ts
+  lib/song-pairs.ts
+  lib/setlist-utils.ts
