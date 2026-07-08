@@ -2,11 +2,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
+import { getRadioCoSessionCookie, RADIO_CO_STUDIO_API_V1 } from "../_shared/radio-co-session.ts"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STATION_ID = "s3c11c85d6"
-const STUDIO_PLAYLISTS_URL = `https://studio.radio.co/api/v1/stations/${STATION_ID}/playlists`
+const STUDIO_PLAYLISTS_URL = `${RADIO_CO_STUDIO_API_V1}/stations/${STATION_ID}/playlists`
 const DEFAULT_SHOW = "Unsorted"
 const PAGE_SIZE = 1000
 const WRITE_BATCH = 500
@@ -30,31 +31,6 @@ type Playlist = {
   id: number
   name: string
   artwork?: { large_url?: string | null } | null
-}
-
-// ─── Radio.co session helper ──────────────────────────────────────────────────
-
-async function getRadioSession(): Promise<string> {
-  const csrfRes = await fetch("https://studio.radio.co/api/auth/csrf")
-  if (!csrfRes.ok) throw new Error(`CSRF fetch failed: ${csrfRes.status}`)
-  const { csrfToken: _csrf } = await csrfRes.json()
-  const csrfCookies = csrfRes.headers.get("set-cookie") ?? ""
-
-  const loginRes = await fetch("https://studio.radio.co/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Cookie": csrfCookies },
-    body: JSON.stringify({
-      email: Deno.env.get("RADIO_CO_EMAIL"),
-      password: Deno.env.get("RADIO_CO_PASSWORD"),
-      _remember_me: true,
-    }),
-    redirect: "manual",
-  })
-
-  const setCookie = loginRes.headers.get("set-cookie") ?? ""
-  const session = setCookie.match(/radiocosession=([^;]+)/)?.[1]
-  if (!session) throw new Error(`Failed to extract radiocosession. Status: ${loginRes.status}`)
-  return session
 }
 
 // ─── JSON error helper ────────────────────────────────────────────────────────
@@ -140,15 +116,15 @@ serve(async (req) => {
     const radioPassword = Deno.env.get("RADIO_CO_PASSWORD")
     if (!radioEmail || !radioPassword) return err("Server configuration error — missing Radio.co credentials", 500)
 
-    let radioSession: string
+    let radioCookie: string
     try {
-      radioSession = await getRadioSession()
+      radioCookie = await getRadioCoSessionCookie()
     } catch (e) {
       return err("Failed to authenticate with Radio.co", 502, { message: e instanceof Error ? e.message : String(e) })
     }
 
     const playlistsRes = await fetch(STUDIO_PLAYLISTS_URL, {
-      headers: { "Cookie": `radiocosession=${radioSession}`, "Accept": "application/json" },
+      headers: { Cookie: radioCookie, Accept: "application/json" },
     })
     if (!playlistsRes.ok) {
       return err(`Radio.co returned ${playlistsRes.status}`, 502, { detail: (await playlistsRes.text()).slice(0, 500) })

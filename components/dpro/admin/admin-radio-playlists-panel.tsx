@@ -44,7 +44,10 @@ async function callAdminEpisodes(
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    throw new Error((data as { error?: string }).error ?? `Edge function returned ${res.status}`)
+    const payload = data as { error?: string; message?: string; detail?: string }
+    const detail = payload.message ?? payload.detail
+    const base = payload.error ?? `Edge function returned ${res.status}`
+    throw new Error(detail ? `${base}: ${detail}` : base)
   }
   return data
 }

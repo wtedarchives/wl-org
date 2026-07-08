@@ -1,40 +1,9 @@
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
+import { getRadioCoSessionCookie, RADIO_CO_STUDIO_API_V1 } from "../_shared/radio-co-session.ts"
 
 const STATION_ID = "s3c11c85d6"
-const STUDIO_PLAYLISTS_URL = `https://studio.radio.co/api/v1/stations/${STATION_ID}/playlists`
-
-async function getRadioSession(): Promise<string> {
-  // Step 1: get CSRF token
-  const csrfRes = await fetch("https://studio.radio.co/api/auth/csrf")
-  if (!csrfRes.ok) throw new Error(`CSRF fetch failed: ${csrfRes.status}`)
-  const { csrfToken } = await csrfRes.json()
-  const csrfCookies = csrfRes.headers.get("set-cookie") ?? ""
-
-  // Step 2: login with credentials
-  const loginRes = await fetch("https://studio.radio.co/auth/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Cookie": csrfCookies,
-    },
-    body: JSON.stringify({
-      email: Deno.env.get("RADIO_CO_EMAIL"),
-      password: Deno.env.get("RADIO_CO_PASSWORD"),
-      _remember_me: true,
-    }),
-    redirect: "manual",
-  })
-
-  const setCookie = loginRes.headers.get("set-cookie") ?? ""
-  const session = setCookie.match(/radiocosession=([^;]+)/)?.[1]
-  if (!session) {
-    throw new Error(
-      `Failed to extract radiocosession. Status: ${loginRes.status}, Set-Cookie: ${setCookie.slice(0, 200)}`,
-    )
-  }
-  return session
-}
+const STUDIO_PLAYLISTS_URL = `${RADIO_CO_STUDIO_API_V1}/stations/${STATION_ID}/playlists`
 
 Deno.serve(async (req) => {
   try {
@@ -95,10 +64,9 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Dynamically obtain a fresh Radio.co session
-    let radioSession: string
+    let radioCookie: string
     try {
-      radioSession = await getRadioSession()
+      radioCookie = await getRadioCoSessionCookie()
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e)
       return new Response(
@@ -112,8 +80,8 @@ Deno.serve(async (req) => {
 
     const res = await fetch(STUDIO_PLAYLISTS_URL, {
       headers: {
-        "Cookie": `radiocosession=${radioSession}`,
-        "Accept": "application/json",
+        Cookie: radioCookie,
+        Accept: "application/json",
       },
     })
 
