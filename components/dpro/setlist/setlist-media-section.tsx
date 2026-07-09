@@ -31,6 +31,10 @@ interface SetlistMediaSectionProps {
   bandcampTrackEmbed?: BandcampEntryTrack | null
   /** Close the controlled Bandcamp track embed. */
   onCloseBandcampTrack?: () => void
+  /** Controlled YouTube release embed, opened from a setlist row's YouTube icon. */
+  youtubeReleaseEmbed?: ShowRelease | null
+  /** Close the controlled YouTube release embed. */
+  onCloseYoutube?: () => void
 }
 
 export function SetlistMediaSection({
@@ -39,6 +43,8 @@ export function SetlistMediaSection({
   visualVariant = "dpro",
   bandcampTrackEmbed = null,
   onCloseBandcampTrack,
+  youtubeReleaseEmbed = null,
+  onCloseYoutube,
 }: SetlistMediaSectionProps) {
   const isV2 = visualVariant === "wl-home-v2"
   const isMobile = useIsMobile()
@@ -52,7 +58,7 @@ export function SetlistMediaSection({
   const nowPlayingRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (activeEmbed || bandcampTrackEmbed) {
+    if (activeEmbed || bandcampTrackEmbed || youtubeReleaseEmbed) {
       const id = requestAnimationFrame(() => {
         nowPlayingRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -61,16 +67,16 @@ export function SetlistMediaSection({
       })
       return () => cancelAnimationFrame(id)
     }
-  }, [activeEmbed, bandcampTrackEmbed])
+  }, [activeEmbed, bandcampTrackEmbed, youtubeReleaseEmbed])
 
-  // A Bandcamp track embed (opened from a setlist row) takes over the Now Playing
-  // slot — clear any release embed so only one plays at a time.
+  // A row-icon embed (Bandcamp track or YouTube video) takes over the Now Playing
+  // slot — clear any release-tile embed so only one plays at a time.
   useEffect(() => {
-    if (bandcampTrackEmbed) {
+    if (bandcampTrackEmbed || youtubeReleaseEmbed) {
       setActiveEmbed(null)
       setBandcampAlbumId(null)
     }
-  }, [bandcampTrackEmbed])
+  }, [bandcampTrackEmbed, youtubeReleaseEmbed])
 
   const handleStreamingClick = useCallback(
     async (e: React.MouseEvent, release: ShowRelease) => {
@@ -81,8 +87,9 @@ export function SetlistMediaSection({
       if (service !== "bandcamp" && service !== "youtube") return
       if (!release.release_link) return
 
-      // Opening a release embed replaces any active per-track Bandcamp embed.
+      // Opening a release-tile embed replaces any active row-icon embed.
       onCloseBandcampTrack?.()
+      onCloseYoutube?.()
 
       const isSameRelease =
         activeEmbed?.release.release_id === release.release_id
@@ -144,7 +151,7 @@ export function SetlistMediaSection({
         setActiveEmbed({ release, type: "youtube" })
       }
     },
-    [activeEmbed, onCloseBandcampTrack],
+    [activeEmbed, onCloseBandcampTrack, onCloseYoutube],
   )
 
   const handleCloseEmbed = useCallback(async () => {
@@ -155,7 +162,8 @@ export function SetlistMediaSection({
     setIsClosing(false)
   }, [])
 
-  if (releases.length === 0 && !bandcampTrackEmbed) return null
+  if (releases.length === 0 && !bandcampTrackEmbed && !youtubeReleaseEmbed)
+    return null
 
   const activeEmbedReleaseId =
     activeEmbed?.release.release_id ?? null
@@ -248,6 +256,15 @@ export function SetlistMediaSection({
         fullWidth={isMobile}
         visualVariant={visualVariant}
       />
+    : youtubeReleaseEmbed ?
+      <SetlistReleaseEmbedCard
+        release={youtubeReleaseEmbed}
+        type="youtube"
+        bandcampAlbumId={null}
+        onClose={() => onCloseYoutube?.()}
+        fullWidth={isMobile}
+        visualVariant={visualVariant}
+      />
     : activeEmbed ?
       <SetlistReleaseEmbedCard
         release={activeEmbed.release}
@@ -287,7 +304,7 @@ export function SetlistMediaSection({
       <div
         className={cn(
           "wl-home-v2-setlist-media-shell",
-          (activeEmbed || bandcampTrackEmbed) &&
+          (activeEmbed || bandcampTrackEmbed || youtubeReleaseEmbed) &&
             "wl-home-v2-setlist-media-shell--with-now-playing",
         )}
       >

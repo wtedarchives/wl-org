@@ -14,6 +14,7 @@ import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-la
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
 import { SetlistEntryBandcampCell } from "@/components/dpro/setlist/setlist-entry-bandcamp-cell"
+import { SetlistEntryYouTubeCell } from "@/components/dpro/setlist/setlist-entry-youtube-cell"
 import {
   SetlistTruncatableCell,
   SetlistTruncatableHtmlCell,
@@ -32,7 +33,7 @@ import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 import { WlHomeV2SetlistSongTreeChrome } from "@/components/wl-home-v2/wl-home-v2-setlist-song-tree-chrome"
 import { railLabelForEntrySet } from "@/components/wl-home-v2/wl-home-v2-setlist-table.utils"
-import type { ReleaseToEntriesMap } from "@/hooks/use-setlist-releases"
+import type { ReleaseToEntriesMap, ShowRelease } from "@/hooks/use-setlist-releases"
 import type { SetlistTreeChrome } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
 
@@ -42,7 +43,7 @@ export function WlHomeV2SetlistTableRow({
   displayNumber,
   showCanonColumns,
   showWtedColumn,
-  showBandcampColumn,
+  showMediaColumn,
   isDesktop,
   isFirstOfRun,
   runSpan,
@@ -53,6 +54,8 @@ export function WlHomeV2SetlistTableRow({
   onSongClick,
   onWtedClick,
   onBandcampClick,
+  youtubeRelease,
+  onYouTubeClick,
   showTimeColumn,
   showCoachColumn,
   showAdminUi,
@@ -70,7 +73,7 @@ export function WlHomeV2SetlistTableRow({
   displayNumber: number | null
   showCanonColumns: boolean
   showWtedColumn: boolean
-  showBandcampColumn: boolean
+  showMediaColumn: boolean
   showTimeColumn: boolean
   showCoachColumn: boolean
   isDesktop: boolean
@@ -83,6 +86,8 @@ export function WlHomeV2SetlistTableRow({
   onSongClick?: (entry: SetlistEntry) => void
   onWtedClick?: (entry: SetlistEntry) => void
   onBandcampClick?: (entry: SetlistEntry) => void
+  youtubeRelease?: ShowRelease | null
+  onYouTubeClick?: (release: ShowRelease) => void
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
@@ -220,21 +225,6 @@ export function WlHomeV2SetlistTableRow({
           </div>
         </td>
       : null}
-      {showBandcampColumn ?
-        <td
-          className="center"
-          onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
-        >
-          <div className="setlist-cell-inner">
-            <SetlistEntryBandcampCell
-              entry={entry}
-              onBandcampClick={onBandcampClick}
-              showTooltips={isDesktop}
-              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
-            />
-          </div>
-        </td>
-      : null}
       {showTimeColumn ?
         <td
           className="time-cell"
@@ -307,6 +297,27 @@ export function WlHomeV2SetlistTableRow({
                   {rarity}
                 </span>
             : null}
+          </div>
+        </td>
+      : null}
+      {showMediaColumn ?
+        <td
+          className="center"
+          onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
+        >
+          <div className="setlist-cell-inner flex items-center justify-center gap-2">
+            <SetlistEntryBandcampCell
+              entry={entry}
+              onBandcampClick={onBandcampClick}
+              showTooltips={isDesktop}
+              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+            />
+            <SetlistEntryYouTubeCell
+              release={youtubeRelease ?? null}
+              onYouTubeClick={onYouTubeClick}
+              showTooltips={isDesktop}
+              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+            />
           </div>
         </td>
       : null}

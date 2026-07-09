@@ -3,6 +3,7 @@
 import {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useState,
   type CSSProperties,
 } from "react"
@@ -27,6 +28,7 @@ import { WlHomeV2SetlistPlaceholderMainHeader } from "@/components/wl-home-v2/wl
 import type { WlHomeV2SetlistPlaceholderToolsProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
 import type { WlHomeV2SetlistPlaceholderViewProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view.types"
 import type { BandcampEntryTrack, SetlistEntry } from "@/types/setlist"
+import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
 import { isValidWlCommunityTopicUrl } from "@/lib/wl-community-topic-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
@@ -90,13 +92,48 @@ export function WlHomeV2SetlistPlaceholderView({
   )
   const [activeBandcampTrack, setActiveBandcampTrack] =
     useState<BandcampEntryTrack | null>(null)
+  const [activeYouTubeRelease, setActiveYouTubeRelease] =
+    useState<ShowRelease | null>(null)
 
   useEffect(() => {
     setHoveredReleaseId(null)
     setActiveBandcampTrack(null)
+    setActiveYouTubeRelease(null)
   }, [showId])
 
+  /**
+   * Per-entry YouTube release to link in the Media column. A song may have several YouTube
+   * media; pick one by: prefer displayname != "Full Show", then lowest release_order;
+   * fall back to the "Full Show" video if that's all there is.
+   */
+  const entryYouTubeReleaseMap = useMemo(() => {
+    const isFullShow = (r: ShowRelease) =>
+      (r.release_displayname ?? "").trim().toLowerCase() === "full show"
+    const byEntry: Record<string, ShowRelease[]> = {}
+    for (const r of releases) {
+      if ((r.release_service ?? "").toLowerCase().trim() !== "youtube") continue
+      if (!r.release_link) continue
+      const entries = releaseToEntriesMap[r.release_id]
+      if (!entries) continue
+      entries.forEach((entryId) => {
+        ;(byEntry[entryId] ??= []).push(r)
+      })
+    }
+    const map: Record<string, ShowRelease> = {}
+    for (const [entryId, list] of Object.entries(byEntry)) {
+      const chosen = [...list].sort((a, b) => {
+        const aFull = isFullShow(a) ? 1 : 0
+        const bFull = isFullShow(b) ? 1 : 0
+        if (aFull !== bFull) return aFull - bFull
+        return (a.release_order ?? Infinity) - (b.release_order ?? Infinity)
+      })[0]
+      if (chosen) map[entryId] = chosen
+    }
+    return map
+  }, [releases, releaseToEntriesMap])
+
   const handleBandcampClick = (entry: SetlistEntry) => {
+    setActiveYouTubeRelease(null)
     setActiveBandcampTrack((prev) =>
       prev && prev.track_id === entry.bandcampTrack?.track_id ?
         null
@@ -105,12 +142,20 @@ export function WlHomeV2SetlistPlaceholderView({
   }
   const handlePairBandcampClick = (entries: SetlistEntry[]) => {
     const track = entries.find((e) => e.bandcampTrack)?.bandcampTrack ?? null
+    setActiveYouTubeRelease(null)
     setActiveBandcampTrack((prev) =>
       prev && prev.track_id === track?.track_id ? null : track,
     )
   }
+  const handleYouTubeClick = (release: ShowRelease) => {
+    setActiveBandcampTrack(null)
+    setActiveYouTubeRelease((prev) =>
+      prev && prev.release_id === release.release_id ? null : release,
+    )
+  }
 
-  const showMediaSection = releases.length > 0 || !!activeBandcampTrack
+  const showMediaSection =
+    releases.length > 0 || !!activeBandcampTrack || !!activeYouTubeRelease
 
   const hasAverageRating = averageRating > 0
   const ratingValueDisplay = hasAverageRating ?
@@ -256,6 +301,8 @@ export function WlHomeV2SetlistPlaceholderView({
                   onPairWtedClick={onPairWtedClick}
                   onBandcampClick={handleBandcampClick}
                   onPairBandcampClick={handlePairBandcampClick}
+                  entryYouTubeReleaseMap={entryYouTubeReleaseMap}
+                  onYouTubeClick={handleYouTubeClick}
                   hoveredReleaseId={hoveredReleaseId}
                   releaseToEntriesMap={releaseToEntriesMap}
                   hoveredCategory={hoveredCategory}
@@ -272,6 +319,8 @@ export function WlHomeV2SetlistPlaceholderView({
                           onCloseBandcampTrack={() =>
                             setActiveBandcampTrack(null)
                           }
+                          youtubeReleaseEmbed={activeYouTubeRelease}
+                          onCloseYoutube={() => setActiveYouTubeRelease(null)}
                         />
                       </div>
                     : null}
@@ -288,6 +337,8 @@ export function WlHomeV2SetlistPlaceholderView({
                     onReleaseHover={setHoveredReleaseId}
                     bandcampTrackEmbed={activeBandcampTrack}
                     onCloseBandcampTrack={() => setActiveBandcampTrack(null)}
+                    youtubeReleaseEmbed={activeYouTubeRelease}
+                    onCloseYoutube={() => setActiveYouTubeRelease(null)}
                   />
                 : null}
                 {!useCompactTools && showEgnAttribution ?

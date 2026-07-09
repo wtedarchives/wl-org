@@ -14,7 +14,7 @@ import {
 type WlHomeV2SetlistTableHeadProps = {
   showDiscographySetUi: boolean
   showWtedColumn: boolean
-  showBandcampColumn: boolean
+  showMediaColumn: boolean
   showTimeColumn: boolean
   showCanonColumns: boolean
   showCoachColumn: boolean
@@ -30,7 +30,7 @@ type WlHomeV2SetlistTableHeadProps = {
 export function WlHomeV2SetlistTableHead({
   showDiscographySetUi,
   showWtedColumn,
-  showBandcampColumn,
+  showMediaColumn,
   showTimeColumn,
   showCanonColumns,
   showCoachColumn,
@@ -86,23 +86,6 @@ export function WlHomeV2SetlistTableHead({
             : "WTED"}
           </th>
         : null}
-        {showBandcampColumn ?
-          <th className="center">
-            {isDesktop ?
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="setlist-th-help">Bandcamp</span>
-                </TooltipTrigger>
-                <TooltipContent
-                  className="setlist-header-tooltip setlist-header-tooltip--tight"
-                  {...SETLIST_HEADER_TOOLTIP_CONTENT}
-                >
-                  Use the icons below to play songs on Bandcamp.
-                </TooltipContent>
-              </Tooltip>
-            : "Bandcamp"}
-          </th>
-        : null}
         {showTimeColumn ?
           <th className="center">Time</th>
         : null}
@@ -128,6 +111,24 @@ export function WlHomeV2SetlistTableHead({
         : null}
         {showCanonColumns ?
           <th className="center">Rarity</th>
+        : null}
+        {showMediaColumn ?
+          <th className="center">
+            {isDesktop ?
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="setlist-th-help">Media</span>
+                </TooltipTrigger>
+                <TooltipContent
+                  className="setlist-header-tooltip setlist-header-tooltip--tight"
+                  {...SETLIST_HEADER_TOOLTIP_CONTENT}
+                >
+                  Use the icons below to play a song&apos;s media on Bandcamp or
+                  YouTube.
+                </TooltipContent>
+              </Tooltip>
+            : "Media"}
+          </th>
         : null}
         <th className="set-table-personnel-head">Personnel</th>
         {showCoachColumn ?

@@ -82,9 +82,13 @@ export function AdminBandcamp() {
 
   const fetchSetlistAndAssignments = async (showId: string) => {
     if (!supabase) return
+    const client = supabase
+    setLoadingSetlist(true)
+
+    // 1. Setlist entries — the primary data for the table.
+    let rows: BandcampSetlistEntry[] = []
     try {
-      setLoadingSetlist(true)
-      const { data: entries, error } = await supabase
+      const { data: entries, error } = await client
         .from("setlist_entries")
         .select(
           "entry_id, entry_set, entry_setnum, entry_setorder, entry_song, entry_short, entry_segue, entry_placement",
@@ -94,12 +98,18 @@ export function AdminBandcamp() {
         .order("entry_setnum", { ascending: true })
         .order("entry_setorder", { ascending: true })
       if (error) throw error
-      const rows = (entries || []) as BandcampSetlistEntry[]
-      setSetlistEntries(rows)
+      rows = (entries || []) as BandcampSetlistEntry[]
+    } catch {
+      rows = []
+    }
+    setSetlistEntries(rows)
 
+    // 2. Existing assignments — supplementary; a failure here (e.g. table not yet
+    //    migrated) must NOT clear the setlist above.
+    try {
       const ids = rows.map((r) => r.entry_id)
       if (ids.length > 0) {
-        const { data: links, error: linkErr } = await supabase
+        const { data: links, error: linkErr } = await client
           .from("bandcamp_tracks")
           .select("entry_id, track_id, track_link, track_title, album_id, album_url")
           .in("entry_id", ids)
@@ -119,7 +129,6 @@ export function AdminBandcamp() {
         setAssignments({})
       }
     } catch {
-      setSetlistEntries([])
       setAssignments({})
     } finally {
       setLoadingSetlist(false)
