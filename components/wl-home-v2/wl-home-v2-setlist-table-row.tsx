@@ -305,7 +305,7 @@ export function WlHomeV2SetlistTableRow({
           className="center"
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
-          <div className="setlist-cell-inner flex items-center justify-center gap-2">
+          <div className="setlist-cell-inner flex items-center justify-center gap-1">
             <SetlistEntryBandcampCell
               entry={entry}
               onBandcampClick={onBandcampClick}

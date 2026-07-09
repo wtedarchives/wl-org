@@ -3,7 +3,6 @@
 import {
   useEffect,
   useLayoutEffect,
-  useMemo,
   useState,
   type CSSProperties,
 } from "react"
@@ -100,37 +99,6 @@ export function WlHomeV2SetlistPlaceholderView({
     setActiveBandcampTrack(null)
     setActiveYouTubeRelease(null)
   }, [showId])
-
-  /**
-   * Per-entry YouTube release to link in the Media column. A song may have several YouTube
-   * media; pick one by: prefer displayname != "Full Show", then lowest release_order;
-   * fall back to the "Full Show" video if that's all there is.
-   */
-  const entryYouTubeReleaseMap = useMemo(() => {
-    const isFullShow = (r: ShowRelease) =>
-      (r.release_displayname ?? "").trim().toLowerCase() === "full show"
-    const byEntry: Record<string, ShowRelease[]> = {}
-    for (const r of releases) {
-      if ((r.release_service ?? "").toLowerCase().trim() !== "youtube") continue
-      if (!r.release_link) continue
-      const entries = releaseToEntriesMap[r.release_id]
-      if (!entries) continue
-      entries.forEach((entryId) => {
-        ;(byEntry[entryId] ??= []).push(r)
-      })
-    }
-    const map: Record<string, ShowRelease> = {}
-    for (const [entryId, list] of Object.entries(byEntry)) {
-      const chosen = [...list].sort((a, b) => {
-        const aFull = isFullShow(a) ? 1 : 0
-        const bFull = isFullShow(b) ? 1 : 0
-        if (aFull !== bFull) return aFull - bFull
-        return (a.release_order ?? Infinity) - (b.release_order ?? Infinity)
-      })[0]
-      if (chosen) map[entryId] = chosen
-    }
-    return map
-  }, [releases, releaseToEntriesMap])
 
   const handleBandcampClick = (entry: SetlistEntry) => {
     setActiveYouTubeRelease(null)
@@ -301,7 +269,6 @@ export function WlHomeV2SetlistPlaceholderView({
                   onPairWtedClick={onPairWtedClick}
                   onBandcampClick={handleBandcampClick}
                   onPairBandcampClick={handlePairBandcampClick}
-                  entryYouTubeReleaseMap={entryYouTubeReleaseMap}
                   onYouTubeClick={handleYouTubeClick}
                   hoveredReleaseId={hoveredReleaseId}
                   releaseToEntriesMap={releaseToEntriesMap}

@@ -60,6 +60,8 @@ export interface SetlistEntry {
   radio_id?: string | null
   /** Linked Bandcamp track for this entry (populated in fetchSetlistCore). */
   bandcampTrack?: BandcampEntryTrack | null
+  /** Chosen YouTube release to link for this entry (populated in fetchSetlistCore). */
+  youtubeRelease?: import("@/hooks/use-setlist-releases").ShowRelease | null
   song_tour_count: string | null
   last_count: string | null
   song_id: string

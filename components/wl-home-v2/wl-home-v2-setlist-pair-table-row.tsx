@@ -355,7 +355,7 @@ export function WlHomeV2SetlistPairTableRow({
           className="center"
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
-          <div className="setlist-cell-inner flex items-center justify-center gap-2">
+          <div className="setlist-cell-inner flex items-center justify-center gap-1">
             {hasBandcamp ?
               <SetlistEntryBandcampCell
                 entry={bandcampProxyEntry}

@@ -4,6 +4,7 @@ import {
   SETLIST_ENTRY_DETAIL_SELECT,
 } from "@/lib/map-supabase-setlist-entry-row"
 import type { Show, SetlistEntry } from "@/types/setlist"
+import type { ShowRelease } from "@/hooks/use-setlist-releases"
 
 export interface SetlistCoreData {
   show: Show
@@ -109,6 +110,93 @@ export async function fetchSetlistCore(
               track_title: (row.track_title as string | null) ?? null,
             }
           : null
+      }
+    }
+  }
+
+  // Attach the chosen YouTube release per entry, in the same fetch as the setlist so the
+  // Media column is fully determined on first paint (no pop-in). Priority: prefer a
+  // display name other than "Full Show", then the lowest releases_shows.release_order;
+  // fall back to a "Full Show" video if that's all a song has.
+  if (entryIds.length > 0) {
+    const { data: rsData } = await client
+      .from("releases_shows")
+      .select(
+        "release_id, release_order, releases(release_id, release_displayname, release_artwork, release_link, release_service)",
+      )
+      .eq("show_id", showId)
+      .order("release_order", { ascending: true })
+
+    type RsRow = {
+      release_id: string
+      release_order: number | null
+      releases:
+        | {
+            release_id: string
+            release_displayname: string | null
+            release_artwork: string | null
+            release_link: string | null
+            release_service: string | null
+          }
+        | {
+            release_id: string
+            release_displayname: string | null
+            release_artwork: string | null
+            release_link: string | null
+            release_service: string | null
+          }[]
+        | null
+    }
+    const youtubeReleases: ShowRelease[] = ((rsData as RsRow[] | null) ?? [])
+      .map((r): ShowRelease | null => {
+        const rel = Array.isArray(r.releases) ? r.releases[0] : r.releases
+        if (!rel) return null
+        if ((rel.release_service ?? "").toLowerCase().trim() !== "youtube")
+          return null
+        if (!rel.release_link) return null
+        return {
+          release_id: rel.release_id,
+          release_displayname: rel.release_displayname,
+          release_artwork: rel.release_artwork,
+          release_link: rel.release_link,
+          release_service: rel.release_service,
+          release_order: r.release_order,
+        }
+      })
+      .filter((r): r is ShowRelease => r != null)
+
+    if (youtubeReleases.length > 0) {
+      const { data: semData } = await client
+        .from("setlist_entry_media")
+        .select("setlist_entry_id, release_id")
+        .in(
+          "release_id",
+          youtubeReleases.map((r) => r.release_id),
+        )
+      const releaseById = new Map(youtubeReleases.map((r) => [r.release_id, r]))
+      const byEntry = new Map<string, ShowRelease[]>()
+      for (const row of (semData ?? []) as {
+        setlist_entry_id: string
+        release_id: string
+      }[]) {
+        const rel = releaseById.get(row.release_id)
+        if (!rel) continue
+        if (!byEntry.has(row.setlist_entry_id)) {
+          byEntry.set(row.setlist_entry_id, [])
+        }
+        byEntry.get(row.setlist_entry_id)!.push(rel)
+      }
+      const isFullShow = (r: ShowRelease) =>
+        (r.release_displayname ?? "").trim().toLowerCase() === "full show"
+      for (const entry of setlist) {
+        const list = byEntry.get(entry.entry_id)
+        if (!list?.length) continue
+        entry.youtubeRelease = [...list].sort((a, b) => {
+          const aFull = isFullShow(a) ? 1 : 0
+          const bFull = isFullShow(b) ? 1 : 0
+          if (aFull !== bFull) return aFull - bFull
+          return (a.release_order ?? Infinity) - (b.release_order ?? Infinity)
+        })[0]
       }
     }
   }

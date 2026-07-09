@@ -44,7 +44,6 @@ export function WlHomeV2SetlistTable({
   onPairWtedClick,
   onBandcampClick,
   onPairBandcampClick,
-  entryYouTubeReleaseMap,
   onYouTubeClick,
   hoveredReleaseId,
   releaseToEntriesMap,
@@ -66,8 +65,6 @@ export function WlHomeV2SetlistTable({
   onPairWtedClick?: (entries: SetlistEntry[]) => void
   onBandcampClick?: (entry: SetlistEntry) => void
   onPairBandcampClick?: (entries: SetlistEntry[]) => void
-  /** entry_id -> the chosen YouTube release to link for that song (null/absent = none). */
-  entryYouTubeReleaseMap?: Record<string, ShowRelease>
   onYouTubeClick?: (release: ShowRelease) => void
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: ReleaseToEntriesMap
@@ -90,7 +87,7 @@ export function WlHomeV2SetlistTable({
   const showCanonColumns = show.show_canonid != null
   const showWtedColumn = setlist.some((e) => !!e.radio_id)
   const showMediaColumn = setlist.some(
-    (e) => !!e.bandcampTrack || !!entryYouTubeReleaseMap?.[e.entry_id],
+    (e) => !!e.bandcampTrack || !!e.youtubeRelease,
   )
   const showTimeColumn = setlist.some(
     (e) => (formatEntryLength(e.entry_length) ?? "") !== "",
@@ -288,9 +285,8 @@ export function WlHomeV2SetlistTable({
                         onWtedClick={onPairWtedClick}
                         onBandcampClick={onPairBandcampClick}
                         youtubeRelease={
-                          row.entries
-                            .map((e) => entryYouTubeReleaseMap?.[e.entry_id])
-                            .find(Boolean) ?? null
+                          row.entries.map((e) => e.youtubeRelease).find(Boolean) ??
+                          null
                         }
                         onYouTubeClick={onYouTubeClick}
                         showAdminUi={showAdminUi}
@@ -325,9 +321,7 @@ export function WlHomeV2SetlistTable({
                         onSongClick={onSongClick}
                         onWtedClick={onWtedClick}
                         onBandcampClick={onBandcampClick}
-                        youtubeRelease={
-                          entryYouTubeReleaseMap?.[row.entry.entry_id] ?? null
-                        }
+                        youtubeRelease={row.entry.youtubeRelease ?? null}
                         onYouTubeClick={onYouTubeClick}
                         showAdminUi={showAdminUi}
                         copiedEntryIds={copiedEntryIds}
