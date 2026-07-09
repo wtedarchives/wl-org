@@ -37,6 +37,14 @@ export interface Show {
   egn_sourced?: boolean | null
 }
 
+/** A Bandcamp track linked to a setlist entry (for the setlist page icon + embed). */
+export interface BandcampEntryTrack {
+  track_id: number
+  album_id: number
+  track_link: string
+  track_title: string | null
+}
+
 export interface SetlistEntry {
   entry_id: string
   entry_set: string
@@ -50,6 +58,8 @@ export interface SetlistEntry {
   entry_setorder: number
   entry_show: string
   radio_id?: string | null
+  /** Linked Bandcamp track for this entry (populated in fetchSetlistCore). */
+  bandcampTrack?: BandcampEntryTrack | null
   song_tour_count: string | null
   last_count: string | null
   song_id: string

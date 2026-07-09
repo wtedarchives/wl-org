@@ -13,6 +13,7 @@ import { entryHasSongStatsLines } from "@/components/dpro/setlist/setlist-entry-
 import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-last-cell"
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
+import { SetlistEntryBandcampCell } from "@/components/dpro/setlist/setlist-entry-bandcamp-cell"
 import {
   SetlistTruncatableCell,
   SetlistTruncatableHtmlCell,
@@ -41,6 +42,7 @@ export function WlHomeV2SetlistTableRow({
   displayNumber,
   showCanonColumns,
   showWtedColumn,
+  showBandcampColumn,
   isDesktop,
   isFirstOfRun,
   runSpan,
@@ -50,6 +52,7 @@ export function WlHomeV2SetlistTableRow({
   onJotyBadgeClick,
   onSongClick,
   onWtedClick,
+  onBandcampClick,
   showTimeColumn,
   showCoachColumn,
   showAdminUi,
@@ -67,6 +70,7 @@ export function WlHomeV2SetlistTableRow({
   displayNumber: number | null
   showCanonColumns: boolean
   showWtedColumn: boolean
+  showBandcampColumn: boolean
   showTimeColumn: boolean
   showCoachColumn: boolean
   isDesktop: boolean
@@ -78,6 +82,7 @@ export function WlHomeV2SetlistTableRow({
   onJotyBadgeClick?: (entry: SetlistEntry) => void
   onSongClick?: (entry: SetlistEntry) => void
   onWtedClick?: (entry: SetlistEntry) => void
+  onBandcampClick?: (entry: SetlistEntry) => void
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
@@ -209,6 +214,21 @@ export function WlHomeV2SetlistTableRow({
             <SetlistEntryWtedCell
               entry={entry}
               onWtedClick={onWtedClick}
+              showTooltips={isDesktop}
+              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+            />
+          </div>
+        </td>
+      : null}
+      {showBandcampColumn ?
+        <td
+          className="center"
+          onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
+        >
+          <div className="setlist-cell-inner">
+            <SetlistEntryBandcampCell
+              entry={entry}
+              onBandcampClick={onBandcampClick}
               showTooltips={isDesktop}
               tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
             />

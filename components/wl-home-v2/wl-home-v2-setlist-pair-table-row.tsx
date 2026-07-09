@@ -12,6 +12,7 @@ import { entriesHaveSongStatsLines } from "@/components/dpro/setlist/setlist-ent
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
+import { SetlistEntryBandcampCell } from "@/components/dpro/setlist/setlist-entry-bandcamp-cell"
 import { SetlistExpandButton } from "@/components/dpro/setlist/setlist-expand-button"
 import {
   SetlistTruncatableCell,
@@ -48,6 +49,7 @@ export function WlHomeV2SetlistPairTableRow({
   displayNumber,
   showCanonColumns,
   showWtedColumn,
+  showBandcampColumn,
   showTimeColumn,
   showCoachColumn,
   isDesktop,
@@ -61,6 +63,7 @@ export function WlHomeV2SetlistPairTableRow({
   onJotyBadgeClick,
   onSongClick,
   onWtedClick,
+  onBandcampClick,
   showAdminUi,
   copiedEntryIds,
   onNumberClick,
@@ -75,6 +78,7 @@ export function WlHomeV2SetlistPairTableRow({
   displayNumber: number | null
   showCanonColumns: boolean
   showWtedColumn: boolean
+  showBandcampColumn: boolean
   showTimeColumn: boolean
   showCoachColumn: boolean
   isDesktop: boolean
@@ -88,6 +92,7 @@ export function WlHomeV2SetlistPairTableRow({
   onJotyBadgeClick?: (entry: SetlistEntry) => void
   onSongClick?: (entries: SetlistEntry[]) => void
   onWtedClick?: (entries: SetlistEntry[]) => void
+  onBandcampClick?: (entries: SetlistEntry[]) => void
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>
   onNumberClick?: (entryId: string) => void
@@ -105,6 +110,9 @@ export function WlHomeV2SetlistPairTableRow({
   const combinedLength = pairCombinedLength(entries)
   const hasWted = pairHasWted(entries)
   const wtedProxyEntry = entries.find((e) => e.radio_id) ?? primaryEntry
+  const hasBandcamp = entries.some((e) => !!e.bandcampTrack)
+  const bandcampProxyEntry =
+    entries.find((e) => e.bandcampTrack) ?? primaryEntry
 
   const railClass = cn(
     "set-section-rail",
@@ -240,6 +248,25 @@ export function WlHomeV2SetlistPairTableRow({
                   onWtedClick ?
                     (_entry) => onWtedClick(entries)
                   : undefined
+                }
+                showTooltips={isDesktop}
+                tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
+              />
+            : null}
+          </div>
+        </td>
+      : null}
+      {showBandcampColumn ?
+        <td
+          className="center"
+          onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
+        >
+          <div className="setlist-cell-inner">
+            {hasBandcamp ?
+              <SetlistEntryBandcampCell
+                entry={bandcampProxyEntry}
+                onBandcampClick={
+                  onBandcampClick ? () => onBandcampClick(entries) : undefined
                 }
                 showTooltips={isDesktop}
                 tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}

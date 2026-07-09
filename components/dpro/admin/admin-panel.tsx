@@ -23,6 +23,7 @@ import { AdminMedia } from "./admin-media"
 import { AdminVenue } from "./admin-venue"
 import { AdminSubvenue } from "./admin-subvenue"
 import { AdminWted } from "./admin-wted"
+import { AdminBandcamp } from "./admin-bandcamp"
 import { AdminDiscography } from "./admin-discography"
 
 export function AdminPanel() {
@@ -194,6 +195,9 @@ export function AdminPanel() {
           </TabsContent>
           <TabsContent value="WTED" className="mt-0 w-full p-3 sm:p-4">
             <AdminWted />
+          </TabsContent>
+          <TabsContent value="Bandcamp" className="mt-0 w-full p-3 sm:p-4">
+            <AdminBandcamp />
           </TabsContent>
         </div>
       </Tabs>

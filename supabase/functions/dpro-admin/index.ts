@@ -151,6 +151,40 @@ async function handleAction(
       return { data: true }
     }
 
+    case "bandcamp_tracks_upsert": {
+      const entry_id = body.entry_id as string | undefined
+      const track_link = body.track_link as string | undefined
+      const track_id = body.track_id as number | undefined
+      const album_id = body.album_id as number | undefined
+      if (!entry_id || !track_link || track_id == null || album_id == null) {
+        return { error: "Invalid payload" }
+      }
+      const row = {
+        entry_id,
+        track_link,
+        track_id,
+        album_id,
+        track_title: (body.track_title as string | null) ?? null,
+        album_url: (body.album_url as string | null) ?? null,
+      }
+      const { error } = await db
+        .from("bandcamp_tracks")
+        .upsert(row, { onConflict: "entry_id,track_id" })
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "bandcamp_tracks_delete": {
+      const id = body.id as string | undefined
+      const entry_id = body.entry_id as string | undefined
+      if (!id && !entry_id) return { error: "Missing id or entry_id" }
+      let q = db.from("bandcamp_tracks").delete()
+      q = id ? q.eq("id", id) : q.eq("entry_id", entry_id as string)
+      const { error } = await q
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
     case "shows_insert": {
       const row = body.row as Record<string, unknown> | undefined
       if (!row) return { error: "Missing row" }

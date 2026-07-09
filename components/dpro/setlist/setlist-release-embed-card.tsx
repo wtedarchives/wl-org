@@ -33,6 +33,8 @@ interface SetlistReleaseEmbedCardProps {
   release: ShowRelease
   type: "bandcamp" | "youtube"
   bandcampAlbumId: string | null
+  /** When set, the album embed opens positioned at this specific track. */
+  bandcampTrackId?: number | null
   bandcampLoading?: boolean
   onClose: () => void
   isClosing?: boolean
@@ -44,6 +46,7 @@ export function SetlistReleaseEmbedCard({
   release,
   type,
   bandcampAlbumId,
+  bandcampTrackId = null,
   bandcampLoading = false,
   onClose,
   isClosing = false,
@@ -66,7 +69,9 @@ export function SetlistReleaseEmbedCard({
 
   const bandcampEmbedUrl =
     type === "bandcamp" && bandcampAlbumId
-      ? `https://bandcamp.com/EmbeddedPlayer/album=${bandcampAlbumId}/size=large/bgcol=333333/linkcol=0fa2d1/artwork=small/transparent=true/`
+      ? `https://bandcamp.com/EmbeddedPlayer/album=${bandcampAlbumId}/size=large/bgcol=333333/linkcol=0fa2d1/artwork=small/${
+          bandcampTrackId ? `track=${bandcampTrackId}/` : ""
+        }transparent=true/`
       : null
 
   const showContent =

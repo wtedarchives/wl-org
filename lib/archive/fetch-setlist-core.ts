@@ -89,5 +89,29 @@ export async function fetchSetlistCore(
     mapSupabaseSetlistRowToEntry(entry),
   )
 
+  // Attach linked Bandcamp tracks (separate query, like setlist_entry_media).
+  const entryIds = setlist.map((e) => e.entry_id)
+  if (entryIds.length > 0) {
+    const { data: bandcampRows } = await client
+      .from("bandcamp_tracks")
+      .select("entry_id, track_id, album_id, track_link, track_title")
+      .in("entry_id", entryIds)
+    if (bandcampRows && bandcampRows.length > 0) {
+      const byEntry = new Map<string, (typeof bandcampRows)[number]>()
+      for (const row of bandcampRows) byEntry.set(row.entry_id as string, row)
+      for (const entry of setlist) {
+        const row = byEntry.get(entry.entry_id)
+        entry.bandcampTrack = row
+          ? {
+              track_id: Number(row.track_id),
+              album_id: Number(row.album_id),
+              track_link: row.track_link as string,
+              track_title: (row.track_title as string | null) ?? null,
+            }
+          : null
+      }
+    }
+  }
+
   return { show, setlist }
 }

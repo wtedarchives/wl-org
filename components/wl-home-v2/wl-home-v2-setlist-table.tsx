@@ -42,6 +42,8 @@ export function WlHomeV2SetlistTable({
   onPairSongClick,
   onWtedClick,
   onPairWtedClick,
+  onBandcampClick,
+  onPairBandcampClick,
   hoveredReleaseId,
   releaseToEntriesMap,
   hoveredCategory,
@@ -60,6 +62,8 @@ export function WlHomeV2SetlistTable({
   ) => void
   onWtedClick?: (entry: SetlistEntry) => void
   onPairWtedClick?: (entries: SetlistEntry[]) => void
+  onBandcampClick?: (entry: SetlistEntry) => void
+  onPairBandcampClick?: (entries: SetlistEntry[]) => void
   hoveredReleaseId?: string | null
   releaseToEntriesMap?: ReleaseToEntriesMap
   hoveredCategory?: string | null
@@ -80,6 +84,7 @@ export function WlHomeV2SetlistTable({
 
   const showCanonColumns = show.show_canonid != null
   const showWtedColumn = setlist.some((e) => !!e.radio_id)
+  const showBandcampColumn = setlist.some((e) => !!e.bandcampTrack)
   const showTimeColumn = setlist.some(
     (e) => (formatEntryLength(e.entry_length) ?? "") !== "",
   )
@@ -149,6 +154,7 @@ export function WlHomeV2SetlistTable({
     1 +
     1 +
     (showWtedColumn ? 1 : 0) +
+    (showBandcampColumn ? 1 : 0) +
     (showTimeColumn ? 1 : 0) +
     (showCanonColumns ? 3 : 0) +
     1 +
@@ -183,6 +189,7 @@ export function WlHomeV2SetlistTable({
             <WlHomeV2SetlistTableHead
               showDiscographySetUi={showDiscographySetUi}
               showWtedColumn={showWtedColumn}
+              showBandcampColumn={showBandcampColumn}
               showTimeColumn={showTimeColumn}
               showCanonColumns={showCanonColumns}
               showCoachColumn={showCoachColumn}
@@ -252,6 +259,7 @@ export function WlHomeV2SetlistTable({
                         displayNumber={displayNumbers[index] ?? null}
                         showCanonColumns={showCanonColumns}
                         showWtedColumn={showWtedColumn}
+                        showBandcampColumn={showBandcampColumn}
                         showTimeColumn={showTimeColumn}
                         showCoachColumn={showCoachColumn}
                         isDesktop={isDesktop}
@@ -271,6 +279,7 @@ export function WlHomeV2SetlistTable({
                             (entries) => onPairSongClick(entries, row.pair)
                           : undefined}
                         onWtedClick={onPairWtedClick}
+                        onBandcampClick={onPairBandcampClick}
                         showAdminUi={showAdminUi}
                         copiedEntryIds={copiedEntryIds}
                         onNumberClick={onNumberClick}
@@ -288,6 +297,7 @@ export function WlHomeV2SetlistTable({
                         }
                         showCanonColumns={showCanonColumns}
                         showWtedColumn={showWtedColumn}
+                        showBandcampColumn={showBandcampColumn}
                         showTimeColumn={showTimeColumn}
                         showCoachColumn={showCoachColumn}
                         isDesktop={isDesktop}
@@ -301,6 +311,7 @@ export function WlHomeV2SetlistTable({
                         onJotyBadgeClick={onJotyBadgeClick}
                         onSongClick={onSongClick}
                         onWtedClick={onWtedClick}
+                        onBandcampClick={onBandcampClick}
                         showAdminUi={showAdminUi}
                         copiedEntryIds={copiedEntryIds}
                         onNumberClick={onNumberClick}

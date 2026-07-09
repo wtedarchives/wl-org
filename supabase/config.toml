@@ -4,6 +4,9 @@
 [functions.bandcamp-album-id]
 verify_jwt = false
 
+[functions.bandcamp-album-tracks]
+verify_jwt = false
+
 [functions.radio-co-playlists]
 verify_jwt = true
 

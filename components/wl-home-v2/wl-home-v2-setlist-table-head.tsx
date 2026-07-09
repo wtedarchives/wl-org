@@ -14,6 +14,7 @@ import {
 type WlHomeV2SetlistTableHeadProps = {
   showDiscographySetUi: boolean
   showWtedColumn: boolean
+  showBandcampColumn: boolean
   showTimeColumn: boolean
   showCanonColumns: boolean
   showCoachColumn: boolean
@@ -29,6 +30,7 @@ type WlHomeV2SetlistTableHeadProps = {
 export function WlHomeV2SetlistTableHead({
   showDiscographySetUi,
   showWtedColumn,
+  showBandcampColumn,
   showTimeColumn,
   showCanonColumns,
   showCoachColumn,
@@ -82,6 +84,23 @@ export function WlHomeV2SetlistTableHead({
                 </TooltipContent>
               </Tooltip>
             : "WTED"}
+          </th>
+        : null}
+        {showBandcampColumn ?
+          <th className="center">
+            {isDesktop ?
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="setlist-th-help">Bandcamp</span>
+                </TooltipTrigger>
+                <TooltipContent
+                  className="setlist-header-tooltip setlist-header-tooltip--tight"
+                  {...SETLIST_HEADER_TOOLTIP_CONTENT}
+                >
+                  Use the icons below to play songs on Bandcamp.
+                </TooltipContent>
+              </Tooltip>
+            : "Bandcamp"}
           </th>
         : null}
         {showTimeColumn ?

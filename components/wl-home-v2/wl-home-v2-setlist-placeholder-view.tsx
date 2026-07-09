@@ -26,6 +26,7 @@ import { WlHomeV2SetlistPlaceholderCrumbsBar } from "@/components/wl-home-v2/wl-
 import { WlHomeV2SetlistPlaceholderMainHeader } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-main-header"
 import type { WlHomeV2SetlistPlaceholderToolsProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
 import type { WlHomeV2SetlistPlaceholderViewProps } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-view.types"
+import type { BandcampEntryTrack, SetlistEntry } from "@/types/setlist"
 import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
 import { isValidWlCommunityTopicUrl } from "@/lib/wl-community-topic-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
@@ -87,10 +88,29 @@ export function WlHomeV2SetlistPlaceholderView({
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(
     null,
   )
+  const [activeBandcampTrack, setActiveBandcampTrack] =
+    useState<BandcampEntryTrack | null>(null)
 
   useEffect(() => {
     setHoveredReleaseId(null)
+    setActiveBandcampTrack(null)
   }, [showId])
+
+  const handleBandcampClick = (entry: SetlistEntry) => {
+    setActiveBandcampTrack((prev) =>
+      prev && prev.track_id === entry.bandcampTrack?.track_id ?
+        null
+      : entry.bandcampTrack ?? null,
+    )
+  }
+  const handlePairBandcampClick = (entries: SetlistEntry[]) => {
+    const track = entries.find((e) => e.bandcampTrack)?.bandcampTrack ?? null
+    setActiveBandcampTrack((prev) =>
+      prev && prev.track_id === track?.track_id ? null : track,
+    )
+  }
+
+  const showMediaSection = releases.length > 0 || !!activeBandcampTrack
 
   const hasAverageRating = averageRating > 0
   const ratingValueDisplay = hasAverageRating ?
@@ -133,7 +153,7 @@ export function WlHomeV2SetlistPlaceholderView({
     (useCompactTools && showWlTopPosts)
 
   const showDesktopBelowTableRow =
-    !useCompactTools && (releases.length > 0 || showWlTopPosts)
+    !useCompactTools && (showMediaSection || showWlTopPosts)
 
   const showGroupLabel = show.show_group?.trim() ?? ""
   const venueLocation = show.show_venue_location?.trim() ?? ""
@@ -234,18 +254,24 @@ export function WlHomeV2SetlistPlaceholderView({
                   onPairSongClick={onPairSongClick}
                   onWtedClick={onWtedClick}
                   onPairWtedClick={onPairWtedClick}
+                  onBandcampClick={handleBandcampClick}
+                  onPairBandcampClick={handlePairBandcampClick}
                   hoveredReleaseId={hoveredReleaseId}
                   releaseToEntriesMap={releaseToEntriesMap}
                   hoveredCategory={hoveredCategory}
                 />
                 {showDesktopBelowTableRow ?
                   <div className="wl-home-v2-setlist-below-table-row">
-                    {releases.length > 0 ?
+                    {showMediaSection ?
                       <div className="wl-home-v2-setlist-below-table-media">
                         <SetlistMediaSection
                           releases={releases}
                           visualVariant="wl-home-v2"
                           onReleaseHover={setHoveredReleaseId}
+                          bandcampTrackEmbed={activeBandcampTrack}
+                          onCloseBandcampTrack={() =>
+                            setActiveBandcampTrack(null)
+                          }
                         />
                       </div>
                     : null}
@@ -255,11 +281,13 @@ export function WlHomeV2SetlistPlaceholderView({
                       </div>
                     : null}
                   </div>
-                : releases.length > 0 ?
+                : showMediaSection ?
                   <SetlistMediaSection
                     releases={releases}
                     visualVariant="wl-home-v2"
                     onReleaseHover={setHoveredReleaseId}
+                    bandcampTrackEmbed={activeBandcampTrack}
+                    onCloseBandcampTrack={() => setActiveBandcampTrack(null)}
                   />
                 : null}
                 {!useCompactTools && showEgnAttribution ?
