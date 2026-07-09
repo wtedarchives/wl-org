@@ -6,23 +6,29 @@ interface ShowSlice {
   show_id: string
 }
 
+function showIdsKey(filteredShows: ShowSlice[]): string {
+  return filteredShows.map((s) => s.show_id).join("\0")
+}
+
 export function useShowRatings(filteredShows: ShowSlice[]) {
   const [showRatings, setShowRatings] = useState<Record<string, number>>({})
+  const idsKey = showIdsKey(filteredShows)
 
   useEffect(() => {
+    const showIds = idsKey ? idsKey.split("\0") : []
+
     async function fetchShowRatings() {
       if (!supabase) {
-        setShowRatings({})
+        setShowRatings((prev) => (Object.keys(prev).length === 0 ? prev : {}))
         return
       }
-      if (filteredShows.length === 0) {
-        setShowRatings({})
+      if (showIds.length === 0) {
+        setShowRatings((prev) => (Object.keys(prev).length === 0 ? prev : {}))
         return
       }
 
       try {
         const client = supabase
-        const showIds = filteredShows.map((s) => s.show_id)
 
         const { data, error } = await client
           .from("show_ratings")
@@ -32,16 +38,18 @@ export function useShowRatings(filteredShows: ShowSlice[]) {
         if (error) throw error
 
         const ratings: Record<string, number> = {}
-        filteredShows.forEach((show) => {
+        showIds.forEach((showId) => {
           const showRatingsData =
-            data?.filter((r) => r.show_id === show.show_id) ?? []
+            data?.filter((r) => r.show_id === showId) ?? []
           if (showRatingsData.length > 0) {
             const average =
-              showRatingsData.reduce((sum, r) => sum + (r as any).rating, 0) /
-              showRatingsData.length
-            ratings[show.show_id] = Math.round(average * 100) / 100
+              showRatingsData.reduce(
+                (sum, r) => sum + (r as { rating: number }).rating,
+                0,
+              ) / showRatingsData.length
+            ratings[showId] = Math.round(average * 100) / 100
           } else {
-            ratings[show.show_id] = 0
+            ratings[showId] = 0
           }
         })
 
@@ -53,8 +61,7 @@ export function useShowRatings(filteredShows: ShowSlice[]) {
     }
 
     fetchShowRatings()
-  }, [filteredShows])
+  }, [idsKey])
 
   return { showRatings }
 }
-

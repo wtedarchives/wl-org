@@ -1,0 +1,449 @@
+import {
+  isRecordingSessionEmbedShow,
+  isRecordingSessionShow,
+} from "@/lib/show-recording-session-filter"
+import { supabase } from "@/lib/supabase"
+import type {
+  LastPlayed,
+  PlacementStat,
+  SongData,
+  SongPerformance,
+  SongStats,
+} from "@/types/song"
+
+function getAlaskaDateString(): string {
+  return new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Anchorage",
+  })
+}
+
+/** PostgREST may embed `shows` as one object or a single-element array. */
+type SongEmbedShow = {
+  show_id: string
+  show_date: string
+  show_group: string
+  show_subvenue: string
+  show_venue_location: string
+  show_tour: string | null
+  show_canonid?: number | null
+  show_detail?: string | null
+  show_subvenue_venue?: string | null
+  subvenues?: unknown
+}
+
+function normalizeSongEmbedShow(
+  raw: SongEmbedShow | SongEmbedShow[] | null | undefined,
+): SongEmbedShow | undefined {
+  if (raw == null) return undefined
+  return Array.isArray(raw) ? raw[0] : raw
+}
+
+export interface SongCoreData {
+  song: SongData
+  performances: SongPerformance[]
+  stats: SongStats
+  placementStats: PlacementStat[]
+  lastPlayed: LastPlayed | null
+}
+
+const EMPTY_STATS: SongStats = {
+  groupCounts: [],
+  rarity: "",
+  totalShows: 0,
+  hasRarity: false,
+}
+
+async function calculateStats(
+  client: NonNullable<typeof supabase>,
+  perfs: SongPerformance[],
+): Promise<SongStats> {
+  const uniqueShowsMap = new Map<string, Set<string>>()
+  const uniqueShowIds = new Set(perfs.map((p) => p.show_id))
+
+  perfs.forEach((perf) => {
+    if (!uniqueShowsMap.has(perf.show_group)) {
+      uniqueShowsMap.set(perf.show_group, new Set())
+    }
+    uniqueShowsMap.get(perf.show_group)?.add(perf.show_id)
+  })
+
+  const groupCounts = Array.from(uniqueShowsMap)
+    .map(([group, shows]) => ({ group, count: shows.size }))
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count
+      return a.group.localeCompare(b.group)
+    })
+
+  const { data: showsWithCanonIds, error: showsError } = await client
+    .from("shows")
+    .select("show_canonid")
+    .in("show_id", Array.from(uniqueShowIds))
+    .not("show_canonid", "is", null)
+
+  if (showsError || !showsWithCanonIds || showsWithCanonIds.length === 0) {
+    return {
+      groupCounts,
+      rarity: "",
+      totalShows: uniqueShowIds.size,
+      hasRarity: false,
+    }
+  }
+
+  const minCanonId = Math.min(
+    ...showsWithCanonIds.map((s) => s.show_canonid as number),
+  )
+
+  const alaskaDate = getAlaskaDateString()
+
+  const { data: mostRecentShow, error: maxError } = await client
+    .from("shows")
+    .select("show_canonid, show_date, show_detail")
+    .not("show_canonid", "is", null)
+    .lte("show_date", alaskaDate)
+    .order("show_date", { ascending: false })
+    .order("show_canonid", { ascending: false })
+    .order("show_group", { ascending: true })
+    .limit(20)
+
+  const mostRecentNonSession = (mostRecentShow ?? []).find(
+    (s) => !isRecordingSessionShow(s),
+  )
+
+  if (maxError || !mostRecentNonSession) {
+    return {
+      groupCounts,
+      rarity: "",
+      totalShows: uniqueShowIds.size,
+      hasRarity: false,
+    }
+  }
+
+  const maxCanonId = mostRecentNonSession.show_canonid as number
+  const showRange = maxCanonId - minCanonId + 1
+  const uniqueShowCount = showsWithCanonIds.length
+  const rarityPercentage = (uniqueShowCount / showRange) * 100
+
+  return {
+    groupCounts,
+    rarity: `${rarityPercentage.toFixed(2)}%`,
+    totalShows: uniqueShowIds.size,
+    hasRarity: true,
+  }
+}
+
+async function fetchPlacementStats(
+  client: NonNullable<typeof supabase>,
+  songName: string,
+): Promise<PlacementStat[]> {
+  try {
+    const { data: placementOrders, error: placementError } = await client
+      .from("placements")
+      .select("placements, placement_order")
+
+    if (placementError) throw placementError
+
+    const placementOrderMap: Record<string, number> = {}
+    if (placementOrders) {
+      placementOrders.forEach(
+        (p: { placements: string; placement_order: number | null }) => {
+          if (p.placement_order !== null) {
+            placementOrderMap[p.placements] = p.placement_order
+          }
+        },
+      )
+    }
+
+    const { data: canonPerformancesRaw, error } = await client
+      .from("setlist_entries")
+      .select(
+        `
+            entry_placement,
+            shows!inner (
+              show_canonid,
+              show_detail
+            )
+          `,
+      )
+      .eq("entry_song", songName)
+      .not("shows.show_canonid", "is", null)
+
+    if (error) throw error
+
+    const canonPerformances = (canonPerformancesRaw ?? []).filter(
+      (perf: { shows?: unknown }) =>
+        !isRecordingSessionEmbedShow(
+          perf.shows as
+            | { show_detail?: string | null }
+            | Array<{ show_detail?: string | null }>
+            | null,
+        ),
+    )
+
+    if (!canonPerformances || canonPerformances.length === 0) {
+      return []
+    }
+
+    const placementCounts: Record<string, number> = {}
+    canonPerformances.forEach((perf: { entry_placement: string }) => {
+      const placement = perf.entry_placement
+      placementCounts[placement] = (placementCounts[placement] || 0) + 1
+    })
+
+    const totalPerformances = canonPerformances.length
+    return Object.entries(placementCounts)
+      .map(([placement, count]) => ({
+        placement,
+        count,
+        percentage: (count / totalPerformances) * 100,
+        order: placementOrderMap[placement],
+      }))
+      .sort((a, b) => b.count - a.count)
+  } catch (err) {
+    console.error("Error fetching placement stats:", err)
+    return []
+  }
+}
+
+async function fetchLastPlayed(
+  client: NonNullable<typeof supabase>,
+  songName: string,
+): Promise<LastPlayed | null> {
+  try {
+    const alaskaDate = getAlaskaDateString()
+
+    const { data: mostRecentShowRows, error: recentError } = await client
+      .from("shows")
+      .select("show_canonid, show_date, show_detail")
+      .not("show_canonid", "is", null)
+      .lte("show_date", alaskaDate)
+      .order("show_date", { ascending: false })
+      .order("show_canonid", { ascending: false })
+      .order("show_group", { ascending: true })
+      .limit(20)
+
+    const mostRecentShow = (mostRecentShowRows ?? []).find(
+      (s) => !isRecordingSessionShow(s),
+    )
+
+    if (recentError || !mostRecentShow) {
+      return null
+    }
+
+    const { data: lastPerformanceRows, error: lastError } = await client
+      .from("setlist_entries")
+      .select(
+        `
+            entry_show,
+            shows!inner (
+              show_id,
+              show_date,
+              show_canonid,
+              show_detail
+            )
+          `,
+      )
+      .eq("entry_song", songName)
+      .not("shows.show_canonid", "is", null)
+      .order("shows(show_canonid)", { ascending: false })
+      .limit(20)
+
+    if (lastError || !lastPerformanceRows?.length) {
+      return null
+    }
+
+    const lastPerformance = lastPerformanceRows.find(
+      (row) => !isRecordingSessionEmbedShow(row.shows),
+    )
+
+    if (!lastPerformance) {
+      return null
+    }
+
+    const showsRaw = lastPerformance.shows as
+      | { show_id: string; show_date: string; show_canonid: number }
+      | { show_id: string; show_date: string; show_canonid: number }[]
+    const showsRel = Array.isArray(showsRaw) ? showsRaw[0] : showsRaw
+    if (!showsRel) {
+      return null
+    }
+    const showsAgo =
+      (mostRecentShow.show_canonid as number) - showsRel.show_canonid + 1
+
+    return {
+      show_date: showsRel.show_date,
+      show_canonid: showsRel.show_canonid,
+      showsAgo,
+      show_id: showsRel.show_id,
+    }
+  } catch (err) {
+    console.error("Error fetching last played:", err)
+    return null
+  }
+}
+
+export async function fetchSongCore(
+  songId: string,
+): Promise<SongCoreData | null> {
+  if (!supabase) {
+    throw new Error("Supabase client is not configured")
+  }
+
+  const client = supabase
+
+  const { data: songData, error: songError } = await client
+    .from("songs")
+    .select(
+      `
+            song,
+            song_displayname,
+            song_category,
+            song_originalartist,
+            song_writer,
+            song_coachnotes,
+            song_lyrics,
+            categories (
+              category_type,
+              category_artwork
+            )
+          `,
+    )
+    .eq("song_id", songId)
+    .single()
+
+  if (songError) throw songError
+  if (!songData) {
+    return null
+  }
+
+  const song = songData as unknown as SongData
+  const songName = (songData as { song: string }).song
+
+  const { data: performanceData, error: performanceError } = await client
+    .from("setlist_entries")
+    .select(
+      `
+            entry_id,
+            entry_show,
+            radio_id,
+            entry_length,
+            entry_placement,
+            entry_coachnotes,
+            entry_segue,
+            entry_short,
+            entry_set,
+            entry_setnum,
+            shows_since_debut_num,
+            joty_results (
+              round_achieved
+            ),
+            shows (
+              show_date,
+              show_group,
+              show_subvenue,
+              show_venue_location,
+              show_tour,
+              show_id,
+              show_canonid,
+              show_detail,
+              subvenues:show_subvenue(
+                venues:subvenue_venue(
+                  venue_id
+                )
+              )
+            ),
+            setlist_entry_guests (
+              guest_id,
+              guests (
+                guest_displayname,
+                guest_canonid,
+                guest_instrument,
+                guest_category
+              )
+            )
+          `,
+    )
+    .eq("entry_song", songName)
+    .order("entry_show", { ascending: true })
+
+  if (performanceError) throw performanceError
+
+  const processedPerformances = (performanceData ?? [])
+    .filter((perf: Record<string, unknown>) => {
+      const showsRel = normalizeSongEmbedShow(
+        perf.shows as SongEmbedShow | SongEmbedShow[] | undefined,
+      )
+      return !isRecordingSessionShow(showsRel)
+    })
+    .map((perf: Record<string, unknown>) => {
+      const showsRel = normalizeSongEmbedShow(
+        perf.shows as SongEmbedShow | SongEmbedShow[] | undefined,
+      )
+
+      const subvenuesVal = showsRel?.subvenues
+      const venueId =
+        (Array.isArray(subvenuesVal)
+          ? subvenuesVal[0]?.venues?.venue_id
+          : (subvenuesVal as { venues?: { venue_id: string } } | undefined)
+              ?.venues?.venue_id) ?? null
+
+      return {
+        entry_id: perf.entry_id,
+        radio_id: (perf.radio_id as string | null | undefined) ?? null,
+        show_id: showsRel?.show_id ?? "",
+        show_date: showsRel?.show_date ?? "",
+        show_group: showsRel?.show_group ?? "",
+        show_subvenue: showsRel?.show_subvenue ?? "",
+        show_venue_location: showsRel?.show_venue_location ?? "",
+        show_subvenue_venue: showsRel?.show_subvenue_venue ?? null,
+        venue_id: venueId,
+        show_tour: showsRel?.show_tour ?? null,
+        show_canonid: showsRel?.show_canonid ?? null,
+        entry_length: (perf.entry_length as string | null) ?? null,
+        entry_placement: (perf.entry_placement as string) ?? "",
+        entry_coachnotes: (perf.entry_coachnotes as string | null) ?? null,
+        entry_segue: (perf.entry_segue as string | null) ?? null,
+        entry_short: (perf.entry_short as string | null) ?? null,
+        entry_set: (perf.entry_set as string) ?? "",
+        entry_setnum: perf.entry_setnum ?? 0,
+        entry_song: songName,
+        joty_round:
+          (
+            perf.joty_results as { round_achieved: string | null } | undefined
+          )?.round_achieved ?? null,
+        shows_since_debut_num:
+          (perf.shows_since_debut_num as number | null) ?? null,
+        guests:
+          (
+            perf.setlist_entry_guests as Array<{
+              guest_id: string
+              guests: {
+                guest_displayname: string
+                guest_canonid: number
+                guest_instrument: string
+                guest_category?: string | null
+              }
+            }>
+          )?.map((g) => ({
+            guest_id: g.guest_id,
+            guest_display_name: g.guests.guest_displayname,
+            guest_canonid: g.guests.guest_canonid,
+            guest_instrument: g.guests.guest_instrument,
+            guest_category: g.guests.guest_category ?? null,
+          })) ?? [],
+      }
+    }) as SongPerformance[]
+
+  const stats = await calculateStats(client, processedPerformances)
+  const placementStats = await fetchPlacementStats(client, songName)
+  const lastPlayed = await fetchLastPlayed(client, songName)
+
+  return {
+    song,
+    performances: processedPerformances,
+    stats,
+    placementStats,
+    lastPlayed,
+  }
+}
+
+export { EMPTY_STATS }

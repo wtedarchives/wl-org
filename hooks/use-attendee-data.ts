@@ -6,25 +6,35 @@ interface ShowSlice {
   show_id: string
 }
 
+function showIdsKey(filteredShows: ShowSlice[]): string {
+  return filteredShows.map((s) => s.show_id).join("\0")
+}
+
 export function useAttendeeData(filteredShows: ShowSlice[]) {
   const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>(
     {},
   )
+  const idsKey = showIdsKey(filteredShows)
 
   useEffect(() => {
+    const showIds = idsKey ? idsKey.split("\0") : []
+
     async function fetchAttendeeCounts() {
       if (!supabase) {
-        setAttendeeCounts({})
+        setAttendeeCounts((prev) =>
+          Object.keys(prev).length === 0 ? prev : {},
+        )
         return
       }
-      if (filteredShows.length === 0) {
-        setAttendeeCounts({})
+      if (showIds.length === 0) {
+        setAttendeeCounts((prev) =>
+          Object.keys(prev).length === 0 ? prev : {},
+        )
         return
       }
 
       try {
         const client = supabase
-        const showIds = filteredShows.map((s) => s.show_id)
 
         const { count, error: countError } = await client
           .from("user_attended_shows")
@@ -55,8 +65,8 @@ export function useAttendeeData(filteredShows: ShowSlice[]) {
         }
 
         const counts: Record<string, number> = {}
-        filteredShows.forEach((show) => {
-          counts[show.show_id] = 0
+        showIds.forEach((showId) => {
+          counts[showId] = 0
         })
 
         allData.forEach((record) => {
@@ -71,8 +81,7 @@ export function useAttendeeData(filteredShows: ShowSlice[]) {
     }
 
     fetchAttendeeCounts()
-  }, [filteredShows])
+  }, [idsKey])
 
   return { attendeeCounts }
 }
-

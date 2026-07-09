@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 
+import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { SetlistEntryGuestsCell } from "@/components/dpro/setlist/setlist-entry-guests-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
 import {
@@ -81,17 +82,17 @@ export function PerfArchiveTableRow({
         {showTooltips ?
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link href={getSetlistArchiveUrl(perf.show_id)}>
+              <ArchivePrefetchLink href={getSetlistArchiveUrl(perf.show_id)}>
                 {formatSetlistDate(perf.show_date)}
-              </Link>
+              </ArchivePrefetchLink>
             </TooltipTrigger>
             <TooltipContent {...SETLIST_V2_ROW_TOOLTIP_CONTENT}>
               <PerformanceTooltipContent fullData={perf} />
             </TooltipContent>
           </Tooltip>
-        : <Link href={getSetlistArchiveUrl(perf.show_id)}>
+        : <ArchivePrefetchLink href={getSetlistArchiveUrl(perf.show_id)}>
             {formatSetlistDate(perf.show_date)}
-          </Link>
+          </ArchivePrefetchLink>
         }
       </td>
       <td className="dim">{perf.show_group}</td>
@@ -144,12 +145,12 @@ export function PerfArchiveTableRow({
               <span className="perf-table-song-segue">→</span>
             : null}
           </span>
-        : <Link
+        : <ArchivePrefetchLink
             href={getSetlistArchiveUrl(perf.show_id)}
             className="perf-table-song-tease"
           >
             &gt;
-          </Link>
+          </ArchivePrefetchLink>
         }
       </td>
       {showWtedColumn ?

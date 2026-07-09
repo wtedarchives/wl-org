@@ -1,6 +1,7 @@
 "use client"
 
 
+import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
@@ -144,12 +145,12 @@ export function YearShowRow({
         </TooltipProvider>
       </TableCell>
       <TableCell className="whitespace-nowrap !px-2 !py-0.5 text-center text-[11px] font-medium tabular-nums">
-        <Link
+        <ArchivePrefetchLink
           href={getSetlistArchiveUrl(show.show_id)}
           className="hover:underline"
         >
           {formatShowDate(show.show_date)}
-        </Link>
+        </ArchivePrefetchLink>
       </TableCell>
       {session ? (
         <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
@@ -204,13 +205,13 @@ export function YearShowRow({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
+                  <ArchivePrefetchLink
                     href={getSetlistArchiveUrl(show.show_id)}
                     aria-label="View setlist"
                     className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                   >
                     <FileAudio className="size-3.5" aria-hidden />
-                  </Link>
+                  </ArchivePrefetchLink>
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <span className="text-[11px]">Setlist scan</span>
@@ -228,13 +229,13 @@ export function YearShowRow({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
+                  <ArchivePrefetchLink
                     href={getSetlistArchiveUrl(show.show_id)}
                     aria-label="View releases"
                     className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
                   >
                     <Broadcast className="size-3.5" aria-hidden />
-                  </Link>
+                  </ArchivePrefetchLink>
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <span className="text-[11px]">Media available</span>
@@ -291,7 +292,7 @@ export function YearShowRow({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
+                  <ArchivePrefetchLink
                     href={getSetlistArchiveUrl(show.show_id)}
                     aria-label="WTED Goose Radio"
                     className="inline-flex items-center justify-center rounded hover:opacity-90"
@@ -303,7 +304,7 @@ export function YearShowRow({
                       height={14}
                       className="h-3.5 w-auto block"
                     />
-                  </Link>
+                  </ArchivePrefetchLink>
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <span className="text-[11px]">WTED Goose Radio</span>

@@ -11,6 +11,7 @@ import {
   wlHomeSetlistPillClass,
 } from "@/hooks/use-wl-home-most-recent-show"
 import type { WlHomeMostRecentShow } from "@/hooks/use-wl-home-most-recent-show"
+import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home-v2-archive-random-show-button"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSetlistGameArchiveIndexUrl } from "@/lib/setlist-game-archive-url"
@@ -67,7 +68,7 @@ export function WlHomeV2TileArchive({
             .join(" ")}
         >
           {archiveSetlistPanelActive && archiveMostRecentShow ?
-            <Link
+            <ArchivePrefetchLink
               href={getSetlistArchiveUrl(archiveMostRecentShow.show_id)}
               className="widget-panel-hit-area"
               aria-label={`View setlist — ${archiveMostRecentShow.show_venue_location}${archiveMostRecentShow.show_subvenue ? `, ${archiveMostRecentShow.show_subvenue}` : ""}, ${formatWlHomeTileShowDate(archiveMostRecentShow.show_date)}`}
@@ -124,13 +125,13 @@ export function WlHomeV2TileArchive({
                           getSongArchiveUrl(entry.song_id)
                         : getSetlistArchiveUrl(archiveMostRecentShow.show_id)
                       return (
-                        <Link
+                        <ArchivePrefetchLink
                           key={`${entry.entry_song}-${entry.entry_set}-${entry.entry_setnum}-${setIndex}-${index}`}
                           href={href}
                           className={wlHomeSetlistPillClass(entry.entry_set)}
                         >
                           {label}
-                        </Link>
+                        </ArchivePrefetchLink>
                       )
                     })}
                   </div>

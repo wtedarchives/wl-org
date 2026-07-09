@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 
+import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { cn } from "@/lib/utils"
 import { getTourArchiveUrl } from "@/lib/tour-archive-url"
 import {
@@ -59,7 +60,7 @@ export function ToursCard({
             const [label, countPart] = tour.tour_count.split(" (")
             const countStr = countPart ? countPart.replace(")", "") : ""
             return (
-              <Link
+              <ArchivePrefetchLink
                 key={tour.tour_id || tour.tour_count}
                 href={getTourArchiveUrl(tour.tour_id)}
                 className="topic-row !items-center gap-2"
@@ -75,7 +76,7 @@ export function ToursCard({
                 {countStr ?
                   <span className="count">{countStr}</span>
                 : null}
-              </Link>
+              </ArchivePrefetchLink>
             )
           })
         }
@@ -116,12 +117,12 @@ export function ToursCard({
                     style={{ backgroundColor: tour.color }}
                   />
                   <div className="flex-1 px-2 py-1.5 leading-tight">
-                    <Link
+                    <ArchivePrefetchLink
                       href={getTourArchiveUrl(tour.tour_id)}
                       className="text-[11px] font-medium hover:underline"
                     >
                       {label}
-                    </Link>
+                    </ArchivePrefetchLink>
                     {countPart ? (
                       <span className="ml-1 text-[10px] text-muted-foreground">
                         ({countPart.replace(")", "")})

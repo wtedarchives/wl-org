@@ -1,6 +1,7 @@
 "use client"
 
 
+import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
@@ -96,12 +97,12 @@ export function MostRecentShowCard({
         <div className="text-[11px] leading-tight text-wl-white">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <Link
+              <ArchivePrefetchLink
                 href={getSetlistArchiveUrl(mostRecentShow.show_id)}
                 className="font-medium hover:underline"
               >
                 {formatShowDate(mostRecentShow.show_date)}
-              </Link>
+              </ArchivePrefetchLink>
               {" — "}
               {mostRecentShow.venue_id ? (
                 <Link
@@ -118,12 +119,12 @@ export function MostRecentShowCard({
               {showsWithSetlists.has(mostRecentShow.show_id) ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link
+                    <ArchivePrefetchLink
                       href={getSetlistArchiveUrl(mostRecentShow.show_id)}
                       aria-label="View setlist"
                     >
                       <FileMusic className="size-3.5 text-emerald-500" />
-                    </Link>
+                    </ArchivePrefetchLink>
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     View printed setlist
@@ -133,12 +134,12 @@ export function MostRecentShowCard({
               {showsWithReleases.has(mostRecentShow.show_id) ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link
+                    <ArchivePrefetchLink
                       href={getSetlistArchiveUrl(mostRecentShow.show_id)}
                       aria-label="View releases"
                     >
                       <AudioLines className="size-3.5 text-rose-500" />
-                    </Link>
+                    </ArchivePrefetchLink>
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     Show contains media
@@ -215,19 +216,20 @@ export function MostRecentShowCard({
                     </div>
                     <div className="flex flex-1 items-center justify-between gap-2 pl-2">
                       <span className="truncate font-medium">
-                        <Link
+                        <ArchivePrefetchLink
                           href={
                             entry.songs?.song_id
                               ? getSongArchiveUrl(entry.songs.song_id)
                               : "#"
                           }
+                          prefetchArchive={Boolean(entry.songs?.song_id)}
                           className="hover:underline"
                         >
                           <SongDisplayName
                             song={entry.entry_song}
                             songDisplayName={entry.songs?.song_displayname}
                           />
-                        </Link>
+                        </ArchivePrefetchLink>
                         {entry.entry_short && (
                           <span className="ml-2 text-[10px] font-medium text-destructive">
                             [{entry.entry_short}]
