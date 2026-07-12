@@ -45,6 +45,14 @@ export default function AuthCallbackPage() {
         const sig = params.get("sig")
 
         const finishWithoutSession = () => {
+          // Native app mode: report the failure to the app so its auth sheet closes.
+          if (sessionStorage.getItem("sso_app_mode") === "1") {
+            sessionStorage.removeItem("sso_app_mode")
+            sessionStorage.removeItem("sso_nonce")
+            sessionStorage.removeItem("sso_return_to")
+            window.location.href = "wtedradio://auth/callback?error=1"
+            return
+          }
           const wasLogout = consumeLogoutFlow()
           if (!wasLogout && hasSilentAttempted()) {
             console.log("[Auth] Silent SSO failed — user not logged into WLC")
@@ -109,6 +117,17 @@ export default function AuthCallbackPage() {
 
         // Store the JWT
         storeToken(data.token)
+
+        // Native app mode: hand the token to the iOS app via the custom scheme
+        // and stop here (the app captures it in ASWebAuthenticationSession).
+        if (sessionStorage.getItem("sso_app_mode") === "1") {
+          sessionStorage.removeItem("sso_app_mode")
+          sessionStorage.removeItem("sso_nonce")
+          sessionStorage.removeItem("sso_return_to")
+          window.location.href = `wtedradio://auth/callback?token=${encodeURIComponent(data.token)}`
+          return
+        }
+
         if (hasSilentAttempted()) {
           console.log("[Auth] Silent SSO succeeded — auto logged in")
           clearSilentAttempted()
