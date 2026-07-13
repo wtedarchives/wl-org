@@ -11,7 +11,8 @@ import { UserSlots } from "@/components/dpro/profile/user-slots"
 import { UserPersonnel } from "@/components/dpro/profile/user-personnel"
 import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
 import { ProfileSongsTabContent } from "@/components/dpro/profile/profile-songs-tab-content"
-import { SongRankings } from "@/components/dpro/profile/song-rankings"
+// Rankings tab temporarily disabled (see profile-stats-tab-config.ts):
+// import { SongRankings } from "@/components/dpro/profile/song-rankings"
 import type { ProfileStatsTabSlug } from "@/components/dpro/profile/profile-stats-tab-config"
 
 import "./profile-overview-tab.css"
@@ -137,15 +138,19 @@ export function ProfileStatsTabPanel({
           </div>
         </div>
       )
-    case "rankings":
-      if (!userId) return null
-      return (
-        <div className="wl-home-v2-profile-rankings-tab">
-          <div className="wl-home-v2-profile-rankings-tab__section">
-            <SongRankings userId={userId} isOwnProfile={isOwnProfile} />
-          </div>
-        </div>
-      )
+    // Rankings tab temporarily disabled — hidden from the tab bar via
+    // profile-stats-tab-config.ts (which also drops "rankings" from
+    // ProfileStatsTabSlug, so this case is intentionally commented out).
+    // Retained for easy re-enable:
+    // case "rankings":
+    //   if (!userId) return null
+    //   return (
+    //     <div className="wl-home-v2-profile-rankings-tab">
+    //       <div className="wl-home-v2-profile-rankings-tab__section">
+    //         <SongRankings userId={userId} isOwnProfile={isOwnProfile} />
+    //       </div>
+    //     </div>
+    //   )
     default:
       return null
   }

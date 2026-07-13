@@ -5,7 +5,10 @@ export const PROFILE_STATS_TABS = [
   { slug: "slots", label: "Slots" },
   { slug: "personnel", label: "Personnel" },
   { slug: "badges", label: "Badges" },
-  { slug: "rankings", label: "Rankings" },
+  // Rankings tab temporarily disabled — hidden from both personal and public
+  // profiles. Uncomment to restore (also re-enable the `case "rankings"` block
+  // and the `SongRankings` import in profile-stats-tab-panel.tsx).
+  // { slug: "rankings", label: "Rankings" },
 ] as const
 
 export type ProfileStatsTabSlug = (typeof PROFILE_STATS_TABS)[number]["slug"]
