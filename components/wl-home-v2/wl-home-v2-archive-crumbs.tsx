@@ -5,6 +5,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react"
+import Link from "next/link"
 
 import {
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
@@ -116,10 +117,10 @@ export function WlHomeV2ArchiveCrumbsTrail({
                 {renderLastCrumb?.(item, i) ?? item.label}
               </span>
             : isArchivesHub && openArchiveHub ?
-              <a href={item.href} onClick={onArchivesCrumbClick}>
+              <Link href={item.href} onClick={onArchivesCrumbClick}>
                 {item.label}
-              </a>
-            : <a href={item.href}>{item.label}</a>}
+              </Link>
+            : <Link href={item.href}>{item.label}</Link>}
           </Fragment>
         )
       })}

@@ -8,6 +8,7 @@ import { formatSetlistDate } from "@/lib/setlist-utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getRarityColor } from "@/lib/setlist-utils"
 import { SongPlacementPill } from "./song-placement-pill"
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 import type { SongData, SongStats, LastPlayed, PlacementStat } from "@/types/song"
 
 interface SongInfoProps {
@@ -27,6 +28,7 @@ export function SongInfo({
   onGroupClick,
   placementStats = [],
 }: SongInfoProps) {
+  const onLinkClick = useInternalLinkInterceptor()
   const hasGroupCounts = stats.groupCounts.length > 0
   const hasSongNotes = !!song.song_coachnotes
   const hasPlacementStats = placementStats.length > 0
@@ -155,6 +157,7 @@ export function SongInfo({
           </CardHeader>
           <CardContent className="py-3 px-3">
             <div
+              onClick={onLinkClick}
               className="text-xs leading-relaxed [&_a]:font-medium [&_a]:text-wl-orange [&_a]:hover:underline"
               dangerouslySetInnerHTML={{ __html: song.song_coachnotes ?? "" }}
             />

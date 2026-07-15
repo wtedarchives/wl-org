@@ -13,6 +13,7 @@ import {
 
 import { Plus } from "@phosphor-icons/react"
 
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 import { cn } from "@/lib/utils"
 
 /** `SetlistEntryGuestsCell` must use `nowrap` so measure / clip see real horizontal overflow. */
@@ -125,6 +126,7 @@ export function SetlistTruncatableCell({
   defaultExpanded = false,
 }: SetlistTruncatableCellProps) {
   const useExternalExpand = !!onExpandClick
+  const onLinkClick = useInternalLinkInterceptor()
   const blockPlain = cn(COACH_COLLAPSED_PLAIN_TYPO, blockPlainClassName)
   const blockCollapseHtmlClass =
     collapseHtmlClassName ??
@@ -204,6 +206,7 @@ export function SetlistTruncatableCell({
   return (
     <div
       ref={rootRef}
+      onClick={variant === "block" ? onLinkClick : undefined}
       className={cn(
         "min-w-0",
         maxWidthClass,

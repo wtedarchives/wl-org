@@ -4,6 +4,7 @@ import { shouldShowSetlistEntryShort } from "@/components/dpro/setlist/display-s
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { formatPerformanceLength } from "@/lib/song-performance-utils"
 import type { SongPerformance } from "@/types/song"
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 
 export interface PerformanceTooltipContentProps {
   fullData: SongPerformance
@@ -13,6 +14,7 @@ export interface PerformanceTooltipContentProps {
 export function PerformanceTooltipContent({
   fullData,
 }: PerformanceTooltipContentProps) {
+  const onLinkClick = useInternalLinkInterceptor()
   return (
     <div className="space-y-0.5 max-w-[250px]">
       <div className="font-medium">
@@ -42,6 +44,7 @@ export function PerformanceTooltipContent({
       </div>
       {fullData.entry_coachnotes && (
         <div
+          onClick={onLinkClick}
           className="italic"
           dangerouslySetInnerHTML={{ __html: fullData.entry_coachnotes }}
         />

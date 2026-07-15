@@ -187,12 +187,14 @@ export function WtedEpisodeGroupSpreadCard({
               className={cn(
                 "flex h-6 shrink-0 items-center justify-center overflow-hidden rounded-sm text-center text-xs font-semibold",
                 isV2 ?
-                  "wl-home-v2-setlist-song-spread-icon w-20 max-w-20 truncate px-0.5 text-[11px] text-white/70"
+                  "wl-home-v2-setlist-song-spread-icon w-20 max-w-20 px-0.5 text-[11px] text-white/70"
                 : "inline-block w-20 truncate rounded-md bg-muted px-1 py-0.5 text-muted-foreground",
               )}
               title={displayLabel}
             >
-              {displayLabel}
+              {isV2 ?
+                <span className="min-w-0 truncate">{displayLabel}</span>
+              : displayLabel}
             </span>
             {isV2 ?
               <div

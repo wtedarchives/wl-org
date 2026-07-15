@@ -14,6 +14,7 @@ import {
 } from "@/lib/setlist-utils"
 import { songDetailPlacementLegendSwatch } from "@/lib/song-detail-placement-chip"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 import type { LastPlayed, SongData, SongStats } from "@/types/song"
 
 export function WlHomeV2SongArchiveDetailInfoStrip({
@@ -46,6 +47,7 @@ export function WlHomeV2SongArchiveDetailInfoStrip({
   infoStripCardCount: number
   hasPlacements: boolean
 }) {
+  const onLinkClick = useInternalLinkInterceptor()
   return (
     <div
       className="info-strip"
@@ -168,6 +170,7 @@ export function WlHomeV2SongArchiveDetailInfoStrip({
             <h3>Coach&apos;s Notes</h3>
           </div>
           <div
+            onClick={onLinkClick}
             className="card-body"
             dangerouslySetInnerHTML={{ __html: song.song_coachnotes }}
           />

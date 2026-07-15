@@ -14,6 +14,7 @@ import { formatEntryLength, formatSetlistDate } from "@/lib/setlist-utils"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import { cn } from "@/lib/utils"
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 import type { SongPerformance } from "@/hooks/use-song-tour-performances"
 
 const SETLIST_SONG_PERF_COLUMN_COUNT = 6
@@ -27,6 +28,7 @@ export function SetlistSongPerformanceTableRow({
   onDismiss: () => void
   wlHomeV2YearsTable: boolean
 }) {
+  const onLinkClick = useInternalLinkInterceptor()
   return (
     <TableRow className={cn("align-middle", wlHomeV2YearsTable && "song-row")}>
       <TableCell
@@ -138,6 +140,7 @@ export function SetlistSongPerformanceTableRow({
       >
         {perf.entry_coachnotes ?
           <div
+            onClick={onLinkClick}
             className={cn(
               "w-fit max-w-full min-w-0 break-words [&_p]:my-0",
               wlHomeV2YearsTable ?

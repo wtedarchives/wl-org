@@ -1,3 +1,6 @@
+"use client"
+
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 import { cn } from "@/lib/utils"
 
 /** Show-level coach notes + callbacks under the setlist table (hidden when both empty). */
@@ -11,6 +14,7 @@ export function WlHomeV2SetlistCoachCallbacksFooter({
   callbacksHtml: string
   showDividerAfterTable?: boolean
 }) {
+  const onLinkClick = useInternalLinkInterceptor()
   const hasCoach = coachNotesHtml.length > 0
   const hasCallbacks = callbacksHtml.length > 0
   if (!hasCoach && !hasCallbacks) return null
@@ -23,6 +27,7 @@ export function WlHomeV2SetlistCoachCallbacksFooter({
         <div className="show-notes-inner">
           <div className="notes-label">{label}</div>
           <div
+            onClick={onLinkClick}
             className="show-notes-body"
             dangerouslySetInnerHTML={{ __html: html }}
           />

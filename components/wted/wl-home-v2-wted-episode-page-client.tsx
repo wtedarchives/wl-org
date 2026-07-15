@@ -11,8 +11,8 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
-import { SetlistJotyDrawer } from "@/components/dpro/setlist/setlist-joty-drawer"
 import { SetlistSongSpreadCard } from "@/components/dpro/setlist/setlist-song-spread-card"
+import { WlHomeV2SetlistJotyModal } from "@/components/wl-home-v2/wl-home-v2-setlist-joty-modal"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
@@ -48,6 +48,7 @@ export function WlHomeV2WtedEpisodePageClient() {
   const { session } = useAuth()
   const openLogin = useWlHomeV2OpenLogin()
   const wtedModalHeadingId = useId()
+  const jotyModalHeadingId = useId()
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
   const [hoveredPerformanceYear, setHoveredPerformanceYear] = useState<
     string | null
@@ -59,9 +60,9 @@ export function WlHomeV2WtedEpisodePageClient() {
   const [wtedModalEntry, setWtedModalEntry] = useState<SetlistEntry | null>(
     null,
   )
-  const [jotyDrawerOpen, setJotyDrawerOpen] = useState(false)
-  const [jotyDrawerYear, setJotyDrawerYear] = useState<number | null>(null)
-  const [jotyDrawerHighlightedEntryId, setJotyDrawerHighlightedEntryId] =
+  const [jotyModalOpen, setJotyModalOpen] = useState(false)
+  const [jotyModalYear, setJotyModalYear] = useState<number | null>(null)
+  const [jotyModalHighlightedEntryId, setJotyModalHighlightedEntryId] =
     useState<string | null>(null)
   const [layoutMode, setLayoutMode] = useState<WtedEpisodeLayoutMode>(null)
   const { episodeId, invalidParams } = useWtedEpisodePageId()
@@ -110,9 +111,9 @@ export function WlHomeV2WtedEpisodePageClient() {
   useEffect(() => {
     setWtedModalOpen(false)
     setWtedModalEntry(null)
-    setJotyDrawerOpen(false)
-    setJotyDrawerYear(null)
-    setJotyDrawerHighlightedEntryId(null)
+    setJotyModalOpen(false)
+    setJotyModalYear(null)
+    setJotyModalHighlightedEntryId(null)
   }, [episodeId])
 
   const closeWtedModal = useCallback(() => {
@@ -173,9 +174,9 @@ export function WlHomeV2WtedEpisodePageClient() {
         raw && !Number.isNaN(new Date(raw).getTime()) ?
           new Date(raw).getFullYear()
         : null
-      setJotyDrawerYear(year)
-      setJotyDrawerHighlightedEntryId(entry.entry_id)
-      setJotyDrawerOpen(true)
+      setJotyModalYear(year)
+      setJotyModalHighlightedEntryId(entry.entry_id)
+      setJotyModalOpen(true)
     },
     [rows],
   )
@@ -305,11 +306,12 @@ export function WlHomeV2WtedEpisodePageClient() {
                         />
                       </div>
                     </div>
-                    <SetlistJotyDrawer
-                      open={jotyDrawerOpen}
-                      onOpenChange={setJotyDrawerOpen}
-                      year={jotyDrawerYear}
-                      highlightedEntryId={jotyDrawerHighlightedEntryId}
+                    <WlHomeV2SetlistJotyModal
+                      open={jotyModalOpen}
+                      onClose={() => setJotyModalOpen(false)}
+                      year={jotyModalYear}
+                      highlightedEntryId={jotyModalHighlightedEntryId}
+                      headingId={jotyModalHeadingId}
                     />
                     <WlHomeV2SetlistWtedModal
                       open={wtedModalOpen}

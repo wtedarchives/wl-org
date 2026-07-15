@@ -5,6 +5,7 @@ import type { CSSProperties } from "react"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
+import { useInternalLinkInterceptor } from "@/hooks/use-internal-link-interceptor"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 
@@ -61,6 +62,7 @@ export function UserSongPerformancesSheet({
   )
 
   const badgeLabel = isOwnProfile ? "Your shows" : "Attended shows"
+  const onLinkClick = useInternalLinkInterceptor()
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -196,7 +198,10 @@ export function UserSongPerformancesSheet({
                       </TableCell>
                       <TableCell className="min-w-[400px] max-w-[400px] align-middle whitespace-normal px-2 py-1 text-[11px]">
                         {perf.entry_coachnotes && (
-                          <div className="text-[10px] leading-tight text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline [&_p]:my-0">
+                          <div
+                            onClick={onLinkClick}
+                            className="text-[10px] leading-tight text-muted-foreground [&_a]:font-semibold [&_a]:text-wl-orange [&_a]:hover:underline [&_p]:my-0"
+                          >
                             <span
                               dangerouslySetInnerHTML={{
                                 __html: perf.entry_coachnotes.trim(),
