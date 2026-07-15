@@ -8,8 +8,7 @@ import {
   buildSetlistNowPlayingDiscourseMessage,
   buildSetlistShowEventDiscourseMessage,
   isSetlistDiscourseShowEvent,
-  // TEMP (push testing): restore alongside the Discourse post blocks below.
-  // postBrainsDiscourseChatMessage,
+  postBrainsDiscourseChatMessage,
 } from "../_shared/discourse-brains-chat.ts"
 import {
   buildSetlistNowPlayingPushNotification,
@@ -729,13 +728,11 @@ async function handleAction(
         show.show_venue_location as string | null | undefined,
         event,
       )
-      // TEMP (push testing): Discourse posting disabled so test clicks don't
-      // flood the chat channel. Restore this block before production.
-      // const posted = await postBrainsDiscourseChatMessage(
-      //   BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
-      //   message,
-      // )
-      // if (!posted.ok) return { error: posted.error }
+      const posted = await postBrainsDiscourseChatMessage(
+        BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+        message,
+      )
+      if (!posted.ok) return { error: posted.error }
       const pushPayload = buildSetlistShowEventPushNotification(
         show_id,
         String(show.show_date ?? ""),
@@ -790,13 +787,11 @@ async function handleAction(
         Number(entry.entry_setnum),
         entry.entry_song as string | null | undefined,
       )
-      // TEMP (push testing): Discourse posting disabled so test clicks don't
-      // flood the chat channel. Restore this block before production.
-      // const posted = await postBrainsDiscourseChatMessage(
-      //   BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
-      //   message,
-      // )
-      // if (!posted.ok) return { error: posted.error }
+      const posted = await postBrainsDiscourseChatMessage(
+        BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+        message,
+      )
+      if (!posted.ok) return { error: posted.error }
       const pushPayload = buildSetlistNowPlayingPushNotification(
         String(entry.entry_show),
         String(show.show_date ?? ""),
