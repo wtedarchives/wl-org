@@ -4,12 +4,10 @@ import { useEffect, useId, useState } from "react"
 import { Check } from "@phosphor-icons/react"
 
 import { ToggleSwitch } from "@/components/dpro/setlistgame/song-selection/toggle-switch"
-import { useAuth } from "@/components/auth-context"
 import { cn } from "@/lib/utils"
 import { useSetlistCombinedRowsPreferenceContext } from "@/components/wl-home-v2/setlist-combined-rows-preference-context"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { WlHomeV2SettingsSetlistPreview } from "@/components/wl-home-v2/wl-home-v2-settings-setlist-preview"
-import { usePushNotificationsPreference } from "@/hooks/use-push-notifications-preference"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
 import "./wl-home-v2-settings.css"
@@ -26,34 +24,24 @@ export function WlHomeV2SettingsModal({
   headingId,
 }: WlHomeV2SettingsModalProps) {
   const statusId = useId()
-  const { session } = useAuth()
   const {
     expandCombinedOnLoad,
     saveExpandCombinedOnLoad,
     preferenceLoading,
     preferenceSaving,
   } = useSetlistCombinedRowsPreferenceContext()
-  const {
-    pushEnabled,
-    savePushEnabled,
-    loading: pushLoading,
-    saving: pushSaving,
-    supportState,
-  } = usePushNotificationsPreference(session?.profileId, session?.token)
 
   const [draftExpanded, setDraftExpanded] = useState(expandCombinedOnLoad)
-  const [draftPushEnabled, setDraftPushEnabled] = useState(pushEnabled)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saveJustSucceeded, setSaveJustSucceeded] = useState(false)
 
   useEffect(() => {
     if (open) {
       setDraftExpanded(expandCombinedOnLoad)
-      setDraftPushEnabled(pushEnabled)
       setSaveError(null)
       setSaveJustSucceeded(false)
     }
-  }, [open, expandCombinedOnLoad, pushEnabled])
+  }, [open, expandCombinedOnLoad])
 
   useEffect(() => {
     if (!saveJustSucceeded) return
@@ -63,28 +51,18 @@ export function WlHomeV2SettingsModal({
 
   useWlHomeV2ScrollLock(open)
 
-  const setlistDirty = draftExpanded !== expandCombinedOnLoad
-  const pushDirty = draftPushEnabled !== pushEnabled
-  const isDirty = setlistDirty || pushDirty
-  const isSaving = preferenceSaving || pushSaving
-  const isLoading = preferenceLoading || pushLoading
+  const isDirty = draftExpanded !== expandCombinedOnLoad
+  const isSaving = preferenceSaving
+  const isLoading = preferenceLoading
 
   const handleSave = async () => {
     setSaveError(null)
     setSaveJustSucceeded(false)
 
-    if (setlistDirty) {
+    if (isDirty) {
       const ok = await saveExpandCombinedOnLoad(draftExpanded)
       if (!ok) {
         setSaveError("Could not save setlist preferences. Try again.")
-        return
-      }
-    }
-
-    if (pushDirty) {
-      const result = await savePushEnabled(draftPushEnabled)
-      if (!result.ok) {
-        setSaveError(result.error)
         return
       }
     }
@@ -97,9 +75,6 @@ export function WlHomeV2SettingsModal({
     : saveError ? saveError
     : isSaving ? "Saving…"
     : null
-
-  const pushUnsupported = supportState === "unsupported"
-  const pushBlocked = supportState === "blocked"
 
   return (
     <WlHomeV2ModalPortal open={open}>
@@ -184,37 +159,6 @@ export function WlHomeV2SettingsModal({
               <WlHomeV2SettingsSetlistPreview
                 expandedByDefault={draftExpanded}
               />
-            </section>
-
-            <section className="wl-home-v2-settings-section">
-              <h4 className="wl-home-v2-settings-section-title">
-                Live Show Notifications
-              </h4>
-              <p className="wl-home-v2-settings-section-desc">
-                Get desktop alerts when a live show is announced on stage, during breaks, and
-                for each song while we are tracking the setlist.
-              </p>
-              {pushUnsupported ?
-                <p className="wl-home-v2-settings-section-desc">
-                  Push notifications are not supported in this browser.
-                </p>
-              : pushBlocked ?
-                <p className="wl-home-v2-settings-section-desc">
-                  Notifications are blocked for this site. Allow notifications in your browser
-                  settings, then try again.
-                </p>
-              : <>
-                  <div className="wl-home-v2-settings-toggle-row">
-                    <ToggleSwitch
-                      showActualSetlist={draftPushEnabled}
-                      setShowActualSetlist={setDraftPushEnabled}
-                      leftLabel="Off"
-                      rightLabel="On"
-                      wlV2Chrome
-                    />
-                  </div>
-                </>
-              }
             </section>
           </div>
         </div>
