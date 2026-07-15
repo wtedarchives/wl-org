@@ -30,6 +30,10 @@ verify_jwt = false
 [functions.user-profile-preferences]
 verify_jwt = false
 
+# Native-app APNs token registration (anon; per-device, no sign-in).
+[functions.apns-register]
+verify_jwt = false
+
 [functions.show-rating]
 verify_jwt = false
 
