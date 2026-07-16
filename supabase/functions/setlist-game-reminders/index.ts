@@ -32,9 +32,13 @@ serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
   if (!supabaseUrl || !serviceKey) return json({ error: "Server configuration error" }, 500)
 
-  // Only the scheduled cron (service-role key) may trigger this.
-  const auth = req.headers.get("authorization") ?? ""
-  if (auth !== `Bearer ${serviceKey}`) return json({ error: "Unauthorized" }, 401)
+  // Only the scheduled cron may trigger this. Auth against a dedicated secret we
+  // control on both sides (the SETLIST_GAME_CRON_SECRET env here and the Vault
+  // secret the cron sends) — no dependence on the ambiguous service-role key.
+  const cronSecret = Deno.env.get("SETLIST_GAME_CRON_SECRET")?.trim()
+  if (!cronSecret) return json({ error: "Server configuration error (cron secret)" }, 500)
+  const provided = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim()
+  if (provided !== cronSecret) return json({ error: "Unauthorized" }, 401)
 
   const db = createClient(supabaseUrl, serviceKey)
 
