@@ -293,11 +293,12 @@ export function useAdminRadioTracksPanel() {
       >(session.token, { action: "wted_radio_ids_sync" })
       if (invokeError) throw new Error(invokeError)
       if (!data) throw new Error("Sync returned no data.")
-      const { inserted, updatedToRemoved, updatedArtwork } = data
+      const { inserted, updatedToRemoved, updatedArtwork, updatedTitles } = data
       if (
         inserted.length === 0 &&
         updatedToRemoved.length === 0 &&
-        updatedArtwork.length === 0
+        updatedArtwork.length === 0 &&
+        updatedTitles.length === 0
       ) {
         setSyncBanner({
           kind: "no-change",
@@ -307,7 +308,7 @@ export function useAdminRadioTracksPanel() {
       } else {
         setSyncBanner({
           kind: "success",
-          message: `Sync complete: ${inserted.length} added as NEW, ${updatedToRemoved.length} marked REMOVED, ${updatedArtwork.length} artwork URLs updated.`,
+          message: `Sync complete: ${inserted.length} added as NEW, ${updatedToRemoved.length} marked REMOVED, ${updatedArtwork.length} artwork URLs updated, ${updatedTitles.length} titles updated.`,
         })
       }
       await loadNewAndRemoved()

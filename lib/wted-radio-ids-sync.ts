@@ -83,6 +83,7 @@ export type SyncWtedRadioIdsResult = {
   inserted: WtedRadioIdRow[]
   updatedToRemoved: WtedRadioIdRow[]
   updatedArtwork: WtedRadioIdRow[]
+  updatedTitles: WtedRadioIdRow[]
 }
 
 /** Server-side implementation: `supabase/functions/_shared/wted-radio-ids-sync.ts` via `dpro-admin` action `wted_radio_ids_sync`. */

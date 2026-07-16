@@ -83,6 +83,7 @@ export type SyncWtedRadioIdsResult = {
   inserted: WtedRadioIdRow[]
   updatedToRemoved: WtedRadioIdRow[]
   updatedArtwork: WtedRadioIdRow[]
+  updatedTitles: WtedRadioIdRow[]
 }
 
 export async function syncWtedRadioIds(
@@ -111,6 +112,17 @@ export async function syncWtedRadioIds(
     if (apiArt === null) continue
     if (normalizedDbArtwork(row.artwork) === apiArt) continue
     toUpdateArtwork.push({ uuid: row.uuid, artwork: apiArt })
+  }
+
+  // Refresh title/artist for existing ids when radio.co's values have changed.
+  // (The sync previously set these only at insert time, so a later title change
+  // on radio.co — e.g. a date/venue getting appended — was never written back.)
+  const toUpdateInfo: { uuid: string; track_title: string; track_artist: string }[] = []
+  for (const t of tracks) {
+    const row = dbByRadioId.get(String(t.id))
+    if (!row) continue
+    if (row.track_title === t.title && row.track_artist === t.artist) continue
+    toUpdateInfo.push({ uuid: row.uuid, track_title: t.title, track_artist: t.artist })
   }
 
   const toRemoveUuids = allDb
@@ -172,9 +184,33 @@ export async function syncWtedRadioIds(
     }
   }
 
+  const updatedTitles: WtedRadioIdRow[] = []
+  for (
+    let i = 0;
+    i < toUpdateInfo.length;
+    i += WTED_RADIO_IDS_ARTWORK_UPDATE_CONCURRENCY
+  ) {
+    const slice = toUpdateInfo.slice(i, i + WTED_RADIO_IDS_ARTWORK_UPDATE_CONCURRENCY)
+    const results = await Promise.all(
+      slice.map(async ({ uuid, track_title, track_artist }) => {
+        const { data, error } = await client
+          .from("wted_radio_ids")
+          .update({ track_title, track_artist })
+          .eq("uuid", uuid)
+          .select("uuid, radio_id, track_artist, track_title, status, artwork")
+        if (error) throw error
+        return (data?.[0] as WtedRadioIdRow | undefined) ?? null
+      }),
+    )
+    for (const r of results) {
+      if (r) updatedTitles.push(r)
+    }
+  }
+
   return {
     inserted: insertedRows,
     updatedToRemoved: updatedRows,
     updatedArtwork,
+    updatedTitles,
   }
 }
