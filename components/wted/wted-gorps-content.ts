@@ -46,7 +46,7 @@ export const GORPS_ENTRIES: GorpEntry[] = [
     image: { src: "/wted/gorps/brett.jpg", alt: "Brett Dunkin" },
     name: 'Brett "Grateful Goose Gizzard Biscuits" Dunkin',
     bio: [
-      "Brett is a Wysteria Lane Community moderator and Goose Jockey for WTED Goose Radio. He's a huge live music fan, having been to more than 350 concerts, festivals, and other shows, starting when he was eight years old and his dad took him to see R.E.M. at the Hollywood Bowl. He lives in Los Angeles and enjoys that California Magic.",
+      "Brett is a Wysteria Lane Community moderator and Goose Jockey for WTED Goose Radio. He's a huge live music fan, having been to more than 500 concerts, festivals, and other shows, starting when he was eight years old and his dad took him to see R.E.M. at the Hollywood Bowl. He recently moved to Colorado after growing up in Los Angeles, and now you can find him on a mountain, under a yellow desert moon.",
     ],
     quote:
       "My first introduction to the jam band world was the Fare Thee Well shows in San Francisco in 2015, though I didn't really become a true \"fan\" of the Grateful Dead until my sophomore year of college, when I listened to Europe '72 on a long drive back to school after a weekend hometown visit. My first introduction to Goose was watching the 2019 Peach Fest set. After hearing the cover of Mississippi Half-Step and that ripping Madhuvan, I knew these guys were something special. My first Goose show was at the Greek Theatre in Los Angeles in August of 2022 with my dad, and I've seen them nine more times (and counting) since then!\n\nI am super excited to be a part of this wonderful radio station and cannot wait to see it grow into something magical. Thanks for listening!",
