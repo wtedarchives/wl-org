@@ -27,7 +27,7 @@ alter table public.setlist_game_reminders enable row level security;
 
 -- Scheduled trigger: every 15 min, invoke the reminder Edge Function.
 create extension if not exists pg_cron with schema pg_catalog;
-create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_net;
 
 -- Auth + target come from Vault (create these secrets once, out of band — never
 -- in this migration):
