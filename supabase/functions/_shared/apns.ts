@@ -7,6 +7,8 @@
 //   APNS_PRIVATE_KEY  – contents of the AuthKey_XXXX.p8 (PKCS#8 PEM)
 //   APNS_BUNDLE_ID    – (optional) app bundle id; defaults to org.wysterialane.wtedradio
 
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
+
 const DEFAULT_BUNDLE_ID = "org.wysterialane.wtedradio"
 // APNs allows a provider JWT to live up to 60 min; refresh a little early.
 const JWT_TTL_SECONDS = 50 * 60
@@ -156,4 +158,67 @@ export async function sendApns(
     reason = undefined
   }
   return { status: res.status, reason }
+}
+
+export type ApnsTokenRow = {
+  device_token: string
+  environment: string | null
+}
+
+export type ApnsBatchResult = {
+  attempted: number
+  sent: number
+  failed: number
+  removed: number
+  skipped?: string
+  lastError?: string
+}
+
+/**
+ * Send one payload to a batch of device tokens. Handles the JWT config, the send
+ * loop, and dead-token cleanup. Never throws.
+ */
+export async function sendApnsBatch(
+  db: SupabaseClient,
+  rows: ApnsTokenRow[],
+  payload: ApnsPayload,
+): Promise<ApnsBatchResult> {
+  const apns = await getApnsConfig()
+  if (!apns.ok) {
+    console.warn("APNs batch skipped:", apns.error)
+    return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: apns.error }
+  }
+  if (rows.length === 0) {
+    return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: "no registered devices" }
+  }
+
+  let sent = 0
+  let failed = 0
+  let removed = 0
+  let lastError: string | undefined
+
+  for (const row of rows) {
+    try {
+      const result = await sendApns(row.device_token, row.environment, apns.config, payload)
+      if (result.status === 200) {
+        sent += 1
+        continue
+      }
+      failed += 1
+      lastError = `APNs ${result.status}${result.reason ? ` (${result.reason})` : ""}`
+      if (isDeadTokenReason(result.status, result.reason)) {
+        const { error: deleteError } = await db
+          .from("apns_tokens")
+          .delete()
+          .eq("device_token", row.device_token)
+        if (!deleteError) removed += 1
+      }
+    } catch (err: unknown) {
+      failed += 1
+      lastError = err instanceof Error ? err.message : String(err)
+      console.warn("APNs send failed:", row.device_token, err)
+    }
+  }
+
+  return { attempted: rows.length, sent, failed, removed, lastError }
 }

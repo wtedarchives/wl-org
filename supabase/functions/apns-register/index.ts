@@ -25,6 +25,8 @@ serve(async (req) => {
     device_token?: string
     environment?: string
     unregister?: boolean
+    live_shows?: boolean
+    setlist_game?: boolean
   }
   try {
     body = await req.json()
@@ -50,10 +52,21 @@ serve(async (req) => {
     return json({ ok: true, unregistered: true }, 200)
   }
 
+  // Per-type opt-in. Default live-shows on (backward compatible) and game off
+  // when a caller omits a flag.
+  const liveShows = body.live_shows ?? true
+  const setlistGame = body.setlist_game ?? false
+
   const { error } = await supabase
     .from("apns_tokens")
     .upsert(
-      { device_token: deviceToken, environment, updated_at: new Date().toISOString() },
+      {
+        device_token: deviceToken,
+        environment,
+        live_shows_enabled: liveShows,
+        setlist_game_enabled: setlistGame,
+        updated_at: new Date().toISOString(),
+      },
       { onConflict: "device_token" },
     )
   if (error) {
