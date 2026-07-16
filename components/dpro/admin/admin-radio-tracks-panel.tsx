@@ -180,11 +180,14 @@ export function AdminRadioTracksPanel() {
               <code className="wl-home-v2-admin-radio-tab-code">
                 releases.release_artwork
               </code>{" "}
-              changes so already-filled rows are corrected. It re-runs the
-              setlist→release chain on every release-sourced row, so it is much
-              slower and more likely to hit 546—re-run until it completes, or
-              chunk with{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">max_rows</code>.
+              changes so already-filled rows are corrected. It sweeps the whole
+              table in resumable chunks (using{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">max_rows</code> +{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">
+                start_after_uuid
+              </code>
+              ), shrinking the chunk automatically if a chunk hits 546, so one
+              click finishes the sweep without you re-running it.
             </p>
           </div>
         </div>

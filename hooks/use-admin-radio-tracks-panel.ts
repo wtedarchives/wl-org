@@ -161,42 +161,111 @@ export function useAdminRadioTracksPanel() {
         throw new Error("Missing Supabase anon key.")
       }
 
-      const res = await fetch(`${base}/wted-radio-backfill-artwork`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${anon}`,
-          [WYSTERIA_AUTH_HEADER]: `Bearer ${session.token}`,
-          apikey: anon,
-        },
-        body: JSON.stringify(
-          revalidateExisting ? { revalidate_existing: true } : {},
-        ),
-      })
-      const data = (await res.json().catch(() => ({}))) as {
+      type BackfillResponse = {
         error?: string
         examined?: number
         updated?: number
         error_count?: number
-      }
-      if (!res.ok) {
-        const hint =
-          res.status === 546 ?
-            " Supabase 546 = worker limit on a single run; click Backfill again to continue, or call the function with max_rows in smaller chunks."
-          : ""
-        throw new Error(
-          (data.error ?? `Backfill failed (${res.status})`) + hint,
-        )
+        done?: boolean
+        db_exhausted?: boolean
+        next_cursor?: string | null
       }
 
-      const examined = data.examined ?? 0
-      const updated = data.updated ?? 0
+      const callBackfill = async (
+        payload: Record<string, unknown>,
+      ): Promise<{ ok: boolean; status: number; data: BackfillResponse }> => {
+        const res = await fetch(`${base}/wted-radio-backfill-artwork`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${anon}`,
+            [WYSTERIA_AUTH_HEADER]: `Bearer ${session.token}`,
+            apikey: anon,
+          },
+          body: JSON.stringify(payload),
+        })
+        const data = (await res
+          .json()
+          .catch(() => ({}))) as BackfillResponse
+        return { ok: res.ok, status: res.status, data }
+      }
+
+      if (!revalidateExisting) {
+        // Cheap pass: empty rows + Radio.co corrections, one request.
+        const { ok, status, data } = await callBackfill({})
+        if (!ok) {
+          const hint =
+            status === 546
+              ? " Supabase 546 = worker limit on a single run; click Artwork again to continue."
+              : ""
+          throw new Error((data.error ?? `Backfill failed (${status})`) + hint)
+        }
+        setBackfillBanner({
+          kind: "success",
+          message: `Artwork backfill: updated ${data.updated ?? 0} row(s), examined ${data.examined ?? 0} (empty rows filled; existing URLs updated when Radio.co large_url differs).`,
+        })
+        await loadNewAndRemoved()
+        return
+      }
+
+      // Full re-verify: sweep the whole table in bounded, resumable chunks so
+      // no single request hits the worker limit. Shrink the chunk on 546 and
+      // retry the same cursor so the sweep always makes forward progress.
+      let cursor: string | null = null
+      let chunk = 300
+      const MIN_CHUNK = 25
+      const MAX_CALLS = 500
+      let totalExamined = 0
+      let totalUpdated = 0
+      let calls = 0
+
+      for (;;) {
+        if (calls >= MAX_CALLS) {
+          throw new Error(
+            `Re-verify stopped after ${calls} chunks (examined ${totalExamined}, updated ${totalUpdated}). Run it again to continue.`,
+          )
+        }
+        calls++
+
+        const payload: Record<string, unknown> = {
+          revalidate_existing: true,
+          max_rows: chunk,
+        }
+        if (cursor !== null) payload.start_after_uuid = cursor
+
+        const { ok, status, data } = await callBackfill(payload)
+
+        if (!ok) {
+          if (status === 546 && chunk > MIN_CHUNK) {
+            chunk = Math.max(MIN_CHUNK, Math.floor(chunk / 2))
+            calls-- // retry same cursor with a smaller chunk; don't count it
+            continue
+          }
+          throw new Error(
+            (data.error ?? `Re-verify failed (${status})`) +
+              (status === 546
+                ? " Worker limit hit even at the smallest chunk — run Re-verify all again to resume where it stopped."
+                : ""),
+          )
+        }
+
+        totalExamined += data.examined ?? 0
+        totalUpdated += data.updated ?? 0
+
+        setBackfillBanner({
+          kind: "success",
+          message: `Re-verifying artwork… examined ${totalExamined}, corrected ${totalUpdated} so far.`,
+        })
+
+        const done = data.done ?? data.db_exhausted ?? false
+        const nextCursor = data.next_cursor ?? null
+        if (done || nextCursor === null) break
+        cursor = nextCursor
+      }
 
       setBackfillBanner({
         kind: "success",
-        message: revalidateExisting
-          ? `Full artwork re-verify: updated ${updated} row(s), examined ${examined} (every row re-derived; stale release-artwork URLs corrected).`
-          : `Artwork backfill: updated ${updated} row(s), examined ${examined} (empty rows filled; existing URLs updated when Radio.co large_url differs).`,
+        message: `Full artwork re-verify complete: corrected ${totalUpdated} row(s), examined ${totalExamined} across ${calls} chunk(s). Every row re-derived; stale release-artwork URLs fixed.`,
       })
       await loadNewAndRemoved()
     } catch (err) {
