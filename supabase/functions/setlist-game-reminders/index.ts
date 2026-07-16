@@ -89,6 +89,7 @@ serve(async (req) => {
       body: formatShowDateVenueLine(show.show_date ?? "", show.show_venue_location),
       showID: show.show_id,
       url: getSetlistArchiveAbsoluteUrl(show.show_id),
+      type: "setlistGame",
     })
     // Log the show as reminded unless APNs itself is unconfigured (so it retries
     // once secrets are set). "no registered devices" still counts as done.

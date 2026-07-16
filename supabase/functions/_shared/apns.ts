@@ -21,6 +21,8 @@ export type ApnsPayload = {
   body: string
   showID?: string
   url?: string
+  /** Routing hint for the app's tap handler (e.g. "setlistGame" → open the game). */
+  type?: string
 }
 
 function base64UrlFromString(value: string): string {
@@ -133,6 +135,7 @@ export async function sendApns(
   }
   if (payload.showID) aps.showID = payload.showID
   if (payload.url) aps.url = payload.url
+  if (payload.type) aps.type = payload.type
 
   const res = await fetch(`${host}/3/device/${deviceToken}`, {
     method: "POST",
