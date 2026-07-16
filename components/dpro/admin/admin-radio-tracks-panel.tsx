@@ -1,6 +1,6 @@
 "use client"
 
-import { ImageUpIcon, RefreshCwIcon } from "lucide-react"
+import { ImageUpIcon, ListChecksIcon, RefreshCwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -80,7 +80,7 @@ export function AdminRadioTracksPanel() {
                 size="sm"
                 variant="ghost"
                 className="wl-home-v2-tours-header-pill wl-home-v2-admin-radio-action-pill"
-                onClick={handleBackfillArtwork}
+                onClick={() => handleBackfillArtwork(false)}
                 disabled={backfilling || syncing || loading}
               >
                 {backfilling ? (
@@ -92,6 +92,27 @@ export function AdminRadioTracksPanel() {
                   <>
                     <ImageUpIcon className="size-3.5 shrink-0 opacity-80" />
                     Artwork
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="wl-home-v2-tours-header-pill wl-home-v2-admin-radio-action-pill"
+                onClick={() => handleBackfillArtwork(true)}
+                disabled={backfilling || syncing || loading}
+                title="Re-derive artwork for every row (corrects rows whose release artwork changed). Slower — may need re-running on large catalogs."
+              >
+                {backfilling ? (
+                  <>
+                    <RefreshCwIcon className="size-3.5 shrink-0 animate-spin opacity-80" />
+                    Working…
+                  </>
+                ) : (
+                  <>
+                    <ListChecksIcon className="size-3.5 shrink-0 opacity-80" />
+                    Re-verify all
                   </>
                 )}
               </Button>
@@ -151,7 +172,19 @@ export function AdminRadioTracksPanel() {
               in one request; very large catalogs may hit HTTP 546—run again or
               use a capped{" "}
               <code className="wl-home-v2-admin-radio-tab-code">max_rows</code>{" "}
-              on that function.
+              on that function. Re-verify all sends{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">
+                revalidate_existing
+              </code>{" "}
+              so every row is re-derived—use it after{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">
+                releases.release_artwork
+              </code>{" "}
+              changes so already-filled rows are corrected. It re-runs the
+              setlist→release chain on every release-sourced row, so it is much
+              slower and more likely to hit 546—re-run until it completes, or
+              chunk with{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">max_rows</code>.
             </p>
           </div>
         </div>

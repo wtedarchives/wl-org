@@ -132,7 +132,12 @@ serve(async (req) => {
     )
   }
 
-  let body: { max_rows?: unknown; page_size?: unknown; flush_every?: unknown } = {}
+  let body: {
+    max_rows?: unknown
+    page_size?: unknown
+    flush_every?: unknown
+    revalidate_existing?: unknown
+  } = {}
   try {
     if (req.headers.get("content-length") !== "0") {
       body = await req.json()
@@ -149,6 +154,11 @@ serve(async (req) => {
     1,
     500,
   )
+  // Opt-in full re-verify: recompute EVERY row (not just empty ones) so rows
+  // whose `releases.release_artwork` changed in the DB get corrected. Heavier
+  // (each release-sourced row runs the setlist→release chain), so it is far
+  // more likely to hit 546 on a full catalog — pair with `max_rows` chunking.
+  const revalidateExisting = body.revalidate_existing === true
 
   let apiMap: Map<string, string | null>
   try {
@@ -203,8 +213,10 @@ serve(async (req) => {
         : null
 
       // Radio.co gave a non-empty large_url → always evaluate (match = no DB write).
-      // Otherwise only rows with empty artwork get release-chain backfill.
-      const needsWork = Boolean(apiN) || curN === null
+      // Otherwise only rows with empty artwork get release-chain backfill,
+      // unless `revalidate_existing` forces every row to be re-derived so
+      // stale release-artwork URLs on already-filled rows get corrected.
+      const needsWork = revalidateExisting || Boolean(apiN) || curN === null
       if (!needsWork) continue
       tasks.push(row)
     }
@@ -278,6 +290,7 @@ serve(async (req) => {
       ok: true,
       radio_co_large_url_sync: true,
       empty_artwork_release_backfill: true,
+      revalidate_existing: revalidateExisting,
       max_rows: maxRows,
       page_size: pageSize,
       flush_every: flushEvery,

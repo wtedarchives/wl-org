@@ -144,7 +144,7 @@ export function useAdminRadioTracksPanel() {
     if (ok) setRemovedDispositionRow(null)
   }
 
-  const handleBackfillArtwork = async () => {
+  const handleBackfillArtwork = async (revalidateExisting = false) => {
     if (!supabase) return
     setBackfilling(true)
     setBackfillBanner(null)
@@ -169,7 +169,9 @@ export function useAdminRadioTracksPanel() {
           [WYSTERIA_AUTH_HEADER]: `Bearer ${session.token}`,
           apikey: anon,
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(
+          revalidateExisting ? { revalidate_existing: true } : {},
+        ),
       })
       const data = (await res.json().catch(() => ({}))) as {
         error?: string
@@ -192,7 +194,9 @@ export function useAdminRadioTracksPanel() {
 
       setBackfillBanner({
         kind: "success",
-        message: `Artwork backfill: updated ${updated} row(s), examined ${examined} (empty rows filled; existing URLs updated when Radio.co large_url differs).`,
+        message: revalidateExisting
+          ? `Full artwork re-verify: updated ${updated} row(s), examined ${examined} (every row re-derived; stale release-artwork URLs corrected).`
+          : `Artwork backfill: updated ${updated} row(s), examined ${examined} (empty rows filled; existing URLs updated when Radio.co large_url differs).`,
       })
       await loadNewAndRemoved()
     } catch (err) {
