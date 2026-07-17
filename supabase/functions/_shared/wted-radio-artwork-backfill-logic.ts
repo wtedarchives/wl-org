@@ -91,6 +91,31 @@ async function fetchReleasesOnShow(
   return out
 }
 
+/** Every release on a show (no `release_id` filter) — for the show_id fallback. */
+async function fetchAllReleasesOnShow(
+  client: SupabaseClient,
+  showId: string,
+): Promise<RsRow[]> {
+  const out: RsRow[] = []
+  let page = 0
+  let more = true
+  while (more) {
+    const from = page * PAGE_SIZE
+    const to = from + PAGE_SIZE - 1
+    const { data, error } = await client
+      .from("releases_shows")
+      .select("release_id, release_order")
+      .eq("show_id", showId)
+      .range(from, to)
+    if (error) throw error
+    const rows = (data ?? []) as RsRow[]
+    out.push(...rows)
+    more = rows.length === PAGE_SIZE
+    page++
+  }
+  return out
+}
+
 function mergeByReleaseIdMinOrder(rows: RsRow[]): RsRow[] {
   const m = new Map<string, RsRow>()
   for (const r of rows) {
@@ -408,7 +433,46 @@ async function resolveWtedRequestFromRadioId(
   }
 }
 
-/** Setlist → release artwork only (no Radio.co map). */
+/** Show-level release artwork: the lowest-`release_order` release on a show. */
+async function fetchShowLevelReleaseArtwork(
+  client: SupabaseClient,
+  showId: string,
+): Promise<string | null> {
+  const onShow = await fetchAllReleasesOnShow(client, showId)
+  const winner = pickLowestOrderAmongReleases(onShow)
+  if (!winner) return null
+  const { data: rel, error } = await client
+    .from("releases")
+    .select("release_artwork")
+    .eq("release_id", winner.release_id)
+    .maybeSingle()
+  if (error) throw error
+  const art =
+    (rel as { release_artwork: string | null } | null)?.release_artwork ?? null
+  return normalizedArtworkUrl(art)
+}
+
+/** The catalog row's stored `show_id` for a radio_id (trimmed; null if unset). */
+async function fetchShowIdForRadioId(
+  client: SupabaseClient,
+  radioId: string,
+): Promise<string | null> {
+  const { data, error } = await client
+    .from("wted_radio_ids")
+    .select("show_id")
+    .eq("radio_id", radioId)
+    .limit(1)
+  if (error) throw error
+  const showId = (data?.[0] as { show_id: string | null } | undefined)?.show_id
+  return showId && showId.trim() !== "" ? showId.trim() : null
+}
+
+/**
+ * Setlist → release artwork only (no Radio.co map). When a radio_id has setlist
+ * entries, resolve via the entry-specific chain (drawer parity). When it has
+ * NONE, fall back to the catalog row's `show_id` and use that show's lowest-order
+ * release artwork.
+ */
 export async function computeReleaseArtworkOnly(
   client: SupabaseClient,
   radioId: string,
@@ -417,16 +481,21 @@ export async function computeReleaseArtworkOnly(
   if (!rid) return null
   try {
     const resolved = await resolveWtedRequestFromRadioId(client, rid, null)
-    if (!resolved) return null
-    const entryId = String(resolved.entry.entry_id ?? "")
-    const entryShow = String(resolved.entry.entry_show ?? "")
-    if (!entryId || !entryShow) return null
-    return await fetchReleaseArtworkFromSem(
-      client,
-      entryId,
-      entryShow,
-      resolved.fallbackReleaseArtwork,
-    )
+    if (resolved) {
+      const entryId = String(resolved.entry.entry_id ?? "")
+      const entryShow = String(resolved.entry.entry_show ?? "")
+      if (!entryId || !entryShow) return null
+      return await fetchReleaseArtworkFromSem(
+        client,
+        entryId,
+        entryShow,
+        resolved.fallbackReleaseArtwork,
+      )
+    }
+    // No setlist entries: fall back to the catalog row's show_id.
+    const showId = await fetchShowIdForRadioId(client, rid)
+    if (!showId) return null
+    return await fetchShowLevelReleaseArtwork(client, showId)
   } catch {
     return null
   }
