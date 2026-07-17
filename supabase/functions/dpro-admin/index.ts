@@ -89,6 +89,16 @@ async function handleAction(
       ])
       const { error } = await db.from("setlist_entries").update(allowed).eq("entry_id", entry_id)
       if (error) return { error: error.message }
+      // When a radio_id was assigned, keep wted_radio_ids.show_id pointed at the
+      // oldest-dated show that carries it (matches the one-time backfill). Best-
+      // effort: the primary update already succeeded, so a sync hiccup shouldn't
+      // fail the request.
+      if (typeof allowed.radio_id === "string" && allowed.radio_id.trim() !== "") {
+        const { error: syncError } = await db.rpc("sync_wted_radio_id_show", {
+          p_radio_id: allowed.radio_id.trim(),
+        })
+        if (syncError) console.error("sync_wted_radio_id_show:", syncError.message)
+      }
       return { data: true }
     }
 
