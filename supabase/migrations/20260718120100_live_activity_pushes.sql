@@ -37,7 +37,7 @@ begin
     select 1 from public.shows s
     where s.show_id = _show
       and s.show_time <= now()
-      and s.show_time >= now() - interval '5 hours'
+      and s.show_time >= now() - interval '6 hours'
   ) then
     perform public.la_push('update', _show);
   end if;
@@ -57,7 +57,7 @@ select cron.schedule('la-start-scan', '* * * * *', $$
     from public.shows s
     left join public.live_activity_show_state st on st.show_id = s.show_id
     where s.show_time <= now()
-      and s.show_time >= now() - interval '5 hours'
+      and s.show_time >= now() - interval '6 hours'
       and st.show_id is null
     on conflict (show_id) do nothing
     returning show_id
@@ -73,7 +73,7 @@ select cron.schedule('la-end-scan', '* * * * *', $$
     from public.shows s
     where st.show_id = s.show_id
       and st.ended_at is null
-      and s.show_time < now() - interval '5 hours'
+      and s.show_time < now() - interval '6 hours'
     returning st.show_id
   )
   select public.la_push('end', show_id) from due;

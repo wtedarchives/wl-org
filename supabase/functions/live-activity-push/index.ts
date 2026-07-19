@@ -18,7 +18,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { getApnsConfig, isDeadTokenReason, type ApnsConfig } from "../_shared/apns.ts"
 
-const WINDOW_HOURS = 5 // must match the app's live-show window
+const WINDOW_HOURS = 6 // must match the app's live-show window
 const IMPROV_JAM = "[Improv/Jam]"
 const PROD_HOST = "https://api.push.apple.com"
 const SANDBOX_HOST = "https://api.sandbox.push.apple.com"
