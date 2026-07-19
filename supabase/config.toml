@@ -56,3 +56,11 @@ verify_jwt = false
 # Custom API keys validated inside the function (not Supabase Auth JWTs).
 [functions.bot-read-api]
 verify_jwt = false
+
+# Registers Live Activity push tokens from the app (public, like apns-register).
+[functions.live-activity-register]
+verify_jwt = false
+
+# Internal APNs liveactivity sender; the service-role bearer is checked in-function.
+[functions.live-activity-push]
+verify_jwt = false
