@@ -234,7 +234,7 @@ export function WlHomeV2Header({
             >
               <div className="top-nav-primary-row">
                 <a
-                  href="/wted/episodes"
+                  href="/radio/episodes"
                   className="top-nav-radio-link"
                   onClick={onRadioNavClick}
                 >

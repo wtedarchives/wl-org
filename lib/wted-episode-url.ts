@@ -1,4 +1,4 @@
 /** Canonical WTED episode URL (query `id` = `wted_episodes.uuid`). */
 export function getWtedEpisodeUrl(episodeId: string): string {
-  return `/wted/episode?id=${encodeURIComponent(episodeId)}`
+  return `/radio/episode?id=${encodeURIComponent(episodeId)}`
 }

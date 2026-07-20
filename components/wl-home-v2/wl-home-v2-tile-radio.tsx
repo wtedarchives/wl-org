@@ -90,15 +90,15 @@ export function WlHomeV2TileRadio({
             </button>
           </div>
           <div className="tile-widget-actions-row tile-widget-actions-row--triple">
-            <Link className="wbtn wbtn--app-store" href="/wted/about">
+            <Link className="wbtn wbtn--app-store" href="/radio/about">
               <span className="wbtn-text">About Us</span>
               <Info className="wbtn-icon" size={18} weight="regular" aria-hidden />
             </Link>
-            <Link className="wbtn wbtn--app-store" href="/wted/gorps">
+            <Link className="wbtn wbtn--app-store" href="/radio/gorps">
               <span className="wbtn-text">GORPs</span>
               <Users className="wbtn-icon" size={18} weight="regular" aria-hidden />
             </Link>
-            <Link className="wbtn wbtn--app-store" href="/wted/episodes">
+            <Link className="wbtn wbtn--app-store" href="/radio/episodes">
               <span className="wbtn-text">Shows</span>
               <ListNumbers className="wbtn-icon" size={18} weight="regular" aria-hidden />
             </Link>

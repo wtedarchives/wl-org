@@ -95,7 +95,7 @@ export function WlHomeV2RadioModal({
               </button>
 
               <Link
-                href="/wted/episodes"
+                href="/radio/episodes"
                 className="modal-archive-tile"
                 onClick={onClose}
               >
@@ -115,7 +115,7 @@ export function WlHomeV2RadioModal({
               </Link>
 
               <Link
-                href="/wted/about"
+                href="/radio/about"
                 className="modal-archive-tile"
                 onClick={onClose}
               >
@@ -133,7 +133,7 @@ export function WlHomeV2RadioModal({
               </Link>
 
               <Link
-                href="/wted/gorps"
+                href="/radio/gorps"
                 className="modal-archive-tile"
                 onClick={onClose}
               >

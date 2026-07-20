@@ -23,11 +23,12 @@ The current **Wysteria Lane v2** shell (`WlHomeV2`) is the main entry point:
 
 Modals on the homepage handle login, signup, password reset, radio schedule, tour schedule, "this day in history," and archive navigation without leaving the page.
 
-### WTED Radio (`/wted/...`)
+### WTED Radio (`/radio/...`)
 
-- **About** (`/wted/about`) — Mission, FAQ, and how the station works.
-- **Episodes** (`/wted/program-director`) — Episode catalog and show pages.
-- **GORPs** (`/wted/gorps`) — Goose Obsessed Radio Personalities and contributors.
+- **About** (`/radio`, `/radio/about`) — Mission, FAQ, and how the station works.
+- **Episodes** (`/radio/episodes`) — Episode catalog and show pages.
+- **GORPs** (`/radio/gorps`) — Goose Obsessed Radio Personalities and contributors.
+- Legacy `/wted/...` URLs 301 to `/radio/...`.
 
 ### Setlist Archive (`/archive/...`)
 
@@ -153,7 +154,7 @@ The Netlify deploy does **not** deploy Edge Functions; use the Supabase CLI or D
 
 ```
 app/
-  (wl-home-v2)/     # Current site: home, /archive/*, /wted/*, /user, auth
+  (wl-home-v2)/     # Current site: home, /archive/*, /radio/*, /user, auth
   (main)/           # Legacy layout + /old/* mirrors
 components/
   wl-home-v2/       # Homepage shell, header, tiles, modals

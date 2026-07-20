@@ -753,7 +753,7 @@
         TOP_NAV_PANEL_ID +
         '" class="top-nav" aria-label="Primary">',
       '<div class="top-nav-primary-row">',
-      '<a href="' + WTED_BASE + '/wted/episodes">',
+      '<a href="' + WTED_BASE + '/radio/episodes">',
       navImgIcon(IMG_WTED_DESKTOP, "top-nav-radio-img--desktop"),
       navImgIcon(IMG_WTED_MOBILE, "top-nav-radio-img--mobile"),
       "Radio</a>",

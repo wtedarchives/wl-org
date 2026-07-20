@@ -1,15 +1,19 @@
 # New homepage is at /; draft URL and bookmarks → home
 /v2  /  301
 
-# WTED Info page removed; send legacy URLs to About
-/wted/info  /wted/about  301
+# WTED Radio pages moved from /wted → /radio
+/wted  /radio  301
+/wted/about  /radio/about  301
+/wted/episodes  /radio/episodes  301
+/wted/episodes/catalog  /radio/episodes/catalog  301
+/wted/episode  /radio/episode  301
+/wted/gorps  /radio/gorps  301
 
-# Shows page retired; UI preserved in repo (components/wted-shows.tsx)
-/wted/shows  /wted/episodes  301
-
-# Program Director slug → Episodes
-/wted/program-director  /wted/episodes  301
-/wted/program-director/catalog  /wted/episodes/catalog  301
+# Legacy WTED aliases → /radio
+/wted/info  /radio/about  301
+/wted/shows  /radio/episodes  301
+/wted/program-director  /radio/episodes  301
+/wted/program-director/catalog  /radio/episodes/catalog  301
 
 # Setlist Archive: static routes under `/archive` (see `app/(wl-home-v2)/archive`).
 
@@ -41,9 +45,6 @@
 /signup  /?signup=1  301
 /reset-password  /?forgot=1  301
 /update-password  https://community.wysterialane.org/my/preferences/account  301
-
-# WTED index → About
-/wted  /wted/about  301
 
 # Legacy path-style /user/{uuid} → query canonical (tab defaults in-app when omitted)
 /user/*  /user?id=:splat  301
