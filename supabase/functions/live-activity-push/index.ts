@@ -17,6 +17,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { getApnsConfig, isDeadTokenReason, type ApnsConfig } from "../_shared/apns.ts"
+import { type FcmTokenRow, sendFcmBatch } from "../_shared/fcm.ts"
 
 const WINDOW_HOURS = 6 // must match the app's live-show window
 const IMPROV_JAM = "[Improv/Jam]"
@@ -67,6 +68,35 @@ serve(async (req) => {
   const nowSec = Math.floor(Date.now() / 1000)
   const startSec = showStartSec(show)
   const staleSec = startSec ? startSec + WINDOW_HOURS * 3600 : nowSec + 3600
+
+  // Android (FCM) fan-out for the same event. Android has no per-activity token —
+  // the ongoing notification is device-level — so every opted-in device gets the
+  // data message and the client decides create/update/dismiss. Additive and
+  // isolated; the APNs Live Activity path below is unchanged.
+  try {
+    const { data: fcmData, error: fcmError } = await supabase
+      .from("fcm_tokens")
+      .select("fcm_token")
+      .eq("live_shows_enabled", true)
+    if (fcmError) {
+      console.error("live-activity FCM tokens query:", fcmError)
+    } else {
+      await sendFcmBatch(supabase, (fcmData ?? []) as FcmTokenRow[], {
+        type: "liveActivity",
+        event,
+        show_id: show.show_id,
+        song_name: state.songName,
+        set_label: state.setLabel,
+        song_index: String(state.songNumber),
+        song_count: String(state.songCount),
+        venue: attributes.venue,
+        location: attributes.location,
+        date: attributes.showDate,
+      })
+    }
+  } catch (err) {
+    console.error("live-activity FCM fan-out failed:", err)
+  }
 
   if (event === "start") {
     const tokens = await tokenRows(supabase, "live_activity_start_tokens")

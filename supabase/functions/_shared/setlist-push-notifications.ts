@@ -6,6 +6,7 @@ import {
   type SetlistDiscourseShowEvent,
 } from "./discourse-brains-chat.ts"
 import { type ApnsBatchResult, type ApnsTokenRow, sendApnsBatch } from "./apns.ts"
+import { type FcmTokenRow, sendFcmBatch } from "./fcm.ts"
 
 export type SetlistPushPayload = {
   title: string
@@ -68,5 +69,28 @@ export async function sendSetlistPushNotifications(
     console.error("live-show push tokens query:", error)
     return { attempted: 0, sent: 0, failed: 0, removed: 0, skipped: error.message }
   }
-  return sendApnsBatch(db, (tokens ?? []) as ApnsTokenRow[], payload)
+  const apnsResult = await sendApnsBatch(db, (tokens ?? []) as ApnsTokenRow[], payload)
+
+  // Additively fan out to Android (FCM). Isolated so an FCM failure never
+  // affects the APNs result the caller relies on.
+  try {
+    const { data: fcmTokens, error: fcmError } = await db
+      .from("fcm_tokens")
+      .select("fcm_token")
+      .eq("live_shows_enabled", true)
+    if (fcmError) {
+      console.error("live-show FCM tokens query:", fcmError)
+    } else {
+      await sendFcmBatch(db, (fcmTokens ?? []) as FcmTokenRow[], {
+        type: "liveShow",
+        title: payload.title,
+        body: payload.body,
+        show_id: payload.showID,
+      })
+    }
+  } catch (err) {
+    console.error("live-show FCM fan-out failed:", err)
+  }
+
+  return apnsResult
 }
