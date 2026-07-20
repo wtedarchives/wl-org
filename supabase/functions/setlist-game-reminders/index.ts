@@ -14,6 +14,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { corsHeaders } from "../_shared/cors.ts"
 import { type ApnsTokenRow, sendApnsBatch } from "../_shared/apns.ts"
+import { type FcmTokenRow, sendFcmBatch } from "../_shared/fcm.ts"
 import {
   formatShowDateVenueLine,
   getSetlistArchiveAbsoluteUrl,
@@ -82,6 +83,15 @@ serve(async (req) => {
   }
   const tokens = (tokensData ?? []) as ApnsTokenRow[]
 
+  // Android (FCM) opt-ins, queried once. Fan-out is additive and isolated so an
+  // FCM issue never blocks the APNs path or the dedupe bookkeeping.
+  const { data: fcmData, error: fcmError } = await db
+    .from("fcm_tokens")
+    .select("fcm_token")
+    .eq("setlist_game_enabled", true)
+  if (fcmError) console.error("setlist-game-reminders FCM tokens query:", fcmError)
+  const fcmTokens = (fcmData ?? []) as FcmTokenRow[]
+
   let reminded = 0
   for (const show of pending) {
     const result = await sendApnsBatch(db, tokens, {
@@ -91,6 +101,16 @@ serve(async (req) => {
       url: getSetlistArchiveAbsoluteUrl(show.show_id),
       type: "setlistGame",
     })
+    try {
+      await sendFcmBatch(db, fcmTokens, {
+        type: "setlistGame",
+        title: "Setlist Game Picks Lock Soon",
+        body: formatShowDateVenueLine(show.show_date ?? "", show.show_venue_location),
+        show_id: show.show_id,
+      })
+    } catch (err) {
+      console.error("setlist-game-reminders FCM fan-out failed:", err)
+    }
     // Log the show as reminded unless APNs itself is unconfigured (so it retries
     // once secrets are set). "no registered devices" still counts as done.
     const configMissing = result.skipped != null && result.skipped !== "no registered devices"

@@ -34,6 +34,10 @@ verify_jwt = false
 [functions.apns-register]
 verify_jwt = false
 
+# Native Android app FCM token registration (anon; per-device, no sign-in).
+[functions.fcm-register]
+verify_jwt = false
+
 # Setlist Game "picks lock soon" reminders (pg_cron via pg_net; service-key auth).
 [functions.setlist-game-reminders]
 verify_jwt = false
