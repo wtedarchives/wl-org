@@ -68,3 +68,7 @@ verify_jwt = false
 # Internal APNs liveactivity sender; the service-role bearer is checked in-function.
 [functions.live-activity-push]
 verify_jwt = false
+
+# Radio-program "New Show" notifier; internal (service-role bearer checked in-function).
+[functions.radio-program-notify]
+verify_jwt = false

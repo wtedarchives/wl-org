@@ -27,6 +27,7 @@ serve(async (req) => {
     unregister?: boolean
     live_shows?: boolean
     setlist_game?: boolean
+    radio_program?: boolean
   }
   try {
     body = await req.json()
@@ -51,10 +52,11 @@ serve(async (req) => {
     return json({ ok: true, unregistered: true }, 200)
   }
 
-  // Per-type opt-in. Default live-shows on (backward compatible) and game off
-  // when a caller omits a flag.
+  // Per-type opt-in. Default live-shows on (backward compatible); game and radio
+  // program off when a caller omits a flag.
   const liveShows = body.live_shows ?? true
   const setlistGame = body.setlist_game ?? false
+  const radioProgram = body.radio_program ?? false
 
   const { error } = await supabase
     .from("fcm_tokens")
@@ -63,6 +65,7 @@ serve(async (req) => {
         fcm_token: fcmToken,
         live_shows_enabled: liveShows,
         setlist_game_enabled: setlistGame,
+        radio_program_enabled: radioProgram,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "fcm_token" },

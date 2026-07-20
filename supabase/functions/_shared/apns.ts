@@ -20,6 +20,8 @@ export type ApnsPayload = {
   title: string
   body: string
   showID?: string
+  /** WTED episode uuid — tap opens the episode page (multi-show radio program). */
+  episodeUUID?: string
   url?: string
   /** Routing hint for the app's tap handler (e.g. "setlistGame" → open the game). */
   type?: string
@@ -134,6 +136,7 @@ export async function sendApns(
     aps: { alert: { title: payload.title, body: payload.body }, sound: "default" },
   }
   if (payload.showID) aps.showID = payload.showID
+  if (payload.episodeUUID) aps.episodeUUID = payload.episodeUUID
   if (payload.url) aps.url = payload.url
   if (payload.type) aps.type = payload.type
 
