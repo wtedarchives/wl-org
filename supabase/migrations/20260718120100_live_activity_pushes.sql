@@ -29,17 +29,21 @@ begin
 end $$;
 
 -- Trigger: a setlist row changed for a show currently in its live window → update.
+-- entry_show / shows.show_id are uuid; la_push takes text (cast at the call site).
 create or replace function public.la_on_setlist_change()
 returns trigger language plpgsql as $$
-declare _show text := coalesce(NEW.entry_show, OLD.entry_show);
+declare _show uuid := coalesce(NEW.entry_show, OLD.entry_show);
 begin
+  if _show is null then
+    return coalesce(NEW, OLD);
+  end if;
   if exists (
     select 1 from public.shows s
     where s.show_id = _show
       and s.show_time <= now()
       and s.show_time >= now() - interval '6 hours'
   ) then
-    perform public.la_push('update', _show);
+    perform public.la_push('update', _show::text);
   end if;
   return coalesce(NEW, OLD);
 end $$;
@@ -50,12 +54,13 @@ after insert or update or delete on public.setlist_entries
 for each row execute function public.la_on_setlist_change();
 
 -- Cron: shows entering the live window → start (once each; state row dedupes).
+-- live_activity_show_state.show_id is text; shows.show_id is uuid — cast explicitly.
 select cron.schedule('la-start-scan', '* * * * *', $$
   with due as (
     insert into public.live_activity_show_state (show_id, started_at)
-    select s.show_id, now()
+    select s.show_id::text, now()
     from public.shows s
-    left join public.live_activity_show_state st on st.show_id = s.show_id
+    left join public.live_activity_show_state st on st.show_id = s.show_id::text
     where s.show_time <= now()
       and s.show_time >= now() - interval '6 hours'
       and st.show_id is null
@@ -71,7 +76,7 @@ select cron.schedule('la-end-scan', '* * * * *', $$
     update public.live_activity_show_state st
     set ended_at = now()
     from public.shows s
-    where st.show_id = s.show_id
+    where st.show_id = s.show_id::text
       and st.ended_at is null
       and s.show_time < now() - interval '6 hours'
     returning st.show_id
