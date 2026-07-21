@@ -2,9 +2,9 @@
  * "New Show on the Radio" — notifies opted-in devices when a new scheduled
  * program starts airing on the radio.co stream.
  *
- * Internal-only: invoked by `public.radio_program_tick()` (pg_cron) with the
- * service-role key as Bearer, and only near a program boundary (the SQL gate
- * skips mid-program ticks). Each run:
+ * Internal-only: invoked by `public.radio_program_tick()` (pg_cron) with a
+ * dedicated cron secret as Bearer, and only near a program boundary (the SQL
+ * gate skips mid-program ticks). Each run:
  *   1. reads the radio.co schedule, finds the program airing *now*,
  *   2. resolves it to a `wted_episodes` row (unresolved = filler → skip),
  *   3. if it's a different program than last time, sends APNs + FCM and records it.
@@ -13,8 +13,8 @@
  *   • present (single-show) → "mm.dd.yy: group · location · venue", tap → setlist
  *   • absent (multi-show)   → "<show> · <display_name>",           tap → episode page
  *
- * Reuses ../_shared/apns.ts + ../_shared/fcm.ts. Deploy with verify_jwt: true
- * (the service-role bearer is also checked below).
+ * Reuses ../_shared/apns.ts + ../_shared/fcm.ts. Deployed with verify_jwt: false;
+ * the dedicated RADIO_PROGRAM_CRON_SECRET bearer is checked below.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
@@ -29,8 +29,13 @@ serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
   if (!supabaseUrl || !serviceKey) return json({ error: "Server configuration error" }, 500)
 
+  // Only the scheduled tick may trigger this. Auth against a dedicated secret we
+  // control on both sides (RADIO_PROGRAM_CRON_SECRET here and the Vault secret the
+  // tick sends) — no dependence on the ambiguous/rotatable service-role key.
+  const cronSecret = Deno.env.get("RADIO_PROGRAM_CRON_SECRET")?.trim()
+  if (!cronSecret) return json({ error: "Server configuration error (cron secret)" }, 500)
   const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim()
-  if (bearer !== serviceKey) return json({ error: "Unauthorized" }, 401)
+  if (bearer !== cronSecret) return json({ error: "Unauthorized" }, 401)
 
   const db = createClient(supabaseUrl, serviceKey)
 

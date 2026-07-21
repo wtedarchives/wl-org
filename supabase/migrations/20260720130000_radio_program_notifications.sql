@@ -30,8 +30,9 @@ alter table public.radio_program_state enable row level security;  -- service-ro
 
 -- Gate: every minute, cheaply decide whether to invoke the edge function.
 -- Mid-program (now < end − 5 min) → return immediately. Near the boundary,
--- during filler, or when nothing is locked → invoke. Service key from Vault
--- (stored under 'service_role_key'); the function URL is this project's own.
+-- during filler, or when nothing is locked → invoke. Dedicated cron secret from
+-- Vault (stored under 'radio_program_cron_key', matching the function's
+-- RADIO_PROGRAM_CRON_SECRET env); the function URL is this project's own.
 create or replace function public.radio_program_tick()
 returns void language plpgsql security definer set search_path = public as $$
 declare
@@ -44,7 +45,7 @@ begin
     return;  -- mid-program: nothing can change yet
   end if;
   select decrypted_secret into _key
-  from vault.decrypted_secrets where name = 'service_role_key' limit 1;
+  from vault.decrypted_secrets where name = 'radio_program_cron_key' limit 1;
   perform net.http_post(
     url     := _url,
     headers := jsonb_build_object('Content-Type', 'application/json',

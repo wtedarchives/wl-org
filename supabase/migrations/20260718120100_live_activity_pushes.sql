@@ -3,7 +3,8 @@
 -- of record. Idempotent.)
 --
 -- One-time config (NOT in this file — no secrets in migrations):
---   store the service-role key in Vault under the name 'service_role_key'.
+--   store the dedicated cron secret in Vault under 'live_activity_cron_key'
+--   (matching the live-activity-push function's LIVE_ACTIVITY_CRON_SECRET env).
 -- (The functions base URL is this project's own public domain, so it's inlined
 --  below — the SQL-editor role can't `alter database … set` a custom GUC.)
 create extension if not exists pg_net;
@@ -17,7 +18,7 @@ declare
   _key text;
 begin
   select decrypted_secret into _key
-  from vault.decrypted_secrets where name = 'service_role_key' limit 1;
+  from vault.decrypted_secrets where name = 'live_activity_cron_key' limit 1;
 
   perform net.http_post(
     url     := _url,

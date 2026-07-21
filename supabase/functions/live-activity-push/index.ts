@@ -1,7 +1,7 @@
 /**
  * Send APNs "liveactivity" pushes for the setlist Live Activity.
  *
- * Internal-only — called by the DB (pg_net) with the service-role key as Bearer.
+ * Internal-only — called by the DB (pg_net) with a dedicated cron secret as Bearer.
  * Body: { event: "start" | "update" | "end", show_id }.
  *   • start  → all push-to-start tokens (begins the activity with the app closed)
  *   • update → a show's per-activity tokens (new song)
@@ -12,7 +12,8 @@
  *
  * Secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, plus the shared
  * APNS_KEY_ID / APNS_TEAM_ID / APNS_PRIVATE_KEY / APNS_BUNDLE_ID.
- * Deploy with verify_jwt: true (the service-role bearer is also checked below).
+ * Deployed with verify_jwt: false; the dedicated LIVE_ACTIVITY_CRON_SECRET bearer
+ * is checked below.
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
@@ -29,9 +30,13 @@ serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
   if (!supabaseUrl || !serviceKey) return json({ error: "Server configuration error" }, 500)
 
-  // Internal caller only (the trigger/cron sends the service-role key).
+  // Internal caller only. Auth against a dedicated secret we control on both sides
+  // (LIVE_ACTIVITY_CRON_SECRET here and the Vault secret la_push sends) — no
+  // dependence on the ambiguous/rotatable service-role key.
+  const cronSecret = Deno.env.get("LIVE_ACTIVITY_CRON_SECRET")?.trim()
+  if (!cronSecret) return json({ error: "Server configuration error (cron secret)" }, 500)
   const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim()
-  if (bearer !== serviceKey) return json({ error: "Unauthorized" }, 401)
+  if (bearer !== cronSecret) return json({ error: "Unauthorized" }, 401)
 
   let event = ""
   let showId = ""
