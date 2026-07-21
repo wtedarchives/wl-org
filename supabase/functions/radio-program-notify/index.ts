@@ -108,13 +108,13 @@ async function resolveEpisode(db: SupabaseClient, ev: ScheduleEvent): Promise<Ep
   const name = ev.playlist?.name?.trim()
   if (name) {
     const { data } = await db.from("wted_episodes").select(cols)
-      .eq("episode", name).neq("status", "REMOVED").limit(1)
+      .eq("episode", name).or("status.is.null,status.neq.REMOVED").limit(1)
     if (data && data.length) return data[0] as EpisodeRow
   }
   const rid = radioIdFromArtwork(ev.playlist?.artwork)
   if (rid) {
     const { data } = await db.from("wted_episodes").select(cols)
-      .eq("radio_id", rid).neq("status", "REMOVED").limit(1)
+      .eq("radio_id", rid).or("status.is.null,status.neq.REMOVED").limit(1)
     if (data && data.length) return data[0] as EpisodeRow
   }
   return null
