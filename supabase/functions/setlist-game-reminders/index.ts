@@ -100,6 +100,7 @@ serve(async (req) => {
       showID: show.show_id,
       url: getSetlistArchiveAbsoluteUrl(show.show_id),
       type: "setlistGame",
+      mutableContent: true,   // → app's NSE attaches the Archives logo
     })
     try {
       await sendFcmBatch(db, fcmTokens, {

@@ -25,6 +25,9 @@ export type ApnsPayload = {
   url?: string
   /** Routing hint for the app's tap handler (e.g. "setlistGame" → open the game). */
   type?: string
+  /** Set `aps.mutable-content` so the app's Notification Service Extension runs
+   * (e.g. to attach an image). Harmless for apps without the extension. */
+  mutableContent?: boolean
 }
 
 function base64UrlFromString(value: string): string {
@@ -132,9 +135,12 @@ export async function sendApns(
   payload: ApnsPayload,
 ): Promise<ApnsSendResult> {
   const host = environment === "sandbox" ? SANDBOX_HOST : PROD_HOST
-  const aps: Record<string, unknown> = {
-    aps: { alert: { title: payload.title, body: payload.body }, sound: "default" },
+  const apsFields: Record<string, unknown> = {
+    alert: { title: payload.title, body: payload.body },
+    sound: "default",
   }
+  if (payload.mutableContent) apsFields["mutable-content"] = 1
+  const aps: Record<string, unknown> = { aps: apsFields }
   if (payload.showID) aps.showID = payload.showID
   if (payload.episodeUUID) aps.episodeUUID = payload.episodeUUID
   if (payload.url) aps.url = payload.url
