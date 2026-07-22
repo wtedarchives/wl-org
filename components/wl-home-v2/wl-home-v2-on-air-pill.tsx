@@ -8,6 +8,7 @@ import {
   formatRadioScheduleTimeRange,
   type RadioScheduleDay,
 } from "@/hooks/use-radio-schedule"
+import { resolveRadioScheduleSlotTitle } from "@/lib/wted-episodes-schedule-lookup"
 import { cn } from "@/lib/utils"
 
 const WL_HOME_V2_ON_AIR_TABLIST_ID = "wl-home-v2-on-air-schedule-tabs"
@@ -46,9 +47,7 @@ function WlHomeV2OnAirScheduleRow({
 }: {
   slot: RadioScheduleDay["slots"][number]
 }) {
-  const label =
-    slot.event.playlist.name?.trim() ||
-    slot.event.playlist.title?.trim()
+  const label = resolveRadioScheduleSlotTitle(slot.event, slot.wtedEpisode)
   if (!label) return null
 
   const artwork = slot.wtedEpisode?.artwork
