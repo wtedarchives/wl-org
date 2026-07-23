@@ -62,8 +62,10 @@ serve(async (req) => {
   }
   const config = apns.config
 
-  const state = latestSong(await loadEntries(supabase, showId)) ??
-    { songName: "Show starting…", setLabel: "", songNumber: 0, songCount: 0 }
+  const state = resolveState(
+    await loadEntries(supabase, showId),
+    await loadEvents(supabase, showId),
+  )
   const attributes = {
     showID: show.show_id,
     showDate: formatDate(show.show_date),
@@ -157,7 +159,12 @@ interface Entry {
   entry_set: string | null
   entry_setnum: number | null
   entry_song: string
+  created_at: string | null
   songs: { song_displayname: string | null } | null
+}
+interface ShowEvent {
+  event: string
+  created_at: string | null
 }
 interface TokenRow { token: string; environment: string | null }
 
@@ -173,9 +180,17 @@ async function loadShow(db: SupabaseClient, showId: string): Promise<Show | null
 async function loadEntries(db: SupabaseClient, showId: string): Promise<Entry[]> {
   const { data } = await db
     .from("setlist_entries")
-    .select("entry_set,entry_setnum,entry_song,songs(song_displayname)")
+    .select("entry_set,entry_setnum,entry_song,created_at,songs(song_displayname)")
     .eq("entry_show", showId)
   return (data as Entry[]) ?? []
+}
+
+async function loadEvents(db: SupabaseClient, showId: string): Promise<ShowEvent[]> {
+  const { data } = await db
+    .from("setlist_show_events")
+    .select("event,created_at")
+    .eq("show_id", showId)
+  return (data as ShowEvent[]) ?? []
 }
 
 async function tokenRows(db: SupabaseClient, table: string, showId?: string): Promise<TokenRow[]> {
@@ -226,12 +241,42 @@ function latestSong(entries: Entry[]) {
           : x[3] - y[3]
   let last = real[0]
   for (const e of real) if (cmp(key(e), key(last)) > 0) last = e
+  const at = last.created_at ? Date.parse(last.created_at) : 0
   return {
-    songName: last.songs?.song_displayname ?? last.entry_song,
-    setLabel: setLabel(last.entry_set ?? ""),
-    songNumber: last.entry_setnum ?? real.length,
-    songCount: real.length,
+    at,
+    state: {
+      songName: last.songs?.song_displayname ?? last.entry_song,
+      setLabel: setLabel(last.entry_set ?? ""),
+      songNumber: last.entry_setnum ?? real.length,
+      songCount: real.length,
+      phase: "song",
+    },
   }
+}
+
+/** ContentState for an admin status event (non-song phase). */
+function statusState(event: string) {
+  const label =
+    event === "onstage" ? "Band Onstage"
+    : event === "set_break" ? "Set Break"
+    : event === "encore_break" ? "Encore Break"
+    : event
+  return { songName: label, setLabel: "", songNumber: 0, songCount: 0, phase: event }
+}
+
+/** Display state: whichever is more recent — the latest song or the latest admin
+ * status event (onstage/set break/encore break). `end_show` doesn't change the
+ * display (the end-scan cron dismisses via the delayed timestamp). Mirrors the
+ * app's SetlistLiveActivityController.resolveState. */
+function resolveState(entries: Entry[], events: ShowEvent[]) {
+  const song = latestSong(entries)
+  const status = events
+    .filter((e) => e.event !== "end_show")
+    .map((e) => ({ event: e.event, at: e.created_at ? Date.parse(e.created_at) : 0 }))
+    .sort((a, b) => b.at - a.at)[0]
+  if (status && (!song || status.at >= song.at)) return statusState(status.event)
+  if (song) return song.state
+  return { songName: "Show starting…", setLabel: "", songNumber: 0, songCount: 0, phase: "starting" }
 }
 
 function showStartSec(show: Show): number | null {

@@ -733,6 +733,14 @@ async function handleAction(
         .maybeSingle()
       if (showErr) return { error: showErr.message }
       if (!show) return { error: "Show not found" }
+      // Record the event so the Live Activity reflects it — a DB trigger
+      // (la_on_show_event) pushes the update, or schedules the delayed end for
+      // end_show. Non-fatal: a failure here still posts Discourse + the push.
+      {
+        const { error: evErr } = await db
+          .from("setlist_show_events").insert({ show_id, event })
+        if (evErr) console.error("setlist_show_events insert:", evErr)
+      }
       const message = buildSetlistShowEventDiscourseMessage(
         show_id,
         String(show.show_date ?? ""),
