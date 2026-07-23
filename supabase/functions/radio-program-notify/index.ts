@@ -20,6 +20,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { type ApnsPayload, type ApnsTokenRow, sendApnsBatch } from "../_shared/apns.ts"
 import { type FcmTokenRow, sendFcmBatch } from "../_shared/fcm.ts"
+import {
+  formatEpisodeScheduleTitle,
+  formatLinkedShowScheduleTitle,
+  type LinkedShowFields,
+} from "../_shared/schedule-title.ts"
 
 const STATION_ID = Deno.env.get("RADIO_CO_STATION_ID") ?? "s3c11c85d6"
 const SCHEDULE_URL = `https://public.radio.co/stations/${STATION_ID}/embed/schedule`
@@ -131,26 +136,23 @@ function radioIdFromArtwork(url?: string | null): string | null {
 interface PushSpec { apns: ApnsPayload; fcm: Record<string, string> }
 const TITLE = "Now Playing on WTED Radio"
 
-interface ShowRow {
-  show_date: string | null
-  show_group: string | null
-  show_venue_location: string | null
-  show_subvenue: string | null
-}
+type ShowRow = LinkedShowFields
 
 async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> {
   const showLink = ep.show_link?.trim()
   if (showLink) {
-    // Single-show program → concert copy, tap opens the setlist.
+    // Single-show program → concert copy, tap opens the setlist. Uses the same
+    // title rules as the app schedule (mm.dd.yy · group · detail · location · venue).
     const show = await loadShow(db, showLink)
-    const body = show ? singleShowBody(show) : (ep.display_name ?? ep.episode ?? "")
+    const body = show ? formatLinkedShowScheduleTitle(show) : (ep.display_name ?? ep.episode ?? "")
     return {
       apns: { title: TITLE, body, showID: showLink, type: "radioProgram" },
       fcm: { type: "radioProgram", title: TITLE, body, show_id: showLink },
     }
   }
-  // Multi-show curated program → episode copy, tap opens the episode page.
-  const body = [ep.show, ep.display_name ?? ep.episode].filter(Boolean).join(" · ")
+  // Multi-show curated program → episode copy, tap opens the episode page. Same
+  // rules as the app schedule (display-name-only buckets → display_name).
+  const body = formatEpisodeScheduleTitle(ep.show, ep.display_name ?? ep.episode)
   const uuid = ep.uuid ?? ""
   return {
     apns: { title: TITLE, body, episodeUUID: uuid, type: "radioProgram" },
@@ -158,30 +160,11 @@ async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> 
   }
 }
 
-function singleShowBody(show: ShowRow): string {
-  const parts = [show.show_group, show.show_venue_location, show.show_subvenue]
-    .map((s) => (s ?? "").trim()).filter(Boolean)
-  const date = mmddyy(show.show_date)
-  const tail = parts.join(" · ")
-  if (!date) return tail
-  return tail ? `${date}: ${tail}` : date
-}
-
 async function loadShow(db: SupabaseClient, showId: string): Promise<ShowRow | null> {
   const { data } = await db.from("shows")
-    .select("show_date,show_group,show_venue_location,show_subvenue")
+    .select("show_date,show_group,show_detail,show_venue_location,show_subvenue")
     .eq("show_id", showId).maybeSingle()
   return (data as ShowRow) ?? null
-}
-
-function mmddyy(raw: string | null): string {
-  if (!raw) return ""
-  const d = new Date(`${raw.slice(0, 10)}T00:00:00Z`)
-  if (Number.isNaN(d.getTime())) return raw
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0")
-  const dd = String(d.getUTCDate()).padStart(2, "0")
-  const yy = String(d.getUTCFullYear()).slice(-2)
-  return `${mm}.${dd}.${yy}`
 }
 
 // ── send ────────────────────────────────────────────────────────────────────
