@@ -84,7 +84,7 @@ export function WlHomeV2SetlistPageModals({
       />
       <WlHomeV2SetlistScanModal
         open={state.setlistScanModalOpen}
-        onClose={() => state.setSetlistScanModalOpen(false)}
+        onClose={state.closeSetlistScanModal}
         headingId={state.scanHeadingId}
         setlistUrl={state.setlistUrl ?? ""}
         show={show}

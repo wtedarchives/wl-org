@@ -20,6 +20,7 @@ import { useGroupsData } from "@/hooks/use-groups-data"
 import { useAttendeeData } from "@/hooks/use-attendee-data"
 import { useShowRatings } from "@/hooks/use-show-ratings"
 import { useShowMetadata } from "@/hooks/use-show-metadata"
+import { useShowsWithPosters } from "@/hooks/use-shows-with-posters"
 import { useAverageSetlist } from "@/hooks/use-average-setlist"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { WlHomeV2YearsToolModal } from "@/components/wl-home-v2/wl-home-v2-years-tool-modal"
@@ -51,6 +52,7 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
   const { showRatings } = useShowRatings(filteredShows)
   const { showsWithSetlists, showsWithReleases, showsWithRadioIds } =
     useShowMetadata(shows, currentYear)
+  const showsWithPosters = useShowsWithPosters()
 
   const averageSetlistResult = useAverageSetlist(shows, "year")
 
@@ -196,6 +198,7 @@ export function WlHomeV2YearPageBody({ yearId }: { yearId: string }) {
                 attendeeCounts={attendeeCounts}
                 showRatings={showRatings}
                 showsWithSetlists={showsWithSetlists}
+                showsWithPosters={showsWithPosters}
                 showsWithReleases={showsWithReleases}
                 showsWithRadioIds={showsWithRadioIds}
                 currentYear={currentYear}

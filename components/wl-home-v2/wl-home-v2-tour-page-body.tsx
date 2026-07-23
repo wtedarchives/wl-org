@@ -17,6 +17,7 @@ import {
 } from "@/components/setlist-breadcrumb-context"
 import { useTourPageData } from "@/hooks/use-tour-page-data"
 import { useYearIdFromYear } from "@/hooks/use-setlist-year-id"
+import { useShowsWithPosters } from "@/hooks/use-shows-with-posters"
 import { TourShowsTable } from "@/components/dpro/tours/tour-shows-table"
 import { TourSlotsTable } from "@/components/dpro/tours/tour-slots-table"
 import { TourStats } from "@/components/dpro/tours/tour-stats"
@@ -75,6 +76,7 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
     notPlayedSongs,
     averageSetlistResult,
   } = useTourPageData(tourId)
+  const showsWithPosters = useShowsWithPosters()
 
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const yearFromTour = currentTour ? extractYear(currentTour.tour) : null
@@ -200,6 +202,7 @@ export function WlHomeV2TourPageBody({ tourId }: { tourId: string }) {
                   attendeeCounts={attendeeCounts}
                   showRatings={showRatings}
                   showsWithSetlists={showsWithSetlists}
+                  showsWithPosters={showsWithPosters}
                   showsWithReleases={showsWithReleases}
                   showsWithRadioIds={showsWithRadioIds}
                   loading={isLoading}

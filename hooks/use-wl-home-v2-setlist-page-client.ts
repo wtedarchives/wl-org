@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { useAuth } from "@/components/auth-context"
 import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
@@ -23,6 +24,10 @@ import { useMaxShowCanonId } from "@/hooks/use-max-show-canonid"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useSongPairs } from "@/hooks/use-song-pairs"
 import { uniqueWtedEntriesFromPair } from "@/lib/song-pairs"
+import {
+  setlistUrlRequestsScan,
+  stripSetlistModalQueryParams,
+} from "@/lib/setlist-archive-url"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import type { SetlistEntry } from "@/types/setlist"
 import type { SongPair } from "@/types/song-pair"
@@ -32,6 +37,9 @@ type SongModalMode = "single" | "multi-section"
 export function useWlHomeV2SetlistPageClient() {
   const { session } = useAuth()
   const openLogin = useWlHomeV2OpenLogin()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { showId, invalidParams } = useSetlistArchiveShowId()
   const { show, setlist, loading, showLengthRank } = useSetlistData(showId)
   const { songPairs, loading: songPairsLoading } = useSongPairs()
@@ -94,6 +102,24 @@ export function useWlHomeV2SetlistPageClient() {
     setHoveredCategory(null)
   }, [showId])
   const { setlistUrl } = useSetlistScan(showId)
+
+  useEffect(() => {
+    if (!setlistUrl) return
+    if (setlistUrlRequestsScan(searchParams)) {
+      setSetlistScanModalOpen(true)
+    }
+  }, [showId, setlistUrl, searchParams])
+
+  const closeSetlistScanModal = useCallback(() => {
+    setSetlistScanModalOpen(false)
+    if (!setlistUrlRequestsScan(searchParams)) return
+    const next = stripSetlistModalQueryParams(searchParams, { scan: true })
+    const query = next.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname || "/", {
+      scroll: false,
+    })
+  }, [pathname, router, searchParams])
+
   const { releases, releaseToEntriesMap } = useSetlistReleases(showId)
   const fallbackWtedArtwork = releases[0]?.release_artwork ?? null
 
@@ -341,6 +367,7 @@ export function useWlHomeV2SetlistPageClient() {
     wtedModalHeadingId,
     setlistScanModalOpen,
     setSetlistScanModalOpen,
+    closeSetlistScanModal,
     scanHeadingId,
   }
 }

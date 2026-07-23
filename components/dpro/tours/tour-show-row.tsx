@@ -7,6 +7,7 @@ import {
   Broadcast,
   Check,
   FileAudio,
+  Presentation,
 } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-context"
@@ -40,6 +41,7 @@ export interface TourShowRowProps {
   attendeeCounts: Record<string, number>
   showRatings: Record<string, number>
   showsWithSetlists: Set<string>
+  showsWithPosters: Set<string>
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
   showRarityColumn?: boolean
@@ -53,6 +55,7 @@ export function TourShowRow({
   attendeeCounts,
   showRatings,
   showsWithSetlists,
+  showsWithPosters,
   showsWithReleases,
   showsWithRadioIds,
   showRarityColumn = true,
@@ -226,8 +229,8 @@ export function TourShowRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <ArchivePrefetchLink
-                    href={getSetlistArchiveUrl(show.show_id)}
-                    aria-label="View setlist"
+                    href={getSetlistArchiveUrl(show.show_id, { scan: true })}
+                    aria-label="View setlist scan"
                     className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
                   >
                     <FileAudio className="size-3.5" aria-hidden />
@@ -235,6 +238,35 @@ export function TourShowRow({
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <span className="text-[11px]">Setlist scan</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="inline-block size-3.5" aria-hidden />
+          )}
+        </div>
+      </TableCell>
+      <TableCell
+        className={cn(
+          "w-[32px] text-center align-middle leading-none",
+          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
+        )}
+      >
+        <div className="inline-flex items-center justify-center">
+          {showsWithPosters.has(show.show_id) ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <ArchivePrefetchLink
+                    href={getSetlistArchiveUrl(show.show_id, { poster: true })}
+                    aria-label="View poster"
+                    className="inline-flex items-center justify-center rounded p-0.5 text-yellow-400 hover:text-yellow-300"
+                  >
+                    <Presentation className="size-3.5" aria-hidden />
+                  </ArchivePrefetchLink>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <span className="text-[11px]">Poster</span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

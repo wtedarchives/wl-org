@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import type { ReactNode } from "react"
-import { Broadcast, Check, FileAudio, Users } from "@phosphor-icons/react"
+import { Broadcast, Check, FileAudio, Presentation, Users } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -23,6 +23,7 @@ interface TourShowsTableProps {
   attendeeCounts: Record<string, number>
   showRatings: Record<string, number>
   showsWithSetlists: Set<string>
+  showsWithPosters: Set<string>
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
   loading: boolean
@@ -42,6 +43,7 @@ export function TourShowsTable({
   attendeeCounts,
   showRatings,
   showsWithSetlists,
+  showsWithPosters,
   showsWithReleases,
   showsWithRadioIds,
   loading,
@@ -270,6 +272,13 @@ export function TourShowsTable({
               className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
             >
               <div className="flex w-full items-center justify-center">
+                <Presentation className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+              </div>
+            </TableHead>
+            <TableHead
+              className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
+            >
+              <div className="flex w-full items-center justify-center">
                 <Broadcast className="size-3 shrink-0 text-muted-foreground" aria-hidden />
               </div>
             </TableHead>
@@ -331,6 +340,7 @@ export function TourShowsTable({
               attendeeCounts={attendeeCounts}
               showRatings={showRatings}
               showsWithSetlists={showsWithSetlists}
+              showsWithPosters={showsWithPosters}
               showsWithReleases={showsWithReleases}
               showsWithRadioIds={showsWithRadioIds}
               showRarityColumn={hasRarity}

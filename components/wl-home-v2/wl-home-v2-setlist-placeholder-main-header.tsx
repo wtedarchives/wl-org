@@ -13,7 +13,9 @@ import {
   type WlHomeV2SetlistPlaceholderToolsProps,
 } from "@/components/wl-home-v2/wl-home-v2-setlist-placeholder-tools"
 import { WlHomeV2SetlistToolsPanel } from "@/components/wl-home-v2/wl-home-v2-setlist-tools-panel"
+import { WlHomeV2SetlistShowHeaderPoster } from "@/components/wl-home-v2/wl-home-v2-setlist-show-header-poster"
 import type { UserAttendedGooseCanonNavState } from "@/hooks/use-user-attended-goose-canon-nav"
+import { useShowPosters } from "@/hooks/use-show-poster-image"
 
 export type WlHomeV2SetlistPlaceholderMainHeaderProps = {
   useCompactTools: boolean
@@ -70,6 +72,13 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
     : null
 
   const showWeekdayLabel = formatShowWeekday(show.show_date)
+  const posters = useShowPosters(show.show_id)
+  const hasPosters = posters.length > 0
+  /** Compact: pill above tour when poster fills the top-right; otherwise top-right of title. */
+  const compactCanonInTitle =
+    useCompactTools && showCanonPositionPill && !hasPosters
+  const compactCanonAboveTour =
+    useCompactTools && showCanonPositionPill && hasPosters
 
   return (
     <div
@@ -86,13 +95,12 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
           </div>
         : null}
         <div className="show-header-main">
+        <div className="show-header-lead">
         <div className="left">
           <div
             className={cn(
               "show-header-title-row",
-              useCompactTools &&
-                showCanonPositionPill &&
-                "show-header-title-row--with-canon",
+              compactCanonInTitle && "show-header-title-row--with-canon",
             )}
           >
             <h1 className="show-header-heading">
@@ -107,7 +115,7 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
                 </>
               : null}
             </h1>
-            {useCompactTools && showHeaderCanonPillJsx}
+            {compactCanonInTitle ? showHeaderCanonPillJsx : null}
           </div>
           {subvenueLabel || venueLocation ?
             <div
@@ -157,69 +165,74 @@ export function WlHomeV2SetlistPlaceholderMainHeader({
             </div>
           : null}
         </div>
+          {hasPosters ?
+            <WlHomeV2SetlistShowHeaderPoster posters={posters} showThumbnail />
+          : null}
+        </div>
         <div className="show-header-nav">
-          {!useCompactTools && showHeaderCanonPillJsx}
-          <div className="show-header-nav-tour-block">
-            {show.show_tour || showPositionInTour ?
-              <div
-                className={cn(
-                  "meta show-header-nav-tour",
-                  mobileStackTourNameAndPositionLines &&
-                    "show-header-nav-tour--stack-lines",
-                )}
-              >
-                {show.show_tour ?
-                  <span className="meta-tour">{show.show_tour}</span>
-                : null}
-                {!mobileStackTourNameAndPositionLines &&
-                show.show_tour &&
-                showPositionInTour ?
-                  <span aria-hidden="true"> · </span>
-                : null}
-                {showPositionInTour ?
-                  <span className="meta-tour">
-                    Show {showPositionInTour.position} of{" "}
-                    {showPositionInTour.total}
-                  </span>
-                : null}
+            {!useCompactTools && showHeaderCanonPillJsx}
+            <div className="show-header-nav-tour-block">
+              {compactCanonAboveTour ? showHeaderCanonPillJsx : null}
+              {show.show_tour || showPositionInTour ?
+                <div
+                  className={cn(
+                    "meta show-header-nav-tour",
+                    mobileStackTourNameAndPositionLines &&
+                      "show-header-nav-tour--stack-lines",
+                  )}
+                >
+                  {show.show_tour ?
+                    <span className="meta-tour">{show.show_tour}</span>
+                  : null}
+                  {!mobileStackTourNameAndPositionLines &&
+                  show.show_tour &&
+                  showPositionInTour ?
+                    <span aria-hidden="true"> · </span>
+                  : null}
+                  {showPositionInTour ?
+                    <span className="meta-tour">
+                      Show {showPositionInTour.position} of{" "}
+                      {showPositionInTour.total}
+                    </span>
+                  : null}
+                </div>
+              : null}
+              <div className="nav-btns">
+                <button
+                  type="button"
+                  className="nav-btn"
+                  aria-label="Previous show in tour"
+                  disabled={!tourShowNav?.prevShowId}
+                  onClick={() =>
+                    tourShowNav?.prevShowId &&
+                    onTourShowSelect(tourShowNav.prevShowId)
+                  }
+                >
+                  <CaretLeft
+                    className="size-3.5 shrink-0 opacity-90"
+                    aria-hidden
+                  />
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  className="nav-btn"
+                  aria-label="Next show in tour"
+                  disabled={!tourShowNav?.nextShowId}
+                  onClick={() =>
+                    tourShowNav?.nextShowId &&
+                    onTourShowSelect(tourShowNav.nextShowId)
+                  }
+                >
+                  Next
+                  <CaretRight
+                    className="size-3.5 shrink-0 opacity-90"
+                    aria-hidden
+                  />
+                </button>
               </div>
-            : null}
-            <div className="nav-btns">
-              <button
-                type="button"
-                className="nav-btn"
-                aria-label="Previous show in tour"
-                disabled={!tourShowNav?.prevShowId}
-                onClick={() =>
-                  tourShowNav?.prevShowId &&
-                  onTourShowSelect(tourShowNav.prevShowId)
-                }
-              >
-                <CaretLeft
-                  className="size-3.5 shrink-0 opacity-90"
-                  aria-hidden
-                />
-                Prev
-              </button>
-              <button
-                type="button"
-                className="nav-btn"
-                aria-label="Next show in tour"
-                disabled={!tourShowNav?.nextShowId}
-                onClick={() =>
-                  tourShowNav?.nextShowId &&
-                  onTourShowSelect(tourShowNav.nextShowId)
-                }
-              >
-                Next
-                <CaretRight
-                  className="size-3.5 shrink-0 opacity-90"
-                  aria-hidden
-                />
-              </button>
             </div>
           </div>
-        </div>
         </div>
       </div>
 

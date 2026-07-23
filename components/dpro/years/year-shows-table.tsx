@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Broadcast, Check, FileAudio, Users } from "@phosphor-icons/react"
+import { Broadcast, Check, FileAudio, Presentation, Users } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -23,6 +23,7 @@ interface YearShowsTableProps {
   attendeeCounts: Record<string, number>
   showRatings: Record<string, number>
   showsWithSetlists: Set<string>
+  showsWithPosters: Set<string>
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
   currentYear: string
@@ -39,6 +40,7 @@ export function YearShowsTable({
   attendeeCounts,
   showRatings,
   showsWithSetlists,
+  showsWithPosters,
   showsWithReleases,
   showsWithRadioIds,
   currentYear,
@@ -205,6 +207,14 @@ export function YearShowsTable({
               </TableHead>
               <TableHead className="w-[32px] !px-1 !py-0.5 text-center text-[11px] font-medium">
                 <div className="flex w-full items-center justify-center">
+                  <Presentation
+                    className="size-3 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                </div>
+              </TableHead>
+              <TableHead className="w-[32px] !px-1 !py-0.5 text-center text-[11px] font-medium">
+                <div className="flex w-full items-center justify-center">
                   <Broadcast
                     className="size-3 shrink-0 text-muted-foreground"
                     aria-hidden
@@ -262,6 +272,7 @@ export function YearShowsTable({
                 attendeeCounts={attendeeCounts}
                 showRatings={showRatings}
                 showsWithSetlists={showsWithSetlists}
+                showsWithPosters={showsWithPosters}
                 showsWithReleases={showsWithReleases}
                 showsWithRadioIds={showsWithRadioIds}
                 wlHomeV2={wlHomeV2}

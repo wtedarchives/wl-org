@@ -5912,6 +5912,146 @@
     color: var(--wl-light-orange);
     text-decoration: underline;
   }
+
+  /* Show poster — same shell as setlist scan; image + metadata */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-poster {
+    max-width: min(800px, 96vw);
+    width: 100%;
+    max-height: min(90vh, 880px);
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-poster
+    .modal-setlist-poster-body {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    margin-top: 14px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 2px 8px;
+    box-shadow: none;
+    border: 0;
+    background: transparent;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+    min-height: min(40vh, 360px);
+  }
+  @media (min-width: 1344px) {
+    .wl-home-v2 .wl-home-v2-setlist-poster-columns {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .wl-home-v2 .wl-home-v2-setlist-poster-col--image {
+      flex: 0 1 52%;
+      max-width: 52%;
+      min-width: 0;
+    }
+    .wl-home-v2 .wl-home-v2-setlist-poster-col--details {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+  .wl-home-v2
+    .modal.modal--wted-request.modal--setlist-poster
+    .sc-label {
+    margin: 0 0 8px 0;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.58);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-image-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-image {
+    max-height: min(560px, 58vh);
+    max-width: 100%;
+    width: auto;
+    border-radius: 10px;
+    object-fit: contain;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-image-fallback,
+  .wl-home-v2 .wl-home-v2-setlist-poster-empty,
+  .wl-home-v2 .wl-home-v2-setlist-poster-empty-details {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-nav-count {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.55);
+    font-variant-numeric: tabular-nums;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-nav-btn {
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-nav-btn:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-field .sc-label {
+    margin-bottom: 4px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-detail-primary {
+    margin: 0;
+    font-weight: 600;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-detail-muted {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.68);
+    white-space: pre-wrap;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-artists,
+  .wl-home-v2 .wl-home-v2-setlist-poster-tours {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-artist-link {
+    font-weight: 600;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-poster-artist-link:hover {
+    color: rgb(255, 255, 255);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
   /* Aside: show changes (matches SetlistShowChangesCard data) */
   .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-show-changes-head {
     display: flex;
@@ -11926,7 +12066,7 @@
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  gap: 10px;
+  gap: 20px;
   flex-wrap: wrap;
   padding: 16px;
 }
@@ -11982,6 +12122,15 @@
   position: relative;
   z-index: 1;
 }
+.wl-home-v2 .wl-home-v2-setlist .show-header .show-header-lead {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
 .wl-home-v2 .wl-home-v2-setlist .show-header .left {
   position: relative;
   z-index: 2;
@@ -12004,6 +12153,49 @@
 }
 .wl-home-v2 .wl-home-v2-setlist .show-header .meta .meta-tour {
   min-width: 0;
+}
+/* 1:1 window matching header row height; image contain + center. */
+.wl-home-v2 .wl-home-v2-setlist .show-header .show-header-poster {
+  flex: 0 0 auto;
+  align-self: stretch;
+  height: 0;
+  min-height: 100%;
+  aspect-ratio: 1 / 1;
+  width: auto;
+  max-width: none;
+  display: block;
+  position: relative;
+  line-height: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.wl-home-v2 .wl-home-v2-setlist .show-header .show-header-poster__img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0;
+  transition: opacity 0.85s ease;
+  pointer-events: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .show-header
+  .show-header-poster__img--active {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-poster__img {
+    transition: none;
+  }
 }
 .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-nav {
   display: flex;
@@ -12310,7 +12502,8 @@
   color: #fff;
   font-weight: 700;
 }
-/* Compact setlist (`< xl`): SHOW n OF m shares the title row with date · group (right-aligned). */
+/* Compact setlist (`< xl`): poster matches `.left` height; SHOW n OF m is top-right
+   unless a poster takes that corner (then it sits above the tour line). */
 @media (max-width: 1343px) {
   /* Slightly smaller date + group than desktop (shared `h1`; matches compact tools layout). */
   .wl-home-v2 .wl-home-v2-setlist .show-header h1.show-header-heading {
@@ -12329,7 +12522,11 @@
     width: 100%;
     min-width: 0;
   }
-  .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-title-row--with-canon .show-header-heading {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header
+    .show-header-title-row--with-canon
+    .show-header-heading {
     flex: 1 1 auto;
     min-width: 0;
     text-align: left;
@@ -12341,6 +12538,15 @@
     .show-header-canon-pill {
     flex: 0 0 auto;
     text-align: right;
+  }
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .show-header
+    .show-header-nav-tour-block
+    .show-header-canon-pill {
+    justify-self: center;
+    align-self: center;
+    text-align: center;
   }
   /* Long tour name on compact: tour name vs show position/total on stacked lines (`< xl` only via TS). */
   .wl-home-v2 .wl-home-v2-setlist .show-header .show-header-nav-tour.show-header-nav-tour--stack-lines {
