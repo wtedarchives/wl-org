@@ -276,7 +276,7 @@ function resolveState(entries: Entry[], events: ShowEvent[]) {
     .sort((a, b) => b.at - a.at)[0]
   if (status && (!song || status.at >= song.at)) return statusState(status.event)
   if (song) return song.state
-  return { songName: "Show starting…", setLabel: "", songNumber: 0, songCount: 0, phase: "starting" }
+  return { songName: "Show Starting Soon", setLabel: "", songNumber: 0, songCount: 0, phase: "starting" }
 }
 
 function showStartSec(show: Show): number | null {
