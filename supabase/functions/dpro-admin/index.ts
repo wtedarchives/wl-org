@@ -472,6 +472,47 @@ async function handleAction(
       return { data: true }
     }
 
+    case "show_posters_insert": {
+      const row = body.row as Record<string, unknown> | undefined
+      if (!row) return { error: "Missing row" }
+      const allowed = pick(row, [
+        "show",
+        "tour",
+        "artist",
+        "print_run",
+        "description",
+        "image",
+      ])
+      const { data, error } = await db.from("show_posters").insert([allowed]).select("uuid").single()
+      if (error) return { error: error.message }
+      return { data: { uuid: data.uuid } }
+    }
+
+    case "show_posters_update": {
+      const uuid = body.uuid as string | undefined
+      const patch = body.patch as Record<string, unknown> | undefined
+      if (!uuid || !patch) return { error: "Invalid payload" }
+      const allowed = pick(patch, [
+        "show",
+        "tour",
+        "artist",
+        "print_run",
+        "description",
+        "image",
+      ])
+      const { error } = await db.from("show_posters").update(allowed).eq("uuid", uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "show_posters_delete": {
+      const uuid = body.uuid as string | undefined
+      if (!uuid) return { error: "Missing uuid" }
+      const { error } = await db.from("show_posters").delete().eq("uuid", uuid)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
     case "discography_entries_insert": {
       const rows = body.rows as unknown
       if (!Array.isArray(rows) || rows.length === 0) return { error: "Invalid rows" }

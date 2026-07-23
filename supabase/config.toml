@@ -57,6 +57,10 @@ verify_jwt = false
 [functions.radio-schedule-share-upload]
 verify_jwt = false
 
+# Wysteria admin JWT verified inside the function; poster image body is raw bytes.
+[functions.show-poster-upload]
+verify_jwt = false
+
 # Custom API keys validated inside the function (not Supabase Auth JWTs).
 [functions.bot-read-api]
 verify_jwt = false

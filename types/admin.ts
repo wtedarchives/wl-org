@@ -203,4 +203,21 @@ export interface DiscographyEntryLink {
   order: number
 }
 
+/** Artist credit on a show poster (`show_posters.artist` jsonb) */
+export interface ShowPosterArtist {
+  name: string
+  link: string
+}
+
+/** Row from `show_posters` for Admin Poster tab */
+export interface ShowPosterRecord {
+  uuid: string
+  show: string[] | null
+  tour: string[] | null
+  artist: ShowPosterArtist[] | null
+  print_run: number | null
+  description: string | null
+  image: string | null
+}
+
 export type AdminShowDataBasic = ShowData

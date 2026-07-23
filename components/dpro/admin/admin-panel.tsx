@@ -25,6 +25,7 @@ import { AdminSubvenue } from "./admin-subvenue"
 import { AdminWted } from "./admin-wted"
 import { AdminBandcamp } from "./admin-bandcamp"
 import { AdminDiscography } from "./admin-discography"
+import { AdminPoster } from "./admin-poster"
 
 export function AdminPanel() {
   const { session } = useAuth()
@@ -183,6 +184,9 @@ export function AdminPanel() {
           </TabsContent>
           <TabsContent value="Discography" className="mt-0 w-full p-3 sm:p-4">
             <AdminDiscography />
+          </TabsContent>
+          <TabsContent value="Poster" className="mt-0 w-full p-3 sm:p-4">
+            <AdminPoster />
           </TabsContent>
           <TabsContent value="Media" className="mt-0 w-full p-3 sm:p-4">
             <AdminMedia />

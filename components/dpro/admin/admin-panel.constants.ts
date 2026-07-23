@@ -8,6 +8,7 @@ export const ADMIN_PANEL_TABS = [
   "Changes",
   "Releases",
   "Discography",
+  "Poster",
   "Media",
   "Venue",
   "Subvenue",
