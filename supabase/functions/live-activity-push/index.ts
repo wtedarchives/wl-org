@@ -68,10 +68,12 @@ serve(async (req) => {
   )
   const attributes = {
     showID: show.show_id,
-    showDate: formatDate(show.show_date),
+    // iOS Live Activity header shows "mm.dd.yy · location" / venue.
+    showDate: formatShortDate(show.show_date),
     location: show.show_venue_location ?? "",
     venue: show.show_subvenue ?? "",
   }
+  const showDateLong = formatDate(show.show_date) // long form for the Android/FCM payload
   const nowSec = Math.floor(Date.now() / 1000)
   const startSec = showStartSec(show)
   const staleSec = startSec ? startSec + WINDOW_HOURS * 3600 : nowSec + 3600
@@ -98,7 +100,7 @@ serve(async (req) => {
         song_count: String(state.songCount),
         venue: attributes.venue,
         location: attributes.location,
-        date: attributes.showDate,
+        date: showDateLong,
       })
     }
   } catch (err) {
@@ -160,7 +162,7 @@ interface Entry {
   entry_setnum: number | null
   entry_song: string
   created_at: string | null
-  songs: { song_displayname: string | null } | null
+  songs: { song_displayname: string | null; song_category: string | null } | null
 }
 interface ShowEvent {
   event: string
@@ -180,7 +182,7 @@ async function loadShow(db: SupabaseClient, showId: string): Promise<Show | null
 async function loadEntries(db: SupabaseClient, showId: string): Promise<Entry[]> {
   const { data } = await db
     .from("setlist_entries")
-    .select("entry_set,entry_setnum,entry_song,created_at,songs(song_displayname)")
+    .select("entry_set,entry_setnum,entry_song,created_at,songs(song_displayname,song_category)")
     .eq("entry_show", showId)
   return (data as Entry[]) ?? []
 }
@@ -250,6 +252,8 @@ function latestSong(entries: Entry[]) {
       songNumber: last.entry_setnum ?? real.length,
       songCount: real.length,
       phase: "song",
+      // Category key for the widget's App-Group art cache (null → goose).
+      artworkKey: last.songs?.song_category ?? null,
     },
   }
 }
@@ -261,7 +265,7 @@ function statusState(event: string) {
     : event === "set_break" ? "Set Break"
     : event === "encore_break" ? "Encore Break"
     : event
-  return { songName: label, setLabel: "", songNumber: 0, songCount: 0, phase: event }
+  return { songName: label, setLabel: "", songNumber: 0, songCount: 0, phase: event, artworkKey: null }
 }
 
 /** Display state: whichever is more recent — the latest song or the latest admin
@@ -276,7 +280,7 @@ function resolveState(entries: Entry[], events: ShowEvent[]) {
     .sort((a, b) => b.at - a.at)[0]
   if (status && (!song || status.at >= song.at)) return statusState(status.event)
   if (song) return song.state
-  return { songName: "Show Starting Soon", setLabel: "", songNumber: 0, songCount: 0, phase: "starting" }
+  return { songName: "Show Starting Soon", setLabel: "", songNumber: 0, songCount: 0, phase: "starting", artworkKey: null }
 }
 
 function showStartSec(show: Show): number | null {
@@ -290,6 +294,17 @@ function formatDate(raw: string | null): string {
   const d = new Date(`${raw.slice(0, 10)}T00:00:00Z`)
   if (isNaN(d.getTime())) return raw
   return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })
+}
+
+/** Compact "mm.dd.yy" (UTC) — matches the iOS app's ArchiveFormat.shortDate. */
+function formatShortDate(raw: string | null): string {
+  if (!raw) return ""
+  const d = new Date(`${raw.slice(0, 10)}T00:00:00Z`)
+  if (isNaN(d.getTime())) return raw
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0")
+  const dd = String(d.getUTCDate()).padStart(2, "0")
+  const yy = String(d.getUTCFullYear()).slice(-2)
+  return `${mm}.${dd}.${yy}`
 }
 
 // ── APNs liveactivity transport ─────────────────────────────────────────────
