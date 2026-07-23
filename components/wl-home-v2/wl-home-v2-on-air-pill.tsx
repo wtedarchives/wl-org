@@ -50,7 +50,7 @@ function WlHomeV2OnAirScheduleRow({
   const label = resolveRadioScheduleSlotTitle(slot.event, slot.wtedEpisode)
   if (!label) return null
 
-  const artwork = slot.wtedEpisode?.artwork
+  const artwork = slot.wtedEpisode?.artwork?.trim() || "/WL.png"
   const href = slot.wtedEpisode?.scheduleLinkHref ?? null
   const timeRange = formatRadioScheduleTimeRange(
     slot.displayStart,

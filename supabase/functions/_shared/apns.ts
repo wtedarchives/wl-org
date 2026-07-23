@@ -28,6 +28,9 @@ export type ApnsPayload = {
   /** Set `aps.mutable-content` so the app's Notification Service Extension runs
    * (e.g. to attach an image). Harmless for apps without the extension. */
   mutableContent?: boolean
+  /** Image the Notification Service Extension should download + attach
+   * (surfaced to the app as `image_url`). Requires `mutableContent`. */
+  imageUrl?: string
 }
 
 function base64UrlFromString(value: string): string {
@@ -145,6 +148,7 @@ export async function sendApns(
   if (payload.episodeUUID) aps.episodeUUID = payload.episodeUUID
   if (payload.url) aps.url = payload.url
   if (payload.type) aps.type = payload.type
+  if (payload.imageUrl) aps.image_url = payload.imageUrl
 
   const res = await fetch(`${host}/3/device/${deviceToken}`, {
     method: "POST",

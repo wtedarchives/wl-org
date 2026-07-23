@@ -106,10 +106,11 @@ interface EpisodeRow {
   show: string | null
   show_link: string | null
   status: string | null
+  artwork: string | null
 }
 
 async function resolveEpisode(db: SupabaseClient, ev: ScheduleEvent): Promise<EpisodeRow | null> {
-  const cols = "uuid,episode,display_name,show,show_link,status"
+  const cols = "uuid,episode,display_name,show,show_link,status,artwork"
   const name = ev.playlist?.name?.trim()
   if (name) {
     const { data } = await db.from("wted_episodes").select(cols)
@@ -139,6 +140,10 @@ const TITLE = "Now Playing on WTED Radio"
 type ShowRow = LinkedShowFields
 
 async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> {
+  // Curated episode artwork drives the push image (matches the app/wl-home-v2
+  // schedule). When absent, the app's NSE attaches the bundled WL fallback, so
+  // `mutableContent` is always set so the extension runs either way.
+  const image = ep.artwork?.trim() || undefined
   const showLink = ep.show_link?.trim()
   if (showLink) {
     // Single-show program → concert copy, tap opens the setlist. Uses the same
@@ -146,7 +151,7 @@ async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> 
     const show = await loadShow(db, showLink)
     const body = show ? formatLinkedShowScheduleTitle(show) : (ep.display_name ?? ep.episode ?? "")
     return {
-      apns: { title: TITLE, body, showID: showLink, type: "radioProgram" },
+      apns: { title: TITLE, body, showID: showLink, type: "radioProgram", mutableContent: true, imageUrl: image },
       fcm: { type: "radioProgram", title: TITLE, body, show_id: showLink },
     }
   }
@@ -155,7 +160,7 @@ async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> 
   const body = formatEpisodeScheduleTitle(ep.show, ep.display_name ?? ep.episode)
   const uuid = ep.uuid ?? ""
   return {
-    apns: { title: TITLE, body, episodeUUID: uuid, type: "radioProgram" },
+    apns: { title: TITLE, body, episodeUUID: uuid, type: "radioProgram", mutableContent: true, imageUrl: image },
     fcm: { type: "radioProgram", title: TITLE, body, episode_uuid: uuid },
   }
 }
