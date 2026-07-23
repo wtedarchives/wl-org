@@ -13,6 +13,28 @@ export type SetlistPushPayload = {
   body: string
   url: string
   showID: string
+  type?: string
+  mutableContent?: boolean
+  imageUrl?: string
+}
+
+/** Category artwork for a song: `songs.song` → `songs.song_category` →
+ * `categories.category` → `categories.category_artwork`. undefined when the
+ * song, its category, or the category's artwork can't be resolved. */
+export async function resolveSongCategoryArtwork(
+  db: SupabaseClient,
+  entrySong: string | null | undefined,
+): Promise<string | undefined> {
+  const song = (entrySong ?? "").trim()
+  if (!song) return undefined
+  const { data: songRow } = await db
+    .from("songs").select("song_category").eq("song", song).maybeSingle()
+  const category = (songRow?.song_category ?? "").trim()
+  if (!category) return undefined
+  const { data: catRow } = await db
+    .from("categories").select("category_artwork").eq("category", category).maybeSingle()
+  const art = (catRow?.category_artwork ?? "").trim()
+  return art || undefined
 }
 
 const SHOW_EVENT_PUSH_TITLES: Record<SetlistDiscourseShowEvent, string> = {
@@ -29,6 +51,7 @@ export function buildSetlistNowPlayingPushNotification(
   entrySet: string | null | undefined,
   entrySetnum: number,
   entrySong: string | null | undefined,
+  imageUrl?: string,
 ): SetlistPushPayload {
   const songName = (entrySong ?? "").trim() || "—"
   const setSongLine = buildSetlistNowPlayingSetSongLine(entrySet, entrySetnum)
@@ -37,6 +60,10 @@ export function buildSetlistNowPlayingPushNotification(
     body: `${formatShowDateVenueLine(showDate, venueLocation)}\n${setSongLine}`,
     url: getSetlistArchiveAbsoluteUrl(showId),
     showID: showId,
+    type: "liveShow",
+    mutableContent: true,
+    // Song's category artwork; when absent the app's NSE uses the WL fallback.
+    imageUrl,
   }
 }
 
@@ -51,6 +78,9 @@ export function buildSetlistShowEventPushNotification(
     body: formatShowDateVenueLine(showDate, venueLocation),
     url: getSetlistArchiveAbsoluteUrl(showId),
     showID: showId,
+    type: "liveShow",
+    // No song → no per-song image; the app's NSE attaches the WL fallback.
+    mutableContent: true,
   }
 }
 

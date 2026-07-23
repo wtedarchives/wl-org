@@ -13,6 +13,7 @@ import {
 import {
   buildSetlistNowPlayingPushNotification,
   buildSetlistShowEventPushNotification,
+  resolveSongCategoryArtwork,
   sendSetlistPushNotifications,
 } from "../_shared/setlist-push-notifications.ts"
 import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
@@ -802,6 +803,10 @@ async function handleAction(
         message,
       )
       if (!posted.ok) return { error: posted.error }
+      const nowPlayingArtwork = await resolveSongCategoryArtwork(
+        db,
+        entry.entry_song as string | null | undefined,
+      )
       const pushPayload = buildSetlistNowPlayingPushNotification(
         String(entry.entry_show),
         String(show.show_date ?? ""),
@@ -809,6 +814,7 @@ async function handleAction(
         entry.entry_set as string | null | undefined,
         Number(entry.entry_setnum),
         entry.entry_song as string | null | undefined,
+        nowPlayingArtwork,
       )
       let pushResult
       try {
