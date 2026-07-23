@@ -72,6 +72,7 @@ serve(async (req) => {
     showDate: formatShortDate(show.show_date),
     location: show.show_venue_location ?? "",
     venue: show.show_subvenue ?? "",
+    showGroup: show.show_group ?? "",
   }
   const showDateLong = formatDate(show.show_date) // long form for the Android/FCM payload
   const nowSec = Math.floor(Date.now() / 1000)
@@ -154,6 +155,7 @@ interface Show {
   show_id: string
   show_date: string | null
   show_time: string | null
+  show_group: string | null
   show_subvenue: string | null
   show_venue_location: string | null
 }
@@ -173,7 +175,7 @@ interface TokenRow { token: string; environment: string | null }
 async function loadShow(db: SupabaseClient, showId: string): Promise<Show | null> {
   const { data } = await db
     .from("shows")
-    .select("show_id,show_date,show_time,show_subvenue,show_venue_location")
+    .select("show_id,show_date,show_time,show_group,show_subvenue,show_venue_location")
     .eq("show_id", showId)
     .maybeSingle()
   return (data as Show) ?? null
