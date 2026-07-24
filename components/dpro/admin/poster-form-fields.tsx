@@ -4,7 +4,7 @@ import { useMemo, useState, type Dispatch, type SetStateAction } from "react"
 import Image from "next/image"
 import { Plus, X } from "lucide-react"
 import { getShowDisplayData } from "@/lib/utils/show-utils"
-import type { ShowData, TourData } from "@/types/admin"
+import type { ShowData, ShowPosterArtist, TourData } from "@/types/admin"
 import { AdminShowDropdown } from "./admin-show-dropdown"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +24,7 @@ interface PosterFormFieldsProps {
   setFormData: Dispatch<SetStateAction<PosterFormFields>>
   shows: ShowData[]
   tours: TourData[]
+  knownArtists: ShowPosterArtist[]
   showsLoading: boolean
   showsLoadingProgress: number
   uploading: boolean
@@ -36,6 +37,7 @@ export function PosterFormFields({
   setFormData,
   shows,
   tours,
+  knownArtists,
   showsLoading,
   showsLoadingProgress,
   uploading,
@@ -45,6 +47,7 @@ export function PosterFormFields({
   const [showDropdownOpen, setShowDropdownOpen] = useState(false)
   const [showSearch, setShowSearch] = useState("")
   const [tourPickKey, setTourPickKey] = useState(0)
+  const [artistPickKey, setArtistPickKey] = useState(0)
 
   const showById = useMemo(() => {
     const map = new Map<string, ShowData>()
@@ -67,6 +70,17 @@ export function PosterFormFields({
     const selected = new Set(formData.tourNames)
     return tours.filter((t) => !selected.has(t.tour))
   }, [tours, formData.tourNames])
+
+  const availableKnownArtists = useMemo(() => {
+    const selected = new Set(
+      formData.artists
+        .map((a) => a.name.trim().toLowerCase())
+        .filter(Boolean),
+    )
+    return knownArtists.filter(
+      (a) => !selected.has(a.name.trim().toLowerCase()),
+    )
+  }, [knownArtists, formData.artists])
 
   const addShow = (show: { show_id: string }) => {
     setFormData((prev) =>
@@ -106,6 +120,23 @@ export function PosterFormFields({
       ...prev,
       artists: [...prev.artists, { name: "", link: "" }],
     }))
+  }
+
+  const addKnownArtist = (name: string) => {
+    const match = knownArtists.find(
+      (a) => a.name.trim().toLowerCase() === name.trim().toLowerCase(),
+    )
+    if (!match) return
+    setFormData((prev) => {
+      const already = prev.artists.some(
+        (a) => a.name.trim().toLowerCase() === match.name.toLowerCase(),
+      )
+      if (already) return prev
+      return {
+        ...prev,
+        artists: [...prev.artists, { name: match.name, link: match.link }],
+      }
+    })
   }
 
   const updateArtist = (
@@ -257,6 +288,34 @@ export function PosterFormFields({
             Add artist
           </Button>
         </div>
+        {knownArtists.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            No saved poster artists yet — add one below.
+          </p>
+        ) : availableKnownArtists.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            All known artists already added.
+          </p>
+        ) : (
+          <Select
+            key={artistPickKey}
+            onValueChange={(v) => {
+              addKnownArtist(v)
+              setArtistPickKey((k) => k + 1)
+            }}
+          >
+            <SelectTrigger className="h-11 w-full text-xs sm:h-8">
+              <SelectValue placeholder="Choose existing artist…" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableKnownArtists.map((a) => (
+                <SelectItem key={a.name.toLowerCase()} value={a.name}>
+                  {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         {formData.artists.length === 0 ? (
           <p className="text-xs text-muted-foreground">No artists added.</p>
         ) : (
@@ -276,6 +335,7 @@ export function PosterFormFields({
                     onChange={(e) => updateArtist(index, "name", e.target.value)}
                     className="h-11 text-xs sm:h-8"
                     placeholder="Artist name"
+                    list="poster-known-artist-names"
                   />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -305,6 +365,13 @@ export function PosterFormFields({
             ))}
           </ul>
         )}
+        {knownArtists.length > 0 ? (
+          <datalist id="poster-known-artist-names">
+            {knownArtists.map((a) => (
+              <option key={a.name.toLowerCase()} value={a.name} />
+            ))}
+          </datalist>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-1">

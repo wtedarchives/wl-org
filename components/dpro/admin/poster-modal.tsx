@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth-context"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { uploadShowPosterImage } from "@/lib/show-poster-upload"
 import { supabase } from "@/lib/supabase"
-import type { ShowData, ShowPosterRecord, TourData } from "@/types/admin"
+import type { ShowData, ShowPosterArtist, ShowPosterRecord, TourData } from "@/types/admin"
 import {
   Dialog,
   DialogClose,
@@ -31,6 +31,8 @@ interface PosterModalProps {
   onSave: () => void
   record: ShowPosterRecord | null
   isAddMode: boolean
+  /** Unique artists already on posters (for quick-pick). */
+  knownArtists: ShowPosterArtist[]
 }
 
 function formatAuthError(message: string): string {
@@ -46,6 +48,7 @@ export function PosterModal({
   onSave,
   record,
   isAddMode,
+  knownArtists,
 }: PosterModalProps) {
   const { session } = useAuth()
   const token = session?.token ?? null
@@ -240,6 +243,7 @@ export function PosterModal({
             setFormData={setFormData}
             shows={shows}
             tours={tours}
+            knownArtists={knownArtists}
             showsLoading={showsLoading}
             showsLoadingProgress={showsLoadingProgress}
             uploading={uploading}

@@ -49,6 +49,28 @@ function artistSummary(record: ShowPosterRecord): string {
     .join(", ") || "—"
 }
 
+/** Unique poster artists by name (case-insensitive), sorted A–Z. */
+function uniquePosterArtists(
+  posters: ShowPosterRecord[],
+): NonNullable<ShowPosterRecord["artist"]> {
+  const byName = new Map<string, { name: string; link: string }>()
+  for (const poster of posters) {
+    for (const a of poster.artist ?? []) {
+      const name = typeof a.name === "string" ? a.name.trim() : ""
+      if (!name) continue
+      const key = name.toLowerCase()
+      if (byName.has(key)) continue
+      byName.set(key, {
+        name,
+        link: typeof a.link === "string" ? a.link.trim() : "",
+      })
+    }
+  }
+  return [...byName.values()].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  )
+}
+
 export function AdminPoster() {
   const [rows, setRows] = useState<ShowPosterRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -94,6 +116,8 @@ export function AdminPoster() {
   useEffect(() => {
     void fetchRows()
   }, [fetchRows])
+
+  const knownArtists = useMemo(() => uniquePosterArtists(rows), [rows])
 
   const handleRowClick = (row: ShowPosterRecord) => {
     setSelected(row)
@@ -260,6 +284,7 @@ export function AdminPoster() {
         onSave={handleModalSave}
         record={selected}
         isAddMode={isAddMode}
+        knownArtists={knownArtists}
       />
     </AdminTabShell>
   )
