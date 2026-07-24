@@ -8,6 +8,10 @@ export function WlHomeV2Footer() {
         <Link href="/privacy" className="foot-link">
           Privacy
         </Link>
+        {" · "}
+        <Link href="/help" className="foot-link">
+          Help
+        </Link>
       </span>
       <span className="foot-tagline">BUILT BY FANS, FOR FANS</span>
     </footer>

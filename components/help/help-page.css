@@ -1,0 +1,260 @@
+/* Help / FAQ — same tile chrome as GORPs; 4 → 3 → 2 → 1 columns by width. */
+
+.wl-home-v2 .grid.grid--help-faq {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: none;
+  grid-auto-rows: minmax(min-content, auto);
+  align-content: start;
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (min-width: 768px) and (max-width: 1343px) {
+  .wl-home-v2 .grid.grid--help-faq {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1344px) and (max-width: 1539px) {
+  .wl-home-v2 .grid.grid--help-faq {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1540px) {
+  .wl-home-v2 .grid.grid--help-faq {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.wl-home-v2 .grid.grid--help-faq > .tile {
+  min-height: 0;
+  border: 0;
+  border-right: 1px solid var(--theme-divider);
+  border-bottom: 1px solid var(--theme-divider);
+  border-radius: 0;
+}
+
+.wl-home-v2 .grid.grid--help-faq > .tile:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 767px) {
+  .wl-home-v2 .grid.grid--help-faq > .tile {
+    border-right: 0;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1343px) {
+  .wl-home-v2 .grid.grid--help-faq > .tile:nth-child(2n) {
+    border-right: 0;
+  }
+  .wl-home-v2 .grid.grid--help-faq > .tile:last-child:not(:nth-child(2n)) {
+    border-right: 0;
+  }
+}
+
+@media (min-width: 1344px) and (max-width: 1539px) {
+  .wl-home-v2 .grid.grid--help-faq > .tile:nth-child(3n) {
+    border-right: 0;
+  }
+  .wl-home-v2 .grid.grid--help-faq > .tile:last-child:not(:nth-child(3n)) {
+    border-right: 0;
+  }
+}
+
+@media (min-width: 1540px) {
+  .wl-home-v2 .grid.grid--help-faq > .tile:nth-child(4n) {
+    border-right: 0;
+  }
+  .wl-home-v2 .grid.grid--help-faq > .tile:last-child:not(:nth-child(4n)) {
+    border-right: 0;
+  }
+}
+
+/* Single-column tile body (same idea as `.tile-gorp`); keep base `.tile` padding. */
+.wl-home-v2 .tile.tile-help-faq {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, auto);
+  gap: 0;
+  align-items: stretch;
+  text-align: left;
+  overflow: hidden;
+  cursor: default;
+}
+
+@media (max-width: 1343px) {
+  .wl-home-v2 .tile.tile-help-faq {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, auto);
+  }
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-inner {
+  position: relative;
+  z-index: 2;
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-question {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+  color: var(--wl-white);
+}
+
+/* Beat `.wl-home-v2 .tile p { max-width: 34ch }` — full tile width like GORP bios. */
+.wl-home-v2 .tile.tile-help-faq p {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-group-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--wl-light-orange);
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-group p {
+  margin: 0;
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-bullets {
+  margin: 0;
+  padding-left: 1.15rem;
+  list-style: disc;
+  list-style-position: outside;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-bullets li {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.wl-home-v2 .tile.tile-help-faq .tile-help-faq-bullets li:first-child {
+  margin-top: 0;
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-embed {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 16 / 9;
+  margin-top: 4px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-thumb {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-thumb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-play {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(206, 17, 38, 0.92);
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-thumb:hover .help-yt-play {
+  background: rgba(206, 17, 38, 1);
+  transform: scale(1.08);
+}
+
+.wl-home-v2 .tile.tile-help-faq .help-yt-play::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 14px solid #fff;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  margin-left: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-home-v2 .tile.tile-help-faq .help-yt-play {
+    transition: none;
+  }
+
+  .wl-home-v2 .tile.tile-help-faq .help-yt-thumb:hover .help-yt-play {
+    transform: none;
+  }
+}

@@ -1,0 +1,125 @@
+/* Homepage welcome / launch announcement modal */
+
+.wl-home-v2 .modal.modal--wted-request.modal--welcome {
+  max-width: min(640px, 96vw);
+  max-height: min(90vh, 800px);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-scroll p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: none;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-scroll a {
+  color: var(--wl-light-orange);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-scroll a:hover {
+  color: var(--wl-orange);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-section-title {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: disc;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-list li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-signoff {
+  margin-top: 4px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(49, 51, 49);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-actions .wbtn {
+  flex: 1 1 0;
+  width: 50%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 14px;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-actions .wbtn.primary {
+  background: var(--wl-orange);
+  border-color: var(--wl-orange);
+  color: #000;
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-actions .wbtn.primary:hover {
+  background: var(--wl-light-orange);
+  border-color: var(--wl-light-orange);
+  transform: translateY(-1px);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-actions .wbtn.green {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.wl-home-v2 .modal.modal--welcome .modal-welcome-actions .wbtn.green:hover {
+  background: color-mix(in oklch, var(--primary) 80%, black);
+  border-color: color-mix(in oklch, var(--primary) 80%, black);
+  transform: translateY(-1px);
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .modal.modal--welcome .modal-welcome-actions .wbtn {
+    min-height: 36px;
+  }
+}

@@ -33,6 +33,7 @@ import {
   Export,
   GearSix,
   MagnifyingGlass,
+  Question,
   SignIn,
   SignOut,
   SlidersHorizontal,
@@ -252,17 +253,6 @@ export function WlHomeV2UserMenu({
                   Settings
                 </DropdownMenuItem>
               : null}
-              <DropdownMenuSeparator className="top-nav-dd-sep" />
-              <DropdownMenuItem
-                className="top-nav-dd-item"
-                onClick={() => {
-                  void handleSignOut()
-                  router.push("/")
-                }}
-              >
-                <SignOut className="top-nav-dd-icon size-4 shrink-0" />
-                Sign Out
-              </DropdownMenuItem>
             </>
           ) : (
             <>
@@ -282,6 +272,31 @@ export function WlHomeV2UserMenu({
               </DropdownMenuItem>
             </>
           )}
+          <DropdownMenuSeparator className="top-nav-dd-sep" />
+          <DropdownMenuItem asChild className="top-nav-dd-item">
+            <Link
+              href="/help"
+              className="top-nav-dd-link flex cursor-pointer items-center gap-2"
+            >
+              <Question className="top-nav-dd-icon size-4 shrink-0" aria-hidden />
+              Help
+            </Link>
+          </DropdownMenuItem>
+          {isLoggedIn ? (
+            <>
+              <DropdownMenuSeparator className="top-nav-dd-sep" />
+              <DropdownMenuItem
+                className="top-nav-dd-item"
+                onClick={() => {
+                  void handleSignOut()
+                  router.push("/")
+                }}
+              >
+                <SignOut className="top-nav-dd-icon size-4 shrink-0" />
+                Sign Out
+              </DropdownMenuItem>
+            </>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
       {isAdmin && (
