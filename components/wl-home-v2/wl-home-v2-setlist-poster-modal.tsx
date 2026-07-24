@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { CaretLeft, CaretRight } from "@phosphor-icons/react"
 
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
@@ -14,11 +14,15 @@ type WlHomeV2SetlistPosterModalProps = {
   headingId: string
   posters: ShowPosterRecord[]
   initialIndex?: number
+  /** Hide tour names in details (e.g. tour page posters panel). */
+  hideTours?: boolean
+  /** Poster uuid → show lines (`mm.dd.yy (venue)`), shown first when present. */
+  showLabelsByUuid?: Record<string, string[]>
 }
 
 /**
  * WL Home v2: poster detail modal (same shell as setlist scan).
- * Left: artwork · Right: artist / print run / description / tours.
+ * Left: artwork · Right: show / artist / print run / description / tours.
  */
 export function WlHomeV2SetlistPosterModal({
   open,
@@ -26,6 +30,8 @@ export function WlHomeV2SetlistPosterModal({
   headingId,
   posters,
   initialIndex = 0,
+  hideTours = false,
+  showLabelsByUuid,
 }: WlHomeV2SetlistPosterModalProps) {
   const [index, setIndex] = useState(initialIndex)
   const [imageError, setImageError] = useState(false)
@@ -64,8 +70,11 @@ export function WlHomeV2SetlistPosterModal({
 
   const poster = posters[index] ?? null
   const artists = poster?.artist ?? []
-  const tours = poster?.tour ?? []
+  const tours = hideTours ? [] : (poster?.tour ?? [])
+  const showLabels =
+    poster && showLabelsByUuid ? (showLabelsByUuid[poster.uuid] ?? []) : []
   const hasDetails =
+    showLabels.length > 0 ||
     artists.length > 0 ||
     poster?.print_run != null ||
     Boolean(poster?.description?.trim()) ||
@@ -164,6 +173,23 @@ export function WlHomeV2SetlistPosterModal({
                       No additional details for this poster.
                     </p>
                   : <div className="wl-home-v2-setlist-poster-detail">
+                      {showLabels.length > 0 ?
+                        <div className="wl-home-v2-setlist-poster-field">
+                          <div className="sc-label">
+                            {showLabels.length === 1 ? "Show" : "Shows"}
+                          </div>
+                          <ul className="wl-home-v2-setlist-poster-tours">
+                            {showLabels.map((label) => (
+                              <li
+                                key={label}
+                                className="wl-home-v2-setlist-poster-detail-primary"
+                              >
+                                {label}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      : null}
                       {artists.length > 0 ?
                         <div className="wl-home-v2-setlist-poster-field">
                           <div className="sc-label">Artist</div>

@@ -7,6 +7,7 @@ import { TourSongsCombined } from "./tour-songs-combined"
 import { NotPlayedInTour } from "./not-played-in-tour"
 import { LiberatedSongs } from "./liberated-songs"
 import { GuestAppearances } from "./guest-appearances"
+import { TourPosters } from "./tour-posters"
 import { AverageSetlistCard } from "@/components/dpro/years/average-setlist-card"
 import type { AverageSetlistResult } from "@/hooks/use-average-setlist"
 import type { TourShow } from "@/types/tour"
@@ -91,6 +92,14 @@ export function TourStats({
     />
   )
 
+  const tourPostersBlock = (
+    <TourPosters
+      tourName={currentTour}
+      showIds={showIds}
+      wlHomeV2={wlHomeV2}
+    />
+  )
+
   const showAverageSetlist =
     currentTourShowFields === true && shows.length > 0
 
@@ -170,7 +179,10 @@ export function TourStats({
           {averageSetlistBlock}
           <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
             {notPlayedBlock}
-            {guestAppearancesBlock}
+            <div className="flex min-w-0 flex-col gap-4">
+              {guestAppearancesBlock}
+              {tourPostersBlock}
+            </div>
           </div>
         </div>
       )}
@@ -195,6 +207,7 @@ export function TourStats({
                 {averageSetlistBlock}
                 {notPlayedBlock}
                 {guestAppearancesBlock}
+                {tourPostersBlock}
               </aside>
             : null}
           </div>

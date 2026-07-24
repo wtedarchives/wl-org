@@ -1,0 +1,46 @@
+/* Tour page posters panel — dissolve gallery (mirrors setlist header poster). */
+
+.wl-home-v2 .widget-panel.tour-posters-panel {
+  padding: 14px;
+}
+
+.tour-posters-gallery {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  line-height: 0;
+}
+
+.tour-posters-gallery__img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0;
+  transition: opacity 0.85s ease;
+  pointer-events: none;
+}
+
+.tour-posters-gallery__img--active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-posters-gallery__img {
+    transition: none;
+  }
+}
