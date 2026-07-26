@@ -1,26 +1,27 @@
 "use client"
 
 import { formatTourShowDate } from "@/components/dpro/tours/tour-show-format"
-import { TourShowsStatPill } from "@/components/dpro/tours/tour-shows-stat-pill"
+import {
+  TourShowRowAttendeeCountCell,
+  TourShowRowPosterCell,
+  TourShowRowRadioCell,
+  TourShowRowReleasesCell,
+  TourShowRowSetlistScanCell,
+  TourShowRowWlLinkCell,
+} from "@/components/dpro/tours/tour-show-row-action-cells"
 import { TourShowRowRatingStars } from "@/components/dpro/tours/tour-show-row-rating-stars"
 import {
-  Broadcast,
-  Check,
-  FileAudio,
-  Presentation,
-} from "@phosphor-icons/react"
+  parseTourShowGap,
+  parseTourShowRarity,
+} from "@/components/dpro/tours/tour-show-row-stats"
+import { TourShowsStatPill } from "@/components/dpro/tours/tour-shows-stat-pill"
+import { Check } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-context"
 import {
   TableCell,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip"
 import type { TourShow } from "@/types/tour"
 import {
   formatLengthAsHmmss,
@@ -32,7 +33,6 @@ import {
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
-import Image from "next/image"
 import Link from "next/link"
 
 export interface TourShowRowProps {
@@ -66,20 +66,8 @@ export function TourShowRow({
   const rating = showRatings[show.show_id] ?? 0
   const attendeeCount = attendeeCounts[show.show_id] ?? 0
 
-  const rarityNumeric =
-    show.show_rarity != null && String(show.show_rarity).trim() !== ""
-      ? Number.parseFloat(
-          String(show.show_rarity).replace(/%/g, "").trim(),
-        )
-      : NaN
-  const gapNumeric =
-    show.show_gap != null && String(show.show_gap).trim() !== ""
-      ? Number.parseFloat(String(show.show_gap).trim())
-      : NaN
-
-  const rarityPctStr = Number.isFinite(rarityNumeric)
-    ? `${rarityNumeric.toFixed(2)}%`
-    : null
+  const { pctStr: rarityPctStr } = parseTourShowRarity(show.show_rarity)
+  const gapNumeric = parseTourShowGap(show.show_gap)
 
   return (
     <TableRow
@@ -217,177 +205,31 @@ export function TourShowRow({
           <TourShowRowRatingStars rating={rating} />
         </div>
       </TableCell>
-      <TableCell
-        className={cn(
-          "w-[32px] text-center align-middle leading-none",
-          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
-        )}
-      >
-        <div className="inline-flex items-center justify-center">
-          {showsWithSetlists.has(show.show_id) ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <ArchivePrefetchLink
-                    href={getSetlistArchiveUrl(show.show_id, { scan: true })}
-                    aria-label="View setlist scan"
-                    className="inline-flex items-center justify-center rounded p-0.5 text-emerald-600 hover:text-emerald-500"
-                  >
-                    <FileAudio className="size-3.5" aria-hidden />
-                  </ArchivePrefetchLink>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <span className="text-[11px]">Setlist scan</span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <span className="inline-block size-3.5" aria-hidden />
-          )}
-        </div>
-      </TableCell>
-      <TableCell
-        className={cn(
-          "w-[32px] text-center align-middle leading-none",
-          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
-        )}
-      >
-        <div className="inline-flex items-center justify-center">
-          {showsWithPosters.has(show.show_id) ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <ArchivePrefetchLink
-                    href={getSetlistArchiveUrl(show.show_id, { poster: true })}
-                    aria-label="View poster"
-                    className="inline-flex items-center justify-center rounded p-0.5 text-yellow-400 hover:text-yellow-300"
-                  >
-                    <Presentation className="size-3.5" aria-hidden />
-                  </ArchivePrefetchLink>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <span className="text-[11px]">Poster</span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <span className="inline-block size-3.5" aria-hidden />
-          )}
-        </div>
-      </TableCell>
-      <TableCell
-        className={cn(
-          "w-[32px] text-center align-middle leading-none",
-          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
-        )}
-      >
-        <div className="inline-flex items-center justify-center">
-          {showsWithReleases.has(show.show_id) ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <ArchivePrefetchLink
-                    href={getSetlistArchiveUrl(show.show_id)}
-                    aria-label="View releases"
-                    className="inline-flex items-center justify-center rounded p-0.5 text-rose-600 hover:text-rose-500"
-                  >
-                    <Broadcast className="size-3.5" aria-hidden />
-                  </ArchivePrefetchLink>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <span className="text-[11px]">Media available</span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <span className="inline-block size-3.5" aria-hidden />
-          )}
-        </div>
-      </TableCell>
-      <TableCell
-        className={cn(
-          "w-[32px] text-center align-middle text-[11px] font-medium leading-none",
-          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
-        )}
-      >
-        <div className="inline-flex items-center justify-center">
-          {attendeeCount > 0 ? attendeeCount : ""}
-        </div>
-      </TableCell>
-      <TableCell
-        className={cn(
-          "w-[32px] text-center align-middle leading-none",
-          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
-        )}
-      >
-        <div className="inline-flex items-center justify-center">
-          {show.show_wl_link ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={show.show_wl_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Wysteria Lane article"
-                    className="inline-flex items-center justify-center rounded hover:opacity-90"
-                  >
-                    <Image
-                      src="/WL.png"
-                      alt="Wysteria Lane"
-                      width={14}
-                      height={14}
-                      className="h-3.5 w-auto block"
-                    />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <span className="text-[11px]">
-                    Chat in the Wysteria Lane Community
-                  </span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <span className="inline-block size-3.5" aria-hidden />
-          )}
-        </div>
-      </TableCell>
-      <TableCell
-        className={cn(
-          "w-[32px] text-center align-middle leading-none",
-          wlHomeV2 ? "!px-1 !py-0.5" : "px-1 py-1",
-        )}
-      >
-        <div className="inline-flex items-center justify-center">
-          {showsWithRadioIds.has(show.show_id) ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <ArchivePrefetchLink
-                    href={getSetlistArchiveUrl(show.show_id)}
-                    aria-label="WTED Goose Radio"
-                    className="inline-flex items-center justify-center rounded hover:opacity-90"
-                  >
-                    <Image
-                      src="/WTED2.png"
-                      alt="WTED Goose Radio"
-                      width={14}
-                      height={14}
-                      className="h-3.5 w-auto block"
-                    />
-                  </ArchivePrefetchLink>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <span className="text-[11px]">WTED Goose Radio</span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <span className="inline-block size-3.5" aria-hidden />
-          )}
-        </div>
-      </TableCell>
+      <TourShowRowSetlistScanCell
+        showId={show.show_id}
+        hasSetlist={showsWithSetlists.has(show.show_id)}
+        wlHomeV2={wlHomeV2}
+      />
+      <TourShowRowPosterCell
+        showId={show.show_id}
+        hasPoster={showsWithPosters.has(show.show_id)}
+        wlHomeV2={wlHomeV2}
+      />
+      <TourShowRowReleasesCell
+        showId={show.show_id}
+        hasReleases={showsWithReleases.has(show.show_id)}
+        wlHomeV2={wlHomeV2}
+      />
+      <TourShowRowAttendeeCountCell
+        attendeeCount={attendeeCount}
+        wlHomeV2={wlHomeV2}
+      />
+      <TourShowRowWlLinkCell wlLink={show.show_wl_link} wlHomeV2={wlHomeV2} />
+      <TourShowRowRadioCell
+        showId={show.show_id}
+        hasRadio={showsWithRadioIds.has(show.show_id)}
+        wlHomeV2={wlHomeV2}
+      />
       <TableCell
         className={cn(
           "text-[11px] text-muted-foreground",

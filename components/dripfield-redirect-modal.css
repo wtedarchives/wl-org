@@ -1,0 +1,85 @@
+/* Dripfield redirect notice — same chrome as Request a Song / login-required. */
+.wl-home-v2 .modal.modal--wted-request.modal--dripfield-redirect {
+  max-width: min(540px, 96vw);
+  max-height: none;
+  padding-bottom: 20px;
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-request-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-copy {
+  /* Contain the float so actions stay below the wrapped block */
+  display: flow-root;
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-logo-img {
+  float: right;
+  width: 110px;
+  height: auto;
+  margin: 0 0 10px 16px;
+  object-fit: contain;
+  shape-outside: margin-box;
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-copy p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+  text-wrap: pretty;
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-copy p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 639px) {
+  .wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-logo-img {
+    width: 88px;
+    margin: 0 0 8px 12px;
+  }
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(49, 51, 49);
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-actions .wbtn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 10px 14px;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-actions .wbtn.green {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-actions .wbtn.green:hover {
+  background: color-mix(in oklch, var(--primary) 80%, black);
+  border-color: color-mix(in oklch, var(--primary) 80%, black);
+  transform: translateY(-1px);
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .modal.modal--dripfield-redirect .modal-dripfield-actions .wbtn {
+    min-height: 36px;
+  }
+}
