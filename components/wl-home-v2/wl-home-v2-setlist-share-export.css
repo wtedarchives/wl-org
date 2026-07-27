@@ -121,14 +121,6 @@
   color: #ffffff;
 }
 
-.wl-home-v2-share-export__brand-tagline {
-  margin-top: 3px;
-  font-family: "Geist Mono", ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.55);
-}
-
 .wl-home-v2-share-export__top-split {
   display: grid;
   grid-template-columns: 1.75fr 1.25fr;

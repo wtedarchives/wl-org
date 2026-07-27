@@ -4233,7 +4233,6 @@
     }
     .wl-home-v2 #tileGrid .tile .tile-body h2,
     .wl-home-v2 #tileGrid .tile .tile-body .tile-radio-attribution-pill,
-    .wl-home-v2 #tileGrid .tile .tile-body .tile-archive-attribution-pill,
     .wl-home-v2 #tileGrid .tile .tile-body-copy {
       position: relative;
       z-index: 2;
@@ -4245,8 +4244,7 @@
       grid-column: 1;
       grid-row: 2;
     }
-    .wl-home-v2 #tileGrid .tile .tile-body .tile-radio-attribution-pill,
-    .wl-home-v2 #tileGrid .tile .tile-body .tile-archive-attribution-pill {
+    .wl-home-v2 #tileGrid .tile .tile-body .tile-radio-attribution-pill {
       grid-column: 1;
       grid-row: 3;
     }
@@ -5114,8 +5112,7 @@
   .wl-home-v2 #tileGrid .tile.tile-radio .live-pill-upcoming {
     border-top-color: rgb(92, 96, 94);
   }
-  .wl-home-v2 #tileGrid .tile.tile-radio .tile-radio-attribution-pill,
-  .wl-home-v2 #tileGrid .tile.tile-archive .tile-archive-attribution-pill {
+  .wl-home-v2 #tileGrid .tile.tile-radio .tile-radio-attribution-pill {
     align-self: flex-start;
     margin-top: 8px;
     display: inline-flex;
@@ -5134,8 +5131,7 @@
     color: rgba(255, 255, 255, 0.86);
   }
   @media (min-width: 1356px) {
-    .wl-home-v2 #tileGrid .tile.tile-radio .tile-radio-attribution-pill,
-    .wl-home-v2 #tileGrid .tile.tile-archive .tile-archive-attribution-pill {
+    .wl-home-v2 #tileGrid .tile.tile-radio .tile-radio-attribution-pill {
       margin-top: 0;
     }
   }
