@@ -107,9 +107,6 @@ export const WlHomeV2SetlistShareExportCard = forwardRef<
                 <span className="wl-home-v2-share-export__brand-title">
                   WTED Archives
                 </span>
-                <span className="wl-home-v2-share-export__brand-tagline">
-                  Powered by Dripfield.pro
-                </span>
               </div>
             </div>
           </div>

@@ -196,9 +196,6 @@ export function WlHomeV2TileArchive({
           <br />
           Archives
         </h2>
-        <span className="tile-archive-attribution-pill">
-          Powered by dripfield.pro
-        </span>
         <div className="tile-body-copy">
           <p>
             The comprehensive show archive — setlists, stats, tours, and
