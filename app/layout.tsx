@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { PersistentRadioRoot } from "@/components/persistent-radio";
 import { Providers } from "@/components/providers";
+import { UmamiAnalytics } from "@/components/umami-analytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -65,6 +66,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <UmamiAnalytics />
         <Providers>
           <PersistentRadioRoot>{children}</PersistentRadioRoot>
         </Providers>

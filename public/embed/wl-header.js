@@ -6,7 +6,7 @@
  * for community.wysterialane.org via a single <script src> tag.
  *
  * Markup and styles mirror components/wl-home-v2/wl-home-v2-header.tsx (no user menu).
- * Update WTED_BASE when the wtedradio.com cutover happens.
+ * On cutover: swap WTED_BASE to wtedradio.com (see below).
  */
 (function () {
   if (typeof window === "undefined") return;
@@ -16,8 +16,11 @@
   // Configuration
   // --------------------------------------------------------------------------
 
-  /** Origin that hosts wl-org images and pages. Swap to https://wtedradio.com on cutover. */
+  /** Origin that hosts wl-org images and pages. */
+  // Live — Netlify default host (pre-cutover)
   var WTED_BASE = "https://wted-org.netlify.app";
+  // Cutover — uncomment below and comment out the Netlify URL above:
+  // var WTED_BASE = "https://wtedradio.com";
   var COMMUNITY_URL = "https://community.wysterialane.org";
   var RADIO_IFRAME_SRC =
     "https://wtedradio.com/radio-player/player-markup.html";

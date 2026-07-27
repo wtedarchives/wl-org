@@ -14,7 +14,10 @@ import { corsHeaders } from "../_shared/cors.ts"
 
 const PAIRING_TTL_SECONDS = 600 // 10 minutes
 const POLL_INTERVAL_SECONDS = 5
+// Live — Netlify default host (pre-cutover)
 const DEFAULT_BASE_URL = "https://wted-org.netlify.app"
+// Cutover — uncomment below and comment out the Netlify URL above:
+// const DEFAULT_BASE_URL = "https://wtedradio.com"
 
 /** Unambiguous alphabet for the human-facing code (no 0/O/1/I). */
 const USER_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"

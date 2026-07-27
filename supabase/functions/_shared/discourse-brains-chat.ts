@@ -12,15 +12,14 @@ export function formatShowDateMmDdYy(dateString: string): string {
 
 /**
  * Absolute setlist show URL — shared by Discourse chat links and Web Push deep links.
- * Swap the active return when wtedradio.com goes live.
+ * On cutover: swap the active return to wtedradio.com (see below).
  */
 export function getSetlistShowAbsoluteUrl(showId: string): string {
   const id = encodeURIComponent(showId.trim())
 
-  // Live — dripfield.pro
+  // Live — dripfield.pro (pre-cutover)
   return `https://dripfield.pro/setlist/${id}`
-
-  // Future — wtedradio.com (uncomment and remove dripfield line above)
+  // Cutover — uncomment below and comment out the dripfield return above:
   // return `https://wtedradio.com/archive/setlist?id=${id}`
 }
 
