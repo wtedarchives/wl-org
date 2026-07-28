@@ -6,7 +6,6 @@
  * for community.wysterialane.org via a single <script src> tag.
  *
  * Markup and styles mirror components/wl-home-v2/wl-home-v2-header.tsx (no user menu).
- * On cutover: swap WTED_BASE to wtedradio.com (see below).
  */
 (function () {
   if (typeof window === "undefined") return;
@@ -16,21 +15,22 @@
   // Configuration
   // --------------------------------------------------------------------------
 
-  /** Origin that hosts wl-org images and pages. */
-  // Live — Netlify default host (pre-cutover)
-  var WTED_BASE = "https://wted-org.netlify.app";
-  // Cutover — uncomment below and comment out the Netlify URL above:
-  // var WTED_BASE = "https://wtedradio.com";
+  /** Nav / page links — production site. */
+  var WTED_BASE = "https://wtedradio.com";
   var COMMUNITY_URL = "https://community.wysterialane.org";
   var RADIO_IFRAME_SRC =
     "https://wtedradio.com/radio-player/player-markup.html";
 
-  var IMG_WL = WTED_BASE + "/WL.png";
-  var IMG_WTED_DESKTOP = WTED_BASE + "/WTED.png";
-  var IMG_WTED_MOBILE = WTED_BASE + "/WTED2.png";
-  var IMG_ARCHIVE = WTED_BASE + "/wted-sa-cropped-2.png";
-  var IMG_MONEY_WAVY = WTED_BASE + "/money-wavy.svg";
-  var IMG_ARROW_RIGHT = WTED_BASE + "/arrow-right.svg";
+  /** Image host — Netlify until wtedradio.com serves the static export. */
+  var ASSET_BASE = "https://wted-org.netlify.app";
+
+  var IMG_WL = ASSET_BASE + "/WL.png";
+  var IMG_WTED_DESKTOP = ASSET_BASE + "/WTED.png";
+  var IMG_WTED_MOBILE = ASSET_BASE + "/WTED2.png";
+  var IMG_ARCHIVE = ASSET_BASE + "/wted-sa-cropped-2.png";
+  /** Same asset as logged-out homepage “My Show Stats” tile. */
+  var IMG_STATS = ASSET_BASE + "/icon-myprofile.png";
+  var STATS_URL = WTED_BASE + "/archive/profile?tab=overview";
 
   var TOP_NAV_PANEL_ID = "wl-home-v2-top-nav-panel";
 
@@ -51,7 +51,7 @@
   var PHRASE_DISSOLVE_MS = 400;
 
   // --------------------------------------------------------------------------
-  // Inline icons (mobile menu toggle only)
+  // Inline icons (mobile menu toggle + Support / Follow Us)
   // --------------------------------------------------------------------------
 
   var ICON_LIST =
@@ -62,6 +62,18 @@
   var ICON_X =
     '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">' +
     '<path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/>' +
+    "</svg>";
+
+  /** Phosphor CurrencyDollar regular — matches React header Support icon. */
+  var ICON_CURRENCY_DOLLAR =
+    '<svg class="top-nav-primary-icon" viewBox="0 0 256 256" width="18" height="18" fill="currentColor" aria-hidden="true">' +
+    '<path d="M152,120H136V56h8a32,32,0,0,1,32,32,8,8,0,0,0,16,0,48.05,48.05,0,0,0-48-48h-8V24a8,8,0,0,0-16,0V40h-8a48,48,0,0,0,0,96h8v64H104a32,32,0,0,1-32-32,8,8,0,0,0-16,0,48.05,48.05,0,0,0,48,48h16v16a8,8,0,0,0,16,0V216h16a48,48,0,0,0,0-96Zm-40,0a32,32,0,0,1,0-64h8v64Zm40,80H136V136h16a32,32,0,0,1,0,64Z"/>' +
+    "</svg>";
+
+  /** Phosphor ArrowRight regular — matches React header Follow Us icon. */
+  var ICON_ARROW_RIGHT =
+    '<svg class="top-nav-primary-icon" viewBox="0 0 256 256" width="18" height="18" fill="currentColor" aria-hidden="true">' +
+    '<path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/>' +
     "</svg>";
 
   // --------------------------------------------------------------------------
@@ -143,17 +155,17 @@
     "  display: flex;",
     "  flex-direction: column;",
     "  align-items: flex-start;",
-    "  gap: 2px;",
+    "  gap: 5px;",
     "  min-width: 0;",
     "  max-width: 360px;",
-    "  width: 100%;",
+    "  width: max-content;",
     "}",
     "header.top .top-brand-cluster-top {",
     "  display: flex;",
     "  align-items: center;",
     "  gap: 14px;",
     "  min-width: 0;",
-    "  width: 100%;",
+    "  width: auto;",
     "}",
     "header.top .top-brand-cluster-top .top-brand-cluster-actions {",
     "  margin-left: auto;",
@@ -200,6 +212,7 @@
     "  gap: 8px;",
     "  width: 100%;",
     "  min-width: 6rem;",
+    "  box-sizing: border-box;",
     "  font-size: 12px;",
     "  font-weight: 500;",
     "  color: #000000;",
@@ -221,19 +234,6 @@
     "  height: 18px;",
     "  color: #000000;",
     "  opacity: 1;",
-    "}",
-    ".top-nav-primary-icon--svg {",
-    "  display: inline-flex;",
-    "  align-items: center;",
-    "  justify-content: center;",
-    "  width: 18px;",
-    "  height: 18px;",
-    "  flex-shrink: 0;",
-    "}",
-    ".top-nav-primary-icon--svg img {",
-    "  width: 18px;",
-    "  height: 18px;",
-    "  display: block;",
     "}",
 
     "a.brand {",
@@ -348,7 +348,7 @@
     "  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);",
     "  width: 100%;",
     "}",
-    ".radio-embed { display: block; width: 100%; min-height: 66px; height: auto; border: 0; }",
+    ".radio-embed { display: block; width: 100%; height: 76px; border: 0; }",
 
     "@media (min-width: 1344px) {",
     "  header.top .top-brand-cluster .brand-mark {",
@@ -454,7 +454,7 @@
     "  }",
     "  header.top nav.top-nav .top-nav-primary-row {",
     "    display: grid;",
-    "    grid-template-columns: repeat(3, minmax(0, 1fr));",
+    "    grid-template-columns: repeat(4, minmax(0, 1fr));",
     "    gap: 4px;",
     "    align-items: center;",
     "    width: 100%;",
@@ -499,11 +499,6 @@
     "  }",
     "  header.top nav.top-nav .top-nav-secondary-row > a { padding: 6px; }",
     "  header.top nav.top-nav .top-nav-primary-icon { width: 16px; height: 16px; }",
-    "  header.top nav.top-nav .top-nav-primary-icon--svg,",
-    "  header.top nav.top-nav .top-nav-primary-icon--svg img {",
-    "    width: 16px;",
-    "    height: 16px;",
-    "  }",
     "  header.top nav.top-nav .top-nav-primary-icon.top-nav-primary-icon--img {",
     "    width: auto; height: 22px;",
     "  }",
@@ -514,10 +509,6 @@
     "    border-color: rgb(52, 109, 95);",
     "    color: #fff;",
     "    transform: translateY(-1px);",
-    "  }",
-    "  header.top nav.top-nav .top-nav-secondary-row .top-nav-primary-icon--svg img {",
-    "    filter: brightness(0) invert(1);",
-    "    opacity: 0.92;",
     "  }",
     "  header.top:has(nav.top-nav.top-nav--mobile-open) {",
     "    padding-bottom: 0;",
@@ -540,7 +531,7 @@
     "  }",
     "  header.top nav.top-nav .top-nav-primary-row {",
     "    display: grid;",
-    "    grid-template-columns: repeat(3, minmax(0, 1fr));",
+    "    grid-template-columns: repeat(4, minmax(0, 1fr));",
     "    gap: 0;",
     "    align-items: center;",
     "    width: 100%;",
@@ -591,7 +582,7 @@
     "    font-size: 12px;",
     "  }",
     "  header.top nav.top-nav .top-nav-secondary-row > a { padding: 6px; }",
-    "  header.top nav.top-nav .top-nav-primary-row > a:nth-child(3),",
+    "  header.top nav.top-nav .top-nav-primary-row > a:nth-child(4),",
     "  header.top nav.top-nav .top-nav-secondary-row > a:nth-child(2) {",
     "    border-right: 0;",
     "  }",
@@ -602,7 +593,7 @@
     "    transform: none;",
     "    border-right: 1px solid rgb(49, 51, 49);",
     "  }",
-    "  header.top nav.top-nav .top-nav-primary-row > a:nth-child(3):hover,",
+    "  header.top nav.top-nav .top-nav-primary-row > a:nth-child(4):hover,",
     "  header.top nav.top-nav .top-nav-secondary-row > a:nth-child(2):hover {",
     "    border-right: 0;",
     "  }",
@@ -652,7 +643,7 @@
     "    box-shadow: none;",
     "    transform: none;",
     "  }",
-    "  header.top nav.top-nav .top-nav-primary-row > a:nth-child(3),",
+    "  header.top nav.top-nav .top-nav-primary-row > a:nth-child(4),",
     "  header.top nav.top-nav .top-nav-secondary-row > a:nth-child(2) {",
     "    border-right: 0;",
     "  }",
@@ -677,16 +668,6 @@
       '"><img class="top-nav-primary-img" src="' +
       src +
       '" alt=""></span>'
-    );
-  }
-
-  function navSvgIcon(src) {
-    return (
-      '<span class="top-nav-primary-icon top-nav-primary-icon--svg" aria-hidden="true">' +
-      '<img src="' +
-      src +
-      '" alt="" width="18" height="18">' +
-      "</span>"
     );
   }
 
@@ -739,10 +720,10 @@
       "</a>",
       '<div class="top-brand-cluster-actions">',
       '<a href="' + WTED_BASE + '/support">',
-      navSvgIcon(IMG_MONEY_WAVY),
-      "Support</a>",
+      ICON_CURRENCY_DOLLAR,
+      "Support Us</a>",
       '<a href="' + WTED_BASE + '/links">',
-      navSvgIcon(IMG_ARROW_RIGHT),
+      ICON_ARROW_RIGHT,
       "Follow Us</a>",
       "</div>",
       "</div>",
@@ -768,13 +749,16 @@
       '<a href="' + WTED_BASE + '/archive">',
       navImgIcon(IMG_ARCHIVE),
       "Archives</a>",
+      '<a href="' + STATS_URL + '">',
+      navImgIcon(IMG_STATS),
+      "Stats</a>",
       "</div>",
       '<div class="top-nav-secondary-row">',
       '<a href="' + WTED_BASE + '/support">',
-      navSvgIcon(IMG_MONEY_WAVY),
-      "Support</a>",
+      ICON_CURRENCY_DOLLAR,
+      "Support Us</a>",
       '<a href="' + WTED_BASE + '/links">',
-      navSvgIcon(IMG_ARROW_RIGHT),
+      ICON_ARROW_RIGHT,
       "Follow Us</a>",
       "</div>",
       "</nav>",
