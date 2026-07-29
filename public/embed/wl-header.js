@@ -108,7 +108,6 @@
     "  align-items: center;",
     "  column-gap: 24px;",
     "  padding: 8px 28px;",
-    "  border-bottom: 1px solid rgb(34, 37, 35);",
     "}",
     "header.top .top-embed-row {",
     "  grid-area: radio;",
@@ -348,11 +347,10 @@
     ".radio-embed-wrap {",
     "  border-radius: 10px;",
     "  overflow: hidden;",
-    "  border: 1px solid rgb(44, 46, 45);",
+    "  border: 1px solid rgba(101, 179, 160, 0.5);",
     "  background: rgba(0, 0, 0, 0.48);",
     "  backdrop-filter: blur(6px);",
     "  -webkit-backdrop-filter: blur(6px);",
-    "  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);",
     "  width: 100%;",
     "}",
     ".radio-embed { display: block; width: 100%; height: 76px; border: 0; }",
@@ -715,7 +713,10 @@
 
       '<div class="top-brand-cluster">',
       '<div class="top-brand-cluster-top">',
-      '<a class="brand" href="' + WTED_BASE + '/" aria-label="Wysteria Lane Community home">',
+      '<a class="brand" href="' +
+        COMMUNITY_URL +
+        '" aria-label="Wysteria Lane Community home" target="_blank" rel="noopener noreferrer">',
+
       '<div class="brand-mark"><img src="' +
         IMG_WL +
         '" alt="" width="30" height="30"></div>',
