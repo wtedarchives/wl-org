@@ -1,0 +1,18 @@
+{
+  "_comment": "Corrected dates for posts whose captions have typos. Key = post basename, value = explicit list of YYYY-MM-DD. Overrides caption parsing entirely.",
+
+  "2024-11-05_03-42-19_UTC": ["2024-06-23"],
+  "2025-06-27_21-08-59_UTC": ["2025-06-27"],
+  "2025-08-27_17-20-02_UTC": ["2025-08-28"],
+  "2025-10-05_00-19-00_UTC": ["2023-12-08", "2023-12-09"],
+
+  "_comment2": "Multi-date formats the parser doesn't handle (comma lists, ampersands, truncated years). All verified against shows + the venue named in the caption.",
+
+  "2024-12-13_23-24-53_UTC": ["2024-12-13", "2024-12-14"],
+  "2024-12-13_23-43-39_UTC": ["2024-12-13", "2024-12-14"],
+  "2025-05-25_21-24-33_UTC": ["2020-10-15", "2020-10-17", "2020-10-19"],
+  "2025-05-30_16-21-32_UTC": ["2022-03-04", "2022-03-05", "2022-03-07"],
+  "2025-06-05_20-54-26_UTC": ["2021-05-06", "2021-05-08", "2021-05-09"],
+  "2025-06-13_21-19-02_UTC": ["2022-02-07", "2022-02-09"],
+  "2026-05-09_02-18-05_UTC": ["2026-05-08"]
+}

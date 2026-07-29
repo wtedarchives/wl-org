@@ -2,10 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
-const RADIO_EMBED_SRC =
-  "https://wtedradio.com/radio-player/player-markup.html"
+/** Same-origin LunaRadio markup under `public/radio-player/`. */
+const RADIO_EMBED_PATH = "/radio-player/player-markup.html"
 const MAX_EMBED_LOAD_ATTEMPTS = 3
 const EMBED_LOAD_TIMEOUT_MS = 15_000
+
+function radioEmbedSrc() {
+  return `${RADIO_EMBED_PATH}?_=${Date.now()}`
+}
 
 export function RadioEmbed({
   className = "",
@@ -14,7 +18,7 @@ export function RadioEmbed({
   className?: string
   style?: React.CSSProperties
 }) {
-  const [src, setSrc] = useState(RADIO_EMBED_SRC)
+  const [src, setSrc] = useState(radioEmbedSrc)
   const attemptRef = useRef(0)
   const loadedRef = useRef(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -25,7 +29,7 @@ export function RadioEmbed({
       if (loadedRef.current) return
       if (attemptRef.current >= MAX_EMBED_LOAD_ATTEMPTS - 1) return
       attemptRef.current += 1
-      setSrc(`${RADIO_EMBED_SRC}?_=${Date.now()}`)
+      setSrc(radioEmbedSrc())
     }, EMBED_LOAD_TIMEOUT_MS)
   }, [])
 
@@ -49,7 +53,7 @@ export function RadioEmbed({
     if (loadedRef.current) return
     if (attemptRef.current >= MAX_EMBED_LOAD_ATTEMPTS - 1) return
     attemptRef.current += 1
-    setSrc(`${RADIO_EMBED_SRC}?_=${Date.now()}`)
+    setSrc(radioEmbedSrc())
   }, [])
 
   return (

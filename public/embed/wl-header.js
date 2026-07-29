@@ -18,8 +18,9 @@
   /** Nav / page links — production site. */
   var WTED_BASE = "https://wtedradio.com";
   var COMMUNITY_URL = "https://community.wysterialane.org";
-  var RADIO_IFRAME_SRC =
-    "https://wtedradio.com/radio-player/player-markup.html";
+  /** Absolute — Community hosts this script cross-origin. Cache-bust with `?_=`. */
+  var RADIO_IFRAME_PATH = WTED_BASE + "/radio-player/player-markup.html";
+  var RADIO_IFRAME_SRC = RADIO_IFRAME_PATH + "?_=" + Date.now();
 
   /** Image host — same origin as production site after cutover. */
   var ASSET_BASE = "https://wtedradio.com";
