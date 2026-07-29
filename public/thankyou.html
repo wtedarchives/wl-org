@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thank You — WTED Radio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+          sans-serif;
+        background: #0e1015;
+        color: #e8ebe9;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 36rem;
+      }
+
+      .headerctr {
+        text-align: center;
+      }
+
+      .headertxtclr {
+        margin: 0 0 1rem;
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 700;
+        color: #65b3a0;
+      }
+
+      .container > p.headerctr {
+        margin: 0 0 1.75rem;
+        line-height: 1.55;
+        font-size: 1.05rem;
+        color: #c5cbc7;
+      }
+
+      .tytxtclr {
+        margin: 0;
+        font-size: clamp(1.15rem, 3vw, 1.4rem);
+        font-weight: 600;
+        color: #e8a574;
+      }
+
+      #countdown {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="headerctr headertxtclr">Thank You!</h2>
+      <p class="headerctr">
+        Your gift is what enables WTED and the WysteriaLane community to continue
+        to thrive. Thanks again, and keep it TED.
+      </p>
+      <h2 class="headerctr tytxtclr">
+        Heading home in&nbsp;<span id="countdown">10</span>...
+      </h2>
+      <script>
+        let seconds = 10;
+
+        let countdown = function () {
+          seconds = seconds - 1;
+          if (seconds < 0) {
+            window.location.href = "https://www.wtedradio.com";
+          } else {
+            document.getElementById("countdown").innerHTML = seconds;
+            window.setTimeout("countdown()", 1000);
+          }
+        };
+        countdown();
+      </script>
+    </div>
+  </body>
+</html>
