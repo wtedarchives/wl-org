@@ -21,8 +21,10 @@
   var RADIO_IFRAME_SRC =
     "https://wtedradio.com/radio-player/player-markup.html";
 
-  /** Image host — Netlify until wtedradio.com serves the static export. */
-  var ASSET_BASE = "https://wted-org.netlify.app";
+  /** Image host — same origin as production site after cutover. */
+  var ASSET_BASE = "https://wtedradio.com";
+  // Rollback — Netlify default host:
+  // var ASSET_BASE = "https://wted-org.netlify.app";
 
   var IMG_WL = ASSET_BASE + "/WL.png";
   var IMG_WTED_DESKTOP = ASSET_BASE + "/WTED.png";

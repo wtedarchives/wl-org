@@ -17,10 +17,10 @@ export function formatShowDateMmDdYy(dateString: string): string {
 export function getSetlistShowAbsoluteUrl(showId: string): string {
   const id = encodeURIComponent(showId.trim())
 
-  // Live — dripfield.pro (pre-cutover)
-  return `https://dripfield.pro/setlist/${id}`
-  // Cutover — uncomment below and comment out the dripfield return above:
-  // return `https://wtedradio.com/archive/setlist?id=${id}`
+  // Cutover — wtedradio.com (live)
+  return `https://wtedradio.com/archive/setlist?id=${id}`
+  // Rollback — dripfield.pro:
+  // return `https://dripfield.pro/setlist/${id}`
 }
 
 /** Discourse requires absolute URLs (not site-relative paths). */

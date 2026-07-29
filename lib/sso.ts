@@ -15,12 +15,12 @@
 // Discourse docs: https://meta.discourse.org/t/32974
 
 const WLC_BASE_URL = "https://community.wysterialane.org";
-// Live — Netlify default host (pre-cutover)
+// Cutover — wtedradio.com (live)
 const DEFAULT_PROD_CALLBACK_URL =
-  "https://wted-org.netlify.app/auth/callback";
-// Cutover — uncomment below and comment out the Netlify URL above:
+  "https://wtedradio.com/auth/callback";
+// Rollback — Netlify default host:
 // const DEFAULT_PROD_CALLBACK_URL =
-//   "https://wtedradio.com/auth/callback";
+//   "https://wted-org.netlify.app/auth/callback";
 
 /** Where Discourse redirects after login (`return_sso_url` in the SSO payload). */
 function resolveSsoCallbackUrl(): string {

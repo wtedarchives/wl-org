@@ -45,19 +45,19 @@ const DEFAULT_PROD_CALLBACK_URL =
 
 If Netlify has `NEXT_PUBLIC_SSO_CALLBACK_URL` set, update that env too (see § External).
 
-### 2. Community embed base — `public/embed/wl-header.js`
+### 2. Community embed — `public/embed/wl-header.js`
+
+`WTED_BASE` / radio iframe already point at `wtedradio.com`. Flip **asset** host:
 
 ```js
 // BEFORE
-var WTED_BASE = "https://wted-org.netlify.app";
-// var WTED_BASE = "https://wtedradio.com";
+var ASSET_BASE = "https://wted-org.netlify.app";
 
 // AFTER
-// var WTED_BASE = "https://wted-org.netlify.app";
-var WTED_BASE = "https://wtedradio.com";
+var ASSET_BASE = "https://wtedradio.com";
 ```
 
-Optional preview file: `dev/wl-header-preview.html` (same pattern for the script `src`).
+Optional preview file: `dev/wl-header-preview.html` (script `src` → `wtedradio.com`).
 
 ### 3. TV pairing QR base — `supabase/functions/tv-pair-start/index.ts`
 
@@ -166,7 +166,7 @@ CORS on Edge Functions is already `*`; no origin flip required there.
 | File | What to flip |
 |------|----------------|
 | `lib/sso.ts` | Default SSO callback URL |
-| `public/embed/wl-header.js` | `WTED_BASE` |
+| `public/embed/wl-header.js` | `ASSET_BASE` (nav/radio already on `wtedradio.com`) |
 | `supabase/functions/tv-pair-start/index.ts` | `DEFAULT_BASE_URL` |
 | `supabase/functions/_shared/discourse-brains-chat.ts` | Absolute setlist URL |
 | `dev/wl-header-preview.html` | Preview script src (optional) |
