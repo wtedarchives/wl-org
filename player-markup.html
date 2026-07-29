@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>WTED Radio</title>
+  <style>
+    .radio-div {
+    display: flex;
+    justify-content: center;
+    background-color: #65b3a0;
+    font-family: Arial, Helvetica, sans-serif;
+    }
+    .bgcolor {
+      background-color: #65b3a0;
+    }
+  </style>
+  <script src="js/lunaradio.min.js"></script>
+</head>
+<body class="bgcolor">
+
+  <div class="radio-div">
+    <div id="lunaradio" style="width:100%; height:60px;"></div>
+</div>
+
+
+
+
+<script>
+  /*prod community.wysterialane.org token: VWFfX2dgW2ZrIGlrZWZXZFtTXlNgVyBhZFk=
+  test local wysterialane.org token: aWtlZldkW1NeU2BXIGFkWQ==
+  token for coreyterrell.com: VWFkV2tmV2RkV15eIFVhXw==
+  */
+  window.addEventListener("load", function () {
+    lunaRadio("lunaradio",{ token: "aWZXVmRTVlthIFVhXw==",
+      userinterface: "small",
+      backgroundcolor: "rgba(14,16,21,0.5)",
+      fontcolor: "#ffffff",
+      hightlightcolor: "#65b3a0", /*"#fa225b"*/
+      fontname: "",
+      googlefont: "",
+      fontratio: "0.4",
+      radioname: "WTED Radio",
+      scroll: "true",
+      scrollradioname: "left",
+      scrolltitle: "left",
+      coverimage: "",
+      onlycoverimage: "false",
+      coverstyle: "circle",
+      usevisualizer: "real",
+      visualizertype: "4",
+      multicolorvisualizer: "true",
+      color1: "#e66c35", /*#e66c35*/
+      color2: "#7351A6", /*#d04345*/
+      color3: "#B26478", /*#85a752*/
+      color4: "#067dcc", /*#067dcc*/
+      visualizeropacity: "0.9",
+      visualizerghost: "0.0",
+      itunestoken: "1000lIPN",
+      metadatatechnic: "directly",
+      ownmetadataurl: "",
+      streamurl: "https://s4.radio.co/s3c11c85d6/listen",
+      streamtype: "radioco",
+      icecastmountpoint: "",
+      radionomyid: "",
+      radionomyapikey: "",
+      radiojarid: "",
+      radiocoid: "s3c11c85d6",
+      shoutcastpath: "/;?type=http&nocache=107036",
+      shoutcastid: "1",
+      streamsuffix: "",
+      metadatainterval: "15000",
+      volume: "100",
+      debug: "false",
+      uselocalstorage: "false",
+      autoplay: "false",
+      displayliveicon: "true",
+      displayvisualizericon: "true",
+      usestreamcorsproxy: "false", 
+      corsproxy: "",
+  });
+});
+</script>
+</body>	
+
+</html>
