@@ -1,0 +1,49 @@
+.wl-home-v2 .wl-home-v2-thankyou {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.wl-home-v2 .wl-home-v2-thankyou__inner {
+  width: min(100%, 36rem);
+  min-width: 0;
+  text-align: center;
+}
+
+.wl-home-v2 .wl-home-v2-thankyou__title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--wl-green, #65b3a0);
+}
+
+.wl-home-v2 .wl-home-v2-thankyou__copy {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--theme-text, #e8ebe9);
+}
+
+.wl-home-v2 .wl-home-v2-thankyou__countdown {
+  margin: 1.5rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--wl-orange);
+}
+
+.wl-home-v2 .wl-home-v2-thankyou__countdown-num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 639px) {
+  .wl-home-v2 .wl-home-v2-thankyou {
+    padding-inline: 1rem;
+    justify-content: flex-start;
+    padding-top: 3rem;
+  }
+}
