@@ -185,7 +185,12 @@ export function WlHomeV2WelcomeModal() {
                   WTEDRadio.com/help
                 </Link>
                 . Additionally, we’re happy to field any questions or help
-                resolve any issues you find. Please feel free to reach out to us on the Wysteria Lane Community. We’re excited about this journey
+                resolve any issues you find. Please feel free to reach out to us
+                on the{" "}
+                <ExtLink href="https://community.wysterialane.org">
+                  Wysteria Lane Community
+                </ExtLink>
+                . We’re excited about this journey
                 and hope you enjoy the new features.
               </p>
 

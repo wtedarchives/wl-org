@@ -117,7 +117,7 @@ export function WlHomeV2TileRadio({
         </span>
         <div className="tile-body-copy">
           <p>
-            Listen to Goose on demand, 24/7 — live streams, historic sets, and
+            Listen to Goose 24/7 — live streams, historic sets, and
             listener requests.
           </p>
           <span className="cta">
