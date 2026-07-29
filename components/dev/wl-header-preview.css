@@ -1,0 +1,47 @@
+.wl-header-preview {
+  min-height: 100vh;
+  background: #1a1f1c;
+  color: #d4d8d5;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.wl-header-preview__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 1.25rem;
+  background: #121612;
+  border-bottom: 1px solid rgb(40, 48, 42);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: oklch(0.82 0.1 55);
+}
+
+.wl-header-preview__label span {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #8a938e;
+}
+
+.wl-header-preview__body {
+  padding: 1.5rem 1.25rem;
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.wl-header-preview__body h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f2f4f3;
+}
+
+.wl-header-preview__body p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #a8b0ab;
+}
