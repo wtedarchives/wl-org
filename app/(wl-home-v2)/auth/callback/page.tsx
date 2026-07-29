@@ -24,6 +24,7 @@ import {
   isLogoutFlowPending,
   isSsoFailedPayload,
   markSilentAttempted,
+  suppressSilentSsoBriefly,
 } from "@/lib/sso"
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -54,11 +55,17 @@ export default function AuthCallbackPage() {
             return
           }
           const wasLogout = consumeLogoutFlow()
-          if (!wasLogout && hasSilentAttempted()) {
-            console.log("[Auth] Silent SSO failed — user not logged into WLC")
+          if (wasLogout) {
+            // Allow a later visit (e.g. after logging into Community) to silent SSO again.
+            clearSilentAttempted()
+            suppressSilentSsoBriefly()
+          } else {
+            if (hasSilentAttempted()) {
+              console.log("[Auth] Silent SSO failed — user not logged into WLC")
+            }
+            // Failed prompt=none — don't retry on every page load.
+            markSilentAttempted()
           }
-          // Prevent silent SSO from re-firing after logout or failed prompt=none
-          markSilentAttempted()
           sessionStorage.removeItem("sso_nonce")
           const returnTo = sessionStorage.getItem("sso_return_to") ?? "/"
           sessionStorage.removeItem("sso_return_to")

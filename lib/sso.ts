@@ -68,6 +68,9 @@ async function signPayload(payload: string, secret: string): Promise<string> {
 // ─── Silent SSO attempt flag (localStorage — shared across tabs) ───────────────
 
 const SSO_SILENT_ATTEMPTED_KEY = "sso_silent_attempted";
+/** After logout, skip silent SSO briefly so we don't bounce straight back in. */
+const SSO_SILENT_SUPPRESS_UNTIL_KEY = "sso_silent_suppress_until";
+const SSO_SILENT_SUPPRESS_MS = 90_000;
 
 export function hasSilentAttempted(): boolean {
   if (typeof window === "undefined") return false;
@@ -93,6 +96,39 @@ export function clearSilentAttempted(): void {
     window.localStorage.removeItem(SSO_SILENT_ATTEMPTED_KEY);
   } catch {
     console.error("Failed to clear silent SSO attempt flag");
+  }
+}
+
+/** True for a short window after logout — does not permanently block later silent SSO. */
+export function isSilentSsoSuppressed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.localStorage.getItem(SSO_SILENT_SUPPRESS_UNTIL_KEY);
+    if (!raw) return false;
+    const until = Number(raw);
+    if (!Number.isFinite(until)) {
+      window.localStorage.removeItem(SSO_SILENT_SUPPRESS_UNTIL_KEY);
+      return false;
+    }
+    if (Date.now() >= until) {
+      window.localStorage.removeItem(SSO_SILENT_SUPPRESS_UNTIL_KEY);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function suppressSilentSsoBriefly(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      SSO_SILENT_SUPPRESS_UNTIL_KEY,
+      String(Date.now() + SSO_SILENT_SUPPRESS_MS),
+    );
+  } catch {
+    console.error("Failed to set silent SSO suppress window");
   }
 }
 

@@ -25,9 +25,12 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 
 import {
   hasSilentAttempted,
+  isSilentSsoSuppressed,
   markLogoutFlow,
   markSilentAttempted,
+  clearSilentAttempted,
   redirectToLogin,
+  suppressSilentSsoBriefly,
 } from "@/lib/sso"
 import { isDevAuthMockSessionActive } from "@/lib/dev-auth-mock"
 import {
@@ -84,6 +87,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return
     }
 
+    // Brief window after logout — avoid immediate silent re-login bounce.
+    if (isSilentSsoSuppressed()) {
+      setLoading(false)
+      return
+    }
+
     if (hasSilentAttempted()) {
       setLoading(false)
       return
@@ -136,7 +145,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signOut = () => {
     console.log("[Auth] Sign out — clearing WLC session")
     markLogoutFlow()
-    markSilentAttempted()
+    // Don't permanently block silent SSO — only suppress the immediate bounce-back.
+    clearSilentAttempted()
+    suppressSilentSsoBriefly()
     clearSession()
     setSession(null)
     void redirectToLogin("/", { logout: true })
