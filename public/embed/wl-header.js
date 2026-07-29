@@ -715,7 +715,7 @@
       '<div class="top-brand-cluster-top">',
       '<a class="brand" href="' +
         COMMUNITY_URL +
-        '" aria-label="Wysteria Lane Community home" target="_blank" rel="noopener noreferrer">',
+        '" aria-label="Wysteria Lane Community home">',
 
       '<div class="brand-mark"><img src="' +
         IMG_WL +
@@ -748,9 +748,7 @@
       navImgIcon(IMG_WTED_DESKTOP, "top-nav-radio-img--desktop"),
       navImgIcon(IMG_WTED_MOBILE, "top-nav-radio-img--mobile"),
       "Radio</a>",
-      '<a href="' +
-        COMMUNITY_URL +
-        '" target="_blank" rel="noopener noreferrer">',
+      '<a href="' + COMMUNITY_URL + '">',
       navImgIcon(IMG_WL),
       "Community</a>",
       '<a href="' + WTED_BASE + '/archive">',
