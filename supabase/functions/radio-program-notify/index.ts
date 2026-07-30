@@ -152,7 +152,8 @@ async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> 
     const body = show ? formatLinkedShowScheduleTitle(show) : (ep.display_name ?? ep.episode ?? "")
     return {
       apns: { title: TITLE, body, showID: showLink, type: "radioProgram", mutableContent: true, imageUrl: image },
-      fcm: { type: "radioProgram", title: TITLE, body, show_id: showLink },
+      // `image_url` omitted rather than undefined — FcmData is Record<string, string>.
+      fcm: { type: "radioProgram", title: TITLE, body, show_id: showLink, ...(image ? { image_url: image } : {}) },
     }
   }
   // Multi-show curated program → episode copy, tap opens the episode page. Same
@@ -161,7 +162,7 @@ async function buildSpec(db: SupabaseClient, ep: EpisodeRow): Promise<PushSpec> 
   const uuid = ep.uuid ?? ""
   return {
     apns: { title: TITLE, body, episodeUUID: uuid, type: "radioProgram", mutableContent: true, imageUrl: image },
-    fcm: { type: "radioProgram", title: TITLE, body, episode_uuid: uuid },
+    fcm: { type: "radioProgram", title: TITLE, body, episode_uuid: uuid, ...(image ? { image_url: image } : {}) },
   }
 }
 

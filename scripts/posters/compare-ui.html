@@ -101,13 +101,28 @@
 <div id="lightbox" onclick="this.style.display='none'"><img id="lbimg"></div>
 
 <script>
-let groups=[], cur=null, tours=[], clip=null
+let groups=[], cur=null, tours=[], clip=null, stats={decided:0,total:0}
 const $=id=>document.getElementById(id)
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))
+
+async function refreshStats(){
+  try{
+    const r=await fetch('/api/stats')
+    if(!r.ok) throw new Error('stats '+r.status)
+    stats=await r.json()
+  }catch(e){
+    // Server predates /api/stats (needs a restart) — fall back to summing
+    // groups, which double-counts multi-show posters but keeps the UI alive.
+    stats={decided:groups.reduce((a,g)=>a+g.decided,0),total:groups.reduce((a,g)=>a+g.total,0)}
+  }
+  const pct=stats.total?Math.round(1000*stats.decided/stats.total)/10:0
+  document.title=`${pct}% · ${stats.decided.toLocaleString()}/${stats.total.toLocaleString()} — Poster comparison`
+}
 
 async function boot(){
   groups=await (await fetch('/api/groups')).json()
   tours=await (await fetch('/api/tours')).json()
+  await refreshStats()
   renderList(); if(list().length) openGroup(list()[0].key)
 }
 
@@ -133,8 +148,8 @@ function renderList(){
       <div class="meta"><span>${g.existing} db</span><span>${g.candidates} new</span>
         <b>${g.decided}/${g.total}</b></div>
     </div>`).join('')
-  const dec=groups.reduce((a,g)=>a+g.decided,0), tot=groups.reduce((a,g)=>a+g.total,0)
-  $('tally').textContent=`${dec}/${tot} decided · ${items.length} groups shown`
+  const pct=stats.total?Math.round(1000*stats.decided/stats.total)/10:0
+  $('tally').textContent=`${pct}% · ${stats.decided.toLocaleString()}/${stats.total.toLocaleString()} decided · ${items.length} groups`
 }
 
 async function openGroup(key){
@@ -168,8 +183,8 @@ function card(r){
       <span class="src ${r.source}">${db?'DATABASE':'EXPRESSO BEANS'}</span>
       ${(r.flags||[]).map(f=>`<span class="flag">${esc(f)}</span>`).join('')}
       <div class="f"><label>Shows</label>
-        <div id="sh_${cssid(r._id)}" class="${(v('show')||[]).length?'shows-on':'shows-off'}">${(v('show')||[]).map((id,i)=>
-          `<div class="chip"><span>${esc(r.show_labels&&r.show_labels[i]||id)}</span>
+        <div id="sh_${cssid(r._id)}" class="${(v('show')||[]).length?'shows-on':'shows-off'}">${(v('show')||[]).map(id=>
+          `<div class="chip"><span>${esc((r.show_labels&&r.show_labels[id])||id)}</span>
            <button onclick="rmShow('${r._id}','${id}')">×</button></div>`).join('')||
            '<div class="chip" style="color:var(--dim)">— none —</div>'}</div>
         <input placeholder="add show: date, venue, city…" oninput="findShow(this,'${r._id}')" autocomplete="off">
@@ -229,7 +244,20 @@ async function edit(id,patch){
   const r=await getRec(id)
   const d=r.decision||{action:null,edits:{}}
   d.edits={...(d.edits||{}),...patch}
-  pending[id]=d; await flush(); await openGroup(cur)
+  pending[id]=d; await flush()
+  if('show' in patch||'tour' in patch) await regroup(); else await openGroup(cur)
+}
+
+// Re-point a poster at another show and it belongs to a different group now.
+async function regroup(){
+  groups=await (await fetch('/api/groups')).json()
+  await refreshStats()
+  renderList()
+  if(!groups.some(g=>g.key===cur)){
+    // the current group no longer exists (its last poster moved away)
+    const l=list(); cur=l.length?l[0].key:null
+  }
+  if(cur) await openGroup(cur)
 }
 async function editArtist(id,field,val){
   const r=await getRec(id)
@@ -245,6 +273,7 @@ async function act(id,action){
   d.action=d.action===action?null:action
   pending[id]=d; await flush()
   groups=await (await fetch('/api/groups')).json()
+  await refreshStats()
   renderList(); await openGroup(cur)
 }
 async function rmShow(id,sid){
@@ -252,7 +281,7 @@ async function rmShow(id,sid){
   const d=r.decision||{action:null,edits:{}}
   const list0=(d.edits?.show!==undefined?d.edits.show:r.show)||[]
   d.edits={...(d.edits||{}),show:list0.filter(x=>x!==sid)}
-  pending[id]=d; await flush(); await openGroup(cur)
+  pending[id]=d; await flush(); await regroup()
 }
 async function findShow(input,id){
   const box=input.nextElementSibling, q=input.value.trim()
@@ -267,7 +296,7 @@ async function addShow(id,sid){
   const d=r.decision||{action:null,edits:{}}
   const list0=(d.edits?.show!==undefined?d.edits.show:r.show)||[]
   if(!list0.includes(sid)) d.edits={...(d.edits||{}),show:[...list0,sid]}
-  pending[id]=d; await flush(); await openGroup(cur)
+  pending[id]=d; await flush(); await regroup()
 }
 
 async function copyFrom(id){

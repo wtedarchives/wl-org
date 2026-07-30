@@ -116,6 +116,11 @@ export async function sendSetlistPushNotifications(
         title: payload.title,
         body: payload.body,
         show_id: payload.showID,
+        // Song's category artwork, same image the APNs path attaches via the
+        // NSE. Omitted (not undefined — FcmData is Record<string, string>) when
+        // there's no per-song image; the Android client falls back to the
+        // bundled WL mark, matching the extension.
+        ...(payload.imageUrl ? { image_url: payload.imageUrl } : {}),
       })
     }
   } catch (err) {

@@ -91,6 +91,11 @@ serve(async (req) => {
     if (fcmError) {
       console.error("live-activity FCM tokens query:", fcmError)
     } else {
+      // iOS ships only the category *key* and the widget reads its App-Group
+      // art cache (a widget process has no network). Android builds the
+      // notification in-process, so resolve the key to a URL here and let the
+      // client fetch it — no cache to keep in sync.
+      const imageUrl = await categoryArtwork(supabase, state.artworkKey)
       await sendFcmBatch(supabase, (fcmData ?? []) as FcmTokenRow[], {
         type: "liveActivity",
         event,
@@ -102,6 +107,8 @@ serve(async (req) => {
         venue: attributes.venue,
         location: attributes.location,
         date: showDateLong,
+        // Omitted rather than undefined — FcmData is Record<string, string>.
+        ...(imageUrl ? { image_url: imageUrl } : {}),
       })
     }
   } catch (err) {
@@ -258,6 +265,24 @@ function latestSong(entries: Entry[]) {
       artworkKey: last.songs?.song_category ?? null,
     },
   }
+}
+
+/**
+ * Resolve a song-category key to its artwork URL, for the Android payload.
+ * undefined when there's no key, no row, or no artwork — the client then falls
+ * back to its bundled mark.
+ */
+async function categoryArtwork(
+  db: SupabaseClient,
+  key: string | null,
+): Promise<string | undefined> {
+  if (!key) return undefined
+  const { data } = await db
+    .from("categories")
+    .select("category_artwork")
+    .eq("category", key)
+    .maybeSingle()
+  return (data?.category_artwork ?? "").trim() || undefined
 }
 
 /** ContentState for an admin status event (non-song phase). */

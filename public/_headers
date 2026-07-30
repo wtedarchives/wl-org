@@ -3,3 +3,10 @@
 /embed/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=300, must-revalidate
+
+# Google Cast Styled Media Receiver skin + its assets. The receiver runs on a
+# Google-owned origin and fetches these cross-origin, so it needs CORS or it
+# silently falls back to the default (unstyled) skin.
+/cast/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300, must-revalidate

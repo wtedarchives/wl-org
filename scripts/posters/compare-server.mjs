@@ -44,12 +44,61 @@ const json = (res, body, code = 200) => {
 // Stable id per card: db rows keyed by uuid, candidates by image filename.
 const idOf = (r) => (r.source === 'database' ? `db:${r.uuid}` : `eb:${r.id}`)
 
-const decorate = (r) => ({
-  ...r,
-  _id: idOf(r),
-  show_labels: (r.show || []).map(label),
-  decision: state[idOf(r)] || null,
-})
+const decorate = (r) => {
+  const dec = state[idOf(r)] || null
+  // Label by show id, not by position: the card renders the *edited* show list,
+  // so a positional array goes stale the moment a show is added or removed.
+  const ids = new Set([...(r.show || []), ...(dec?.edits?.show || [])])
+  const show_labels = {}
+  for (const id of ids) show_labels[id] = label(id)
+  return { ...r, _id: idOf(r), show_labels, decision: dec }
+}
+
+// The grouping on disk reflects the ORIGINAL show assignments. Once you
+// re-point a poster at a different show it has to move, so groups are rebuilt
+// from the current decisions rather than read from the file.
+const allRecords = (() => {
+  const seen = new Map()
+  for (const g of groups) for (const r of [...g.existing, ...g.candidates]) seen.set(idOf(r), r)
+  return [...seen.values()]
+})()
+
+const effective = (r) => {
+  const e = state[idOf(r)]?.edits || {}
+  return {
+    show: e.show !== undefined ? e.show : r.show,
+    tour: e.tour !== undefined ? e.tour : r.tour,
+  }
+}
+
+let groupCache = null
+const buildGroups = () => {
+  if (groupCache) return groupCache
+  const byKey = new Map()
+  const put = (key, label_, sort, type, r) => {
+    if (!byKey.has(key))
+      byKey.set(key, { key, label: label_, sort, type, existing: [], candidates: [] })
+    byKey.get(key)[r.source === 'database' ? 'existing' : 'candidates'].push(r)
+  }
+  for (const r of allRecords) {
+    const { show, tour } = effective(r)
+    let placed = false
+    for (const sid of show || []) {
+      const s = showById.get(sid)
+      put(`show:${sid}`, s ? label(sid) : `(unknown show ${sid})`, s ? s.show_date : '9999', 'show', r)
+      placed = true
+    }
+    for (const t of tour || []) {
+      put(`tour:${t}`, `TOUR — ${t}`, /^\d{4}/.test(t) ? t.slice(0, 4) : '0000', 'tour', r)
+      placed = true
+    }
+    if (!placed) put('unassigned', 'UNASSIGNED — needs manual mapping', 'zzzz', 'unassigned', r)
+  }
+  groupCache = [...byKey.values()].sort(
+    (a, b) => (a.type !== 'show') - (b.type !== 'show') || a.sort.localeCompare(b.sort) || a.label.localeCompare(b.label)
+  )
+  return groupCache
+}
 
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`)
@@ -64,7 +113,7 @@ const server = createServer(async (req, res) => {
     const decided = (arr) => arr.filter((r) => state[idOf(r)]?.action).length
     return json(
       res,
-      groups.map((g) => ({
+      buildGroups().map((g) => ({
         key: g.key,
         label: g.label,
         type: g.type,
@@ -77,13 +126,22 @@ const server = createServer(async (req, res) => {
   }
 
   if (p === '/api/group') {
-    const g = groups.find((x) => x.key === url.searchParams.get('key'))
+    const g = buildGroups().find((x) => x.key === url.searchParams.get('key'))
     if (!g) return json(res, { error: 'no such group' }, 404)
     return json(res, {
       ...g,
       existing: g.existing.map(decorate),
       candidates: g.candidates.map(decorate),
     })
+  }
+
+  // Unique record counts — a poster that lands in two groups must not be
+  // counted twice, so this walks distinct ids rather than summing groups.
+  if (p === '/api/stats') {
+    const ids = new Set(allRecords.map(idOf))
+    let decided = 0
+    for (const id of ids) if (state[id]?.action) decided++
+    return json(res, { decided, total: ids.size })
   }
 
   if (p === '/api/tours') return json(res, tours)
@@ -118,14 +176,14 @@ const server = createServer(async (req, res) => {
       state[id] = { ...dec, updated_at: new Date().toISOString() }
     }
     save()
+    groupCache = null // a show/tour edit can move a poster to a different group
     return json(res, { ok: true, staged: Object.keys(state).length })
   }
 
   // The staged plan. Still nothing executed — this is just the file the
   // apply step will read once you've reviewed it.
   if (p === '/api/export') {
-    const byId = new Map()
-    for (const g of groups) for (const r of [...g.existing, ...g.candidates]) byId.set(idOf(r), r)
+    const byId = new Map(allRecords.map((r) => [idOf(r), r]))
 
     const merged = (r, dec) => {
       const e = dec?.edits || {}
@@ -194,6 +252,7 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`poster comparison  →  http://localhost:${PORT}`)
   console.log(
-    `${groups.length} groups | ${Object.keys(state).length} decisions staged | read-only against Supabase`
+    `${buildGroups().length} groups | ${allRecords.length} records | ` +
+      `${Object.keys(state).length} decisions staged | read-only against Supabase`
   )
 })
