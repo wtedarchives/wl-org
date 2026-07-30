@@ -1,45 +1,60 @@
 /*
  * WTED Goose Radio — Google Cast Styled Media Receiver skin.
  *
- * Served at https://wtedradio.com/cast/receiver.css and referenced by the
- * "Styled Media Receiver" app at cast.google.com/publish. The receiver fetches
- * it cross-origin, so public/_headers grants /cast/* an Access-Control-Allow-Origin.
+ * Served at https://wtedradio.com/cast/receiver.css and referenced as the
+ * "Skin URL" of the Styled Media Receiver app at cast.google.com/publish. The
+ * receiver fetches it cross-origin, so public/_headers grants /cast/* an
+ * Access-Control-Allow-Origin header.
  *
- * The Styled Media Receiver reads a fixed set of CSS variables off `body`;
- * anything outside that set is ignored (so an unrecognised name degrades to the
- * default rather than breaking the skin). Cross-check against Google's Styled
- * Media Receiver reference if a value appears to have no effect.
+ * The Styled Media Receiver customises exactly five class selectors:
+ *   .background   the receiver background
+ *   .logo         shown while the receiver is launching
+ *   .splash       the idle screen (falls back to .logo, then the app name)
+ *   .watermark    small mark shown while media plays
+ *   .progressBar  the playback progress bar
+ * See https://developers.google.com/cast/docs/styled_receiver
  *
  * Colours mirror the apps' design system — iOS Theme.swift / Android
  * ui/theme/Theme.kt, both mirrors of the site's globals.css.
  */
 
-body {
-  /*
-   * Matches the splash image's own field (#333a35 ≈ the app's #313A34 launch
-   * background), so the splash composites with no visible square edge.
-   */
-  --background-color: #313a34;
+/*
+ * #313a34 matches the splash image's own field (#333a35), so the splash
+ * composites against the background with no visible square edge on a 16:9
+ * screen. It's also the iOS LaunchBackground colour.
+ */
+.background {
+  background-color: #313a34;
+}
 
-  /* WLGreen — progress bar and highlights. */
-  --progress-color: #58c8ae;
-  --theme-hue: 165;
+/* Transparent WTED radio mark, shown while the receiver launches. */
+.logo {
+  background-image: url("https://wtedradio.com/cast/wted-logo.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
 
-  /* Text on the dark field. */
-  --title-color: #ffffff;
-  --subtitle-color: rgba(255, 255, 255, 0.55);
+/* Goose mark on the idle screen, before anything is playing. */
+.splash {
+  background-image: url("https://wtedradio.com/cast/wted-splash.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
 
-  /* Geist isn't available to the receiver; fall back to a close neutral. */
-  --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+/*
+ * Persistent mark while audio plays. `contain` rather than a square
+ * background-size — the logo is 750x650, so forcing a square would distort it.
+ */
+.watermark {
+  background-image: url("https://wtedradio.com/cast/wted-logo.png");
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  background-size: contain;
+}
 
-  /* Goose mark, shown when a track has no artwork of its own. */
-  --splash-image: url("https://wtedradio.com/cast/wted-splash.png");
-  --splash-size: contain;
-
-  /* Transparent WTED radio mark — idle screen and persistent watermark. */
-  --logo-image: url("https://wtedradio.com/cast/wted-logo.png");
-  --playback-logo-image: url("https://wtedradio.com/cast/wted-logo.png");
-  --watermark-image: url("https://wtedradio.com/cast/wted-logo.png");
-  --watermark-position: bottom right;
-  --watermark-size: 84px;
+/* WLGreen. */
+.progressBar {
+  background-color: #58c8ae;
 }
