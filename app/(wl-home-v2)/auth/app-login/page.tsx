@@ -4,10 +4,16 @@
 //
 // Native-app SSO entry point.
 //
-// The iOS app opens this route inside an ASWebAuthenticationSession. We flag
-// "app mode" in sessionStorage so the shared /auth/callback hands the minted
-// JWT back to the app via the `wtedradio://` scheme (see auth/callback/page.tsx),
-// then kick off the normal DiscourseConnect SSO flow. No new secrets involved.
+// The iOS app opens this route in its login web view. We start the normal
+// DiscourseConnect SSO flow with `appMode`, which returns through
+// /auth/app-callback — a route that always hands the minted JWT back to the app
+// via the `wtedradio://` scheme. No new secrets involved.
+//
+// The legacy `sso_app_mode` sessionStorage flag is still set so app builds that
+// somehow land on /auth/callback instead keep working. Don't rely on it: it's
+// per-origin, so it vanishes if sign-in starts on a different host than the one
+// Discourse returns to (that's what broke app login at the wtedradio.com
+// cutover, and why app mode now lives in the return path).
 
 import { useEffect } from "react"
 import { redirectToLogin } from "@/lib/sso"
@@ -17,9 +23,9 @@ export default function AppLoginPage() {
     try {
       sessionStorage.setItem("sso_app_mode", "1")
     } catch {
-      // sessionStorage unavailable — the callback simply falls back to web behavior.
+      // sessionStorage unavailable — /auth/app-callback doesn't need it.
     }
-    void redirectToLogin("/")
+    void redirectToLogin("/", { appMode: true })
   }, [])
 
   return (

@@ -37,6 +37,25 @@ function resolveSsoCallbackUrl(): string {
   return DEFAULT_PROD_CALLBACK_URL;
 }
 
+/**
+ * Native-app return URL — `/auth/app-callback` on the same origin as the normal
+ * callback. That route ALWAYS hands the JWT back over `wtedradio://`.
+ *
+ * Why a separate route instead of a flag: app mode used to live in
+ * `sessionStorage`, which is per-origin. When the app opened `/auth/app-login`
+ * on one host and Discourse returned to another (the wtedradio.com cutover), the
+ * flag was gone and the callback silently logged into the website instead of
+ * returning a token to the app. Encoding app mode in the *path* survives any
+ * host change, so the app's base URL and the site's callback host can drift
+ * without breaking sign-in.
+ */
+export function resolveAppCallbackUrl(): string {
+  const base = resolveSsoCallbackUrl();
+  return base.endsWith("/auth/callback")
+    ? `${base.slice(0, -"/auth/callback".length)}/auth/app-callback`
+    : base;
+}
+
 // ─── Generate a random nonce ──────────────────────────────────────────────────
 
 function generateNonce(): string {
@@ -195,6 +214,8 @@ export function isSsoFailedPayload(sso: string): boolean {
 export type SSORedirectOptions = {
   promptNone?: boolean;
   logout?: boolean;
+  /** Native-app sign-in: return through `/auth/app-callback` (see above). */
+  appMode?: boolean;
 };
 
 export async function buildSSORedirectURL(
@@ -207,7 +228,9 @@ export async function buildSSORedirectURL(
   }
 
   const nonce = generateNonce();
-  const callbackUrl = resolveSsoCallbackUrl();
+  const callbackUrl = options?.appMode
+    ? resolveAppCallbackUrl()
+    : resolveSsoCallbackUrl();
 
   // Store nonce and intended destination in sessionStorage
   // so the callback route can verify and redirect correctly
