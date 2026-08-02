@@ -42,3 +42,9 @@ next-env.d.ts
 
 # ShipStudio metadata
 .shipstudio/
+
+# poster import pipeline (one-off tooling, not part of the app)
+scripts/posters/
+
+# supabase cli scratch
+supabase/.temp/
