@@ -15,6 +15,7 @@ import { WlHomeV2RequestModal } from "./wl-home-v2-request-modal"
 import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
 import { WlHomeV2SettingsModal } from "./wl-home-v2-settings-modal"
 import { WlHomeV2SignupModal } from "./wl-home-v2-signup-modal"
+import { WlHomeV2SiteSearchModal } from "./wl-home-v2-site-search-modal"
 import { WlHomeV2ThisDayHistoryModal } from "./wl-home-v2-this-day-history-modal"
 import { WlHomeV2TourScheduleModal } from "./wl-home-v2-tour-schedule-modal"
 
@@ -46,6 +47,11 @@ export type WlHomeV2ShellModalsProps = {
   archiveOpen: boolean
   closeArchiveModal: () => void
   archiveHeadingId: string
+  onOpenSiteSearchFromArchive?: () => void
+  siteSearchOpen: boolean
+  setSiteSearchOpen: (open: boolean) => void
+  siteSearchHeadingId: string
+  siteSearchAllowed: boolean
   radioOpen: boolean
   setRadioOpen: (open: boolean) => void
   radioHeadingId: string
@@ -89,6 +95,11 @@ export function WlHomeV2ShellModals({
   archiveOpen,
   closeArchiveModal,
   archiveHeadingId,
+  onOpenSiteSearchFromArchive,
+  siteSearchOpen,
+  setSiteSearchOpen,
+  siteSearchHeadingId,
+  siteSearchAllowed,
   radioOpen,
   setRadioOpen,
   radioHeadingId,
@@ -134,7 +145,15 @@ export function WlHomeV2ShellModals({
         open={archiveOpen}
         onClose={closeArchiveModal}
         headingId={archiveHeadingId}
+        onOpenSiteSearch={onOpenSiteSearchFromArchive}
       />
+      {siteSearchAllowed ?
+        <WlHomeV2SiteSearchModal
+          open={siteSearchOpen}
+          onClose={() => setSiteSearchOpen(false)}
+          headingId={siteSearchHeadingId}
+        />
+      : null}
       <WlHomeV2RadioModal
         open={radioOpen}
         onClose={() => setRadioOpen(false)}

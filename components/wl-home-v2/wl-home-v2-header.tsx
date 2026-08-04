@@ -28,11 +28,9 @@ import {
   WL_HOME_V2_TOP_NAV_PANEL_ID,
 } from "./wl-home-v2-constants"
 import { WlHomeV2HeaderPhraseRotator } from "./wl-home-v2-header-phrase-rotator"
+import { useWlHomeV2OpenSiteSearch } from "./wl-home-v2-open-site-search-context"
 import { WlHomeV2SiteSearch } from "./wl-home-v2-site-search"
-import { WlHomeV2SiteSearchModal } from "./wl-home-v2-site-search-modal"
 import { WlHomeV2UserMenu } from "./wl-home-v2-user-menu"
-
-const SITE_SEARCH_MODAL_HEADING_ID = "wl-home-v2-site-search-heading"
 
 function TopNavPrimaryImage({
   src,
@@ -85,16 +83,16 @@ export function WlHomeV2Header({
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
   const { allowed: siteSearchAllowed } = useSiteSearchAccess()
+  const openSiteSearchFromShell = useWlHomeV2OpenSiteSearch()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [siteSearchOpen, setSiteSearchOpen] = useState(false)
   /** Stable id (not `useId`) — see `WL_HOME_V2_TOP_NAV_PANEL_ID` in constants. */
   const mobileNavId = WL_HOME_V2_TOP_NAV_PANEL_ID
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), [])
 
   const openSiteSearch = useCallback(() => {
     closeMobileNav()
-    setSiteSearchOpen(true)
-  }, [closeMobileNav])
+    openSiteSearchFromShell?.()
+  }, [closeMobileNav, openSiteSearchFromShell])
 
   const onArchivesNavClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
@@ -359,13 +357,6 @@ export function WlHomeV2Header({
           </div>
         </div>
       </header>
-      {siteSearchAllowed ?
-        <WlHomeV2SiteSearchModal
-          open={siteSearchOpen}
-          onClose={() => setSiteSearchOpen(false)}
-          headingId={SITE_SEARCH_MODAL_HEADING_ID}
-        />
-      : null}
     </>
   )
 }

@@ -6,6 +6,7 @@ import {
   ChartBar,
   LineSegments,
   ListNumbers,
+  MagnifyingGlass,
   MapPin,
   MusicNote,
   Trophy,
@@ -24,6 +25,7 @@ import {
 } from "@/lib/archive-hub-content"
 import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
+import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
@@ -59,6 +61,8 @@ type WlHomeV2ArchiveModalProps = {
   open: boolean
   onClose: () => void
   headingId: string
+  /** Opens site search (closes this hub first when provided). */
+  onOpenSiteSearch?: () => void
 }
 
 const YEARS_ENTRY = ARCHIVE_ENTRIES.find((entry) => entry.title === "Years")
@@ -147,9 +151,11 @@ export function WlHomeV2ArchiveModal({
   open,
   onClose,
   headingId,
+  onOpenSiteSearch,
 }: WlHomeV2ArchiveModalProps) {
   const descId = useId()
   const myStatsProfile = useUserProfilePicture()
+  const { allowed: siteSearchAllowed } = useSiteSearchAccess()
   useWlHomeV2ScrollLock(open)
 
   return (
@@ -177,14 +183,35 @@ export function WlHomeV2ArchiveModal({
                 {ARCHIVE_INTRO.description}
               </p>
             </div>
-            <button
-              type="button"
-              className="modal-request-close"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <div className="modal-request-head-trailing">
+              {siteSearchAllowed && onOpenSiteSearch ?
+                <button
+                  type="button"
+                  className="wl-home-v2-site-search-icon-trigger wl-home-v2-site-search-icon-trigger--labeled"
+                  aria-haspopup="dialog"
+                  aria-label="Search archive"
+                  onClick={onOpenSiteSearch}
+                >
+                  <MagnifyingGlass
+                    className="wl-home-v2-site-search-icon-trigger__icon"
+                    size={22}
+                    weight="regular"
+                    aria-hidden
+                  />
+                  <span className="wl-home-v2-site-search-icon-trigger__label">
+                    Search
+                  </span>
+                </button>
+              : null}
+              <button
+                type="button"
+                className="modal-request-close"
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
           </div>
           <div className="modal-request-body modal-archive-hub-body">
             <ArchiveModalYearsRow

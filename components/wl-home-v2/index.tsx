@@ -14,6 +14,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
+import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import { cn } from "@/lib/utils"
 
@@ -28,6 +29,7 @@ import { SetlistCombinedRowsPreferenceProvider } from "./setlist-combined-rows-p
 import { WlHomeV2OpenArchiveHubContext } from "./wl-home-v2-open-archive-hub-context"
 import { WlHomeV2AuthQuerySync } from "./wl-home-v2-auth-query-sync"
 import { WlHomeV2AuthModalsContext } from "./wl-home-v2-open-login-context"
+import { WlHomeV2OpenSiteSearchContext } from "./wl-home-v2-open-site-search-context"
 import { WlHomeV2OpenSettingsContext } from "./wl-home-v2-open-settings-context"
 import { WlHomeV2ShellModals } from "./wl-home-v2-shell-modals"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
@@ -46,6 +48,7 @@ export function WlHomeV2({
   const { session } = useAuth()
   const { showAdminUi } = useSetlistAdmin(session, undefined, undefined)
   const showRadioScheduleShare = showAdminUi
+  const { allowed: siteSearchAllowed } = useSiteSearchAccess()
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -74,6 +77,9 @@ export function WlHomeV2({
   const [archiveOpen, setArchiveOpen] = useState(archiveModalInitiallyOpen)
   const archiveHeadingId = useId()
 
+  const [siteSearchOpen, setSiteSearchOpen] = useState(false)
+  const siteSearchHeadingId = useId()
+
   const [radioOpen, setRadioOpen] = useState(false)
   const radioHeadingId = useId()
 
@@ -98,6 +104,15 @@ export function WlHomeV2({
   const openArchiveHub = useCallback(() => {
     setArchiveOpen(true)
   }, [])
+
+  const openSiteSearch = useCallback(() => {
+    setSiteSearchOpen(true)
+  }, [])
+
+  const openSiteSearchFromArchive = useCallback(() => {
+    setSiteSearchOpen(true)
+    closeArchiveModal()
+  }, [closeArchiveModal])
 
   const openLogin = useCallback(() => {
     setLoginOpen(true)
@@ -146,6 +161,7 @@ export function WlHomeV2({
       !forgotOpen &&
       !signupOpen &&
       !archiveOpen &&
+      !siteSearchOpen &&
       !radioOpen &&
       !followUsOpen &&
       !radioScheduleShareOpen &&
@@ -163,6 +179,7 @@ export function WlHomeV2({
       setForgotOpen(false)
       setSignupOpen(false)
       closeArchiveModal()
+      setSiteSearchOpen(false)
       setRadioOpen(false)
       setFollowUsOpen(false)
       setRadioScheduleShareOpen(false)
@@ -180,6 +197,7 @@ export function WlHomeV2({
     forgotOpen,
     signupOpen,
     archiveOpen,
+    siteSearchOpen,
     radioOpen,
     followUsOpen,
     radioScheduleShareOpen,
@@ -192,6 +210,7 @@ export function WlHomeV2({
       <SetlistCombinedRowsPreferenceProvider>
       <WlHomeV2AuthModalsContext.Provider value={authModals}>
       <WlHomeV2OpenSettingsContext.Provider value={openSettings}>
+      <WlHomeV2OpenSiteSearchContext.Provider value={openSiteSearch}>
       <WlHomeV2OpenArchiveHubContext.Provider value={openArchiveHub}>
         <div className="wl-home-v2">
         <div className="wl-home-v2__stack">
@@ -269,6 +288,11 @@ export function WlHomeV2({
         archiveOpen={archiveOpen}
         closeArchiveModal={closeArchiveModal}
         archiveHeadingId={archiveHeadingId}
+        onOpenSiteSearchFromArchive={openSiteSearchFromArchive}
+        siteSearchOpen={siteSearchOpen}
+        setSiteSearchOpen={setSiteSearchOpen}
+        siteSearchHeadingId={siteSearchHeadingId}
+        siteSearchAllowed={siteSearchAllowed}
         radioOpen={radioOpen}
         setRadioOpen={setRadioOpen}
         radioHeadingId={radioHeadingId}
@@ -288,6 +312,7 @@ export function WlHomeV2({
 
       </div>
         </WlHomeV2OpenArchiveHubContext.Provider>
+      </WlHomeV2OpenSiteSearchContext.Provider>
       </WlHomeV2OpenSettingsContext.Provider>
       </WlHomeV2AuthModalsContext.Provider>
       </SetlistCombinedRowsPreferenceProvider>
