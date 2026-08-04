@@ -315,23 +315,6 @@ export function WlHomeV2Header({
                     />
                     Follow Us
                   </a>
-                  {siteSearchAllowed ?
-                    <button
-                      type="button"
-                      className="wl-home-v2-site-search-mobile-trigger"
-                      aria-haspopup="dialog"
-                      aria-label="Search archive"
-                      onClick={openSiteSearch}
-                    >
-                      <MagnifyingGlass
-                        className="top-nav-primary-icon"
-                        size={18}
-                        weight="regular"
-                        aria-hidden
-                      />
-                      Search
-                    </button>
-                  : null}
                 </div>
                 {isArchiveRoute ?
                   <Suspense fallback={null}>
@@ -344,6 +327,22 @@ export function WlHomeV2Header({
               </nav>
 
               <div className="top-user-cluster">
+                {siteSearchAllowed ?
+                  <button
+                    type="button"
+                    className="wl-home-v2-site-search-icon-trigger"
+                    aria-haspopup="dialog"
+                    aria-label="Search archive"
+                    onClick={openSiteSearch}
+                  >
+                    <MagnifyingGlass
+                      className="wl-home-v2-site-search-icon-trigger__icon"
+                      size={22}
+                      weight="regular"
+                      aria-hidden
+                    />
+                  </button>
+                : null}
                 <div className="top-user-menu">
                   <WlHomeV2UserMenu
                     onOpenLogin={onOpenLogin}

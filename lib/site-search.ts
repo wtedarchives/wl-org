@@ -1,8 +1,17 @@
 import { WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
+import {
+  fetchSiteSearchCategoryDev,
+  fetchSiteSearchDev,
+} from "@/lib/site-search-dev"
 
 export const SITE_SEARCH_MIN_QUERY_LENGTH = 2
 export const SITE_SEARCH_PAGE_LIMIT = 40
+
+/** True only under `next dev` — unlocks UI + client-side search without auth. */
+export function isSiteSearchDevUnlocked(): boolean {
+  return process.env.NODE_ENV === "development"
+}
 
 export const SITE_SEARCH_CATEGORIES = [
   "shows",
@@ -28,6 +37,21 @@ export type SiteSearchShowHit = {
   id: string
   label: string
   detail?: string | null
+  /** Structured fields for tour-dates table (full search page). */
+  show_date?: string | null
+  show_group?: string | null
+  show_subvenue?: string | null
+  show_venue_location?: string | null
+  show_alert?: string | null
+  show_tour?: string | null
+  show_iscanon?: boolean
+  show_canonid?: number | null
+  show_wl_link?: string | null
+  show_length?: string | null
+  show_rarity?: string | null
+  show_gap?: string | null
+  show_subvenue_venue?: string | null
+  venue_id?: string | null
 }
 
 export type SiteSearchSongHit = {
@@ -40,11 +64,14 @@ export type SiteSearchDiscographyHit = {
   id: string
   name: string
   displayname?: string | null
+  artist?: string | null
 }
 
 export type SiteSearchVenueHit = {
   id: string
   label: string
+  subvenue?: string | null
+  location?: string | null
 }
 
 export type SiteSearchTourHit = {
@@ -148,8 +175,10 @@ function parseHasMore(raw: unknown): SiteSearchHasMore {
 
 /** Ask Edge whether the current session may use site search (boolean only). */
 export async function fetchSiteSearchAccess(
-  accessToken: string,
+  accessToken: string | null | undefined,
 ): Promise<boolean> {
+  if (isSiteSearchDevUnlocked()) return true
+  if (!accessToken) return false
   const res = await fetch(`${functionsBase()}/site-search?check=1`, {
     headers: siteSearchHeaders(accessToken),
   })
@@ -159,9 +188,16 @@ export async function fetchSiteSearchAccess(
 }
 
 export async function fetchSiteSearch(
-  accessToken: string,
+  accessToken: string | null | undefined,
   q: string,
 ): Promise<SiteSearchResponse> {
+  if (isSiteSearchDevUnlocked()) {
+    return fetchSiteSearchDev(q)
+  }
+  if (!accessToken) {
+    throw new Error("You must be signed in to search.")
+  }
+
   const trimmed = q.trim()
   if (trimmed.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
     throw new Error(
@@ -197,12 +233,19 @@ export async function fetchSiteSearch(
 }
 
 export async function fetchSiteSearchCategory(opts: {
-  accessToken: string
+  accessToken?: string | null
   q: string
   category: SiteSearchCategory
   offset?: number
   limit?: number
 }): Promise<SiteSearchCategoryResponse> {
+  if (isSiteSearchDevUnlocked()) {
+    return fetchSiteSearchCategoryDev(opts)
+  }
+  if (!opts.accessToken) {
+    throw new Error("You must be signed in to search.")
+  }
+
   const trimmed = opts.q.trim()
   if (trimmed.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
     throw new Error(
@@ -245,4 +288,30 @@ export async function fetchSiteSearchCategory(opts: {
     hasMore: data.hasMore === true,
     items: Array.isArray(data.items) ? data.items : [],
   }
+}
+
+const SITE_SEARCH_ALL_PAGE_LIMIT = 100
+const SITE_SEARCH_ALL_MAX_PAGES = 50
+
+/** Fetch every hit for a category (pages until exhausted). Used by /archive/search. */
+export async function fetchSiteSearchCategoryAll(opts: {
+  accessToken?: string | null
+  q: string
+  category: SiteSearchCategory
+}): Promise<SiteSearchHit[]> {
+  const items: SiteSearchHit[] = []
+  let offset = 0
+  for (let page = 0; page < SITE_SEARCH_ALL_MAX_PAGES; page++) {
+    const data = await fetchSiteSearchCategory({
+      accessToken: opts.accessToken,
+      q: opts.q,
+      category: opts.category,
+      offset,
+      limit: SITE_SEARCH_ALL_PAGE_LIMIT,
+    })
+    items.push(...data.items)
+    if (!data.hasMore || data.items.length === 0) break
+    offset += data.items.length
+  }
+  return items
 }

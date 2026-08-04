@@ -5,21 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation"
 import {
   useCallback,
   useEffect,
-  useMemo,
   useState,
   type FormEvent,
 } from "react"
 
-import {
-  WL_V2_ARCHIVES_BREADCRUMB_ROOT,
-  type BreadcrumbItem,
-} from "@/components/setlist-breadcrumb-context"
-import {
-  WlHomeV2ArchiveCrumbsShell,
-  WlHomeV2ArchiveCrumbsTrail,
-} from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
-import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
+import {
+  siteSearchShowsSupportTourTable,
+  WlHomeV2SiteSearchShowsTable,
+} from "@/components/wl-home-v2/wl-home-v2-site-search-shows-table"
 import { useAuth } from "@/components/auth-context"
 import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { getDiscographyArchiveUrl } from "@/lib/discography-archive-url"
@@ -27,12 +21,12 @@ import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSiteSearchArchiveUrl } from "@/lib/site-search-archive-url"
 import {
-  fetchSiteSearchCategory,
+  fetchSiteSearchCategoryAll,
   isSiteSearchCategory,
+  isSiteSearchDevUnlocked,
   SITE_SEARCH_CATEGORIES,
   SITE_SEARCH_CATEGORY_LABELS,
   SITE_SEARCH_MIN_QUERY_LENGTH,
-  SITE_SEARCH_PAGE_LIMIT,
   type SiteSearchCategory,
   type SiteSearchDiscographyHit,
   type SiteSearchHit,
@@ -89,15 +83,36 @@ function HitContent({
   }
   if (category === "discography") {
     const row = hit as SiteSearchDiscographyHit
+    const artist = (row.artist ?? "").trim()
     return (
-      <span className="wl-home-v2-site-search-hit-label">
-        {(row.displayname ?? "").trim() || row.name}
+      <span className="wl-home-v2-site-search-hit-inline">
+        <span className="wl-home-v2-site-search-hit-label">
+          {(row.displayname ?? "").trim() || row.name}
+        </span>
+        {artist ?
+          <span className="wl-home-v2-site-search-meta-pill">{artist}</span>
+        : null}
       </span>
     )
   }
   if (category === "venues") {
     const row = hit as SiteSearchVenueHit
-    return <span className="wl-home-v2-site-search-hit-label">{row.label}</span>
+    const divider = " – "
+    const label = typeof row.label === "string" ? row.label : ""
+    const fromLabel = label.includes(divider) ? label.split(divider) : [label]
+    const subvenue =
+      (row.subvenue ?? "").trim() || fromLabel[0]?.trim() || label || "Venue"
+    const location =
+      (row.location ?? "").trim() ||
+      (fromLabel.length > 1 ? fromLabel.slice(1).join(divider).trim() : "")
+    return (
+      <span className="wl-home-v2-site-search-hit-inline">
+        <span className="wl-home-v2-site-search-hit-label">{subvenue}</span>
+        {location ?
+          <span className="wl-home-v2-site-search-meta-pill">{location}</span>
+        : null}
+      </span>
+    )
   }
   if (category === "tours") {
     const row = hit as SiteSearchTourHit
@@ -110,7 +125,6 @@ function HitContent({
 }
 
 export function WlHomeV2SiteSearchArchiveView() {
-  const openArchiveHub = useWlHomeV2OpenArchiveHub()
   const { session } = useAuth()
   const { allowed, loading: accessLoading } = useSiteSearchAccess()
   const router = useRouter()
@@ -124,9 +138,7 @@ export function WlHomeV2SiteSearchArchiveView() {
 
   const [draftQ, setDraftQ] = useState(qParam)
   const [items, setItems] = useState<SiteSearchHit[]>([])
-  const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -140,28 +152,17 @@ export function WlHomeV2SiteSearchArchiveView() {
     }
   }, [accessLoading, allowed, router])
 
-  const breadcrumbs: BreadcrumbItem[] = useMemo(
-    () => [
-      WL_V2_ARCHIVES_BREADCRUMB_ROOT,
-      {
-        label: qParam ? `Search: ${qParam}` : "Search",
-        href: getSiteSearchArchiveUrl(qParam, category),
-      },
-    ],
-    [qParam, category],
-  )
-
   const loadInitial = useCallback(async () => {
-    if (!session?.token || !allowed) {
+    const canFetch =
+      allowed && (isSiteSearchDevUnlocked() || Boolean(session?.token))
+    if (!canFetch) {
       setItems([])
-      setHasMore(false)
       setLoading(false)
       return
     }
 
     if (qParam.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
       setItems([])
-      setHasMore(false)
       setLoading(false)
       setError(
         qParam.length === 0
@@ -174,18 +175,14 @@ export function WlHomeV2SiteSearchArchiveView() {
     setLoading(true)
     setError(null)
     try {
-      const data = await fetchSiteSearchCategory({
-        accessToken: session.token,
+      const all = await fetchSiteSearchCategoryAll({
+        accessToken: session?.token,
         q: qParam,
         category,
-        offset: 0,
-        limit: SITE_SEARCH_PAGE_LIMIT,
       })
-      setItems(data.items)
-      setHasMore(data.hasMore)
+      setItems(all)
     } catch (e) {
       setItems([])
-      setHasMore(false)
       setError(e instanceof Error ? e.message : "Search failed")
     } finally {
       setLoading(false)
@@ -195,27 +192,6 @@ export function WlHomeV2SiteSearchArchiveView() {
   useEffect(() => {
     void loadInitial()
   }, [loadInitial])
-
-  const onLoadMore = async () => {
-    if (loadingMore || !hasMore || !session?.token) return
-    setLoadingMore(true)
-    setError(null)
-    try {
-      const data = await fetchSiteSearchCategory({
-        accessToken: session.token,
-        q: qParam,
-        category,
-        offset: items.length,
-        limit: SITE_SEARCH_PAGE_LIMIT,
-      })
-      setItems((prev) => [...prev, ...data.items])
-      setHasMore(data.hasMore)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Search failed")
-    } finally {
-      setLoadingMore(false)
-    }
-  }
 
   const onSubmitSearch = (e: FormEvent) => {
     e.preventDefault()
@@ -233,16 +209,6 @@ export function WlHomeV2SiteSearchArchiveView() {
 
   return (
     <div className="wl-home-v2-site-search-page rounded-b-none md:rounded-b-xl overflow-hidden">
-      <WlHomeV2ArchiveCrumbsShell
-        variant="page-gutter"
-        trail={
-          <WlHomeV2ArchiveCrumbsTrail
-            items={breadcrumbs}
-            openArchiveHub={openArchiveHub ?? undefined}
-          />
-        }
-      />
-
       <div className="wl-home-v2-site-search-page-inner">
         <header className="wl-home-v2-site-search-page-head">
           <h1 className="wl-home-v2-site-search-page-title">Search</h1>
@@ -285,10 +251,8 @@ export function WlHomeV2SiteSearchArchiveView() {
               role="tab"
               aria-selected={cat === category}
               className={[
-                "wl-home-v2-site-search-page-tab",
-                cat === category ?
-                  "wl-home-v2-site-search-page-tab--active"
-                : "",
+                "wl-home-v2-archive-subnav-pill",
+                cat === category ? "wl-home-v2-archive-subnav-pill--active" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}
@@ -309,37 +273,29 @@ export function WlHomeV2SiteSearchArchiveView() {
           <p className="wl-home-v2-site-search-status">
             Enter a search of at least {SITE_SEARCH_MIN_QUERY_LENGTH} characters.
           </p>
-        : items.length === 0 ?
-          <p className="wl-home-v2-site-search-status">
-            No {SITE_SEARCH_CATEGORY_LABELS[category].toLowerCase()} for “
-            {qParam}”.
-          </p>
-        : <>
-            <ul className="wl-home-v2-site-search-page-list">
-              {items.map((hit) => (
-                <li key={hit.id}>
-                  <Link
-                    href={hitHref(category, hit)}
-                    className="wl-home-v2-site-search-hit wl-home-v2-site-search-page-hit"
-                  >
-                    <HitContent category={category} hit={hit} />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            {hasMore ?
-              <div className="wl-home-v2-site-search-page-more">
-                <button
-                  type="button"
-                  className="wl-home-v2-site-search-page-more-btn"
-                  onClick={() => void onLoadMore()}
-                  disabled={loadingMore}
+        : category === "shows" &&
+          items.length > 0 &&
+          siteSearchShowsSupportTourTable(items as SiteSearchShowHit[]) ?
+          <WlHomeV2SiteSearchShowsTable hits={items as SiteSearchShowHit[]} />
+        : <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-site-search-results-panel">
+            {items.length === 0 ?
+              <p className="wl-home-v2-site-search-status">
+                No {SITE_SEARCH_CATEGORY_LABELS[category].toLowerCase()} for “
+                {qParam}”.
+              </p>
+            : items.map((hit) => (
+                <Link
+                  key={hit.id}
+                  href={hitHref(category, hit)}
+                  className="topic-row wl-home-v2-site-search-page-topic-row"
                 >
-                  {loadingMore ? "Loading…" : "Load more"}
-                </button>
-              </div>
-            : null}
-          </>
+                  <span className="wl-home-v2-site-search-page-topic-main">
+                    <HitContent category={category} hit={hit} />
+                  </span>
+                </Link>
+              ))
+            }
+          </div>
         }
       </div>
     </div>

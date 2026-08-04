@@ -40,7 +40,7 @@ export function useSiteSearchForm(accessToken: string | null | undefined) {
       setHint(null)
       setError(null)
 
-      if (!accessToken) {
+      if (!accessToken && process.env.NODE_ENV !== "development") {
         setResults(null)
         setLoading(false)
         setError("You must be signed in to search.")

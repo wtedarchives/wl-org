@@ -279,16 +279,21 @@
     outline: none;
   }
   .wl-home-v2 .wl-home-v2-site-search-page {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     min-height: 0;
     background: rgba(0, 0, 0, 0.18);
   }
   .wl-home-v2 .wl-home-v2-site-search-page-inner {
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
     padding: 8px 16px 28px;
     max-width: 920px;
+    width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
   }
@@ -310,101 +315,95 @@
     color: #fff;
   }
   .wl-home-v2 .wl-home-v2-site-search-page-form .wl-home-v2-site-search-input {
-    height: 44px;
+    height: 28px;
     font-size: 15px;
   }
   .wl-home-v2 .wl-home-v2-site-search-page-form .wl-home-v2-site-search-submit {
     width: 52px;
     min-width: 52px;
-    height: 44px;
+    height: 28px;
     font-size: 13px;
     font-weight: 700;
   }
   .wl-home-v2 .wl-home-v2-site-search-page-tabs {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 6px;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-tab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    border: 1px solid rgb(65, 68, 66);
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.75);
-    font-size: 12px;
-    font-weight: 600;
+  .wl-home-v2 .wl-home-v2-site-search-page-tabs .wl-home-v2-archive-subnav-pill {
     cursor: pointer;
-    transition: background 0.15s ease-out, border-color 0.15s ease-out,
-      color 0.15s ease-out;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-tab:hover,
-  .wl-home-v2 .wl-home-v2-site-search-page-tab:focus-visible {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    outline: none;
+  .wl-home-v2 .wl-home-v2-site-search-results-panel,
+  .wl-home-v2 .wl-home-v2-site-search-shows-table {
+    width: 100%;
+    max-width: none;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-tab--active {
-    background: rgb(255, 170, 129);
-    border-color: rgb(210, 125, 88);
-    color: #000;
+  /* Beat `.wl-home-v2 .widget-panel` (12px 14px 4px) for every category panel. */
+  .wl-home-v2 .wl-home-v2-site-search-page .widget-panel {
+    padding: 8px;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-tab--active:hover,
-  .wl-home-v2 .wl-home-v2-site-search-page-tab--active:focus-visible {
-    background: rgb(245, 155, 112);
-    color: #000;
+  .wl-home-v2
+    .wl-home-v2-site-search-page
+    .widget-panel
+    > a.topic-row.wl-home-v2-site-search-page-topic-row {
+    align-items: flex-start;
+    margin-left: -8px;
+    margin-right: -8px;
+    padding: 8px;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  .wl-home-v2 .wl-home-v2-site-search-page-topic-main {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    min-width: 0;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-hit {
-    padding: 12px 12px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgb(49, 51, 49);
-    border-radius: 10px;
-  }
-  .wl-home-v2 .wl-home-v2-site-search-page-hit .wl-home-v2-site-search-hit-label {
-    font-size: 14px;
-  }
-  .wl-home-v2 .wl-home-v2-site-search-page-hit .wl-home-v2-site-search-hit-detail {
-    font-size: 12px;
-  }
-  .wl-home-v2 .wl-home-v2-site-search-page-more {
+  .wl-home-v2 .wl-home-v2-site-search-hit-inline {
     display: flex;
-    justify-content: center;
-    padding-top: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-more-btn {
-    min-height: 44px;
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: 1px solid rgb(65, 68, 66);
-    background: rgba(255, 255, 255, 0.07);
-    color: #fff;
+  .wl-home-v2 .wl-home-v2-site-search-meta-pill {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgb(44, 46, 45);
+    color: rgba(255, 255, 255, 0.75);
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  .wl-home-v2
+    .wl-home-v2-site-search-page-topic-main
+    .wl-home-v2-site-search-hit-label {
     font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease-out, border-color 0.15s ease-out;
+    font-weight: 550;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.9);
+    word-break: break-word;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-more-btn:hover:not(:disabled),
-  .wl-home-v2 .wl-home-v2-site-search-page-more-btn:focus-visible:not(:disabled) {
-    background: rgba(88, 200, 174, 0.18);
-    border-color: rgb(52, 109, 95);
-    outline: none;
+  .wl-home-v2
+    .wl-home-v2-site-search-page-topic-main
+    .wl-home-v2-site-search-hit-detail {
+    font-size: 11px;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.55);
+    word-break: break-word;
   }
-  .wl-home-v2 .wl-home-v2-site-search-page-more-btn:disabled {
-    opacity: 0.6;
-    cursor: wait;
+  .wl-home-v2 .wl-home-v2-site-search-shows-table {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
-  .wl-home-v2 .wl-home-v2-site-search-mobile-trigger {
+  .wl-home-v2 .wl-home-v2-site-search-icon-trigger {
     display: none;
   }
   .wl-home-v2 .modal.modal--site-search {
@@ -536,7 +535,7 @@
   .wl-home-v2 header.top .top-user-cluster {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
   }
   .wl-home-v2 header.top .top-user-menu {
@@ -699,7 +698,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 3px 10px;
+    padding: 3px 10px 3px 3px;
     line-height: 1;
     border: 0;
     border-radius: 8px;
@@ -793,8 +792,8 @@
   /* Below desktop content width (1344px): stacked header + drawer nav */
   @media (max-width: 1343px) {
     .wl-home-v2 header.top {
-      /* Equal side tracks so the shrink-wrapped logo+OLD column sits at true viewport center. */
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      /* Hamburger + brand left; user (+ search icon) right. */
+      grid-template-columns: auto minmax(0, 1fr) auto;
       grid-template-rows: auto auto auto auto;
       grid-template-areas:
         "radio radio radio"
@@ -802,7 +801,7 @@
         "menu brand user"
         "drawer drawer drawer";
       row-gap: 0;
-      column-gap: 10px;
+      column-gap: 6px;
       padding: 8px;
     }
     .wl-home-v2 header.top .top-header-controls {
@@ -825,8 +824,35 @@
     }
     .wl-home-v2 header.top .top-brand-cluster-top {
       grid-area: brand;
-      justify-self: center;
+      justify-self: start;
       align-self: center;
+    }
+    .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.85);
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger:focus-visible {
+      outline: 2px solid var(--wl-light-orange);
+      outline-offset: 2px;
+    }
+    .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger__icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
     }
     .wl-home-v2 header.top .top-brand-cluster-phrase {
       display: block;
@@ -901,44 +927,6 @@
       align-items: center;
       width: 100%;
       margin-top: 4px;
-    }
-    .wl-home-v2 header.top nav.top-nav
-      .top-nav-secondary-row:has(.wl-home-v2-site-search-mobile-trigger) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      text-align: center;
-      min-width: 44px;
-      min-height: 44px;
-      padding: 6px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 500;
-      line-height: 1.15;
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgb(65, 68, 66);
-      box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.85);
-      cursor: pointer;
-      transition: background 0.18s, border-color 0.18s, color 0.15s,
-        transform 0.18s;
-    }
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:hover,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:focus-visible {
-      background: rgba(88, 200, 174, 0.18);
-      border-color: rgb(52, 109, 95);
-      color: #fff;
-      transform: translateY(-1px);
-      outline: none;
     }
     .wl-home-v2 header.top nav.top-nav.top-nav--mobile-open {
       max-height: 140px;
@@ -1020,13 +1008,13 @@
   /* Primary nav drawer: < md — 3-col seamless row; edge-to-edge (100vw breakout). */
   @media (max-width: 767px) {
     .wl-home-v2 header.top .top-brand-cluster-top {
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       width: auto;
-      max-width: calc(100vw - 120px);
+      max-width: calc(100vw - 140px);
     }
     .wl-home-v2 header.top .top-brand-cluster-top .brand {
-      justify-content: center;
+      justify-content: flex-start;
     }
     .wl-home-v2 header.top .top-brand-cluster-top .brand-text .wl {
       align-self: flex-start;
@@ -1073,14 +1061,8 @@
       border-top: 0;
       border-radius: 0;
     }
-    .wl-home-v2 header.top nav.top-nav
-      .top-nav-secondary-row:has(.wl-home-v2-site-search-mobile-trigger) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger {
+    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a {
       flex-direction: row;
       align-items: center;
       justify-content: center;
@@ -1098,9 +1080,7 @@
       padding: 6px;
       font-size: 12px;
     }
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger {
+    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a {
       display: inline-flex;
       padding: 6px;
       min-width: 0;
@@ -1121,11 +1101,9 @@
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a:hover,
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a:focus-visible,
     .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a:hover,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a:focus-visible,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:hover,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:focus-visible {
+    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a:focus-visible {
+      color: #fff;
+      background: rgba(88, 200, 174, 0.18);
       transform: none;
       border-right: 1px solid rgb(49, 51, 49);
     }
@@ -1143,12 +1121,12 @@
       header.top
       nav.top-nav
       .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:hover,
+      > :last-child:hover,
     .wl-home-v2
       header.top
       nav.top-nav
       .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:focus-visible {
+      > :last-child:focus-visible {
       border-right: 0;
     }
     .wl-home-v2
@@ -1201,14 +1179,8 @@
       border-top: 0;
       border-radius: 0;
     }
-    .wl-home-v2 header.top nav.top-nav
-      .top-nav-secondary-row:has(.wl-home-v2-site-search-mobile-trigger) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger {
+    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a {
       flex-direction: row;
       align-items: center;
       justify-content: center;
@@ -1230,9 +1202,7 @@
       padding: 6px;
       font-size: 12px;
     }
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger {
+    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a {
       display: inline-flex;
       padding: 6px;
       min-width: 0;
@@ -1251,11 +1221,7 @@
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a:hover,
     .wl-home-v2 header.top nav.top-nav .top-nav-primary-row > a:focus-visible,
     .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a:hover,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a:focus-visible,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:hover,
-    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row
-      > .wl-home-v2-site-search-mobile-trigger:focus-visible {
+    .wl-home-v2 header.top nav.top-nav .top-nav-secondary-row > a:focus-visible {
       color: #fff;
       background: rgba(88, 200, 174, 0.18);
       transform: none;

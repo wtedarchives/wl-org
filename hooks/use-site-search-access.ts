@@ -3,21 +3,33 @@
 import { useEffect, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
-import { fetchSiteSearchAccess } from "@/lib/site-search"
+import {
+  fetchSiteSearchAccess,
+  isSiteSearchDevUnlocked,
+} from "@/lib/site-search"
 
 /**
  * Whether the signed-in user may see site search (Edge allowlist).
- * Returns false while loading / signed out / not allowlisted.
+ * Under `next dev`, always allowed (client-side search; production unchanged).
  */
 export function useSiteSearchAccess(): {
   allowed: boolean
   loading: boolean
 } {
   const { session } = useAuth()
-  const [allowed, setAllowed] = useState(false)
-  const [loading, setLoading] = useState(Boolean(session?.token))
+  const devUnlocked = isSiteSearchDevUnlocked()
+  const [allowed, setAllowed] = useState(devUnlocked)
+  const [loading, setLoading] = useState(
+    !devUnlocked && Boolean(session?.token),
+  )
 
   useEffect(() => {
+    if (isSiteSearchDevUnlocked()) {
+      setAllowed(true)
+      setLoading(false)
+      return
+    }
+
     const token = session?.token
     if (!token) {
       setAllowed(false)

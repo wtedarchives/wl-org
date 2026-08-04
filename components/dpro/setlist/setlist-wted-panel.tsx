@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
 import { SetlistWtedPanelDrawerChrome } from "@/components/dpro/setlist/setlist-wted-panel-drawer-chrome"
@@ -38,6 +38,11 @@ export interface SetlistWtedPanelProps {
   scrollClassName?: string
   /** When set, "Request another song" calls this instead of `onOpenChange(false)`. */
   onRequestAnother?: () => void
+  /**
+   * When true, submit the selected track once requests are loaded (skip the
+   * manual “Request track” confirmation). Used by the home request modal.
+   */
+  autoRequestOnOpen?: boolean
 }
 
 export function SetlistWtedPanel({
@@ -51,6 +56,7 @@ export function SetlistWtedPanel({
   variant,
   scrollClassName,
   onRequestAnother,
+  autoRequestOnOpen = false,
 }: SetlistWtedPanelProps) {
   const isMultiPairMode = !!(wtedEntryOptions && wtedEntryOptions.length > 1)
   const activeEntry = entry
@@ -90,6 +96,9 @@ export function SetlistWtedPanel({
   const [requestWaitMs, setRequestWaitMs] = useState<number>(0)
   const [suppressAlreadyRequestedBannerRadioId, setSuppressAlreadyRequestedBannerRadioId] =
     useState<string | null>(null)
+  /** One-shot arm for `autoRequestOnOpen` (cleared after submit attempt). */
+  const [autoRequestArmed, setAutoRequestArmed] = useState(false)
+  const autoRequestedRadioIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     setSuppressAlreadyRequestedBannerRadioId(null)
@@ -101,8 +110,17 @@ export function SetlistWtedPanel({
       setSubmitErrorByRadioId({})
       setSubmittingRadioId(null)
       setSuppressAlreadyRequestedBannerRadioId(null)
+      setAutoRequestArmed(false)
+      autoRequestedRadioIdRef.current = null
+      return
     }
-  }, [open])
+    if (autoRequestOnOpen && activeEntry?.radio_id) {
+      const rid = String(activeEntry.radio_id)
+      if (autoRequestedRadioIdRef.current !== rid) {
+        setAutoRequestArmed(true)
+      }
+    }
+  }, [open, autoRequestOnOpen, activeEntry?.radio_id])
 
   useEffect(() => {
     if (lastRequestTime === 0) {
@@ -208,6 +226,30 @@ export function SetlistWtedPanel({
     await submitRequest(activeEntry)
   }, [activeEntry, canRequestThisEntry, submitRequest])
 
+  useEffect(() => {
+    if (!autoRequestArmed || loading || !activeEntry?.radio_id) return
+    const rid = String(activeEntry.radio_id)
+    if (autoRequestedRadioIdRef.current === rid) {
+      setAutoRequestArmed(false)
+      return
+    }
+    if (!canRequestThisEntry) {
+      // Already requested / rate-limited / no slot — leave panel in that state.
+      autoRequestedRadioIdRef.current = rid
+      setAutoRequestArmed(false)
+      return
+    }
+    autoRequestedRadioIdRef.current = rid
+    setAutoRequestArmed(false)
+    void handleRequest()
+  }, [
+    autoRequestArmed,
+    loading,
+    activeEntry,
+    canRequestThisEntry,
+    handleRequest,
+  ])
+
   const handleRequestEntry = useCallback(
     async (targetEntry: SetlistEntry) => {
       await submitRequest(targetEntry)
@@ -280,7 +322,10 @@ export function SetlistWtedPanel({
       releaseArtwork={releaseArtwork}
       artworkLoading={artworkLoading}
       handleRequest={handleRequest}
-      submitting={submittingRadioId === String(activeEntry?.radio_id ?? "")}
+      submitting={
+        autoRequestArmed ||
+        submittingRadioId === String(activeEntry?.radio_id ?? "")
+      }
       submitError={submitError}
       requestWaitSeconds={requestWaitSeconds}
       onOpenChange={onOpenChange}

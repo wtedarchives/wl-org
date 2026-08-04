@@ -40,6 +40,18 @@ type ShowRow = {
   show_subvenue: string | null
   show_venue_location: string | null
   show_detail: string | null
+  show_alert: string | null
+  show_tour: string | null
+  show_iscanon: boolean | null
+  show_canonid: number | null
+  show_wl_link: string | null
+  show_length: string | null
+  show_rarity: number | string | null
+  show_gap: number | string | null
+  show_subvenue_venue: string | null
+  subvenues?: {
+    venues?: { venue_id: string } | { venue_id: string }[] | null
+  } | null
 }
 
 type SongRow = {
@@ -52,6 +64,7 @@ type DiscographyRow = {
   uuid: string
   name: string | null
   displayname: string | null
+  artist: string | null
 }
 
 type SubvenueRow = {
@@ -156,10 +169,34 @@ function isCategory(value: string): value is Category {
 
 function mapShow(row: ShowRow) {
   const detail = (row.show_detail ?? "").trim()
+  const venues = row.subvenues?.venues
+  const venueId = Array.isArray(venues) ? venues[0]?.venue_id : venues?.venue_id
+  const rarity =
+    row.show_rarity != null && String(row.show_rarity).trim() !== "" ?
+      `${Number(row.show_rarity).toFixed(2)}%`
+    : null
+  const gap =
+    row.show_gap != null && String(row.show_gap).trim() !== "" ?
+      Number(row.show_gap).toFixed(2)
+    : null
   return {
     id: row.show_id,
     label: formatShowLabel(row) || mmddyy(row.show_date) || "Show",
     detail: detail.length > 0 ? detail : null,
+    show_date: row.show_date,
+    show_group: row.show_group,
+    show_subvenue: row.show_subvenue,
+    show_venue_location: row.show_venue_location,
+    show_alert: row.show_alert,
+    show_tour: row.show_tour,
+    show_iscanon: row.show_iscanon ?? false,
+    show_canonid: row.show_canonid,
+    show_wl_link: row.show_wl_link,
+    show_length: row.show_length,
+    show_rarity: rarity,
+    show_gap: gap,
+    show_subvenue_venue: row.show_subvenue_venue,
+    venue_id: venueId ?? null,
   }
 }
 
@@ -172,24 +209,32 @@ function mapSong(row: SongRow) {
 }
 
 function mapDisco(row: DiscographyRow) {
+  const artist = (row.artist ?? "").trim()
   return {
     id: row.uuid,
     name: row.name ?? "",
     displayname: row.displayname,
+    artist: artist.length > 0 ? artist : null,
   }
 }
 
-function mapVenue(row: SubvenueRow): { id: string; label: string } | null {
+function mapVenue(row: SubvenueRow): {
+  id: string
+  label: string
+  subvenue: string | null
+  location: string | null
+} | null {
   const v = row.venues
   const venueId = Array.isArray(v) ? v[0]?.venue_id : v?.venue_id
   const key = venueId || row.subvenue_venue || ""
   if (!key) return null
+  const subvenue = (row.subvenue ?? "").trim() || null
+  const location = (row.subvenue_venue_location ?? "").trim() || null
   return {
     id: key,
-    label:
-      joinParts([row.subvenue, row.subvenue_venue_location]) ||
-      row.subvenue ||
-      "Venue",
+    label: joinParts([subvenue, location]) || subvenue || "Venue",
+    subvenue,
+    location,
   }
 }
 
@@ -229,7 +274,28 @@ async function searchShows(
   const { data, error } = await db
     .from("shows")
     .select(
-      "show_id, show_date, show_group, show_subvenue, show_venue_location, show_detail",
+      `
+      show_id,
+      show_date,
+      show_group,
+      show_subvenue,
+      show_venue_location,
+      show_detail,
+      show_alert,
+      show_tour,
+      show_iscanon,
+      show_canonid,
+      show_wl_link,
+      show_length,
+      show_rarity,
+      show_gap,
+      show_subvenue_venue,
+      subvenues:show_subvenue(
+        venues:subvenue_venue(
+          venue_id
+        )
+      )
+      `,
     )
     .or(showOr)
     // Keep null details; drop “Recording Session” shows (years component parity).
@@ -271,7 +337,7 @@ async function searchDiscography(
 ) {
   const { data, error } = await db
     .from("discography")
-    .select("uuid, name, displayname")
+    .select("uuid, name, displayname, artist")
     .ilike("name", ilikePattern(q))
     .order("name", { ascending: true })
     .range(offset, offset + limit)
@@ -308,7 +374,7 @@ async function searchVenues(
   if (error) throw error
 
   const seen = new Set<string>()
-  const unique: Array<{ id: string; label: string }> = []
+  const unique: NonNullable<ReturnType<typeof mapVenue>>[] = []
   for (const row of (data ?? []) as SubvenueRow[]) {
     const mapped = mapVenue(row)
     if (!mapped || seen.has(mapped.id)) continue

@@ -199,6 +199,7 @@ export function WtedRequestSongFlow({
                   fallbackReleaseArtwork={fallbackArtwork}
                   variant="modal"
                   scrollClassName="wted-request-inline-panel-scroll"
+                  autoRequestOnOpen
                 />
               </div>
             : null
