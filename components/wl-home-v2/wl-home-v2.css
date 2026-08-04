@@ -831,9 +831,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 44px;
-      min-height: 44px;
-      padding: 0;
+      gap: 6px;
+      min-width: 34px;
+      min-height: 34px;
+      padding: 0 8px 0 6px;
       border: 0;
       border-radius: 10px;
       background: transparent;
@@ -853,6 +854,21 @@
       width: 22px;
       height: 22px;
       flex-shrink: 0;
+    }
+    .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger__label {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    @media (max-width: 539px) {
+      .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger {
+        gap: 0;
+        padding: 0;
+      }
+      .wl-home-v2 header.top .wl-home-v2-site-search-icon-trigger__label {
+        display: none;
+      }
     }
     .wl-home-v2 header.top .top-brand-cluster-phrase {
       display: block;

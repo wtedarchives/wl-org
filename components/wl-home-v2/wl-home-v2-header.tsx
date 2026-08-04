@@ -341,6 +341,9 @@ export function WlHomeV2Header({
                       weight="regular"
                       aria-hidden
                     />
+                    <span className="wl-home-v2-site-search-icon-trigger__label">
+                      Search
+                    </span>
                   </button>
                 : null}
                 <div className="top-user-menu">
