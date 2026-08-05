@@ -20,7 +20,6 @@ import { usePathname } from "next/navigation"
 
 import { RadioHomeSlot, RadioMobileSlot } from "@/components/persistent-radio"
 import { useIsBelowXl } from "@/hooks/use-mobile"
-import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 
 import { WlHomeV2ArchiveSubnavContent } from "./wl-home-v2-archive-subnav"
 import {
@@ -82,7 +81,6 @@ export function WlHomeV2Header({
 }) {
   const isBelowXl = useIsBelowXl()
   const pathname = usePathname()
-  const { allowed: siteSearchAllowed } = useSiteSearchAccess()
   const openSiteSearchFromShell = useWlHomeV2OpenSiteSearch()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   /** Stable id (not `useId`) — see `WL_HOME_V2_TOP_NAV_PANEL_ID` in constants. */
@@ -325,25 +323,23 @@ export function WlHomeV2Header({
               </nav>
 
               <div className="top-user-cluster">
-                {siteSearchAllowed ?
-                  <button
-                    type="button"
-                    className="wl-home-v2-site-search-icon-trigger"
-                    aria-haspopup="dialog"
-                    aria-label="Search archive"
-                    onClick={openSiteSearch}
-                  >
-                    <MagnifyingGlass
-                      className="wl-home-v2-site-search-icon-trigger__icon"
-                      size={22}
-                      weight="regular"
-                      aria-hidden
-                    />
-                    <span className="wl-home-v2-site-search-icon-trigger__label">
-                      Search
-                    </span>
-                  </button>
-                : null}
+                <button
+                  type="button"
+                  className="wl-home-v2-site-search-icon-trigger"
+                  aria-haspopup="dialog"
+                  aria-label="Search archive"
+                  onClick={openSiteSearch}
+                >
+                  <MagnifyingGlass
+                    className="wl-home-v2-site-search-icon-trigger__icon"
+                    size={22}
+                    weight="regular"
+                    aria-hidden
+                  />
+                  <span className="wl-home-v2-site-search-icon-trigger__label">
+                    Search
+                  </span>
+                </button>
                 <div className="top-user-menu">
                   <WlHomeV2UserMenu
                     onOpenLogin={onOpenLogin}
@@ -353,7 +349,7 @@ export function WlHomeV2Header({
                 </div>
               </div>
             </div>
-            {siteSearchAllowed ? <WlHomeV2SiteSearch /> : null}
+            <WlHomeV2SiteSearch />
           </div>
         </div>
       </header>

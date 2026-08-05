@@ -17,7 +17,7 @@ import {
 
 import { WlHomeV2SiteSearchResults } from "./wl-home-v2-site-search-results"
 
-export function useSiteSearchForm(accessToken: string | null | undefined) {
+export function useSiteSearchForm() {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SiteSearchResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -33,41 +33,31 @@ export function useSiteSearchForm(accessToken: string | null | undefined) {
     setLoading(false)
   }, [])
 
-  const submit = useCallback(
-    async (raw: string) => {
-      const trimmed = raw.trim()
-      setPanelOpen(true)
-      setHint(null)
-      setError(null)
+  const submit = useCallback(async (raw: string) => {
+    const trimmed = raw.trim()
+    setPanelOpen(true)
+    setHint(null)
+    setError(null)
 
-      if (!accessToken && process.env.NODE_ENV !== "development") {
-        setResults(null)
-        setLoading(false)
-        setError("You must be signed in to search.")
-        return
-      }
-
-      if (trimmed.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
-        setResults(null)
-        setLoading(false)
-        setHint(`Enter at least ${SITE_SEARCH_MIN_QUERY_LENGTH} characters.`)
-        return
-      }
-
-      setLoading(true)
+    if (trimmed.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
       setResults(null)
-      try {
-        const data = await fetchSiteSearch(accessToken, trimmed)
-        setResults(data)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Search failed")
-        setResults(null)
-      } finally {
-        setLoading(false)
-      }
-    },
-    [accessToken],
-  )
+      setLoading(false)
+      setHint(`Enter at least ${SITE_SEARCH_MIN_QUERY_LENGTH} characters.`)
+      return
+    }
+
+    setLoading(true)
+    setResults(null)
+    try {
+      const data = await fetchSiteSearch(trimmed)
+      setResults(data)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Search failed")
+      setResults(null)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   return {
     query,

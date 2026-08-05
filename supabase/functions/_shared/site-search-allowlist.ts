@@ -1,6 +1,9 @@
 /**
  * Site-search beta allowlist — profile IDs from Edge secret `SITE_SEARCH_ALLOWLIST`
  * (comma-separated UUIDs). Never ship this list in the Next.js client.
+ *
+ * Used by `GET …/site-search?check=1` for future gated features. Public archive
+ * search does **not** require allowlist membership.
  */
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 

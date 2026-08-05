@@ -25,7 +25,6 @@ import {
 } from "@/lib/archive-hub-content"
 import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
-import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { archiveV2NavHref } from "@/lib/archive-v2-nav-href"
@@ -155,7 +154,6 @@ export function WlHomeV2ArchiveModal({
 }: WlHomeV2ArchiveModalProps) {
   const descId = useId()
   const myStatsProfile = useUserProfilePicture()
-  const { allowed: siteSearchAllowed } = useSiteSearchAccess()
   useWlHomeV2ScrollLock(open)
 
   return (
@@ -184,7 +182,7 @@ export function WlHomeV2ArchiveModal({
               </p>
             </div>
             <div className="modal-request-head-trailing">
-              {siteSearchAllowed && onOpenSiteSearch ?
+              {onOpenSiteSearch ?
                 <button
                   type="button"
                   className="wl-home-v2-site-search-icon-trigger wl-home-v2-site-search-icon-trigger--labeled"

@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 
-import { useAuth } from "@/components/auth-context"
-
 import {
   useSiteSearchForm,
   WlHomeV2SiteSearchField,
@@ -16,7 +14,6 @@ const POPOVER_EXIT_MS = 200
  * Desktop header search: compact field under the right nav + results popover.
  */
 export function WlHomeV2SiteSearch() {
-  const { session } = useAuth()
   const {
     query,
     setQuery,
@@ -28,7 +25,7 @@ export function WlHomeV2SiteSearch() {
     setPanelOpen,
     submit,
     resetPanel,
-  } = useSiteSearchForm(session?.token)
+  } = useSiteSearchForm()
 
   const rootRef = useRef<HTMLDivElement>(null)
   const [renderPanel, setRenderPanel] = useState(false)

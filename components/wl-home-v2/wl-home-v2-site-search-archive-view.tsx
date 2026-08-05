@@ -14,8 +14,6 @@ import {
   siteSearchShowsSupportTourTable,
   WlHomeV2SiteSearchShowsTable,
 } from "@/components/wl-home-v2/wl-home-v2-site-search-shows-table"
-import { useAuth } from "@/components/auth-context"
-import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { getDiscographyArchiveUrl } from "@/lib/discography-archive-url"
 import { getPersonnelArchiveUrl } from "@/lib/personnel-archive-url"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
@@ -23,7 +21,6 @@ import { getSiteSearchArchiveUrl } from "@/lib/site-search-archive-url"
 import {
   fetchSiteSearchCategoryAll,
   isSiteSearchCategory,
-  isSiteSearchDevUnlocked,
   SITE_SEARCH_CATEGORIES,
   SITE_SEARCH_CATEGORY_LABELS,
   SITE_SEARCH_MIN_QUERY_LENGTH,
@@ -125,8 +122,6 @@ function HitContent({
 }
 
 export function WlHomeV2SiteSearchArchiveView() {
-  const { session } = useAuth()
-  const { allowed, loading: accessLoading } = useSiteSearchAccess()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -145,22 +140,7 @@ export function WlHomeV2SiteSearchArchiveView() {
     setDraftQ(qParam)
   }, [qParam])
 
-  useEffect(() => {
-    if (accessLoading) return
-    if (!allowed) {
-      router.replace("/archive")
-    }
-  }, [accessLoading, allowed, router])
-
   const loadInitial = useCallback(async () => {
-    const canFetch =
-      allowed && (isSiteSearchDevUnlocked() || Boolean(session?.token))
-    if (!canFetch) {
-      setItems([])
-      setLoading(false)
-      return
-    }
-
     if (qParam.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
       setItems([])
       setLoading(false)
@@ -176,7 +156,6 @@ export function WlHomeV2SiteSearchArchiveView() {
     setError(null)
     try {
       const all = await fetchSiteSearchCategoryAll({
-        accessToken: session?.token,
         q: qParam,
         category,
       })
@@ -187,7 +166,7 @@ export function WlHomeV2SiteSearchArchiveView() {
     } finally {
       setLoading(false)
     }
-  }, [qParam, category, session?.token, allowed])
+  }, [qParam, category])
 
   useEffect(() => {
     void loadInitial()
@@ -201,10 +180,6 @@ export function WlHomeV2SiteSearchArchiveView() {
 
   const onCategoryChange = (next: SiteSearchCategory) => {
     router.push(getSiteSearchArchiveUrl(qParam, next))
-  }
-
-  if (accessLoading || !allowed) {
-    return <WlHomeV2PageLoading message="Loading search…" />
   }
 
   return (

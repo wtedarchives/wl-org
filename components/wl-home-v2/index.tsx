@@ -14,7 +14,6 @@ import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
 import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
-import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import { cn } from "@/lib/utils"
 
@@ -48,7 +47,6 @@ export function WlHomeV2({
   const { session } = useAuth()
   const { showAdminUi } = useSetlistAdmin(session, undefined, undefined)
   const showRadioScheduleShare = showAdminUi
-  const { allowed: siteSearchAllowed } = useSiteSearchAccess()
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -292,7 +290,6 @@ export function WlHomeV2({
         siteSearchOpen={siteSearchOpen}
         setSiteSearchOpen={setSiteSearchOpen}
         siteSearchHeadingId={siteSearchHeadingId}
-        siteSearchAllowed={siteSearchAllowed}
         radioOpen={radioOpen}
         setRadioOpen={setRadioOpen}
         radioHeadingId={radioHeadingId}

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react"
 
-import { useAuth } from "@/components/auth-context"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
@@ -24,7 +23,6 @@ export function WlHomeV2SiteSearchModal({
   headingId,
 }: WlHomeV2SiteSearchModalProps) {
   useWlHomeV2ScrollLock(open)
-  const { session } = useAuth()
 
   const {
     query,
@@ -35,7 +33,7 @@ export function WlHomeV2SiteSearchModal({
     hint,
     submit,
     resetPanel,
-  } = useSiteSearchForm(session?.token)
+  } = useSiteSearchForm()
 
   useEffect(() => {
     if (!open) {

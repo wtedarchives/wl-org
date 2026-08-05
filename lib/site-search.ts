@@ -8,7 +8,7 @@ import {
 export const SITE_SEARCH_MIN_QUERY_LENGTH = 2
 export const SITE_SEARCH_PAGE_LIMIT = 40
 
-/** True only under `next dev` — unlocks UI + client-side search without auth. */
+/** True only under `next dev` — uses client-side search mock instead of Edge. */
 export function isSiteSearchDevUnlocked(): boolean {
   return process.env.NODE_ENV === "development"
 }
@@ -153,12 +153,20 @@ function functionsBase(): string {
   return base
 }
 
-function siteSearchHeaders(accessToken: string): HeadersInit {
+/** Anon gateway headers — public search (no Wysteria JWT). */
+function siteSearchPublicHeaders(): HeadersInit {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!anon) throw new Error("Missing site configuration")
   return {
     Authorization: `Bearer ${anon}`,
     apikey: anon,
+  }
+}
+
+/** Anon + Wysteria JWT — allowlist probe (`?check=1`) for future gated features. */
+function siteSearchAllowlistHeaders(accessToken: string): HeadersInit {
+  return {
+    ...siteSearchPublicHeaders(),
     [WYSTERIA_AUTH_HEADER]: `Bearer ${accessToken}`,
   }
 }
@@ -173,29 +181,27 @@ function parseHasMore(raw: unknown): SiteSearchHasMore {
   return base
 }
 
-/** Ask Edge whether the current session may use site search (boolean only). */
+/**
+ * Ask Edge whether the current Wysteria session is on `SITE_SEARCH_ALLOWLIST`
+ * (`?check=1`). Public archive search does not require this — keep for future
+ * gated features via `useSiteSearchAccess`.
+ */
 export async function fetchSiteSearchAccess(
   accessToken: string | null | undefined,
 ): Promise<boolean> {
   if (isSiteSearchDevUnlocked()) return true
   if (!accessToken) return false
   const res = await fetch(`${functionsBase()}/site-search?check=1`, {
-    headers: siteSearchHeaders(accessToken),
+    headers: siteSearchAllowlistHeaders(accessToken),
   })
   if (!res.ok) return false
   const data = (await res.json().catch(() => ({}))) as { allowed?: boolean }
   return data.allowed === true
 }
 
-export async function fetchSiteSearch(
-  accessToken: string | null | undefined,
-  q: string,
-): Promise<SiteSearchResponse> {
+export async function fetchSiteSearch(q: string): Promise<SiteSearchResponse> {
   if (isSiteSearchDevUnlocked()) {
     return fetchSiteSearchDev(q)
-  }
-  if (!accessToken) {
-    throw new Error("You must be signed in to search.")
   }
 
   const trimmed = q.trim()
@@ -207,7 +213,7 @@ export async function fetchSiteSearch(
 
   const res = await fetch(
     `${functionsBase()}/site-search?q=${encodeURIComponent(trimmed)}`,
-    { headers: siteSearchHeaders(accessToken) },
+    { headers: siteSearchPublicHeaders() },
   )
 
   const data = (await res.json().catch(() => ({}))) as SiteSearchResponse & {
@@ -233,7 +239,6 @@ export async function fetchSiteSearch(
 }
 
 export async function fetchSiteSearchCategory(opts: {
-  accessToken?: string | null
   q: string
   category: SiteSearchCategory
   offset?: number
@@ -241,9 +246,6 @@ export async function fetchSiteSearchCategory(opts: {
 }): Promise<SiteSearchCategoryResponse> {
   if (isSiteSearchDevUnlocked()) {
     return fetchSiteSearchCategoryDev(opts)
-  }
-  if (!opts.accessToken) {
-    throw new Error("You must be signed in to search.")
   }
 
   const trimmed = opts.q.trim()
@@ -267,7 +269,7 @@ export async function fetchSiteSearchCategory(opts: {
   })
 
   const res = await fetch(`${functionsBase()}/site-search?${params}`, {
-    headers: siteSearchHeaders(opts.accessToken),
+    headers: siteSearchPublicHeaders(),
   })
 
   const data = (await res.json().catch(() => ({}))) as SiteSearchCategoryResponse & {
@@ -295,7 +297,6 @@ const SITE_SEARCH_ALL_MAX_PAGES = 50
 
 /** Fetch every hit for a category (pages until exhausted). Used by /archive/search. */
 export async function fetchSiteSearchCategoryAll(opts: {
-  accessToken?: string | null
   q: string
   category: SiteSearchCategory
 }): Promise<SiteSearchHit[]> {
@@ -303,7 +304,6 @@ export async function fetchSiteSearchCategoryAll(opts: {
   let offset = 0
   for (let page = 0; page < SITE_SEARCH_ALL_MAX_PAGES; page++) {
     const data = await fetchSiteSearchCategory({
-      accessToken: opts.accessToken,
       q: opts.q,
       category: opts.category,
       offset,

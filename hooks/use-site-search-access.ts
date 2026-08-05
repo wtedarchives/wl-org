@@ -9,8 +9,11 @@ import {
 } from "@/lib/site-search"
 
 /**
- * Whether the signed-in user may see site search (Edge allowlist).
- * Under `next dev`, always allowed (client-side search; production unchanged).
+ * Whether the signed-in user is on `SITE_SEARCH_ALLOWLIST` (Edge `?check=1`).
+ *
+ * Public archive search is open to all visitors and does **not** use this hook.
+ * Keep for future gated features that should only be testable by allowlisted users.
+ * Under `next dev`, always allowed.
  */
 export function useSiteSearchAccess(): {
   allowed: boolean

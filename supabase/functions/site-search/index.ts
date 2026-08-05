@@ -3,9 +3,14 @@
  *
  * GET /functions/v1/site-search?q=...
  *   Preview across all categories (8 each) + hasMore flags.
+ *   Open to all visitors (anon gateway auth only).
  *
  * GET /functions/v1/site-search?q=...&category=shows&offset=0&limit=40
  *   Single-category page (paginated).
+ *
+ * GET /functions/v1/site-search?check=1
+ *   Allowlist probe for future gated features (Wysteria JWT + SITE_SEARCH_ALLOWLIST).
+ *   Not required for search itself.
  *
  * Gateway still requires Authorization / apikey (anon). This handler uses the
  * service role for DB reads.
@@ -456,15 +461,15 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Method not allowed" }, 405)
   }
 
-  const caller = await resolveSiteSearchCaller(req)
-  if (!caller.ok) {
-    return jsonResponse({ error: caller.error }, caller.status)
-  }
-
   const url = new URL(req.url)
 
-  // Access probe — returns only a boolean (never the allowlist).
+  // Allowlist probe for future gated features — not required for search.
+  // Returns only a boolean (never the allowlist).
   if (url.searchParams.get("check") === "1") {
+    const caller = await resolveSiteSearchCaller(req)
+    if (!caller.ok) {
+      return jsonResponse({ allowed: false }, caller.status === 500 ? 500 : 200)
+    }
     return jsonResponse({ allowed: true })
   }
 
