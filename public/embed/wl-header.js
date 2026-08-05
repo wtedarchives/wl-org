@@ -90,6 +90,9 @@
   var SITE_SEARCH_MODAL_EXIT_MS = 200;
   var SITE_SEARCH_IDLE =
     "Press enter to search WTED Archives.";
+  /** Document-body portal — escapes Discourse overflow clipping. */
+  var SITE_SEARCH_PORTAL_Z = "2147483000";
+  var SITE_SEARCH_PORTAL_STYLE_ID = "wl-header-site-search-portal-css";
   var ICON_MAGNIFYING_GLASS_SM =
     '<svg class="wl-site-search-icon" viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true">' +
     '<path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/>' +
@@ -102,6 +105,9 @@
   var STYLES = [
     ":host {",
     "  display: block;",
+    "  position: relative;",
+    "  z-index: 10050;",
+    "  overflow: visible;",
     "  --wl-deep-green: #65b3a0;",
     "  --wl-light-orange: oklch(0.82 0.10 55);",
     "  --wl-white: #ffffff;",
@@ -117,6 +123,7 @@
 
     "header.top {",
     "  position: relative; z-index: 5;",
+    "  overflow: visible;",
     "  display: grid;",
     "  grid-template-columns: minmax(0, 360px) minmax(0, 1fr) minmax(0, 360px);",
     "  grid-template-rows: auto;",
@@ -144,6 +151,7 @@
     "  min-width: 0;",
     "  max-width: 360px;",
     "  width: 100%;",
+    "  overflow: visible;",
     "}",
     "header.top .top-header-controls-stack {",
     "  display: flex;",
@@ -153,6 +161,7 @@
     "  width: max-content;",
     "  max-width: 100%;",
     "  min-width: 0;",
+    "  overflow: visible;",
     "}",
     "header.top .top-header-controls-top-row,",
     "header.top #" + TOP_NAV_PANEL_ID + ".top-nav,",
@@ -401,6 +410,7 @@
     "    z-index: 2;",
     "    width: 100%;",
     "    margin-top: 4px;",
+    "    overflow: visible;",
     "  }",
     "  header.top .top-header-controls nav.top-nav .top-nav-primary-row > a {",
     "    color: #000000;",
@@ -919,31 +929,9 @@
     "  min-width: 32px;",
     "  height: 24px;",
     "}",
-    ".wl-site-search-popover {",
-    "  position: absolute;",
-    "  top: calc(100% + 6px);",
-    "  right: 0;",
-    "  left: 0;",
-    "  z-index: 40;",
-    "  max-height: min(70vh, 420px);",
-    "  overflow-x: hidden;",
-    "  overflow-y: auto;",
-    "  -webkit-overflow-scrolling: touch;",
-    "  padding: 10px 10px 12px;",
-    "  border: 1px solid rgb(65, 68, 66);",
-    "  border-radius: 10px;",
-    "  background: rgb(22, 26, 24);",
-    "  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.85);",
-    "  opacity: 0;",
-    "  transform: translateY(-4px);",
-    "  pointer-events: none;",
-    "  transition: opacity 0.2s ease-out, transform 0.2s ease-out;",
-    "}",
-    ".wl-site-search-popover--open {",
-    "  opacity: 1;",
-    "  transform: translateY(0);",
-    "  pointer-events: auto;",
-    "}",
+    /* In-shadow popover unused on desktop — results portal to document.body
+       so Discourse overflow/stacking cannot clip them. Kept for parity/CSS reuse. */
+    ".wl-site-search-popover { display: none; }",
     ".wl-site-search-input {",
     "  flex: 1 1 auto;",
     "  min-width: 0;",
@@ -1172,13 +1160,140 @@
         ICON_MAGNIFYING_GLASS_SM +
         "</button>",
       "</form>",
-      '<div class="wl-site-search-popover" hidden role="region" aria-label="Search results">',
-      '<div class="wl-site-search-results">',
-      '<p class="wl-site-search-status">' + SITE_SEARCH_IDLE + "</p>",
-      "</div>",
-      "</div>",
       "</div>",
     ].join("");
+  }
+
+  function ensureDesktopSearchPortalStyles() {
+    if (document.getElementById(SITE_SEARCH_PORTAL_STYLE_ID)) return;
+    var style = document.createElement("style");
+    style.id = SITE_SEARCH_PORTAL_STYLE_ID;
+    style.textContent = [
+      ".wl-site-search-portal-popover {",
+      "  box-sizing: border-box;",
+      "  position: fixed;",
+      "  z-index: " + SITE_SEARCH_PORTAL_Z + ";",
+      "  max-height: min(70vh, 420px);",
+      "  overflow-x: hidden;",
+      "  overflow-y: auto;",
+      "  -webkit-overflow-scrolling: touch;",
+      "  padding: 10px 10px 12px;",
+      "  border: 1px solid rgb(65, 68, 66);",
+      "  border-radius: 10px;",
+      "  background: rgb(22, 26, 24);",
+      "  color: #fff;",
+      '  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;',
+      "  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.85);",
+      "  opacity: 0;",
+      "  transform: translateY(-4px);",
+      "  pointer-events: none;",
+      "  transition: opacity 0.2s ease-out, transform 0.2s ease-out;",
+      "}",
+      ".wl-site-search-portal-popover.wl-site-search-portal-popover--open {",
+      "  opacity: 1;",
+      "  transform: translateY(0);",
+      "  pointer-events: auto;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-results {",
+      "  min-height: 0;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-status {",
+      "  margin: 0;",
+      "  padding: 6px 4px;",
+      "  font-size: 12px;",
+      "  line-height: 1.35;",
+      "  color: rgba(255,255,255,0.65);",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-status--error {",
+      "  color: rgb(255, 170, 129);",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-sections {",
+      "  display: flex;",
+      "  flex-direction: column;",
+      "  gap: 12px;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-section-title {",
+      "  margin: 0 0 2px;",
+      "  padding: 0 4px;",
+      "  font-size: 10px;",
+      "  font-weight: 700;",
+      "  letter-spacing: 0.08em;",
+      "  text-transform: uppercase;",
+      "  color: rgba(255,255,255,0.45);",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-list {",
+      "  list-style: none;",
+      "  margin: 0;",
+      "  padding: 0;",
+      "  display: flex;",
+      "  flex-direction: column;",
+      "  gap: 1px;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-hit {",
+      "  display: flex;",
+      "  flex-direction: column;",
+      "  gap: 1px;",
+      "  min-width: 0;",
+      "  padding: 4px 8px;",
+      "  border-radius: 8px;",
+      "  text-decoration: none;",
+      "  color: rgba(255,255,255,0.9);",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-hit:hover,",
+      ".wl-site-search-portal-popover .wl-site-search-hit:focus-visible {",
+      "  background: rgba(255,255,255,0.08);",
+      "  outline: none;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-hit-label {",
+      "  font-size: 12px;",
+      "  font-weight: 550;",
+      "  line-height: 1.1;",
+      "  word-break: break-word;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-hit-detail {",
+      "  font-size: 11px;",
+      "  line-height: 1.1;",
+      "  color: rgba(255,255,255,0.55);",
+      "  word-break: break-word;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-see-more {",
+      "  display: flex;",
+      "  align-items: center;",
+      "  justify-content: center;",
+      "  width: 100%;",
+      "  box-sizing: border-box;",
+      "  margin-top: 2px;",
+      "  padding: 4px;",
+      "  font-size: 12px;",
+      "  font-weight: 600;",
+      "  text-align: center;",
+      "  color: rgb(255, 170, 129);",
+      "  text-decoration: none;",
+      "  border-radius: 8px;",
+      "}",
+      ".wl-site-search-portal-popover .wl-site-search-see-more:hover {",
+      "  background: rgba(255, 170, 129, 0.12);",
+      "}",
+      "@media (prefers-reduced-motion: reduce) {",
+      "  .wl-site-search-portal-popover { transition: none; }",
+      "}",
+    ].join("\n");
+    document.head.appendChild(style);
+  }
+
+  function createDesktopSearchPortal() {
+    ensureDesktopSearchPortalStyles();
+    var el = document.createElement("div");
+    el.className = "wl-site-search-portal-popover";
+    el.setAttribute("role", "region");
+    el.setAttribute("aria-label", "Search results");
+    el.hidden = true;
+    el.innerHTML =
+      '<div class="wl-site-search-results"><p class="wl-site-search-status">' +
+      SITE_SEARCH_IDLE +
+      "</p></div>";
+    document.body.appendChild(el);
+    return el;
   }
 
   // --------------------------------------------------------------------------
@@ -1330,10 +1445,10 @@
     this._desktopRoot = sr.querySelector(".wl-site-search--desktop");
     this._desktopForm = sr.querySelector(".wl-site-search-field--desktop");
     this._desktopInput = sr.querySelector("#wl-site-search-desktop-input");
-    this._desktopPopover = sr.querySelector(".wl-site-search-popover");
-    this._desktopResults = this._desktopPopover
-      ? this._desktopPopover.querySelector(".wl-site-search-results")
-      : null;
+    this._desktopPopover = createDesktopSearchPortal();
+    this._desktopResults = this._desktopPopover.querySelector(
+      ".wl-site-search-results"
+    );
     this._desktopPopoverOpen = false;
     this._desktopPopoverTimer = null;
 
@@ -1384,12 +1499,17 @@
       );
     };
     this._onDesktopPointerDown = function (e) {
-      if (!self._desktopPopoverOpen || !self._desktopRoot) return;
+      if (!self._desktopPopoverOpen) return;
       var path = e.composedPath ? e.composedPath() : [];
       for (var i = 0; i < path.length; i++) {
-        if (path[i] === self._desktopRoot) return;
+        if (path[i] === self._desktopRoot || path[i] === self._desktopPopover) {
+          return;
+        }
       }
       self._closeDesktopPopover();
+    };
+    this._onDesktopReposition = function () {
+      if (self._desktopPopoverOpen) self._positionDesktopPopover();
     };
 
     this._toggle.addEventListener("click", this._onToggleClick);
@@ -1415,6 +1535,8 @@
     }
     window.addEventListener("keydown", this._onKey);
     document.addEventListener("mousedown", this._onDesktopPointerDown);
+    window.addEventListener("resize", this._onDesktopReposition);
+    window.addEventListener("scroll", this._onDesktopReposition, true);
 
     this._currentPhrase = TICKER_PHRASES[0] || "";
     if (this._phraseEl) {
@@ -1456,6 +1578,10 @@
     if (this._onDesktopPointerDown) {
       document.removeEventListener("mousedown", this._onDesktopPointerDown);
     }
+    if (this._onDesktopReposition) {
+      window.removeEventListener("resize", this._onDesktopReposition);
+      window.removeEventListener("scroll", this._onDesktopReposition, true);
+    }
     if (this._phraseIntervalId) {
       window.clearInterval(this._phraseIntervalId);
     }
@@ -1464,6 +1590,9 @@
     }
     if (this._desktopPopoverTimer) {
       window.clearTimeout(this._desktopPopoverTimer);
+    }
+    if (this._desktopPopover && this._desktopPopover.parentNode) {
+      this._desktopPopover.parentNode.removeChild(this._desktopPopover);
     }
     if (this._searchOpen) {
       document.body.style.overflow = "";
@@ -1486,6 +1615,20 @@
     return mode === "desktop" ? this._desktopResults : this._modalResults;
   };
 
+  WlHeader.prototype._positionDesktopPopover = function () {
+    if (!this._desktopPopover || !this._desktopForm) return;
+    var rect = this._desktopForm.getBoundingClientRect();
+    var pop = this._desktopPopover;
+    var width = Math.max(rect.width, 240);
+    var left = rect.left;
+    var maxLeft = window.innerWidth - width - 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    if (left < 8) left = 8;
+    pop.style.top = Math.round(rect.bottom + 6) + "px";
+    pop.style.left = Math.round(left) + "px";
+    pop.style.width = Math.round(width) + "px";
+  };
+
   WlHeader.prototype._openDesktopPopover = function () {
     var self = this;
     if (!this._desktopPopover) return;
@@ -1494,9 +1637,10 @@
       this._desktopPopoverTimer = null;
     }
     this._desktopPopoverOpen = true;
+    this._positionDesktopPopover();
     this._desktopPopover.hidden = false;
     requestAnimationFrame(function () {
-      self._desktopPopover.classList.add("wl-site-search-popover--open");
+      self._desktopPopover.classList.add("wl-site-search-portal-popover--open");
     });
   };
 
@@ -1504,7 +1648,7 @@
     var self = this;
     if (!this._desktopPopover || !this._desktopPopoverOpen) return;
     this._desktopPopoverOpen = false;
-    this._desktopPopover.classList.remove("wl-site-search-popover--open");
+    this._desktopPopover.classList.remove("wl-site-search-portal-popover--open");
     this._desktopPopoverTimer = window.setTimeout(function () {
       self._desktopPopover.hidden = true;
       if (self._desktopResults) {
