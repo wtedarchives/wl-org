@@ -90,6 +90,11 @@
   var SITE_SEARCH_MODAL_EXIT_MS = 200;
   var SITE_SEARCH_IDLE =
     "Press enter to search WTED Archives.";
+  /**
+   * Embed archive search UI — set true to show desktop field + mobile trigger.
+   * Implementation below is kept; currently hidden while editing.
+   */
+  var SITE_SEARCH_UI_ENABLED = false;
   /** Document-body portal — escapes Discourse overflow clipping. */
   var SITE_SEARCH_PORTAL_Z = "2147483000";
   var SITE_SEARCH_PORTAL_STYLE_ID = "wl-header-site-search-portal-css";
@@ -1378,36 +1383,42 @@
       "</div>",
       "</nav>",
       "</div>",
-      desktopSearchHtml(),
+      SITE_SEARCH_UI_ENABLED ? desktopSearchHtml() : "",
       "</div>",
       "</div>",
 
-      '<div class="top-user-cluster top-user-cluster--mobile">',
-      searchTriggerHtml(),
-      "</div>",
+      SITE_SEARCH_UI_ENABLED
+        ? '<div class="top-user-cluster top-user-cluster--mobile">' +
+          searchTriggerHtml() +
+          "</div>"
+        : "",
 
       "</header>",
 
-      '<div class="wl-site-search-backdrop" hidden>',
-      '<div class="wl-site-search-modal" role="dialog" aria-modal="true" aria-labelledby="wl-site-search-heading">',
-      '<div class="wl-site-search-modal-head">',
-      '<h3 id="wl-site-search-heading">Search</h3>',
-      '<button type="button" class="wl-site-search-close" aria-label="Close">×</button>',
-      "</div>",
-      '<div class="wl-site-search-modal-body">',
-      '<form class="wl-site-search-field wl-site-search-field--modal" role="search">',
-      '<label class="sr-only" for="wl-site-search-input" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Search WTED Archives</label>',
-      '<input id="wl-site-search-input" class="wl-site-search-input" type="search" name="q" placeholder="Search WTED Archives..." autocomplete="off" autocorrect="off" spellcheck="false">',
-      '<button type="submit" class="wl-site-search-submit" aria-label="Search">' +
-        ICON_MAGNIFYING_GLASS +
-        "</button>",
-      "</form>",
-      '<div class="wl-site-search-results wl-site-search-results--modal">',
-      '<p class="wl-site-search-status">' + SITE_SEARCH_IDLE + "</p>",
-      "</div>",
-      "</div>",
-      "</div>",
-      "</div>",
+      SITE_SEARCH_UI_ENABLED
+        ? [
+            '<div class="wl-site-search-backdrop" hidden>',
+            '<div class="wl-site-search-modal" role="dialog" aria-modal="true" aria-labelledby="wl-site-search-heading">',
+            '<div class="wl-site-search-modal-head">',
+            '<h3 id="wl-site-search-heading">Search</h3>',
+            '<button type="button" class="wl-site-search-close" aria-label="Close">×</button>',
+            "</div>",
+            '<div class="wl-site-search-modal-body">',
+            '<form class="wl-site-search-field wl-site-search-field--modal" role="search">',
+            '<label class="sr-only" for="wl-site-search-input" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Search WTED Archives</label>',
+            '<input id="wl-site-search-input" class="wl-site-search-input" type="search" name="q" placeholder="Search WTED Archives..." autocomplete="off" autocorrect="off" spellcheck="false">',
+            '<button type="submit" class="wl-site-search-submit" aria-label="Search">' +
+              ICON_MAGNIFYING_GLASS +
+              "</button>",
+            "</form>",
+            '<div class="wl-site-search-results wl-site-search-results--modal">',
+            '<p class="wl-site-search-status">' + SITE_SEARCH_IDLE + "</p>",
+            "</div>",
+            "</div>",
+            "</div>",
+            "</div>",
+          ].join("")
+        : "",
     ].join("");
   }
 
@@ -1445,10 +1456,12 @@
     this._desktopRoot = sr.querySelector(".wl-site-search--desktop");
     this._desktopForm = sr.querySelector(".wl-site-search-field--desktop");
     this._desktopInput = sr.querySelector("#wl-site-search-desktop-input");
-    this._desktopPopover = createDesktopSearchPortal();
-    this._desktopResults = this._desktopPopover.querySelector(
-      ".wl-site-search-results"
-    );
+    this._desktopPopover = SITE_SEARCH_UI_ENABLED
+      ? createDesktopSearchPortal()
+      : null;
+    this._desktopResults = this._desktopPopover
+      ? this._desktopPopover.querySelector(".wl-site-search-results")
+      : null;
     this._desktopPopoverOpen = false;
     this._desktopPopoverTimer = null;
 
