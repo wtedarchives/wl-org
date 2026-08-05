@@ -85,7 +85,7 @@ export function WlHomeV2SiteSearchResults({
   if (!results) {
     return (
       <p className="wl-home-v2-site-search-status">
-        Press Enter to search the archive.
+        Press enter to search WTED Archives.
       </p>
     )
   }

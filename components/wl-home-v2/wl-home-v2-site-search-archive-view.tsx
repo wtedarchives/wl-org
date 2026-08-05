@@ -193,14 +193,14 @@ export function WlHomeV2SiteSearchArchiveView() {
             role="search"
           >
             <label htmlFor="archive-site-search-q" className="sr-only">
-              Search WTED
+              Search WTED Archives
             </label>
             <input
               id="archive-site-search-q"
               type="search"
               value={draftQ}
               onChange={(e) => setDraftQ(e.target.value)}
-              placeholder="Search WTED..."
+              placeholder="Search WTED Archives..."
               className="wl-home-v2-site-search-input"
               autoComplete="off"
             />

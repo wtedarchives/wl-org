@@ -91,7 +91,7 @@ export function WlHomeV2SiteSearchField({
   onQueryChange,
   onSubmit,
   autoFocus,
-  placeholder = "Search WTED...",
+  placeholder = "Search WTED Archives...",
   className,
 }: WlHomeV2SiteSearchFieldProps) {
   const generatedId = useId()
@@ -112,7 +112,7 @@ export function WlHomeV2SiteSearchField({
       role="search"
     >
       <label htmlFor={id} className="sr-only">
-        Search WTED
+        Search WTED Archives
       </label>
       <input
         id={id}

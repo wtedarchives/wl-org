@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/generate-site-search-proxy.cjs",
     "dev": "next dev",
+    "prebuild": "node scripts/generate-site-search-proxy.cjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:site-search-proxy": "node scripts/generate-site-search-proxy.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

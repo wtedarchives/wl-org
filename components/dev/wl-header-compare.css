@@ -1,0 +1,65 @@
+.wl-header-compare {
+  min-height: 100vh;
+  background: #121612;
+  color: #d4d8d5;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.wl-header-compare__section {
+  border-bottom: 1px solid rgb(40, 48, 42);
+}
+
+.wl-header-compare__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 1.25rem;
+  background: #0c0f0c;
+  border-bottom: 1px solid rgb(40, 48, 42);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: oklch(0.82 0.1 55);
+}
+
+.wl-header-compare__label span {
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #8a938e;
+}
+
+.wl-header-compare__react-shell {
+  /* Isolate WlHomeV2 stack so the page can show a second header below. */
+  min-height: 0;
+}
+
+.wl-header-compare__react-shell .wl-home-v2 .wl-home-v2__stack {
+  /* Compare page stacks two headers; don't force a full viewport per shell. */
+  min-height: 0;
+}
+
+.wl-header-compare__react-shell .wl-home-v2 footer.foot {
+  display: none;
+}
+
+.wl-header-compare__react-body,
+.wl-header-compare__embed-body {
+  padding: 1.25rem;
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.wl-header-compare__react-body p,
+.wl-header-compare__embed-body p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #a8b0ab;
+}
+
+.wl-header-compare__embed-body code {
+  font-size: 0.85em;
+  color: #d4d8d5;
+}
