@@ -12,6 +12,12 @@ export type WtedRadioIdRow = {
   track_title: string | null
   status: string | null
   artwork: string | null
+  /**
+   * FK to shows.show_id. Drives tier-2 artwork in `wted_radio_ids_catalog`
+   * (show -> lowest-release_order release -> release_artwork). Optional because
+   * most read paths don't select it.
+   */
+  show_id?: string | null
 }
 
 export type RadioCoApiTrack = {
@@ -113,6 +119,8 @@ export type ReconcileWtedRadioIdsResult = {
   madeUnrequestable: number
   resolvedToNew: number
   resolvedToSkipped: number
+  /** Previously-skipped tracks that became requestable and need show mapping. */
+  requeuedToNew: number
   updatedToRemoved: WtedRadioIdRow[]
   updatedTitles: WtedRadioIdRow[]
   abortedReason?: string

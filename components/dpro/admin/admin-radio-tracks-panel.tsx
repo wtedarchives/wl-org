@@ -1,6 +1,6 @@
 "use client"
 
-import { ImageUpIcon, ListChecksIcon, RefreshCwIcon } from "lucide-react"
+import { RefreshCwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -9,17 +9,25 @@ import {
   RemovedDispositionDialog,
 } from "@/components/dpro/admin/admin-radio-tables"
 import { useAdminRadioTracksPanel } from "@/hooks/use-admin-radio-tracks-panel"
+import { useShowData } from "@/hooks/use-show-data"
 
 export function AdminRadioTracksPanel() {
+  // Loaded at panel level, not inside the dialog: the dialog unmounts on close,
+  // so a hook there would refetch the full show list on every single open while
+  // working through the NEW queue.
+  const {
+    allShows,
+    loading: showsLoading,
+    loadingProgress: showsLoadingProgress,
+  } = useShowData()
+
   const {
     newRows,
     removedRows,
     loading,
     syncing,
-    backfilling,
     error,
     syncBanner,
-    backfillBanner,
     updatingUuid,
     newDispositionRow,
     setNewDispositionRow,
@@ -27,7 +35,8 @@ export function AdminRadioTracksPanel() {
     setRemovedDispositionRow,
     savingNewDisposition,
     savingRemovedDisposition,
-    handleBackfillArtwork,
+    assigningShowUuid,
+    assignShow,
     handleSync,
     confirmNewDisposition,
     confirmRemovedSkipped,
@@ -45,6 +54,18 @@ export function AdminRadioTracksPanel() {
         }}
         onConfirm={confirmNewDisposition}
         updating={savingNewDisposition}
+        showPicker={{
+          allShows,
+          showsLoading,
+          loadingProgress: showsLoadingProgress,
+          assigningShow:
+            newDispositionRow !== null &&
+            assigningShowUuid === newDispositionRow.uuid,
+          onAssignShow: (showId) =>
+            newDispositionRow ?
+              assignShow(newDispositionRow.uuid, showId)
+            : Promise.resolve(false),
+        }}
       />
 
       <RemovedDispositionDialog
@@ -74,55 +95,25 @@ export function AdminRadioTracksPanel() {
             <span className="wp-head-date min-w-0 flex-1 truncate pr-2">
               Radio request tracks
             </span>
+            {/*
+              The old "Artwork" and "Re-verify all" buttons were removed on
+              2026-08-06. They called `wted-radio-backfill-artwork`, which wrote
+              "Radio.co large_url, else release artwork" into
+              `wted_radio_ids.artwork` — both halves now break the artwork model:
+              its large_url came from the PUBLIC feed (no `artwork.type`), so it
+              re-introduced iTunes auto-matches, and writing release artwork into
+              that column collapses the tier-1/tier-2 split that
+              `wted_radio_ids_catalog` depends on. Sync owns tier 1; the view
+              resolves tier 2 live. Do not reinstate them.
+            */}
             <div className="wl-home-v2-admin-radio-tab-actions">
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
                 className="wl-home-v2-tours-header-pill wl-home-v2-admin-radio-action-pill"
-                onClick={() => handleBackfillArtwork(false)}
-                disabled={backfilling || syncing || loading}
-              >
-                {backfilling ? (
-                  <>
-                    <RefreshCwIcon className="size-3.5 shrink-0 animate-spin opacity-80" />
-                    Backfilling…
-                  </>
-                ) : (
-                  <>
-                    <ImageUpIcon className="size-3.5 shrink-0 opacity-80" />
-                    Artwork
-                  </>
-                )}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="wl-home-v2-tours-header-pill wl-home-v2-admin-radio-action-pill"
-                onClick={() => handleBackfillArtwork(true)}
-                disabled={backfilling || syncing || loading}
-                title="Re-derive artwork for every row (corrects rows whose release artwork changed). Slower — may need re-running on large catalogs."
-              >
-                {backfilling ? (
-                  <>
-                    <RefreshCwIcon className="size-3.5 shrink-0 animate-spin opacity-80" />
-                    Working…
-                  </>
-                ) : (
-                  <>
-                    <ListChecksIcon className="size-3.5 shrink-0 opacity-80" />
-                    Re-verify all
-                  </>
-                )}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="wl-home-v2-tours-header-pill wl-home-v2-admin-radio-action-pill"
                 onClick={handleSync}
-                disabled={syncing || backfilling || loading}
+                disabled={syncing || loading}
               >
                 {syncing ? (
                   <>
@@ -140,72 +131,56 @@ export function AdminRadioTracksPanel() {
           </div>
           <div className="wl-home-v2-admin-radio-tab-description-wrap">
             <p className="wl-home-v2-admin-radio-tab-description">
-              Compare Radio.co request tracks with{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">
-                wted_radio_ids
-              </code>
-              . New and removed tracks update status; when Radio.co sends{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">
-                artwork.large_url
-              </code>
-              , the{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">artwork</code>{" "}
-              column is filled or corrected. Backfill artwork: rows with empty{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">artwork</code>{" "}
-              use Radio.co{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">large_url</code>{" "}
-              when present, otherwise release artwork like the request drawer.
-              Rows that already have a URL are left alone unless Radio.co{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">large_url</code>{" "}
-              differs from the stored value, then the DB is updated to match
-              Radio.co. The Sync button calls the{" "}
+              Sync is the only action here. It calls the{" "}
               <code className="wl-home-v2-admin-radio-tab-code">dpro-admin</code>{" "}
-              Edge Function (admin session + service role): it pulls the public
-              Radio.co list server-side and updates{" "}
+              Edge Function (admin session + service role) and runs two passes.
+              First it crawls the authenticated Radio.co{" "}
+              <strong>Studio</strong> catalog — the full station inventory,
+              including commentary, intros, bumpers and station IDs that the
+              public feed omits — in resumable page chunks, inserting anything
+              missing from{" "}
               <code className="wl-home-v2-admin-radio-tab-code">
                 wted_radio_ids
               </code>
-              . The Artwork button calls{" "}
+              . Then it reads the <strong>public</strong> requests feed, the only
+              source of truth for{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">requestable</code>
+              , and sets that flag, resolves new tracks into NEW or skipped, and
+              marks departures REMOVED. If more than 10% of requestable tracks
+              would be hidden in one run it aborts without writing anything,
+              since a truncated Radio.co response is indistinguishable from a
+              real mass removal.
+              <br />
+              <br />
+              Artwork has three tiers.{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">artwork</code>{" "}
+              stores <em>only</em> art uploaded to Radio.co (
               <code className="wl-home-v2-admin-radio-tab-code">
-                wted-radio-backfill-artwork
-              </code>{" "}
-              in one request; very large catalogs may hit HTTP 546—run again or
-              use a capped{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">max_rows</code>{" "}
-              on that function. Re-verify all sends{" "}
+                artwork.type = &quot;custom&quot;
+              </code>
+              ) — Sync writes it and clears anything else, so the column mirrors
+              Radio.co exactly. Radio.co&apos;s automatic iTunes matches are
+              deliberately excluded; curated release artwork beats them. Tracks
+              without custom art fall through to their show&apos;s
+              lowest-
               <code className="wl-home-v2-admin-radio-tab-code">
-                revalidate_existing
+                release_order
               </code>{" "}
-              so every row is re-derived—use it after{" "}
+              release artwork, resolved live by the{" "}
+              <code className="wl-home-v2-admin-radio-tab-code">
+                wted_radio_ids_catalog
+              </code>{" "}
+              view — no backfill, and edits to{" "}
               <code className="wl-home-v2-admin-radio-tab-code">
                 releases.release_artwork
               </code>{" "}
-              changes so already-filled rows are corrected. It sweeps the whole
-              table in resumable chunks (using{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">max_rows</code> +{" "}
-              <code className="wl-home-v2-admin-radio-tab-code">
-                start_after_uuid
-              </code>
-              ), shrinking the chunk automatically if a chunk hits 546, so one
-              click finishes the sweep without you re-running it.
+              show up immediately. Anything with neither falls back to WL.png, so
+              assigning a show in the NEW dialog is what gives a track its image.
             </p>
           </div>
         </div>
 
         <div className="wl-home-v2-admin-radio-tab-alerts">
-          {backfillBanner && (
-            <div
-              role="status"
-              className={`rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-out ${
-                backfillBanner.kind === "error"
-                  ? "border-destructive/50 bg-destructive/10 text-destructive"
-                  : "border-primary/30 bg-primary/5 text-foreground"
-              }`}
-            >
-              {backfillBanner.message}
-            </div>
-          )}
-
           {syncBanner && (
             <div
               role="status"
@@ -221,7 +196,7 @@ export function AdminRadioTracksPanel() {
             </div>
           )}
 
-          {error && !syncBanner && !backfillBanner && (
+          {error && !syncBanner && (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive transition-all duration-200">
               {error}
             </div>

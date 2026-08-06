@@ -403,6 +403,8 @@ export type ReconcileWtedRadioIdsResult = {
   resolvedToNew: number
   /** PENDING rows resolved straight to skipped (commentary, bumpers, IDs). */
   resolvedToSkipped: number
+  /** Previously-skipped rows that became requestable and need show mapping. */
+  requeuedToNew: number
   updatedToRemoved: WtedRadioIdRow[]
   updatedTitles: WtedRadioIdRow[]
   /** Set when the removal guard tripped; nothing was written. */
@@ -472,6 +474,7 @@ export async function reconcileWtedRadioIds(
       madeUnrequestable: 0,
       resolvedToNew: 0,
       resolvedToSkipped: 0,
+      requeuedToNew: 0,
       updatedToRemoved: [],
       updatedTitles: [],
       abortedReason:
@@ -505,6 +508,22 @@ export async function reconcileWtedRadioIds(
     .filter((r) => !publicById.has(r.radio_id))
     .map((r) => r.radio_id)
 
+  /**
+   * A track that BECOMES requestable this run while sitting in `skipped` goes
+   * back into the NEW queue: it is now listener-facing but was never linked to a
+   * show, so without review it renders with no artwork (no show_id → no tier-2
+   * release art) and nothing would ever prompt anyone to map it.
+   *
+   * Keyed on the false→true TRANSITION, not on the state `requestable && skipped`.
+   * A state-based rule would re-queue every admin-skipped requestable track on
+   * every single sync, endlessly overriding a deliberate "reviewed, not linking
+   * this" decision. Transition-based fires exactly once per change.
+   */
+  const becomingRequestable = new Set(toRequestable)
+  const requeueFromSkipped = allDb
+    .filter((r) => becomingRequestable.has(r.radio_id) && r.status === "skipped")
+    .map((r) => r.radio_id)
+
   // Title/artist drift for requestable tracks. Artwork is deliberately NOT
   // touched here: the public feed carries no `artwork.type`, so this pass cannot
   // tell curated custom art from an iTunes auto-match and would keep
@@ -535,6 +554,9 @@ export async function reconcileWtedRadioIds(
   const resolvedToNew = await updateIn(client, pendingToNew, { status: "NEW" })
   const resolvedToSkipped = await updateIn(client, pendingToSkipped, {
     status: "skipped",
+  })
+  const requeuedToNew = await updateIn(client, requeueFromSkipped, {
+    status: "NEW",
   })
 
   const updatedRows: WtedRadioIdRow[] = []
@@ -578,6 +600,7 @@ export async function reconcileWtedRadioIds(
     madeUnrequestable,
     resolvedToNew,
     resolvedToSkipped,
+    requeuedToNew,
     updatedToRemoved: updatedRows,
     updatedTitles,
   }

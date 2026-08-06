@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { getSession } from "@/lib/jwt"
-import { invokeDproAdmin, WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
-import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import type {
   ReconcileWtedRadioIdsResult,
   StudioCrawlChunkResult,
@@ -23,26 +22,19 @@ export type AdminRadioTracksSyncBanner = {
   message: string
 } | null
 
-export type AdminRadioTracksBackfillBanner = {
-  kind: "success" | "error"
-  message: string
-} | null
-
 export function useAdminRadioTracksPanel() {
   const [newRows, setNewRows] = useState<WtedRadioIdRow[]>([])
   const [removedRows, setRemovedRows] = useState<WtedRadioIdRow[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
-  const [backfilling, setBackfilling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [syncBanner, setSyncBanner] = useState<AdminRadioTracksSyncBanner>(null)
-  const [backfillBanner, setBackfillBanner] =
-    useState<AdminRadioTracksBackfillBanner>(null)
   const [updatingUuid, setUpdatingUuid] = useState<string | null>(null)
   const [newDispositionRow, setNewDispositionRow] =
     useState<WtedRadioIdRow | null>(null)
   const [removedDispositionRow, setRemovedDispositionRow] =
     useState<WtedRadioIdRow | null>(null)
+  const [assigningShowUuid, setAssigningShowUuid] = useState<string | null>(null)
 
   const savingNewDisposition =
     updatingUuid !== null && newDispositionRow !== null
@@ -57,12 +49,12 @@ export function useAdminRadioTracksPanel() {
       const [newRes, removedRes] = await Promise.all([
         supabase
           .from("wted_radio_ids")
-          .select("uuid, radio_id, track_artist, track_title, status, artwork")
+          .select("uuid, radio_id, track_artist, track_title, status, artwork, show_id")
           .eq("status", "NEW")
           .order("radio_id", { ascending: true }),
         supabase
           .from("wted_radio_ids")
-          .select("uuid, radio_id, track_artist, track_title, status, artwork")
+          .select("uuid, radio_id, track_artist, track_title, status, artwork, show_id")
           .eq("status", "REMOVED")
           .order("radio_id", { ascending: true }),
       ])
@@ -151,139 +143,53 @@ export function useAdminRadioTracksPanel() {
     if (ok) setRemovedDispositionRow(null)
   }
 
-  const handleBackfillArtwork = async (revalidateExisting = false) => {
-    if (!supabase) return
-    setBackfilling(true)
-    setBackfillBanner(null)
-    setError(null)
-    try {
-      const base = getSupabaseFunctionsUrl()
-      if (!base) throw new Error("Supabase URL is not configured.")
-      const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
-      const session = getSession()
-      if (!session?.token) {
-        throw new Error("Sign in again to run this action.")
-      }
-      if (!anon) {
-        throw new Error("Missing Supabase anon key.")
-      }
-
-      type BackfillResponse = {
-        error?: string
-        examined?: number
-        updated?: number
-        error_count?: number
-        done?: boolean
-        db_exhausted?: boolean
-        next_cursor?: string | null
-      }
-
-      const callBackfill = async (
-        payload: Record<string, unknown>,
-      ): Promise<{ ok: boolean; status: number; data: BackfillResponse }> => {
-        const res = await fetch(`${base}/wted-radio-backfill-artwork`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${anon}`,
-            [WYSTERIA_AUTH_HEADER]: `Bearer ${session.token}`,
-            apikey: anon,
-          },
-          body: JSON.stringify(payload),
-        })
-        const data = (await res
-          .json()
-          .catch(() => ({}))) as BackfillResponse
-        return { ok: res.ok, status: res.status, data }
-      }
-
-      if (!revalidateExisting) {
-        // Cheap pass: empty rows + Radio.co corrections, one request.
-        const { ok, status, data } = await callBackfill({})
-        if (!ok) {
-          const hint =
-            status === 546
-              ? " Supabase 546 = worker limit on a single run; click Artwork again to continue."
-              : ""
-          throw new Error((data.error ?? `Backfill failed (${status})`) + hint)
+  /**
+   * Assign the track's show, which is what gives it tier-2 artwork
+   * (show -> lowest-release_order release -> release_artwork).
+   *
+   * Deliberately patches state in place instead of calling loadNewAndRemoved():
+   * a refetch would swap the row identity underneath an open dialog, and the
+   * point of doing this inline is that the admin keeps the modal open and still
+   * picks linked/skipped afterwards.
+   */
+  const assignShow = useCallback(
+    async (uuid: string, showId: string | null): Promise<boolean> => {
+      setAssigningShowUuid(uuid)
+      setError(null)
+      try {
+        const session = getSession()
+        if (!session?.token) {
+          setError("Sign in again to perform this action.")
+          return false
         }
-        setBackfillBanner({
-          kind: "success",
-          message: `Artwork backfill: updated ${data.updated ?? 0} row(s), examined ${data.examined ?? 0} (empty rows filled; existing URLs updated when Radio.co large_url differs).`,
-        })
-        await loadNewAndRemoved()
-        return
+        const { data, error: invokeError } =
+          await invokeDproAdmin<WtedRadioIdRow>(session.token, {
+            action: "wted_radio_ids_set_show",
+            uuid,
+            show_id: showId,
+          })
+        if (invokeError) throw new Error(invokeError)
+
+        const nextShowId = data?.show_id ?? showId
+        const patch = (rows: WtedRadioIdRow[]) =>
+          rows.map((r) => (r.uuid === uuid ? { ...r, show_id: nextShowId } : r))
+        setNewRows(patch)
+        setRemovedRows(patch)
+        setNewDispositionRow((cur) =>
+          cur && cur.uuid === uuid ? { ...cur, show_id: nextShowId } : cur,
+        )
+        return true
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to set the track's show.",
+        )
+        return false
+      } finally {
+        setAssigningShowUuid(null)
       }
-
-      // Full re-verify: sweep the whole table in bounded, resumable chunks so
-      // no single request hits the worker limit. Shrink the chunk on 546 and
-      // retry the same cursor so the sweep always makes forward progress.
-      let cursor: string | null = null
-      let chunk = 300
-      const MIN_CHUNK = 25
-      const MAX_CALLS = 500
-      let totalExamined = 0
-      let totalUpdated = 0
-      let calls = 0
-
-      for (;;) {
-        if (calls >= MAX_CALLS) {
-          throw new Error(
-            `Re-verify stopped after ${calls} chunks (examined ${totalExamined}, updated ${totalUpdated}). Run it again to continue.`,
-          )
-        }
-        calls++
-
-        const payload: Record<string, unknown> = {
-          revalidate_existing: true,
-          max_rows: chunk,
-        }
-        if (cursor !== null) payload.start_after_uuid = cursor
-
-        const { ok, status, data } = await callBackfill(payload)
-
-        if (!ok) {
-          if (status === 546 && chunk > MIN_CHUNK) {
-            chunk = Math.max(MIN_CHUNK, Math.floor(chunk / 2))
-            calls-- // retry same cursor with a smaller chunk; don't count it
-            continue
-          }
-          throw new Error(
-            (data.error ?? `Re-verify failed (${status})`) +
-              (status === 546
-                ? " Worker limit hit even at the smallest chunk — run Re-verify all again to resume where it stopped."
-                : ""),
-          )
-        }
-
-        totalExamined += data.examined ?? 0
-        totalUpdated += data.updated ?? 0
-
-        setBackfillBanner({
-          kind: "success",
-          message: `Re-verifying artwork… examined ${totalExamined}, corrected ${totalUpdated} so far.`,
-        })
-
-        const done = data.done ?? data.db_exhausted ?? false
-        const nextCursor = data.next_cursor ?? null
-        if (done || nextCursor === null) break
-        cursor = nextCursor
-      }
-
-      setBackfillBanner({
-        kind: "success",
-        message: `Full artwork re-verify complete: corrected ${totalUpdated} row(s), examined ${totalExamined} across ${calls} chunk(s). Every row re-derived; stale release-artwork URLs fixed.`,
-      })
-      await loadNewAndRemoved()
-    } catch (err) {
-      const msg =
-        err instanceof Error ? err.message : "Artwork backfill failed."
-      setBackfillBanner({ kind: "error", message: msg })
-      setError(msg)
-    } finally {
-      setBackfilling(false)
-    }
-  }
+    },
+    [],
+  )
 
   /**
    * Two passes: crawl the Radio.co Studio catalog in bounded page chunks
@@ -377,6 +283,7 @@ export function useAdminRadioTracksPanel() {
         artworkClearedTotal +
         rec.madeRequestable +
         rec.madeUnrequestable +
+        rec.requeuedToNew +
         rec.updatedToRemoved.length +
         rec.updatedTitles.length
 
@@ -394,6 +301,7 @@ export function useAdminRadioTracksPanel() {
             `Sync complete: ${insertedTotal} tracks added ` +
             `(${rec.resolvedToNew} requestable → NEW, ${rec.resolvedToSkipped} non-requestable → skipped), ` +
             `${rec.madeRequestable} became requestable, ${rec.madeUnrequestable} hidden, ` +
+            `${rec.requeuedToNew} re-queued to NEW for show mapping, ` +
             `${rec.updatedToRemoved.length} marked REMOVED, ` +
             `${artworkSetTotal} custom artwork set, ${artworkClearedTotal} artwork cleared to release fallback, ` +
             `${rec.updatedTitles.length} titles updated.`,
@@ -415,10 +323,8 @@ export function useAdminRadioTracksPanel() {
     removedRows,
     loading,
     syncing,
-    backfilling,
     error,
     syncBanner,
-    backfillBanner,
     updatingUuid,
     newDispositionRow,
     setNewDispositionRow,
@@ -426,7 +332,8 @@ export function useAdminRadioTracksPanel() {
     setRemovedDispositionRow,
     savingNewDisposition,
     savingRemovedDisposition,
-    handleBackfillArtwork,
+    assigningShowUuid,
+    assignShow,
     handleSync,
     confirmNewDisposition,
     confirmRemovedSkipped,

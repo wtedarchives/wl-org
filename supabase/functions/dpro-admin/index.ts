@@ -798,6 +798,31 @@ async function handleAction(
       return { data: true }
     }
 
+    /**
+     * Admin panel: point a catalog row at a show. `show_id` drives tier-2
+     * artwork in wted_radio_ids_catalog (show -> lowest-release_order release
+     * -> release_artwork), so assigning one is what gives an otherwise
+     * artwork-less track its image. Pass null to clear.
+     */
+    case "wted_radio_ids_set_show": {
+      const uuid = body.uuid as string | undefined
+      const rawShowId = body.show_id
+      if (!uuid) return { error: "Missing uuid" }
+      if (rawShowId !== null && typeof rawShowId !== "string") {
+        return { error: "`show_id` must be a uuid string or null" }
+      }
+      const show_id = rawShowId === null ? null : rawShowId.trim() || null
+
+      const { data, error } = await db
+        .from("wted_radio_ids")
+        .update({ show_id })
+        .eq("uuid", uuid)
+        .select("uuid, radio_id, track_artist, track_title, status, artwork, show_id")
+      if (error) return { error: error.message }
+      if (!data?.length) return { error: "No matching row." }
+      return { data: data[0] }
+    }
+
     /** Admin panel: mark REMOVED row skipped (leave REMOVED list). */
     case "wted_radio_ids_skip_removed": {
       const uuid = body.uuid as string | undefined
