@@ -43,8 +43,12 @@ export function useWtedRadioIdsCatalog(enabled: boolean) {
       for (;;) {
         if (signal.aborted) return
         const { data, error: pageError } = await supabase
+          // Only tracks in the public Radio.co requests feed. The catalog also
+          // holds Studio-only tracks (commentary, bumpers, station IDs) that
+          // exist for playlist building but must never be requestable.
           .from("wted_radio_ids")
           .select("uuid, radio_id, track_artist, track_title, status, artwork")
+          .eq("requestable", true)
           .order("track_title", { ascending: true, nullsFirst: false })
           .range(from, from + WTED_RADIO_IDS_PAGE_SIZE - 1)
         if (signal.aborted) return
