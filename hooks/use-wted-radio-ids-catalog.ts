@@ -43,10 +43,15 @@ export function useWtedRadioIdsCatalog(enabled: boolean) {
       for (;;) {
         if (signal.aborted) return
         const { data, error: pageError } = await supabase
-          // Only tracks in the public Radio.co requests feed. The catalog also
-          // holds Studio-only tracks (commentary, bumpers, station IDs) that
-          // exist for playlist building but must never be requestable.
-          .from("wted_radio_ids")
+          // The catalog VIEW, not the table: it resolves artwork as Radio.co
+          // custom art, else the show's lowest-release_order release artwork.
+          // Reading the table directly would show only tier-1 and lose artwork
+          // for ~6,000 tracks.
+          //
+          // `requestable` filters to the public Radio.co requests feed — the
+          // catalog also holds Studio-only tracks (commentary, bumpers, station
+          // IDs) that exist for playlist building but must never be requestable.
+          .from("wted_radio_ids_catalog")
           .select("uuid, radio_id, track_artist, track_title, status, artwork")
           .eq("requestable", true)
           .order("track_title", { ascending: true, nullsFirst: false })

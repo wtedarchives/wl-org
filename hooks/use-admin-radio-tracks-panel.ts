@@ -6,9 +6,16 @@ import { getSession } from "@/lib/jwt"
 import { invokeDproAdmin, WYSTERIA_AUTH_HEADER } from "@/lib/dpro-admin-edge"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 import type {
-  SyncWtedRadioIdsResult,
+  ReconcileWtedRadioIdsResult,
+  StudioCrawlChunkResult,
   WtedRadioIdRow,
 } from "@/lib/wted-radio-ids-sync"
+
+/** Studio pages per crawl invocation; halved on HTTP 546 (edge resource limit). */
+const SYNC_CRAWL_PAGES = 60
+const MIN_CRAWL_PAGES = 10
+/** ~177 pages ÷ MIN_CRAWL_PAGES, with generous headroom for 546 retries. */
+const MAX_CRAWL_INVOCATIONS = 60
 import type { NewDispositionStatus } from "@/components/dpro/admin/admin-radio-tables"
 
 export type AdminRadioTracksSyncBanner = {
@@ -278,6 +285,14 @@ export function useAdminRadioTracksPanel() {
     }
   }
 
+  /**
+   * Two passes: crawl the Radio.co Studio catalog in bounded page chunks
+   * (resumable, so no single invocation risks the edge-function wall clock),
+   * then one cheap reconcile that decides what's requestable.
+   *
+   * The crawl only ever inserts non-requestable PENDING rows, so an interrupted
+   * run leaves the request modal untouched rather than half-populated.
+   */
   const handleSync = async () => {
     if (!supabase) return
     setSyncing(true)
@@ -288,27 +303,100 @@ export function useAdminRadioTracksPanel() {
       if (!session?.token) {
         throw new Error("Sign in again to run sync.")
       }
-      const { data, error: invokeError } = await invokeDproAdmin<
-        SyncWtedRadioIdsResult
-      >(session.token, { action: "wted_radio_ids_sync" })
-      if (invokeError) throw new Error(invokeError)
-      if (!data) throw new Error("Sync returned no data.")
-      const { inserted, updatedToRemoved, updatedArtwork, updatedTitles } = data
-      if (
-        inserted.length === 0 &&
-        updatedToRemoved.length === 0 &&
-        updatedArtwork.length === 0 &&
-        updatedTitles.length === 0
-      ) {
+
+      let startPage = 1
+      let pageCount = SYNC_CRAWL_PAGES
+      let insertedTotal = 0
+      let artworkSetTotal = 0
+      let artworkClearedTotal = 0
+      let pagesDone = 0
+      let totalPages: number | null = null
+      let guardPasses = 0
+
+      for (;;) {
+        // Runaway guard: at the minimum chunk size a full crawl is ~177/10
+        // invocations, so this ceiling can only be hit by a server-side bug.
+        if (guardPasses++ > MAX_CRAWL_INVOCATIONS) {
+          throw new Error(
+            "Crawl did not finish after too many attempts — check the Radio.co Studio credentials.",
+          )
+        }
+
+        const {
+          data,
+          error: crawlError,
+          status,
+        } = await invokeDproAdmin<StudioCrawlChunkResult>(session.token, {
+          action: "wted_radio_ids_studio_crawl",
+          start_page: startPage,
+          page_count: pageCount,
+        })
+
+        if (crawlError) {
+          // 546 = edge function resource limit. Halve the chunk and retry the
+          // SAME page range; inserts are idempotent so nothing is duplicated.
+          // Branch on status, not the message — 546 bodies are often not JSON.
+          if (status === 546 && pageCount > MIN_CRAWL_PAGES) {
+            pageCount = Math.max(MIN_CRAWL_PAGES, Math.floor(pageCount / 2))
+            continue
+          }
+          throw new Error(crawlError)
+        }
+        if (!data) throw new Error("Studio crawl returned no data.")
+
+        insertedTotal += data.inserted
+        artworkSetTotal += data.artwork_updated
+        artworkClearedTotal += data.artwork_cleared
+        totalPages = data.total_pages
+        pagesDone = data.next_page === null ? data.total_pages : data.next_page - 1
+        setSyncBanner({
+          kind: "success",
+          message: `Scanning Radio.co catalog… ${pagesDone}/${data.total_pages} pages, ${insertedTotal} new tracks found.`,
+        })
+
+        if (data.done || data.next_page === null) break
+        startPage = data.next_page
+      }
+
+      const { data: rec, error: recError } =
+        await invokeDproAdmin<ReconcileWtedRadioIdsResult>(session.token, {
+          action: "wted_radio_ids_sync",
+        })
+      if (recError) throw new Error(recError)
+      if (!rec) throw new Error("Sync returned no data.")
+
+      if (rec.abortedReason) {
+        setSyncBanner({ kind: "error", message: rec.abortedReason })
+        setError(rec.abortedReason)
+        return
+      }
+
+      const changed =
+        insertedTotal +
+        artworkSetTotal +
+        artworkClearedTotal +
+        rec.madeRequestable +
+        rec.madeUnrequestable +
+        rec.updatedToRemoved.length +
+        rec.updatedTitles.length
+
+      if (changed === 0) {
         setSyncBanner({
           kind: "no-change",
-          message:
-            "No changes — the database already matches the Radio.co request list.",
+          message: `No changes — the database already matches Radio.co${
+            totalPages ? ` (${totalPages} pages scanned)` : ""
+          }.`,
         })
       } else {
         setSyncBanner({
           kind: "success",
-          message: `Sync complete: ${inserted.length} added as NEW, ${updatedToRemoved.length} marked REMOVED, ${updatedArtwork.length} artwork URLs updated, ${updatedTitles.length} titles updated.`,
+          message:
+            `Sync complete: ${insertedTotal} tracks added ` +
+            `(${rec.resolvedToNew} requestable → NEW, ${rec.resolvedToSkipped} non-requestable → skipped), ` +
+            `${rec.madeRequestable} became requestable, ${rec.madeUnrequestable} hidden, ` +
+            `${rec.updatedToRemoved.length} marked REMOVED, ` +
+            `${artworkSetTotal} custom artwork set, ${artworkClearedTotal} artwork cleared to release fallback, ` +
+            `${rec.updatedTitles.length} titles updated.`,
         })
       }
       await loadNewAndRemoved()

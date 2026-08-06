@@ -28,8 +28,12 @@ const thumbFrame =
 /** Row min height + TanStack Virtual estimate (Request a Song catalog only). */
 const CATALOG_ROW_HEIGHT_PX = 44
 
-/** When `wted_radio_ids.artwork` is empty; catalog is expected to use DB URLs after backfill. */
-const REQUEST_CATALOG_ARTWORK_FALLBACK = "/WTED3.png"
+/**
+ * Tier 3. Reached only when `wted_radio_ids_catalog.artwork` is null — i.e. the
+ * track has no Radio.co custom art AND no show with a release to borrow artwork
+ * from (63 of 6,451 rows as of 2026-08-06).
+ */
+const REQUEST_CATALOG_ARTWORK_FALLBACK = "/WL.png"
 
 function CatalogRowThumbnail({ row }: { row: WtedRadioIdRow }) {
   const dbArtwork = wtedRadioIdsRowArtworkUrl(row)

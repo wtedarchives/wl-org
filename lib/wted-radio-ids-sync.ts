@@ -79,11 +79,43 @@ export async function fetchAllWtedRadioIds(
   return acc
 }
 
-export type SyncWtedRadioIdsResult = {
-  inserted: WtedRadioIdRow[]
+/**
+ * Result of `dpro-admin` action `wted_radio_ids_studio_crawl` — one bounded
+ * range of Radio.co Studio pages. The admin panel loops until `done`.
+ */
+export type StudioCrawlChunkResult = {
+  /** Rows actually inserted (ON CONFLICT DO NOTHING, so repeats insert 0). */
+  inserted: number
+  /** Existing rows given Radio.co custom artwork. */
+  artwork_updated: number
+  /**
+   * Existing rows whose artwork was cleared because Radio.co has no custom art
+   * for them — including the legacy release-artwork URLs the old backfill wrote.
+   * Cleared rows fall through to tier-2 in `wted_radio_ids_catalog`.
+   */
+  artwork_cleared: number
+  fetched: number
+  total_pages: number
+  total_items: number
+  next_page: number | null
+  done: boolean
+}
+
+/**
+ * Result of `dpro-admin` action `wted_radio_ids_sync` — the reconcile pass that
+ * sets `requestable` from the public feed and resolves PENDING rows.
+ *
+ * `abortedReason` is set when the safety guard tripped, in which case NOTHING
+ * was written and every counter is zero.
+ */
+export type ReconcileWtedRadioIdsResult = {
+  madeRequestable: number
+  madeUnrequestable: number
+  resolvedToNew: number
+  resolvedToSkipped: number
   updatedToRemoved: WtedRadioIdRow[]
-  updatedArtwork: WtedRadioIdRow[]
   updatedTitles: WtedRadioIdRow[]
+  abortedReason?: string
 }
 
 /** Server-side implementation: `supabase/functions/_shared/wted-radio-ids-sync.ts` via `dpro-admin` action `wted_radio_ids_sync`. */

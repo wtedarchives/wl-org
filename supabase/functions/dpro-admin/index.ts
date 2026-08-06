@@ -2,7 +2,13 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
-import { syncWtedRadioIds } from "../_shared/wted-radio-ids-sync.ts"
+import {
+  crawlStudioTracksChunk,
+  insertStudioTracks,
+  reconcileWtedRadioIds,
+  WTED_RADIO_CO_STUDIO_CHUNK_PAGES,
+} from "../_shared/wted-radio-ids-sync.ts"
+import { getRadioCoSessionCookie } from "../_shared/radio-co-session.ts"
 import {
   BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
   buildSetlistNowPlayingDiscourseMessage,
@@ -717,9 +723,56 @@ async function handleAction(
       return { data: { count: count ?? 0 } }
     }
 
+    /**
+     * Admin panel, step 1 of 2: crawl one bounded range of Radio.co Studio pages
+     * and insert anything missing. Idempotent — the client loops on `next_page`
+     * until `done`, shrinking `page_count` if an invocation hits HTTP 546.
+     * Inserts land non-requestable + PENDING; only the reconcile grants access.
+     */
+    case "wted_radio_ids_studio_crawl": {
+      try {
+        const startPage = Number(body.start_page ?? 1)
+        const pageCount = Number(body.page_count ?? WTED_RADIO_CO_STUDIO_CHUNK_PAGES)
+        if (!Number.isInteger(startPage) || startPage < 1) {
+          return { error: "`start_page` must be a positive integer" }
+        }
+        if (!Number.isInteger(pageCount) || pageCount < 1) {
+          return { error: "`page_count` must be a positive integer" }
+        }
+
+        const cookie = await getRadioCoSessionCookie()
+        const chunk = await crawlStudioTracksChunk(cookie, startPage, pageCount)
+        const { inserted, artworkUpdated, artworkCleared } =
+          await insertStudioTracks(db, chunk.tracks)
+
+        return {
+          data: {
+            inserted,
+            artwork_updated: artworkUpdated,
+            artwork_cleared: artworkCleared,
+            fetched: chunk.tracks.length,
+            total_pages: chunk.totalPages,
+            total_items: chunk.totalItems,
+            next_page: chunk.nextPage,
+            done: chunk.nextPage === null,
+          },
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Radio track crawl failed."
+        return { error: msg }
+      }
+    }
+
+    /**
+     * Admin panel, step 2 of 2: set `requestable` from the public feed, resolve
+     * PENDING rows into NEW/skipped, and mark departures REMOVED. Cheap enough
+     * to always run in a single invocation.
+     */
     case "wted_radio_ids_sync": {
       try {
-        const result = await syncWtedRadioIds(db)
+        const result = await reconcileWtedRadioIds(db, {
+          allowLargeRemoval: body.allow_large_removal === true,
+        })
         return { data: result }
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Radio track sync failed."
