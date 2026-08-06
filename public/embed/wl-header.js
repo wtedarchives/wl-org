@@ -111,7 +111,6 @@
     ":host {",
     "  display: block;",
     "  position: relative;",
-    "  z-index: 10050;",
     "  overflow: visible;",
     "  --wl-deep-green: #65b3a0;",
     "  --wl-light-orange: oklch(0.82 0.10 55);",
