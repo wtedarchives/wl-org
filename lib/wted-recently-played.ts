@@ -144,9 +144,17 @@ function firstRelated<T>(value: T | T[] | null | undefined): T | null {
  * shape.
  *
  * The station plays a playlist through in order, so an entry sitting between two
- * tracks of the SAME episode aired during that episode. Only fills when both
- * neighbours agree; a gap at either end of the window has nothing to confirm it
- * and stays null rather than being guessed.
+ * tracks of the SAME episode aired during that episode.
+ *
+ * Interior gaps require both neighbours to agree. Gaps at either END of the
+ * window have only one neighbour, and are filled from it anyway: the newest row
+ * is very often a track with custom art (which is exactly why its URL carries no
+ * playlist id), and leaving it unknown pushes the divider a row too low — the
+ * show's first track ends up sitting ABOVE its own heading.
+ *
+ * The bet is that a boundary falls precisely on the edge of the window far less
+ * often than a custom-art track does, and it self-corrects on the next poll once
+ * a playlist-shaped URL enters the window.
  */
 function fillEpisodeGaps(ids: (string | null)[]): (string | null)[] {
   const out = [...ids]
@@ -170,7 +178,11 @@ function fillEpisodeGaps(ids: (string | null)[]): (string | null)[] {
       }
     }
 
-    if (before != null && before === after) out[i] = before
+    if (before != null && after != null) {
+      if (before === after) out[i] = before
+    } else {
+      out[i] = before ?? after
+    }
   }
 
   return out
