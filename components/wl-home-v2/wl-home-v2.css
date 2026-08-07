@@ -9146,6 +9146,30 @@
     -webkit-line-clamp: 2;
     line-clamp: 2;
   }
+  /* Marks where a new radio show begins. The list runs newest-first, so this
+     labels the top of each run of consecutive tracks from the same episode. */
+  .wl-home-v2 .modal-recently-played-divider {
+    padding: 3px 10px;
+    border-top: 1px solid rgb(44, 46, 45);
+    background: rgba(0, 0, 0, 0.28);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.66);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wl-home-v2 .modal-recently-played-divider:first-child {
+    border-top: 0;
+  }
+  /* The divider already draws the rule, so the row beneath must not double it.
+     This also covers the case the `:first-child` rule above no longer catches:
+     a divider ahead of the first row makes that row a second child. */
+  .wl-home-v2 .modal-recently-played-divider + .modal-recently-played-row {
+    border-top: 0;
+  }
   .wl-home-v2 .modal-recently-played-status {
     display: flex;
     align-items: center;

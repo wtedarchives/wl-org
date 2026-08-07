@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useId } from "react"
+import { Fragment, useId } from "react"
 import { CircleNotch } from "@phosphor-icons/react"
 
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
@@ -10,10 +10,11 @@ import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import type { WtedRecentlyPlayedTrack } from "@/lib/wted-recently-played"
 import { cn } from "@/lib/utils"
 
-const RECENTLY_PLAYED_ARTWORK_FALLBACK = "/WTED3.png"
+const RECENTLY_PLAYED_ARTWORK_FALLBACK = "/WL.png"
 
-const thumbFrame =
-  "relative size-[30px] shrink-0 overflow-hidden rounded border border-wl-dark-grey/50"
+// `overflow-hidden` is what actually clips the artwork to the rounded corners,
+// so the border can go without losing them.
+const thumbFrame = "relative size-[30px] shrink-0 overflow-hidden rounded"
 
 function RecentlyPlayedRowThumbnail({
   track,
@@ -36,13 +37,15 @@ function RecentlyPlayedRowThumbnail({
   }
 
   return (
-    <div className={cn(thumbFrame, "bg-black/20")}>
+    // Centred rather than filled: the logo is sized to 24px while the frame
+    // stays 30px, so fallback rows keep the same footprint as real artwork.
+    <div className={cn(thumbFrame, "flex items-center justify-center bg-black/20")}>
       <Image
         src={RECENTLY_PLAYED_ARTWORK_FALLBACK}
         alt=""
-        width={30}
-        height={30}
-        className="size-full object-contain p-0.5"
+        width={24}
+        height={24}
+        className="h-auto w-[24px]"
         unoptimized
       />
     </div>
@@ -110,15 +113,25 @@ export function WlHomeV2RecentlyPlayedModal({
               <p className="modal-recently-played-status">No history yet.</p>
             : <ul className="modal-recently-played-list">
                 {tracks.map((track) => (
-                  <li key={track.id} className="modal-recently-played-row">
-                    <RecentlyPlayedRowThumbnail track={track} />
-                    <span
-                      className="modal-recently-played-row-title"
-                      title={track.title}
-                    >
-                      {track.title}
-                    </span>
-                  </li>
+                  <Fragment key={track.id}>
+                    {track.startsEpisode && track.episodeName ?
+                      <li
+                        className="modal-recently-played-divider"
+                        aria-hidden
+                      >
+                        {track.episodeName}
+                      </li>
+                    : null}
+                    <li className="modal-recently-played-row">
+                      <RecentlyPlayedRowThumbnail track={track} />
+                      <span
+                        className="modal-recently-played-row-title"
+                        title={track.title}
+                      >
+                        {track.title}
+                      </span>
+                    </li>
+                  </Fragment>
                 ))}
               </ul>
             }
