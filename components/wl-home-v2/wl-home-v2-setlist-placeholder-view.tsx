@@ -71,6 +71,7 @@ export function WlHomeV2SetlistPlaceholderView({
   averageRating,
   reviewCount,
   onRatingClick,
+  onAttendeesClick,
   attendeeCount,
   attended,
   attendanceToggling,
@@ -195,6 +196,7 @@ export function WlHomeV2SetlistPlaceholderView({
     attendanceToggling,
     onAttendanceToggle,
     onRatingClick,
+    onAttendeesClick,
   }
 
   const showEgnAttribution = show.egn_sourced === true

@@ -6133,6 +6133,45 @@
   .wl-home-v2 .modal.modal--setlist-rating .modal-setlist-rating-body {
     min-height: min(40vh, 360px);
   }
+  /* Setlist attendees list — same shell as rating modal */
+  .wl-home-v2 .modal.modal--wted-request.modal--setlist-attendees {
+    max-width: min(560px, 96vw);
+    width: 100%;
+    max-height: min(88vh, 720px);
+  }
+  .wl-home-v2 .modal.modal--setlist-attendees .modal-setlist-attendees-body {
+    min-height: min(40vh, 360px);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--panel-bg);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .wl-home-v2 .modal.modal--setlist-attendees .modal-setlist-attendees-sub {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .wl-home-v2
+    .modal.modal--setlist-attendees
+    .modal-setlist-attendees-sub__venue {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wl-home-v2
+    .modal.modal--setlist-attendees
+    .modal-setlist-attendees-sub__count {
+    flex-shrink: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
   /* Setlist scan — same data as archive drawer; wide two-column body */
   .wl-home-v2 .modal.modal--wted-request.modal--setlist-scan {
     max-width: min(800px, 96vw);
@@ -14735,6 +14774,39 @@
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__attendees {
   grid-column: 2;
   grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees-open {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+  width: 100%;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees-open:focus {
+  outline: none;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees-open:focus-visible {
+  outline: 2px solid var(--wl-light-orange);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel__chat {
   grid-column: 1 / -1;
@@ -14766,6 +14838,40 @@
   .wl-home-v2-setlist-tools-panel__rating.side-card:hover:not(:disabled) {
   transform: none;
   border-right-color: rgb(63, 65, 64);
+}
+/* Match rating tile teal wash (rating is `button.side-card`; attendees is a div) */
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees.side-card {
+  transition: all 0.18s;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees.side-card:has(
+    .wl-home-v2-setlist-tools-panel__attendees-open:hover
+  ),
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees.side-card:has(
+    .wl-home-v2-setlist-tools-panel__attendees-open:focus-visible
+  ) {
+  background: rgba(88, 200, 174, 0.4);
+  color: #fff;
+}
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees.side-card:has(
+    .wl-home-v2-setlist-tools-panel__attendees-open:hover
+  )
+  .sc-label,
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-tools-panel__attendees.side-card:has(
+    .wl-home-v2-setlist-tools-panel__attendees-open:focus-visible
+  )
+  .sc-label {
+  color: var(--setlist-rail-label-color);
+  transition: color 0.18s;
 }
 .wl-home-v2 .wl-home-v2-setlist .wl-home-v2-setlist-tools-panel .sc-value {
   font-size: 22px;

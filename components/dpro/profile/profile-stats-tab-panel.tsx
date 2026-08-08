@@ -7,6 +7,7 @@ import { UserStats } from "@/components/dpro/profile/user-stats"
 import { AttendedShows } from "@/components/dpro/profile/attended-shows"
 import { AttendedByGroupChart } from "@/components/dpro/profile/attended-by-group-chart"
 import { AttendanceStats } from "@/components/dpro/profile/attendance-stats"
+import { ShowBuddies } from "@/components/dpro/profile/show-buddies"
 import { UserSlots } from "@/components/dpro/profile/user-slots"
 import { UserPersonnel } from "@/components/dpro/profile/user-personnel"
 import { LooseEndsContent } from "@/components/dpro/profile/loose-ends-content"
@@ -89,6 +90,12 @@ export function ProfileStatsTabPanel({
                   refetchKey={sidebarRefetchKey}
                 />
                 <AttendanceStats
+                  userId={userId}
+                  isOwnProfile={isOwnProfile}
+                  username={username}
+                  refetchKey={sidebarRefetchKey}
+                />
+                <ShowBuddies
                   userId={userId}
                   isOwnProfile={isOwnProfile}
                   username={username}

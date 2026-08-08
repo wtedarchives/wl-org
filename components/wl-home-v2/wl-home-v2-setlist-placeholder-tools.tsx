@@ -12,6 +12,7 @@ export type WlHomeV2SetlistPlaceholderToolsProps = {
   attendanceToggling: boolean
   onAttendanceToggle: () => void
   onRatingClick: () => void
+  onAttendeesClick: () => void
 }
 
 export function WlHomeV2SetlistPlaceholderRatingAttendees({
@@ -24,6 +25,7 @@ export function WlHomeV2SetlistPlaceholderRatingAttendees({
   attendanceToggling,
   onAttendanceToggle,
   onRatingClick,
+  onAttendeesClick,
 }: WlHomeV2SetlistPlaceholderToolsProps) {
   return (
     <>
@@ -50,14 +52,25 @@ export function WlHomeV2SetlistPlaceholderRatingAttendees({
         <div className="sc-sub">{reviewSummary}</div>
       </button>
       <div className="wl-home-v2-setlist-tools-panel__attendees side-card">
-        <div className="sc-label normal-case tracking-normal">attendees</div>
-        <div className="sc-value flex items-center gap-2">
-          {attendeeCount.toLocaleString("en-US")}
-          <Users
-            className="size-[1.15em] shrink-0 text-white/85"
-            aria-hidden
-          />
-        </div>
+        <button
+          type="button"
+          className="wl-home-v2-setlist-tools-panel__attendees-open"
+          onClick={onAttendeesClick}
+          aria-label={
+            attendeeCount > 0 ?
+              `${attendeeCount.toLocaleString("en-US")} attendees. Click to view list.`
+            : "No attendees yet. Click to view list."
+          }
+        >
+          <div className="sc-label normal-case tracking-normal">attendees</div>
+          <div className="sc-value flex items-center gap-2">
+            {attendeeCount.toLocaleString("en-US")}
+            <Users
+              className="size-[1.15em] shrink-0 text-white/85"
+              aria-hidden
+            />
+          </div>
+        </button>
         <button
           type="button"
           className={

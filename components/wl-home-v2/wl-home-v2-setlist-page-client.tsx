@@ -83,6 +83,7 @@ export function WlHomeV2SetlistPageClient() {
         averageRating={state.averageRating}
         reviewCount={state.reviewCount}
         onRatingClick={state.onRatingClick}
+        onAttendeesClick={state.onAttendeesClick}
         attendeeCount={state.attendeeCount}
         attended={state.attended}
         attendanceToggling={state.toggling}

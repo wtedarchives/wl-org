@@ -1,5 +1,6 @@
 "use client"
 
+import { WlHomeV2SetlistAttendeesModal } from "@/components/wl-home-v2/wl-home-v2-setlist-attendees-modal"
 import { WlHomeV2SetlistJotyModal } from "@/components/wl-home-v2/wl-home-v2-setlist-joty-modal"
 import { WlHomeV2SetlistRatingModal } from "@/components/wl-home-v2/wl-home-v2-setlist-rating-modal"
 import { WlHomeV2SetlistScanModal } from "@/components/wl-home-v2/wl-home-v2-setlist-scan-modal"
@@ -51,6 +52,20 @@ export function WlHomeV2SetlistPageModals({
         submitting={state.submitting}
         onFetchReviews={state.fetchReviews}
         validateReview={state.validateReview}
+      />
+      <WlHomeV2SetlistAttendeesModal
+        open={state.attendeesModalOpen}
+        onClose={() => state.setAttendeesModalOpen(false)}
+        headingId={state.attendeesModalHeadingId}
+        showDate={show.show_date ?? ""}
+        showVenueLocation={show.show_venue_location ?? ""}
+        attendeeCount={state.attendeeCount}
+        attendees={state.attendees}
+        isLoadingAttendees={state.isLoadingAttendees}
+        attendeesError={state.attendeesError}
+        onFetchAttendees={state.fetchAttendees}
+        showCanonPositions={state.showAttendeeCanonPositions}
+        currentUserId={state.sessionProfileId}
       />
       <WlHomeV2SetlistJotyModal
         open={state.jotyModalOpen}

@@ -20,7 +20,9 @@ import {
 import { useSetlistAttendance } from "@/hooks/use-setlist-attendance"
 import { useUserAttendedGooseCanonNav } from "@/hooks/use-user-attended-goose-canon-nav"
 import { useSetlistRating } from "@/hooks/use-setlist-rating"
+import { useSetlistAttendees } from "@/hooks/use-setlist-attendees"
 import { useMaxShowCanonId } from "@/hooks/use-max-show-canonid"
+import { isAttendedGooseCanonShow } from "@/lib/user-attended-goose-canon-nav"
 import { useSetlistYearId } from "@/hooks/use-setlist-year-id"
 import { useSongPairs } from "@/hooks/use-song-pairs"
 import { uniqueWtedEntriesFromPair } from "@/lib/song-pairs"
@@ -67,6 +69,7 @@ export function useWlHomeV2SetlistPageClient() {
   const songModalTourId = useId()
   const wtedModalHeadingId = useId()
   const ratingModalHeadingId = useId()
+  const attendeesModalHeadingId = useId()
   const scanHeadingId = useId()
   const [jotyModalOpen, setJotyModalOpen] = useState(false)
   const [songModalOpen, setSongModalOpen] = useState(false)
@@ -83,6 +86,7 @@ export function useWlHomeV2SetlistPageClient() {
     SetlistEntry[] | null
   >(null)
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
+  const [attendeesModalOpen, setAttendeesModalOpen] = useState(false)
   const [jotyYear, setJotyYear] = useState<number | null>(null)
   const [jotyHighlightedEntryId, setJotyHighlightedEntryId] = useState<
     string | null
@@ -140,6 +144,12 @@ export function useWlHomeV2SetlistPageClient() {
     fetchReviews,
     validateReview,
   } = useSetlistRating(showId, session)
+  const {
+    attendees,
+    isLoadingAttendees,
+    attendeesError,
+    fetchAttendees,
+  } = useSetlistAttendees(showId, show ?? null)
   const { attended, toggling, toggle } = useSetlistAttendance(
     showId,
     session,
@@ -151,6 +161,7 @@ export function useWlHomeV2SetlistPageClient() {
     show ?? null,
     attended,
   )
+  const showAttendeeCanonPositions = isAttendedGooseCanonShow(show)
 
   const onRatingClick = useCallback(() => {
     if (session) {
@@ -159,6 +170,10 @@ export function useWlHomeV2SetlistPageClient() {
     }
     openLogin?.()
   }, [session, openLogin])
+
+  const onAttendeesClick = useCallback(() => {
+    setAttendeesModalOpen(true)
+  }, [])
 
   const onAttendanceClick = useCallback(() => {
     if (!session) {
@@ -290,6 +305,7 @@ export function useWlHomeV2SetlistPageClient() {
     invalidParams,
     showId,
     show,
+    sessionProfileId: session?.profileId ?? null,
     setlist,
     loading,
     songPairsLoading,
@@ -329,7 +345,16 @@ export function useWlHomeV2SetlistPageClient() {
     toggling,
     attendedGooseCanonNav,
     onRatingClick,
+    onAttendeesClick,
     onAttendanceClick,
+    attendees,
+    isLoadingAttendees,
+    attendeesError,
+    fetchAttendees,
+    showAttendeeCanonPositions,
+    attendeesModalOpen,
+    setAttendeesModalOpen,
+    attendeesModalHeadingId,
     handleNumberClick,
     onJotyBadgeClick,
     onSongClick,

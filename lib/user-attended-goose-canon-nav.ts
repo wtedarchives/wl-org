@@ -90,7 +90,7 @@ async function fetchAllAttendedShowIds(userId: string): Promise<string[]> {
   return ids
 }
 
-async function fetchAttendedGooseCanonShowRows(
+export async function fetchAttendedGooseCanonShowRows(
   showIds: string[],
 ): Promise<AttendedGooseCanonShowRow[]> {
   const client = supabase

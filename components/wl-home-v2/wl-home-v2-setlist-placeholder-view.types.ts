@@ -41,6 +41,7 @@ export type WlHomeV2SetlistPlaceholderViewProps = {
   averageRating: number
   reviewCount: number
   onRatingClick: () => void
+  onAttendeesClick: () => void
   attendeeCount: number
   attended: boolean
   attendanceToggling: boolean
