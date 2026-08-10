@@ -23,6 +23,7 @@ All URL slugs for **Setlist Archive** pages must start with `/archive`.
   - **My Stats (signed-in)**: `/archive/profile?tab={slug}` — same tab slugs as public profiles. Path-style `/archive/profile/{tab}` **301** in `public/_redirects` to `?tab=`.
   - **Public user stats**: `/user?id={user_uuid}&tab={slug}` (`overview`, `shows`, `songs`, `slots`, `personnel`, `badges`; legacy `loose-ends` **301** / canonicalized to `badges`) — use `getUserProfileUrl` from `lib/user-profile-url.ts`. `/archive/user` **301** to `/user` with merged query in `public/_redirects`. Legacy `/user/{uuid}` **301** to `?id=`.
   - Submit: `/archive/submit`
+  - Find (admin): `/archive/find`
   - **Show setlist (per-show)**: `/archive/setlist?id={uuid}` — use `getSetlistArchiveUrl(showId)` from `lib/setlist-archive-url.ts` for every internal link. Static export cannot add new `generateStaticParams` entries after deploy; query-based URLs avoid that. **Legacy** `?show_id=` is still accepted on the client and replaced with `?id=` for the same value.
 
 ## Implementation

@@ -6,7 +6,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { ADMIN_SUB } from "@/components/app-sidebar.constants"
-import { FindDialog } from "@/components/dpro/admin/find-dialog"
 import { useAuth } from "@/components/auth-context"
 import { supabase } from "@/lib/supabase"
 import {
@@ -82,7 +81,6 @@ export function WlHomeV2UserMenu({
   const router = useRouter()
   const [profileUsername, setProfileUsername] = useState<string | null>(null)
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
-  const [findDialogOpen, setFindDialogOpen] = useState(false)
 
   useEffect(() => {
     if (!session || !supabase) {
@@ -207,15 +205,17 @@ export function WlHomeV2UserMenu({
                       </Link>
                     </DropdownMenuItem>
                   ))}
-                  <DropdownMenuItem
-                    className="top-nav-dd-item flex cursor-pointer items-center gap-2"
-                    onClick={() => setFindDialogOpen(true)}
-                  >
-                    <MagnifyingGlass
-                      className="top-nav-dd-icon size-4 shrink-0"
-                      aria-hidden
-                    />
-                    Find
+                  <DropdownMenuItem asChild className="top-nav-dd-item">
+                    <Link
+                      href="/archive/find"
+                      className="top-nav-dd-link flex cursor-pointer items-center gap-2"
+                    >
+                      <MagnifyingGlass
+                        className="top-nav-dd-icon size-4 shrink-0"
+                        aria-hidden
+                      />
+                      Find
+                    </Link>
                   </DropdownMenuItem>
                   {onOpenShareSchedule ?
                     <DropdownMenuItem
@@ -299,9 +299,6 @@ export function WlHomeV2UserMenu({
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      {isAdmin && (
-        <FindDialog open={findDialogOpen} onOpenChange={setFindDialogOpen} />
-      )}
     </>
   )
 }

@@ -5951,6 +5951,60 @@
     cursor: not-allowed;
     transform: none;
   }
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-results {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 210px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px;
+  }
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-results-note {
+    margin: 0;
+    padding: 8px 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .wl-home-v2
+    .modal.modal--dpro-find
+    .modal-dpro-find-results-note--error {
+    color: #fecaca;
+  }
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-result {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-result:hover,
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-result:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    outline: none;
+  }
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-result-name {
+    font-size: 13px;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .wl-home-v2 .modal.modal--dpro-find .modal-dpro-find-result-id {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.45);
+    word-break: break-all;
+  }
   .wl-home-v2 .modal.modal--wted-request.modal--dpro-bugs-resolve {
     max-width: min(440px, 96vw);
     max-height: min(88vh, 560px);
