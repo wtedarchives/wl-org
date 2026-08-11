@@ -36,6 +36,26 @@ const MAX_BYTES = 1_600_000
 /** JPEG has no alpha — the capture needs an opaque ground behind the card. */
 const CAPTURE_BACKGROUND = "#000000"
 
+/**
+ * Instagram canvas: exactly 4:5, the tallest ratio Instagram accepts for a feed
+ * image (it rejects anything outside 4:5–1.91:1). The card is centred inside
+ * this frame and scaled down when a long setlist would overflow, so the ratio is
+ * fixed by construction and can never drift into rejection territory.
+ *
+ * 576×720 CSS at pixelRatio 2 → 1152×1440, under Instagram's 1440px max width.
+ */
+const IG_CANVAS_WIDTH_PX = 576
+const IG_CANVAS_HEIGHT_PX = 720
+const IG_CANVAS_PADDING_PX = 16
+const IG_CAPTURE_STEPS = [
+  { pixelRatio: 2, quality: 0.9 },
+  { pixelRatio: 2, quality: 0.75 },
+  { pixelRatio: 1.5, quality: 0.7 },
+] as const
+
+/** Instagram's own limit is 8MB; this is comfortable headroom. */
+const IG_MAX_BYTES = 4_000_000
+
 type SetlistShareCaptureContextValue = {
   /**
    * Base64 JPEG (no data: prefix) of the setlist share card with coach notes,
@@ -43,6 +63,8 @@ type SetlistShareCaptureContextValue = {
    * not block the Discourse/push/Bluesky send.
    */
   capture: () => Promise<string | null>
+  /** Same card, letterboxed into a fixed 4:5 canvas for Instagram. */
+  captureInstagram: () => Promise<string | null>
 }
 
 const SetlistShareCaptureContext =
@@ -93,6 +115,9 @@ export function SetlistShareCaptureProvider({
   children: React.ReactNode
 }) {
   const captureRef = useRef<HTMLDivElement | null>(null)
+  const igCaptureRef = useRef<HTMLDivElement | null>(null)
+  const igCardRef = useRef<HTMLDivElement | null>(null)
+  const [igScale, setIgScale] = useState(1)
   const [show, setShow] = useState<Show | null>(null)
   const [entries, setEntries] = useState<SetlistEntry[]>([])
   // Portal target is only available after mount (static export prerenders this).
@@ -165,11 +190,30 @@ export function SetlistShareCaptureProvider({
     }
   }, [showId, loadShow, loadEntries])
 
-  const capture = useCallback(async (): Promise<string | null> => {
-    if (!showId) return null
-    try {
-      // Refetch first: the entry being announced was likely just added, and a
-      // stale card would omit the very song this post is about.
+  /**
+   * Fit the card to the 4:5 canvas. Scales up to fill the width on short
+   * setlists and down to fit the height on long ones. `offsetHeight` ignores
+   * transforms, so the measurement stays stable across recalculations.
+   */
+  useEffect(() => {
+    const card = igCardRef.current
+    if (!card) return
+    const width = card.offsetWidth
+    const height = card.offsetHeight
+    if (!width || !height) return
+    const availableWidth = IG_CANVAS_WIDTH_PX - IG_CANVAS_PADDING_PX * 2
+    const availableHeight = IG_CANVAS_HEIGHT_PX - IG_CANVAS_PADDING_PX * 2
+    const next = Math.min(availableWidth / width, availableHeight / height)
+    setIgScale(Number.isFinite(next) && next > 0 ? next : 1)
+  }, [show, entries])
+
+  /**
+   * Refetch, commit, and hand back the node to rasterise. The entry being
+   * announced was likely just added, and a stale card would omit the very song
+   * the post is about.
+   */
+  const prepareNode = useCallback(
+    async (ref: typeof captureRef): Promise<HTMLDivElement | null> => {
       const [freshShow, freshEntries] = await Promise.all([
         loadShow(),
         loadEntries(),
@@ -178,18 +222,24 @@ export function SetlistShareCaptureProvider({
       setShow(freshShow)
       setEntries(freshEntries)
 
-      // Let React commit the refreshed card before rasterising it.
-      await new Promise((resolve) =>
-        requestAnimationFrame(() => resolve(null)),
-      )
-      await new Promise((resolve) =>
-        requestAnimationFrame(() => resolve(null)),
-      )
+      // Two frames: one for React to commit, one for layout to settle.
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
 
-      const node = captureRef.current
-      if (!node) return null
+      return ref.current
+    },
+    [loadShow, loadEntries],
+  )
 
-      for (const step of CAPTURE_STEPS) {
+  /** Try each quality rung until one lands under `maxBytes`. */
+  const rasterise = useCallback(
+    async (
+      node: HTMLDivElement,
+      steps: ReadonlyArray<{ pixelRatio: number; quality: number }>,
+      maxBytes: number,
+      label: string,
+    ): Promise<string | null> => {
+      for (const step of steps) {
         const dataUrl = await toJpeg(node, {
           cacheBust: true,
           pixelRatio: step.pixelRatio,
@@ -198,22 +248,46 @@ export function SetlistShareCaptureProvider({
         })
         const base64 = dataUrl ? base64FromDataUrl(dataUrl) : null
         if (!base64) continue
-        if (decodedByteLength(base64) <= MAX_BYTES) return base64
+        if (decodedByteLength(base64) <= maxBytes) return base64
       }
-
-      console.error(
-        "share capture: every quality step exceeded the size budget",
-      )
+      console.error(`${label}: every quality step exceeded the size budget`)
       return null
+    },
+    [],
+  )
+
+  const capture = useCallback(async (): Promise<string | null> => {
+    if (!showId) return null
+    try {
+      const node = await prepareNode(captureRef)
+      if (!node) return null
+      return await rasterise(node, CAPTURE_STEPS, MAX_BYTES, "share capture")
     } catch (err) {
       console.error("share capture failed:", err)
       return null
     }
-  }, [showId, loadShow, loadEntries])
+  }, [showId, prepareNode, rasterise])
+
+  const captureInstagram = useCallback(async (): Promise<string | null> => {
+    if (!showId) return null
+    try {
+      const node = await prepareNode(igCaptureRef)
+      if (!node) return null
+      return await rasterise(
+        node,
+        IG_CAPTURE_STEPS,
+        IG_MAX_BYTES,
+        "instagram capture",
+      )
+    } catch (err) {
+      console.error("instagram capture failed:", err)
+      return null
+    }
+  }, [showId, prepareNode, rasterise])
 
   const value = useMemo<SetlistShareCaptureContextValue>(
-    () => ({ capture }),
-    [capture],
+    () => ({ capture, captureInstagram }),
+    [capture, captureInstagram],
   )
 
   return (
@@ -252,6 +326,57 @@ export function SetlistShareCaptureProvider({
               showPositionInTour={showPositionInTour}
               showEntryCoachNotes
             />
+
+            {/*
+             * Instagram frame — a fixed 4:5 canvas with the same card centred
+             * inside it. Instagram rejects feed images outside 4:5–1.91:1, and
+             * the card grows with the setlist, so pinning the canvas and scaling
+             * the card to fit makes rejection impossible regardless of length.
+             */}
+            <div
+              ref={igCaptureRef}
+              style={{
+                width: IG_CANVAS_WIDTH_PX,
+                height: IG_CANVAS_HEIGHT_PX,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                background: CAPTURE_BACKGROUND,
+                position: "relative",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- JPEG capture; must rasterize reliably */}
+              <img
+                src={backgroundSrc}
+                alt=""
+                crossOrigin="anonymous"
+                draggable={false}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              <div
+                style={{
+                  position: "relative",
+                  transform: `scale(${igScale})`,
+                  transformOrigin: "center center",
+                }}
+              >
+                <WlHomeV2SetlistShareExportCard
+                  ref={igCardRef}
+                  backgroundSrc={backgroundSrc}
+                  show={show}
+                  setlist={entries}
+                  showPositionInTour={showPositionInTour}
+                  showEntryCoachNotes
+                />
+              </div>
+            </div>
           </div>,
           document.body,
         )

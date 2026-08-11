@@ -128,7 +128,8 @@ async function loadShowPosterImage(
   return image || undefined
 }
 
-async function loadRootShowInfo(
+/** Also used by the Instagram caption builder. */
+export async function loadRootShowInfo(
   db: SupabaseClient,
   showId: string,
 ): Promise<BlueskyRootShowInfo> {

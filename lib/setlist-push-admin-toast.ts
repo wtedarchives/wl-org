@@ -40,11 +40,18 @@ export type SetlistBlueskyResult = {
   error?: string
 }
 
+export type SetlistInstagramResult = {
+  status: "created" | "skipped" | "disabled" | "failed"
+  mediaId?: string
+  error?: string
+}
+
 /** `dpro-admin` payload shared by the brain button and the show-event buttons. */
 export type SetlistBrainResponse = {
   discourse?: SetlistDiscourseResult
   push?: SendSetlistPushResult
   bluesky?: SetlistBlueskyResult
+  instagram?: SetlistInstagramResult
 }
 
 /**
@@ -63,7 +70,7 @@ export function formatSetlistBrainToasts(
   const error: string[] = []
   if (!response) return { success, error, failed: false }
 
-  const { discourse, push, bluesky } = response
+  const { discourse, push, bluesky, instagram } = response
 
   if (discourse?.error) {
     error.push(`Discourse failed: ${discourse.error}`)
@@ -80,6 +87,14 @@ export function formatSetlistBrainToasts(
     success.push("Bluesky: post updated")
   } else if (bluesky?.status === "failed") {
     error.push(`Bluesky failed: ${bluesky.error ?? "unknown error"}`)
+  }
+
+  if (instagram?.status === "created") {
+    success.push("Instagram: posted")
+  } else if (instagram?.status === "skipped") {
+    success.push("Instagram: already posted for this show — skipped")
+  } else if (instagram?.status === "failed") {
+    error.push(`Instagram failed: ${instagram.error ?? "unknown error"}`)
   }
 
   return { success, error, failed: error.length > 0 }

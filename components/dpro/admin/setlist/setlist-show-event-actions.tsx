@@ -15,6 +15,7 @@ import {
 } from "@/lib/setlist-push-admin-toast"
 import { cn } from "@/lib/utils"
 import type { ShowData } from "@/types/admin"
+import { useSetlistShareCapture } from "./setlist-share-capture"
 
 const SETLIST_SHOW_EVENT_ACTIONS = [
   { label: "Onstage", event: "onstage" },
@@ -38,6 +39,7 @@ export function SetlistShowEventActions({
   selectedShow,
 }: SetlistShowEventActionsProps) {
   const { session } = useAuth()
+  const shareCapture = useSetlistShareCapture()
   const [buttonStatus, setButtonStatus] = useState<
     Partial<Record<SetlistShowEventLabel, SetlistShowEventButtonStatus>>
   >({})
@@ -84,10 +86,21 @@ export function SetlistShowEventActions({
 
     setButtonStatus((prev) => ({ ...prev, [label]: "sending" }))
     try {
+      // Instagram gets one post per show, at end of show only — so the 4:5
+      // capture only runs for that button. A null capture surfaces as an
+      // Instagram failure in the toast; it can't block the other targets.
+      const instagramImage =
+        event === "end_show" ?
+          ((await shareCapture?.captureInstagram()) ?? null)
+        : null
+
       const { data, error } = await invokeDproAdmin<SetlistBrainResponse>(token, {
         action: "setlist_discourse_show_event",
         show_id: selectedShow.show_id,
         event,
+        ...(instagramImage ?
+          { instagram_image_jpeg_base64: instagramImage }
+        : {}),
       })
       if (error) throw new Error(error)
       const toasts = formatSetlistBrainToasts(data)

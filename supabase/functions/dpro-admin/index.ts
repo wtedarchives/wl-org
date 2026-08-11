@@ -26,6 +26,7 @@ import {
   postSetlistShowEventToBluesky,
   postSetlistSongToBluesky,
 } from "../_shared/bluesky-setlist-post.ts"
+import { postSetlistToInstagram } from "../_shared/instagram-setlist-post.ts"
 import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
 
 function httpErr(message: string, status: number) {
@@ -904,6 +905,17 @@ async function handleAction(
       // appends a new reply rather than editing.
       const bluesky = await postSetlistShowEventToBluesky(db, show_id, event)
 
+      // Instagram gets one post per show, at end of show only. Isolated like
+      // the Bluesky leg: a failure here can't affect Discourse, push, or Bluesky.
+      const instagram =
+        event === "end_show" ?
+          await postSetlistToInstagram(db, show_id, {
+            imageJpegBase64: body.instagram_image_jpeg_base64 as
+              | string
+              | undefined,
+          })
+        : undefined
+
       return {
         data: {
           message,
@@ -912,6 +924,7 @@ async function handleAction(
           discourse: { posted: posted.ok, skipped: false, error: discourseError },
           push: pushResult,
           bluesky,
+          instagram,
         },
       }
     }
