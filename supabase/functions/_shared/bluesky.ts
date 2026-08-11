@@ -49,6 +49,32 @@ export type BlueskyClient = {
   createPost(record: BlueskyPostRecord): Promise<BlueskyCreatedPost>
   putPost(rkey: string, record: BlueskyPostRecord): Promise<BlueskyStrongRef>
   uploadImage(imageUrl: string): Promise<BlueskyBlob | undefined>
+  uploadImageBytes(
+    bytes: Uint8Array,
+    mimeType: string,
+  ): Promise<BlueskyBlob | undefined>
+}
+
+/**
+ * Supabase Storage public object URL → the image-transform endpoint, bounded to
+ * `maxWidth` and re-encoded at `quality`.
+ *
+ * Show posters are stored at full scan resolution (the bucket allows 20MB) and
+ * routinely exceed the 2MB embed cap, which would silently drop the embed. The
+ * transform brings a ~2.7MB poster to ~0.5MB. Non-Storage URLs pass through
+ * untouched.
+ */
+export function boundedSupabaseImageUrl(
+  imageUrl: string,
+  maxWidth = 1200,
+  quality = 80,
+): string {
+  const url = imageUrl.trim()
+  const marker = "/storage/v1/object/public/"
+  if (!url.includes(marker)) return url
+  const transformed = url.replace(marker, "/storage/v1/render/image/public/")
+  const separator = transformed.includes("?") ? "&" : "?"
+  return `${transformed}${separator}width=${maxWidth}&quality=${quality}`
 }
 
 const utf8Length = (value: string): number =>
@@ -289,7 +315,9 @@ export async function createBlueskyClient(
   /** Authenticated XRPC call; re-authenticates once on an expired access token. */
   const authed = async (
     path: string,
-    init: { body: BodyInit; contentType: string },
+    // JSON payloads or raw image bytes; cast at the call because lib.dom's
+    // BodyInit doesn't admit Deno's Uint8Array.
+    init: { body: string | Uint8Array; contentType: string },
   ): Promise<Response> => {
     const send = () =>
       fetch(`${session.pdsUrl}/xrpc/${path}`, {
@@ -299,7 +327,7 @@ export async function createBlueskyClient(
           "Content-Type": init.contentType,
           Accept: "application/json",
         },
-        body: init.body,
+        body: init.body as BodyInit,
       })
 
     let res = await send()
@@ -335,6 +363,39 @@ export async function createBlueskyClient(
     return { uri: body.uri, cid: body.cid }
   }
 
+  /**
+   * Upload raw image bytes as a blob. Returns undefined — never throws — when
+   * the bytes are empty or over the embed cap, so a bad image degrades to a
+   * text-only post instead of losing the post.
+   */
+  const uploadBytes = async (
+    bytes: Uint8Array,
+    mimeType: string,
+  ): Promise<BlueskyBlob | undefined> => {
+    try {
+      if (bytes.byteLength === 0) return undefined
+      if (bytes.byteLength > IMAGE_MAX_BYTES) {
+        console.error(
+          `bluesky image: ${bytes.byteLength} bytes exceeds ${IMAGE_MAX_BYTES}`,
+        )
+        return undefined
+      }
+      const res = await authed("com.atproto.repo.uploadBlob", {
+        body: bytes,
+        contentType: mimeType,
+      })
+      if (!res.ok) {
+        console.error("bluesky uploadBlob:", await readXrpcError(res))
+        return undefined
+      }
+      const body = (await res.json()) as { blob?: BlueskyBlob }
+      return body.blob ?? undefined
+    } catch (err) {
+      console.error("bluesky uploadBlob:", err)
+      return undefined
+    }
+  }
+
   return {
     get did() {
       return session.did
@@ -360,11 +421,9 @@ export async function createBlueskyClient(
       })
     },
 
-    /**
-     * Fetch an image URL and upload it as a blob. Returns undefined — never
-     * throws — when the image is missing, oversized, or not an image, so a bad
-     * artwork URL degrades to a text-only post instead of losing the post.
-     */
+    uploadImageBytes: uploadBytes,
+
+    /** Fetch an image URL and upload it. Same never-throws contract as above. */
     async uploadImage(imageUrl) {
       const url = imageUrl.trim()
       if (!url) return undefined
@@ -381,25 +440,10 @@ export async function createBlueskyClient(
           console.error(`bluesky image fetch ${url}: non-image ${mimeType}`)
           return undefined
         }
-        const bytes = new Uint8Array(await imageRes.arrayBuffer())
-        if (bytes.byteLength === 0) return undefined
-        if (bytes.byteLength > IMAGE_MAX_BYTES) {
-          console.error(
-            `bluesky image ${url}: ${bytes.byteLength} bytes exceeds ${IMAGE_MAX_BYTES}`,
-          )
-          return undefined
-        }
-
-        const res = await authed("com.atproto.repo.uploadBlob", {
-          body: bytes,
-          contentType: mimeType,
-        })
-        if (!res.ok) {
-          console.error("bluesky uploadBlob:", await readXrpcError(res))
-          return undefined
-        }
-        const body = (await res.json()) as { blob?: BlueskyBlob }
-        return body.blob ?? undefined
+        return await uploadBytes(
+          new Uint8Array(await imageRes.arrayBuffer()),
+          mimeType,
+        )
       } catch (err) {
         console.error(`bluesky image upload ${url}:`, err)
         return undefined

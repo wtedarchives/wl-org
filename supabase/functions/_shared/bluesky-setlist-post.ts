@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import {
+  boundedSupabaseImageUrl,
   buildLinkFacets,
   createBlueskyClient,
   rkeyFromPostUri,
@@ -185,7 +186,12 @@ async function ensureThreadRoot(
   const url = getSetlistShowAbsoluteUrl(showId)
 
   const posterImage = await loadShowPosterImage(db, showId)
-  const posterBlob = posterImage ? await client.uploadImage(posterImage) : undefined
+  // Posters are full-resolution scans and routinely blow past the 2MB embed cap,
+  // so they go through Storage's image transform on the way out.
+  const posterBlob =
+    posterImage ?
+      await client.uploadImage(boundedSupabaseImageUrl(posterImage))
+    : undefined
   let embed: Record<string, unknown>
   if (posterBlob) {
     const card = buildBlueskyExternalCardMeta(info)
@@ -327,16 +333,45 @@ async function loadSongContext(
   }
 }
 
+/** Base64 JPEG (no data: prefix) → bytes, or undefined when unusable. */
+function decodeJpegBase64(base64: string | undefined): Uint8Array | undefined {
+  const raw = (base64 ?? "").trim()
+  if (!raw) return undefined
+  try {
+    // Tolerate a data: prefix in case a caller sends the full data URL.
+    const payload = raw.includes(",") ? raw.slice(raw.indexOf(",") + 1) : raw
+    const binary = atob(payload)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
+    return bytes.byteLength > 0 ? bytes : undefined
+  } catch (err) {
+    console.error("bluesky song image decode:", err)
+    return undefined
+  }
+}
+
+export type PostSetlistSongOptions = {
+  /**
+   * Base64 JPEG of the setlist share card, captured in the browser at press
+   * time. The card is rendered by `html-to-image` from live DOM, which Deno
+   * can't reproduce, so it has to arrive from the client.
+   */
+  songImageJpegBase64?: string
+}
+
 /**
  * Create — or, on a repeat press, edit — this entry's song post.
  *
  * `putRecord` keeps the post's URI and its original `createdAt`, and the stored
  * reply refs and embed are replayed so an edit can't detach the post from the
- * thread or drop its artwork.
+ * thread or drop its artwork. Note that Bluesky's AppView does not re-index
+ * updated post records, so an edit is durable in the repo but invisible in
+ * clients — see the notes in the admin brain button.
  */
 export async function postSetlistSongToBluesky(
   db: SupabaseClient,
   entryId: string,
+  options: PostSetlistSongOptions = {},
 ): Promise<BlueskyPostResult> {
   try {
     const client = await createBlueskyClient(db)
@@ -387,8 +422,16 @@ export async function postSetlistSongToBluesky(
     }
 
     const thread = await ensureThreadRoot(db, client, context.showId)
-    const artworkBlob =
-      context.artworkUrl ? await client.uploadImage(context.artworkUrl) : undefined
+
+    // Setlist share card when the client captured one; category artwork is the
+    // fallback so a failed capture still yields an illustrated post.
+    const capturedBytes = decodeJpegBase64(options.songImageJpegBase64)
+    const imageBlob =
+      capturedBytes ? await client.uploadImageBytes(capturedBytes, "image/jpeg")
+      : context.artworkUrl ?
+        await client.uploadImage(boundedSupabaseImageUrl(context.artworkUrl))
+      : undefined
+
     const ref = await appendThreadReply(
       db,
       client,
@@ -399,8 +442,8 @@ export async function postSetlistSongToBluesky(
       {
         entryId,
         embed:
-          artworkBlob ?
-            imagesEmbed(artworkBlob, context.text.split("\n")[0])
+          imageBlob ?
+            imagesEmbed(imageBlob, context.text.split("\n")[0])
           : undefined,
       },
     )

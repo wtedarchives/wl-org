@@ -997,7 +997,9 @@ async function handleAction(
         }
       }
 
-      const bluesky = await postSetlistSongToBluesky(db, entry_id)
+      const bluesky = await postSetlistSongToBluesky(db, entry_id, {
+        songImageJpegBase64: body.song_image_jpeg_base64 as string | undefined,
+      })
 
       return {
         data: {

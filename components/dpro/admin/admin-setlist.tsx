@@ -6,6 +6,7 @@ import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
 import { WlWidgetPanelLoading } from "@/components/dpro/wl-widget-panel-loading"
 import { MainHeader } from "./setlist/main-header"
 import { ShowHeader } from "./setlist/show-header"
+import { SetlistShareCaptureProvider } from "./setlist/setlist-share-capture"
 import { SetlistShowEventActions } from "./setlist/setlist-show-event-actions"
 import { SetlistTable } from "./setlist/setlist-table"
 
@@ -78,6 +79,9 @@ export function AdminSetlist() {
 
   return (
     <AdminTabShell>
+      {/* Mounts the offscreen setlist share card so the brain button can attach
+          it to Bluesky song posts. */}
+      <SetlistShareCaptureProvider showId={selectedShow?.show_id}>
       <MainHeader
         saveStatus={saveStatus}
         shows={shows}
@@ -149,6 +153,7 @@ export function AdminSetlist() {
         isNewEntry={isNewEntry}
         allShows={shows}
       />
+      </SetlistShareCaptureProvider>
     </AdminTabShell>
   )
 }
