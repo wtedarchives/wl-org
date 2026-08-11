@@ -10,8 +10,8 @@ import { useAuth } from "@/components/auth-context"
 import { isDevAuthMockSessionActive } from "@/lib/dev-auth-mock"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import {
-  formatSetlistPushAdminToast,
-  type SendSetlistPushResult,
+  formatSetlistBrainToasts,
+  type SetlistBrainResponse,
 } from "@/lib/setlist-push-admin-toast"
 import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
@@ -62,16 +62,15 @@ export function SetlistEntryDiscourseBrain({
 
     setStatus("sending")
     try {
-      const { data, error } = await invokeDproAdmin<{
-        push?: SendSetlistPushResult
-      }>(token, {
+      const { data, error } = await invokeDproAdmin<SetlistBrainResponse>(token, {
         action: "setlist_discourse_now_playing",
         entry_id: entry.entry_id,
       })
       if (error) throw new Error(error)
-      setOutcomeWithReset("success")
-      const pushMessage = formatSetlistPushAdminToast(data?.push)
-      if (pushMessage) toast.success(pushMessage)
+      const toasts = formatSetlistBrainToasts(data)
+      setOutcomeWithReset(toasts.failed ? "error" : "success")
+      for (const message of toasts.success) toast.success(message)
+      for (const message of toasts.error) toast.error(message)
     } catch (err) {
       setOutcomeWithReset("error")
       toast.error(

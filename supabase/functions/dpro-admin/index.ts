@@ -22,6 +22,10 @@ import {
   resolveSongCategoryArtwork,
   sendSetlistPushNotifications,
 } from "../_shared/setlist-push-notifications.ts"
+import {
+  postSetlistShowEventToBluesky,
+  postSetlistSongToBluesky,
+} from "../_shared/bluesky-setlist-post.ts"
 import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
 
 function httpErr(message: string, status: number) {
@@ -870,32 +874,44 @@ async function handleAction(
         BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
         message,
       )
-      if (!posted.ok) return { error: posted.error }
-      const pushPayload = buildSetlistShowEventPushNotification(
-        show_id,
-        String(show.show_date ?? ""),
-        show.show_venue_location as string | null | undefined,
-        event,
-      )
+      // Discourse no longer short-circuits: push and Bluesky are independent
+      // targets and a Discourse outage shouldn't silence either of them.
+      const discourseError = posted.ok ? undefined : posted.error
+
       let pushResult
-      try {
-        pushResult = await sendSetlistPushNotifications(db, pushPayload)
-      } catch (pushErr) {
-        console.error("setlist_discourse_show_event push:", pushErr)
-        pushResult = {
-          attempted: 0,
-          sent: 0,
-          failed: 0,
-          removed: 0,
-          skipped: "push send crashed",
+      if (posted.ok) {
+        const pushPayload = buildSetlistShowEventPushNotification(
+          show_id,
+          String(show.show_date ?? ""),
+          show.show_venue_location as string | null | undefined,
+          event,
+        )
+        try {
+          pushResult = await sendSetlistPushNotifications(db, pushPayload)
+        } catch (pushErr) {
+          console.error("setlist_discourse_show_event push:", pushErr)
+          pushResult = {
+            attempted: 0,
+            sent: 0,
+            failed: 0,
+            removed: 0,
+            skipped: "push send crashed",
+          }
         }
       }
+
+      // Repeatable by design — onstage/breaks fire once per set, so each press
+      // appends a new reply rather than editing.
+      const bluesky = await postSetlistShowEventToBluesky(db, show_id, event)
+
       return {
         data: {
           message,
           channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
           event,
+          discourse: { posted: posted.ok, skipped: false, error: discourseError },
           push: pushResult,
+          bluesky,
         },
       }
     }
@@ -905,7 +921,9 @@ async function handleAction(
       if (!entry_id) return { error: "Missing entry_id" }
       const { data: entry, error: entryErr } = await db
         .from("setlist_entries")
-        .select("entry_id, entry_show, entry_set, entry_setnum, entry_song")
+        .select(
+          "entry_id, entry_show, entry_set, entry_setnum, entry_song, entry_discourse_posted_at",
+        )
         .eq("entry_id", entry_id)
         .maybeSingle()
       if (entryErr) return { error: entryErr.message }
@@ -925,43 +943,74 @@ async function handleAction(
         Number(entry.entry_setnum),
         entry.entry_song as string | null | undefined,
       )
-      const posted = await postBrainsDiscourseChatMessage(
-        BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
-        message,
-      )
-      if (!posted.ok) return { error: posted.error }
-      const nowPlayingArtwork = await resolveSongCategoryArtwork(
-        db,
-        entry.entry_song as string | null | undefined,
-      )
-      const pushPayload = buildSetlistNowPlayingPushNotification(
-        String(entry.entry_show),
-        String(show.show_date ?? ""),
-        show.show_venue_location as string | null | undefined,
-        entry.entry_set as string | null | undefined,
-        Number(entry.entry_setnum),
-        entry.entry_song as string | null | undefined,
-        nowPlayingArtwork,
-      )
+      // One button, two behaviours. Discourse and push are fire-once — a repeat
+      // press (fixing a song, adding coach notes) must not duplicate them.
+      // Bluesky always runs and edits its existing post in place.
+      const alreadyAnnounced = Boolean(entry.entry_discourse_posted_at)
+      let discoursePosted = false
+      let discourseError: string | undefined
       let pushResult
-      try {
-        pushResult = await sendSetlistPushNotifications(db, pushPayload)
-      } catch (pushErr) {
-        console.error("setlist_discourse_now_playing push:", pushErr)
-        pushResult = {
-          attempted: 0,
-          sent: 0,
-          failed: 0,
-          removed: 0,
-          skipped: "push send crashed",
+
+      if (!alreadyAnnounced) {
+        const posted = await postBrainsDiscourseChatMessage(
+          BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
+          message,
+        )
+        discoursePosted = posted.ok
+        discourseError = posted.ok ? undefined : posted.error
+
+        if (posted.ok) {
+          // Stamped only on success, so a failed send is retried by pressing again.
+          const { error: stampErr } = await db
+            .from("setlist_entries")
+            .update({ entry_discourse_posted_at: new Date().toISOString() })
+            .eq("entry_id", entry_id)
+          if (stampErr) {
+            console.error("entry_discourse_posted_at stamp:", stampErr.message)
+          }
+
+          const nowPlayingArtwork = await resolveSongCategoryArtwork(
+            db,
+            entry.entry_song as string | null | undefined,
+          )
+          const pushPayload = buildSetlistNowPlayingPushNotification(
+            String(entry.entry_show),
+            String(show.show_date ?? ""),
+            show.show_venue_location as string | null | undefined,
+            entry.entry_set as string | null | undefined,
+            Number(entry.entry_setnum),
+            entry.entry_song as string | null | undefined,
+            nowPlayingArtwork,
+          )
+          try {
+            pushResult = await sendSetlistPushNotifications(db, pushPayload)
+          } catch (pushErr) {
+            console.error("setlist_discourse_now_playing push:", pushErr)
+            pushResult = {
+              attempted: 0,
+              sent: 0,
+              failed: 0,
+              removed: 0,
+              skipped: "push send crashed",
+            }
+          }
         }
       }
+
+      const bluesky = await postSetlistSongToBluesky(db, entry_id)
+
       return {
         data: {
           message,
           channel_id: BRAINS_DISCOURSE_ONSTAGE_CHANNEL_ID,
           entry_id,
+          discourse: {
+            posted: discoursePosted,
+            skipped: alreadyAnnounced,
+            error: discourseError,
+          },
           push: pushResult,
+          bluesky,
         },
       }
     }
