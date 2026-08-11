@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import {
   getInstagramToken,
+  INSTAGRAM_MAX_CAPTION_CHARS,
   isInstagramEnabled,
   publishInstagramImage,
 } from "./instagram.ts"
@@ -22,11 +23,77 @@ export type InstagramPostResult = {
 const clean = (value: string | null | undefined): string => (value ?? "").trim()
 
 /**
- * Caption for the end-of-show post. Instagram captions aren't linkified, so the
- * URL is plain text people have to type — hence "Full setlist:" framing rather
- * than pretending it's a link.
+ * Songs whose `entry_short` is never rendered. Mirrors
+ * `ENTRY_SHORT_HIDDEN_FOR_SONGS` in
+ * `components/dpro/setlist/display-setlist-table.constants.ts` — duplicated
+ * because edge functions can't import from the Next app. Keep the two in sync.
  */
-export function buildInstagramCaption(info: BlueskyRootShowInfo): string {
+const ENTRY_SHORT_HIDDEN_FOR_SONGS = new Set([
+  "Charge",
+  "First Call",
+  "Happy Birthday to You",
+  "[Trevor Reads Poetry]",
+])
+
+export type CaptionEntry = {
+  entry_set: string | null
+  entry_setnum: number | null
+  entry_song: string | null
+  entry_short: string | null
+  entry_segue: string | null
+  songs?: { song_displayname: string | null } | null
+}
+
+/** Separator printed between sets. */
+const SET_SEPARATOR = "---"
+
+/**
+ * Plain-text setlist for the caption.
+ *
+ *     Royal ->
+ *     The Whales ->
+ *     No California
+ *     ---
+ *     Arrow ->
+ *
+ * Display names are preferred over raw `entry_song`. `entry_short` renders as a
+ * bracketed tag (`unfinished`, `reprise`, …) matching how the card annotates it,
+ * and `entry_segue` — always `>` in the data — becomes a trailing `->`.
+ */
+export function buildInstagramSetlistText(entries: CaptionEntry[]): string {
+  const lines: string[] = []
+  let previousSet: string | null = null
+
+  for (const entry of entries) {
+    const set = clean(entry.entry_set)
+    if (previousSet !== null && set !== previousSet) lines.push(SET_SEPARATOR)
+    previousSet = set
+
+    const song = clean(entry.entry_song)
+    const name = clean(entry.songs?.song_displayname) || song || "—"
+
+    const short = clean(entry.entry_short)
+    const showShort = short && !ENTRY_SHORT_HIDDEN_FOR_SONGS.has(song)
+
+    // The column stores a bare `>`. Any `>` is stripped and replaced with a
+    // literal `->` so the raw character can never reach the caption, even if a
+    // row someday holds `>>` or `> partial`.
+    const segueRaw = clean(entry.entry_segue)
+    const hasSegue = segueRaw.length > 0
+    const segueNote = segueRaw.replace(/>/g, "").trim()
+
+    lines.push(
+      [name, showShort ? `[${short}]` : "", hasSegue ? "->" : "", segueNote]
+        .filter(Boolean)
+        .join(" "),
+    )
+  }
+
+  return lines.join("\n")
+}
+
+/** Show-context header — date, venue, tour position. */
+function buildCaptionHeader(info: BlueskyRootShowInfo): string {
   const date = formatShowDateMmDdYy(info.showDate)
   const group = clean(info.showGroup)
   const subvenue = clean(info.showSubvenue)
@@ -38,16 +105,71 @@ export function buildInstagramCaption(info: BlueskyRootShowInfo): string {
       `Show ${info.tourPosition.position} of ${info.tourPosition.total}`
     : ""
 
-  const lines = [
+  return [
     group ? `${date} – ${group}` : date,
     subvenue ? `${subvenue} – ${location}` : location,
     detail,
     tour && counter ? `${tour} – ${counter}`
     : tour ? tour
     : counter,
-  ].filter(Boolean)
+  ]
+    .filter(Boolean)
+    .join("\n")
+}
 
-  return `${lines.join("\n")}\n\nFull setlist: ${getSetlistShowAbsoluteUrl(info.showId)}`
+/**
+ * Caption for the end-of-show post: show header, then the text setlist.
+ *
+ * Falls back to the setlist URL when there are no entries to print. Instagram
+ * captions aren't linkified, so that URL is text people have to type — it's a
+ * fallback, not the primary payload.
+ */
+export function buildInstagramCaption(
+  info: BlueskyRootShowInfo,
+  entries: CaptionEntry[],
+): string {
+  const header = buildCaptionHeader(info)
+  const setlist = buildInstagramSetlistText(entries)
+  if (!setlist) {
+    return `${header}\n\nFull setlist: ${getSetlistShowAbsoluteUrl(info.showId)}`
+  }
+
+  const caption = `${header}\n\n${setlist}`
+  if (caption.length <= INSTAGRAM_MAX_CAPTION_CHARS) return caption
+
+  // Very long setlist — keep the header and as many songs as fit.
+  console.error(
+    `instagram caption ${caption.length} chars exceeds ${INSTAGRAM_MAX_CAPTION_CHARS}; trimming`,
+  )
+  const budget = INSTAGRAM_MAX_CAPTION_CHARS - header.length - 4
+  const kept: string[] = []
+  let used = 0
+  for (const line of setlist.split("\n")) {
+    if (used + line.length + 1 > budget) break
+    kept.push(line)
+    used += line.length + 1
+  }
+  return `${header}\n\n${kept.join("\n")}\n…`
+}
+
+/** Entries in card order: set ascending, then position within the set. */
+async function loadCaptionEntries(
+  db: SupabaseClient,
+  showId: string,
+): Promise<CaptionEntry[]> {
+  const { data, error } = await db
+    .from("setlist_entries")
+    .select(
+      "entry_set, entry_setnum, entry_song, entry_short, entry_segue, songs ( song_displayname )",
+    )
+    .eq("entry_show", showId)
+    .order("entry_set", { ascending: true })
+    .order("entry_setnum", { ascending: true })
+  if (error) {
+    console.error("instagram caption entries:", error.message)
+    return []
+  }
+  return (data ?? []) as unknown as CaptionEntry[]
 }
 
 /** Base64 JPEG (tolerating a data: prefix) → bytes. */
@@ -133,8 +255,11 @@ export async function postSetlistToInstagram(
       return { status: "failed", error: "No usable Instagram access token." }
     }
 
-    const info = await loadRootShowInfo(db, showId)
-    const caption = buildInstagramCaption(info)
+    const [info, captionEntries] = await Promise.all([
+      loadRootShowInfo(db, showId),
+      loadCaptionEntries(db, showId),
+    ])
+    const caption = buildInstagramCaption(info, captionEntries)
     const imageUrl = await uploadInstagramImage(db, showId, bytes)
 
     const published = await publishInstagramImage({
