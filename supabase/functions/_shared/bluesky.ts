@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { readImageDimensions, type ImageDimensions } from "./image-dimensions.ts"
 
 const DEFAULT_PDS_URL = "https://bsky.social"
 const POST_COLLECTION = "app.bsky.feed.post"
@@ -43,30 +44,48 @@ type BlueskySessionState = {
   refreshJwt: string
 }
 
+/**
+ * An uploaded blob plus its pixel dimensions when they could be read.
+ *
+ * `aspectRatio` matters: without it clients can't reserve the right box before
+ * the image loads and fall back to a square container, letterboxing anything
+ * that isn't square.
+ */
+export type BlueskyUploadedImage = {
+  blob: BlueskyBlob
+  aspectRatio?: ImageDimensions
+}
+
 /** Bluesky client bound to the cached session row. Created via {@link createBlueskyClient}. */
 export type BlueskyClient = {
   did: string
   createPost(record: BlueskyPostRecord): Promise<BlueskyCreatedPost>
   putPost(rkey: string, record: BlueskyPostRecord): Promise<BlueskyStrongRef>
-  uploadImage(imageUrl: string): Promise<BlueskyBlob | undefined>
+  uploadImage(imageUrl: string): Promise<BlueskyUploadedImage | undefined>
   uploadImageBytes(
     bytes: Uint8Array,
     mimeType: string,
-  ): Promise<BlueskyBlob | undefined>
+  ): Promise<BlueskyUploadedImage | undefined>
 }
 
 /**
- * Supabase Storage public object URL → the image-transform endpoint, bounded to
- * `maxWidth` and re-encoded at `quality`.
+ * Supabase Storage public object URL → the image-transform endpoint, scaled to
+ * fit inside a `maxEdge` box and re-encoded at `quality`.
  *
  * Show posters are stored at full scan resolution (the bucket allows 20MB) and
  * routinely exceed the 2MB embed cap, which would silently drop the embed. The
- * transform brings a ~2.7MB poster to ~0.5MB. Non-Storage URLs pass through
- * untouched.
+ * transform brings a ~2.7MB poster to ~0.5MB.
+ *
+ * Both dimensions and `resize=contain` are required: the transform defaults to
+ * `resize=cover`, so passing `width` alone keeps the original height and
+ * *distorts* the image (a 1663×2048 poster came back as 1200×2048). With
+ * `contain` the aspect ratio is preserved and only the long edge is bounded.
+ *
+ * Non-Storage URLs pass through untouched.
  */
 export function boundedSupabaseImageUrl(
   imageUrl: string,
-  maxWidth = 1200,
+  maxEdge = 1600,
   quality = 80,
 ): string {
   const url = imageUrl.trim()
@@ -74,7 +93,7 @@ export function boundedSupabaseImageUrl(
   if (!url.includes(marker)) return url
   const transformed = url.replace(marker, "/storage/v1/render/image/public/")
   const separator = transformed.includes("?") ? "&" : "?"
-  return `${transformed}${separator}width=${maxWidth}&quality=${quality}`
+  return `${transformed}${separator}width=${maxEdge}&height=${maxEdge}&resize=contain&quality=${quality}`
 }
 
 const utf8Length = (value: string): number =>
@@ -371,7 +390,7 @@ export async function createBlueskyClient(
   const uploadBytes = async (
     bytes: Uint8Array,
     mimeType: string,
-  ): Promise<BlueskyBlob | undefined> => {
+  ): Promise<BlueskyUploadedImage | undefined> => {
     try {
       if (bytes.byteLength === 0) return undefined
       if (bytes.byteLength > IMAGE_MAX_BYTES) {
@@ -380,6 +399,13 @@ export async function createBlueskyClient(
         )
         return undefined
       }
+      // Read dimensions from the bytes we're actually sending — for posters
+      // that's the transformed copy, not the original upload.
+      const aspectRatio = readImageDimensions(bytes)
+      if (!aspectRatio) {
+        console.error(`bluesky image: unreadable dimensions for ${mimeType}`)
+      }
+
       const res = await authed("com.atproto.repo.uploadBlob", {
         body: bytes,
         contentType: mimeType,
@@ -389,7 +415,7 @@ export async function createBlueskyClient(
         return undefined
       }
       const body = (await res.json()) as { blob?: BlueskyBlob }
-      return body.blob ?? undefined
+      return body.blob ? { blob: body.blob, aspectRatio } : undefined
     } catch (err) {
       console.error("bluesky uploadBlob:", err)
       return undefined

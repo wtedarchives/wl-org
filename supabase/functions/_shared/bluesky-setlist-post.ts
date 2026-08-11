@@ -4,10 +4,10 @@ import {
   buildLinkFacets,
   createBlueskyClient,
   rkeyFromPostUri,
-  type BlueskyBlob,
   type BlueskyClient,
   type BlueskyPostRecord,
   type BlueskyStrongRef,
+  type BlueskyUploadedImage,
 } from "./bluesky.ts"
 import {
   buildBlueskyExternalCardMeta,
@@ -56,9 +56,16 @@ type ThreadState = { root: BlueskyStrongRef; tail: BlueskyStrongRef }
 
 const nowIso = () => new Date().toISOString()
 
-const imagesEmbed = (blob: BlueskyBlob, alt: string) => ({
+/** `aspectRatio` is omitted when unreadable — clients then square-box the image. */
+const imagesEmbed = (image: BlueskyUploadedImage, alt: string) => ({
   $type: "app.bsky.embed.images",
-  images: [{ alt, image: blob }],
+  images: [
+    {
+      alt,
+      image: image.blob,
+      ...(image.aspectRatio ? { aspectRatio: image.aspectRatio } : {}),
+    },
+  ],
 })
 
 /**
@@ -185,24 +192,22 @@ async function ensureThreadRoot(
   const text = buildBlueskyRootPostText(info)
   const url = getSetlistShowAbsoluteUrl(showId)
 
-  const posterImage = await loadShowPosterImage(db, showId)
+  const posterUrl = await loadShowPosterImage(db, showId)
   // Posters are full-resolution scans and routinely blow past the 2MB embed cap,
   // so they go through Storage's image transform on the way out.
-  const posterBlob =
-    posterImage ?
-      await client.uploadImage(boundedSupabaseImageUrl(posterImage))
+  const posterImage =
+    posterUrl ?
+      await client.uploadImage(boundedSupabaseImageUrl(posterUrl))
     : undefined
-  let embed: Record<string, unknown>
-  if (posterBlob) {
-    const card = buildBlueskyExternalCardMeta(info)
-    embed = imagesEmbed(posterBlob, `Show poster — ${card.title}`)
-  } else {
-    const card = buildBlueskyExternalCardMeta(info)
-    embed = {
-      $type: "app.bsky.embed.external",
-      external: { uri: url, title: card.title, description: card.description },
-    }
-  }
+
+  const card = buildBlueskyExternalCardMeta(info)
+  const embed: Record<string, unknown> =
+    posterImage ?
+      imagesEmbed(posterImage, `Show poster — ${card.title}`)
+    : {
+        $type: "app.bsky.embed.external",
+        external: { uri: url, title: card.title, description: card.description },
+      }
 
   const record: BlueskyPostRecord = {
     $type: "app.bsky.feed.post",
@@ -426,7 +431,7 @@ export async function postSetlistSongToBluesky(
     // Setlist share card when the client captured one; category artwork is the
     // fallback so a failed capture still yields an illustrated post.
     const capturedBytes = decodeJpegBase64(options.songImageJpegBase64)
-    const imageBlob =
+    const songImage =
       capturedBytes ? await client.uploadImageBytes(capturedBytes, "image/jpeg")
       : context.artworkUrl ?
         await client.uploadImage(boundedSupabaseImageUrl(context.artworkUrl))
@@ -442,8 +447,8 @@ export async function postSetlistSongToBluesky(
       {
         entryId,
         embed:
-          imageBlob ?
-            imagesEmbed(imageBlob, context.text.split("\n")[0])
+          songImage ?
+            imagesEmbed(songImage, context.text.split("\n")[0])
           : undefined,
       },
     )
