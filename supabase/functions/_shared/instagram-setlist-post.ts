@@ -47,18 +47,21 @@ export type CaptionEntry = {
 /** Separator printed between sets. */
 const SET_SEPARATOR = "---"
 
+/** U+2192, matching the arrow the setlist card renders. */
+const SEGUE_ARROW = "→"
+
 /**
  * Plain-text setlist for the caption.
  *
- *     Royal ->
- *     The Whales ->
+ *     Royal →
+ *     The Whales →
  *     No California
  *     ---
- *     Arrow ->
+ *     Arrow →
  *
  * Display names are preferred over raw `entry_song`. `entry_short` renders as a
  * bracketed tag (`unfinished`, `reprise`, …) matching how the card annotates it,
- * and `entry_segue` — always `>` in the data — becomes a trailing `->`.
+ * and `entry_segue` — always `>` in the data — becomes a trailing {@link SEGUE_ARROW}.
  */
 export function buildInstagramSetlistText(entries: CaptionEntry[]): string {
   const lines: string[] = []
@@ -75,15 +78,15 @@ export function buildInstagramSetlistText(entries: CaptionEntry[]): string {
     const short = clean(entry.entry_short)
     const showShort = short && !ENTRY_SHORT_HIDDEN_FOR_SONGS.has(song)
 
-    // The column stores a bare `>`. Any `>` is stripped and replaced with a
-    // literal `->` so the raw character can never reach the caption, even if a
+    // The column stores a bare `>`. Any `>` is stripped and replaced with the
+    // arrow glyph so the raw character can never reach the caption, even if a
     // row someday holds `>>` or `> partial`.
     const segueRaw = clean(entry.entry_segue)
     const hasSegue = segueRaw.length > 0
     const segueNote = segueRaw.replace(/>/g, "").trim()
 
     lines.push(
-      [name, showShort ? `[${short}]` : "", hasSegue ? "->" : "", segueNote]
+      [name, showShort ? `[${short}]` : "", hasSegue ? SEGUE_ARROW : "", segueNote]
         .filter(Boolean)
         .join(" "),
     )
