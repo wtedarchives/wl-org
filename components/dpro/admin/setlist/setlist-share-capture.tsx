@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { createPortal } from "react-dom"
 import { toJpeg } from "html-to-image"
 
 import { supabase } from "@/lib/supabase"
@@ -94,6 +95,12 @@ export function SetlistShareCaptureProvider({
   const captureRef = useRef<HTMLDivElement | null>(null)
   const [show, setShow] = useState<Show | null>(null)
   const [entries, setEntries] = useState<SetlistEntry[]>([])
+  // Portal target is only available after mount (static export prerenders this).
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Fixed per show so successive song posts in one show share a background.
   const backgroundSrc = useMemo(
@@ -212,30 +219,43 @@ export function SetlistShareCaptureProvider({
   return (
     <SetlistShareCaptureContext.Provider value={value}>
       {children}
-      {show && entries.length > 0 ? (
-        /* Offscreen rather than hidden — html-to-image needs real layout, so
-           display:none / visibility:hidden would capture nothing. */
-        <div
-          aria-hidden
-          style={{
-            position: "fixed",
-            top: 0,
-            left: -99999,
-            width: WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
-            pointerEvents: "none",
-            zIndex: -1,
-          }}
-        >
-          <WlHomeV2SetlistShareExportCard
-            ref={captureRef}
-            backgroundSrc={backgroundSrc}
-            show={show}
-            setlist={entries}
-            showPositionInTour={showPositionInTour}
-            showEntryCoachNotes
-          />
-        </div>
-      ) : null}
+      {mounted && show && entries.length > 0 ?
+        /*
+         * Portalled to <body>, matching where the share modal's Radix Dialog
+         * puts the card. The card's palette comes from custom properties scoped
+         * to `.wl-home-v2` (e.g. `--wl-deep-green`), so rendering it inside the
+         * admin tree instead resolves variables the modal leaves unset and
+         * changes the output — the brand bar picks up a solid green fill, and
+         * ancestor-scoped table rules shift the row padding. Same DOM position
+         * as the modal ⇒ same cascade ⇒ same image.
+         *
+         * Offscreen rather than hidden: html-to-image needs real layout, so
+         * display:none / visibility:hidden would capture nothing.
+         */
+        createPortal(
+          <div
+            aria-hidden
+            style={{
+              position: "fixed",
+              top: 0,
+              left: -99999,
+              width: WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
+              pointerEvents: "none",
+              zIndex: -1,
+            }}
+          >
+            <WlHomeV2SetlistShareExportCard
+              ref={captureRef}
+              backgroundSrc={backgroundSrc}
+              show={show}
+              setlist={entries}
+              showPositionInTour={showPositionInTour}
+              showEntryCoachNotes
+            />
+          </div>,
+          document.body,
+        )
+      : null}
     </SetlistShareCaptureContext.Provider>
   )
 }
