@@ -2,6 +2,7 @@
 
 import { redirectToLogin } from "@/lib/sso"
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -22,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAdminStatus } from "@/hooks/use-admin-status"
+import { useBrainsAccess } from "@/hooks/use-brains-access"
 import { useWlHomeV2OpenSettings } from "@/components/wl-home-v2/wl-home-v2-open-settings-context"
 import { useBugCount } from "@/hooks/use-bug-count"
 import {
@@ -77,6 +79,9 @@ export function WlHomeV2UserMenu({
   const openSettingsFromContext = useWlHomeV2OpenSettings()
   const openSettings = onOpenSettings ?? openSettingsFromContext ?? undefined
   const { isAdmin } = useAdminStatus(session)
+  // One request per session for almost everyone: users with no assignment get an
+  // empty reply and nothing further happens. Admins pass on their JWT claim.
+  const { hasAccess: hasBrainsAccess } = useBrainsAccess()
   const openBugCount = useBugCount()
   const router = useRouter()
   const [profileUsername, setProfileUsername] = useState<string | null>(null)
@@ -269,6 +274,34 @@ export function WlHomeV2UserMenu({
               >
                 <User className="top-nav-dd-icon size-4 shrink-0" />
                 Create account
+              </DropdownMenuItem>
+            </>
+          )}
+          {/*
+            wted-brains sits in its own block above Help rather than inside the
+            admin group, because Help renders for everyone (outside the
+            isLoggedIn branch) while ADMIN_SUB does not — and brains is shown to
+            assigned non-admins too, whose access is a live server lookup rather
+            than a JWT claim.
+          */}
+          {hasBrainsAccess && (
+            <>
+              <DropdownMenuSeparator className="top-nav-dd-sep" />
+              <DropdownMenuItem asChild className="top-nav-dd-item">
+                <Link
+                  href="/archive/brains"
+                  className="top-nav-dd-link flex cursor-pointer items-center gap-2"
+                >
+                  <Image
+                    src="/Brain.jpg"
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="top-nav-dd-icon size-4 shrink-0 rounded-full object-cover"
+                    aria-hidden
+                  />
+                  wted-brains
+                </Link>
               </DropdownMenuItem>
             </>
           )}

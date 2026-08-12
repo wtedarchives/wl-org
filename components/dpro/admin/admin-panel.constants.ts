@@ -14,6 +14,7 @@ export const ADMIN_PANEL_TABS = [
   "Subvenue",
   "WTED",
   "Bandcamp",
+  "Brains",
 ] as const
 
 export type AdminPanelTab = (typeof ADMIN_PANEL_TABS)[number]

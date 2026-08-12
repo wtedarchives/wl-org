@@ -26,6 +26,7 @@ import { AdminWted } from "./admin-wted"
 import { AdminBandcamp } from "./admin-bandcamp"
 import { AdminDiscography } from "./admin-discography"
 import { AdminPoster } from "./admin-poster"
+import { AdminBrains } from "./admin-brains"
 
 export function AdminPanel() {
   const { session } = useAuth()
@@ -73,11 +74,25 @@ export function AdminPanel() {
     setIsUpdating(true)
     setUpdateStatus({ type: null, message: null })
     try {
-      const { error } = await invokeDproAdmin(token, {
-        action: "rpc_update_all_setlist_entries",
-      })
+      const { data, error } = await invokeDproAdmin<{
+        ran: boolean
+        reason?: "cooldown" | "in_progress"
+      }>(token, { action: "rpc_update_all_setlist_entries" })
       if (error) throw new Error(error)
-      setUpdateStatus({ type: "success", message: "Success!" })
+      // The rebuild is now serialized by a global advisory lock and gated by a
+      // 90-second cooldown, so a call can legitimately do nothing. Reporting
+      // "Success!" for a skipped run would be a lie.
+      if (data && data.ran === false) {
+        setUpdateStatus({
+          type: "success",
+          message:
+            data.reason === "in_progress"
+              ? "Already running"
+              : "Already current",
+        })
+      } else {
+        setUpdateStatus({ type: "success", message: "Success!" })
+      }
       setTimeout(() => setUpdateStatus({ type: null, message: null }), 3000)
     } catch (err) {
       setUpdateStatus({
@@ -202,6 +217,9 @@ export function AdminPanel() {
           </TabsContent>
           <TabsContent value="Bandcamp" className="mt-0 w-full p-3 sm:p-4">
             <AdminBandcamp />
+          </TabsContent>
+          <TabsContent value="Brains" className="mt-0 w-full p-3 sm:p-4">
+            <AdminBrains />
           </TabsContent>
         </div>
       </Tabs>

@@ -28,6 +28,16 @@ import {
 } from "../_shared/bluesky-setlist-post.ts"
 import { postSetlistToInstagram } from "../_shared/instagram-setlist-post.ts"
 import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
+import {
+  ACTOR_STAMPED_ACTIONS,
+  auditTarget,
+  authorizeSetlister,
+  BRAINS_AUDITED_ACTIONS,
+  fetchShowLabel,
+  SELF_SCOPED_ACTIONS,
+  writeBrainsAudit,
+  type SetlisterGrant,
+} from "../_shared/brains-authz.ts"
 
 function httpErr(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -43,6 +53,9 @@ function jsonOk(body: Record<string, unknown>) {
   })
 }
 
+/** Floor between stats rebuilds, measured from the previous run's completion. */
+const REBUILD_COOLDOWN_MS = 90_000
+
 function pick(row: Record<string, unknown>, keys: string[]) {
   const o: Record<string, unknown> = {}
   for (const k of keys) {
@@ -57,10 +70,43 @@ async function handleAction(
   body: Record<string, unknown>,
 ): Promise<{ data?: unknown; error?: string }> {
   switch (action) {
+    /**
+     * Full stats rebuild — ~45 seconds, every setlist entry.
+     *
+     * Two separate guards, because they solve different problems:
+     *   - The advisory lock inside update_all_setlist_entries_locked() prevents
+     *     two rebuilds running at once. This is the correctness guard, and it has
+     *     to be global: opening the button to setlisters means an admin and a
+     *     setlister can now fire it concurrently, and they are different users so
+     *     no per-user limit would catch it.
+     *   - The cooldown below prevents pointless back-to-back rebuilds, which is
+     *     a waste guard. Applied to admins too — the lock already stops the
+     *     dangerous case, and 90 seconds costs nobody anything.
+     */
     case "rpc_update_all_setlist_entries": {
-      const { error } = await db.rpc("update_all_setlist_entries")
+      // Derived from the audit log rather than a state table: this action is
+      // always audited and its row is written after the RPC returns, so
+      // created_at is effectively the last completion time. The worker clock is
+      // fine here — a cooldown is a courtesy, not a security boundary.
+      const since = new Date(Date.now() - REBUILD_COOLDOWN_MS).toISOString()
+      const { data: recent, error: recentErr } = await db
+        .from("brains_audit_log")
+        .select("created_at")
+        .eq("action", "rpc_update_all_setlist_entries")
+        .eq("outcome", "success")
+        .gte("created_at", since)
+        .limit(1)
+      if (recentErr) return { error: recentErr.message }
+      if (recent && recent.length > 0) {
+        return { data: { ran: false, reason: "cooldown" } }
+      }
+
+      const { data: ran, error } = await db.rpc(
+        "update_all_setlist_entries_locked",
+      )
       if (error) return { error: error.message }
-      return { data: true }
+      if (ran === false) return { data: { ran: false, reason: "in_progress" } }
+      return { data: { ran: true } }
     }
 
     case "setlist_entries_insert": {
@@ -120,6 +166,55 @@ async function handleAction(
       const { error } = await db.from("setlist_entries").delete().eq("entry_id", entry_id)
       if (error) return { error: error.message }
       return { data: true }
+    }
+
+    /**
+     * Bulk renumber after a drag. One RPC, one transaction — a drag that moves a
+     * song up a set renumbers every row below it, and a half-applied renumber
+     * leaves two entries sharing a setnum, which sort nondeterministically.
+     */
+    case "setlist_entries_reorder": {
+      const entries = body.entries
+      if (!Array.isArray(entries) || entries.length === 0) {
+        return { error: "Missing entries" }
+      }
+      const payload: {
+        entry_id: string
+        entry_set: string
+        entry_setnum: number
+      }[] = []
+      for (const raw of entries) {
+        if (!raw || typeof raw !== "object") return { error: "Invalid entry" }
+        const e = raw as Record<string, unknown>
+        const entry_id = e.entry_id
+        const entry_set = e.entry_set
+        const entry_setnum = e.entry_setnum
+        if (typeof entry_id !== "string" || entry_id.trim() === "") {
+          return { error: "Each entry needs entry_id" }
+        }
+        // Both columns are NOT NULL with foreign keys onto sets(set) and
+        // setnums(setnums), so bad values fail the constraint rather than
+        // writing something the archive cannot represent.
+        if (typeof entry_set !== "string" || entry_set.trim() === "") {
+          return { error: "Each entry needs entry_set" }
+        }
+        if (typeof entry_setnum !== "number" || !Number.isInteger(entry_setnum)) {
+          return { error: "Each entry needs an integer entry_setnum" }
+        }
+        payload.push({ entry_id, entry_set, entry_setnum })
+      }
+
+      const { data: touched, error } = await db.rpc(
+        "brains_reorder_setlist_entries",
+        { p_entries: payload },
+      )
+      if (error) return { error: error.message }
+      if (typeof touched === "number" && touched !== payload.length) {
+        return {
+          error: `Reorder touched ${touched} of ${payload.length} entries`,
+        }
+      }
+      return { data: { reordered: payload.length } }
     }
 
     case "setlist_entry_guests_select": {
@@ -1038,6 +1133,131 @@ async function handleAction(
       return { data: true }
     }
 
+    // ─── wted-brains ────────────────────────────────────────────────────────
+
+    /**
+     * The caller's own open and imminent windows.
+     *
+     * `profile_id` is overwritten from the verified JWT in serve() and is never
+     * read from the request, so this cannot be used to inspect anyone else.
+     *
+     * Returns windows open now OR opening within 24h so the client can arm a
+     * timer for the boundary rather than polling — most of the 1,115 users have
+     * none, and one empty response ends the conversation for them.
+     */
+    case "brains_my_assignments": {
+      const profile_id = body.profile_id as string | undefined
+      if (!profile_id) return { error: "Missing profile_id" }
+      const now = Date.now()
+      const nowIso = new Date(now).toISOString()
+      const horizonIso = new Date(now + 24 * 60 * 60 * 1000).toISOString()
+      const { data, error } = await db
+        .from("brains_assignments")
+        .select(
+          "uuid, show_id, access_start, access_end, shows(show_date, show_group, show_subvenue, show_venue_location)",
+        )
+        .eq("profile_id", profile_id)
+        .is("revoked_at", null)
+        .gt("access_end", nowIso)
+        .lt("access_start", horizonIso)
+        .order("access_start", { ascending: true })
+      if (error) return { error: error.message }
+      // `now` lets the client measure its clock offset once and tick the
+      // countdown locally. This is display only — the authoritative window check
+      // is brains_active_assignment(), which compares against the DB clock.
+      return { data: { now: nowIso, assignments: data ?? [] } }
+    }
+
+    case "brains_assignments_list": {
+      // Live, upcoming, and the last week of closed windows — enough to answer
+      // "who was working that show?" without paging.
+      const sinceIso = new Date(
+        Date.now() - 7 * 24 * 60 * 60 * 1000,
+      ).toISOString()
+      const { data, error } = await db
+        .from("brains_assignments")
+        .select(
+          "uuid, show_id, profile_id, access_start, access_end, revoked_at, created_at, " +
+            "profiles!brains_assignments_profile_id_fkey(username), " +
+            "shows(show_date, show_group, show_subvenue, show_venue_location, show_time)",
+        )
+        .gt("access_end", sinceIso)
+        .order("access_start", { ascending: false })
+        .limit(200)
+      if (error) return { error: error.message }
+      // `now` for the same reason brains_my_assignments returns it: the live /
+      // upcoming / closed labels are decided against the server's clock, not the
+      // admin's laptop.
+      return { data: { now: new Date().toISOString(), assignments: data ?? [] } }
+    }
+
+    case "brains_assignments_insert": {
+      const show_id = body.show_id as string | undefined
+      const profile_id = body.profile_id as string | undefined
+      const access_start = body.access_start as string | undefined
+      const access_end = body.access_end as string | undefined
+      // Stamped from the JWT in serve(), not accepted from the client.
+      const created_by = body.created_by as string | undefined
+      if (!show_id || !profile_id || !access_start || !access_end) {
+        return { error: "show_id, profile_id, access_start and access_end required" }
+      }
+      if (!created_by) return { error: "Missing actor" }
+      if (new Date(access_end) <= new Date(access_start)) {
+        return { error: "Window must end after it starts." }
+      }
+      const { error } = await db.from("brains_assignments").insert({
+        show_id,
+        profile_id,
+        access_start,
+        access_end,
+        created_by,
+      })
+      if (error) {
+        // Partial unique index on (show_id, profile_id) where revoked_at is null.
+        if (error.code === "23505" || /duplicate key/i.test(error.message)) {
+          return {
+            error: "That person already has a live assignment for this show.",
+          }
+        }
+        return { error: error.message }
+      }
+      return { data: true }
+    }
+
+    case "brains_assignments_revoke": {
+      const uuid = body.uuid as string | undefined
+      if (!uuid) return { error: "Missing uuid" }
+      // Guarded on revoked_at is null so re-revoking cannot rewrite the original
+      // timestamp and lose when access actually ended.
+      const { error } = await db
+        .from("brains_assignments")
+        .update({ revoked_at: new Date().toISOString() })
+        .eq("uuid", uuid)
+        .is("revoked_at", null)
+      if (error) return { error: error.message }
+      return { data: true }
+    }
+
+    case "brains_audit_list": {
+      const filterProfile = body.actor_profile_id as string | undefined
+      const filterShow = body.show_id as string | undefined
+      const filterSurface = body.surface as string | undefined
+      let q = db
+        .from("brains_audit_log")
+        .select(
+          "uuid, created_at, actor_profile_id, actor_username, show_id, show_label, " +
+            "surface, action, target_table, target_id, before, after, outcome",
+        )
+        .order("created_at", { ascending: false })
+        .limit(300)
+      if (filterProfile) q = q.eq("actor_profile_id", filterProfile)
+      if (filterShow) q = q.eq("show_id", filterShow)
+      if (filterSurface) q = q.eq("surface", filterSurface)
+      const { data, error } = await q
+      if (error) return { error: error.message }
+      return { data: { entries: data ?? [] } }
+    }
+
     default:
       return { error: `Unknown action: ${action}` }
   }
@@ -1072,7 +1292,18 @@ serve(async (req) => {
     return httpErr("Invalid or expired Wysteria session", 401)
   }
 
-  if (jwtPayload.is_admin !== true) return httpErr("Forbidden", 403)
+  const isAdmin = jwtPayload.is_admin === true
+  const profileId =
+    typeof jwtPayload.profile_id === "string" ? jwtPayload.profile_id : null
+  const username =
+    typeof jwtPayload.username === "string" ? jwtPayload.username : "unknown"
+
+  // Non-admins are not rejected outright any more — wted-brains lets an assigned
+  // user reach a small subset of actions for one show inside a time window. The
+  // decision needs the action name, so the body is parsed first. Everything
+  // below the JWT check is untrusted input either way, so parsing earlier leaks
+  // nothing.
+  if (!isAdmin && !profileId) return httpErr("Forbidden", 403)
 
   let body: Record<string, unknown> = {}
   try {
@@ -1085,7 +1316,70 @@ serve(async (req) => {
   if (!action) return httpErr("Missing action", 400)
 
   const db = createClient(supabaseUrl, supabaseServiceKey)
+
+  // Self-scoped actions never trust a client-supplied profile id. Overwriting it
+  // from the verified JWT — for admins too — is what makes brains_my_assignments
+  // safe to expose without an assignment check.
+  if (SELF_SCOPED_ACTIONS.has(action)) {
+    body.profile_id = profileId
+  }
+  if (ACTOR_STAMPED_ACTIONS.has(action)) {
+    body.created_by = profileId
+  }
+
+  let grant: SetlisterGrant | null = null
+  if (!isAdmin && !SELF_SCOPED_ACTIONS.has(action)) {
+    const decision = await authorizeSetlister(db, profileId!, action, body)
+    if (!decision.allowed) {
+      // Denials are logged: a refused write is the clearest signal of either
+      // misuse or a UI bug that let a forbidden control render.
+      const { targetTable, targetId } = auditTarget(action, body)
+      await writeBrainsAudit(db, {
+        actorProfileId: profileId,
+        actorUsername: username,
+        showId: typeof body.show_id === "string" ? body.show_id : null,
+        surface: "brains",
+        action,
+        targetTable,
+        targetId,
+        after: body.row ?? body.patch ?? body.entries ?? null,
+        outcome: "denied",
+      })
+      return httpErr(decision.message, decision.status)
+    }
+    grant = decision
+    // Values the caller is not allowed to choose (currently guest_category,
+    // pinned to "Guest"). Applied after authorization so a client cannot use
+    // them to influence the scope check.
+    Object.assign(body, grant.force)
+  }
+
   const result = await handleAction(db, action, body)
+
+  if (BRAINS_AUDITED_ACTIONS.has(action)) {
+    const { targetTable, targetId } = auditTarget(action, body)
+    const showId =
+      grant?.showId ?? (typeof body.show_id === "string" ? body.show_id : null)
+    // Admin rows carry no before-image: producing one would mean running the
+    // brains scope resolution on every admin call purely to fetch prior state.
+    // The requirement is auditing setlisters, so admins get action + target only.
+    // Deliberate asymmetry, not an oversight.
+    await writeBrainsAudit(db, {
+      actorProfileId: profileId,
+      actorUsername: username,
+      assignmentId: grant?.assignmentId ?? null,
+      showId,
+      showLabel: await fetchShowLabel(db, showId),
+      surface: isAdmin ? "admin" : "brains",
+      action,
+      targetTable,
+      targetId,
+      before: grant?.before ?? null,
+      after: body.row ?? body.patch ?? body.entries ?? null,
+      outcome: result.error ? "error" : "success",
+    })
+  }
+
   if (result.error) {
     return jsonOk({ error: result.error })
   }
