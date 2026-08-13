@@ -69,13 +69,6 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
       "Curated song and show lists. Longest shows, song suites, segues, and other community-created collections.",
   },
   {
-    title: "Setlist Game",
-    href: "/archive/setlistgame",
-    icon: "Trophy",
-    description:
-      "Predict the setlist before the show. See how you stack up when the band hits the stage.",
-  },
-  {
     title: "Goose 101",
     href: "/goose101",
     icon: "BookOpen",

@@ -1,24 +1,19 @@
-import { Suspense } from "react"
-import type { Metadata } from "next"
+"use client"
 
-import { WlHomeV2 } from "@/components/wl-home-v2"
-import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
-import { WlHomeV2SetlistGameView } from "@/components/wl-home-v2/wl-home-v2-setlistgame-view"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export const metadata: Metadata = {
-  title: "Setlist Game",
-}
-
+/**
+ * Setlist Game is temporarily offline. Netlify `_redirects` also 301s these
+ * URLs; this page keeps local/static hits from rendering the game UI.
+ * Game components under `components/dpro/setlistgame` are retained.
+ */
 export default function ArchiveSetlistGamePage() {
-  return (
-    <WlHomeV2>
-      <Suspense
-        fallback={
-          <WlHomeV2PageLoading message="Loading setlist game…" />
-        }
-      >
-        <WlHomeV2SetlistGameView />
-      </Suspense>
-    </WlHomeV2>
-  )
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace("/archive")
+  }, [router])
+
+  return null
 }

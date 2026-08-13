@@ -9,7 +9,6 @@ import {
   MagnifyingGlass,
   MapPin,
   MusicNote,
-  Trophy,
   UserCircle,
   Users,
   VinylRecord,
@@ -46,7 +45,6 @@ const ARCHIVE_ICONS: Record<string, PhosphorTileIcon> = {
   Users,
   Disc3: VinylRecord,
   ListMusic: ListNumbers,
-  Trophy,
   UserCircle,
   BookOpen,
 }

@@ -24,7 +24,6 @@ export const SETLIST_ARCHIVE_SUB = [
   { title: "Venues", url: "/archive/venues" },
   { title: "Discography", url: "/archive/discography" },
   { title: "Lists", url: "/archive/lists" },
-  { title: "Setlist Game", url: "/archive/setlistgame" },
   { title: "Goose 101", url: "/goose101" },
   { title: "Submit", url: "/archive/submit" },
 ] as const
