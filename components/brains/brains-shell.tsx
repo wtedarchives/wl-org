@@ -34,7 +34,8 @@ function showRefFromShowData(show: ShowData | undefined): BrainsShowRef | null {
  * choice: several live assignments, or an admin who may reach any show.
  */
 export function BrainsShell({ children }: { children?: React.ReactNode }) {
-  const { isAdmin, active, all, offsetMs, refresh } = useBrainsAccess()
+  const { isAdmin, active, all, offsetMs, refresh, devMockBlocked } =
+    useBrainsAccess()
   const { shows: adminShows, loading: adminShowsLoading } =
     useBrainsShows(isAdmin)
 
@@ -145,6 +146,26 @@ export function BrainsShell({ children }: { children?: React.ReactNode }) {
           </p>
         )}
       </header>
+
+      {/* Dev only: explains why the page is empty under a mock session. */}
+      {devMockBlocked && (
+        <div
+          role="status"
+          className="flex min-w-0 flex-col gap-1 rounded border border-amber-400/30 bg-amber-500/10 px-3 py-2"
+        >
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-amber-200">
+            Dev mock session
+          </p>
+          <p className="text-xs text-white/70">
+            Layout renders, but assignments cannot load: the dev bar mints an
+            unsigned token and the Edge Function rejects it. To exercise the real
+            checks you need a genuinely signed session — sign in as this account
+            for real, or run{" "}
+            <code className="font-mono">scripts/dev-mint-session.mjs</code> if you
+            have WYSTERIA_JWT_SECRET locally.
+          </p>
+        </div>
+      )}
 
       {windowClosed && (
         <div

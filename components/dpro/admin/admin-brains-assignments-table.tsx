@@ -71,73 +71,79 @@ export function AdminBrainsAssignmentsTable({
 }: AdminBrainsAssignmentsTableProps) {
   if (assignments.length === 0) {
     return (
-      <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-white/50">
-        No assignments in the last week
-      </p>
+      <div className="flex flex-1 items-center justify-center px-3 py-10">
+        <p className="m-0 text-xs text-white/65">
+          No assignments in the last week
+        </p>
+      </div>
     )
   }
 
   return (
-    <div className="min-w-0 overflow-x-auto">
-      <Table className="text-xs">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="whitespace-nowrap">Person</TableHead>
-            <TableHead>Show</TableHead>
-            <TableHead className="whitespace-nowrap">Opens</TableHead>
-            <TableHead className="whitespace-nowrap">Closes</TableHead>
-            <TableHead className="whitespace-nowrap">State</TableHead>
-            <TableHead className="sr-only">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {assignments.map((row) => {
-            const state = windowState(row, nowMs)
-            const canRevoke = state === "live" || state === "upcoming"
-            return (
-              <TableRow key={row.uuid}>
-                <TableCell className="whitespace-nowrap font-mono">
-                  {row.profiles?.username ?? "—"}
-                </TableCell>
-                <TableCell className="min-w-0">
-                  {formatBrainsShowLabel(row.shows)}
-                </TableCell>
-                <TableCell className="whitespace-nowrap tabular-nums">
-                  {formatLocal(row.access_start)}
-                </TableCell>
-                <TableCell className="whitespace-nowrap tabular-nums">
-                  {formatLocal(row.access_end)}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <span
-                    className={cn(
-                      "inline-block rounded px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.06em]",
-                      STATE_PILL[state],
-                    )}
-                  >
-                    {STATE_LABEL[state]}
-                  </span>
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-right">
-                  {canRevoke && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="wl-home-v2-tours-header-pill"
-                      disabled={revokingUuid === row.uuid}
-                      onClick={() => onRevoke(row.uuid)}
-                      title="End this window now"
-                    >
-                      {revokingUuid === row.uuid ? "Revoking…" : "Revoke"}
-                    </Button>
+    <Table className="set-table">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="text-left text-sm">Person</TableHead>
+          <TableHead className="text-left text-sm">Show</TableHead>
+          <TableHead className="whitespace-nowrap text-left text-sm">
+            Opens
+          </TableHead>
+          <TableHead className="whitespace-nowrap text-left text-sm">
+            Closes
+          </TableHead>
+          <TableHead className="whitespace-nowrap text-center text-sm">
+            State
+          </TableHead>
+          <TableHead className="sr-only">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {assignments.map((row) => {
+          const state = windowState(row, nowMs)
+          const canRevoke = state === "live" || state === "upcoming"
+          return (
+            <TableRow key={row.uuid} className="text-[0.625rem]">
+              <TableCell className="whitespace-nowrap text-xs font-medium">
+                {row.profiles?.username ?? "—"}
+              </TableCell>
+              <TableCell className="min-w-0 text-xs">
+                {formatBrainsShowLabel(row.shows)}
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-xs tabular-nums">
+                {formatLocal(row.access_start)}
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-xs tabular-nums">
+                {formatLocal(row.access_end)}
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-center">
+                <span
+                  className={cn(
+                    "inline-block rounded px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.06em]",
+                    STATE_PILL[state],
                   )}
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </div>
+                >
+                  {STATE_LABEL[state]}
+                </span>
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-right">
+                {canRevoke ?
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="wl-home-v2-tours-header-pill"
+                    disabled={revokingUuid === row.uuid}
+                    onClick={() => onRevoke(row.uuid)}
+                    title="End this window now"
+                  >
+                    {revokingUuid === row.uuid ? "Revoking…" : "Revoke"}
+                  </Button>
+                : null}
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
   )
 }

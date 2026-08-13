@@ -158,7 +158,7 @@ export function GuestModal({
                 name="guest"
                 value={formData.guest ?? ""}
                 onChange={handleInputChange}
-                placeholder="Enter guest name"
+                placeholder="Enter personnel name"
                 required
               />
             </div>

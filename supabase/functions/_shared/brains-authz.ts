@@ -99,6 +99,8 @@ export const SETLISTER_RULES: Record<string, SetlisterRule> = {
   },
   setlist_entries_reorder: {
     showRef: { from: "entryList", key: "entries", idField: "entry_id" },
+    // Placement rides along so a cross-set drag reassigns it with the set, instead
+    // of leaving "Main Set 1" on a song now sitting in set 2.
     targetTable: "setlist_entries",
   },
 

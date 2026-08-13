@@ -2390,6 +2390,12 @@
     border: 1px solid rgb(49, 51, 49);
     color: rgba(255, 255, 255, 0.92);
   }
+  /* Leading icon inside field (e.g. Brains person search) — beat padding-inline above */
+  .wl-home-v2-archive-admin-song-form
+    [data-slot="input"].wl-home-v2-archive-admin-input--with-leading-icon {
+    padding-left: 2.25rem;
+    padding-right: 12px;
+  }
   .wl-home-v2-archive-admin-song-form [data-slot="input"]::placeholder {
     color: rgba(255, 255, 255, 0.42);
   }
@@ -2412,12 +2418,18 @@
     color: rgba(255, 255, 255, 0.45);
   }
   /* Inline floating-dropdown / combobox trigger — same shell as select (Subvenue parent venue picker) */
-  .wl-home-v2-archive-admin-song-form button.wl-home-v2-archive-admin-form-combobox-trigger {
+  .wl-home-v2-archive-admin-song-form button.wl-home-v2-archive-admin-form-combobox-trigger,
+  .wl-home-v2
+    .wl-home-v2-archive-admin-tab-shell
+    .wl-home-v2-archive-admin-song-form
+    button.wl-home-v2-archive-admin-form-combobox-trigger.wl-home-v2-tours-header-pill {
     box-sizing: border-box;
     width: 100%;
+    max-width: none;
     min-width: 0;
     min-height: 2rem;
     height: 2rem;
+    padding-block: 0;
     padding-inline: 12px;
     font-size: 0.75rem;
     line-height: 1.25;
@@ -2432,6 +2444,9 @@
     cursor: pointer;
     outline: none;
     text-align: left;
+    text-transform: none;
+    letter-spacing: normal;
+    font-family: inherit;
   }
   .wl-home-v2-archive-admin-song-form button.wl-home-v2-archive-admin-form-combobox-trigger:focus-visible {
     border-color: rgba(255, 122, 103, 0.55);

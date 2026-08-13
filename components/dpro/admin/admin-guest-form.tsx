@@ -67,7 +67,7 @@ export function AdminGuestForm({
       </div>
       <div className="wl-home-v2-archive-admin-song-form__grid">
         <div className="min-w-0">
-          <label htmlFor="personnel-admin-name">Guest Name</label>
+          <label htmlFor="personnel-admin-name">Personnel Name</label>
           <Input
             id="personnel-admin-name"
             type="text"

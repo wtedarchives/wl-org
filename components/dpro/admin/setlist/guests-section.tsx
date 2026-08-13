@@ -53,7 +53,7 @@ export function GuestsSection({
       <div className="flex flex-col space-y-0.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <label className="block text-xs font-medium">Guests</label>
+            <label className="block text-xs font-medium">Personnel</label>
             {canEdit && (
               <button
                 type="button"
@@ -120,7 +120,7 @@ export function GuestsSection({
                   type="text"
                   value={guestSearchTerm}
                   onChange={(e) => setGuestSearchTerm(e.target.value)}
-                  placeholder="Search guests..."
+                  placeholder="Search personnel..."
                   className="h-8 pr-8 text-xs"
                 />
                 <Search className="absolute right-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

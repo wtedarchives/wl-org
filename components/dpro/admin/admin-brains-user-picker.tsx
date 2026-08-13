@@ -18,6 +18,7 @@ const DEBOUNCE_MS = 250
 interface AdminBrainsUserPickerProps {
   selected: UserSearchResult | null
   onSelect: (user: UserSearchResult | null) => void
+  inputId?: string
 }
 
 /**
@@ -31,6 +32,7 @@ interface AdminBrainsUserPickerProps {
 export function AdminBrainsUserPicker({
   selected,
   onSelect,
+  inputId,
 }: AdminBrainsUserPickerProps) {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<UserSearchResult[]>([])
@@ -106,15 +108,18 @@ export function AdminBrainsUserPicker({
 
   if (selected) {
     return (
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="min-w-0 truncate font-mono text-xs text-white/90">
-          {selected.username}
-        </span>
+      <div className="wl-home-v2-archive-admin-inline-field-row min-w-0">
+        <Input
+          id={inputId}
+          value={selected.username}
+          readOnly
+          aria-label="Selected person"
+        />
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="wl-home-v2-tours-header-pill gap-1"
+          className="wl-home-v2-tours-header-pill shrink-0 gap-1"
           onClick={() => {
             onSelect(null)
             setQuery("")
@@ -128,35 +133,34 @@ export function AdminBrainsUserPicker({
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-1">
       <div className="relative min-w-0">
         <MagnifyingGlass
-          className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 opacity-60"
+          className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/45"
           aria-hidden
         />
+        {/* pl-9 not pl-7: the icon spans 10–24px, so 28px left the glyph almost
+            touching the placeholder. */}
         <Input
+          id={inputId}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Username or user UUID"
-          className="h-8 pl-7 text-xs"
+          className="wl-home-v2-archive-admin-input--with-leading-icon"
           aria-label="Find a person to assign"
         />
       </div>
 
-      {searching && (
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-white/50">
-          Searching…
-        </p>
-      )}
+      {searching ?
+        <p className="m-0 text-[11px] text-white/50">Searching…</p>
+      : null}
 
-      {notFound && !searching && (
-        <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-white/50">
-          No match
-        </p>
-      )}
+      {notFound && !searching ?
+        <p className="m-0 text-[11px] text-white/50">No match</p>
+      : null}
 
-      {results.length > 0 && (
-        <ul className="flex max-h-44 min-w-0 flex-col gap-0.5 overflow-y-auto">
+      {results.length > 0 ?
+        <ul className="m-0 flex max-h-44 min-w-0 list-none flex-col gap-0.5 overflow-y-auto rounded-md border border-[rgb(49,51,49)] bg-black/35 p-1">
           {results.map((row) => (
             <li key={row.id} className="min-w-0">
               <button
@@ -166,14 +170,14 @@ export function AdminBrainsUserPicker({
                   setQuery("")
                   setResults([])
                 }}
-                className="w-full min-w-0 truncate rounded px-2 py-1 text-left font-mono text-xs text-white/85 hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+                className="w-full min-w-0 truncate rounded px-2 py-1.5 text-left text-xs text-white/85 hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
               >
                 {row.username}
               </button>
             </li>
           ))}
         </ul>
-      )}
+      : null}
     </div>
   )
 }

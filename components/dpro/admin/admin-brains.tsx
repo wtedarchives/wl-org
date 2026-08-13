@@ -14,6 +14,7 @@ import {
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from "@/lib/brains-window"
+import { cn } from "@/lib/utils"
 import type { UserSearchResult } from "@/lib/user-search"
 import type { ShowData } from "@/types/admin"
 import type {
@@ -21,6 +22,7 @@ import type {
   BrainsAssignableShow,
 } from "@/types/brains"
 
+import { AdminBrainsAudit } from "./admin-brains-audit"
 import { AdminTabShell } from "./admin-tab-shell"
 import { AdminTabToolbar } from "./admin-tab-toolbar"
 import { AdminBrainsAssignmentsTable } from "./admin-brains-assignments-table"
@@ -53,6 +55,7 @@ export function AdminBrains() {
   >([])
   const [nowMs, setNowMs] = useState(() => Date.now())
   const [revokingUuid, setRevokingUuid] = useState<string | null>(null)
+  const [view, setView] = useState<"assign" | "activity">("assign")
   const showsFetchedRef = useRef(false)
 
   // ─── Assignable shows ─────────────────────────────────────────────────────
@@ -199,98 +202,135 @@ export function AdminBrains() {
 
   return (
     <AdminTabShell>
-      <AdminTabToolbar title="wted-brains access" />
-
-      <div className="flex min-w-0 flex-col gap-3">
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-          <label className="flex min-w-0 flex-col gap-1.5">
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/60">
-              Person
-            </span>
-            <AdminBrainsUserPicker
-              selected={selectedUser}
-              onSelect={setSelectedUser}
-            />
-          </label>
-
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/60">
-              Show
-            </span>
-            <div className="flex min-w-0 flex-col gap-1">
-              <ShowDropdown
-                shows={showDataForDropdown}
-                loading={showsLoading}
-                loadingProgress={showsLoading ? 40 : 100}
-                onShowSelect={applyShowSelection}
-                selectedShow={selectedShowForDropdown}
-              />
-              {selectedShow && !selectedShow.show_time && (
-                <p className="font-mono text-[10px] uppercase tracking-[0.06em] text-amber-200/80">
-                  No show time on record — enter the window by hand
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-          <label className="flex min-w-0 flex-col gap-1.5">
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/60">
-              Access opens (your time)
-            </span>
-            <Input
-              type="datetime-local"
-              value={startLocal}
-              onChange={(e) => setStartLocal(e.target.value)}
-              className="h-8 text-xs"
-            />
-          </label>
-          <label className="flex min-w-0 flex-col gap-1.5">
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/60">
-              Access closes (your time)
-            </span>
-            <Input
-              type="datetime-local"
-              value={endLocal}
-              onChange={(e) => setEndLocal(e.target.value)}
-              className="h-8 text-xs"
-            />
-          </label>
-        </div>
-
-        {selectedShow && (
-          <p className="min-w-0 font-mono text-[11px] text-white/60">
-            {formatBrainsShowLabel(selectedShow)}
-          </p>
-        )}
-
-        <div className="flex min-w-0 items-center gap-2">
+      <AdminTabToolbar title="wted-brains access">
+        {(["assign", "activity"] as const).map((v) => (
           <Button
+            key={v}
             type="button"
             variant="ghost"
             size="sm"
-            className="wl-home-v2-tours-header-pill"
-            disabled={!canSave || saving}
-            onClick={() => void handleAssign()}
+            className={
+              "wl-home-v2-tours-header-pill" + (view === v ? " bg-white/15" : "")
+            }
+            onClick={() => setView(v)}
           >
-            {saving ? "Assigning…" : "Assign"}
+            {v === "assign" ? "Assign" : "Activity"}
           </Button>
-          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-white/40">
-            Defaults to 2h before through 6h after show time
-          </span>
-        </div>
-      </div>
+        ))}
+      </AdminTabToolbar>
 
-      <div className="mt-2 flex min-w-0 flex-col gap-2">
-        <AdminTabToolbar title="Current & recent" />
-        <AdminBrainsAssignmentsTable
-          assignments={assignments}
-          nowMs={nowMs}
-          revokingUuid={revokingUuid}
-          onRevoke={(uuid) => void handleRevoke(uuid)}
-        />
-      </div>
+      {view === "activity" ?
+        <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
+          <div
+            className={cn(
+              "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
+              "flex w-full min-w-0 shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-2 border-b border-[rgb(29,32,30)] pb-3",
+            )}
+          >
+            <span className="wp-head-date min-w-0 truncate">Activity</span>
+          </div>
+          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-3 sm:p-4">
+            <AdminBrainsAudit />
+          </div>
+        </div>
+      : <>
+          <div className="wl-home-v2-archive-admin-song-form wl-home-v2-archive-admin-form--two-col wl-home-v2-archive-admin-show-form w-full min-w-0">
+            <div className="wl-home-v2-archive-admin-song-form__grid">
+              <div className="min-w-0">
+                <label htmlFor="brains-admin-person">Person</label>
+                <AdminBrainsUserPicker
+                  selected={selectedUser}
+                  onSelect={setSelectedUser}
+                  inputId="brains-admin-person"
+                />
+              </div>
+
+              <div className="min-w-0">
+                <label>Show</label>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <ShowDropdown
+                    shows={showDataForDropdown}
+                    loading={showsLoading}
+                    loadingProgress={showsLoading ? 40 : 100}
+                    onShowSelect={applyShowSelection}
+                    selectedShow={selectedShowForDropdown}
+                    triggerClassName="wl-home-v2-archive-admin-form-combobox-trigger w-full justify-between !normal-case !tracking-normal"
+                  />
+                  {selectedShow ?
+                    <p className="min-w-0 break-words text-[11px] leading-relaxed text-white/65">
+                      {formatBrainsShowLabel(selectedShow)}
+                    </p>
+                  : null}
+                  {selectedShow && !selectedShow.show_time ?
+                    <p className="text-[11px] leading-relaxed text-amber-200/80">
+                      No show time on record — enter the window by hand
+                    </p>
+                  : null}
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <label htmlFor="brains-admin-opens">Access opens (your time)</label>
+                <Input
+                  id="brains-admin-opens"
+                  type="datetime-local"
+                  value={startLocal}
+                  onChange={(e) => setStartLocal(e.target.value)}
+                />
+              </div>
+
+              <div className="min-w-0">
+                <label htmlFor="brains-admin-closes">
+                  Access closes (your time)
+                </label>
+                <Input
+                  id="brains-admin-closes"
+                  type="datetime-local"
+                  value={endLocal}
+                  onChange={(e) => setEndLocal(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="wl-home-v2-tours-header-pill"
+                disabled={!canSave || saving}
+                onClick={() => void handleAssign()}
+              >
+                {saving ? "Assigning…" : "Assign"}
+              </Button>
+              <span className="text-[11px] leading-relaxed text-white/45">
+                Defaults to 2h before through 6h after show time
+              </span>
+            </div>
+          </div>
+
+          <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
+            <div
+              className={cn(
+                "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
+                "flex w-full min-w-0 shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-2 border-b border-[rgb(29,32,30)] pb-3",
+              )}
+            >
+              <span className="wp-head-date min-w-0 truncate">
+                Current &amp; recent
+              </span>
+            </div>
+            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+              <AdminBrainsAssignmentsTable
+                assignments={assignments}
+                nowMs={nowMs}
+                revokingUuid={revokingUuid}
+                onRevoke={(uuid) => void handleRevoke(uuid)}
+              />
+            </div>
+          </div>
+        </>
+      }
     </AdminTabShell>
   )
 }

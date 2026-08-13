@@ -88,24 +88,41 @@ async function handleAction(
       // always audited and its row is written after the RPC returns, so
       // created_at is effectively the last completion time. The worker clock is
       // fine here — a cooldown is a courtesy, not a security boundary.
-      const since = new Date(Date.now() - REBUILD_COOLDOWN_MS).toISOString()
+      const now = Date.now()
+      const since = new Date(now - REBUILD_COOLDOWN_MS).toISOString()
       const { data: recent, error: recentErr } = await db
         .from("brains_audit_log")
         .select("created_at")
         .eq("action", "rpc_update_all_setlist_entries")
         .eq("outcome", "success")
         .gte("created_at", since)
+        .order("created_at", { ascending: false })
         .limit(1)
       if (recentErr) return { error: recentErr.message }
       if (recent && recent.length > 0) {
-        return { data: { ran: false, reason: "cooldown" } }
+        // `retryAfterMs` lets a caller that wants stats eventually rebuilt schedule
+        // a tight retry instead of guessing at the full cooldown. Brains uses this
+        // so the last save in a burst is never the one that gets skipped.
+        const lastMs = new Date(recent[0].created_at as string).getTime()
+        const remaining = Number.isFinite(lastMs)
+          ? Math.max(0, REBUILD_COOLDOWN_MS - (now - lastMs))
+          : REBUILD_COOLDOWN_MS
+        return {
+          data: { ran: false, reason: "cooldown", retryAfterMs: remaining },
+        }
       }
 
       const { data: ran, error } = await db.rpc(
         "update_all_setlist_entries_locked",
       )
       if (error) return { error: error.message }
-      if (ran === false) return { data: { ran: false, reason: "in_progress" } }
+      if (ran === false) {
+        // Someone else's rebuild is mid-flight. It runs 30–45s, so a retry a
+        // little past that will find the lock free.
+        return {
+          data: { ran: false, reason: "in_progress", retryAfterMs: 50_000 },
+        }
+      }
       return { data: { ran: true } }
     }
 
@@ -182,6 +199,7 @@ async function handleAction(
         entry_id: string
         entry_set: string
         entry_setnum: number
+        entry_placement: string | null
       }[] = []
       for (const raw of entries) {
         if (!raw || typeof raw !== "object") return { error: "Invalid entry" }
@@ -189,6 +207,12 @@ async function handleAction(
         const entry_id = e.entry_id
         const entry_set = e.entry_set
         const entry_setnum = e.entry_setnum
+        // Optional: null means "leave the stored placement alone", which the RPC
+        // handles with a coalesce. Only a cross-set drag sends a value.
+        const entry_placement =
+          typeof e.entry_placement === "string" && e.entry_placement.trim() !== ""
+            ? e.entry_placement
+            : null
         if (typeof entry_id !== "string" || entry_id.trim() === "") {
           return { error: "Each entry needs entry_id" }
         }
@@ -201,7 +225,7 @@ async function handleAction(
         if (typeof entry_setnum !== "number" || !Number.isInteger(entry_setnum)) {
           return { error: "Each entry needs an integer entry_setnum" }
         }
-        payload.push({ entry_id, entry_set, entry_setnum })
+        payload.push({ entry_id, entry_set, entry_setnum, entry_placement })
       }
 
       const { data: touched, error } = await db.rpc(

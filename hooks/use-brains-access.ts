@@ -11,12 +11,15 @@ import type {
 } from "@/types/brains"
 
 /**
- * In `next dev` the caller is treated as an admin so the page can be built and
- * styled without granting a real assignment — matching WlHomeV2AdminGate and
- * AdminGuard, which also step aside in development. Production static builds
- * enforce the real check.
+ * In `next dev` with no mock account selected, the caller is treated as an admin so
+ * the page can be built and styled without granting a real assignment — matching
+ * WlHomeV2AdminGate and AdminGuard, which also step aside in development.
+ *
+ * Selecting a mock account on the dev bar turns this OFF and honours that account's
+ * own `is_admin`. Otherwise signing in as the non-admin `wted-brains` profile would
+ * still be handed the admin path, which is exactly the thing it exists to test.
  */
-const DEV_TREAT_AS_ADMIN = process.env.NODE_ENV === "development"
+const IS_DEV = process.env.NODE_ENV === "development"
 
 export interface BrainsAccess {
   loading: boolean
@@ -30,6 +33,12 @@ export interface BrainsAccess {
   offsetMs: number
   /** True when the caller may see brains at all. */
   hasAccess: boolean
+  /**
+   * Dev-bar mock session standing in for a non-admin: the page renders so layout
+   * can be checked, but assignments cannot be read because the mock token has a
+   * placeholder signature the Edge Function rejects. Always false in production.
+   */
+  devMockBlocked: boolean
   refresh: () => void
 }
 
@@ -72,14 +81,25 @@ export function useBrainsAccess(): BrainsAccess {
   const [tick, setTick] = useState(0)
   const boundaryTimerRef = useRef<number | null>(null)
 
-  const effectiveIsAdmin = isAdmin || DEV_TREAT_AS_ADMIN
+  /**
+   * Reads localStorage, which is safe during render and re-evaluates whenever the
+   * session changes (the dev bar dispatches `wl-session-updated`). Always false
+   * outside `next dev`.
+   */
+  const mockActive = isDevAuthMockSessionActive()
+
+  const effectiveIsAdmin = isAdmin || (IS_DEV && !mockActive)
 
   /**
    * A dev mock session cannot call Edge Functions, and an unauthenticated one has
    * nothing to ask for. Both are "no request to make", which keeps the fetch
    * effect free of synchronous state writes.
    */
-  const canQuery = !!session && !!token && !isDevAuthMockSessionActive()
+  const canQuery = !!session && !!token && !mockActive
+
+  // Let a non-admin mock session through the gate so the page can be inspected,
+  // rather than bouncing it to "/" with no explanation.
+  const devMockBlocked = IS_DEV && mockActive && !isAdmin
 
   // Refresh is a key bump rather than a separate callable, so there is exactly one
   // code path that fetches and one place that writes state.
@@ -175,7 +195,8 @@ export function useBrainsAccess(): BrainsAccess {
     active,
     all: assignments,
     offsetMs,
-    hasAccess: effectiveIsAdmin || active.length > 0,
+    hasAccess: effectiveIsAdmin || active.length > 0 || devMockBlocked,
+    devMockBlocked,
     refresh,
   }
 }
