@@ -107,3 +107,11 @@
   gap: 0.5rem;
   min-width: 0;
 }
+
+/* Leading-icon search fields: song-form `padding-inline: 12px` otherwise sits under the icon. */
+.wl-home-v2
+  .wl-home-v2-brains-shell
+  [data-slot="input"].wl-home-v2-archive-admin-input--with-leading-icon {
+  padding-left: 2.25rem;
+  padding-right: 0.75rem;
+}

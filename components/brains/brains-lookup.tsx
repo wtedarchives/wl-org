@@ -64,7 +64,7 @@ export function BrainsLookup<T>({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="h-8 pl-9 text-xs"
+          className="wl-home-v2-archive-admin-input--with-leading-icon h-8 text-xs"
         />
       </div>
 

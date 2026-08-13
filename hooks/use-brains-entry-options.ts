@@ -9,6 +9,7 @@ export interface BrainsGuestOption {
   guest: string
   guest_displayname: string | null
   guest_instrument: string | null
+  guest_category: string | null
 }
 
 export interface BrainsSongOption {
@@ -81,7 +82,9 @@ export function useBrainsEntryOptions(): BrainsEntryOptions {
             .order("song"),
           client
             .from("guests")
-            .select("guest_id, guest, guest_displayname, guest_instrument")
+            .select(
+              "guest_id, guest, guest_displayname, guest_instrument, guest_category",
+            )
             .order("guest"),
           client.from("artists").select("artist_id, artist").order("artist"),
           client.from("categories").select("category").order("category"),

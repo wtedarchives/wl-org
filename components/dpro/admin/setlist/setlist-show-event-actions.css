@@ -1,8 +1,10 @@
-/* Setlist admin — show timing action buttons below entry table.
-   Scoped under `.wl-home-v2-archive-admin-root--panel` (see css-structure-no-inline.mdc).
+/* Setlist admin + wted-brains — show timing action pills.
+   Scoped under admin panel root OR brains shell (brains reuses the same component).
    Self-contained pill styles — same compact desktop look on all viewports. */
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events {
   display: flex;
   flex-shrink: 0;
   flex-wrap: nowrap;
@@ -17,23 +19,31 @@
   scrollbar-width: none;
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events::-webkit-scrollbar {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events::-webkit-scrollbar {
   display: none;
 }
 
 @media (max-width: 599px) {
-  .wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
+  .wl-home-v2
+    :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+    .wl-home-v2-admin-setlist-show-events {
     justify-content: flex-start;
   }
 }
 
 @media (min-width: 640px) {
-  .wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events {
+  .wl-home-v2
+    :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+    .wl-home-v2-admin-setlist-show-events {
     padding-inline: 0.75rem;
   }
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events__btn {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -64,7 +74,7 @@
 
 /* Override shadcn `Button` sm/ghost defaults so mobile matches desktop pills. */
 .wl-home-v2
-  .wl-home-v2-archive-admin-root--panel
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
   .wl-home-v2-admin-setlist-show-events__btn[data-slot="button"][data-size="sm"] {
   height: auto;
   min-height: 30px;
@@ -76,7 +86,7 @@
 }
 
 .wl-home-v2
-  .wl-home-v2-archive-admin-root--panel
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
   .wl-home-v2-admin-setlist-show-events__btn[data-slot="button"]:hover:not(:disabled):not(
     .wl-home-v2-admin-setlist-show-events__btn--success
   ):not(.wl-home-v2-admin-setlist-show-events__btn--error) {
@@ -85,31 +95,41 @@
   color: rgb(255, 255, 255);
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__icon {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events__icon {
   width: 0.875rem;
   height: 0.875rem;
   flex-shrink: 0;
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn--success {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events__btn--success {
   border-color: rgb(72, 140, 90);
   background: rgba(72, 140, 90, 0.22);
   color: rgb(190, 235, 200);
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn--success:hover {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events__btn--success:hover {
   border-color: rgb(88, 158, 106);
   background: rgba(72, 140, 90, 0.3);
   color: rgb(210, 245, 215);
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn--error {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events__btn--error {
   border-color: rgb(168, 72, 68);
   background: rgba(168, 72, 68, 0.22);
   color: rgb(255, 190, 185);
 }
 
-.wl-home-v2 .wl-home-v2-archive-admin-root--panel .wl-home-v2-admin-setlist-show-events__btn--error:hover {
+.wl-home-v2
+  :is(.wl-home-v2-archive-admin-root--panel, .wl-home-v2-brains-shell)
+  .wl-home-v2-admin-setlist-show-events__btn--error:hover {
   border-color: rgb(188, 88, 84);
   background: rgba(168, 72, 68, 0.3);
   color: rgb(255, 210, 205);

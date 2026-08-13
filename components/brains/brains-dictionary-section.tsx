@@ -33,18 +33,24 @@ export function BrainsDictionarySection() {
       <div className="wl-home-v2-brains-archive-grid">
         <section className="wl-home-v2-brains-archive-col" aria-label="Songs">
           <h3 className="wl-home-v2-brains-archive-col__title">Songs</h3>
-          <BrainsAddSong />
+          <div className="wl-home-v2-archive-admin-song-form">
+            <BrainsAddSong />
+          </div>
         </section>
         <section className="wl-home-v2-brains-archive-col" aria-label="Artists">
           <h3 className="wl-home-v2-brains-archive-col__title">Artists</h3>
-          <BrainsAddArtist />
+          <div className="wl-home-v2-archive-admin-song-form">
+            <BrainsAddArtist />
+          </div>
         </section>
         <section
           className="wl-home-v2-brains-archive-col"
           aria-label="Personnel"
         >
           <h3 className="wl-home-v2-brains-archive-col__title">Personnel</h3>
-          <BrainsAddPersonnel />
+          <div className="wl-home-v2-archive-admin-song-form">
+            <BrainsAddPersonnel />
+          </div>
         </section>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { MagnifyingGlass } from "@phosphor-icons/react"
 import { toast } from "sonner"
 
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { GUEST_CATEGORIES } from "@/constants/guest-categories"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { getDefaultPlacementForSet } from "@/lib/setlist-default-placement"
 import { nextBrainsSlot } from "@/lib/brains-setlist-reorder"
@@ -42,6 +43,14 @@ const NEW_SONG_OPTIONS = [
 ] as const
 
 const SEGUE_VALUE = ">"
+
+const GOOSE_CURRENT = GUEST_CATEGORIES[0] // "Goose (current)"
+
+function gooseCurrentGuestIds(personnel: BrainsGuestOption[]): string[] {
+  return personnel
+    .filter((g) => g.guest_category === GOOSE_CURRENT)
+    .map((g) => g.guest_id)
+}
 
 interface BrainsEntryFormProps {
   open: boolean
@@ -100,11 +109,14 @@ export function BrainsEntryForm({
   const [personnelQuery, setPersonnelQuery] = useState("")
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  /** True after Goose defaults (or edit guests) have been applied for this open. */
+  const personnelSeededRef = useRef(false)
 
   // Reset the whole form whenever the dialog opens, keyed on which entry it opened
   // for. Without this an edit would inherit the previous row's values.
   useEffect(() => {
     if (!open) return
+    personnelSeededRef.current = false
     if (entry) {
       setEntrySet(entry.entry_set ?? "1")
       setSetnum(entry.entry_setnum ?? 1)
@@ -139,25 +151,38 @@ export function BrainsEntryForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, entry?.entry_id])
 
-  // Existing personnel for the row being edited.
+  // Edit: load saved guests. Add: default the four "Goose (current)" members —
+  // removable, with search still available for sit-ins.
   useEffect(() => {
-    if (!open || !entry || !token) {
+    if (!open) {
+      personnelSeededRef.current = false
       setGuestIds([])
       return
     }
+    if (!entry) {
+      if (personnelSeededRef.current) return
+      const ids = gooseCurrentGuestIds(options.personnel)
+      if (ids.length === 0) return
+      personnelSeededRef.current = true
+      setGuestIds(ids)
+      return
+    }
+    if (!token || personnelSeededRef.current) return
     let cancelled = false
     async function run() {
       const { data } = await invokeDproAdmin<{ guest_ids: string[] }>(token, {
         action: "setlist_entry_guests_select",
         setlist_entry_id: entry!.entry_id,
       })
-      if (!cancelled) setGuestIds(data?.guest_ids ?? [])
+      if (cancelled) return
+      personnelSeededRef.current = true
+      setGuestIds(data?.guest_ids ?? [])
     }
     void run()
     return () => {
       cancelled = true
     }
-  }, [open, entry, token])
+  }, [open, entry, token, options.personnel])
 
   /** Changing the set re-derives the number and the placement together. */
   const handleSetChange = (nextSet: string) => {
@@ -254,7 +279,7 @@ export function BrainsEntryForm({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex min-w-0 flex-col gap-3">
+        <div className="wl-home-v2-archive-admin-song-form flex min-w-0 flex-col gap-3">
           {/* Song — the one field that always needs a decision, so it leads. */}
           <div className="flex min-w-0 flex-col gap-1.5">
             <span className={labelCls}>Song</span>
@@ -283,7 +308,7 @@ export function BrainsEntryForm({
                     value={songQuery}
                     onChange={(e) => setSongQuery(e.target.value)}
                     placeholder="Search songs"
-                    className="h-9 pl-9"
+                    className="wl-home-v2-archive-admin-input--with-leading-icon h-9"
                     autoFocus={isNew}
                   />
                 </div>
@@ -419,12 +444,18 @@ export function BrainsEntryForm({
                 ))}
               </ul>
             )}
-            <Input
-              value={personnelQuery}
-              onChange={(e) => setPersonnelQuery(e.target.value)}
-              placeholder="Search personnel"
-              className="h-9"
-            />
+            <div className="relative min-w-0">
+              <MagnifyingGlass
+                className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 opacity-60"
+                aria-hidden
+              />
+              <Input
+                value={personnelQuery}
+                onChange={(e) => setPersonnelQuery(e.target.value)}
+                placeholder="Search to add or replace"
+                className="wl-home-v2-archive-admin-input--with-leading-icon h-9"
+              />
+            </div>
             {personnelQuery.trim() !== "" && (
               <ul className="flex max-h-40 min-w-0 flex-col gap-0.5 overflow-y-auto">
                 {filteredPersonnel.map((g) => (
