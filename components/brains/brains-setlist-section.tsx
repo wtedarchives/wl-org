@@ -7,6 +7,7 @@ import { SetlistShareCaptureProvider } from "@/components/dpro/admin/setlist/set
 import { SetlistShowEventActions } from "@/components/dpro/admin/setlist/setlist-show-event-actions"
 import { Button } from "@/components/ui/button"
 import { useBrainsSetlist } from "@/hooks/use-brains-setlist"
+import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
 
 import { BrainsEntryForm } from "./brains-entry-form"
@@ -75,31 +76,34 @@ export function BrainsSetlistSection() {
 
   return (
     <SetlistShareCaptureProvider showId={showId}>
-      <section className="flex min-w-0 flex-col gap-3">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <span className="flex min-w-0 items-center gap-2">
-            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-white/90">
-              Setlist
-            </span>
+      <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
+        <div
+          className={cn(
+            "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
+            "flex w-full min-w-0 shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-2 border-b border-[rgb(29,32,30)] pb-3",
+          )}
+        >
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            <span className="wp-head-date min-w-0 truncate">Setlist</span>
             {/*
               Stats rebuild on their own after every edit. This says so quietly
               rather than blocking the save — the rebuild takes 30–45 seconds and
               nobody should be waiting on it mid-show.
             */}
-            {rebuildStatus !== "idle" && (
+            {rebuildStatus !== "idle" ?
               <span
                 className="font-mono text-[10px] uppercase tracking-[0.06em] text-white/45"
                 aria-live="polite"
               >
-                {rebuildStatus === "running"
-                  ? "Updating stats…"
-                  : rebuildStatus === "queued"
-                    ? "Stats update queued"
-                    : "Stats update failed"}
+                {rebuildStatus === "running" ?
+                  "Updating stats…"
+                : rebuildStatus === "queued" ?
+                  "Stats update queued"
+                : "Stats update failed"}
               </span>
-            )}
+            : null}
           </span>
-          {!readOnly && (
+          {!readOnly ?
             <span className="flex shrink-0 items-center gap-2">
               <Button
                 type="button"
@@ -124,25 +128,30 @@ export function BrainsSetlistSection() {
                 Add song
               </Button>
             </span>
-          )}
+          : null}
         </div>
 
         {/* Onstage / Set Break / Encore Break / End Show. */}
-        {!readOnly && <SetlistShowEventActions selectedShow={showData} />}
+        {!readOnly && showData ?
+          <div className="wl-home-v2-brains-setlist-events">
+            <SetlistShowEventActions selectedShow={showData} />
+          </div>
+        : null}
 
-        {loading ? (
-          <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-white/50">
-            Loading setlist…
-          </p>
-        ) : (
-          <BrainsSetlistTable
-            entries={entries}
-            showId={showId}
-            readOnly={readOnly}
-            onEdit={openEdit}
-            onReorder={(activeId, overId) => void reorder(activeId, overId)}
-          />
-        )}
+        {loading ?
+          <div className="px-1 py-8 text-center text-xs text-white/65">
+            <p className="m-0">Loading setlist…</p>
+          </div>
+        : <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+            <BrainsSetlistTable
+              entries={entries}
+              showId={showId}
+              readOnly={readOnly}
+              onEdit={openEdit}
+              onReorder={(activeId, overId) => void reorder(activeId, overId)}
+            />
+          </div>
+        }
 
         <BrainsEntryForm
           open={formOpen}
@@ -151,16 +160,16 @@ export function BrainsSetlistSection() {
           existing={entries}
           options={options}
           onSubmit={(patch) =>
-            editing
-              ? updateEntry(editing.entry_id, patch).then((ok) =>
-                  ok ? editing.entry_id : null,
-                )
-              : insertEntry(patch)
+            editing ?
+              updateEntry(editing.entry_id, patch).then((ok) =>
+                ok ? editing.entry_id : null,
+              )
+            : insertEntry(patch)
           }
           onSavePersonnel={savePersonnel}
           onDelete={deleteEntry}
         />
-      </section>
+      </div>
     </SetlistShareCaptureProvider>
   )
 }

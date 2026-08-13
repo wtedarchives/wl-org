@@ -170,14 +170,14 @@ export function BrainsSetlistTable({
 
   if (entries.length === 0) {
     return (
-      <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-white/50">
-        Nothing yet — add the first song
-      </p>
+      <div className="px-1 py-8 text-center text-xs text-white/65">
+        <p className="m-0">Nothing yet — add the first song</p>
+      </div>
     )
   }
 
   return (
-    <div className="min-w-0 overflow-x-auto">
+    <div className="min-w-0">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

@@ -3,6 +3,8 @@
 import Image from "next/image"
 import { useCallback, useMemo, useState } from "react"
 
+import { AdminTabShell } from "@/components/dpro/admin/admin-tab-shell"
+import { AdminTabToolbar } from "@/components/dpro/admin/admin-tab-toolbar"
 import { ShowDropdown } from "@/components/dpro/admin/setlist/show-dropdown"
 import { Button } from "@/components/ui/button"
 import { useBrainsAccess } from "@/hooks/use-brains-access"
@@ -13,6 +15,8 @@ import type { BrainsMyAssignment, BrainsShowRef } from "@/types/brains"
 
 import { BrainsCountdown } from "./brains-countdown"
 import { BrainsWorkProvider, type BrainsWorkValue } from "./brains-work-context"
+
+import "./brains-page.css"
 
 function showRefFromShowData(show: ShowData | undefined): BrainsShowRef | null {
   if (!show) return null
@@ -100,63 +104,54 @@ export function BrainsShell({ children }: { children?: React.ReactNode }) {
   const needsAssignmentChoice = !isAdmin && !chosen && active.length > 1
 
   return (
-    <div className="flex min-w-0 flex-col gap-3">
-      <header className="flex min-w-0 flex-col gap-2 border-b border-white/10 pb-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="flex min-w-0 shrink-0 items-center gap-2">
-            <Image
-              src="/Brain.jpg"
-              alt=""
-              width={16}
-              height={16}
-              className="size-4 shrink-0 rounded-full object-cover"
-              aria-hidden
-            />
-            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-white/90">
-              wted-brains
-            </span>
-          </span>
-
-          {!isAdmin && chosen && (
+    <AdminTabShell className="wl-home-v2-brains-shell">
+      <AdminTabToolbar title="wted-brains">
+        <span className="flex min-w-0 items-center gap-2">
+          <Image
+            src="/Brain.jpg"
+            alt=""
+            width={16}
+            height={16}
+            className="size-4 shrink-0 rounded-full object-cover"
+            aria-hidden
+          />
+          {!isAdmin && chosen ?
             <BrainsCountdown
               endsAt={chosen.access_end}
               offsetMs={offsetMs}
               onExpire={handleExpire}
             />
-          )}
+          : null}
+          {isAdmin ?
+            <ShowDropdown
+              shows={adminShows}
+              loading={adminShowsLoading}
+              loadingProgress={adminShowsLoading ? 40 : 100}
+              onShowSelect={(s) => setAdminShowId(s.show_id)}
+              selectedShow={
+                adminShowId ? adminShowsById.get(adminShowId) ?? null : null
+              }
+            />
+          : null}
+        </span>
+      </AdminTabToolbar>
 
-          {isAdmin && (
-            <span className="ml-auto min-w-0 shrink-0">
-              <ShowDropdown
-                shows={adminShows}
-                loading={adminShowsLoading}
-                loadingProgress={adminShowsLoading ? 40 : 100}
-                onShowSelect={(s) => setAdminShowId(s.show_id)}
-                selectedShow={
-                  adminShowId ? adminShowsById.get(adminShowId) ?? null : null
-                }
-              />
-            </span>
-          )}
-        </div>
-
-        {show && (
-          <p className="min-w-0 break-words font-mono text-xs text-white/70">
-            {formatBrainsShowLabel(show)}
-          </p>
-        )}
-      </header>
+      {show ?
+        <p className="wl-home-v2-brains-show-heading">
+          {formatBrainsShowLabel(show)}
+        </p>
+      : null}
 
       {/* Dev only: explains why the page is empty under a mock session. */}
-      {devMockBlocked && (
+      {devMockBlocked ?
         <div
           role="status"
-          className="flex min-w-0 flex-col gap-1 rounded border border-amber-400/30 bg-amber-500/10 px-3 py-2"
+          className="flex min-w-0 flex-col gap-1 rounded-md border border-amber-400/30 bg-amber-500/10 px-3 py-2"
         >
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-amber-200">
+          <p className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-amber-200">
             Dev mock session
           </p>
-          <p className="text-xs text-white/70">
+          <p className="m-0 text-xs text-white/70">
             Layout renders, but assignments cannot load: the dev bar mints an
             unsigned token and the Edge Function rejects it. To exercise the real
             checks you need a genuinely signed session — sign in as this account
@@ -165,29 +160,29 @@ export function BrainsShell({ children }: { children?: React.ReactNode }) {
             have WYSTERIA_JWT_SECRET locally.
           </p>
         </div>
-      )}
+      : null}
 
-      {windowClosed && (
+      {windowClosed ?
         <div
           role="status"
-          className="flex min-w-0 flex-col gap-1 rounded border border-rose-400/30 bg-rose-500/10 px-3 py-2"
+          className="flex min-w-0 flex-col gap-1 rounded-md border border-rose-400/30 bg-rose-500/10 px-3 py-2"
         >
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-rose-200">
+          <p className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-rose-200">
             Editing window closed
           </p>
-          <p className="text-xs text-white/70">
+          <p className="m-0 text-xs text-white/70">
             Everything you saved is safe. Ask an admin to extend your access if the
             show ran long.
           </p>
         </div>
-      )}
+      : null}
 
-      {needsAssignmentChoice && (
-        <div className="flex min-w-0 flex-col gap-2">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-white/60">
+      {needsAssignmentChoice ?
+        <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-w-0 flex-col gap-2 p-3 sm:p-4">
+          <p className="m-0 font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-white/60">
             Which show are you working?
           </p>
-          <ul className="flex min-w-0 flex-col gap-1.5">
+          <ul className="m-0 flex min-w-0 list-none flex-col gap-1.5 p-0">
             {active.map((a) => (
               <li key={a.uuid} className="min-w-0">
                 <Button
@@ -205,15 +200,22 @@ export function BrainsShell({ children }: { children?: React.ReactNode }) {
             ))}
           </ul>
         </div>
-      )}
+      : null}
 
-      {!needsAssignmentChoice && !showId && (
-        <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-white/50">
-          {isAdmin ? "Pick a show to start" : "No show assigned right now"}
-        </p>
-      )}
+      {!needsAssignmentChoice && !showId ?
+        <div className="widget-panel wl-home-v2-admin-setlist-empty flex flex-col gap-3">
+          <div className="wp-head">
+            <span>Setlist</span>
+          </div>
+          <p className="m-0 text-[13px] leading-relaxed text-white/65">
+            {isAdmin ?
+              "Use the show picker above to load a setlist for editing."
+            : "No show assigned right now."}
+          </p>
+        </div>
+      : null}
 
       <BrainsWorkProvider value={work}>{children}</BrainsWorkProvider>
-    </div>
+    </AdminTabShell>
   )
 }

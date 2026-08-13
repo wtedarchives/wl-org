@@ -2,13 +2,26 @@
 
 import type { CSSProperties, ReactNode } from "react"
 
+import { cn } from "@/lib/utils"
+
 /**
  * WL Home v2 archive admin tab chrome: B&W hero tile + padded main column
  * (same layout as the Setlist admin tab).
  */
-export function AdminTabShell({ children }: { children: ReactNode }) {
+export function AdminTabShell({
+  children,
+  className,
+}: {
+  children: ReactNode
+  className?: string
+}) {
   return (
-    <div className="wl-home-v2-archive-admin-tab-shell wl-home-v2-years-page min-h-0">
+    <div
+      className={cn(
+        "wl-home-v2-archive-admin-tab-shell wl-home-v2-years-page min-h-0",
+        className,
+      )}
+    >
       <div className="wl-home-v2-years-body min-h-0">
         <section
           className="wl-home-v2-archive-admin-tab-tile wl-home-v2-years-tile wl-home-v2-years-tile--main min-h-0 min-w-0 flex-1"

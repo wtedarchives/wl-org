@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
+import { cn } from "@/lib/utils"
 
 import { useBrainsWork } from "./brains-work-context"
 
@@ -77,12 +78,17 @@ export function BrainsCoachNotesSection() {
   }
 
   return (
-    <section className="flex min-w-0 flex-col gap-2 border-t border-white/10 pt-3">
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.06em] text-white/90">
+    <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-w-0 flex-col">
+      <div
+        className={cn(
+          "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
+          "flex w-full min-w-0 shrink-0 flex-row flex-wrap items-center gap-x-3 gap-y-2 border-b border-[rgb(29,32,30)] pb-3",
+        )}
+      >
+        <span className="wp-head-date min-w-0 flex-1 truncate">
           Coach&rsquo;s notes
         </span>
-        {!readOnly && (
+        {!readOnly ?
           <Button
             type="button"
             variant="ghost"
@@ -93,23 +99,21 @@ export function BrainsCoachNotesSection() {
           >
             {saving ? "Saving…" : dirty ? "Save notes" : "Saved"}
           </Button>
-        )}
+        : null}
       </div>
 
-      {saved === null ? (
-        <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-white/50">
-          Loading notes…
-        </p>
-      ) : (
-        <Textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          readOnly={readOnly}
-          rows={4}
-          placeholder="Notes for this show"
-          className="text-sm"
-        />
-      )}
-    </section>
+      <div className="wl-home-v2-archive-admin-song-form p-3 sm:p-4">
+        {saved === null ?
+          <p className="m-0 text-xs text-white/65">Loading notes…</p>
+        : <Textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            readOnly={readOnly}
+            rows={4}
+            placeholder="Notes for this show"
+          />
+        }
+      </div>
+    </div>
   )
 }

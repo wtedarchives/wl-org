@@ -22,8 +22,8 @@ export default function ArchiveBrainsPage() {
           <BrainsOptionsProvider>
             <BrainsShell>
               <BrainsSetlistSection />
-              <BrainsCoachNotesSection />
               <BrainsDictionarySection />
+              <BrainsCoachNotesSection />
             </BrainsShell>
           </BrainsOptionsProvider>
         </WlHomeV2ArchiveAdminLayout>
