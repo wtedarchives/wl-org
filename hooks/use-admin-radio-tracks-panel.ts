@@ -299,7 +299,7 @@ export function useAdminRadioTracksPanel() {
           kind: "success",
           message:
             `Sync complete: ${insertedTotal} tracks added ` +
-            `(${rec.resolvedToNew} requestable → NEW, ${rec.resolvedToSkipped} non-requestable → skipped), ` +
+            `(${rec.resolvedToNew} → NEW), ` +
             `${rec.madeRequestable} became requestable, ${rec.madeUnrequestable} hidden, ` +
             `${rec.requeuedToNew} re-queued to NEW for show mapping, ` +
             `${rec.updatedToRemoved.length} marked REMOVED, ` +

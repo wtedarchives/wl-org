@@ -889,8 +889,8 @@ async function handleAction(
 
     /**
      * Admin panel, step 2 of 2: set `requestable` from the public feed, resolve
-     * PENDING rows into NEW/skipped, and mark departures REMOVED. Cheap enough
-     * to always run in a single invocation.
+     * PENDING rows into NEW, and mark departures REMOVED. Cheap enough to
+     * always run in a single invocation.
      */
     case "wted_radio_ids_sync": {
       try {

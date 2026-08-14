@@ -109,7 +109,7 @@ export type StudioCrawlChunkResult = {
 
 /**
  * Result of `dpro-admin` action `wted_radio_ids_sync` — the reconcile pass that
- * sets `requestable` from the public feed and resolves PENDING rows.
+ * sets `requestable` from the public feed and resolves PENDING rows to NEW.
  *
  * `abortedReason` is set when the safety guard tripped, in which case NOTHING
  * was written and every counter is zero.
@@ -118,6 +118,7 @@ export type ReconcileWtedRadioIdsResult = {
   madeRequestable: number
   madeUnrequestable: number
   resolvedToNew: number
+  /** Always 0 — PENDING rows are never auto-skipped. Kept for the admin banner. */
   resolvedToSkipped: number
   /** Previously-skipped tracks that became requestable and need show mapping. */
   requeuedToNew: number

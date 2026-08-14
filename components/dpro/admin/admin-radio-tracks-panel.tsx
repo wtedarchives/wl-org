@@ -145,7 +145,7 @@ export function AdminRadioTracksPanel() {
               . Then it reads the <strong>public</strong> requests feed, the only
               source of truth for{" "}
               <code className="wl-home-v2-admin-radio-tab-code">requestable</code>
-              , and sets that flag, resolves new tracks into NEW or skipped, and
+              , and sets that flag, puts every new track in NEW for review, and
               marks departures REMOVED. If more than 10% of requestable tracks
               would be hidden in one run it aborts without writing anything,
               since a truncated Radio.co response is indistinguishable from a

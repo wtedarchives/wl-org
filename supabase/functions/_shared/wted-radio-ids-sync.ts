@@ -19,7 +19,7 @@
  *   1. crawlStudioTracksChunk + insertStudioTracks — paged, idempotent inserts.
  *      Safe to run in any order, any number of times, over any page range.
  *   2. reconcileWtedRadioIds — one cheap public-feed fetch, then sets
- *      `requestable`, resolves PENDING rows and marks REMOVED.
+ *      `requestable`, resolves PENDING rows to NEW, and marks REMOVED.
  *
  * Only (2) needs a complete picture, and it gets that from the DB plus one small
  * request — never from the crawl. That is what makes chunking safe.
@@ -49,10 +49,12 @@ export const WTED_RADIO_CO_STUDIO_CHUNK_PAGES = 60
  * Transient status for a freshly-inserted Studio track, before the public feed
  * has classified it. Never shown in the admin panel (which reads NEW/REMOVED)
  * and never requestable, so an interrupted crawl leaves rows invisible rather
- * than wrong. `reconcileWtedRadioIds` converts every PENDING row to NEW or
- * skipped. Using a distinct value — rather than inserting as NEW directly — is
- * what lets reconcile tell "just arrived" from "admin already dispositioned
- * this as skipped", so we never resurrect a skipped row into the NEW queue.
+ * than wrong. `reconcileWtedRadioIds` converts every PENDING row to NEW and
+ * sets `requestable` from the public feed. Using a distinct value — rather
+ * than inserting as NEW directly — is what lets reconcile tell "just arrived"
+ * from "admin already dispositioned this as skipped", so we never resurrect a
+ * skipped row into the NEW queue. `skipped` is an admin decision, never an
+ * automatic default for studio-only tracks (live recordings, bumpers, IDs).
  */
 export const WTED_RADIO_ID_STATUS_PENDING = "PENDING"
 
@@ -401,7 +403,7 @@ export type ReconcileWtedRadioIdsResult = {
   madeUnrequestable: number
   /** PENDING rows resolved into the NEW admin queue. */
   resolvedToNew: number
-  /** PENDING rows resolved straight to skipped (commentary, bumpers, IDs). */
+  /** Always 0 — PENDING rows are never auto-skipped. Kept for the admin banner. */
   resolvedToSkipped: number
   /** Previously-skipped rows that became requestable and need show mapping. */
   requeuedToNew: number
@@ -431,8 +433,8 @@ async function updateIn(
 }
 
 /**
- * Set `requestable` from the public feed, resolve PENDING rows, and mark tracks
- * that left the requestable list as REMOVED.
+ * Set `requestable` from the public feed, resolve PENDING rows to NEW, and mark
+ * tracks that left the requestable list as REMOVED.
  *
  * Cheap by design — one public-feed request plus a full table read — so it fits
  * comfortably in one invocation regardless of how the Studio crawl was chunked.
@@ -500,12 +502,12 @@ export async function reconcileWtedRadioIds(
     )
     .map((r) => r.radio_id)
 
-  const pending = allDb.filter((r) => r.status === WTED_RADIO_ID_STATUS_PENDING)
-  const pendingToNew = pending
-    .filter((r) => publicById.has(r.radio_id))
-    .map((r) => r.radio_id)
-  const pendingToSkipped = pending
-    .filter((r) => !publicById.has(r.radio_id))
+  // Every freshly-crawled track goes to NEW for admin review. `requestable` is
+  // a separate flag (public feed only) — studio-only live recordings must still
+  // appear in the queue so they can be linked to a show. Auto-skipping anything
+  // not in the request feed was dumping those into skipped.
+  const pendingToNew = allDb
+    .filter((r) => r.status === WTED_RADIO_ID_STATUS_PENDING)
     .map((r) => r.radio_id)
 
   /**
@@ -552,9 +554,6 @@ export async function reconcileWtedRadioIds(
     requestable: false,
   })
   const resolvedToNew = await updateIn(client, pendingToNew, { status: "NEW" })
-  const resolvedToSkipped = await updateIn(client, pendingToSkipped, {
-    status: "skipped",
-  })
   const requeuedToNew = await updateIn(client, requeueFromSkipped, {
     status: "NEW",
   })
@@ -599,7 +598,7 @@ export async function reconcileWtedRadioIds(
     madeRequestable,
     madeUnrequestable,
     resolvedToNew,
-    resolvedToSkipped,
+    resolvedToSkipped: 0,
     requeuedToNew,
     updatedToRemoved: updatedRows,
     updatedTitles,
