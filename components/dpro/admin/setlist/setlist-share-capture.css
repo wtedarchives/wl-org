@@ -1,0 +1,24 @@
+/*
+ * Offscreen idle vs on-screen capture.
+ *
+ * Idle stays far off-canvas so the admin/brains UI is not covered. During
+ * capture, `--live` moves the card into the viewport at near-zero opacity:
+ * iOS Safari will not paint (and html-to-image will not embed) images that
+ * sit at left: -99999px or z-index: -1.
+ */
+.wl-setlist-share-capture {
+  position: fixed;
+  top: 0;
+  left: -99999px;
+  width: 432px;
+  pointer-events: none;
+  z-index: -1;
+  /* Portalled to body, outside `.wl-home-v2` — keep the brand-bar token. */
+  --wl-deep-green: #285b4e;
+}
+
+.wl-setlist-share-capture--live {
+  left: 0;
+  z-index: 0;
+  opacity: 0.01;
+}
