@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { useAuth } from "@/components/auth-context"
+import { GUEST_CATEGORIES } from "@/constants/guest-categories"
 import { useBrainsStatsRebuild } from "@/hooks/use-brains-stats-rebuild"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
@@ -14,6 +15,9 @@ import {
 } from "@/lib/brains-setlist-reorder"
 import type { BrainsRebuildStatus } from "@/hooks/use-brains-stats-rebuild"
 import type { AdminSetlistEntryData } from "@/types/admin"
+
+const GOOSE_CURRENT = GUEST_CATEGORIES[0]
+const ENTRY_NEW_FALSE = "false"
 
 /** Columns a brains caller may write; mirrors the Edge Function whitelist. */
 export type BrainsEntryPatch = Partial<
@@ -37,12 +41,37 @@ export interface UseBrainsSetlist {
   insertEntry: (patch: BrainsEntryPatch) => Promise<string | null>
   updateEntry: (entryId: string, patch: BrainsEntryPatch) => Promise<boolean>
   deleteEntry: (entryId: string) => Promise<boolean>
-  savePersonnel: (entryId: string, guestIds: string[]) => Promise<boolean>
+  deleteEntries: (entryIds: string[]) => Promise<boolean>
   reorder: (activeId: string, overId: string) => Promise<void>
   /** Progress of the automatic stats rebuild, for the header indicator. */
   rebuildStatus: BrainsRebuildStatus
   /** Manual fallback behind the Update button. */
   rebuildNow: () => void
+}
+
+async function attachGooseCurrent(
+  token: string,
+  entryId: string,
+): Promise<void> {
+  if (!supabase) return
+  const { data, error } = await supabase
+    .from("guests")
+    .select("guest_id")
+    .eq("guest_category", GOOSE_CURRENT)
+  if (error) {
+    toast.error("Song saved, but the four Goose members could not be attached.")
+    return
+  }
+  const guestIds = (data ?? []).map((r) => r.guest_id as string)
+  if (guestIds.length === 0) return
+  const { error: replaceError } = await invokeDproAdmin(token, {
+    action: "setlist_entry_guests_replace",
+    setlist_entry_id: entryId,
+    guest_ids: guestIds,
+  })
+  if (replaceError) {
+    toast.error("Song saved, but the four Goose members could not be attached.")
+  }
 }
 
 /**
@@ -54,9 +83,8 @@ export interface UseBrainsSetlist {
  * show. `useBrainsStatsRebuild` fires it alongside the save instead and retries if
  * the lock or cooldown refuses, so stats converge without anyone waiting.
  *
- * The entry itself is correct the instant it saves regardless: every public path
- * orders by `entry_set, entry_setnum`, both written directly here. Only
- * `entry_setorder` and the derived stats (gap, rarity) trail the rebuild.
+ * New rows always stamp `entry_new` as `false` and attach the four current Goose
+ * members. Edits leave personnel untouched.
  */
 export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
   const { session } = useAuth()
@@ -67,6 +95,10 @@ export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
   const [reloadKey, setReloadKey] = useState(0)
 
   const refresh = useCallback(() => setReloadKey((k) => k + 1), [])
+
+  useEffect(() => {
+    setRows(null)
+  }, [showId])
 
   useEffect(() => {
     if (!showId || !supabase) return
@@ -94,10 +126,11 @@ export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
     }
   }, [showId, reloadKey])
 
-  // Re-sorted client-side as well as in the query so an optimistic reorder shows
-  // in the right order before the server confirms.
   const entries = useMemo(
-    () => (rows ? sortBrainsEntries(rows as (AdminSetlistEntryData & BrainsReorderRow)[]) : []),
+    () =>
+      rows ?
+        sortBrainsEntries(rows as (AdminSetlistEntryData & BrainsReorderRow)[])
+      : [],
     [rows],
   )
 
@@ -108,15 +141,17 @@ export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
         rows: { entry_id: string }[]
       }>(token, {
         action: "setlist_entries_insert",
-        row: { ...patch, entry_show: showId },
+        row: { ...patch, entry_new: ENTRY_NEW_FALSE, entry_show: showId },
       })
       if (error) {
         toast.error(error)
         return null
       }
+      const entryId = data?.rows?.[0]?.entry_id ?? null
+      if (entryId) await attachGooseCurrent(token, entryId)
       refresh()
       rebuildNow()
-      return data?.rows?.[0]?.entry_id ?? null
+      return entryId
     },
     [token, showId, refresh, rebuildNow],
   )
@@ -127,7 +162,7 @@ export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
       const { error } = await invokeDproAdmin(token, {
         action: "setlist_entries_update",
         entry_id: entryId,
-        patch,
+        patch: { ...patch, entry_new: ENTRY_NEW_FALSE },
       })
       if (error) {
         toast.error(error)
@@ -158,21 +193,26 @@ export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
     [token, refresh, rebuildNow],
   )
 
-  const savePersonnel = useCallback(
-    async (entryId: string, guestIds: string[]): Promise<boolean> => {
+  const deleteEntries = useCallback(
+    async (entryIds: string[]): Promise<boolean> => {
       if (!token) return false
-      const { error } = await invokeDproAdmin(token, {
-        action: "setlist_entry_guests_replace",
-        setlist_entry_id: entryId,
-        guest_ids: guestIds,
-      })
-      if (error) {
-        toast.error(error)
-        return false
+      if (entryIds.length === 0) return true
+      for (const entryId of entryIds) {
+        const { error } = await invokeDproAdmin(token, {
+          action: "setlist_entries_delete",
+          entry_id: entryId,
+        })
+        if (error) {
+          toast.error(error)
+          refresh()
+          return false
+        }
       }
+      refresh()
+      rebuildNow()
       return true
     },
-    [token],
+    [token, refresh, rebuildNow],
   )
 
   /**
@@ -213,7 +253,7 @@ export function useBrainsSetlist(showId: string | null): UseBrainsSetlist {
     insertEntry,
     updateEntry,
     deleteEntry,
-    savePersonnel,
+    deleteEntries,
     reorder,
     rebuildStatus,
     rebuildNow,

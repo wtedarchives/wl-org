@@ -1,229 +1,128 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { MagnifyingGlass } from "@phosphor-icons/react"
+import { Save, Trash2, X } from "lucide-react"
 import { toast } from "sonner"
 
-import { useAuth } from "@/components/auth-context"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
+import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { GUEST_CATEGORIES } from "@/constants/guest-categories"
-import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
-import { getDefaultPlacementForSet } from "@/lib/setlist-default-placement"
+import {
+  defaultPlacementForNewSong,
+  formatBrainsSetLabel,
+  placementsForSet,
+} from "@/lib/brains-sets"
 import { nextBrainsSlot } from "@/lib/brains-setlist-reorder"
-import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
-import type {
-  BrainsEntryOptions,
-  BrainsGuestOption,
-} from "@/hooks/use-brains-entry-options"
+import type { BrainsEntryOptions } from "@/hooks/use-brains-entry-options"
 import type { BrainsEntryPatch } from "@/hooks/use-brains-setlist"
 
-/**
- * "Is this a debut?" — a text column, not a boolean.
- *
- * Live values in the archive are `FALSE` (4,519 rows), `false` (3,464),
- * `New Cover Song` (16) and `New Original Song` (1). New writes standardize on
- * lowercase `false`; normalizing the legacy uppercase rows is a separate cleanup
- * that only affects the setlist game.
- */
-const NEW_SONG_OPTIONS = [
-  { value: "false", label: "Not new" },
-  { value: "New Original Song", label: "New original" },
-  { value: "New Cover Song", label: "New cover" },
-] as const
+import { BrainsUnknownSongForm } from "./brains-unknown-song-form"
 
 const SEGUE_VALUE = ">"
-
-const GOOSE_CURRENT = GUEST_CATEGORIES[0] // "Goose (current)"
-
-function gooseCurrentGuestIds(personnel: BrainsGuestOption[]): string[] {
-  return personnel
-    .filter((g) => g.guest_category === GOOSE_CURRENT)
-    .map((g) => g.guest_id)
-}
+const LABEL_CLS = "mb-0.5 block text-xs font-medium"
 
 interface BrainsEntryFormProps {
   open: boolean
   onClose: () => void
   /** Null when adding. */
   entry: AdminSetlistEntryData | null
-  /** Current entries, for defaulting a new row's set and number. */
+  /** Set the new row will be appended to. Ignored when editing. */
+  targetSet: string | null
   existing: AdminSetlistEntryData[]
   options: BrainsEntryOptions
   onSubmit: (patch: BrainsEntryPatch) => Promise<string | null>
-  onSavePersonnel: (entryId: string, guestIds: string[]) => Promise<boolean>
   onDelete: (entryId: string) => Promise<boolean>
-}
-
-function personnelLabel(g: BrainsGuestOption): string {
-  const name = g.guest_displayname?.trim() || g.guest
-  return g.guest_instrument?.trim() ? `${name} — ${g.guest_instrument}` : name
 }
 
 /**
  * Add or edit one setlist entry.
  *
- * Carries only the fields a setlister needs: set, number, placement, song, short,
- * segue, personnel, coach's notes and the debut flag. No show picker (the show is
- * fixed by the assignment), no length.
- *
- * Picking a set refills BOTH the number and the placement, so appending during a
- * live show is one choice — the song — and everything else lands correctly.
+ * Set and number are not chosen here — they come from the visual set the song
+ * sits in. Placement is limited to labels that belong to that set.
  */
 export function BrainsEntryForm({
   open,
   onClose,
   entry,
+  targetSet,
   existing,
   options,
   onSubmit,
-  onSavePersonnel,
   onDelete,
 }: BrainsEntryFormProps) {
-  const { session } = useAuth()
-  const token = session?.token ?? null
+  const dialogContentRef = useRef<HTMLDivElement>(null)
   const isNew = entry === null
+  const entrySet = entry?.entry_set ?? targetSet ?? "1"
 
-  const [entrySet, setEntrySet] = useState("1")
-  const [setnum, setSetnum] = useState(1)
-  const [placement, setPlacement] = useState<string>("")
-  // `setlist_entries.entry_song` is TEXT with a foreign key onto `songs(song)`,
-  // whose primary key is the name itself — so this holds the song NAME, not a uuid.
-  const [songName, setSongName] = useState<string>("")
-  const [songQuery, setSongQuery] = useState("")
-  const [short, setShort] = useState<string>("")
+  const [creatingSong, setCreatingSong] = useState(false)
+  const [unknownTitle, setUnknownTitle] = useState("")
+  const [songName, setSongName] = useState("")
+  const [placement, setPlacement] = useState("")
+  const [short, setShort] = useState("")
   const [segue, setSegue] = useState(false)
   const [coachNotes, setCoachNotes] = useState("")
-  const [isNewSong, setIsNewSong] = useState<string>("false")
-  const [guestIds, setGuestIds] = useState<string[]>([])
-  const [personnelQuery, setPersonnelQuery] = useState("")
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  /** True after Goose defaults (or edit guests) have been applied for this open. */
-  const personnelSeededRef = useRef(false)
 
-  // Reset the whole form whenever the dialog opens, keyed on which entry it opened
-  // for. Without this an edit would inherit the previous row's values.
+  const placementOptions = useMemo(() => {
+    const list = placementsForSet(entrySet, options.placements)
+    if (placement && !list.includes(placement)) return [placement, ...list]
+    return list
+  }, [entrySet, options.placements, placement])
+
+  const songNames = useMemo(
+    () => options.songs.map((s) => s.song),
+    [options.songs],
+  )
+
+  const slot = useMemo(
+    () =>
+      nextBrainsSlot(
+        existing.map((e) => ({
+          entry_id: e.entry_id,
+          entry_set: e.entry_set ?? "1",
+          entry_setnum: e.entry_setnum,
+        })),
+        entrySet,
+      ),
+    [existing, entrySet],
+  )
+
   useEffect(() => {
     if (!open) return
-    personnelSeededRef.current = false
+    setCreatingSong(false)
+    setUnknownTitle("")
+    setConfirmDelete(false)
     if (entry) {
-      setEntrySet(entry.entry_set ?? "1")
-      setSetnum(entry.entry_setnum ?? 1)
-      setPlacement(entry.entry_placement ?? "")
       setSongName(entry.entry_song ?? "")
+      setPlacement(entry.entry_placement ?? "")
       setShort(entry.entry_short ?? "")
       setSegue((entry.entry_segue ?? "") === SEGUE_VALUE)
       setCoachNotes(entry.entry_coachnotes ?? "")
-      // Legacy rows carry FALSE as well as false; both mean "not new".
-      const raw = (entry.entry_new ?? "false").trim()
-      setIsNewSong(/^false$/i.test(raw) ? "false" : raw)
-    } else {
-      const slot = nextBrainsSlot(
-        existing.map((e) => ({
-          entry_id: e.entry_id,
-          entry_set: e.entry_set ?? "1",
-          entry_setnum: e.entry_setnum,
-        })),
-      )
-      setEntrySet(slot.entry_set)
-      setSetnum(slot.entry_setnum)
-      setPlacement(getDefaultPlacementForSet(slot.entry_set) ?? "")
-      setSongName("")
-      setShort("")
-      setSegue(false)
-      setCoachNotes("")
-      setIsNewSong("false")
-    }
-    setSongQuery("")
-    setPersonnelQuery("")
-    setConfirmDelete(false)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, entry?.entry_id])
-
-  // Edit: load saved guests. Add: default the four "Goose (current)" members —
-  // removable, with search still available for sit-ins.
-  useEffect(() => {
-    if (!open) {
-      personnelSeededRef.current = false
-      setGuestIds([])
       return
     }
-    if (!entry) {
-      if (personnelSeededRef.current) return
-      const ids = gooseCurrentGuestIds(options.personnel)
-      if (ids.length === 0) return
-      personnelSeededRef.current = true
-      setGuestIds(ids)
-      return
-    }
-    if (!token || personnelSeededRef.current) return
-    let cancelled = false
-    async function run() {
-      const { data } = await invokeDproAdmin<{ guest_ids: string[] }>(token, {
-        action: "setlist_entry_guests_select",
-        setlist_entry_id: entry!.entry_id,
-      })
-      if (cancelled) return
-      personnelSeededRef.current = true
-      setGuestIds(data?.guest_ids ?? [])
-    }
-    void run()
-    return () => {
-      cancelled = true
-    }
-  }, [open, entry, token, options.personnel])
-
-  /** Changing the set re-derives the number and the placement together. */
-  const handleSetChange = (nextSet: string) => {
-    setEntrySet(nextSet)
-    setPlacement(getDefaultPlacementForSet(nextSet) ?? "")
-    if (isNew) {
-      const slot = nextBrainsSlot(
-        existing.map((e) => ({
-          entry_id: e.entry_id,
-          entry_set: e.entry_set ?? "1",
-          entry_setnum: e.entry_setnum,
-        })),
-        nextSet,
-      )
-      setSetnum(slot.entry_setnum)
-    }
-  }
-
-  const filteredSongs = useMemo(() => {
-    const q = songQuery.trim().toLowerCase()
-    if (q === "") return options.songs.slice(0, 40)
-    return options.songs
-      .filter((s) => s.song.toLowerCase().includes(q))
-      .slice(0, 40)
-  }, [songQuery, options.songs])
-
-  const selectedSong = options.songs.find((s) => s.song === songName)
-
-  const filteredPersonnel = useMemo(() => {
-    const q = personnelQuery.trim().toLowerCase()
-    if (q === "") return options.personnel.slice(0, 30)
-    return options.personnel
-      .filter((g) =>
-        `${g.guest} ${g.guest_displayname ?? ""}`.toLowerCase().includes(q),
-      )
-      .slice(0, 30)
-  }, [personnelQuery, options.personnel])
-
-  const selectedPersonnel = options.personnel.filter((g) =>
-    guestIds.includes(g.guest_id),
-  )
+    const isFirst = slot.entry_setnum === 1
+    setSongName("")
+    setPlacement(defaultPlacementForNewSong(entrySet, isFirst))
+    setShort("")
+    setSegue(false)
+    setCoachNotes("")
+  }, [open, entry?.entry_id, entrySet, slot.entry_setnum, entry])
 
   const handleSave = async () => {
     if (!songName) {
@@ -234,18 +133,15 @@ export function BrainsEntryForm({
     try {
       const patch: BrainsEntryPatch = {
         entry_set: entrySet,
-        entry_setnum: setnum,
+        entry_setnum: isNew ? slot.entry_setnum : (entry?.entry_setnum ?? slot.entry_setnum),
         entry_song: songName,
         entry_short: short === "" ? null : short,
         entry_segue: segue ? SEGUE_VALUE : null,
         entry_placement: placement === "" ? null : placement,
         entry_coachnotes: coachNotes.trim() === "" ? null : coachNotes.trim(),
-        entry_new: isNewSong,
       }
       const resultId = await onSubmit(patch)
-      const targetId = entry?.entry_id ?? resultId
-      if (targetId) await onSavePersonnel(targetId, guestIds)
-      onClose()
+      if (resultId) onClose()
     } finally {
       setSaving(false)
     }
@@ -266,267 +162,177 @@ export function BrainsEntryForm({
     }
   }
 
-  const labelCls =
-    "font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/60"
+  const setnum = isNew ? slot.entry_setnum : (entry?.entry_setnum ?? slot.entry_setnum)
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      {/* Near-fullscreen on a phone, a normal dialog from sm up. */}
-      <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto sm:w-full">
-        <DialogHeader>
-          <DialogTitle className="text-base">
-            {isNew ? "Add song" : "Edit song"}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="wl-home-v2-archive-admin-song-form flex min-w-0 flex-col gap-3">
-          {/* Song — the one field that always needs a decision, so it leads. */}
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <span className={labelCls}>Song</span>
-            {selectedSong ? (
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                  {selectedSong.song}
-                </span>
+      <DialogContent
+        className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-xl overflow-y-auto sm:max-w-xl"
+        showCloseButton={false}
+      >
+        <div ref={dialogContentRef} className="contents">
+          <div className="flex items-center justify-between gap-2">
+            <DialogHeader>
+              <DialogTitle>
+                {creatingSong ?
+                  "Add a new song"
+                : isNew ?
+                  "Add Setlist Entry"
+                : "Edit Setlist Entry"}
+              </DialogTitle>
+            </DialogHeader>
+            {!creatingSong ?
+              <div className="flex shrink-0 gap-2">
+                {!isNew ?
+                  <Button
+                    variant={confirmDelete ? "default" : "destructive"}
+                    size="sm"
+                    onClick={() => void handleDelete()}
+                    disabled={saving}
+                    title={confirmDelete ? "Confirm delete" : "Delete"}
+                  >
+                    {confirmDelete ? "Confirm" : <Trash2 className="size-4" />}
+                  </Button>
+                : null}
                 <Button
-                  type="button"
-                  variant="ghost"
                   size="sm"
-                  onClick={() => setSongName("")}
+                  onClick={() => void handleSave()}
+                  disabled={saving || !songName}
                 >
-                  Change
+                  <Save className="size-4" />
+                  {saving ? "…" : null}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                  <X className="size-4" />
                 </Button>
               </div>
-            ) : (
-              <>
-                <div className="relative min-w-0">
-                  <MagnifyingGlass
-                    className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 opacity-60"
-                    aria-hidden
-                  />
-                  <Input
-                    value={songQuery}
-                    onChange={(e) => setSongQuery(e.target.value)}
-                    placeholder="Search songs"
-                    className="wl-home-v2-archive-admin-input--with-leading-icon h-9"
-                    autoFocus={isNew}
-                  />
-                </div>
-                <ul className="flex max-h-48 min-w-0 flex-col gap-0.5 overflow-y-auto">
-                  {filteredSongs.map((s) => (
-                    <li key={s.song_id} className="min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => setSongName(s.song)}
-                        className="w-full min-w-0 truncate rounded px-2 py-1.5 text-left text-sm hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
-                      >
-                        {s.song}
-                      </button>
-                    </li>
-                  ))}
-                  {filteredSongs.length === 0 && (
-                    <li className={labelCls}>No match — add it below the table</li>
-                  )}
-                </ul>
-              </>
-            )}
+            : null}
           </div>
 
-          <div className="grid min-w-0 grid-cols-2 gap-3">
-            <label className="flex min-w-0 flex-col gap-1.5">
-              <span className={labelCls}>Set</span>
-              <select
-                value={entrySet}
-                onChange={(e) => handleSetChange(e.target.value)}
-                className="h-9 min-w-0 rounded border border-white/15 bg-transparent px-2 text-sm"
-              >
-                {options.sets.map((s) => (
-                  <option key={s} value={s} className="text-black">
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex min-w-0 flex-col gap-1.5">
-              <span className={labelCls}>Number</span>
-              <Input
-                type="number"
-                min={1}
-                value={setnum}
-                onChange={(e) => setSetnum(Number(e.target.value) || 1)}
-                className="h-9"
-              />
-            </label>
-          </div>
-
-          <label className="flex min-w-0 flex-col gap-1.5">
-            <span className={labelCls}>Placement</span>
-            <select
-              value={placement}
-              onChange={(e) => setPlacement(e.target.value)}
-              className="h-9 min-w-0 rounded border border-white/15 bg-transparent px-2 text-sm"
-            >
-              <option value="" className="text-black">
-                —
-              </option>
-              {options.placements.map((p) => (
-                <option key={p} value={p} className="text-black">
-                  {p}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div className="grid min-w-0 grid-cols-2 gap-3">
-            <label className="flex min-w-0 flex-col gap-1.5">
-              <span className={labelCls}>Short</span>
-              <select
-                value={short}
-                onChange={(e) => setShort(e.target.value)}
-                className="h-9 min-w-0 rounded border border-white/15 bg-transparent px-2 text-sm"
-              >
-                <option value="" className="text-black">
-                  —
-                </option>
-                {options.shorts.map((s) => (
-                  <option key={s} value={s} className="text-black">
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex min-w-0 flex-col gap-1.5">
-              <span className={labelCls}>New?</span>
-              <select
-                value={isNewSong}
-                onChange={(e) => setIsNewSong(e.target.value)}
-                className="h-9 min-w-0 rounded border border-white/15 bg-transparent px-2 text-sm"
-              >
-                {NEW_SONG_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value} className="text-black">
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          {/* Only ">" exists in the segues table, so this is a toggle. */}
-          <label className="flex min-w-0 cursor-pointer items-center gap-2">
-            <Checkbox
-              checked={segue}
-              onCheckedChange={(v) => setSegue(v === true)}
+          {creatingSong ?
+            <BrainsUnknownSongForm
+              songs={options.songs}
+              artists={options.artists}
+              initialTitle={unknownTitle}
+              onCreated={(name) => {
+                setSongName(name)
+                setCreatingSong(false)
+                setUnknownTitle("")
+              }}
+              onCancel={() => setCreatingSong(false)}
+              onRefreshOptions={options.refresh}
             />
-            <span className="text-sm">Segues into the next song</span>
-          </label>
+          : <div className="wl-home-v2-archive-admin-song-form grid grid-cols-1 gap-3">
+              <p className="m-0 text-xs text-white/55">
+                {formatBrainsSetLabel(entrySet)}
+                {" · "}
+                #{setnum}
+              </p>
 
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <span className={labelCls}>Personnel</span>
-            {selectedPersonnel.length > 0 && (
-              <ul className="flex min-w-0 flex-wrap gap-1">
-                {selectedPersonnel.map((g) => (
-                  <li key={g.guest_id}>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setGuestIds((ids) =>
-                          ids.filter((id) => id !== g.guest_id),
-                        )
-                      }
-                      className="rounded bg-white/10 px-1.5 py-0.5 text-xs hover:bg-white/20"
-                      title="Remove"
-                    >
-                      {personnelLabel(g)} ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="relative min-w-0">
-              <MagnifyingGlass
-                className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 opacity-60"
-                aria-hidden
-              />
-              <Input
-                value={personnelQuery}
-                onChange={(e) => setPersonnelQuery(e.target.value)}
-                placeholder="Search to add or replace"
-                className="wl-home-v2-archive-admin-input--with-leading-icon h-9"
-              />
-            </div>
-            {personnelQuery.trim() !== "" && (
-              <ul className="flex max-h-40 min-w-0 flex-col gap-0.5 overflow-y-auto">
-                {filteredPersonnel.map((g) => (
-                  <li key={g.guest_id} className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setGuestIds((ids) =>
-                          ids.includes(g.guest_id) ? ids : [...ids, g.guest_id],
-                        )
-                        setPersonnelQuery("")
-                      }}
-                      className={cn(
-                        "w-full min-w-0 truncate rounded px-2 py-1.5 text-left text-sm hover:bg-white/10",
-                        guestIds.includes(g.guest_id) && "opacity-40",
+              <div className="min-w-0">
+                <span className={LABEL_CLS}>Song</span>
+                <Combobox
+                  items={songNames}
+                  value={songName || null}
+                  onValueChange={(value) => value != null && setSongName(value)}
+                >
+                  <ComboboxInput
+                    placeholder="Select a song..."
+                    className="h-9 w-full text-sm"
+                  />
+                  <ComboboxContent container={dialogContentRef}>
+                    <ComboboxEmpty>
+                      <span className="flex flex-col items-center gap-2 px-2">
+                        <span>No songs found.</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="min-h-11"
+                          onClick={() => {
+                            setUnknownTitle("")
+                            setCreatingSong(true)
+                          }}
+                        >
+                          Add a new song
+                        </Button>
+                      </span>
+                    </ComboboxEmpty>
+                    <ComboboxList>
+                      {(item) => (
+                        <ComboboxItem key={item} value={item} className="text-xs">
+                          {item}
+                        </ComboboxItem>
                       )}
-                    >
-                      {personnelLabel(g)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+                <button
+                  type="button"
+                  className="mt-1.5 min-h-11 text-left text-xs text-white/55 underline-offset-2 hover:text-white hover:underline"
+                  onClick={() => {
+                    setUnknownTitle("")
+                    setCreatingSong(true)
+                  }}
+                >
+                  Song isn’t listed?
+                </button>
+              </div>
 
-          <label className="flex min-w-0 flex-col gap-1.5">
-            <span className={labelCls}>Coach&rsquo;s notes</span>
-            <Textarea
-              value={coachNotes}
-              onChange={(e) => setCoachNotes(e.target.value)}
-              rows={2}
-              className="text-sm"
-            />
-          </label>
+              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="flex min-w-0 flex-col">
+                  <span className={LABEL_CLS}>Placement</span>
+                  <select
+                    value={placement}
+                    onChange={(e) => setPlacement(e.target.value)}
+                    className="h-9 min-w-0 rounded border border-white/15 bg-transparent px-2 text-sm"
+                  >
+                    {placementOptions.map((p) => (
+                      <option key={p} value={p} className="text-black">
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex min-w-0 flex-col">
+                  <span className={LABEL_CLS}>Short</span>
+                  <select
+                    value={short}
+                    onChange={(e) => setShort(e.target.value)}
+                    className="h-9 min-w-0 rounded border border-white/15 bg-transparent px-2 text-sm"
+                  >
+                    <option value="" className="text-black">
+                      —
+                    </option>
+                    {options.shorts.map((s) => (
+                      <option key={s} value={s} className="text-black">
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="flex min-h-11 min-w-0 cursor-pointer items-center gap-2">
+                <Checkbox
+                  checked={segue}
+                  onCheckedChange={(v) => setSegue(v === true)}
+                />
+                <span className="text-sm">Segues into the next song →</span>
+              </label>
+
+              <label className="flex min-w-0 flex-col">
+                <span className={LABEL_CLS}>Coach&apos;s Notes</span>
+                <Textarea
+                  value={coachNotes}
+                  onChange={(e) => setCoachNotes(e.target.value)}
+                  rows={4}
+                  className="font-mono text-xs"
+                />
+              </label>
+            </div>
+          }
         </div>
-
-        <DialogFooter className="gap-2 sm:justify-between">
-          {!isNew ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={saving}
-              onClick={() => void handleDelete()}
-              className={cn(confirmDelete && "text-rose-300")}
-            >
-              {confirmDelete ? "Tap again to delete" : "Delete"}
-            </Button>
-          ) : (
-            <span />
-          )}
-          <span className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void handleSave()}
-              disabled={saving || !songName}
-            >
-              {saving ? "Saving…" : isNew ? "Add" : "Save"}
-            </Button>
-          </span>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

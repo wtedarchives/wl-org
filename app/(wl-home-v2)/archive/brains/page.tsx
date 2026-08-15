@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 
-import { BrainsCoachNotesSection } from "@/components/brains/brains-coach-notes-section"
-import { BrainsDictionarySection } from "@/components/brains/brains-dictionary-section"
 import { BrainsGate } from "@/components/brains/brains-gate"
 import { BrainsOptionsProvider } from "@/components/brains/brains-options-context"
 import { BrainsSetlistSection } from "@/components/brains/brains-setlist-section"
@@ -22,8 +20,6 @@ export default function ArchiveBrainsPage() {
           <BrainsOptionsProvider>
             <BrainsShell>
               <BrainsSetlistSection />
-              <BrainsDictionarySection />
-              <BrainsCoachNotesSection />
             </BrainsShell>
           </BrainsOptionsProvider>
         </WlHomeV2ArchiveAdminLayout>

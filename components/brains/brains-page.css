@@ -1,4 +1,4 @@
-/* `/archive/brains` (+ preview) — layout polish vs admin setlist chrome */
+/* `/archive/brains` — setlist board, set blocks, header coach notes */
 
 /* Outer marble shell: clear border + rounded corners (mobile square bottom). */
 .wl-home-v2 .wl-home-v2-brains-shell .wl-home-v2-archive-admin-tab-tile {
@@ -22,7 +22,7 @@
   font-weight: 600;
   line-height: 1.35;
   letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgb(235, 235, 235);
 }
 
 @media (min-width: 640px) {
@@ -41,7 +41,6 @@
   border-bottom: 1px solid rgb(29, 32, 30);
 }
 
-/* Event action row from admin setlist — center under brains tile (admin CSS is scoped elsewhere) */
 .wl-home-v2
   .wl-home-v2-archive-admin-tab-shell
   .wl-home-v2-brains-setlist-events
@@ -57,58 +56,238 @@
   overflow: visible;
 }
 
-.wl-home-v2 .wl-home-v2-brains-archive-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  padding: 14px 16px 16px;
+.wl-home-v2 .wl-home-v2-brains-coach {
   min-width: 0;
-}
-
-@media (min-width: 900px) {
-  .wl-home-v2 .wl-home-v2-brains-archive-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    padding: 16px 18px 18px;
-  }
-}
-
-.wl-home-v2 .wl-home-v2-brains-archive-col {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: 14px 18px 16px;
   border: 1px solid rgb(49, 51, 49);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.22);
+  background: rgb(18, 20, 19);
 }
 
-@media (min-width: 900px) {
-  .wl-home-v2 .wl-home-v2-brains-archive-col {
-    padding: 16px 20px 18px;
-  }
-}
-
-.wl-home-v2 .wl-home-v2-brains-archive-col__title {
-  margin: 0;
+.wl-home-v2 .wl-home-v2-brains-coach__toggle {
+  display: flex;
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: rgb(230, 230, 230);
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
 }
 
-.wl-home-v2 .wl-home-v2-brains-archive-col .wl-home-v2-archive-admin-song-form {
+.wl-home-v2 .wl-home-v2-brains-coach__unsaved {
+  color: rgb(251, 191, 36);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.wl-home-v2 .wl-home-v2-brains-coach__panel {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  padding: 0 12px 12px;
+}
+
+.wl-home-v2 .wl-home-v2-brains-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.wl-home-v2 .wl-home-v2-brains-set {
+  min-width: 0;
+  border: 1px solid rgb(49, 51, 49);
+  border-radius: 8px;
+  background: rgb(14, 16, 15);
+  overflow: hidden;
+}
+
+.wl-home-v2 .wl-home-v2-brains-set--encore {
+  border-color: rgb(96, 42, 54);
+}
+
+.wl-home-v2 .wl-home-v2-brains-set--over {
+  border-color: rgb(123, 94, 63);
+}
+
+.wl-home-v2 .wl-home-v2-brains-set__head {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+  border-bottom: 1px solid rgb(29, 32, 30);
+  background: rgb(22, 24, 23);
+}
+
+.wl-home-v2 .wl-home-v2-brains-set--encore .wl-home-v2-brains-set__head {
+  background: rgb(32, 18, 22);
+}
+
+.wl-home-v2 .wl-home-v2-brains-set__title {
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  font-family: Geist, ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgb(245, 245, 245);
+}
+
+.wl-home-v2 .wl-home-v2-brains-set__body {
+  min-height: 56px;
   min-width: 0;
 }
 
-/* Leading-icon search fields: song-form `padding-inline: 12px` otherwise sits under the icon. */
+.wl-home-v2 .wl-home-v2-brains-set__empty {
+  margin: 0;
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: rgb(160, 160, 160);
+}
+
+.wl-home-v2 .wl-home-v2-brains-set__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wl-home-v2 .wl-home-v2-brains-row {
+  display: grid;
+  grid-template-columns: 44px 44px minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  border-top: 1px solid rgb(29, 32, 30);
+}
+
+.wl-home-v2 .wl-home-v2-brains-row:first-child {
+  border-top: 0;
+}
+
+.wl-home-v2 .wl-home-v2-brains-row--dragging {
+  z-index: 10;
+  opacity: 0.8;
+  background: rgb(22, 24, 23);
+}
+
+.wl-home-v2 .wl-home-v2-brains-row__handle,
+.wl-home-v2 .wl-home-v2-brains-row__brain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wl-home-v2 .wl-home-v2-brains-row__body {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 1.25rem;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 10px 6px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wl-home-v2 .wl-home-v2-brains-row__num {
+  font-size: 12px;
+  color: rgb(170, 170, 170);
+}
+
+.wl-home-v2 .wl-home-v2-brains-row__song {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.wl-home-v2 .wl-home-v2-brains-row__segue {
+  text-align: center;
+  font-size: 13px;
+  color: rgb(190, 190, 190);
+}
+
+.wl-home-v2 .wl-home-v2-brains-row__short,
+.wl-home-v2 .wl-home-v2-brains-row__placement {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .wl-home-v2-brains-row__body {
+    grid-template-columns: 1.75rem minmax(0, 1fr) 1.25rem 4.5rem 7.5rem;
+  }
+
+  .wl-home-v2 .wl-home-v2-brains-row__short,
+  .wl-home-v2 .wl-home-v2-brains-row__placement {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgb(180, 180, 180);
+  }
+}
+
+.wl-home-v2
+  .wl-home-v2-brains-row__brain
+  .wl-home-v2-admin-setlist-discourse-brain {
+  width: 32px;
+  height: 32px;
+}
+
+.wl-home-v2
+  .wl-home-v2-brains-row__brain
+  .wl-home-v2-admin-setlist-discourse-brain__icon {
+  width: 14px;
+  height: 14px;
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  min-width: 0;
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set__panel {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  transition:
+    grid-template-rows 200ms ease-out,
+    opacity 200ms ease-out;
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set__panel--closed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set__panel--open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set__inner {
+  overflow: hidden;
+  padding-top: 10px;
+}
+
 .wl-home-v2
   .wl-home-v2-brains-shell
   [data-slot="input"].wl-home-v2-archive-admin-input--with-leading-icon {

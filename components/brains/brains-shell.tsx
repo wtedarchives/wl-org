@@ -13,6 +13,7 @@ import { formatBrainsShowLabel } from "@/lib/brains-window"
 import type { ShowData } from "@/types/admin"
 import type { BrainsMyAssignment, BrainsShowRef } from "@/types/brains"
 
+import { BrainsCoachNotes } from "./brains-coach-notes"
 import { BrainsCountdown } from "./brains-countdown"
 import { BrainsWorkProvider, type BrainsWorkValue } from "./brains-work-context"
 
@@ -140,6 +141,10 @@ export function BrainsShell({ children }: { children?: React.ReactNode }) {
         <p className="wl-home-v2-brains-show-heading">
           {formatBrainsShowLabel(show)}
         </p>
+      : null}
+
+      {showId ?
+        <BrainsCoachNotes showId={showId} readOnly={readOnly} />
       : null}
 
       {/* Dev only: explains why the page is empty under a mock session. */}

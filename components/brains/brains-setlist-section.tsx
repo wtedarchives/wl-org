@@ -1,34 +1,23 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { Plus } from "@phosphor-icons/react"
+import { useEffect, useMemo, useState } from "react"
 
 import { SetlistShareCaptureProvider } from "@/components/dpro/admin/setlist/setlist-share-capture"
 import { SetlistShowEventActions } from "@/components/dpro/admin/setlist/setlist-show-event-actions"
 import { Button } from "@/components/ui/button"
 import { useBrainsSetlist } from "@/hooks/use-brains-setlist"
+import { compareBrainsSets, sortBrainsSetKeys, BRAINS_ALL_SETS } from "@/lib/brains-sets"
 import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData, ShowData } from "@/types/admin"
 
+import { BrainsDeleteSetDialog } from "./brains-delete-set-dialog"
 import { BrainsEntryForm } from "./brains-entry-form"
 import { useBrainsOptions } from "./brains-options-context"
-import { BrainsSetlistTable } from "./brains-setlist-table"
+import { BrainsSetlistBoard } from "./brains-setlist-board"
 import { useBrainsWork } from "./brains-work-context"
 
-/**
- * The setlist half of wted-brains: the table, the row editor, and the show-timing
- * announcements.
- *
- * `SetlistShowEventActions` and `SetlistEntryDiscourseBrain` are reused unchanged
- * from the Admin Panel rather than reimplemented, so the messages a setlister
- * posts to Discourse, push, Bluesky and Instagram are byte-for-byte the ones an
- * admin posts. `SetlistShareCaptureProvider` has to wrap them — it is what renders
- * the offscreen share image the brain button attaches.
- */
 export function BrainsSetlistSection() {
   const { showId, show, readOnly } = useBrainsWork()
-  // Shared with the add-to-archive panels, so an added song is selectable here
-  // straight away and the ~1.3k-song list is fetched once.
   const options = useBrainsOptions()
   const {
     entries,
@@ -36,20 +25,42 @@ export function BrainsSetlistSection() {
     insertEntry,
     updateEntry,
     deleteEntry,
-    savePersonnel,
+    deleteEntries,
     reorder,
     rebuildStatus,
     rebuildNow,
   } = useBrainsSetlist(showId)
 
+  const [emptySets, setEmptySets] = useState<string[]>([])
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<AdminSetlistEntryData | null>(null)
+  const [targetSet, setTargetSet] = useState<string | null>(null)
+  const [deleteSetKey, setDeleteSetKey] = useState<string | null>(null)
 
-  /**
-   * `SetlistShowEventActions` wants a ShowData. Only `show_id` and the identity
-   * fields are read for the announcement, and the brains context already carries
-   * those from the assignment.
-   */
+  useEffect(() => {
+    setEmptySets([])
+    setFormOpen(false)
+    setEditing(null)
+    setTargetSet(null)
+    setDeleteSetKey(null)
+  }, [showId])
+
+  const populatedSets = useMemo(
+    () => new Set(entries.map((e) => e.entry_set ?? "1")),
+    [entries],
+  )
+
+  const visualSets = useMemo(() => {
+    const empty = emptySets.filter((s) => !populatedSets.has(s))
+    return sortBrainsSetKeys([...populatedSets, ...empty])
+  }, [emptySets, populatedSets])
+
+  const availableSets = useMemo(() => {
+    const used = new Set(visualSets)
+    const catalog = options.sets.length > 0 ? options.sets : [...BRAINS_ALL_SETS]
+    return catalog.filter((s) => !used.has(s)).sort(compareBrainsSets)
+  }, [options.sets, visualSets])
+
   const showData: ShowData | null = useMemo(() => {
     if (!showId) return null
     return {
@@ -64,14 +75,43 @@ export function BrainsSetlistSection() {
 
   if (!showId) return null
 
-  const openAdd = () => {
+  const openAdd = (setKey: string) => {
     setEditing(null)
+    setTargetSet(setKey)
     setFormOpen(true)
   }
 
   const openEdit = (entry: AdminSetlistEntryData) => {
     setEditing(entry)
+    setTargetSet(entry.entry_set)
     setFormOpen(true)
+  }
+
+  const handleDeleteSet = async (setKey: string) => {
+    const inSet = entries.filter((e) => e.entry_set === setKey)
+    if (inSet.length > 0) {
+      const ok = await deleteEntries(inSet.map((e) => e.entry_id))
+      if (!ok) return
+    }
+    setEmptySets((prev) => prev.filter((s) => s !== setKey))
+    setDeleteSetKey(null)
+  }
+
+  const handleDeletedEntry = async (entryId: string) => {
+    const row = entries.find((e) => e.entry_id === entryId)
+    const ok = await deleteEntry(entryId)
+    if (ok && row) {
+      const remaining = entries.filter(
+        (e) => e.entry_id !== entryId && e.entry_set === row.entry_set,
+      )
+      if (remaining.length === 0) {
+        const setKey = row.entry_set ?? "1"
+        setEmptySets((prev) =>
+          prev.includes(setKey) ? prev : [...prev, setKey],
+        )
+      }
+    }
+    return ok
   }
 
   return (
@@ -85,11 +125,6 @@ export function BrainsSetlistSection() {
         >
           <span className="flex min-w-0 flex-1 items-center gap-2">
             <span className="wp-head-date min-w-0 truncate">Setlist</span>
-            {/*
-              Stats rebuild on their own after every edit. This says so quietly
-              rather than blocking the save — the rebuild takes 30–45 seconds and
-              nobody should be waiting on it mid-show.
-            */}
             {rebuildStatus !== "idle" ?
               <span
                 className="font-mono text-[10px] uppercase tracking-[0.06em] text-white/45"
@@ -104,34 +139,20 @@ export function BrainsSetlistSection() {
             : null}
           </span>
           {!readOnly ?
-            <span className="flex shrink-0 items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="wl-home-v2-tours-header-pill"
-                onClick={rebuildNow}
-                disabled={rebuildStatus === "running"}
-                title="Rebuild statistics now — takes about 45 seconds"
-              >
-                Update
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="wl-home-v2-tours-header-pill gap-1"
-                onClick={openAdd}
-                title="Add a song"
-              >
-                <Plus className="size-3.5 shrink-0 opacity-80" aria-hidden />
-                Add song
-              </Button>
-            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="wl-home-v2-tours-header-pill min-h-11"
+              onClick={rebuildNow}
+              disabled={rebuildStatus === "running"}
+              title="Rebuild statistics now — takes about 45 seconds, and respects the cooldown"
+            >
+              Update
+            </Button>
           : null}
         </div>
 
-        {/* Onstage / Set Break / Encore Break / End Show. */}
         {!readOnly && showData ?
           <div className="wl-home-v2-brains-setlist-events">
             <SetlistShowEventActions selectedShow={showData} />
@@ -143,12 +164,36 @@ export function BrainsSetlistSection() {
             <p className="m-0">Loading setlist…</p>
           </div>
         : <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
-            <BrainsSetlistTable
+            <BrainsSetlistBoard
               entries={entries}
+              visualSets={visualSets}
+              availableSets={availableSets}
               showId={showId}
               readOnly={readOnly}
+              songs={options.songs}
+              onAddSet={(setKey) =>
+                setEmptySets((prev) =>
+                  prev.includes(setKey) ? prev : [...prev, setKey],
+                )
+              }
+              onAddSong={openAdd}
               onEdit={openEdit}
-              onReorder={(activeId, overId) => void reorder(activeId, overId)}
+              onDeleteSet={setDeleteSetKey}
+              onReorder={(activeId, overId) => {
+                const moving = entries.find((e) => e.entry_id === activeId)
+                const oldSet = moving?.entry_set
+                if (
+                  oldSet &&
+                  entries.every(
+                    (e) => e.entry_id === activeId || e.entry_set !== oldSet,
+                  )
+                ) {
+                  setEmptySets((prev) =>
+                    prev.includes(oldSet) ? prev : [...prev, oldSet],
+                  )
+                }
+                void reorder(activeId, overId)
+              }}
             />
           </div>
         }
@@ -157,6 +202,7 @@ export function BrainsSetlistSection() {
           open={formOpen}
           onClose={() => setFormOpen(false)}
           entry={editing}
+          targetSet={targetSet}
           existing={entries}
           options={options}
           onSubmit={(patch) =>
@@ -166,8 +212,14 @@ export function BrainsSetlistSection() {
               )
             : insertEntry(patch)
           }
-          onSavePersonnel={savePersonnel}
-          onDelete={deleteEntry}
+          onDelete={handleDeletedEntry}
+        />
+
+        <BrainsDeleteSetDialog
+          setKey={deleteSetKey}
+          entries={entries.filter((e) => e.entry_set === deleteSetKey)}
+          onClose={() => setDeleteSetKey(null)}
+          onConfirm={(setKey) => void handleDeleteSet(setKey)}
         />
       </div>
     </SetlistShareCaptureProvider>

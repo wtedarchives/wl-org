@@ -12,10 +12,8 @@ const BrainsOptionsContext = createContext<BrainsEntryOptions | null>(null)
 /**
  * Holds the reference lists once for the whole page.
  *
- * The setlist editor and the three add forms all need the song and personnel
- * lists — the editor to pick from, the add forms to check for duplicates. Sharing
- * one fetch keeps that to a single load of ~1.3k songs instead of two, and means an
- * added song is immediately selectable everywhere after one `refresh()`.
+ * The setlist editor and the add-song dialog share one fetch of ~1.3k songs so an
+ * added song is selectable immediately after `refresh()`.
  */
 export function BrainsOptionsProvider({
   children,
