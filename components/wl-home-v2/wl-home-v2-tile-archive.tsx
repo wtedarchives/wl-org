@@ -13,6 +13,7 @@ import {
 import type { WlHomeMostRecentShow } from "@/hooks/use-wl-home-most-recent-show"
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home-v2-archive-random-show-button"
+import { WlHomeV2SetlistGameAlert } from "@/components/wl-home-v2/wl-home-v2-setlist-game-alert"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
@@ -58,6 +59,7 @@ export function WlHomeV2TileArchive({
       </div>
 
       <div className="tile-widget">
+        <WlHomeV2SetlistGameAlert />
         <div
           className={[
             "widget-panel",

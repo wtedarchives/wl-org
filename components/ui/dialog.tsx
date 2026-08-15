@@ -8,10 +8,30 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
+const PORTALED_MENU_SELECTOR = [
+  "[data-slot='select-content']",
+  "[data-slot='combobox-content']",
+  "[data-admin-show-dropdown-panel]",
+  ".wl-home-v2-archive-admin-floating-dropdown",
+].join(",")
+
+function isPortaledMenuEvent(event: { target: EventTarget | null }) {
+  const target = event.target
+  return target instanceof Element && Boolean(target.closest(PORTALED_MENU_SELECTOR))
+}
+
+/**
+ * `modal` defaults to false. We already lock page scroll ourselves
+ * (`useOverlayRootScrollLock`). Radix's modal mode also mounts
+ * `react-remove-scroll`, which `preventDefault`s touchmove on anything
+ * portaled to `document.body` (Select, Combobox, admin show/song pickers).
+ * On phones that makes the list glitch and snap back to the top.
+ */
 function Dialog({
   open,
   defaultOpen,
   onOpenChange,
+  modal = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   const scrollLock = useOverlayRootScrollLock({
@@ -23,6 +43,7 @@ function Dialog({
     <DialogPrimitive.Root
       data-slot="dialog"
       {...props}
+      modal={modal}
       open={scrollLock.open}
       onOpenChange={scrollLock.onOpenChange}
     />
@@ -68,6 +89,8 @@ function DialogContent({
   children,
   showCloseButton = true,
   overlayClassName,
+  onPointerDownOutside,
+  onInteractOutside,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
@@ -82,6 +105,14 @@ function DialogContent({
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-background p-4 text-xs/relaxed ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
+        onPointerDownOutside={(event) => {
+          if (isPortaledMenuEvent(event)) event.preventDefault()
+          onPointerDownOutside?.(event)
+        }}
+        onInteractOutside={(event) => {
+          if (isPortaledMenuEvent(event)) event.preventDefault()
+          onInteractOutside?.(event)
+        }}
         {...props}
       >
         {children}

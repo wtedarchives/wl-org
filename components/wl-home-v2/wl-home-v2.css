@@ -2844,6 +2844,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   .wl-home-v2 .wl-home-v2-archive-admin-floating-dropdown.wl-home-v2-archive-admin-floating-dropdown--stack-local,
   .wl-home-v2-archive-admin-floating-dropdown.wl-home-v2-archive-admin-floating-dropdown--stack-local {
@@ -3210,6 +3211,14 @@
   .wl-home-v2-archive-admin-portal-content[data-slot="dropdown-menu-content"],
   .wl-home-v2-archive-admin-portal-content[data-slot="select-content"] {
     z-index: 10025;
+  }
+
+  [data-slot="select-content"],
+  [data-slot="combobox-content"],
+  [data-slot="combobox-list"] {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   /* About: title + “Last updated” on one line; meta right-aligned (desktop) */
@@ -5565,6 +5574,41 @@
   }
   .wl-home-v2 #tileGrid .tile.tile-archive .setlist-set-row + .setlist-set-row {
     border-top-color: rgb(92, 96, 94);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-game-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in oklch, var(--wl-orange) 42%, rgb(44, 46, 45));
+    background: color-mix(in oklch, var(--wl-orange) 28%, rgba(0, 0, 0, 0.55));
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+  .wl-home-v2 .wl-home-v2-setlist-game-alert-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--wl-light-orange);
+  }
+  .wl-home-v2 .wl-home-v2-setlist-game-alert p {
+    margin: 0;
+    max-width: none;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
+    text-wrap: pretty;
+  }
+  @media (min-width: 1356px) {
+    .wl-home-v2 #tileGrid .tile.tile-archive .wl-home-v2-setlist-game-alert {
+      align-self: flex-end;
+      width: auto;
+      max-width: 260px;
+      margin-bottom: auto;
+    }
   }
   .wl-home-v2
     #tileGrid
@@ -9522,12 +9566,27 @@
     line-height: 1.32;
     color: rgba(255, 255, 255, 0.68);
   }
+  .wl-home-v2 .modal-archive-hub-footer {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    align-self: center;
+    gap: 14px;
+    width: max-content;
+    max-width: 100%;
+  }
+  .wl-home-v2 .modal-archive-hub-setlist-game-alert {
+    width: 0;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
   .wl-home-v2 .modal-archive-hub-submit {
     flex-shrink: 0;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    align-self: center;
+    align-self: stretch;
     gap: 12px;
     padding: 14px 16px 16px;
     border-radius: 12px;
@@ -9539,7 +9598,7 @@
   /* Mobile (< Tailwind md): centered stack. Desktop: row, left-aligned copy, shrink-wrapped, block centered in modal. */
   @media (min-width: 768px) {
     .wl-home-v2 .modal-archive-hub-submit {
-      align-self: center;
+      align-self: stretch;
       flex-direction: row;
       align-items: center;
       justify-content: flex-start;

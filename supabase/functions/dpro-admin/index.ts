@@ -68,6 +68,7 @@ async function handleAction(
   db: SupabaseClient,
   action: string,
   body: Record<string, unknown>,
+  isAdmin: boolean,
 ): Promise<{ data?: unknown; error?: string }> {
   switch (action) {
     /**
@@ -79,36 +80,38 @@ async function handleAction(
      *     to be global: opening the button to setlisters means an admin and a
      *     setlister can now fire it concurrently, and they are different users so
      *     no per-user limit would catch it.
-     *   - The cooldown below prevents pointless back-to-back rebuilds, which is
-     *     a waste guard. Applied to admins too — the lock already stops the
-     *     dangerous case, and 90 seconds costs nobody anything.
+     *   - The cooldown below prevents pointless back-to-back rebuilds from
+     *     Brains (setlister saves fire this on every song). Admin panel
+     *     Update / setlist saves skip it — admin supersedes Brains.
      */
     case "rpc_update_all_setlist_entries": {
       // Derived from the audit log rather than a state table: this action is
       // always audited and its row is written after the RPC returns, so
       // created_at is effectively the last completion time. The worker clock is
       // fine here — a cooldown is a courtesy, not a security boundary.
-      const now = Date.now()
-      const since = new Date(now - REBUILD_COOLDOWN_MS).toISOString()
-      const { data: recent, error: recentErr } = await db
-        .from("brains_audit_log")
-        .select("created_at")
-        .eq("action", "rpc_update_all_setlist_entries")
-        .eq("outcome", "success")
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(1)
-      if (recentErr) return { error: recentErr.message }
-      if (recent && recent.length > 0) {
-        // `retryAfterMs` lets a caller that wants stats eventually rebuilt schedule
-        // a tight retry instead of guessing at the full cooldown. Brains uses this
-        // so the last save in a burst is never the one that gets skipped.
-        const lastMs = new Date(recent[0].created_at as string).getTime()
-        const remaining = Number.isFinite(lastMs)
-          ? Math.max(0, REBUILD_COOLDOWN_MS - (now - lastMs))
-          : REBUILD_COOLDOWN_MS
-        return {
-          data: { ran: false, reason: "cooldown", retryAfterMs: remaining },
+      if (!isAdmin) {
+        const now = Date.now()
+        const since = new Date(now - REBUILD_COOLDOWN_MS).toISOString()
+        const { data: recent, error: recentErr } = await db
+          .from("brains_audit_log")
+          .select("created_at")
+          .eq("action", "rpc_update_all_setlist_entries")
+          .eq("outcome", "success")
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .limit(1)
+        if (recentErr) return { error: recentErr.message }
+        if (recent && recent.length > 0) {
+          // `retryAfterMs` lets Brains schedule a tight retry instead of
+          // guessing at the full cooldown, so the last save in a burst is
+          // never the one that gets skipped.
+          const lastMs = new Date(recent[0].created_at as string).getTime()
+          const remaining = Number.isFinite(lastMs)
+            ? Math.max(0, REBUILD_COOLDOWN_MS - (now - lastMs))
+            : REBUILD_COOLDOWN_MS
+          return {
+            data: { ran: false, reason: "cooldown", retryAfterMs: remaining },
+          }
         }
       }
 
@@ -1378,7 +1381,7 @@ serve(async (req) => {
     Object.assign(body, grant.force)
   }
 
-  const result = await handleAction(db, action, body)
+  const result = await handleAction(db, action, body, isAdmin)
 
   if (BRAINS_AUDITED_ACTIONS.has(action)) {
     const { targetTable, targetId } = auditTarget(action, body)

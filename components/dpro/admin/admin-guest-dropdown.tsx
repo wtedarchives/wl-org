@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
+import { scrollChildIntoContainer } from "@/lib/scroll-child-into-container"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
@@ -84,13 +85,9 @@ export function AdminGuestDropdown({
       selectedGuestRef.current &&
       scrollContainerRef.current
     ) {
-      setTimeout(() => {
-        selectedGuestRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
-        })
-      }, 100)
+      const container = scrollContainerRef.current
+        const child = selectedGuestRef.current
+        if (container && child) scrollChildIntoContainer(container, child)
     }
   }, [isDropdownOpen, selectedGuest])
 

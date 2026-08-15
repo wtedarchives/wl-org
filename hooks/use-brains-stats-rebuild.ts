@@ -35,10 +35,11 @@ export interface UseBrainsStatsRebuild {
  * completes on its own and this fires the rebuild alongside it.
  *
  * The catch with fire-and-forget is the tail: the global advisory lock and the 90s
- * cooldown both legitimately refuse a run, and the refused one might be the LAST
- * save of the night, leaving stats stale. So a skipped attempt schedules itself to
- * retry once the server says it is worth trying again. One timer at a time, so a
- * burst of twenty saves collapses into one eventual rebuild rather than twenty.
+ * setlister cooldown both legitimately refuse a run, and the refused one might be
+ * the LAST save of the night, leaving stats stale. So a skipped attempt schedules
+ * itself to retry once the server says it is worth trying again. One timer at a
+ * time, so a burst of twenty saves collapses into one eventual rebuild rather than
+ * twenty. Admin panel Update skips the cooldown.
  */
 export function useBrainsStatsRebuild(): UseBrainsStatsRebuild {
   const { session } = useAuth()

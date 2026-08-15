@@ -23,6 +23,7 @@ import {
   type ArchiveEntry,
 } from "@/lib/archive-hub-content"
 import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
+import { WlHomeV2SetlistGameAlert } from "@/components/wl-home-v2/wl-home-v2-setlist-game-alert"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
@@ -231,24 +232,27 @@ export function WlHomeV2ArchiveModal({
                 />
               ))}
             </div>
-            <div className="modal-archive-hub-submit">
-              <p className="modal-archive-hub-submit-text">
-                Have setlist corrections, new shows, or other archive data to
-                contribute?{" "}
-                <br
-                  className="modal-archive-hub-submit-text-linebreak"
-                  aria-hidden
-                />
-                Use the Submit form to help keep the archive accurate and up to
-                date.
-              </p>
-              <Link
-                href="/archive/submit"
-                className="modal-archive-hub-submit-cta"
-                onClick={onClose}
-              >
-                Submit & contribute
-              </Link>
+            <div className="modal-archive-hub-footer">
+              <WlHomeV2SetlistGameAlert className="modal-archive-hub-setlist-game-alert" />
+              <div className="modal-archive-hub-submit">
+                <p className="modal-archive-hub-submit-text">
+                  Have setlist corrections, new shows, or other archive data to
+                  contribute?{" "}
+                  <br
+                    className="modal-archive-hub-submit-text-linebreak"
+                    aria-hidden
+                  />
+                  Use the Submit form to help keep the archive accurate and up
+                  to date.
+                </p>
+                <Link
+                  href="/archive/submit"
+                  className="modal-archive-hub-submit-cta"
+                  onClick={onClose}
+                >
+                  Submit & contribute
+                </Link>
+              </div>
             </div>
           </div>
         </div>

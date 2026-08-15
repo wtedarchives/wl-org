@@ -79,9 +79,9 @@ export function AdminPanel() {
         reason?: "cooldown" | "in_progress"
       }>(token, { action: "rpc_update_all_setlist_entries" })
       if (error) throw new Error(error)
-      // The rebuild is now serialized by a global advisory lock and gated by a
-      // 90-second cooldown, so a call can legitimately do nothing. Reporting
-      // "Success!" for a skipped run would be a lie.
+      // Serialized by a global advisory lock (one rebuild at a time). Admins
+      // skip the 90s Brains cooldown, but a click while one is mid-flight
+      // still does nothing — reporting "Success!" for that would be a lie.
       if (data && data.ran === false) {
         setUpdateStatus({
           type: "success",

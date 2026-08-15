@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type CSSProperties } from "react"
 import { createPortal } from "react-dom"
 import { CaretDown, MagnifyingGlass } from "@phosphor-icons/react"
+import { scrollChildIntoContainer } from "@/lib/scroll-child-into-container"
 import type { SongDataFull } from "@/types/admin"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -73,13 +74,9 @@ export function SongDropdown({
       selectedSongRef.current &&
       scrollContainerRef.current
     ) {
-      setTimeout(() => {
-        selectedSongRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
-        })
-      }, 100)
+      const container = scrollContainerRef.current
+        const child = selectedSongRef.current
+        if (container && child) scrollChildIntoContainer(container, child)
     }
   }, [isDropdownOpen, selectedSong])
 
