@@ -19,8 +19,9 @@ import {
   bakeSetlistShareImages,
   decodedByteLength,
   isSetlistShareCaptureIOSWebKit,
-  letterboxSetlistShareJpegForInstagram,
+  letterboxSetlistShareCardForInstagram,
   rasteriseSetlistShareNode,
+  rasteriseSetlistShareNodeToPng,
   withSetlistShareCaptureLive,
 } from "@/lib/wl-setlist-share-capture"
 import type { SetlistEntry, Show } from "@/types/setlist"
@@ -38,11 +39,11 @@ const CAPTURE_STEPS = [
   { pixelRatio: 2, quality: 0.6 },
 ] as const
 
-/** iOS: html-to-image at pixelRatio > 1 drops images; 1× + upscale keeps them. */
+/** iOS: CSS-scale the live card (not canvas-upscale a 1× JPEG). */
 const IOS_CAPTURE_STEPS = [
-  { pixelRatio: 2, quality: 0.85 },
-  { pixelRatio: 2, quality: 0.7 },
-  { pixelRatio: 1, quality: 0.8 },
+  { pixelRatio: 3, quality: 0.85 },
+  { pixelRatio: 2, quality: 0.8 },
+  { pixelRatio: 2, quality: 0.6 },
 ] as const
 
 /** Headroom under the 2,000,000-byte `app.bsky.embed.images` limit. */
@@ -57,6 +58,7 @@ const MAX_BYTES = 1_600_000
 const IG_CANVAS_WIDTH_PX = 576
 const IG_CANVAS_HEIGHT_PX = 720
 const IG_CANVAS_PADDING_PX = 16
+const IG_CARD_CAPTURE_SCALE = 3
 const IG_MAX_BYTES = 4_000_000
 
 type SetlistShareCaptureContextValue = {
@@ -199,18 +201,15 @@ export function SetlistShareCaptureProvider({
     return captureRef.current
   }, [loadShow, loadEntries])
 
-  const rasteriseLive = useCallback(
-    async (label: string): Promise<string | null> => {
+  const withPreparedCard = useCallback(
+    async <T,>(run: (node: HTMLDivElement) => Promise<T>): Promise<T | null> => {
       const layer = layerRef.current
       const node = await prepareNode()
       if (!layer || !node) return null
       return withSetlistShareCaptureLive(layer, async () => {
         const restore = await bakeSetlistShareImages(node)
         try {
-          const steps = isSetlistShareCaptureIOSWebKit() ?
-            IOS_CAPTURE_STEPS
-          : CAPTURE_STEPS
-          return await rasteriseSetlistShareNode(node, steps, MAX_BYTES, label)
+          return await run(node)
         } finally {
           restore()
         }
@@ -222,23 +221,30 @@ export function SetlistShareCaptureProvider({
   const capture = useCallback(async (): Promise<string | null> => {
     if (!showId) return null
     try {
-      return await rasteriseLive("share capture")
+      return await withPreparedCard((node) => {
+        const steps = isSetlistShareCaptureIOSWebKit() ?
+          IOS_CAPTURE_STEPS
+        : CAPTURE_STEPS
+        return rasteriseSetlistShareNode(node, steps, MAX_BYTES, "share capture")
+      })
     } catch (err) {
       console.error("share capture failed:", err)
       return null
     }
-  }, [showId, rasteriseLive])
+  }, [showId, withPreparedCard])
 
   const captureInstagram = useCallback(async (): Promise<string | null> => {
     if (!showId) return null
     try {
-      const cardBase64 = await rasteriseLive("instagram capture")
-      if (!cardBase64) return null
+      const cardDataUrl = await withPreparedCard((node) =>
+        rasteriseSetlistShareNodeToPng(node, IG_CARD_CAPTURE_SCALE),
+      )
+      if (!cardDataUrl) return null
       const pixelRatio = 2
-      const qualities = [0.9, 0.75, 0.6]
+      const qualities = [0.92, 0.8, 0.65]
       for (const quality of qualities) {
-        const base64 = await letterboxSetlistShareJpegForInstagram(
-          cardBase64,
+        const base64 = await letterboxSetlistShareCardForInstagram(
+          cardDataUrl,
           backgroundSrc,
           IG_CANVAS_WIDTH_PX,
           IG_CANVAS_HEIGHT_PX,
@@ -254,7 +260,7 @@ export function SetlistShareCaptureProvider({
       console.error("instagram capture failed:", err)
       return null
     }
-  }, [showId, rasteriseLive, backgroundSrc])
+  }, [showId, withPreparedCard, backgroundSrc])
 
   const value = useMemo<SetlistShareCaptureContextValue>(
     () => ({ capture, captureInstagram }),

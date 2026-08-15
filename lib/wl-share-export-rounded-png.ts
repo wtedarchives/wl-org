@@ -23,7 +23,7 @@ export async function applyShareExportRoundedCorners(
   const radius = Math.max(0, options.borderRadiusPx * scale)
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  clipRoundedRect(ctx, 0, 0, canvas.width, canvas.height, radius)
+  clipShareExportRoundedRect(ctx, 0, 0, canvas.width, canvas.height, radius)
   ctx.drawImage(bitmap, 0, 0)
   bitmap.close()
 
@@ -35,7 +35,7 @@ export async function applyShareExportRoundedCorners(
   })
 }
 
-function clipRoundedRect(
+export function clipShareExportRoundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,

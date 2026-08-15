@@ -50,7 +50,7 @@ export function BrainsSetlistRow({
         {!readOnly ?
           <button
             type="button"
-            className="flex size-11 touch-manipulation items-center justify-center rounded-md text-white/50 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="flex size-8 touch-manipulation items-center justify-center rounded-md text-white/50 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             aria-label={`Reorder ${entry.entry_song ?? "entry"}`}
             onClick={(e) => e.stopPropagation()}
             {...attributes}

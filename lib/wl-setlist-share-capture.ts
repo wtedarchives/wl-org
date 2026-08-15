@@ -1,17 +1,17 @@
-import { toJpeg } from "html-to-image"
+import { toJpeg, toPng } from "html-to-image"
+
+import { clipShareExportRoundedRect } from "@/lib/wl-share-export-rounded-png"
+import {
+  WL_HOME_V2_SETLIST_SHARE_EXPORT_FRAME_RADIUS_PX,
+  WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX,
+} from "@/lib/wl-home-v2-setlist-share-export-config"
 
 /**
- * Setlist share capture for Bluesky / Instagram (admin brain button).
- *
- * html-to-image rasterizes via SVG foreignObject. On iOS Safari that path
- * drops <img> pixels when the node is off-screen, uses CSS object-fit/filter,
- * cacheBust (re-fetch mid-capture), or pixelRatio > 1. Desktop Chrome is fine;
- * phones are not. This module bakes images into data URLs and captures on-screen
- * at 1×, then upscales.
+ * Setlist share capture for Bluesky / Instagram. iOS Safari's html-to-image
+ * path drops off-screen / filtered / high-pixelRatio images — bake, then CSS-scale.
  */
 
-export const SETLIST_SHARE_CAPTURE_LIVE_CLASS =
-  "wl-setlist-share-capture--live"
+export const SETLIST_SHARE_CAPTURE_LIVE_CLASS = "wl-setlist-share-capture--live"
 
 const CAPTURE_BACKGROUND = "#000000"
 
@@ -96,12 +96,15 @@ function objectFitMode(value: string): "cover" | "contain" | "fill" {
   return "fill"
 }
 
+const BAKE_MAX_EDGE_PX = 4096
+
 /**
- * Replace each <img> with a same-size data URL that already has object-fit and
- * CSS filter baked in, so Safari's foreignObject only has to stretch pixels.
+ * Replace each <img> with a data URL that already has object-fit and CSS filter
+ * baked in. `pixelDensity` keeps bitmaps sharp when the card is CSS-scaled.
  */
 export async function bakeSetlistShareImages(
   root: HTMLElement,
+  pixelDensity = 3,
 ): Promise<() => void> {
   const restores: Array<() => void> = []
   const imgs = Array.from(root.querySelectorAll("img"))
@@ -137,14 +140,24 @@ export async function bakeSetlistShareImages(
         1,
         Math.round(img.clientHeight || img.offsetHeight) || source.naturalHeight,
       )
+      const density = Math.max(
+        1,
+        Math.min(pixelDensity, BAKE_MAX_EDGE_PX / destW, BAKE_MAX_EDGE_PX / destH),
+      )
       const canvas = document.createElement("canvas")
-      canvas.width = destW
-      canvas.height = destH
+      canvas.width = Math.max(1, Math.round(destW * density))
+      canvas.height = Math.max(1, Math.round(destH * density))
       const ctx = canvas.getContext("2d")
       if (!ctx) throw new Error("Canvas 2D unavailable")
       const cssFilter = computed.filter
       if (cssFilter && cssFilter !== "none") ctx.filter = cssFilter
-      drawFitted(ctx, source, destW, destH, objectFitMode(computed.objectFit))
+      drawFitted(
+        ctx,
+        source,
+        canvas.width,
+        canvas.height,
+        objectFitMode(computed.objectFit),
+      )
       ctx.filter = "none"
 
       const opaque = cssFilter.includes("grayscale") || cssFilter.includes("brightness")
@@ -198,6 +211,69 @@ async function upscaleJpegDataUrl(
   return canvas.toDataURL("image/jpeg", quality)
 }
 
+/**
+ * Scale the live DOM with CSS, then capture at pixelRatio 1. iOS drops images
+ * when html-to-image's own pixelRatio is > 1.
+ */
+async function captureWithCssScale(
+  node: HTMLElement,
+  scale: number,
+  opts: {
+    format: "jpeg" | "png"
+    quality?: number
+    backgroundColor?: string
+  },
+): Promise<string | null> {
+  const width = node.offsetWidth
+  const height = node.offsetHeight
+  if (!width || !height) return null
+  const outW = Math.round(width * scale)
+  const outH = Math.round(height * scale)
+
+  const wrapper = document.createElement("div")
+  wrapper.className = "wl-setlist-share-capture-scale"
+  wrapper.style.width = `${outW}px`
+  wrapper.style.height = `${outH}px`
+
+  const scaler = document.createElement("div")
+  scaler.style.width = `${width}px`
+  scaler.style.height = `${height}px`
+  scaler.style.transform = `scale(${scale})`
+  scaler.style.transformOrigin = "top left"
+
+  const parent = node.parentElement
+  const nextSibling = node.nextSibling
+  scaler.appendChild(node)
+  wrapper.appendChild(scaler)
+  document.body.appendChild(wrapper)
+
+  try {
+    await waitDoubleRaf()
+    if (opts.format === "png") {
+      return await toPng(wrapper, {
+        cacheBust: false,
+        pixelRatio: 1,
+        width: outW,
+        height: outH,
+      })
+    }
+    return await toJpeg(wrapper, {
+      cacheBust: false,
+      pixelRatio: 1,
+      width: outW,
+      height: outH,
+      quality: opts.quality ?? 0.92,
+      backgroundColor: opts.backgroundColor ?? CAPTURE_BACKGROUND,
+    })
+  } finally {
+    if (parent) {
+      if (nextSibling) parent.insertBefore(node, nextSibling)
+      else parent.appendChild(node)
+    }
+    wrapper.remove()
+  }
+}
+
 export function base64FromDataUrl(dataUrl: string): string | null {
   const comma = dataUrl.indexOf(",")
   if (comma < 0) return null
@@ -216,20 +292,41 @@ export async function rasteriseSetlistShareNode(
   maxBytes: number,
   label: string,
 ): Promise<string | null> {
-  const lowRatio = isSetlistShareCaptureIOSWebKit()
+  const ios = isSetlistShareCaptureIOSWebKit()
   for (const step of steps) {
-    const dataUrl = await toJpeg(node, {
-      cacheBust: false,
-      pixelRatio: lowRatio ? 1 : step.pixelRatio,
-      quality: step.quality,
-      backgroundColor: CAPTURE_BACKGROUND,
-    })
+    let dataUrl: string | null = null
+    if (ios) {
+      try {
+        dataUrl = await captureWithCssScale(node, step.pixelRatio, {
+          format: "jpeg",
+          quality: step.quality,
+          backgroundColor: CAPTURE_BACKGROUND,
+        })
+      } catch (e) {
+        console.warn("setlist share: CSS scale JPEG failed", e)
+      }
+      if (!dataUrl) {
+        const low = await toJpeg(node, {
+          cacheBust: false,
+          pixelRatio: 1,
+          quality: step.quality,
+          backgroundColor: CAPTURE_BACKGROUND,
+        })
+        dataUrl =
+          low && step.pixelRatio > 1 ?
+            await upscaleJpegDataUrl(low, step.pixelRatio, step.quality)
+          : low
+      }
+    } else {
+      dataUrl = await toJpeg(node, {
+        cacheBust: false,
+        pixelRatio: step.pixelRatio,
+        quality: step.quality,
+        backgroundColor: CAPTURE_BACKGROUND,
+      })
+    }
     if (!dataUrl) continue
-    const scaled =
-      lowRatio && step.pixelRatio > 1 ?
-        await upscaleJpegDataUrl(dataUrl, step.pixelRatio, step.quality)
-      : dataUrl
-    const base64 = base64FromDataUrl(scaled)
+    const base64 = base64FromDataUrl(dataUrl)
     if (!base64) continue
     if (decodedByteLength(base64) <= maxBytes) return base64
   }
@@ -237,9 +334,26 @@ export async function rasteriseSetlistShareNode(
   return null
 }
 
+/** Hi-res PNG of the card for Instagram compositing. */
+export async function rasteriseSetlistShareNodeToPng(
+  node: HTMLElement,
+  scale: number,
+): Promise<string | null> {
+  if (isSetlistShareCaptureIOSWebKit()) {
+    try {
+      const scaled = await captureWithCssScale(node, scale, { format: "png" })
+      if (scaled) return scaled
+    } catch (e) {
+      console.warn("setlist share: CSS scale PNG failed", e)
+    }
+    return toPng(node, { cacheBust: false, pixelRatio: 1 })
+  }
+  return toPng(node, { cacheBust: false, pixelRatio: scale })
+}
+
 /** Letterbox the captured card onto a fixed 4:5 JPEG for Instagram. */
-export async function letterboxSetlistShareJpegForInstagram(
-  cardBase64: string,
+export async function letterboxSetlistShareCardForInstagram(
+  cardDataUrl: string,
   backgroundSrc: string,
   canvasWidthPx: number,
   canvasHeightPx: number,
@@ -249,7 +363,7 @@ export async function letterboxSetlistShareJpegForInstagram(
 ): Promise<string | null> {
   const [bg, card] = await Promise.all([
     fetchToDataUrl(backgroundSrc).then(loadHtmlImage),
-    loadHtmlImage(`data:image/jpeg;base64,${cardBase64}`),
+    loadHtmlImage(cardDataUrl),
   ])
   const w = Math.round(canvasWidthPx * pixelRatio)
   const h = Math.round(canvasHeightPx * pixelRatio)
@@ -268,7 +382,18 @@ export async function letterboxSetlistShareJpegForInstagram(
   const scale = Math.min(availW / card.naturalWidth, availH / card.naturalHeight)
   const dw = card.naturalWidth * scale
   const dh = card.naturalHeight * scale
-  ctx.drawImage(card, (w - dw) / 2, (h - dh) / 2, dw, dh)
+  const dx = (w - dw) / 2
+  const dy = (h - dh) / 2
+  const radius =
+    (WL_HOME_V2_SETLIST_SHARE_EXPORT_FRAME_RADIUS_PX * dw) /
+    WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX
+
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = "high"
+  ctx.save()
+  clipShareExportRoundedRect(ctx, dx, dy, dw, dh, radius)
+  ctx.drawImage(card, dx, dy, dw, dh)
+  ctx.restore()
 
   return base64FromDataUrl(canvas.toDataURL("image/jpeg", quality))
 }

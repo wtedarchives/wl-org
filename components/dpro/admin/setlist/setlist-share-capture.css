@@ -22,3 +22,15 @@
   z-index: 0;
   opacity: 0.01;
 }
+
+/* Hi-res CSS-scale snapshot: on-screen, near-invisible, sized by inline width/height. */
+.wl-setlist-share-capture-scale {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  opacity: 0.01;
+  pointer-events: none;
+  overflow: hidden;
+  --wl-deep-green: #285b4e;
+}
