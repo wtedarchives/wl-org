@@ -91,7 +91,13 @@
 .wl-home-v2 .wl-home-v2-brains-coach__panel {
   display: flex;
   flex-direction: column;
+  align-items: center;
   padding: 0 12px 12px;
+}
+
+.wl-home-v2 .wl-home-v2-brains-coach__panel [data-slot="textarea"] {
+  width: 100%;
+  padding: 10px 12px;
 }
 
 .wl-home-v2 .wl-home-v2-brains-board {
@@ -258,7 +264,7 @@
 .wl-home-v2 .wl-home-v2-brains-add-set {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0;
   min-width: 0;
 }
@@ -286,6 +292,25 @@
 .wl-home-v2 .wl-home-v2-brains-add-set__inner {
   overflow: hidden;
   padding-top: 10px;
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set__label {
+  margin: 0 0 8px;
+  text-align: center;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(160, 160, 160);
+}
+
+.wl-home-v2 .wl-home-v2-brains-add-set__choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .wl-home-v2

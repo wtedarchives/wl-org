@@ -57,9 +57,8 @@ export function BrainsSetlistSection() {
 
   const availableSets = useMemo(() => {
     const used = new Set(visualSets)
-    const catalog = options.sets.length > 0 ? options.sets : [...BRAINS_ALL_SETS]
-    return catalog.filter((s) => !used.has(s)).sort(compareBrainsSets)
-  }, [options.sets, visualSets])
+    return BRAINS_ALL_SETS.filter((s) => !used.has(s)).sort(compareBrainsSets)
+  }, [visualSets])
 
   const showData: ShowData | null = useMemo(() => {
     if (!showId) return null

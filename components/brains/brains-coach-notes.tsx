@@ -127,7 +127,7 @@ export function BrainsCoachNotes({ showId, readOnly }: BrainsCoachNotesProps) {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="wl-home-v2-tours-header-pill mt-2 min-h-11 self-start"
+                    className="wl-home-v2-tours-header-pill mt-2 min-h-11"
                     disabled={!dirty || saving}
                     onClick={() => void handleSave()}
                   >

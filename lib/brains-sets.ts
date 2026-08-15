@@ -2,27 +2,15 @@
  * Visual set organizers for wted-brains, plus the placement options that belong
  * to each set.
  *
- * Set keys match `sets.set`: `1`–`8` and `E1`–`E3`. Placement labels match
- * `placements.placements` — main sets have opener / main / closer; encores have
- * only `Encore N`.
+ * Set keys match `sets.set`. Brains only offers Set 1–3 and Encore 1–2 as
+ * organizers; existing rows in other sets still display if they are already on
+ * the show.
  */
 
 export const BRAINS_SET_DROPPABLE_PREFIX = "brains-set:" as const
 
-/** Every set a brains caller may organize. Matches `sets.set`. */
-export const BRAINS_ALL_SETS = [
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "E1",
-  "E2",
-  "E3",
-] as const
+/** Sets a brains caller may add as organizers: Set 1–3 and Encore 1–2. */
+export const BRAINS_ALL_SETS = ["1", "2", "3", "E1", "E2"] as const
 
 /** The only categories a setlister may assign to a newly created song. */
 export const BRAINS_NEW_SONG_CATEGORIES = [

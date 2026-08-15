@@ -40,17 +40,15 @@ export function BrainsAddSet({ availableSets, onAdd }: BrainsAddSetProps) {
         )}
       >
         <div className="wl-home-v2-brains-add-set__inner">
-          <p className="m-0 mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/55">
-            Which set?
-          </p>
-          <div className="flex flex-wrap gap-1.5">
+          <p className="wl-home-v2-brains-add-set__label">Which set?</p>
+          <div className="wl-home-v2-brains-add-set__choices">
             {sorted.map((setKey) => (
               <Button
                 key={setKey}
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="min-h-11"
+                className="wl-home-v2-admin-setlist-show-events__btn"
                 onClick={() => {
                   onAdd(setKey)
                   setOpen(false)
