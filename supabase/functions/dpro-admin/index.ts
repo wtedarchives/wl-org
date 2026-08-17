@@ -56,6 +56,19 @@ function jsonOk(body: Record<string, unknown>) {
 /** Floor between stats rebuilds, measured from the previous run's completion. */
 const REBUILD_COOLDOWN_MS = 90_000
 
+/**
+ * Share-card images (Bluesky song posts + Instagram end-of-show) stay on the
+ * admin setlist tab. wted-brains still announces text, but must not attach
+ * media — including when an admin is using that page, and including a
+ * setlister who spoofs `surface: "admin"`.
+ */
+function attachSocialImages(
+  isAdmin: boolean,
+  body: Record<string, unknown>,
+): boolean {
+  return isAdmin && body.surface !== "brains"
+}
+
 function pick(row: Record<string, unknown>, keys: string[]) {
   const o: Record<string, unknown> = {}
   for (const k of keys) {
@@ -1027,10 +1040,11 @@ async function handleAction(
       // appends a new reply rather than editing.
       const bluesky = await postSetlistShowEventToBluesky(db, show_id, event)
 
-      // Instagram gets one post per show, at end of show only. Isolated like
-      // the Bluesky leg: a failure here can't affect Discourse, push, or Bluesky.
+      // Instagram gets one post per show, at end of show only, and only from
+      // the admin setlist tab. Isolated like the Bluesky leg: a failure here
+      // can't affect Discourse, push, or Bluesky.
       const instagram =
-        event === "end_show" ?
+        event === "end_show" && attachSocialImages(isAdmin, body) ?
           await postSetlistToInstagram(db, show_id, {
             imageJpegBase64: body.instagram_image_jpeg_base64 as
               | string
@@ -1132,8 +1146,13 @@ async function handleAction(
         }
       }
 
+      const withImage = attachSocialImages(isAdmin, body)
       const bluesky = await postSetlistSongToBluesky(db, entry_id, {
-        songImageJpegBase64: body.song_image_jpeg_base64 as string | undefined,
+        songImageJpegBase64:
+          withImage ?
+            (body.song_image_jpeg_base64 as string | undefined)
+          : undefined,
+        includeImage: withImage,
       })
 
       return {

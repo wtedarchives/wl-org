@@ -154,7 +154,7 @@ export function BrainsSetlistSection() {
 
         {!readOnly && showData ?
           <div className="wl-home-v2-brains-setlist-events">
-            <SetlistShowEventActions selectedShow={showData} />
+            <SetlistShowEventActions selectedShow={showData} surface="brains" />
           </div>
         : null}
 

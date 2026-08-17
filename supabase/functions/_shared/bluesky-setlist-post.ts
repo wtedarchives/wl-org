@@ -363,6 +363,12 @@ export type PostSetlistSongOptions = {
    * can't reproduce, so it has to arrive from the client.
    */
   songImageJpegBase64?: string
+  /**
+   * When false, post text only — no share card and no category-artwork
+   * fallback. Used by wted-brains so the setlister button still threads the
+   * song without attaching an image.
+   */
+  includeImage?: boolean
 }
 
 /**
@@ -430,10 +436,14 @@ export async function postSetlistSongToBluesky(
     const thread = await ensureThreadRoot(db, client, context.showId)
 
     // Setlist share card when the client captured one; category artwork is the
-    // fallback so a failed capture still yields an illustrated post.
-    const capturedBytes = decodeJpegBase64(options.songImageJpegBase64)
+    // fallback so a failed capture still yields an illustrated post. wted-brains
+    // opts out of both so the thread still gets the song text.
+    const includeImage = options.includeImage !== false
+    const capturedBytes =
+      includeImage ? decodeJpegBase64(options.songImageJpegBase64) : undefined
     const songImage =
-      capturedBytes ? await client.uploadImageBytes(capturedBytes, "image/jpeg")
+      !includeImage ? undefined
+      : capturedBytes ? await client.uploadImageBytes(capturedBytes, "image/jpeg")
       : context.artworkUrl ?
         await client.uploadImage(boundedSupabaseImageUrl(context.artworkUrl))
       : undefined

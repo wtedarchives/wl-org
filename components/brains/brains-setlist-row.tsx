@@ -63,7 +63,11 @@ export function BrainsSetlistRow({
 
       <div className="wl-home-v2-brains-row__brain">
         {!readOnly ?
-          <SetlistEntryDiscourseBrain entry={entry} showId={showId} />
+          <SetlistEntryDiscourseBrain
+            entry={entry}
+            showId={showId}
+            surface="brains"
+          />
         : null}
       </div>
 

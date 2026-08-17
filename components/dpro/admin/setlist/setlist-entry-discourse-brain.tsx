@@ -24,12 +24,18 @@ type DiscourseBrainStatus = "idle" | "sending" | "success" | "error"
 interface SetlistEntryDiscourseBrainProps {
   entry: AdminSetlistEntryData
   showId: string
+  /**
+   * `admin` (default) captures the share card and posts it to Bluesky.
+   * `brains` still posts the song text, but skips the image.
+   */
+  surface?: "admin" | "brains"
 }
 
 /** Row control — posts “now playing” for this entry to Discourse chat. */
 export function SetlistEntryDiscourseBrain({
   entry,
   showId,
+  surface = "admin",
 }: SetlistEntryDiscourseBrainProps) {
   const { session } = useAuth()
   const shareCapture = useSetlistShareCapture()
@@ -66,12 +72,14 @@ export function SetlistEntryDiscourseBrain({
     try {
       // Rasterising the share card takes a beat, so it happens inside the
       // "sending" state. A null capture is fine — the post falls back to
-      // category artwork server-side.
-      const songImage = (await shareCapture?.capture()) ?? null
+      // category artwork server-side. wted-brains skips capture entirely.
+      const songImage =
+        surface === "admin" ? ((await shareCapture?.capture()) ?? null) : null
 
       const { data, error } = await invokeDproAdmin<SetlistBrainResponse>(token, {
         action: "setlist_discourse_now_playing",
         entry_id: entry.entry_id,
+        surface,
         ...(songImage ? { song_image_jpeg_base64: songImage } : {}),
       })
       if (error) throw new Error(error)

@@ -1,0 +1,33 @@
+/*
+ * Bare screenshot target. No site chrome. Brand-bar token matches the
+ * portalled capture layer in setlist-share-capture.css.
+ */
+.wl-home-v2-share-card-page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  padding: 24px;
+  background: #000000;
+  --wl-deep-green: #285b4e;
+}
+
+.wl-home-v2-share-card-page__status {
+  margin: 0;
+  font-family:
+    "Geist",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.wl-home-v2-share-card-page__ready {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
