@@ -143,9 +143,9 @@ export const HELP_FAQ_ENTRIES: HelpFaqEntry[] = [
         ],
       },
       {
-        title: "Setlist Game",
+        title: "Echo of a Show",
         items: [
-          "Pick songs for Goose shows during the tour, accumulate points, and dominate the competition.",
+          "Call the songs before Goose plays them. Points for the song, more for the right set, most for the exact spot.",
         ],
       },
       {
