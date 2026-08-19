@@ -1,4 +1,4 @@
-/* Setlist game archive (`/archive/setlistgame`) — WL Home v2 shell + layout. Imported by wl-home-v2-setlistgame-shell.tsx */
+/* Setlist game archive (`/archive/setlistgame2`) — WL Home v2 shell + layout. Imported by wl-home-v2-setlistgame-shell.tsx */
 
 .wl-home-v2 .wl-home-v2-setlistgame-tile-main {
   --tile-bg: url("/newbg3.jpeg");
@@ -18,7 +18,7 @@
 }
 
 /*
- * Per-show header (`/archive/setlistgame?id=`) — below xl, stack stats under date/venue
+ * Per-show header (`/archive/setlistgame2?id=`) — below xl, stack stats under date/venue
  * (archive setlist gets this via `.show-header-main { flex-wrap: wrap }`; game headers omit that wrapper).
  */
 @media (max-width: 1343px) {
@@ -52,7 +52,7 @@
   }
 }
 
-/* `/archive/setlistgame?tour_id=` — breathing room between header and tables */
+/* `/archive/setlistgame2?tour_id=` — breathing room between header and tables */
 .wl-home-v2 .setlist-game-tour-v2-stack {
   display: flex;
   flex-direction: column;
@@ -205,7 +205,7 @@
   color: rgb(254 243 199);
 }
 
-/* Per-show page (`/archive/setlistgame?id=`) — flex gap (margin reset on `.wl-home-v2 *` breaks `space-y-*`) */
+/* Per-show page (`/archive/setlistgame2?id=`) — flex gap (margin reset on `.wl-home-v2 *` breaks `space-y-*`) */
 .wl-home-v2 .setlist-game-show-stack {
   display: flex;
   flex-direction: column;
@@ -268,7 +268,7 @@
 }
 
 /*
- * `/archive/setlistgame` — inline text links in widget panels: hover / focus underline
+ * `/archive/setlistgame2` — inline text links in widget panels: hover / focus underline
  * (same idea as `hover:underline` on tour show rows / song matrix).
  */
 .wl-home-v2

@@ -22,10 +22,6 @@
 
 # Setlist Archive: static routes under `/archive` (see `app/(wl-home-v2)/archive`).
 
-# Setlist Game temporarily offline — all game URLs → archive hub (components retained)
-/archive/setlistgame  /archive  301
-/archive/setlistgame/*  /archive  301
-
 # My Stats — path-style tabs → canonical query on `/archive/profile`
 /archive/profile/overview  /archive/profile?tab=overview  301
 /archive/profile/shows  /archive/profile?tab=shows  301

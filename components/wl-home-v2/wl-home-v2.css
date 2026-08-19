@@ -12883,7 +12883,7 @@
   }
 }
 
-/* Setlist Game (/)archive/setlistgame): one header row at all breakpoints; actions trail right. */
+/* Setlist Game (/archive/setlistgame2): one header row at all breakpoints; actions trail right. */
 .wl-home-v2 .wl-home-v2-setlist .show-header.setlist-game-main-header {
   flex-direction: row;
   align-items: center;

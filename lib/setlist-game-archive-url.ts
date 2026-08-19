@@ -1,9 +1,9 @@
-/** Canonical `/archive/setlistgame`; `legacy` matches until old route tree is removed. */
+/** Existing Setlist Game UI lives at `/setlistgame2` while `/archive/setlistgame` is rebuilt. */
 export type SetlistGameArchiveUrlShell = "v2" | "legacy"
 
 const SETLIST_GAME_PATH: Record<SetlistGameArchiveUrlShell, string> = {
-  v2: "/archive/setlistgame",
-  legacy: "/archive/setlistgame",
+  v2: "/setlistgame2",
+  legacy: "/setlistgame2",
 }
 
 export function getSetlistGameArchiveIndexUrl(
