@@ -61,10 +61,38 @@ export function useSetlistScoring() {
     }
   }
 
+  const recalcShow = async (showId: string) => {
+    if (!showId) return
+    const token = session?.token
+    if (!token) {
+      setScoringError("You must be signed in.")
+      return
+    }
+    try {
+      setIsScoring(true)
+      setScoringError(null)
+      const { error } = await invokeDproAdmin(token, {
+        action: "setlist_game_recalc_show",
+        show_id: showId,
+      })
+      if (error) throw new Error(error)
+    } catch (error) {
+      console.error("Error recalculating submissions:", error)
+      setScoringError(
+        error instanceof Error
+          ? error.message
+          : "Failed to recalc. Please try again.",
+      )
+    } finally {
+      setIsScoring(false)
+    }
+  }
+
   return {
     isScoring,
     scoringComplete,
     scoringError,
     scoreSubmissions,
+    recalcShow,
   }
 }

@@ -42,6 +42,10 @@ verify_jwt = false
 [functions.setlist-game-reminders]
 verify_jwt = false
 
+# Provisional recalc after setlist_entries changes (pg_net; SETLIST_GAME_CRON_SECRET).
+[functions.setlist-game-recalc]
+verify_jwt = false
+
 [functions.show-rating]
 verify_jwt = false
 

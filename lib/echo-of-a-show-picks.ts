@@ -43,6 +43,18 @@ export function echoBestCall(picks: UserPick[]): UserPick | null {
   )
 }
 
+export function echoRevealPickDetail(pick: UserPick): string {
+  const missed = pick.result === "not_played" || (pick.score ?? 0) <= 0
+  if (missed) return "not played"
+  if (pick.placement) {
+    if (/show closer/i.test(pick.placement)) return "show closer"
+    if (/closer/i.test(pick.placement)) return "set closer"
+    return pick.placement.toLowerCase()
+  }
+  if (pick.set.startsWith("E")) return `encore slot ${pick.setnum}`
+  return `set ${pick.set} slot ${pick.setnum}`
+}
+
 export function echoPlacementPillLabel(
   placement: string | null | undefined,
 ): string | null {
@@ -57,4 +69,27 @@ export function echoSetHeading(set: string, count?: number): string {
   const name = getSetDisplayName(set)
   if (count != null && count > 0) return `${name} · ${count} songs`
   return name
+}
+
+export function echoPicksSummary(picks: UserPick[]): string {
+  const songs = picks.filter((pick) => pick.song)
+  if (songs.length === 0) return ""
+  const sets = echoUniqueSets(songs)
+  const regular = sets.filter((set) => !set.startsWith("E")).length
+  const encore = sets.some((set) => set.startsWith("E"))
+  const setLabel =
+    encore && regular > 0
+      ? `${regular} ${regular === 1 ? "set" : "sets"} and an encore`
+      : encore
+        ? "an encore"
+        : `${regular} ${regular === 1 ? "set" : "sets"}`
+  const opener = echoOpenerSong(songs)
+  const closer = echoCloserSong(songs)
+  const ends =
+    opener && closer && opener !== closer
+      ? `${opener} to open, ${closer} to close.`
+      : opener
+        ? `${opener} to open.`
+        : ""
+  return [`${songs.length} songs`, setLabel, ends].filter(Boolean).join(" · ")
 }

@@ -8,6 +8,7 @@ import {
   useSongSelection,
 } from "@/components/dpro/setlistgame/song-selection/hooks"
 import { createSubmissionHandler } from "@/components/dpro/setlistgame/song-selection/submission"
+import type { SongPick } from "@/components/dpro/setlistgame/song-selection/types"
 import type { SongSelectionDialogProps } from "@/components/dpro/setlistgame/song-selection-dialog-types"
 import { EchoPicksEditor } from "@/components/echo-of-a-show/echo-of-a-show-picks-editor"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
@@ -28,8 +29,13 @@ export function EchoOfAShowPicksDialog({
   show,
   existingPicks,
   isEditing,
+  showStarter = false,
   onSuccess,
-}: Omit<SongSelectionDialogProps, "viewMode" | "submissionDetails">) {
+  onSubmitted,
+}: Omit<SongSelectionDialogProps, "viewMode" | "submissionDetails"> & {
+  showStarter?: boolean
+  onSubmitted?: (picks: SongPick[]) => void
+}) {
   const { session } = useAuth()
   const headingId = useId()
   useWlHomeV2ScrollLock(open)
@@ -92,7 +98,10 @@ export function EchoOfAShowPicksDialog({
     setError,
     setSuccess,
     () => onOpenChange(false),
-    onSuccess,
+    () => {
+      onSubmitted?.(songPicks.filter((pick) => !pick.isBreak))
+      onSuccess?.()
+    },
   )
 
   const countdown = getEchoLockCountdown(show.show_time)
@@ -167,10 +176,12 @@ export function EchoOfAShowPicksDialog({
                 currentSet={currentSet}
                 setCurrentSet={setCurrentSet}
                 topSongs={topSongs}
+                showId={show.show_id}
                 submitting={submitting}
                 error={error}
                 success={success}
                 isEditing={isEditing}
+                showStarter={showStarter}
                 onSubmit={() => void handleSubmit()}
                 onClear={() => {
                   setSongPicks([])

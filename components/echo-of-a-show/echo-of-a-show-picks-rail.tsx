@@ -1,11 +1,14 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 import { SongDisplayName } from "@/components/dpro/song-display-name"
 import type { SongPick } from "@/components/dpro/setlistgame/song-selection/types"
 import {
   echoAllSongs,
   echoWildcardCount,
 } from "@/lib/echo-of-a-show-editor"
+import { fetchEchoCanonicalSongAverage } from "@/lib/echo-of-a-show-admin"
 import { echoSetCount } from "@/lib/echo-of-a-show-picks"
 import type { UserPick } from "@/hooks/use-user-picks"
 
@@ -20,6 +23,7 @@ function asUserPicks(picks: SongPick[]): UserPick[] {
 
 export function EchoPicksRail({
   picks,
+  showId,
   submitting,
   error,
   success,
@@ -28,6 +32,7 @@ export function EchoPicksRail({
   onClear,
 }: {
   picks: SongPick[]
+  showId?: string
   submitting: boolean
   error: string | null
   success: boolean
@@ -40,6 +45,19 @@ export function EchoPicksRail({
   const closer = songs[songs.length - 1]?.song ?? null
   const sets = echoSetCount(asUserPicks(picks))
   const wildcards = echoWildcardCount(picks)
+  const [average, setAverage] = useState<number | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchEchoCanonicalSongAverage(showId).then((n) => {
+      if (!cancelled) setAverage(n)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [showId])
+
+  const over = average != null && songs.length > average
 
   return (
     <aside className="echo-picks__rail">
@@ -72,9 +90,21 @@ export function EchoPicksRail({
           <span>{wildcards}</span>
         </div>
       </div>
-      <p className="echo-picks__warn">
-        Every pick over the songs actually played costs −3. Venue average lands
-        in a later pass.
+      <p
+        className={
+          over ? "echo-picks__warn echo-picks__warn--over" : "echo-picks__warn"
+        }
+      >
+        {average != null ?
+          <>
+            Recent canonical shows average{" "}
+            <span className="echo-picks__warn-n">{average}</span>
+            . Picks beyond the count played cost{" "}
+            <span className="echo-picks__warn-n">−3</span> each.
+          </>
+        : <>
+            Every pick over the songs actually played costs −3.
+          </>}
       </p>
       {error ?
         <p className="echo-picks__error">{error}</p>

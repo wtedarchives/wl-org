@@ -11,6 +11,7 @@ import {
 import { EchoPicksBoard } from "@/components/echo-of-a-show/echo-of-a-show-picks-board"
 import { EchoPicksRail } from "@/components/echo-of-a-show/echo-of-a-show-picks-rail"
 import { EchoPicksSongRow } from "@/components/echo-of-a-show/echo-of-a-show-picks-row"
+import { EchoPicksStarter } from "@/components/echo-of-a-show/echo-of-a-show-picks-starter"
 import type { SongStat } from "@/hooks/use-setlist-game-show-data"
 import {
   echoAddColumn,
@@ -18,6 +19,7 @@ import {
   echoAppendSong,
   echoBoardSets,
   echoCanAddColumn,
+  echoCrowdStarterPicks,
   echoMovePick,
   echoPickedSongSet,
   echoSongsInSet,
@@ -36,10 +38,12 @@ export function EchoPicksEditor({
   currentSet,
   setCurrentSet,
   topSongs,
+  showId,
   submitting,
   error,
   success,
   isEditing,
+  showStarter = false,
   onSubmit,
   onClear,
   onRenumber,
@@ -50,10 +54,12 @@ export function EchoPicksEditor({
   currentSet: string
   setCurrentSet: (set: string) => void
   topSongs: SongStat[]
+  showId?: string
   submitting: boolean
   error: string | null
   success: boolean
   isEditing: boolean
+  showStarter?: boolean
   onSubmit: () => void
   onClear: () => void
   onRenumber: () => void
@@ -111,9 +117,25 @@ export function EchoPicksEditor({
     setCurrentSet(next.currentSet)
   }
 
+  const crowdSongs = topSongs
+    .map((stat) => stat.song)
+    .filter((song) => songs.some((item) => item.song === song))
+  const starter =
+    showStarter ?
+      <EchoPicksStarter
+        canFill={crowdSongs.length >= 4}
+        onFill={() => {
+          setPicks(echoCrowdStarterPicks(crowdSongs))
+          setCurrentSet("1")
+          onRenumber()
+        }}
+      />
+    : null
+
   const rail = (
     <EchoPicksRail
       picks={picks}
+      showId={showId}
       submitting={submitting}
       error={error ?? notice}
       success={success}
@@ -125,6 +147,7 @@ export function EchoPicksEditor({
 
   return (
     <div className="echo-picks">
+      {starter}
       <div className="echo-picks__desktop">
         <EchoPicksBank
           songs={songs}

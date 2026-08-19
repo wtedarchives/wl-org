@@ -1179,6 +1179,14 @@ async function handleAction(
       return { data: true }
     }
 
+    case "setlist_game_recalc_show": {
+      const show_id = body.show_id as string | undefined
+      if (!show_id) return { error: "Missing show_id" }
+      const recaled = await scoreSetlistGameShow(db, show_id, "provisional")
+      if (recaled.error) return { error: recaled.error }
+      return { data: true }
+    }
+
     // ─── wted-brains ────────────────────────────────────────────────────────
 
     /**

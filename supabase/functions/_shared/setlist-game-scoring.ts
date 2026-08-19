@@ -231,10 +231,24 @@ function findOptimalMatching(
   }
 }
 
+export type ScoreSetlistGameMode = "final" | "provisional"
+
 export async function scoreSetlistGameShow(
   db: SupabaseClient,
   showId: string,
+  mode: ScoreSetlistGameMode = "final",
 ): Promise<{ error?: string }> {
+  if (mode === "provisional") {
+    const { data: showRow, error: showErr } = await db
+      .from("shows")
+      .select("show_scored")
+      .eq("show_id", showId)
+      .single()
+    if (showErr) return { error: showErr.message }
+    if (showRow?.show_scored) {
+      return { error: "Show is already scored" }
+    }
+  }
   const { data: setlistData, error: setlistError } = await db
     .from("setlist_entries")
     .select("entry_id")
@@ -260,6 +274,7 @@ export async function scoreSetlistGameShow(
   const setlistEntries = (actualSetlistData ?? []) as SetlistEntry[]
   const actualLastSong =
     setlistEntries.length > 0 ? setlistEntries[setlistEntries.length - 1] : null
+  const closerSong = mode === "provisional" ? null : actualLastSong
 
   const { data: submissionsData, error: submissionsError } = await db
     .from("setlist_game_submissions")
@@ -421,7 +436,7 @@ export async function scoreSetlistGameShow(
         newPicks,
         instances,
         setlistEntries[0] ?? null,
-        actualLastSong,
+        closerSong,
         sortedPicks,
       )
 
@@ -456,7 +471,7 @@ export async function scoreSetlistGameShow(
             isFirstPick,
             isLastPick,
             setlistEntries[0] ?? null,
-            actualLastSong,
+            closerSong,
           )
 
           totalScore += potential.score
@@ -522,6 +537,7 @@ export async function scoreSetlistGameShow(
       }
 
       if (
+        mode !== "provisional" &&
         actualLastSong &&
         lastPick.song !== "[New Original Song]" &&
         lastPick.song !== "[New Cover Song]"
@@ -551,26 +567,35 @@ export async function scoreSetlistGameShow(
       }
     }
 
-    if (submission.total_songs_picked > totalSongsPlayed) {
+    if (
+      mode !== "provisional" &&
+      submission.total_songs_picked > totalSongsPlayed
+    ) {
       const excessSongs = submission.total_songs_picked - totalSongsPlayed
       totalScore -= excessSongs * 3
     }
 
     const { error: submissionErr } = await db
       .from("setlist_game_submissions")
-      .update({ score: totalScore })
+      .update(
+        mode === "provisional"
+          ? { score_provisional: totalScore }
+          : { score: totalScore },
+      )
       .eq("submission_id", submission.submission_id)
 
     if (submissionErr) return { error: submissionErr.message }
   }
 
-  const { error: updateError } = await db
-    .from("shows")
-    .update({ show_scored: true })
-    .eq("show_id", showId)
+  if (mode !== "provisional") {
+    const { error: updateError } = await db
+      .from("shows")
+      .update({ show_scored: true })
+      .eq("show_id", showId)
 
-  if (updateError) {
-    return { error: updateError.message }
+    if (updateError) {
+      return { error: updateError.message }
+    }
   }
 
   return {}

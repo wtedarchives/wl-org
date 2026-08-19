@@ -3,11 +3,15 @@
 import { useEffect, useMemo, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
-import { ScoringDialog } from "@/components/dpro/setlistgame/scoring-dialog"
 import { SongSelectionDialog } from "@/components/dpro/setlistgame/song-selection-dialog"
+import { EchoOfAShowScoreDialog } from "@/components/echo-of-a-show/echo-of-a-show-score-dialog"
+import { EchoOfAShowHowItWorks } from "@/components/echo-of-a-show/echo-of-a-show-how-it-works"
+import { EchoOfAShowJoined } from "@/components/echo-of-a-show/echo-of-a-show-joined"
+import { EchoOfAShowOnboard } from "@/components/echo-of-a-show/echo-of-a-show-onboard"
 import { EchoOfAShowPicksDialog } from "@/components/echo-of-a-show/echo-of-a-show-picks-dialog"
 import { EchoOfAShowRail } from "@/components/echo-of-a-show/echo-of-a-show-rail"
 import { EchoOfAShowRulesDialog } from "@/components/echo-of-a-show/echo-of-a-show-rules-dialog"
+import { EchoOfAShowRunning } from "@/components/echo-of-a-show/echo-of-a-show-running"
 import { EchoOfAShowShell } from "@/components/echo-of-a-show/echo-of-a-show-shell"
 import { EchoOfAShowUpNext } from "@/components/echo-of-a-show/echo-of-a-show-up-next"
 import {
@@ -16,9 +20,14 @@ import {
 } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useAdminStatus } from "@/hooks/use-admin-status"
+import {
+  useEchoLiveBoard,
+  useEchoRunningShow,
+} from "@/hooks/use-echo-live-board"
 import { useGameShows, type GameShow } from "@/hooks/use-game-shows"
+import { useSetlistScoring } from "@/hooks/use-setlist-scoring"
 import { useStandingsData } from "@/hooks/use-standings-data"
-import { useUserPicks } from "@/hooks/use-user-picks"
+import { useUserPicks, type UserPick } from "@/hooks/use-user-picks"
 import { ECHO_ACTIVE_LEAGUE } from "@/lib/echo-of-a-show"
 import { supabase } from "@/lib/supabase"
 
@@ -36,13 +45,25 @@ export function EchoOfAShowHome() {
     "totalPoints",
     "desc",
   )
+  const { isScoring, recalcShow } = useSetlistScoring()
+  const runningShow = useEchoRunningShow(gameShows)
+  const { board: runningBoard, refresh: refreshRunning } = useEchoLiveBoard(
+    runningShow?.show_id,
+    session?.profileId,
+  )
   const { userPicks, fetchUserPicks, resetPicks, setUserPicks } = useUserPicks()
 
   const [tourId, setTourId] = useState<string | null>(null)
   const [showRules, setShowRules] = useState(false)
+  const [showHow, setShowHow] = useState(false)
   const [showScoring, setShowScoring] = useState(false)
   const [activeShow, setActiveShow] = useState<GameShow | null>(null)
   const [viewMode, setViewMode] = useState(false)
+  const [justJoined, setJustJoined] = useState<{
+    show: GameShow
+    picks: UserPick[]
+    entryOf: number
+  } | null>(null)
 
   useEffect(() => {
     if (!supabase) return
@@ -73,7 +94,7 @@ export function EchoOfAShowHome() {
   )
 
   const upNext = useMemo(
-    () => remaining.find((show) => !show.isSelectionClosed) ?? remaining[0] ?? null,
+    () => remaining.find((show) => !show.isSelectionClosed) ?? null,
     [remaining],
   )
 
@@ -89,6 +110,32 @@ export function EchoOfAShowHome() {
         )[0] ?? null
     )
   }, [gameShows, session])
+
+  const latestScored = useMemo(
+    () =>
+      [...gameShows]
+        .filter((show) => show.show_scored)
+        .sort(
+          (a, b) =>
+            Number(b.show_canonid) - Number(a.show_canonid) ||
+            b.show_date.localeCompare(a.show_date),
+        )[0] ?? null,
+    [gameShows],
+  )
+
+  const hasPlayed = Boolean(
+    session && gameShows.some((show) => show.submission_id),
+  )
+  const showOnboard = !justJoined && !hasPlayed
+
+  const startFirstPicks = () => {
+    if (!upNext) return
+    if (!session) {
+      openLogin()
+      return
+    }
+    void openPicks(upNext)
+  }
 
   const openPicks = async (show: GameShow) => {
     if (!session) {
@@ -124,28 +171,74 @@ export function EchoOfAShowHome() {
       onLogin={openLogin}
       onSignup={openSignup}
     >
-      <div className="echo-of-a-show__home">
-        <div className="echo-of-a-show__col">
-          {upNext ?
-            <EchoOfAShowUpNext
-              show={upNext}
-              onMakePicks={() => void openPicks(upNext)}
+      <div
+        className={
+          justJoined || showOnboard
+            ? "echo-of-a-show__home echo-of-a-show__home--onboard"
+            : "echo-of-a-show__home"
+        }
+      >
+        {justJoined ?
+          <EchoOfAShowJoined
+            showId={justJoined.show.show_id}
+            showTime={justJoined.show.show_time}
+            picks={justJoined.picks}
+            entryOf={justJoined.entryOf}
+          />
+        : showOnboard ?
+          <EchoOfAShowOnboard
+            nextShow={upNext}
+            lastShow={latestScored}
+            loggedIn={Boolean(session)}
+            onHowItWorks={() => setShowHow(true)}
+            onLogin={openLogin}
+            onMakePicks={startFirstPicks}
+          />
+        : <>
+            <div className="echo-of-a-show__col">
+              {runningShow ?
+                <EchoOfAShowRunning
+                  show={runningShow}
+                  actual={runningBoard.actual}
+                  picks={runningBoard.picks}
+                  youScore={runningBoard.youScore}
+                  scores={runningBoard.scores}
+                  userId={session?.profileId}
+                  onRecalc={
+                    isAdmin
+                      ? () => {
+                          void recalcShow(runningShow.show_id).then(() =>
+                            refreshRunning(),
+                          )
+                        }
+                      : undefined
+                  }
+                  recalcPending={isScoring}
+                />
+              : null}
+              {upNext ?
+                <EchoOfAShowUpNext
+                  show={upNext}
+                  onMakePicks={() => void openPicks(upNext)}
+                />
+              : !runningShow ?
+                <section className="echo-of-a-show__panel echo-of-a-show__panel--pad">
+                  <div className="echo-of-a-show__kicker">This leg</div>
+                  <p className="echo-of-a-show__empty">
+                    No upcoming Echo of a Show dates right now.
+                  </p>
+                </section>
+              : null}
+            </div>
+            <EchoOfAShowRail
+              standings={standings}
+              userId={session?.profileId}
+              lastShow={lastShow}
+              remaining={remaining}
+              league={ECHO_ACTIVE_LEAGUE}
+              tourId={tourId}
             />
-          : <section className="echo-of-a-show__panel echo-of-a-show__panel--pad">
-              <div className="echo-of-a-show__kicker">This leg</div>
-              <p className="echo-of-a-show__empty">
-                No upcoming Echo of a Show dates right now.
-              </p>
-            </section>}
-        </div>
-        <EchoOfAShowRail
-          standings={standings}
-          userId={session?.profileId}
-          lastShow={lastShow}
-          remaining={remaining}
-          league={ECHO_ACTIVE_LEAGUE}
-          tourId={tourId}
-        />
+          </>}
       </div>
 
       {activeShow && viewMode ?
@@ -165,16 +258,38 @@ export function EchoOfAShowHome() {
           show={activeShow}
           existingPicks={userPicks}
           isEditing={Boolean(activeShow.submission_id)}
+          showStarter={!hasPlayed}
+          onSubmitted={(picks) => {
+            if (!hasPlayed) {
+              setJustJoined({
+                show: activeShow,
+                picks,
+                entryOf: (activeShow.playerCount ?? 0) + 1,
+              })
+            }
+          }}
           onSuccess={fetchGameShows}
         />
       : null}
 
-      <ScoringDialog
+      <EchoOfAShowScoreDialog
         open={showScoring}
         onOpenChange={setShowScoring}
         gameShows={gameShows}
-        onScoringComplete={fetchGameShows}
-        wlHomeV2
+        onRefresh={fetchGameShows}
+      />
+
+      <EchoOfAShowHowItWorks
+        open={showHow}
+        onOpenChange={setShowHow}
+        onMakePicks={() => {
+          setShowHow(false)
+          startFirstPicks()
+        }}
+        onFullRules={() => {
+          setShowHow(false)
+          setShowRules(true)
+        }}
       />
 
       <EchoOfAShowRulesDialog

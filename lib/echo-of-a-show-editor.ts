@@ -176,3 +176,20 @@ export function echoEditorPill(
   }
   return null
 }
+
+export function echoCrowdStarterPicks(songs: string[]): SongPick[] {
+  const take = songs.filter(Boolean).slice(0, 12)
+  const buckets: { set: string; names: string[] }[] = [
+    { set: "1", names: take.slice(0, 5) },
+    { set: "2", names: take.slice(5, 10) },
+    { set: "E1", names: take.slice(10) },
+  ]
+  let picks: SongPick[] = []
+  for (const bucket of buckets) {
+    for (const song of bucket.names) {
+      const next = echoAppendSong(picks, song, bucket.set)
+      if (next !== "duplicate") picks = next
+    }
+  }
+  return picks
+}

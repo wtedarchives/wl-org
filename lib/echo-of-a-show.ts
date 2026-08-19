@@ -68,6 +68,14 @@ export function echoLegShortLabel(league: string): string {
   return inner || league
 }
 
+/** Phone header: `2026 Summer [Second Leg]` → `2026 Summer · Leg 2`. */
+export function formatEchoSeasonShortTitle(league: string): string {
+  const yearTour = league.replace(/\s*\[[^\]]*\]\s*/g, " ").replace(/\s+/g, " ").trim()
+  const leg = echoLegShortLabel(league)
+  if (yearTour && leg && leg !== league) return `${yearTour} · ${leg}`
+  return league
+}
+
 export function formatEchoWeekdayShort(showDate: string): string {
   const full = formatShowWeekday(showDate)
   if (!full) return ""
@@ -128,6 +136,12 @@ export function formatEchoShowTimeEt(utcDatetime: string | null | undefined): st
     minute: "2-digit",
     hour12: true,
   })
+}
+
+export function formatEchoLockTimeEt(showTime: string): string {
+  const lockAt = getEchoLockAt(showTime)
+  if (!Number.isFinite(lockAt)) return ""
+  return formatEchoShowTimeEt(new Date(lockAt).toISOString())
 }
 
 export function formatEchoUsername(raw: string | null | undefined): string {
