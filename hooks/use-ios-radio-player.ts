@@ -259,7 +259,6 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     const audio = document.createElement("audio")
     audio.preload = "none"
     audio.crossOrigin = "anonymous"
-    audio.playsInline = true
     audio.setAttribute("playsinline", "")
     audio.setAttribute("webkit-playsinline", "")
     audio.volume = volumeRef.current
