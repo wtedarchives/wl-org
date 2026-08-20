@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { fetchShowIdForRadioCoTrack } from "@/lib/wted-radio-on-air-show"
-import { episodeSubtextFromScheduleSlots } from "@/lib/wted-radio-on-air-episode"
+import { episodeArtworkFromScheduleSlots, episodeSubtextFromScheduleSlots } from "@/lib/wted-radio-on-air-episode"
 import { attachArtworkToRecentlyPlayedTracks } from "@/lib/wted-recently-played"
 import {
   WTED_RADIO_NAME,
@@ -120,6 +120,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   const [isOnline, setIsOnline] = useState(true)
   const [rawTitle, setRawTitle] = useState<string | null>(null)
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null)
+  const [episodeArtworkUrl, setEpisodeArtworkUrl] = useState<string | null>(null)
   const [setlistShowId, setSetlistShowId] = useState<string | null>(null)
   const [episodeSubtext, setEpisodeSubtext] = useState<string | null>(null)
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null)
@@ -141,6 +142,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     elapsed != null && totalDuration != null ?
       Math.max(0, totalDuration - elapsed)
     : null
+  const displayArtworkUrl = artworkUrl ?? episodeArtworkUrl
 
   const clearReconnect = useCallback(() => {
     if (reconnectTimerRef.current) {
@@ -532,6 +534,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   useEffect(() => {
     if (!enabled) {
       setEpisodeSubtext(null)
+      setEpisodeArtworkUrl(null)
       return
     }
 
@@ -541,6 +544,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     function applySlot(nowMs = Date.now()) {
       if (cancelled) return
       setEpisodeSubtext(episodeSubtextFromScheduleSlots(slots, nowMs))
+      setEpisodeArtworkUrl(episodeArtworkFromScheduleSlots(slots, nowMs))
     }
 
     async function refreshSchedule() {
@@ -573,8 +577,8 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       title: displayTitle,
       artist: displayArtist ?? WTED_RADIO_NAME,
       album: WTED_RADIO_NAME,
-      artwork: artworkUrl ?
-        [{ src: artworkUrl, sizes: "300x300", type: "image/jpeg" }]
+      artwork: displayArtworkUrl ?
+        [{ src: displayArtworkUrl, sizes: "300x300", type: "image/jpeg" }]
       : [],
     })
     navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused"
@@ -586,7 +590,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       navigator.mediaSession.setActionHandler("pause", null)
       navigator.mediaSession.setActionHandler("stop", null)
     }
-  }, [artworkUrl, displayArtist, displayTitle, enabled, isPlaying, play, stop])
+  }, [displayArtworkUrl, displayArtist, displayTitle, enabled, isPlaying, play, stop])
 
   useEffect(() => () => cancelSleepTimer(), [cancelSleepTimer])
 
@@ -598,7 +602,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     rawTitle,
     displayTitle,
     displayArtist,
-    artworkUrl,
+    artworkUrl: displayArtworkUrl,
     setlistShowId,
     episodeSubtext,
     totalDuration,

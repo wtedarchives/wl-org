@@ -25,8 +25,10 @@
  *   3. Airing episode is a compilation/requesTED   -> `wted_episodes.artwork`
  *      for its members; non-members with a `show_id` are fillers and keep their
  *      own show's artwork.
- *   4. Anything else (tag-pulled station IDs and bumpers) -> null, and the UI
- *      falls back to the WL image.
+ *   4. Anything else (tag-pulled station IDs and bumpers) -> the airing
+ *      episode's `wted_episodes.artwork` (the same image the Upcoming
+ *      Schedule card shows for that show). If that is also empty, the UI
+ *      falls back to the WL image / broadcast placeholder.
  */
 import type { SupabaseClient } from "@supabase/supabase-js"
 
@@ -581,8 +583,16 @@ export async function attachArtworkToRecentlyPlayedTracks(
       }
     }
 
-    // 4. No identity in the catalog — a tag-pulled station ID or bumper. WL.
+    // 4. No identity in the catalog — a tag-pulled station ID or bumper.
     return { artworkUrl: null, episodeRadioId, episodeName }
+  })
+
+  const withShowArtwork = resolved.map((r) => {
+    if (r.artworkUrl) return r
+    const episode = r.episodeRadioId ? episodes.get(r.episodeRadioId) : null
+    const showArt = nonEmpty(episode?.artwork)
+    if (!showArt) return r
+    return { ...r, artworkUrl: showArt }
   })
 
   /**
@@ -595,7 +605,7 @@ export async function attachArtworkToRecentlyPlayedTracks(
   let lastKnownEpisode: string | null = null
 
   return entries.map((entry, i) => {
-    const r = resolved[i]!
+    const r = withShowArtwork[i]!
     const startsEpisode =
       r.episodeRadioId != null && r.episodeRadioId !== lastKnownEpisode
     if (r.episodeRadioId != null) lastKnownEpisode = r.episodeRadioId
