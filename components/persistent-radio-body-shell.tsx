@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 
 import { RadioEmbed } from "@/components/radio-embed"
+import { IosRadioBar } from "@/components/wted/ios-radio/ios-radio-bar"
 
 const SCROLL_LISTENER_OPTS = { passive: true, capture: true } as const
 
 /**
- * Single iframe on `document.body`. Aligns to the slot with `fixed` + `translate3d`.
+ * Single player on `document.body` (Luna iframe, or the iOS-style bar for
+ * allowlisted testers). Aligns to the slot with `fixed` + `translate3d`.
  * Updates are rAF-coalesced (scroll / wheel / resize / etc.) — not a perpetual rAF loop —
  * to reduce overscroll jitter while keeping playback across route changes.
  */
@@ -15,10 +17,12 @@ export function PersistentRadioBodyShell({
   measureTarget,
   homeEmbedPulseGen,
   pulseEmbedOnHomeBump,
+  useCustomPlayer,
 }: {
   measureTarget: HTMLElement | null
   homeEmbedPulseGen: number
   pulseEmbedOnHomeBump: boolean
+  useCustomPlayer: boolean
 }) {
   const shellRef = useRef<HTMLDivElement | null>(null)
   const pulseOverlayRef = useRef<HTMLDivElement | null>(null)
@@ -48,8 +52,13 @@ export function PersistentRadioBodyShell({
     /** Below modal overlays (z-50). */
     shell.style.zIndex = "40"
     shell.style.width = `${r.width}px`
-    shell.style.transform = `translate3d(${r.left}px, ${r.top}px, 0)`
-  }, [measureTarget])
+    if (useCustomPlayer) {
+      const barHeight = shell.offsetHeight
+      if (barHeight > 0) el.style.height = `${barHeight}px`
+    }
+    const placed = el.getBoundingClientRect()
+    shell.style.transform = `translate3d(${placed.left}px, ${placed.top}px, 0)`
+  }, [measureTarget, useCustomPlayer])
 
   const scheduleSync = useCallback(() => {
     if (rafRef.current !== 0) return
@@ -88,6 +97,9 @@ export function PersistentRadioBodyShell({
         ? new ResizeObserver(() => scheduleSync())
         : null
     if (measureTarget && ro) ro.observe(measureTarget)
+    if (useCustomPlayer && shellRef.current && ro) {
+      ro.observe(shellRef.current)
+    }
 
     window.addEventListener("resize", scheduleSync)
 
@@ -116,7 +128,13 @@ export function PersistentRadioBodyShell({
         vv.removeEventListener("resize", scheduleSync)
       }
     }
-  }, [measureTarget, scheduleSync])
+  }, [measureTarget, scheduleSync, useCustomPlayer])
+
+  useLayoutEffect(() => {
+    return () => {
+      if (measureTarget) measureTarget.style.height = ""
+    }
+  }, [measureTarget, useCustomPlayer])
 
   useEffect(() => {
     if (!pulseEmbedOnHomeBump || homeEmbedPulseGen === 0) return
@@ -128,13 +146,24 @@ export function PersistentRadioBodyShell({
   }, [homeEmbedPulseGen, pulseEmbedOnHomeBump])
 
   return (
-    <div ref={shellRef} className="relative rounded-md">
+    <div
+      ref={shellRef}
+      className={
+        useCustomPlayer ? "relative overflow-hidden rounded-[10px]" : (
+          "relative rounded-md"
+        )
+      }
+    >
       <div
         ref={pulseOverlayRef}
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-10 rounded-md"
+        className={
+          useCustomPlayer ?
+            "pointer-events-none absolute inset-0 z-10 rounded-[10px]"
+          : "pointer-events-none absolute inset-0 z-10 rounded-md"
+        }
       />
-      <RadioEmbed />
+      {useCustomPlayer ? <IosRadioBar /> : <RadioEmbed />}
     </div>
   )
 }

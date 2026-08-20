@@ -1,6 +1,40 @@
-import type { ApiDocsEndpoint } from "@/lib/bot-read-api-docs"
+import type { ApiDocsEndpoint } from "@/lib/public-api-docs"
 
 import { ApiDocsCodeBlock } from "./api-docs-code-block"
+import { ApiDocsHeading } from "./api-docs-heading"
+
+function ApiDocsFieldsTable({
+  columns,
+  fields,
+}: {
+  columns: [string, string, string]
+  fields: { name: string; type: string; description: string }[]
+}) {
+  return (
+    <div className="api-docs-table-wrap">
+      <table className="api-docs-table">
+        <thead>
+          <tr>
+            <th>{columns[0]}</th>
+            <th>{columns[1]}</th>
+            <th className="api-docs-table-desc">{columns[2]}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fields.map((field) => (
+            <tr key={field.name}>
+              <td>
+                <code className="api-docs-inline-code">{field.name}</code>
+              </td>
+              <td>{field.type}</td>
+              <td className="api-docs-table-desc">{field.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 
 export function ApiDocsEndpointSection({
   endpoint,
@@ -10,75 +44,67 @@ export function ApiDocsEndpointSection({
   baseUrl: string
 }) {
   return (
-    <section className="api-docs-section" id={endpoint.id}>
-      <div className="api-docs-section-head">
-        <span className="api-docs-method">GET</span>
-        <h2 className="api-docs-section-title">{endpoint.title}</h2>
-      </div>
+    <section className="api-docs-section">
+      <ApiDocsHeading id={endpoint.id} level={2}>
+        {endpoint.title}
+      </ApiDocsHeading>
       <p className="api-docs-lead">{endpoint.summary}</p>
 
-      <div className="api-docs-callout">
-        <span className="api-docs-callout-label">Request</span>
+      <div className="api-docs-request">
+        <span className="api-docs-method">GET</span>
         <code className="api-docs-request-url">
-          GET {baseUrl}
-          {endpoint.query}
+          {baseUrl}
+          {endpoint.path}
         </code>
       </div>
 
-      <h3 className="api-docs-subtitle">Query parameters</h3>
-      <div className="api-docs-table-wrap">
-        <table className="api-docs-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Required</th>
-              <th>Type</th>
-              <th className="api-docs-table-desc">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {endpoint.params.map((param) => (
-              <tr key={param.name}>
-                <td>
-                  <code>{param.name}</code>
-                </td>
-                <td>{param.required ? "Yes" : "No"}</td>
-                <td>{param.type}</td>
-                <td className="api-docs-table-desc">{param.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {endpoint.params.length > 0 ?
+        <>
+          <ApiDocsHeading id={`${endpoint.id}-parameters`} level={3}>
+            Query parameters
+          </ApiDocsHeading>
+          <ApiDocsFieldsTable
+            columns={["Name", "Type", "Description"]}
+            fields={endpoint.params.map((param) => ({
+              name: param.name,
+              type: `${param.type}${param.required ? ", required" : ""}`,
+              description: param.description,
+            }))}
+          />
+        </>
+      : null}
 
-      <h3 className="api-docs-subtitle">Response fields</h3>
-      <p className="api-docs-muted">Each item in the data array includes:</p>
-      <div className="api-docs-table-wrap">
-        <table className="api-docs-table">
-          <thead>
-            <tr>
-              <th>Field</th>
-              <th>Type</th>
-              <th className="api-docs-table-desc">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {endpoint.responseFields.map((field) => (
-              <tr key={field.name}>
-                <td>
-                  <code>{field.name}</code>
-                </td>
-                <td>{field.type}</td>
-                <td className="api-docs-table-desc">{field.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ApiDocsHeading id={`${endpoint.id}-response`} level={3}>
+        Response fields
+      </ApiDocsHeading>
+      <ApiDocsFieldsTable
+        columns={["Field", "Type", "Description"]}
+        fields={endpoint.responseFields}
+      />
+
+      {endpoint.responseFieldGroups?.map((group) => (
+        <div key={group.title}>
+          <ApiDocsHeading
+            id={`${endpoint.id}-${group.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
+            level={3}
+          >
+            {group.title}
+          </ApiDocsHeading>
+          {group.description ?
+            <p className="api-docs-lead">{group.description}</p>
+          : null}
+          <ApiDocsFieldsTable
+            columns={["Field", "Type", "Description"]}
+            fields={group.fields}
+          />
+        </div>
+      ))}
 
       {endpoint.notes && endpoint.notes.length > 0 ?
         <>
-          <h3 className="api-docs-subtitle">Notes</h3>
+          <ApiDocsHeading id={`${endpoint.id}-notes`} level={3}>
+            Notes
+          </ApiDocsHeading>
           <ul className="api-docs-list">
             {endpoint.notes.map((note) => (
               <li key={note}>{note}</li>
@@ -89,21 +115,23 @@ export function ApiDocsEndpointSection({
 
       {endpoint.errors.length > 0 ?
         <>
-          <h3 className="api-docs-subtitle">Errors</h3>
+          <ApiDocsHeading id={`${endpoint.id}-errors`} level={3}>
+            Errors
+          </ApiDocsHeading>
           <div className="api-docs-table-wrap">
             <table className="api-docs-table">
               <thead>
                 <tr>
                   <th>Status</th>
-                  <th>Message</th>
+                  <th className="api-docs-table-desc">Message</th>
                 </tr>
               </thead>
               <tbody>
                 {endpoint.errors.map((err) => (
                   <tr key={`${err.status}-${err.message}`}>
                     <td>{err.status}</td>
-                    <td>
-                      <code>{`{ "error": "${err.message}" }`}</code>
+                    <td className="api-docs-table-desc">
+                      <code className="api-docs-inline-code">{`{ "error": "${err.message}" }`}</code>
                     </td>
                   </tr>
                 ))}
@@ -113,10 +141,14 @@ export function ApiDocsEndpointSection({
         </>
       : null}
 
-      <h3 className="api-docs-subtitle">Example response</h3>
+      <ApiDocsHeading id={`${endpoint.id}-example`} level={3}>
+        Example response
+      </ApiDocsHeading>
       <ApiDocsCodeBlock code={endpoint.exampleResponse} language="json" />
 
-      <h3 className="api-docs-subtitle">cURL</h3>
+      <ApiDocsHeading id={`${endpoint.id}-curl`} level={3}>
+        cURL
+      </ApiDocsHeading>
       <ApiDocsCodeBlock code={endpoint.exampleCurl(baseUrl)} language="bash" />
     </section>
   )

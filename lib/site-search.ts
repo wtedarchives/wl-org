@@ -183,8 +183,8 @@ function parseHasMore(raw: unknown): SiteSearchHasMore {
 
 /**
  * Ask Edge whether the current Wysteria session is on `SITE_SEARCH_ALLOWLIST`
- * (`?check=1`). Public archive search does not require this — keep for future
- * gated features via `useSiteSearchAccess`.
+ * (`?check=1`). Public archive search does not require this. Used to gate the
+ * iOS-style radio header via `useSiteSearchAccess`.
  */
 export async function fetchSiteSearchAccess(
   accessToken: string | null | undefined,

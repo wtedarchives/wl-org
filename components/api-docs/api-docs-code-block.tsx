@@ -10,6 +10,7 @@ export function ApiDocsCodeBlock({
   language: "json" | "bash"
 }) {
   const [copied, setCopied] = useState(false)
+  const lines = code.split("\n")
 
   const onCopy = useCallback(async () => {
     try {
@@ -29,9 +30,16 @@ export function ApiDocsCodeBlock({
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <pre className="api-docs-code-pre">
-        <code>{code}</code>
-      </pre>
+      <div className="api-docs-code-body">
+        <ol className="api-docs-code-lines" aria-hidden="true">
+          {lines.map((_, index) => (
+            <li key={index}>{index + 1}</li>
+          ))}
+        </ol>
+        <pre className="api-docs-code-pre">
+          <code>{code}</code>
+        </pre>
+      </div>
     </div>
   )
 }

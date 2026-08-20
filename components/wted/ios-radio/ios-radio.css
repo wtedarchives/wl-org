@@ -1,0 +1,754 @@
+/* Header strip is portaled onto document.body — do not nest under .wl-home-v2. */
+
+.ios-radio-bar {
+  --ios-radio-bar-pad: 10px;
+  --ios-radio-control: 44px;
+  --ios-radio-art-gap: 12px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: var(--ios-radio-bar-pad);
+  padding-left: calc(
+    var(--ios-radio-bar-pad) + var(--ios-radio-control) +
+      var(--ios-radio-bar-pad) + var(--ios-radio-art-gap)
+  );
+  border: 4px solid #65b3a0;
+  border-radius: 10px;
+  background:
+    linear-gradient(#0e101580, #0e101580),
+    #65b3a0;
+  color: rgb(255, 255, 255);
+  position: relative;
+}
+
+.ios-radio-bar__art {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 6px 0 0 6px;
+  background: rgb(88, 200, 174);
+}
+
+.ios-radio-bar__art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-radio-bar__art-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgb(40, 91, 78);
+  background: rgb(88, 200, 174);
+}
+
+.ios-radio-bar__copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ios-radio-bar__marquee {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ios-radio-bar__marquee.is-scrolling {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 16px,
+    #000 calc(100% - 16px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 16px,
+    #000 calc(100% - 16px),
+    transparent
+  );
+}
+
+.ios-radio-bar__marquee--title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ios-radio-bar__marquee--sub {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ios-radio-bar__marquee-track {
+  display: flex;
+  width: max-content;
+  animation: ios-radio-marquee var(--ios-radio-marquee-duration, 12s) linear infinite;
+}
+
+.ios-radio-bar__marquee-unit {
+  flex-shrink: 0;
+  padding-right: 28px;
+  white-space: nowrap;
+}
+
+.ios-radio-bar__marquee:not(.is-scrolling) .ios-radio-bar__marquee-unit {
+  padding-right: 0;
+}
+
+.ios-radio-bar__marquee-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes ios-radio-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-radio-bar__marquee-track {
+    animation: none;
+  }
+
+  .ios-radio-bar__marquee.is-scrolling {
+    -webkit-mask-image: none;
+    mask-image: none;
+    text-overflow: ellipsis;
+  }
+
+  .ios-radio-bar__marquee.is-scrolling .ios-radio-bar__marquee-track {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ios-radio-bar__marquee.is-scrolling .ios-radio-bar__marquee-unit:not(:first-child) {
+    display: none;
+  }
+
+  .ios-radio-bar__marquee.is-scrolling .ios-radio-bar__marquee-unit {
+    display: block;
+    overflow: hidden;
+    padding-right: 0;
+    text-overflow: ellipsis;
+  }
+}
+
+.ios-radio-bar__live {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ios-radio-bar__live .ios-radio-bar__marquee {
+  flex: 1 1 auto;
+}
+
+.ios-radio-bar__live .ios-radio-bar__marquee--sub {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+
+.ios-radio-bar__live-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(255, 122, 103);
+}
+
+.ios-radio-bar__live-dot--off {
+  background: rgb(112, 121, 138);
+}
+
+.ios-radio-bar__controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.ios-radio-bar__countdown {
+  flex-shrink: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ios-radio-bar__volume {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+.ios-radio-bar__slider-wrap {
+  display: flex;
+  align-items: center;
+  width: 0;
+  max-width: 0;
+  min-height: 44px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(8px);
+  transition:
+    max-width 0.22s ease-out,
+    width 0.22s ease-out,
+    opacity 0.22s ease-out,
+    transform 0.22s ease-out;
+}
+
+.ios-radio-bar__slider-wrap.is-open {
+  width: 88px;
+  max-width: 88px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.ios-radio-bar__slider {
+  width: 88px;
+  height: 44px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  accent-color: rgb(88, 200, 174);
+  background: transparent;
+}
+
+.ios-radio-bar__slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    rgb(88, 200, 174) 0%,
+    rgb(88, 200, 174) calc(var(--ios-radio-volume, 1) * 100%),
+    rgba(255, 255, 255, 0.22) calc(var(--ios-radio-volume, 1) * 100%),
+    rgba(255, 255, 255, 0.22) 100%
+  );
+}
+
+.ios-radio-bar__slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(88, 200, 174);
+}
+
+.ios-radio-bar__slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.ios-radio-bar__slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: rgb(88, 200, 174);
+}
+
+.ios-radio-bar__slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(88, 200, 174);
+}
+
+.ios-radio-bar__volume-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgb(88, 200, 174);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ios-radio-bar__volume-btn:focus-visible {
+  outline: 2px solid rgb(88, 200, 174);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+.ios-radio-bar__play {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgb(88, 200, 174);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.ios-radio-bar__play:focus-visible {
+  outline: 2px solid rgb(88, 200, 174);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+.ios-radio-bar__play:disabled {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .ios-radio-bar__volume-btn:hover,
+  .ios-radio-bar__play:hover:not(:disabled) {
+    color: rgb(140, 230, 212);
+  }
+}
+
+.ios-radio-bar__pulse {
+  pointer-events: none;
+  position: absolute;
+  inset: 5px;
+  border-radius: 999px;
+  border: 2px solid rgb(88, 200, 174);
+  opacity: 0.55;
+  animation: ios-radio-pulse 1.6s ease-out infinite;
+}
+
+.ios-radio-bar__pulse--delay {
+  animation-delay: 0.8s;
+}
+
+@keyframes ios-radio-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.ios-radio-bar__play-icon {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 324px) {
+  .ios-radio-bar__countdown {
+    display: none;
+  }
+}
+
+@media (min-width: 325px) {
+  .ios-radio-bar.is-volume-open .ios-radio-bar__countdown {
+    display: none;
+  }
+}
+
+@media (min-width: 540px) {
+  .ios-radio-bar__slider-wrap.is-open {
+    width: 112px;
+    max-width: 112px;
+  }
+
+  .ios-radio-bar__slider {
+    width: 112px;
+  }
+}
+
+/* Now Playing page (inside the v2 shell). */
+
+.wl-home-v2 .ios-now-playing {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 20px 16px 32px;
+}
+
+@media (min-width: 640px) {
+  .wl-home-v2 .ios-now-playing {
+    padding: 28px 24px 40px;
+  }
+}
+
+.wl-home-v2 .ios-now-playing__stack {
+  display: flex;
+  width: 100%;
+  max-width: 360px;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.wl-home-v2 .ios-now-playing__art {
+  position: relative;
+  width: min(100%, 320px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 16px;
+  background: rgb(88, 200, 174);
+  box-shadow: 0 12px 24px -8px rgb(0, 0, 0);
+}
+
+.wl-home-v2 .ios-now-playing__art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wl-home-v2 .ios-now-playing__art-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgb(40, 91, 78);
+}
+
+.wl-home-v2 .ios-now-playing__track {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.wl-home-v2 .ios-now-playing__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.wl-home-v2 .ios-now-playing__live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgb(255, 122, 103);
+}
+
+.wl-home-v2 .ios-now-playing__live-dot--off {
+  background: rgb(112, 121, 138);
+}
+
+.wl-home-v2 .ios-now-playing__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-home-v2 .ios-now-playing__artist {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.wl-home-v2 .ios-now-playing__clock {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-home-v2 .ios-now-playing__clock-elapsed {
+  color: rgb(88, 200, 174);
+}
+
+.wl-home-v2 .ios-now-playing__clock-sep {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.wl-home-v2 .ios-now-playing__clock-total {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-home-v2 .ios-now-playing__play {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  min-height: 72px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgb(88, 200, 174);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.wl-home-v2 .ios-now-playing__play:focus-visible {
+  outline: 2px solid rgb(88, 200, 174);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.wl-home-v2 .ios-now-playing__play:disabled {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .wl-home-v2 .ios-now-playing__play:hover:not(:disabled) {
+    color: rgb(140, 230, 212);
+  }
+}
+
+.wl-home-v2 .ios-now-playing__controls {
+  display: flex;
+  width: 100%;
+  max-width: 320px;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 12px;
+}
+
+.wl-home-v2 .ios-now-playing__control {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+}
+
+.wl-home-v2 .ios-now-playing__control--active {
+  color: rgb(88, 200, 174);
+}
+
+.wl-home-v2 .ios-now-playing__control:focus-visible {
+  outline: 2px solid rgb(88, 200, 174);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.wl-home-v2 .ios-now-playing__control-icon {
+  display: flex;
+  width: 44px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+}
+
+.wl-home-v2 .ios-now-playing__control-label {
+  font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.wl-home-v2 .ios-now-playing__sleep {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.wl-home-v2 .ios-now-playing__sleep-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    max-height 0.22s ease-out,
+    opacity 0.22s ease-out,
+    transform 0.22s ease-out;
+}
+
+.wl-home-v2 .ios-now-playing__sleep-options.is-open {
+  max-height: 220px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.wl-home-v2 .ios-now-playing__sleep-chip {
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 1px solid rgb(44, 46, 45);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.38);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wl-home-v2 .ios-now-playing__sleep-chip:focus-visible {
+  outline: 2px solid rgb(88, 200, 174);
+  outline-offset: 2px;
+}
+
+.wl-home-v2 .ios-now-playing__sleep-cancel {
+  min-height: 44px;
+  border-color: rgb(100, 44, 58);
+  color: rgb(255, 169, 182);
+}
+
+.wl-home-v2 .ios-now-playing__history {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid rgb(44, 46, 45);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.wl-home-v2 .ios-now-playing__history-title {
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.wl-home-v2 .ios-now-playing__history-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.wl-home-v2 .ios-now-playing__history-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wl-home-v2 .ios-now-playing__history-divider {
+  margin: 8px 0 4px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(88, 200, 174);
+}
+
+.wl-home-v2 .ios-now-playing__history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgb(34, 37, 35);
+}
+
+.wl-home-v2 .ios-now-playing__history-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.wl-home-v2 .ios-now-playing__history-thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgb(49, 58, 52);
+}
+
+.wl-home-v2 .ios-now-playing__history-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wl-home-v2 .ios-now-playing__history-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.wl-home-v2 .ios-now-playing__history-track {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.55);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

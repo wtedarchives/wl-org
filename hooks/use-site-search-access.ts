@@ -12,7 +12,7 @@ import {
  * Whether the signed-in user is on `SITE_SEARCH_ALLOWLIST` (Edge `?check=1`).
  *
  * Public archive search is open to all visitors and does **not** use this hook.
- * Keep for future gated features that should only be testable by allowlisted users.
+ * Used to gate the iOS-style radio header (Luna remains for everyone else).
  * Under `next dev`, always allowed.
  */
 export function useSiteSearchAccess(): {

@@ -13,7 +13,9 @@ import { createPortal } from "react-dom"
 import { usePathname } from "next/navigation"
 
 import { PersistentRadioBodyShell } from "@/components/persistent-radio-body-shell"
+import { IosRadioPlayerProvider } from "@/components/wted/ios-radio/ios-radio-player-context"
 import { useIsBelowXl } from "@/hooks/use-mobile"
+import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
 import { cn } from "@/lib/utils"
 
 type PersistentRadioContextValue = {
@@ -25,6 +27,8 @@ type PersistentRadioContextValue = {
   mobileNode: HTMLDivElement | null
   homeEmbedPulseGen: number
   bumpHomeEmbedPulse: () => void
+  /** iOS-style header player for `SITE_SEARCH_ALLOWLIST` testers (Luna for everyone else). */
+  useCustomPlayer: boolean
 }
 
 const PersistentRadioContext =
@@ -102,8 +106,13 @@ function HomeRadioPulseDimOverlay({
 function PersistentRadioPortal() {
   const pathname = usePathname()
   const isBelowXl = useIsBelowXl()
-  const { homeNode, sidebarNode, mobileNode, homeEmbedPulseGen } =
-    usePersistentRadio()
+  const {
+    homeNode,
+    sidebarNode,
+    mobileNode,
+    homeEmbedPulseGen,
+    useCustomPlayer,
+  } = usePersistentRadio()
   const [bodyReady, setBodyReady] = useState(false)
   const [pulseDimVisible, setPulseDimVisible] = useState(false)
   const latestPulseGenForDimRef = useRef(0)
@@ -153,6 +162,7 @@ function PersistentRadioPortal() {
           measureTarget={measureTarget}
           homeEmbedPulseGen={homeEmbedPulseGen}
           pulseEmbedOnHomeBump={pulseEmbedOnHomeBump}
+          useCustomPlayer={useCustomPlayer}
         />,
         document.body,
       )}
@@ -160,11 +170,19 @@ function PersistentRadioPortal() {
   )
 }
 
+/** True when the iOS-style header player is mounted for this visitor. */
+export function useCustomIosRadioPlayer() {
+  const ctx = useContext(PersistentRadioContext)
+  return Boolean(ctx?.useCustomPlayer)
+}
+
 export function PersistentRadioRoot({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { allowed } = useSiteSearchAccess()
+  const useCustomPlayer = allowed
   const [homeNode, setHomeNode] = useState<HTMLDivElement | null>(null)
   const [sidebarNode, setSidebarNode] = useState<HTMLDivElement | null>(null)
   const [mobileNode, setMobileNode] = useState<HTMLDivElement | null>(null)
@@ -194,6 +212,7 @@ export function PersistentRadioRoot({
       mobileNode,
       homeEmbedPulseGen,
       bumpHomeEmbedPulse,
+      useCustomPlayer,
     }),
     [
       setHomeNodeCb,
@@ -204,13 +223,22 @@ export function PersistentRadioRoot({
       mobileNode,
       homeEmbedPulseGen,
       bumpHomeEmbedPulse,
+      useCustomPlayer,
     ],
+  )
+
+  const tree = (
+    <>
+      {children}
+      <PersistentRadioPortal />
+    </>
   )
 
   return (
     <PersistentRadioContext.Provider value={value}>
-      {children}
-      <PersistentRadioPortal />
+      <IosRadioPlayerProvider enabled={useCustomPlayer}>
+        {tree}
+      </IosRadioPlayerProvider>
     </PersistentRadioContext.Provider>
   )
 }
