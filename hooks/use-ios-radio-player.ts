@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { fetchShowIdForRadioCoTrack } from "@/lib/wted-radio-on-air-show"
 import { attachArtworkToRecentlyPlayedTracks } from "@/lib/wted-recently-played"
 import {
   WTED_RADIO_NAME,
@@ -26,6 +27,8 @@ export type IosRadioPlayerState = {
   displayTitle: string
   displayArtist: string | null
   artworkUrl: string | null
+  /** Concert `shows.show_id` when the on-air `wted_radio_ids` row has one. */
+  setlistShowId: string | null
   totalDuration: number | null
   elapsed: number | null
   remaining: number | null
@@ -94,6 +97,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   const sleepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const artworkTitleRef = useRef<string | null>(null)
   const artworkAttemptsRef = useRef(0)
+  const setlistKeyRef = useRef<string | null>(null)
   const volumeRef = useRef(1)
 
   const [isPlaying, setIsPlaying] = useState(false)
@@ -101,6 +105,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   const [isOnline, setIsOnline] = useState(true)
   const [rawTitle, setRawTitle] = useState<string | null>(null)
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null)
+  const [setlistShowId, setSetlistShowId] = useState<string | null>(null)
   const [startTimeMs, setStartTimeMs] = useState<number | null>(null)
   const [totalDuration, setTotalDuration] = useState<number | null>(null)
   const [sleepTimerEnd, setSleepTimerEnd] = useState<number | null>(null)
@@ -258,6 +263,34 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     let scheduleDurationSec: number | null = null
     let lastV2PollMs = 0
 
+    async function resolveSetlistShow(
+      title: string | null,
+      radioCoArtwork: string | null,
+    ) {
+      const identity =
+        title ?
+          `${title}\0${radioCoArtwork ?? ""}`
+        : ""
+      if (identity === setlistKeyRef.current) return
+      setlistKeyRef.current = identity
+      if (!title) {
+        setSetlistShowId(null)
+        return
+      }
+      setSetlistShowId(null)
+      try {
+        const showId = await fetchShowIdForRadioCoTrack({
+          artworkUrl: radioCoArtwork,
+          combinedTitle: title,
+        })
+        if (cancelled || setlistKeyRef.current !== identity) return
+        setSetlistShowId(showId)
+      } catch {
+        if (cancelled || setlistKeyRef.current !== identity) return
+        setSetlistShowId(null)
+      }
+    }
+
     async function resolveArtwork(
       title: string,
       radioCoArtwork: string | null,
@@ -297,6 +330,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
         const startTimeMs = parseRadioStartMs(data.current_track?.start_time)
         if (startTimeMs != null) setStartTimeMs(startTimeMs)
         const artworkUrl = data.current_track?.artwork_url?.trim() || null
+        void resolveSetlistShow(title, artworkUrl)
         if (title) void resolveArtwork(title, artworkUrl)
         else setArtworkUrl(null)
         return { title, startTimeMs, artworkUrl }
@@ -446,6 +480,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     displayTitle,
     displayArtist,
     artworkUrl,
+    setlistShowId,
     totalDuration,
     elapsed,
     remaining,

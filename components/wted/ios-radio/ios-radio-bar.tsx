@@ -9,16 +9,56 @@ import {
   StopCircle,
 } from "@phosphor-icons/react"
 
+import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { IosRadioBarVolume } from "@/components/wted/ios-radio/ios-radio-bar-volume"
 import { IosRadioMarquee } from "@/components/wted/ios-radio/ios-radio-bar-marquee"
 import { useIosRadioPlayerContext } from "@/components/wted/ios-radio/ios-radio-player-context"
+import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { formatRadioTrackClock } from "@/lib/wted-radio-track-display-title"
 
 import "./ios-radio.css"
 
+function IosRadioBarCopyInner({
+  player,
+}: {
+  player: ReturnType<typeof useIosRadioPlayerContext>
+}) {
+  return (
+    <>
+      <IosRadioMarquee text={player.displayTitle} variant="title" />
+      {player.isBuffering ?
+        <IosRadioMarquee text="Buffering…" variant="sub" />
+      : player.displayArtist ?
+        <IosRadioMarquee text={player.displayArtist} variant="sub" />
+      : <div className="ios-radio-bar__live">
+          <span
+            className={
+              player.isOnline ?
+                "ios-radio-bar__live-dot"
+              : "ios-radio-bar__live-dot ios-radio-bar__live-dot--off"
+            }
+          />
+          <IosRadioMarquee
+            text={
+              player.isOnline ?
+                `LIVE • ${player.stationName}`
+              : "Offline"
+            }
+            variant="sub"
+          />
+        </div>
+      }
+    </>
+  )
+}
+
 export function IosRadioBar() {
   const player = useIosRadioPlayerContext()
   const [volumeOpen, setVolumeOpen] = useState(false)
+  const setlistHref =
+    player.setlistShowId ?
+      getSetlistArchiveUrl(player.setlistShowId)
+    : null
 
   return (
     <div
@@ -42,31 +82,19 @@ export function IosRadioBar() {
         }
       </div>
 
-      <div className="ios-radio-bar__copy">
-        <IosRadioMarquee text={player.displayTitle} variant="title" />
-        {player.isBuffering ?
-          <IosRadioMarquee text="Buffering…" variant="sub" />
-        : player.displayArtist ?
-          <IosRadioMarquee text={player.displayArtist} variant="sub" />
-        : <div className="ios-radio-bar__live">
-            <span
-              className={
-                player.isOnline ?
-                  "ios-radio-bar__live-dot"
-                : "ios-radio-bar__live-dot ios-radio-bar__live-dot--off"
-              }
-            />
-            <IosRadioMarquee
-              text={
-                player.isOnline ?
-                  `LIVE • ${player.stationName}`
-                : "Offline"
-              }
-              variant="sub"
-            />
-          </div>
-        }
-      </div>
+      {setlistHref ?
+        <ArchivePrefetchLink
+          href={setlistHref}
+          prefetch={false}
+          className="ios-radio-bar__copy ios-radio-bar__copy--link"
+          aria-label={`Open setlist for ${player.displayTitle}`}
+        >
+          <IosRadioBarCopyInner player={player} />
+        </ArchivePrefetchLink>
+      : <div className="ios-radio-bar__copy">
+          <IosRadioBarCopyInner player={player} />
+        </div>
+      }
 
       <div className="ios-radio-bar__controls">
         {player.remaining != null ?
