@@ -26,10 +26,31 @@ function sleepRemainingLabel(endMs: number, nowMs: number) {
   return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`
 }
 
-function IosNowPlayingArtwork({ url }: { url: string | null }) {
-  if (url) {
-    return (
-      <div className="ios-now-playing__art">
+function IosNowPlayingArtwork({
+  url,
+  buffering,
+  playing,
+  onToggle,
+}: {
+  url: string | null
+  buffering: boolean
+  playing: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className="ios-now-playing__art"
+      onClick={onToggle}
+      disabled={buffering}
+      aria-busy={buffering}
+      aria-label={
+        buffering ? "Buffering radio"
+        : playing ? "Stop radio"
+        : "Play radio"
+      }
+    >
+      {url ?
         <Image
           src={url}
           alt=""
@@ -38,16 +59,11 @@ function IosNowPlayingArtwork({ url }: { url: string | null }) {
           className="ios-now-playing__art-img"
           unoptimized
         />
-      </div>
-    )
-  }
-
-  return (
-    <div className="ios-now-playing__art">
-      <span className="ios-now-playing__art-fallback">
-        <Broadcast size={64} weight="fill" aria-hidden />
-      </span>
-    </div>
+      : <span className="ios-now-playing__art-fallback">
+          <Broadcast size={64} weight="fill" aria-hidden />
+        </span>
+      }
+    </button>
   )
 }
 
@@ -91,7 +107,12 @@ export function IosNowPlaying() {
   return (
     <div className="ios-now-playing">
       <div className="ios-now-playing__stack">
-        <IosNowPlayingArtwork url={player.artworkUrl} />
+        <IosNowPlayingArtwork
+          url={player.artworkUrl}
+          buffering={player.isBuffering}
+          playing={player.isPlaying}
+          onToggle={player.toggle}
+        />
 
         <div className="ios-now-playing__track">
           <div className="ios-now-playing__live">

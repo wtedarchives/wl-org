@@ -108,8 +108,10 @@ export function formatWtedEpisodeScheduleTitle(
 }
 
 /**
- * Header-player second subtext: `show · display_name` from the on-air schedule
- * episode. `Show Airings` is omitted — the track line already has the concert.
+ * Header-player second subtext from the on-air schedule episode.
+ * Same title rules as Upcoming Schedule except linked-show archive titles:
+ * `show · display_name`, with Miscellaneous / Show Airings / requesTED / Mixes
+ * showing `display_name` only.
  */
 export function formatOnAirEpisodeSubtext(
   episode:
@@ -118,11 +120,11 @@ export function formatOnAirEpisodeSubtext(
     | undefined,
 ): string | null {
   if (!episode) return null
-  const show = episode.show?.trim() ?? ""
-  if (show === "Show Airings") return null
-  const displayName = episode.display_name?.trim() ?? ""
-  if (show && displayName) return joinScheduleTitleParts([show, displayName])
-  return displayName || show || null
+  return formatWtedEpisodeScheduleTitle({
+    show: episode.show,
+    display_name: episode.display_name,
+    linkedShowTitle: null,
+  })
 }
 
 /**

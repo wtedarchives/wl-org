@@ -34,7 +34,7 @@ export type IosRadioPlayerState = {
   artworkUrl: string | null
   /** Concert `shows.show_id` when the on-air `wted_radio_ids` row has one. */
   setlistShowId: string | null
-  /** Homepage-schedule episode line (`show · display_name`), null for Show Airings. */
+  /** Homepage-schedule episode line; prefix dropped for the four schedule buckets. */
   episodeSubtext: string | null
   totalDuration: number | null
   elapsed: number | null

@@ -66,7 +66,18 @@ export function IosRadioBar() {
         active={player.isPlaying}
       />
       <div className="ios-radio-bar__visualizer-veil" aria-hidden />
-      <div className="ios-radio-bar__art">
+      <button
+        type="button"
+        className="ios-radio-bar__art"
+        onClick={player.toggle}
+        disabled={player.isBuffering}
+        aria-busy={player.isBuffering}
+        aria-label={
+          player.isBuffering ? "Buffering radio"
+          : player.isPlaying ? "Stop radio"
+          : "Play radio"
+        }
+      >
         {player.artworkUrl ?
           <Image
             src={player.artworkUrl}
@@ -80,7 +91,7 @@ export function IosRadioBar() {
             <Broadcast size={28} weight="fill" aria-hidden />
           </span>
         }
-      </div>
+      </button>
 
       {setlistHref ?
         <ArchivePrefetchLink
