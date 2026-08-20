@@ -1,5 +1,16 @@
 /* Header strip is portaled onto document.body — do not nest under .wl-home-v2. */
 
+/* Keep the element in the document (iOS will not analyse a detached Audio()). */
+.ios-radio-audio {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .ios-radio-bar {
   --ios-radio-bar-pad: 10px;
   --ios-radio-control: 44px;
@@ -24,6 +35,7 @@
 }
 
 .ios-radio-bar__visualizer {
+  display: block;
   pointer-events: none;
   position: absolute;
   inset: 0;
@@ -319,11 +331,37 @@
 
 .ios-radio-bar__countdown {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 12px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: rgb(255, 255, 255);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ios-radio-bar__countdown:focus-visible {
+  outline: 2px solid rgb(88, 200, 174);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ios-radio-bar__countdown-total {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .ios-radio-bar__countdown-total {
+    display: inline;
+  }
 }
 
 .ios-radio-bar__volume {

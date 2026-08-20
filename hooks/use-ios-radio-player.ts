@@ -176,7 +176,6 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       return
     }
     try {
-      audio.crossOrigin = "anonymous"
       const AudioCtx =
         window.AudioContext ||
         (window as typeof window & { webkitAudioContext?: typeof AudioContext })
@@ -199,7 +198,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       setAnalyser(node)
       void ctx.resume()
     } catch {
-      // Stream still plays from the element; visualizer just stays off.
+      // Stream still plays from the element; visualizer uses a fallback draw.
     }
   }, [])
 
@@ -208,11 +207,17 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     if (!audio) return
     wantPlayRef.current = true
     clearReconnect()
-    ensureAudioGraph(audio)
     audio.volume = volumeRef.current
+    // iOS needs src on a document-attached element before MediaElementSource.
     audio.src = WTED_RADIO_STREAM_URL
+    ensureAudioGraph(audio)
     setIsBuffering(true)
-    void audio.play().catch(() => {
+    void audio.play().then(() => {
+      if (!wantPlayRef.current) return
+      void audioContextRef.current?.resume()
+      setIsPlaying(true)
+      setIsBuffering(false)
+    }).catch(() => {
       if (!wantPlayRef.current) return
       setIsPlaying(false)
       setIsBuffering(false)
@@ -251,12 +256,23 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
 
   useEffect(() => {
     if (!enabled) return
-    const audio = new Audio()
+    const audio = document.createElement("audio")
     audio.preload = "none"
+    audio.crossOrigin = "anonymous"
+    audio.playsInline = true
+    audio.setAttribute("playsinline", "")
+    audio.setAttribute("webkit-playsinline", "")
     audio.volume = volumeRef.current
+    audio.className = "ios-radio-audio"
+    document.body.appendChild(audio)
     audioRef.current = audio
 
+    const resumeGraph = () => {
+      void audioContextRef.current?.resume()
+    }
+
     const onPlaying = () => {
+      resumeGraph()
       setIsPlaying(true)
       setIsBuffering(false)
     }
@@ -277,12 +293,18 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
         if (wantPlayRef.current) playRef.current()
       }, 2000)
     }
+    const onVisibility = () => {
+      if (document.visibilityState === "visible" && wantPlayRef.current) {
+        resumeGraph()
+      }
+    }
 
     audio.addEventListener("playing", onPlaying)
     audio.addEventListener("waiting", onWaiting)
     audio.addEventListener("pause", onPause)
     audio.addEventListener("ended", scheduleReconnect)
     audio.addEventListener("error", scheduleReconnect)
+    document.addEventListener("visibilitychange", onVisibility)
 
     return () => {
       wantPlayRef.current = false
@@ -292,9 +314,11 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       audio.removeEventListener("pause", onPause)
       audio.removeEventListener("ended", scheduleReconnect)
       audio.removeEventListener("error", scheduleReconnect)
+      document.removeEventListener("visibilitychange", onVisibility)
       audio.pause()
       audio.removeAttribute("src")
       audio.load()
+      audio.remove()
       audioRef.current = null
       audioGraphReadyRef.current = false
       analyserRef.current = null

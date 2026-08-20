@@ -11,6 +11,10 @@ const LAYERS = [
 
 const POINTS = 28
 const LERP = 0.09
+const FREQ_LIVE_MIN = 6
+const ENVELOPE_ATTACK = 0.1
+const ENVELOPE_RELEASE = 0.08
+const ENVELOPE_REST = 0.003
 
 function sampleBin(data: Uint8Array, start: number, end: number, t: number) {
   const span = Math.max(1, end - start)
@@ -26,6 +30,64 @@ function lerpDisplay(display: Float32Array, target: number[]) {
     const next = target[i] ?? 0
     display[i] = display[i]! + (next - display[i]!) * LERP
   }
+}
+
+function maxByte(data: Uint8Array) {
+  let max = 0
+  for (let i = 0; i < data.length; i++) {
+    const value = data[i] ?? 0
+    if (value > max) max = value
+  }
+  return max
+}
+
+function timeDomainPeak(data: Uint8Array) {
+  let peak = 0
+  for (let i = 0; i < data.length; i++) {
+    const delta = Math.abs((data[i] ?? 128) - 128)
+    if (delta > peak) peak = delta
+  }
+  return peak / 128
+}
+
+/** iOS Safari often returns silence from MediaElementSource; keep the waves moving. */
+function fallbackWave(nowMs: number, layerIndex: number, energy: number) {
+  const t = nowMs / 1000
+  const amp = 0.35 + energy * 0.55
+  const target: number[] = []
+  for (let i = 0; i <= POINTS; i++) {
+    const x = i / POINTS
+    const wave =
+      amp *
+      (0.55 +
+        0.28 * Math.sin(t * (0.85 + layerIndex * 0.17) + x * 5.1) +
+        0.17 * Math.sin(t * (1.45 + layerIndex * 0.11) + x * 9.4 + layerIndex * 0.7))
+    target.push(Math.max(0.06, Math.min(1, wave)))
+  }
+  return target
+}
+
+function layerTargets(
+  analyser: AnalyserNode | null,
+  freq: Uint8Array,
+  time: Uint8Array,
+  nowMs: number,
+): number[][] {
+  if (analyser) {
+    analyser.getByteFrequencyData(freq)
+    if (maxByte(freq) >= FREQ_LIVE_MIN) {
+      return LAYERS.map((layer) => {
+        const target: number[] = []
+        for (let i = 0; i <= POINTS; i++) {
+          target.push(sampleBin(freq, layer.binStart, layer.binEnd, i / POINTS))
+        }
+        return target
+      })
+    }
+    analyser.getByteTimeDomainData(time)
+  }
+  const energy = analyser ? Math.min(1, timeDomainPeak(time) * 2.2) : 0.55
+  return LAYERS.map((_, layerIndex) => fallbackWave(nowMs, layerIndex, energy))
 }
 
 function strokeWave(
@@ -75,21 +137,28 @@ export function IosRadioBarVisualizer({
   active: boolean
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const activeRef = useRef(active)
+  const analyserRef = useRef(analyser)
+  const startLoopRef = useRef<(() => void) | null>(null)
+
+  activeRef.current = active
+  analyserRef.current = analyser
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !analyser || !active) return
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return
     }
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-
-    const bins = new Uint8Array(analyser.frequencyBinCount)
+    const freq = new Uint8Array(256)
+    const time = new Uint8Array(512)
     const displays = LAYERS.map(() => new Float32Array(POINTS + 1))
+    let envelope = 0
     let raf = 0
-    let running = true
+    let running = false
     let lastW = 0
     let lastH = 0
 
@@ -105,34 +174,67 @@ export function IosRadioBarVisualizer({
       canvas.height = h
     }
 
-    const draw = () => {
+    const tick = () => {
       if (!running) return
+      const want = activeRef.current ? 1 : 0
+      const rate = want > envelope ? ENVELOPE_ATTACK : ENVELOPE_RELEASE
+      envelope += (want - envelope) * rate
+
+      if (envelope < ENVELOPE_REST && want === 0) {
+        envelope = 0
+        running = false
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        return
+      }
+
       resize()
-      analyser.getByteFrequencyData(bins)
       const { width, height } = canvas
       ctx.clearRect(0, 0, width, height)
+
+      if (want === 1) {
+        const targets = layerTargets(
+          analyserRef.current,
+          freq,
+          time,
+          performance.now(),
+        )
+        LAYERS.forEach((_, layerIndex) => {
+          lerpDisplay(displays[layerIndex]!, targets[layerIndex] ?? [])
+        })
+      }
+
       LAYERS.forEach((layer, layerIndex) => {
-        const target: number[] = []
-        for (let i = 0; i <= POINTS; i++) {
-          target.push(sampleBin(bins, layer.binStart, layer.binEnd, i / POINTS))
-        }
-        const display = displays[layerIndex]!
-        lerpDisplay(display, target)
-        strokeWave(ctx, display, width, height, layer.gain)
+        strokeWave(
+          ctx,
+          displays[layerIndex]!,
+          width,
+          height,
+          layer.gain * envelope,
+        )
         ctx.fillStyle = layer.color
         ctx.fill()
       })
-      raf = requestAnimationFrame(draw)
+      raf = requestAnimationFrame(tick)
     }
 
-    raf = requestAnimationFrame(draw)
+    const startLoop = () => {
+      if (running) return
+      running = true
+      raf = requestAnimationFrame(tick)
+    }
+    startLoopRef.current = startLoop
+    if (activeRef.current) startLoop()
+
     return () => {
       running = false
+      startLoopRef.current = null
       cancelAnimationFrame(raf)
     }
-  }, [analyser, active])
+  }, [])
 
-  if (!active || !analyser) return null
+  useEffect(() => {
+    if (active) startLoopRef.current?.()
+  }, [active])
 
   return (
     <canvas

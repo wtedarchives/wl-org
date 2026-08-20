@@ -10,13 +10,13 @@ import {
 } from "@phosphor-icons/react"
 
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
+import { IosRadioBarCountdown } from "@/components/wted/ios-radio/ios-radio-bar-countdown"
 import { IosRadioBarSubtext } from "@/components/wted/ios-radio/ios-radio-bar-subtext"
 import { IosRadioBarVisualizer } from "@/components/wted/ios-radio/ios-radio-bar-visualizer"
 import { IosRadioBarVolume } from "@/components/wted/ios-radio/ios-radio-bar-volume"
 import { IosRadioMarquee } from "@/components/wted/ios-radio/ios-radio-bar-marquee"
 import { useIosRadioPlayerContext } from "@/components/wted/ios-radio/ios-radio-player-context"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
-import { formatRadioTrackClock } from "@/lib/wted-radio-track-display-title"
 
 import "./ios-radio.css"
 
@@ -63,7 +63,7 @@ export function IosRadioBar() {
     >
       <IosRadioBarVisualizer
         analyser={player.analyser}
-        active={player.isPlaying && !player.isBuffering}
+        active={player.isPlaying}
       />
       <div className="ios-radio-bar__visualizer-veil" aria-hidden />
       <div className="ios-radio-bar__art">
@@ -97,11 +97,11 @@ export function IosRadioBar() {
       }
 
       <div className="ios-radio-bar__controls">
-        {player.remaining != null ?
-          <div className="ios-radio-bar__countdown">
-            {formatRadioTrackClock(player.remaining)}
-          </div>
-        : null}
+        <IosRadioBarCountdown
+          elapsed={player.elapsed}
+          remaining={player.remaining}
+          totalDuration={player.totalDuration}
+        />
 
         <IosRadioBarVolume open={volumeOpen} onOpenChange={setVolumeOpen} />
 
