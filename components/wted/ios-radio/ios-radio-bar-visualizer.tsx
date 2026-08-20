@@ -3,26 +3,31 @@
 import { useEffect, useRef } from "react"
 
 const LAYERS = [
-  { color: "rgba(230, 108, 53, 0.42)", gain: 1.1, binStart: 2, binEnd: 18 },
-  { color: "rgba(115, 81, 166, 0.48)", gain: 0.94, binStart: 6, binEnd: 28 },
-  { color: "rgba(178, 100, 120, 0.52)", gain: 0.78, binStart: 10, binEnd: 40 },
-  { color: "rgba(6, 125, 204, 0.55)", gain: 0.61, binStart: 1, binEnd: 22 },
+  { color: "rgba(230, 108, 53, 0.42)", gain: 1.1, binStart: 3, binEnd: 72 },
+  { color: "rgba(115, 81, 166, 0.48)", gain: 0.94, binStart: 12, binEnd: 112 },
+  { color: "rgba(178, 100, 120, 0.52)", gain: 0.78, binStart: 24, binEnd: 160 },
+  { color: "rgba(6, 125, 204, 0.55)", gain: 0.61, binStart: 6, binEnd: 88 },
 ] as const
 
-const POINTS = 28
-const LERP = 0.09
+const POINTS = 128
+const LERP = 0.14
 const FREQ_LIVE_MIN = 6
 const ENVELOPE_ATTACK = 0.1
 const ENVELOPE_RELEASE = 0.08
 const ENVELOPE_REST = 0.003
 
 function sampleBin(data: Uint8Array, start: number, end: number, t: number) {
-  const span = Math.max(1, end - start)
-  const index = start + Math.min(span - 1, Math.floor(t * span))
-  const prev = data[Math.max(start, index - 1)] ?? 0
-  const curr = data[index] ?? 0
-  const next = data[Math.min(end - 1, index + 1)] ?? 0
-  return (prev + curr * 2 + next) / 4 / 255
+  const last = Math.max(start, end - 1)
+  const pos = start + t * (last - start)
+  const i0 = Math.min(last, Math.max(start, Math.floor(pos)))
+  const i1 = Math.min(last, i0 + 1)
+  const frac = pos - i0
+  const a = data[i0] ?? 0
+  const b = data[i1] ?? 0
+  const prev = data[Math.max(start, i0 - 1)] ?? a
+  const next = data[Math.min(last, i1 + 1)] ?? b
+  const mixed = a * (1 - frac) + b * frac
+  return (prev + mixed * 2 + next) / 4 / 255
 }
 
 function lerpDisplay(display: Float32Array, target: number[]) {
@@ -153,8 +158,8 @@ export function IosRadioBarVisualizer({
       return
     }
 
-    const freq = new Uint8Array(new ArrayBuffer(256))
-    const time = new Uint8Array(new ArrayBuffer(512))
+    let freq = new Uint8Array(new ArrayBuffer(512))
+    let time = new Uint8Array(new ArrayBuffer(1024))
     const displays = LAYERS.map(() => new Float32Array(POINTS + 1))
     let envelope = 0
     let raf = 0
@@ -192,12 +197,16 @@ export function IosRadioBarVisualizer({
       ctx.clearRect(0, 0, width, height)
 
       if (want === 1) {
-        const targets = layerTargets(
-          analyserRef.current,
-          freq,
-          time,
-          performance.now(),
-        )
+        const node = analyserRef.current
+        if (node) {
+          if (freq.length !== node.frequencyBinCount) {
+            freq = new Uint8Array(new ArrayBuffer(node.frequencyBinCount))
+          }
+          if (time.length !== node.fftSize) {
+            time = new Uint8Array(new ArrayBuffer(node.fftSize))
+          }
+        }
+        const targets = layerTargets(node, freq, time, performance.now())
         LAYERS.forEach((_, layerIndex) => {
           lerpDisplay(displays[layerIndex]!, targets[layerIndex] ?? [])
         })

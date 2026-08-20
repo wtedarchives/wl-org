@@ -185,7 +185,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       const source = ctx.createMediaElementSource(audio)
       const node = ctx.createAnalyser()
       const gain = ctx.createGain()
-      node.fftSize = 512
+      node.fftSize = 1024
       node.smoothingTimeConstant = 0.85
       gain.gain.value = volumeRef.current
       source.connect(node)
