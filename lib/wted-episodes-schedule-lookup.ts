@@ -108,6 +108,24 @@ export function formatWtedEpisodeScheduleTitle(
 }
 
 /**
+ * Header-player second subtext: `show · display_name` from the on-air schedule
+ * episode. `Show Airings` is omitted — the track line already has the concert.
+ */
+export function formatOnAirEpisodeSubtext(
+  episode:
+    | Pick<WtedEpisodeScheduleLookup, "show" | "display_name">
+    | null
+    | undefined,
+): string | null {
+  if (!episode) return null
+  const show = episode.show?.trim() ?? ""
+  if (show === "Show Airings") return null
+  const displayName = episode.display_name?.trim() ?? ""
+  if (show && displayName) return joinScheduleTitleParts([show, displayName])
+  return displayName || show || null
+}
+
+/**
  * Prefer matched `wted_episodes` title; fall back to Radio.co playlist name/title.
  */
 export function resolveRadioScheduleSlotTitle(

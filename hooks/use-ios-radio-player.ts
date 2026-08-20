@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { fetchShowIdForRadioCoTrack } from "@/lib/wted-radio-on-air-show"
+import { episodeSubtextFromScheduleSlots } from "@/lib/wted-radio-on-air-episode"
 import { attachArtworkToRecentlyPlayedTracks } from "@/lib/wted-recently-played"
 import {
   WTED_RADIO_NAME,
@@ -14,6 +15,10 @@ import {
   type RadioCoV2CurrentTrackResponse,
 } from "@/lib/wted-radio-co-status"
 import { parseRadioNowPlayingTitle } from "@/lib/wted-radio-track-display-title"
+import {
+  fetchRadioScheduleMergedSlotsForLocalDay,
+  type RadioScheduleSlot,
+} from "@/hooks/use-radio-schedule"
 
 const MAX_ARTWORK_ATTEMPTS = 3
 const SLEEP_OPTIONS_MINUTES = [5, 10, 15, 20, 25, 30, 45, 60] as const
@@ -29,6 +34,8 @@ export type IosRadioPlayerState = {
   artworkUrl: string | null
   /** Concert `shows.show_id` when the on-air `wted_radio_ids` row has one. */
   setlistShowId: string | null
+  /** Homepage-schedule episode line (`show · display_name`), null for Show Airings. */
+  episodeSubtext: string | null
   totalDuration: number | null
   elapsed: number | null
   remaining: number | null
@@ -41,6 +48,8 @@ export type IosRadioPlayerState = {
   setVolume: (value: number) => void
   startSleepTimer: (minutes: number) => void
   cancelSleepTimer: () => void
+  /** Frequency analyser for the bar visualizer; null until playback starts. */
+  analyser: AnalyserNode | null
 }
 
 function clampElapsed(raw: number, total: number | null) {
@@ -50,6 +59,8 @@ function clampElapsed(raw: number, total: number | null) {
 
 const RADIO_POLL_FLOOR_MS = 5_000
 const RADIO_POLL_CEILING_MS = 300_000
+const SCHEDULE_REFRESH_MS = 5 * 60_000
+const SCHEDULE_SLOT_TICK_MS = 30_000
 
 function parseRadioStartMs(raw: string | null | undefined) {
   if (!raw) return null
@@ -99,6 +110,10 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   const artworkAttemptsRef = useRef(0)
   const setlistKeyRef = useRef<string | null>(null)
   const volumeRef = useRef(1)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const gainNodeRef = useRef<GainNode | null>(null)
+  const audioGraphReadyRef = useRef(false)
 
   const [isPlaying, setIsPlaying] = useState(false)
   const [isBuffering, setIsBuffering] = useState(false)
@@ -106,6 +121,8 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   const [rawTitle, setRawTitle] = useState<string | null>(null)
   const [artworkUrl, setArtworkUrl] = useState<string | null>(null)
   const [setlistShowId, setSetlistShowId] = useState<string | null>(null)
+  const [episodeSubtext, setEpisodeSubtext] = useState<string | null>(null)
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null)
   const [startTimeMs, setStartTimeMs] = useState<number | null>(null)
   const [totalDuration, setTotalDuration] = useState<number | null>(null)
   const [sleepTimerEnd, setSleepTimerEnd] = useState<number | null>(null)
@@ -149,7 +166,41 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     const next = Math.min(1, Math.max(0, value))
     volumeRef.current = next
     setVolumeState(next)
+    if (gainNodeRef.current) gainNodeRef.current.gain.value = next
     if (audioRef.current) audioRef.current.volume = next
+  }, [])
+
+  const ensureAudioGraph = useCallback((audio: HTMLAudioElement) => {
+    if (audioGraphReadyRef.current) {
+      void audioContextRef.current?.resume()
+      return
+    }
+    try {
+      audio.crossOrigin = "anonymous"
+      const AudioCtx =
+        window.AudioContext ||
+        (window as typeof window & { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      const source = ctx.createMediaElementSource(audio)
+      const node = ctx.createAnalyser()
+      const gain = ctx.createGain()
+      node.fftSize = 512
+      node.smoothingTimeConstant = 0.85
+      gain.gain.value = volumeRef.current
+      source.connect(node)
+      node.connect(gain)
+      gain.connect(ctx.destination)
+      audioContextRef.current = ctx
+      analyserRef.current = node
+      gainNodeRef.current = gain
+      audioGraphReadyRef.current = true
+      setAnalyser(node)
+      void ctx.resume()
+    } catch {
+      // Stream still plays from the element; visualizer just stays off.
+    }
   }, [])
 
   const play = useCallback(() => {
@@ -157,6 +208,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     if (!audio) return
     wantPlayRef.current = true
     clearReconnect()
+    ensureAudioGraph(audio)
     audio.volume = volumeRef.current
     audio.src = WTED_RADIO_STREAM_URL
     setIsBuffering(true)
@@ -165,7 +217,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       setIsPlaying(false)
       setIsBuffering(false)
     })
-  }, [clearReconnect])
+  }, [clearReconnect, ensureAudioGraph])
 
   const playRef = useRef(play)
   playRef.current = play
@@ -244,6 +296,13 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
       audio.removeAttribute("src")
       audio.load()
       audioRef.current = null
+      audioGraphReadyRef.current = false
+      analyserRef.current = null
+      gainNodeRef.current = null
+      setAnalyser(null)
+      const ctx = audioContextRef.current
+      audioContextRef.current = null
+      if (ctx && ctx.state !== "closed") void ctx.close()
     }
   }, [clearReconnect, enabled])
 
@@ -448,6 +507,43 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
   }, [enabled])
 
   useEffect(() => {
+    if (!enabled) {
+      setEpisodeSubtext(null)
+      return
+    }
+
+    let cancelled = false
+    let slots: RadioScheduleSlot[] = []
+
+    function applySlot(nowMs = Date.now()) {
+      if (cancelled) return
+      setEpisodeSubtext(episodeSubtextFromScheduleSlots(slots, nowMs))
+    }
+
+    async function refreshSchedule() {
+      const { slots: next } = await fetchRadioScheduleMergedSlotsForLocalDay(
+        new Date(),
+        Date.now(),
+      )
+      if (cancelled) return
+      slots = next
+      applySlot()
+    }
+
+    void refreshSchedule()
+    const slotTick = window.setInterval(() => applySlot(), SCHEDULE_SLOT_TICK_MS)
+    const scheduleTick = window.setInterval(
+      () => void refreshSchedule(),
+      SCHEDULE_REFRESH_MS,
+    )
+    return () => {
+      cancelled = true
+      window.clearInterval(slotTick)
+      window.clearInterval(scheduleTick)
+    }
+  }, [enabled])
+
+  useEffect(() => {
     if (!enabled) return
     if (!("mediaSession" in navigator)) return
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -481,6 +577,7 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     displayArtist,
     artworkUrl,
     setlistShowId,
+    episodeSubtext,
     totalDuration,
     elapsed,
     remaining,
@@ -493,5 +590,6 @@ export function useIosRadioPlayer(enabled = true): IosRadioPlayerState {
     setVolume,
     startSleepTimer,
     cancelSleepTimer,
+    analyser,
   }
 }

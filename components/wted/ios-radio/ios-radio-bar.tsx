@@ -10,6 +10,8 @@ import {
 } from "@phosphor-icons/react"
 
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
+import { IosRadioBarSubtext } from "@/components/wted/ios-radio/ios-radio-bar-subtext"
+import { IosRadioBarVisualizer } from "@/components/wted/ios-radio/ios-radio-bar-visualizer"
 import { IosRadioBarVolume } from "@/components/wted/ios-radio/ios-radio-bar-volume"
 import { IosRadioMarquee } from "@/components/wted/ios-radio/ios-radio-bar-marquee"
 import { useIosRadioPlayerContext } from "@/components/wted/ios-radio/ios-radio-player-context"
@@ -23,31 +25,24 @@ function IosRadioBarCopyInner({
 }: {
   player: ReturnType<typeof useIosRadioPlayerContext>
 }) {
+  const liveFallback = !player.isBuffering && !player.displayArtist
+  const primary =
+    player.isBuffering ? "Buffering…"
+    : player.displayArtist ? player.displayArtist
+    : player.isOnline ? `LIVE • ${player.stationName}`
+    : "Offline"
+  const episode =
+    player.isBuffering ? null : player.episodeSubtext
+
   return (
     <>
       <IosRadioMarquee text={player.displayTitle} variant="title" />
-      {player.isBuffering ?
-        <IosRadioMarquee text="Buffering…" variant="sub" />
-      : player.displayArtist ?
-        <IosRadioMarquee text={player.displayArtist} variant="sub" />
-      : <div className="ios-radio-bar__live">
-          <span
-            className={
-              player.isOnline ?
-                "ios-radio-bar__live-dot"
-              : "ios-radio-bar__live-dot ios-radio-bar__live-dot--off"
-            }
-          />
-          <IosRadioMarquee
-            text={
-              player.isOnline ?
-                `LIVE • ${player.stationName}`
-              : "Offline"
-            }
-            variant="sub"
-          />
-        </div>
-      }
+      <IosRadioBarSubtext
+        primary={primary}
+        episode={episode}
+        live={liveFallback}
+        online={player.isOnline}
+      />
     </>
   )
 }
@@ -66,6 +61,11 @@ export function IosRadioBar() {
         volumeOpen ? "ios-radio-bar is-volume-open" : "ios-radio-bar"
       }
     >
+      <IosRadioBarVisualizer
+        analyser={player.analyser}
+        active={player.isPlaying && !player.isBuffering}
+      />
+      <div className="ios-radio-bar__visualizer-veil" aria-hidden />
       <div className="ios-radio-bar__art">
         {player.artworkUrl ?
           <Image

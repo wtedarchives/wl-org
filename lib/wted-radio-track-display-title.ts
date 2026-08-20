@@ -32,7 +32,8 @@ export function parseRadioCoHistoryTrackTitle(
  * iOS `ParsedTrackTitle`: song line + venue/date (or artist) line for now-playing UI.
  *
  *   "Goose - Madhuvan - 2022/06/15 Red Hat Amphitheater, Raleigh, NC"
- *     → primary "Madhuvan", secondary "2022/06/15 Red Hat Amphitheater, Raleigh, NC"
+ *     → primary "Madhuvan",
+ *       secondary "Goose • 2022/06/15 Red Hat Amphitheater, Raleigh, NC"
  */
 export function parseRadioNowPlayingTitle(raw: string): {
   primary: string
@@ -51,10 +52,14 @@ export function parseRadioNowPlayingTitle(raw: string): {
       .trim()
     const context = title.slice(dateMatch.index).trim()
     const dash = head.indexOf(" - ")
+    const artist = dash >= 0 ? head.slice(0, dash).trim() : ""
     const song = dash >= 0 ? head.slice(dash + 3).trim() : head
+    const secondary =
+      artist && context ? `${artist} • ${context}`
+      : context || artist || null
     return {
       primary: song || title,
-      secondary: context || null,
+      secondary,
     }
   }
 
