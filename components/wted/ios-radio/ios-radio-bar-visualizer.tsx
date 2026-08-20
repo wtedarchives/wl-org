@@ -69,8 +69,8 @@ function fallbackWave(nowMs: number, layerIndex: number, energy: number) {
 
 function layerTargets(
   analyser: AnalyserNode | null,
-  freq: Uint8Array,
-  time: Uint8Array,
+  freq: Uint8Array<ArrayBuffer>,
+  time: Uint8Array<ArrayBuffer>,
   nowMs: number,
 ): number[][] {
   if (analyser) {
@@ -153,8 +153,8 @@ export function IosRadioBarVisualizer({
       return
     }
 
-    const freq = new Uint8Array(256)
-    const time = new Uint8Array(512)
+    const freq = new Uint8Array(new ArrayBuffer(256))
+    const time = new Uint8Array(new ArrayBuffer(512))
     const displays = LAYERS.map(() => new Float32Array(POINTS + 1))
     let envelope = 0
     let raf = 0
