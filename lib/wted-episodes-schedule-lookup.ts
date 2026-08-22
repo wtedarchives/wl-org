@@ -110,8 +110,9 @@ export function formatWtedEpisodeScheduleTitle(
 /**
  * Header-player second subtext from the on-air schedule episode.
  * Same title rules as Upcoming Schedule except linked-show archive titles:
- * `show · display_name`, with Miscellaneous / Show Airings / requesTED / Mixes
- * showing `display_name` only.
+ * `show · display_name`, with Miscellaneous / requesTED / Mixes showing
+ * `display_name` only. Show Airings is omitted — the track line already
+ * carries date/venue, so a second slide would be near-duplicate.
  */
 export function formatOnAirEpisodeSubtext(
   episode:
@@ -120,6 +121,7 @@ export function formatOnAirEpisodeSubtext(
     | undefined,
 ): string | null {
   if (!episode) return null
+  if (episode.show?.trim() === "Show Airings") return null
   return formatWtedEpisodeScheduleTitle({
     show: episode.show,
     display_name: episode.display_name,

@@ -20,12 +20,12 @@ export const KNOWN_SERVICE_LABELS: Record<string, string> = {
 
 /** Display order for media sections (top → bottom). Other is always last. */
 export const SERVICE_SECTION_ORDER: readonly string[] = [
-  "vinyl",
   "bandcamp",
   "nugs",
   "spotify",
-  "youtube",
+  "vinyl",
   "discogs",
+  "youtube",
 ]
 
 export function compareServiceSectionKeys(a: string, b: string): number {
