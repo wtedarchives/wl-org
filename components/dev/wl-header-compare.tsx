@@ -9,7 +9,8 @@ import "./wl-header-compare.css"
 
 /**
  * Side-by-side: in-app React header (`WlHomeV2`) vs Community `<wl-header>` embed.
- * Visit `/dev/header-compare` under `next dev` to exercise both search UIs.
+ * Visit `/dev/header-compare` to compare the header radio player on this site
+ * with the iframe player Community will show.
  */
 export function WlHeaderCompare() {
   const [embedReady, setEmbedReady] = useState(false)
@@ -28,15 +29,14 @@ export function WlHeaderCompare() {
       <section className="wl-header-compare__section">
         <div className="wl-header-compare__label">
           Site header (React)
-          <span>WlHomeV2 — desktop field + mobile modal</span>
+          <span>This site — IosRadioBar mounted in-app</span>
         </div>
         <div className="wl-header-compare__react-shell">
           <WlHomeV2>
             <div className="wl-header-compare__react-body">
               <p>
-                Use the magnifying glass (mobile) or search field (wide
-                desktop) in the header above. Results call the Edge function
-                directly via the Next client.
+                Same header as wtedradio.com. Play/stop and volume stay in this
+                tab. Title/copy opens the matched setlist in this tab.
               </p>
             </div>
           </WlHomeV2>
@@ -45,21 +45,19 @@ export function WlHeaderCompare() {
 
       <section className="wl-header-compare__section">
         <div className="wl-header-compare__label">
-          External header (custom element)
+          Community header (custom element)
           <span>
-            /embed/wl-header.js
+            /embed/wl-header.js iframes /embed/radio
             {embedReady ? " · loaded" : " · loading…"}
-            {" · proxy /api/site-search"}
           </span>
         </div>
         {createElement("wl-header")}
         <div className="wl-header-compare__embed-body">
           <p>
-            Same Search control as Community. Fetches{" "}
-            <code>/api/site-search</code> (same-origin proxy; no Supabase
-            functions URL in the embed). On localhost the Next rewrite
-            handles the proxy; production uses Netlify{" "}
-            <code>_redirects</code>.
+            This is the header Discourse will render. The bar is the same
+            React player, loaded in an iframe. Title/copy opens the setlist in
+            a new window. The two players are independent — avoid playing both
+            at once.
           </p>
         </div>
         <Script

@@ -15,7 +15,7 @@ import { usePathname } from "next/navigation"
 import { PersistentRadioBodyShell } from "@/components/persistent-radio-body-shell"
 import { IosRadioPlayerProvider } from "@/components/wted/ios-radio/ios-radio-player-context"
 import { useIsBelowXl } from "@/hooks/use-mobile"
-import { useSiteSearchAccess } from "@/hooks/use-site-search-access"
+import { isIosRadioEmbedPath } from "@/lib/ios-radio-embed"
 import { cn } from "@/lib/utils"
 
 type PersistentRadioContextValue = {
@@ -27,7 +27,7 @@ type PersistentRadioContextValue = {
   mobileNode: HTMLDivElement | null
   homeEmbedPulseGen: number
   bumpHomeEmbedPulse: () => void
-  /** iOS-style header player for `SITE_SEARCH_ALLOWLIST` testers (Luna for everyone else). */
+  /** iOS-style header player (always on; embed page uses its own provider). */
   useCustomPlayer: boolean
 }
 
@@ -181,8 +181,10 @@ export function PersistentRadioRoot({
 }: {
   children: React.ReactNode
 }) {
-  const { allowed } = useSiteSearchAccess()
-  const useCustomPlayer = allowed
+  const pathname = usePathname()
+  const isEmbedPlayerPage = isIosRadioEmbedPath(pathname)
+  // Revert gate: import useSiteSearchAccess and use `allowed && !isEmbedPlayerPage`.
+  const useCustomPlayer = !isEmbedPlayerPage
   const [homeNode, setHomeNode] = useState<HTMLDivElement | null>(null)
   const [sidebarNode, setSidebarNode] = useState<HTMLDivElement | null>(null)
   const [mobileNode, setMobileNode] = useState<HTMLDivElement | null>(null)
@@ -230,7 +232,7 @@ export function PersistentRadioRoot({
   const tree = (
     <>
       {children}
-      <PersistentRadioPortal />
+      {isEmbedPlayerPage ? null : <PersistentRadioPortal />}
     </>
   )
 

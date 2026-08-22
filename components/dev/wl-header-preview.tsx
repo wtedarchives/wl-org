@@ -8,7 +8,7 @@ import "./wl-header-preview.css"
 /**
  * Dev preview for the Community `<wl-header>` embed (`public/embed/wl-header.js`).
  *
- * For React header + embed side-by-side (including search), use
+ * For React header + Community embed side-by-side (radio player), use
  * `/dev/header-compare` (`WlHeaderCompare`).
  */
 export function WlHeaderPreview() {

@@ -18,9 +18,32 @@
   /** Nav / page links — production site. */
   var WTED_BASE = "https://wtedradio.com";
   var COMMUNITY_URL = "https://community.wysterialane.org";
-  /** Absolute — Community hosts this script cross-origin. Cache-bust with `?_=`. */
-  var RADIO_IFRAME_PATH = WTED_BASE + "/radio-player/player-markup.html";
+  /**
+   * Standalone IosRadioBar page (`app/embed/radio`). Use this script's origin
+   * so `/dev/header-compare` on localhost iframes the local player, while
+   * Community (script hosted on wtedradio.com) iframes production.
+   */
+  var SCRIPT_EL = document.currentScript;
+  var RADIO_EMBED_ORIGIN = (function () {
+    if (SCRIPT_EL && SCRIPT_EL.src) {
+      try {
+        return new URL(SCRIPT_EL.src).origin;
+      } catch (e) {}
+    }
+    var scripts = document.getElementsByTagName("script");
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      var src = scripts[i].src || "";
+      if (src.indexOf("wl-header.js") === -1) continue;
+      try {
+        return new URL(src).origin;
+      } catch (e2) {}
+    }
+    return WTED_BASE;
+  })();
+  var RADIO_IFRAME_PATH = RADIO_EMBED_ORIGIN + "/embed/radio";
   var RADIO_IFRAME_SRC = RADIO_IFRAME_PATH + "?_=" + Date.now();
+  /** React bar inner height (pad + control + pad); 4px shorter than the prior 68px slot. */
+  var RADIO_IFRAME_HEIGHT_PX = 64;
 
   /** Image host — same origin as production site after cutover. */
   var ASSET_BASE = "https://wtedradio.com";
@@ -397,9 +420,12 @@
     "  background: rgba(0, 0, 0, 0.48);",
     "  backdrop-filter: blur(6px);",
     "  -webkit-backdrop-filter: blur(6px);",
+    "  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);",
     "  width: 100%;",
     "}",
-    ".radio-embed { display: block; width: 100%; height: 76px; border: 0; }",
+    ".radio-embed { display: block; width: 100%; height: " +
+      RADIO_IFRAME_HEIGHT_PX +
+      "px; border: 0; }",
 
     "@media (min-width: 1344px) {",
     "  header.top .top-brand-cluster .brand-mark {",
@@ -1310,7 +1336,7 @@
 
       '<div class="top-embed-row">',
       '<div class="radio-embed-wrap radio-embed-wrap--header">',
-      '<iframe class="radio-embed" title="WTED Radio" src="' +
+      '<iframe class="radio-embed" title="WTED Radio" allow="autoplay" src="' +
         RADIO_IFRAME_SRC +
         '"></iframe>',
       "</div>",

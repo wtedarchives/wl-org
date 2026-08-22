@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
-/** Same-origin LunaRadio markup under `public/radio-player/`. */
+/** Same-origin LunaRadio markup under `public/radio-player/`. Kept for revert. */
 const RADIO_EMBED_PATH = "/radio-player/player-markup.html"
 const MAX_EMBED_LOAD_ATTEMPTS = 3
 const EMBED_LOAD_TIMEOUT_MS = 15_000

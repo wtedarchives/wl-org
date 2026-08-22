@@ -2,6 +2,8 @@
 
 import * as React from "react"
 
+import { usePathname } from "next/navigation"
+
 import { Button } from "@/components/ui/button"
 import {
   DEV_AUTH_MOCK_PROFILE_IDS,
@@ -10,6 +12,7 @@ import {
   setDevAuthMockProfile,
   type DevAuthMockProfileId,
 } from "@/lib/dev-auth-mock"
+import { isIosRadioEmbedPath } from "@/lib/ios-radio-embed"
 import { cn } from "@/lib/utils"
 
 const IS_DEV = process.env.NODE_ENV === "development"
@@ -24,6 +27,8 @@ const IS_DEV = process.env.NODE_ENV === "development"
  * the read-only lockout, the "no show assigned" state.
  */
 export function DevAuthMockBar() {
+  const pathname = usePathname()
+  const hideOnEmbed = isIosRadioEmbedPath(pathname)
   const [active, setActive] = React.useState<DevAuthMockProfileId | null>(null)
 
   React.useEffect(() => {
@@ -32,13 +37,13 @@ export function DevAuthMockBar() {
   }, [])
 
   React.useEffect(() => {
-    if (!IS_DEV || typeof document === "undefined") return
+    if (!IS_DEV || hideOnEmbed || typeof document === "undefined") return
     const prev = document.body.style.paddingBottom
     document.body.style.paddingBottom = "3.25rem"
     return () => {
       document.body.style.paddingBottom = prev
     }
-  }, [])
+  }, [hideOnEmbed])
 
   React.useEffect(() => {
     if (!IS_DEV || typeof window === "undefined") return
@@ -51,7 +56,7 @@ export function DevAuthMockBar() {
     }
   }, [])
 
-  if (!IS_DEV) return null
+  if (!IS_DEV || hideOnEmbed) return null
 
   const choose = (next: DevAuthMockProfileId | null) => {
     setDevAuthMockProfile(next)

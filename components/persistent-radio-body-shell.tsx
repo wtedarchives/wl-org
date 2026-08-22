@@ -2,14 +2,15 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 
-import { RadioEmbed } from "@/components/radio-embed"
 import { IosRadioBar } from "@/components/wted/ios-radio/ios-radio-bar"
+// Revert to Luna: uncomment RadioEmbed and the ternary below.
+// import { RadioEmbed } from "@/components/radio-embed"
 
 const SCROLL_LISTENER_OPTS = { passive: true, capture: true } as const
 
 /**
- * Single player on `document.body` (Luna iframe, or the iOS-style bar for
- * allowlisted testers). Aligns to the slot with `fixed` + `translate3d`.
+ * Single player on `document.body` (iOS-style bar; Luna kept commented for revert).
+ * Aligns to the slot with `fixed` + `translate3d`.
  * Updates are rAF-coalesced (scroll / wheel / resize / etc.) — not a perpetual rAF loop —
  * to reduce overscroll jitter while keeping playback across route changes.
  */
@@ -163,7 +164,8 @@ export function PersistentRadioBodyShell({
           : "pointer-events-none absolute inset-0 z-10 rounded-md"
         }
       />
-      {useCustomPlayer ? <IosRadioBar /> : <RadioEmbed />}
+      <IosRadioBar />
+      {/* Revert to Luna: {useCustomPlayer ? <IosRadioBar /> : <RadioEmbed />} */}
     </div>
   )
 }

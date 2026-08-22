@@ -47,7 +47,12 @@ function IosRadioBarCopyInner({
   )
 }
 
-export function IosRadioBar() {
+export function IosRadioBar({
+  openSetlistInNewWindow = false,
+}: {
+  /** Community iframe: open the matched setlist on wtedradio.com in a new tab. */
+  openSetlistInNewWindow?: boolean
+}) {
   const player = useIosRadioPlayerContext()
   const [volumeOpen, setVolumeOpen] = useState(false)
   const setlistHref =
@@ -99,6 +104,9 @@ export function IosRadioBar() {
           prefetch={false}
           className="ios-radio-bar__copy ios-radio-bar__copy--link"
           aria-label={`Open setlist for ${player.displayTitle}`}
+          {...(openSetlistInNewWindow ?
+            { target: "_blank", rel: "noopener noreferrer" }
+          : {})}
         >
           <IosRadioBarCopyInner player={player} />
         </ArchivePrefetchLink>
