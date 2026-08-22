@@ -41,7 +41,11 @@
     return WTED_BASE;
   })();
   var RADIO_IFRAME_PATH = RADIO_EMBED_ORIGIN + "/embed/radio";
-  var RADIO_IFRAME_SRC = RADIO_IFRAME_PATH + "?_=" + Date.now();
+  /**
+   * No `?_=` cache-buster — Next static export treats an unknown query as a
+   * client 404 and renders the full WlHomeV2 not-found header inside the iframe.
+   */
+  var RADIO_IFRAME_SRC = RADIO_IFRAME_PATH;
   /** React bar inner height (pad + control + pad); 4px shorter than the prior 68px slot. */
   var RADIO_IFRAME_HEIGHT_PX = 64;
 
@@ -425,7 +429,9 @@
     "}",
     ".radio-embed { display: block; width: 100%; height: " +
       RADIO_IFRAME_HEIGHT_PX +
-      "px; border: 0; }",
+      "px; max-height: " +
+      RADIO_IFRAME_HEIGHT_PX +
+      "px; border: 0; overflow: hidden; }",
 
     "@media (min-width: 1344px) {",
     "  header.top .top-brand-cluster .brand-mark {",
@@ -1336,7 +1342,7 @@
 
       '<div class="top-embed-row">',
       '<div class="radio-embed-wrap radio-embed-wrap--header">',
-      '<iframe class="radio-embed" title="WTED Radio" allow="autoplay" src="' +
+      '<iframe class="radio-embed" title="WTED Radio" allow="autoplay" scrolling="no" src="' +
         RADIO_IFRAME_SRC +
         '"></iframe>',
       "</div>",
