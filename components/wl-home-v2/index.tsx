@@ -32,7 +32,8 @@ import { WlHomeV2OpenSiteSearchContext } from "./wl-home-v2-open-site-search-con
 import { WlHomeV2OpenSettingsContext } from "./wl-home-v2-open-settings-context"
 import { WlHomeV2ShellModals } from "./wl-home-v2-shell-modals"
 import { WlHomeV2Tiles } from "./wl-home-v2-tiles"
-import { WlHomeV2WelcomeModal } from "./wl-home-v2-welcome-modal"
+// Homepage welcome announcement — disabled; uncomment import + JSX below to restore.
+// import { WlHomeV2WelcomeModal } from "./wl-home-v2-welcome-modal"
 
 export function WlHomeV2({
   children,
@@ -305,7 +306,7 @@ export function WlHomeV2({
         settingsHeadingId={settingsHeadingId}
       />
 
-      {children == null ? <WlHomeV2WelcomeModal /> : null}
+      {/* {children == null ? <WlHomeV2WelcomeModal /> : null} */}
 
       </div>
         </WlHomeV2OpenArchiveHubContext.Provider>
