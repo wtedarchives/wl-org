@@ -67,7 +67,10 @@ export function IosRadioBarCountdown({
       {formatRadioTrackClock(primary)}
       {totalDuration != null ?
         <span className="ios-radio-bar__countdown-total">
-          {`\u00A0// ${formatRadioTrackClock(totalDuration)}`}
+          <span className="ios-radio-bar__countdown-sep">
+            {"\u00A0\u00A0//\u00A0\u00A0"}
+          </span>
+          {formatRadioTrackClock(totalDuration)}
         </span>
       : null}
     </button>

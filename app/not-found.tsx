@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { NotFoundContent } from "@/components/not-found-content"
+import { SiteShell } from "@/components/site-shell"
 import { WlHomeV2 } from "@/components/wl-home-v2"
 
 export const metadata: Metadata = {
@@ -9,8 +10,10 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <WlHomeV2>
-      <NotFoundContent />
-    </WlHomeV2>
+    <SiteShell>
+      <WlHomeV2>
+        <NotFoundContent />
+      </WlHomeV2>
+    </SiteShell>
   )
 }

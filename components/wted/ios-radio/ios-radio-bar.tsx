@@ -98,15 +98,22 @@ export function IosRadioBar({
         }
       </button>
 
-      {setlistHref ?
+      {setlistHref && openSetlistInNewWindow ?
+        <a
+          href={setlistHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ios-radio-bar__copy ios-radio-bar__copy--link"
+          aria-label={`Open setlist for ${player.displayTitle}`}
+        >
+          <IosRadioBarCopyInner player={player} />
+        </a>
+      : setlistHref ?
         <ArchivePrefetchLink
           href={setlistHref}
           prefetch={false}
           className="ios-radio-bar__copy ios-radio-bar__copy--link"
           aria-label={`Open setlist for ${player.displayTitle}`}
-          {...(openSetlistInNewWindow ?
-            { target: "_blank", rel: "noopener noreferrer" }
-          : {})}
         >
           <IosRadioBarCopyInner player={player} />
         </ArchivePrefetchLink>

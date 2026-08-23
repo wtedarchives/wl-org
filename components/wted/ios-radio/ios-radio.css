@@ -387,6 +387,12 @@
   display: none;
 }
 
+.ios-radio-bar__countdown-sep {
+  font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-variant-numeric: normal;
+  color: rgb(140, 148, 162);
+}
+
 @media (min-width: 640px) {
   .ios-radio-bar__countdown-total {
     display: inline;

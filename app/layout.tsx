@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { PersistentRadioRoot } from "@/components/persistent-radio";
-import { Providers } from "@/components/providers";
 import { UmamiAnalytics } from "@/components/umami-analytics";
+import { STRIP_IOS_RADIO_EMBED_SEARCH } from "@/lib/ios-radio-embed";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -66,10 +65,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <script
+          dangerouslySetInnerHTML={{ __html: STRIP_IOS_RADIO_EMBED_SEARCH }}
+        />
+        {/* `/embed/radio` must stay outside SiteShell (no auth / in-app radio). */}
         <UmamiAnalytics />
-        <Providers>
-          <PersistentRadioRoot>{children}</PersistentRadioRoot>
-        </Providers>
+        {children}
       </body>
     </html>
   );

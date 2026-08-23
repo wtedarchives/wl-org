@@ -33,6 +33,7 @@ import {
   suppressSilentSsoBriefly,
 } from "@/lib/sso"
 import { isDevAuthMockSessionActive } from "@/lib/dev-auth-mock"
+import { isEmbeddedIframe, isIosRadioEmbedPath } from "@/lib/ios-radio-embed"
 import {
   getSession,
   clearSession,
@@ -78,6 +79,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const { pathname, search } = window.location
     if (pathname.startsWith("/auth/")) {
+      setLoading(false)
+      return
+    }
+
+    // Community `<wl-header>` iframes `/embed/radio`. Silent SSO would navigate
+    // that frame to Discourse / the full site header (nested chrome until refresh).
+    if (isIosRadioEmbedPath(pathname) || isEmbeddedIframe()) {
       setLoading(false)
       return
     }

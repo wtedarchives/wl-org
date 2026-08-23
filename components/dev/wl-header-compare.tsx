@@ -47,7 +47,7 @@ export function WlHeaderCompare() {
         <div className="wl-header-compare__label">
           Community header (custom element)
           <span>
-            /embed/wl-header.js iframes /embed/radio
+            /embed/wl-header.js iframes /embed/radio (no site auth)
             {embedReady ? " · loaded" : " · loading…"}
           </span>
         </div>

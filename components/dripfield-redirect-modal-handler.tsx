@@ -12,7 +12,7 @@ import {
 } from "@/lib/dripfield-redirect-modal-storage"
 
 /* Ensure request-modal shell tokens exist when this opens outside a page that
-   already imported the v2 stylesheet (handler lives in root Providers). */
+   already imported the v2 stylesheet (handler lives in SiteShell / Providers). */
 import "@/components/wl-home-v2/wl-home-v2.css"
 import "./dripfield-redirect-modal.css"
 

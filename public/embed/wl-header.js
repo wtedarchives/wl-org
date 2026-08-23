@@ -19,9 +19,9 @@
   var WTED_BASE = "https://wtedradio.com";
   var COMMUNITY_URL = "https://community.wysterialane.org";
   /**
-   * Standalone IosRadioBar page (`app/embed/radio`). Use this script's origin
-   * so `/dev/header-compare` on localhost iframes the local player, while
-   * Community (script hosted on wtedradio.com) iframes production.
+   * Standalone player document (`/embed/radio`) — no site auth or header shell.
+   * Use this script's origin so `/dev/header-compare` on localhost iframes the
+   * local player, while Community (script hosted on wtedradio.com) uses prod.
    */
   var SCRIPT_EL = document.currentScript;
   var RADIO_EMBED_ORIGIN = (function () {
@@ -418,6 +418,7 @@
     ".top-mobile-nav-icon { width: 22px; height: 22px; flex-shrink: 0; display: block; }",
 
     ".radio-embed-wrap {",
+    "  position: relative;",
     "  border-radius: 10px;",
     "  overflow: hidden;",
     "  border: 1px solid #5b877b;",
@@ -432,6 +433,18 @@
       "px; max-height: " +
       RADIO_IFRAME_HEIGHT_PX +
       "px; border: 0; overflow: hidden; }",
+    ".radio-setlist-hit {",
+    "  position: absolute;",
+    "  top: 0;",
+    "  bottom: 0;",
+    "  left: 64px;",
+    "  right: 118px;",
+    "  z-index: 2;",
+    "  cursor: pointer;",
+    "}",
+    "@media (min-width: 640px) {",
+    "  .radio-setlist-hit { right: 200px; }",
+    "}",
 
     "@media (min-width: 1344px) {",
     "  header.top .top-brand-cluster .brand-mark {",
@@ -1085,6 +1098,22 @@
   // Helpers
   // --------------------------------------------------------------------------
 
+  function isAllowedSetlistUrl(url) {
+    try {
+      var parsed = new URL(url);
+      if (
+        parsed.origin !== RADIO_EMBED_ORIGIN &&
+        parsed.origin !== WTED_BASE
+      ) {
+        return false;
+      }
+      if (parsed.pathname !== "/archive/setlist") return false;
+      return Boolean(parsed.searchParams.get("id"));
+    } catch (e) {
+      return false;
+    }
+  }
+
   function navImgIcon(src, extraClass) {
     return (
       '<span class="top-nav-primary-icon top-nav-primary-icon--img' +
@@ -1345,6 +1374,7 @@
       '<iframe class="radio-embed" title="WTED Radio" allow="autoplay" scrolling="no" src="' +
         RADIO_IFRAME_SRC +
         '"></iframe>',
+      '<a class="radio-setlist-hit" hidden target="_blank" rel="noopener" tabindex="-1"></a>',
       "</div>",
       "</div>",
 
@@ -1470,6 +1500,8 @@
 
   WlHeader.prototype.connectedCallback = function () {
     var sr = this.shadowRoot;
+    this._radioIframe = sr.querySelector("iframe.radio-embed");
+    this._setlistHit = sr.querySelector("a.radio-setlist-hit");
     this._toggle = sr.querySelector(".top-mobile-nav-toggle");
     this._nav = sr.querySelector("nav.top-nav");
     this._iconList = sr.querySelector(".icon-list");
@@ -1497,6 +1529,21 @@
     this._desktopPopoverTimer = null;
 
     var self = this;
+    this._onRadioSetlistMessage = function (event) {
+      if (event.origin !== RADIO_EMBED_ORIGIN) return;
+      if (self._radioIframe && event.source !== self._radioIframe.contentWindow) {
+        return;
+      }
+      var data = event.data;
+      if (
+        !data ||
+        data.source !== "wl-ios-radio" ||
+        data.type !== "setlist"
+      ) {
+        return;
+      }
+      self._setSetlistHit(data.url, data.title);
+    };
     this._onToggleClick = function () {
       self._setOpen(!self._navOpen);
     };
@@ -1577,6 +1624,7 @@
     if (this._desktopForm) {
       this._desktopForm.addEventListener("submit", this._onDesktopSearchSubmit);
     }
+    window.addEventListener("message", this._onRadioSetlistMessage);
     window.addEventListener("keydown", this._onKey);
     document.addEventListener("mousedown", this._onDesktopPointerDown);
     window.addEventListener("resize", this._onDesktopReposition);
@@ -1613,6 +1661,9 @@
   };
 
   WlHeader.prototype.disconnectedCallback = function () {
+    if (this._onRadioSetlistMessage) {
+      window.removeEventListener("message", this._onRadioSetlistMessage);
+    }
     if (this._toggle && this._onToggleClick) {
       this._toggle.removeEventListener("click", this._onToggleClick);
     }
@@ -1641,6 +1692,25 @@
     if (this._searchOpen) {
       document.body.style.overflow = "";
     }
+  };
+
+  WlHeader.prototype._setSetlistHit = function (url, title) {
+    var hit = this._setlistHit;
+    if (!hit) return;
+    if (url && isAllowedSetlistUrl(url)) {
+      hit.href = url;
+      hit.hidden = false;
+      hit.tabIndex = 0;
+      hit.setAttribute(
+        "aria-label",
+        title ? "Open setlist for " + title : "Open setlist"
+      );
+      return;
+    }
+    hit.removeAttribute("href");
+    hit.hidden = true;
+    hit.tabIndex = -1;
+    hit.removeAttribute("aria-label");
   };
 
   WlHeader.prototype._setOpen = function (open) {
