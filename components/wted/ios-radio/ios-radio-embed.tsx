@@ -8,10 +8,10 @@ import {
   useIosRadioPlayerContext,
 } from "@/components/wted/ios-radio/ios-radio-player-context"
 import {
+  getPublicSetlistArchiveUrl,
   IOS_RADIO_EMBED_SETLIST_SOURCE,
   IOS_RADIO_EMBED_SETLIST_TYPE,
 } from "@/lib/ios-radio-embed-setlist"
-import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 
 import "./ios-radio-embed.css"
 
@@ -26,10 +26,7 @@ function EmbedSetlistBridge() {
     if (typeof window === "undefined" || window.parent === window) return
     const url =
       player.setlistShowId ?
-        new URL(
-          getSetlistArchiveUrl(player.setlistShowId),
-          window.location.origin,
-        ).href
+        getPublicSetlistArchiveUrl(player.setlistShowId)
       : null
     try {
       window.parent.postMessage(

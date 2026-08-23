@@ -15,16 +15,17 @@
   // Configuration
   // --------------------------------------------------------------------------
 
-  /** Nav / page links — production site. */
+  /** Nav / page links — production site. Session JWT lives here. */
   var WTED_BASE = "https://wtedradio.com";
+  var NETLIFY_LEGACY_ORIGIN = "https://wted-org.netlify.app";
   var COMMUNITY_URL = "https://community.wysterialane.org";
   /**
-   * Standalone player document (`/embed/radio`) — no site auth or header shell.
-   * Use this script's origin so `/dev/header-compare` on localhost iframes the
-   * local player, while Community (script hosted on wtedradio.com) uses prod.
+   * Script origin is only used for localhost (`/dev/header-compare`).
+   * Community may still load this file from the Netlify default host — the
+   * player iframe and setlist links always use wtedradio.com in that case.
    */
   var SCRIPT_EL = document.currentScript;
-  var RADIO_EMBED_ORIGIN = (function () {
+  var RADIO_SCRIPT_ORIGIN = (function () {
     if (SCRIPT_EL && SCRIPT_EL.src) {
       try {
         return new URL(SCRIPT_EL.src).origin;
@@ -40,7 +41,18 @@
     }
     return WTED_BASE;
   })();
-  var RADIO_IFRAME_PATH = RADIO_EMBED_ORIGIN + "/embed/radio";
+  function isLocalOrigin(origin) {
+    try {
+      var host = new URL(origin).hostname;
+      return host === "localhost" || host === "127.0.0.1";
+    } catch (e3) {
+      return false;
+    }
+  }
+  var RADIO_IFRAME_ORIGIN = isLocalOrigin(RADIO_SCRIPT_ORIGIN)
+    ? RADIO_SCRIPT_ORIGIN
+    : WTED_BASE;
+  var RADIO_IFRAME_PATH = RADIO_IFRAME_ORIGIN + "/embed/radio";
   /**
    * No `?_=` cache-buster — Next static export treats an unknown query as a
    * client 404 and renders the full WlHomeV2 not-found header inside the iframe.
@@ -1098,19 +1110,34 @@
   // Helpers
   // --------------------------------------------------------------------------
 
+  function isAllowedSetlistOrigin(origin) {
+    return (
+      origin === WTED_BASE ||
+      origin === RADIO_IFRAME_ORIGIN ||
+      origin === RADIO_SCRIPT_ORIGIN ||
+      origin === NETLIFY_LEGACY_ORIGIN
+    );
+  }
+
   function isAllowedSetlistUrl(url) {
     try {
       var parsed = new URL(url);
-      if (
-        parsed.origin !== RADIO_EMBED_ORIGIN &&
-        parsed.origin !== WTED_BASE
-      ) {
-        return false;
-      }
+      if (!isAllowedSetlistOrigin(parsed.origin)) return false;
       if (parsed.pathname !== "/archive/setlist") return false;
       return Boolean(parsed.searchParams.get("id"));
     } catch (e) {
       return false;
+    }
+  }
+
+  function canonicalizeSetlistUrl(url) {
+    if (!isAllowedSetlistUrl(url)) return null;
+    if (isLocalOrigin(RADIO_IFRAME_ORIGIN)) return url;
+    try {
+      var parsed = new URL(url);
+      return WTED_BASE + parsed.pathname + parsed.search + parsed.hash;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -1530,7 +1557,7 @@
 
     var self = this;
     this._onRadioSetlistMessage = function (event) {
-      if (event.origin !== RADIO_EMBED_ORIGIN) return;
+      if (!isAllowedSetlistOrigin(event.origin)) return;
       if (self._radioIframe && event.source !== self._radioIframe.contentWindow) {
         return;
       }
@@ -1697,8 +1724,9 @@
   WlHeader.prototype._setSetlistHit = function (url, title) {
     var hit = this._setlistHit;
     if (!hit) return;
-    if (url && isAllowedSetlistUrl(url)) {
-      hit.href = url;
+    var href = canonicalizeSetlistUrl(url);
+    if (href) {
+      hit.href = href;
       hit.hidden = false;
       hit.tabIndex = 0;
       hit.setAttribute(
