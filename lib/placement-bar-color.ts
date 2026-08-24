@@ -44,6 +44,16 @@ export function getPlacementBarCssToken(
   return "none"
 }
 
+const SPANNABLE_PLACEMENT_BAR_TOKENS: ReadonlySet<PlacementBarCssToken> =
+  new Set(["set-1-closer", "set-closer", "encore-1", "encore-23"])
+
+/** Closers and encore placements may join into one bar across consecutive rows. */
+export function isSpannablePlacementBarToken(
+  token: PlacementBarCssToken,
+): boolean {
+  return SPANNABLE_PLACEMENT_BAR_TOKENS.has(token)
+}
+
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const h = hex.trim().replace(/^#/, "")
   if (h.length !== 6) return null

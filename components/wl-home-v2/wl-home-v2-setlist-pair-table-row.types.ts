@@ -1,4 +1,5 @@
 import type { ReleaseToEntriesMap, ShowRelease } from "@/hooks/use-setlist-releases"
+import type { PlacementBarSpanRole } from "@/lib/placement-bar-span"
 import type { SetlistTreeChrome } from "@/lib/song-pairs"
 import type { SetlistEntry } from "@/types/setlist"
 import type { SongPair } from "@/types/song-pair"
@@ -34,4 +35,5 @@ export type WlHomeV2SetlistPairTableRowProps = {
   hoveredCategory?: string | null
   showDiscographySetUi: boolean
   treeChrome?: SetlistTreeChrome
+  placementBarSpanRole?: PlacementBarSpanRole | null
 }

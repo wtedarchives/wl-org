@@ -20,6 +20,7 @@ import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-
 import { WlHomeV2SetlistPairSongCell } from "@/components/wl-home-v2/wl-home-v2-setlist-pair-song-cell"
 import { WlHomeV2SetlistSongTreeChrome } from "@/components/wl-home-v2/wl-home-v2-setlist-song-tree-chrome"
 import { railLabelForEntrySet } from "@/components/wl-home-v2/wl-home-v2-setlist-table.utils"
+import { placementBarSpanClassName } from "@/lib/placement-bar-span"
 
 export function WlHomeV2SetlistPairTableRow({
   pair,
@@ -52,6 +53,7 @@ export function WlHomeV2SetlistPairTableRow({
   hoveredCategory,
   showDiscographySetUi,
   treeChrome,
+  placementBarSpanRole,
 }: WlHomeV2SetlistPairTableRowProps) {
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
 
@@ -141,7 +143,10 @@ export function WlHomeV2SetlistPairTableRow({
               ))}
             </span>
           : <span
-              className="bar"
+              className={cn(
+                "bar",
+                placementBarSpanClassName(placementBarSpanRole),
+              )}
               data-placement-bar={barPlacementTokens[0] ?? "none"}
             />
         : null}

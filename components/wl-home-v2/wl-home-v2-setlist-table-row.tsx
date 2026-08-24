@@ -29,6 +29,10 @@ import { cn } from "@/lib/utils"
 
 import { getCoachIntroDisplay } from "@/lib/setlist-coach-intro-display"
 import { getPlacementBarCssToken } from "@/lib/placement-bar-color"
+import {
+  placementBarSpanClassName,
+  type PlacementBarSpanRole,
+} from "@/lib/placement-bar-span"
 
 import { SETLIST_V2_ROW_TOOLTIP_CONTENT } from "@/components/wl-home-v2/wl-home-v2-setlist-table.constants"
 import { WlHomeV2SetlistSongTreeChrome } from "@/components/wl-home-v2/wl-home-v2-setlist-song-tree-chrome"
@@ -68,6 +72,7 @@ export function WlHomeV2SetlistTableRow({
   coachNotesExpanded = false,
   applyCoachIntroDisplay = true,
   treeChrome,
+  placementBarSpanRole,
 }: {
   entry: SetlistEntry
   displayNumber: number | null
@@ -100,6 +105,7 @@ export function WlHomeV2SetlistTableRow({
   /** Off for entries that belong to pair/reprise/improv combine rows (including expanded). */
   applyCoachIntroDisplay?: boolean
   treeChrome?: SetlistTreeChrome
+  placementBarSpanRole?: PlacementBarSpanRole | null
 }) {
   const [personnelTruncCollapsed, setPersonnelTruncCollapsed] = useState(false)
   const coachIntroDisplay =
@@ -183,7 +189,13 @@ export function WlHomeV2SetlistTableRow({
         onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
       >
         {showDiscographySetUi ?
-          <span className="bar" data-placement-bar={barPlacementToken} />
+          <span
+            className={cn(
+              "bar",
+              placementBarSpanClassName(placementBarSpanRole),
+            )}
+            data-placement-bar={barPlacementToken}
+          />
         : null}
         <div className="setlist-cell-inner">
           <SetlistEntryNumberCell

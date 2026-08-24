@@ -13770,6 +13770,19 @@
   width: 4px;
   border-radius: 0 2px 2px 0;
 }
+.wl-home-v2 .wl-home-v2-setlist .set-table td.num-cell .bar.bar--span-start {
+  bottom: -1px;
+  border-radius: 0 2px 0 0;
+}
+.wl-home-v2 .wl-home-v2-setlist .set-table td.num-cell .bar.bar--span-middle {
+  top: -1px;
+  bottom: -1px;
+  border-radius: 0;
+}
+.wl-home-v2 .wl-home-v2-setlist .set-table td.num-cell .bar.bar--span-end {
+  top: -1px;
+  border-radius: 0 0 2px 0;
+}
 .wl-home-v2 .wl-home-v2-setlist .set-table td.num-cell .bar.bar--split {
   display: flex;
   flex-direction: column;

@@ -7,6 +7,7 @@ import {
   SHORT_EXPLANATIONS,
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
+import { computePlacementBarSpanRoles } from "@/lib/placement-bar-span"
 import {
   buildSetlistTableRows,
   computeDisplayNumbersForTableRows,
@@ -110,6 +111,10 @@ export function WlHomeV2SetlistTable({
   const combinedEntryIds = useMemo(
     () => getSetlistCombinedEntryIds(setlist, songPairs),
     [setlist, songPairs],
+  )
+  const placementBarSpanRoles = useMemo(
+    () => computePlacementBarSpanRoles(tableRows),
+    [tableRows],
   )
   const uniquePlacements = new Set(setlist.map((e) => e.entry_placement))
   const hasSinglePlacementType = uniquePlacements.size === 1
@@ -297,6 +302,9 @@ export function WlHomeV2SetlistTable({
                         hoveredCategory={hoveredCategory}
                         showDiscographySetUi={showDiscographySetUi}
                         treeChrome={row.treeChrome}
+                        placementBarSpanRole={
+                          placementBarSpanRoles[index] ?? null
+                        }
                       />
                     : <WlHomeV2SetlistTableRow
                         entry={row.entry}
@@ -334,6 +342,9 @@ export function WlHomeV2SetlistTable({
                           row.entry.entry_id,
                         )}
                         treeChrome={row.treeChrome}
+                        placementBarSpanRole={
+                          placementBarSpanRoles[index] ?? null
+                        }
                       />
                     }
                   </Fragment>
