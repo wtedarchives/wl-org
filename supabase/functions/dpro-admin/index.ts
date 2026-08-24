@@ -57,10 +57,11 @@ function jsonOk(body: Record<string, unknown>) {
 const REBUILD_COOLDOWN_MS = 90_000
 
 /**
- * Share-card images (Bluesky song posts + Instagram end-of-show) stay on the
- * admin setlist tab. wted-brains still announces text, but must not attach
- * media — including when an admin is using that page, and including a
- * setlister who spoofs `surface: "admin"`.
+ * Share-card images: Instagram end-of-show stays on the admin setlist tab.
+ * Bluesky song images (share card + category artwork) are commented out —
+ * restore the `withImage` block in `setlist_discourse_now_playing` to
+ * re-attach them. wted-brains must not attach media even when an admin
+ * uses that page, or when a setlister spoofs `surface: "admin"`.
  */
 function attachSocialImages(
   isAdmin: boolean,
@@ -1146,13 +1147,16 @@ async function handleAction(
         }
       }
 
-      const withImage = attachSocialImages(isAdmin, body)
+      // Bluesky song images temporarily disabled (share card + category
+      // artwork). Restore `withImage` and the options below to re-attach.
+      // const withImage = attachSocialImages(isAdmin, body)
       const bluesky = await postSetlistSongToBluesky(db, entry_id, {
-        songImageJpegBase64:
-          withImage ?
-            (body.song_image_jpeg_base64 as string | undefined)
-          : undefined,
-        includeImage: withImage,
+        // songImageJpegBase64:
+        //   withImage ?
+        //     (body.song_image_jpeg_base64 as string | undefined)
+        //   : undefined,
+        includeImage: false,
+        // includeImage: withImage,
       })
 
       return {

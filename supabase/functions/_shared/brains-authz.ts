@@ -132,10 +132,12 @@ export const SETLISTER_RULES: Record<string, SetlisterRule> = {
 
   // ─── Live-show posting ────────────────────────────────────────────────────
   // These publish to Discourse chat, push notifications, and Bluesky text.
-  // Share-card images (Bluesky artwork + Instagram) stay on the admin setlist
-  // tab — dpro-admin ignores media when surface is brains. Scoped to the
-  // assigned show and inside the window, which is what makes them safe to
-  // delegate: a setlister can only announce the show they are working.
+  // Instagram stays on the admin setlist tab. Bluesky song images (share
+  // card + category artwork) are commented out; the thread-root show
+  // poster is unchanged. dpro-admin ignores media when surface is brains.
+  // Scoped to the assigned show and inside the window, which is what makes
+  // them safe to delegate: a setlister can only announce the show they are
+  // working.
   setlist_discourse_show_event: {
     showRef: { from: "body", key: "show_id" },
     targetTable: "shows",

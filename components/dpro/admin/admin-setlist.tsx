@@ -79,8 +79,8 @@ export function AdminSetlist() {
 
   return (
     <AdminTabShell>
-      {/* Mounts the offscreen setlist share card so the brain button can attach
-          it to Bluesky song posts. */}
+      {/* Offscreen setlist share card — End Show posts it to Instagram.
+          Bluesky song-image capture from this card is commented out. */}
       <SetlistShareCaptureProvider showId={selectedShow?.show_id}>
       <MainHeader
         saveStatus={saveStatus}

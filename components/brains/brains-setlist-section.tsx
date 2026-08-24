@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react"
 
-import { SetlistShareCaptureProvider } from "@/components/dpro/admin/setlist/setlist-share-capture"
+// Restore with Bluesky song images — Instagram is admin-only, so brains
+// does not need the offscreen share card while those posts stay text-only.
+// import { SetlistShareCaptureProvider } from "@/components/dpro/admin/setlist/setlist-share-capture"
 import { SetlistShowEventActions } from "@/components/dpro/admin/setlist/setlist-show-event-actions"
 import { Button } from "@/components/ui/button"
 import { useBrainsSetlist } from "@/hooks/use-brains-setlist"
@@ -114,8 +116,8 @@ export function BrainsSetlistSection() {
   }
 
   return (
-    <SetlistShareCaptureProvider showId={showId}>
-      <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
+    // Restore: wrap with <SetlistShareCaptureProvider showId={showId}>
+    <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
         <div
           className={cn(
             "wp-head wl-home-v2-years-shows-wp-head wl-home-v2-tours-shows-wp-head",
@@ -221,6 +223,5 @@ export function BrainsSetlistSection() {
           onConfirm={(setKey) => void handleDeleteSet(setKey)}
         />
       </div>
-    </SetlistShareCaptureProvider>
   )
 }

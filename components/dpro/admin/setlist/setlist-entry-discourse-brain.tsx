@@ -15,7 +15,8 @@ import {
 } from "@/lib/setlist-push-admin-toast"
 import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
-import { useSetlistShareCapture } from "./setlist-share-capture"
+// Restore with the song-image capture block in handleClick.
+// import { useSetlistShareCapture } from "./setlist-share-capture"
 
 const OUTCOME_RESET_MS = 2500
 
@@ -25,8 +26,8 @@ interface SetlistEntryDiscourseBrainProps {
   entry: AdminSetlistEntryData
   showId: string
   /**
-   * `admin` (default) captures the share card and posts it to Bluesky.
-   * `brains` still posts the song text, but skips the image.
+   * `admin` vs `brains` still gates Instagram (End Show) and other
+   * media. Bluesky song images are commented out on both surfaces.
    */
   surface?: "admin" | "brains"
 }
@@ -38,7 +39,8 @@ export function SetlistEntryDiscourseBrain({
   surface = "admin",
 }: SetlistEntryDiscourseBrainProps) {
   const { session } = useAuth()
-  const shareCapture = useSetlistShareCapture()
+  // Restore with the song-image capture block in handleClick.
+  // const shareCapture = useSetlistShareCapture()
   const [status, setStatus] = useState<DiscourseBrainStatus>("idle")
 
   useEffect(() => {
@@ -70,17 +72,18 @@ export function SetlistEntryDiscourseBrain({
 
     setStatus("sending")
     try {
-      // Rasterising the share card takes a beat, so it happens inside the
-      // "sending" state. A null capture is fine — the post falls back to
-      // category artwork server-side. wted-brains skips capture entirely.
-      const songImage =
-        surface === "admin" ? ((await shareCapture?.capture()) ?? null) : null
+      // Bluesky song images temporarily disabled (share card + artwork).
+      // Restore this capture so admin attaches the card again; brains
+      // should stay null. A null capture used to fall back to category
+      // artwork server-side.
+      // const songImage =
+      //   surface === "admin" ? ((await shareCapture?.capture()) ?? null) : null
 
       const { data, error } = await invokeDproAdmin<SetlistBrainResponse>(token, {
         action: "setlist_discourse_now_playing",
         entry_id: entry.entry_id,
         surface,
-        ...(songImage ? { song_image_jpeg_base64: songImage } : {}),
+        // ...(songImage ? { song_image_jpeg_base64: songImage } : {}),
       })
       if (error) throw new Error(error)
       const toasts = formatSetlistBrainToasts(data)
