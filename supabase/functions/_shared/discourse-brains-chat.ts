@@ -99,6 +99,11 @@ export function buildSetlistNowPlayingSetSongLine(
   return `Set ${setLabel}, Song ${entrySetnum}`
 }
 
+/**
+ * `showGap` is the `formatSetlistShowGap()` parenthetical — "(5 show gap)" or
+ * "(song debut)" — appended to the song line. Null for entries the Last column
+ * also leaves blank (non-canon show, excluded short).
+ */
 export function buildSetlistNowPlayingDiscourseMessage(
   showId: string,
   showDate: string,
@@ -106,6 +111,7 @@ export function buildSetlistNowPlayingDiscourseMessage(
   entrySet: string | null | undefined,
   entrySetnum: number,
   entrySong: string | null | undefined,
+  showGap?: string | null,
 ): string {
   const linkLine = buildSetlistShowDiscourseLinkLine(
     showId,
@@ -114,7 +120,11 @@ export function buildSetlistNowPlayingDiscourseMessage(
   )
   const setSongLine = buildSetlistNowPlayingSetSongLine(entrySet, entrySetnum)
   const songName = (entrySong ?? "").trim() || "—"
-  return `${linkLine}\n${setSongLine}\n♫ Now Playing:  **${songName}**`
+  const gap = (showGap ?? "").trim()
+  const songLine = gap ?
+    `♫ Now Playing:  **${songName}** ${gap}`
+  : `♫ Now Playing:  **${songName}**`
+  return `${linkLine}\n${setSongLine}\n${songLine}`
 }
 
 /** POST to Discourse chat using BRAINS_API_KEY / BRAINS_USERNAME secrets. */

@@ -26,6 +26,10 @@ import {
   postSetlistShowEventToBluesky,
   postSetlistSongToBluesky,
 } from "../_shared/bluesky-setlist-post.ts"
+import {
+  formatSetlistShowGap,
+  loadSetlistShowGap,
+} from "../_shared/setlist-show-gap.ts"
 import { postSetlistToInstagram } from "../_shared/instagram-setlist-post.ts"
 import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
 import {
@@ -1085,6 +1089,12 @@ async function handleAction(
         .maybeSingle()
       if (showErr) return { error: showErr.message }
       if (!show) return { error: "Show not found" }
+      // Computed live rather than read from setlist_entries.last_count: the row
+      // being announced is the one that rebuild hasn't reached yet. Null when
+      // the Last column would also be blank, and then simply omitted.
+      const showGap = formatSetlistShowGap(
+        await loadSetlistShowGap(db, entry_id),
+      )
       const message = buildSetlistNowPlayingDiscourseMessage(
         String(entry.entry_show),
         String(show.show_date ?? ""),
@@ -1092,6 +1102,7 @@ async function handleAction(
         entry.entry_set as string | null | undefined,
         Number(entry.entry_setnum),
         entry.entry_song as string | null | undefined,
+        showGap,
       )
       // One button, two behaviours. Discourse and push are fire-once — a repeat
       // press (fixing a song, adding coach notes) must not duplicate them.

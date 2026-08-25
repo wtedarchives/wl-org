@@ -65,20 +65,35 @@ export function buildBlueskyRootPostText(info: BlueskyRootShowInfo): string {
   return `${fitGraphemes(head, budget)}\n${url}`
 }
 
-/** Song reply — display name on line 1, coach notes on line 2 when present. */
+/**
+ * Song reply.
+ *
+ *     Royal
+ *     (5 show gap)      ← formatSetlistShowGap(), omitted when null
+ *     Coach notes       ← only when present
+ *
+ * The name and the gap are the post's substance, so the notes are what the
+ * 300-grapheme cap takes first.
+ */
 export function buildBlueskySongPostText(
   songDisplayName: string | null | undefined,
   entrySong: string | null | undefined,
   coachNotes: string | null | undefined,
+  showGap?: string | null,
 ): string {
   const name = clean(songDisplayName) || clean(entrySong) || "—"
+  const gap = clean(showGap)
   const notes = clean(coachNotes)
-  if (!notes) return fitGraphemes(name, BLUESKY_MAX_GRAPHEMES)
 
-  const headline = fitGraphemes(name, BLUESKY_MAX_GRAPHEMES)
-  const budget = BLUESKY_MAX_GRAPHEMES - countGraphemes(headline) - 1
+  const head = fitGraphemes(
+    gap ? `${name}\n${gap}` : name,
+    BLUESKY_MAX_GRAPHEMES,
+  )
+  if (!notes) return head
+
+  const budget = BLUESKY_MAX_GRAPHEMES - countGraphemes(head) - 1
   const fittedNotes = budget > 0 ? fitGraphemes(notes, budget) : ""
-  return fittedNotes ? `${headline}\n${fittedNotes}` : headline
+  return fittedNotes ? `${head}\n${fittedNotes}` : head
 }
 
 /**

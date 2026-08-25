@@ -20,6 +20,10 @@ import {
   getSetlistShowAbsoluteUrl,
   type SetlistDiscourseShowEvent,
 } from "./discourse-brains-chat.ts"
+import {
+  formatSetlistShowGap,
+  loadSetlistShowGap,
+} from "./setlist-show-gap.ts"
 // Restore with the Bluesky song-image block in postSetlistSongToBluesky.
 // import { resolveSongCategoryArtwork } from "./setlist-push-notifications.ts"
 
@@ -329,12 +333,17 @@ async function loadSongContext(
     .eq("song", (entrySong ?? "").trim())
     .maybeSingle()
 
+  // Recomputed here rather than passed in, so the edit path on a repeat press
+  // rebuilds the same text instead of silently dropping the gap line.
+  const showGap = formatSetlistShowGap(await loadSetlistShowGap(db, entryId))
+
   return {
     showId: String(entry.entry_show),
     text: buildBlueskySongPostText(
       songRow?.song_displayname as string | null | undefined,
       entrySong,
       entry.entry_coachnotes as string | null,
+      showGap,
     ),
     artworkUrl: undefined,
     // Restore with Bluesky song images:
