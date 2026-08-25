@@ -1,6 +1,6 @@
 import {
   getPlacementBarCssToken,
-  isSpannablePlacementBarToken,
+  getPlacementBarSpanFamily,
 } from "@/lib/placement-bar-color"
 import {
   pairPlacementBarTokens,
@@ -16,14 +16,15 @@ function spannableKeyForRow(row: SetlistTableRowItem): string | null {
       [getPlacementBarCssToken(row.entry.entry_placement)]
     : pairPlacementBarTokens(row.entries)
   if (tokens.length !== 1) return null
-  const token = tokens[0]!
-  if (!isSpannablePlacementBarToken(token)) return null
-  return `${tableRowEntrySet(row)}::${token}`
+  const family = getPlacementBarSpanFamily(tokens[0]!)
+  if (!family) return null
+  return `${tableRowEntrySet(row)}::${family}`
 }
 
 /**
- * Consecutive same-set closer or encore bars join into one capsule.
- * Solo bars stay inset; runs of 2+ get start / middle / end.
+ * Consecutive same-set opener, closer, or encore bars join into one capsule.
+ * Each row keeps its own color. Solo bars stay inset; runs of 2+ get
+ * start / middle / end.
  */
 export function computePlacementBarSpanRoles(
   rows: SetlistTableRowItem[],

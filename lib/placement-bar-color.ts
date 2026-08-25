@@ -44,14 +44,26 @@ export function getPlacementBarCssToken(
   return "none"
 }
 
-const SPANNABLE_PLACEMENT_BAR_TOKENS: ReadonlySet<PlacementBarCssToken> =
-  new Set(["set-1-closer", "set-closer", "encore-1", "encore-23"])
+export type PlacementBarSpanFamily = "opener" | "closer" | "encore"
 
-/** Closers and encore placements may join into one bar across consecutive rows. */
+/**
+ * Opener / closer / encore bars may join across consecutive rows in the same
+ * set. `none` (main-set songs) never spans.
+ */
+export function getPlacementBarSpanFamily(
+  token: PlacementBarCssToken,
+): PlacementBarSpanFamily | null {
+  if (token === "set-1-opener" || token === "set-opener") return "opener"
+  if (token === "set-1-closer" || token === "set-closer") return "closer"
+  if (token === "encore-1" || token === "encore-23") return "encore"
+  return null
+}
+
+/** True when this token can join a multi-row placement capsule. */
 export function isSpannablePlacementBarToken(
   token: PlacementBarCssToken,
 ): boolean {
-  return SPANNABLE_PLACEMENT_BAR_TOKENS.has(token)
+  return getPlacementBarSpanFamily(token) != null
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
