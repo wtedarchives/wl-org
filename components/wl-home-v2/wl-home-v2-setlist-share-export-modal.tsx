@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useShowPoster } from "@/hooks/use-show-poster"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import type { ShowPositionInTour } from "@/hooks/use-show-position-in-tour"
 import type { SetlistEntry, Show } from "@/types/setlist"
@@ -87,6 +88,8 @@ export function WlHomeV2SetlistShareExportModal({
 }) {
   const { session } = useAuth()
   const isMobile = useIsMobile()
+  // Only fetched while the modal is open — a poster it never shows is wasted.
+  const posterSrc = useShowPoster(show?.show_id, open)
   const captureRefWithout = useRef<HTMLDivElement>(null)
   const captureRefWith = useRef<HTMLDivElement>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -275,6 +278,7 @@ export function WlHomeV2SetlistShareExportModal({
                     <WlHomeV2SetlistShareExportCard
                       ref={captureRef}
                       backgroundSrc={backgroundSrc}
+                      posterSrc={posterSrc}
                       show={show}
                       setlist={setlist}
                       showPositionInTour={showPositionInTour}

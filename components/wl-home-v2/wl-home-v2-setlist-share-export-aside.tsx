@@ -1,7 +1,6 @@
 "use client"
 
 import type { ShareExportDetailPill } from "@/components/wl-home-v2/wl-home-v2-setlist-share-export-card.lib"
-import { prepareWlHomeV2ShareExportRichHtml } from "@/lib/wl-home-v2-share-export-rich-html"
 import {
   getGapColor,
   getGapPillBackground,
@@ -14,13 +13,14 @@ import type { Show } from "@/types/setlist"
 export function WlHomeV2SetlistShareExportAside({
   detailPills,
   show,
-  coachNotes,
+  posterSrc,
   showShareExportStats,
   rarityPctStr,
 }: {
   detailPills: ShareExportDetailPill[]
   show: Show
-  coachNotes: string
+  /** Show poster, displayed under the stats. */
+  posterSrc?: string | null
   showShareExportStats: boolean
   rarityPctStr: string | null
 }) {
@@ -92,13 +92,15 @@ export function WlHomeV2SetlistShareExportAside({
           : null}
         </div>
       : null}
-      {coachNotes ?
-        <div className="wl-home-v2-share-export__block">
-          <div
-            className="wl-home-v2-share-export__rich"
-            dangerouslySetInnerHTML={{
-              __html: prepareWlHomeV2ShareExportRichHtml(coachNotes),
-            }}
+      {posterSrc ?
+        <div className="wl-home-v2-share-export__poster">
+          {/* eslint-disable-next-line @next/next/no-img-element -- PNG capture path */}
+          <img
+            src={posterSrc}
+            alt=""
+            crossOrigin="anonymous"
+            className="wl-home-v2-share-export__poster-img"
+            draggable={false}
           />
         </div>
       : null}

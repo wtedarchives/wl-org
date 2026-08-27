@@ -17,6 +17,8 @@ import "./wl-home-v2-setlist-share-export.css"
 
 export type WlHomeV2SetlistShareExportCardProps = {
   backgroundSrc: string
+  /** Show poster for the aside. Omitted when the show has none. */
+  posterSrc?: string | null
   show: Show
   setlist: SetlistEntry[]
   showPositionInTour: ShowPositionInTour | null
@@ -30,6 +32,7 @@ export const WlHomeV2SetlistShareExportCard = forwardRef<
 >(function WlHomeV2SetlistShareExportCard(
   {
     backgroundSrc,
+    posterSrc,
     show,
     setlist,
     showPositionInTour,
@@ -132,11 +135,28 @@ export const WlHomeV2SetlistShareExportCard = forwardRef<
             <WlHomeV2SetlistShareExportAside
               detailPills={detailPills}
               show={show}
-              coachNotes={coachNotes}
+              posterSrc={posterSrc}
               showShareExportStats={showShareExportStats}
               rarityPctStr={rarityPctStr}
             />
           </div>
+
+          {/*
+            Coach notes and callbacks both run the full width of the body,
+            below the split. Coach notes used to sit in the aside, where a
+            narrower rule dropped them to 10px; out here they take the same
+            11px as callbacks.
+          */}
+          {coachNotes ?
+            <div className="wl-home-v2-share-export__block">
+              <div
+                className="wl-home-v2-share-export__rich"
+                dangerouslySetInnerHTML={{
+                  __html: prepareWlHomeV2ShareExportRichHtml(coachNotes),
+                }}
+              />
+            </div>
+          : null}
 
           {callbacks ?
             <div className="wl-home-v2-share-export__block">

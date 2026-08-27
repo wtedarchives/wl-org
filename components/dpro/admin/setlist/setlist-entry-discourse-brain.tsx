@@ -25,8 +25,10 @@ interface SetlistEntryDiscourseBrainProps {
   entry: AdminSetlistEntryData
   showId: string
   /**
-   * `admin` vs `brains` still gates Instagram (End Show) and other
-   * media. Bluesky song images are commented out on both surfaces.
+   * Which page this button sits on. Recorded on the request for the audit
+   * trail; it no longer affects what gets posted. Media used to be gated to
+   * `admin` because the browser capture only existed there — the card is
+   * rendered server-side now, so both surfaces attach the same images.
    */
   surface?: "admin" | "brains"
 }

@@ -237,6 +237,24 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
+/* Show poster — same panel recipe as the stats/pill cards, image bleeds to the edge. */
+.wl-home-v2-share-export__poster {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgb(63, 65, 64);
+  background: rgba(0, 0, 0, 0.72);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.wl-home-v2-share-export__poster-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 /* Matches `.wl-home-v2-setlist .setlist-card` */
 .wl-home-v2-share-export__table-wrap {
   border-radius: 10px;
