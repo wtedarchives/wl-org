@@ -25,7 +25,7 @@ import {
   loadSetlistShowGap,
 } from "./setlist-show-gap.ts"
 // Restore with the Bluesky song-image block in postSetlistSongToBluesky.
-// import { resolveSongCategoryArtwork } from "./setlist-push-notifications.ts"
+import { resolveSongCategoryArtwork } from "./setlist-push-notifications.ts"
 
 /** What happened on the Bluesky leg — surfaced in the admin toast. */
 export type BlueskyPostResult = {
@@ -345,42 +345,35 @@ async function loadSongContext(
       entry.entry_coachnotes as string | null,
       showGap,
     ),
-    artworkUrl: undefined,
-    // Restore with Bluesky song images:
-    // artworkUrl: await resolveSongCategoryArtwork(db, entrySong),
+    artworkUrl: await resolveSongCategoryArtwork(db, entrySong),
   }
 }
 
 /** Base64 JPEG (no data: prefix) → bytes, or undefined when unusable. */
-// Restore with Bluesky song images in postSetlistSongToBluesky.
-// function decodeJpegBase64(base64: string | undefined): Uint8Array | undefined {
-//   const raw = (base64 ?? "").trim()
-//   if (!raw) return undefined
-//   try {
-//     // Tolerate a data: prefix in case a caller sends the full data URL.
-//     const payload = raw.includes(",") ? raw.slice(raw.indexOf(",") + 1) : raw
-//     const binary = atob(payload)
-//     const bytes = new Uint8Array(binary.length)
-//     for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
-//     return bytes.byteLength > 0 ? bytes : undefined
-//   } catch (err) {
-//     console.error("bluesky song image decode:", err)
-//     return undefined
-//   }
-// }
+function decodeJpegBase64(base64: string | undefined): Uint8Array | undefined {
+  const raw = (base64 ?? "").trim()
+  if (!raw) return undefined
+  try {
+    // Tolerate a data: prefix in case a caller sends the full data URL.
+    const payload = raw.includes(",") ? raw.slice(raw.indexOf(",") + 1) : raw
+    const binary = atob(payload)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
+    return bytes.byteLength > 0 ? bytes : undefined
+  } catch (err) {
+    console.error("bluesky song image decode:", err)
+    return undefined
+  }
+}
 
 export type PostSetlistSongOptions = {
   /**
-   * Base64 JPEG of the setlist share card, captured in the browser at press
-   * time. The card is rendered by `html-to-image` from live DOM, which Deno
-   * can't reproduce, so it has to arrive from the client.
+   * Base64 JPEG of the setlist share card. Rendered server-side from the show,
+   * so it no longer depends on a browser capture — the old `html-to-image`
+   * path rasterised blank on mobile WebKit and produced empty Bluesky images.
    */
   songImageJpegBase64?: string
-  /**
-   * When false, post text only — no share card and no category-artwork
-   * fallback. Used by wted-brains so the setlister button still threads the
-   * song without attaching an image.
-   */
+  /** When false, post text only — no share card and no artwork fallback. */
   includeImage?: boolean
 }
 
@@ -401,8 +394,6 @@ export async function postSetlistSongToBluesky(
   try {
     const client = await createBlueskyClient(db)
     if (!client) return { status: "disabled" }
-    // Referenced so restoring the song-image block below is a copy-paste.
-    void options
 
     const context = await loadSongContext(db, entryId)
 
@@ -450,17 +441,16 @@ export async function postSetlistSongToBluesky(
 
     const thread = await ensureThreadRoot(db, client, context.showId)
 
-    // Bluesky song images temporarily disabled. Restore this block to attach
-    // the setlist share card (or category artwork when capture fails).
-    // const includeImage = options.includeImage !== false
-    // const capturedBytes =
-    //   includeImage ? decodeJpegBase64(options.songImageJpegBase64) : undefined
-    // const songImage =
-    //   !includeImage ? undefined
-    //   : capturedBytes ? await client.uploadImageBytes(capturedBytes, "image/jpeg")
-    //   : context.artworkUrl ?
-    //     await client.uploadImage(boundedSupabaseImageUrl(context.artworkUrl))
-    //   : undefined
+    // The share card when we have one, otherwise the song's category artwork.
+    const includeImage = options.includeImage !== false
+    const renderedBytes =
+      includeImage ? decodeJpegBase64(options.songImageJpegBase64) : undefined
+    const songImage =
+      !includeImage ? undefined
+      : renderedBytes ? await client.uploadImageBytes(renderedBytes, "image/jpeg")
+      : context.artworkUrl ?
+        await client.uploadImage(boundedSupabaseImageUrl(context.artworkUrl))
+      : undefined
 
     const ref = await appendThreadReply(
       db,
@@ -471,10 +461,10 @@ export async function postSetlistSongToBluesky(
       context.text,
       {
         entryId,
-        // embed:
-        //   songImage ?
-        //     imagesEmbed(songImage, context.text.split("\n")[0])
-        //   : undefined,
+        embed:
+          songImage ?
+            imagesEmbed(songImage, context.text.split("\n")[0])
+          : undefined,
       },
     )
     return { status: "created", uri: ref.uri }

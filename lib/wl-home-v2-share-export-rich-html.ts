@@ -1,14 +1,5 @@
-/**
- * Share export renders HTML via `dangerouslySetInnerHTML` and captures with html-to-image.
- * Layout engines often ignore padding/margin on `<br>`, so breaks are turned into a block
- * spacer with a fixed height (styled in `wl-home-v2-setlist-share-export.css`).
+/*
+ * Moved to the shared module so the Deno edge renderer applies the identical
+ * transform. Re-exported here to keep existing import paths.
  */
-const SHARE_EXPORT_BR_RE = /<br\b[^>]*\/?>/gi
-
-export function prepareWlHomeV2ShareExportRichHtml(html: string): string {
-  if (!html) return html
-  return html.replace(
-    SHARE_EXPORT_BR_RE,
-    '<span class="wl-home-v2-share-export__rich-br-gap" aria-hidden="true"></span>',
-  )
-}
+export { prepareWlHomeV2ShareExportRichHtml } from "@/supabase/functions/_shared/setlist-share-card/entry-display"

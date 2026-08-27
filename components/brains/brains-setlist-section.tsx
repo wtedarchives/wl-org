@@ -2,9 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 
-// Restore with Bluesky song images — Instagram is admin-only, so brains
-// does not need the offscreen share card while those posts stay text-only.
-// import { SetlistShareCaptureProvider } from "@/components/dpro/admin/setlist/setlist-share-capture"
 import { SetlistShowEventActions } from "@/components/dpro/admin/setlist/setlist-show-event-actions"
 import { Button } from "@/components/ui/button"
 import { useBrainsSetlist } from "@/hooks/use-brains-setlist"
@@ -116,7 +113,11 @@ export function BrainsSetlistSection() {
   }
 
   return (
-    // Restore: wrap with <SetlistShareCaptureProvider showId={showId}>
+    /*
+     * No share-card provider here. Images are rendered server-side from the
+     * show, so brains posts carry the same card the admin tab does — which is
+     * the point: the old browser capture rasterised blank on mobile WebKit.
+     */
     <div className="widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural flex min-h-0 min-w-0 flex-1 flex-col">
         <div
           className={cn(

@@ -31,6 +31,7 @@ import {
   loadSetlistShowGap,
 } from "../_shared/setlist-show-gap.ts"
 import { postSetlistToInstagram } from "../_shared/instagram-setlist-post.ts"
+import { renderSetlistShareImage } from "../_shared/setlist-share-card/render-client.ts"
 import { scoreSetlistGameShow } from "../_shared/setlist-game-scoring.ts"
 import {
   ACTOR_STAMPED_ACTIONS,
@@ -61,17 +62,25 @@ function jsonOk(body: Record<string, unknown>) {
 const REBUILD_COOLDOWN_MS = 90_000
 
 /**
- * Share-card images: Instagram end-of-show stays on the admin setlist tab.
- * Bluesky song images (share card + category artwork) are commented out —
- * restore the `withImage` block in `setlist_discourse_now_playing` to
- * re-attach them. wted-brains must not attach media even when an admin
- * uses that page, or when a setlister spoofs `surface: "admin"`.
+ * Whether this call attaches share-card media.
+ *
+ * Always true. This was previously `isAdmin && body.surface !== "brains"`,
+ * because the image came from a browser capture that only existed on the admin
+ * setlist tab — so wted-brains could not produce one, and `surface` was a
+ * client-supplied string a setlister could have spoofed.
+ *
+ * Neither concern survives server-side rendering. The image is now built from
+ * `show_id` inside this function, so the client neither supplies nor influences
+ * it. And reaching this action at all already requires an admin JWT or a live
+ * `brains_active_assignment()` window for this show (see `brains-authz.ts`,
+ * which fails closed) — anyone authorised to fire the event is authorised to
+ * have the image that goes with it.
+ *
+ * Kept as a function rather than inlined so the seam survives if media ever
+ * needs narrowing again.
  */
-function attachSocialImages(
-  isAdmin: boolean,
-  body: Record<string, unknown>,
-): boolean {
-  return isAdmin && body.surface !== "brains"
+function attachSocialImages(): boolean {
+  return true
 }
 
 function pick(row: Record<string, unknown>, keys: string[]) {
@@ -1048,14 +1057,22 @@ async function handleAction(
       // Instagram gets one post per show, at end of show only, and only from
       // the admin setlist tab. Isolated like the Bluesky leg: a failure here
       // can't affect Discourse, push, or Bluesky.
-      const instagram =
-        event === "end_show" && attachSocialImages(isAdmin, body) ?
-          await postSetlistToInstagram(db, show_id, {
-            imageJpegBase64: body.instagram_image_jpeg_base64 as
-              | string
-              | undefined,
-          })
-        : undefined
+      /*
+       * The image is rendered server-side now, so the client no longer supplies
+       * one. `instagram_image_jpeg_base64` on the body is ignored — the browser
+       * capture it came from produced blank images on mobile, which is what
+       * moved rendering onto the server in the first place.
+       */
+      let instagram
+      if (event === "end_show" && attachSocialImages()) {
+        const rendered = await renderSetlistShareImage(db, show_id, "instagram")
+        if (!rendered.ok) {
+          console.error("instagram share render failed:", rendered.error)
+        }
+        instagram = await postSetlistToInstagram(db, show_id, {
+          imageJpegBase64: rendered.ok ? rendered.jpegBase64 : undefined,
+        })
+      }
 
       return {
         data: {
@@ -1158,16 +1175,25 @@ async function handleAction(
         }
       }
 
-      // Bluesky song images temporarily disabled (share card + category
-      // artwork). Restore `withImage` and the options below to re-attach.
-      // const withImage = attachSocialImages(isAdmin, body)
+      /*
+       * Share card for the Bluesky song post, rendered server-side. A failure
+       * here is not fatal: `postSetlistSongToBluesky` falls back to the song's
+       * category artwork, and failing that posts text only.
+       */
+      const withImage = attachSocialImages()
+      let songImageJpegBase64: string | undefined
+      if (withImage) {
+        const rendered = await renderSetlistShareImage(
+          db,
+          String(entry.entry_show),
+          "card",
+        )
+        if (rendered.ok) songImageJpegBase64 = rendered.jpegBase64
+        else console.error("bluesky song image render failed:", rendered.error)
+      }
       const bluesky = await postSetlistSongToBluesky(db, entry_id, {
-        // songImageJpegBase64:
-        //   withImage ?
-        //     (body.song_image_jpeg_base64 as string | undefined)
-        //   : undefined,
-        includeImage: false,
-        // includeImage: withImage,
+        songImageJpegBase64,
+        includeImage: withImage,
       })
 
       return {

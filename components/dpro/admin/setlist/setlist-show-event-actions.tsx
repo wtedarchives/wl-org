@@ -15,7 +15,6 @@ import {
 } from "@/lib/setlist-push-admin-toast"
 import { cn } from "@/lib/utils"
 import type { ShowData } from "@/types/admin"
-import { useSetlistShareCapture } from "./setlist-share-capture"
 
 const SETLIST_SHOW_EVENT_ACTIONS = [
   { label: "Onstage", event: "onstage" },
@@ -45,7 +44,6 @@ export function SetlistShowEventActions({
   surface = "admin",
 }: SetlistShowEventActionsProps) {
   const { session } = useAuth()
-  const shareCapture = useSetlistShareCapture()
   const [buttonStatus, setButtonStatus] = useState<
     Partial<Record<SetlistShowEventLabel, SetlistShowEventButtonStatus>>
   >({})
@@ -92,23 +90,17 @@ export function SetlistShowEventActions({
 
     setButtonStatus((prev) => ({ ...prev, [label]: "sending" }))
     try {
-      // Instagram gets one post per show, at end of show only, and only from
-      // the admin setlist tab — so the 4:5 capture only runs there. A null
-      // capture surfaces as an Instagram failure in the toast; it can't block
-      // the other targets.
-      const instagramImage =
-        surface === "admin" && event === "end_show" ?
-          ((await shareCapture?.captureInstagram()) ?? null)
-        : null
-
+      /*
+       * No image is sent any more. The share card is rendered server-side from
+       * `show_id`, which is what makes this work on phones at all — the old
+       * browser capture rasterised blank on mobile WebKit, so brains posts went
+       * out with an empty image and Instagram showed only its background.
+       */
       const { data, error } = await invokeDproAdmin<SetlistBrainResponse>(token, {
         action: "setlist_discourse_show_event",
         show_id: selectedShow.show_id,
         event,
         surface,
-        ...(instagramImage ?
-          { instagram_image_jpeg_base64: instagramImage }
-        : {}),
       })
       if (error) throw new Error(error)
       const toasts = formatSetlistBrainToasts(data)

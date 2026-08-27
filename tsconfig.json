@@ -30,5 +30,11 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "supabase/functions"]
+  "exclude": [
+    "node_modules",
+    "supabase/functions",
+    "netlify/functions",
+    "scripts/build-share-card-assets.ts",
+    "scripts/build-share-card-embeds.ts"
+  ]
 }

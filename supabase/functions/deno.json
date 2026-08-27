@@ -1,0 +1,4 @@
+{
+  "//": "Edge functions are Deno; keep them from resolving the Next app's node_modules at the repo root.",
+  "nodeModulesDir": "none"
+}

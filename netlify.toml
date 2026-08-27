@@ -1,0 +1,16 @@
+# Functions only. Build command and publish directory are intentionally NOT set
+# here so the existing settings in the Netlify UI keep applying.
+
+[functions]
+  directory = "netlify/functions"
+  # esbuild must not try to bundle @resvg/resvg-js: it ships a per-platform
+  # native binary (linux-x64-gnu on Netlify), which has to be installed rather
+  # than inlined. Bundling it produces a function that fails at runtime.
+  external_node_modules = ["@resvg/resvg-js"]
+  node_bundler = "esbuild"
+
+# Memory is left at the 1024MB default deliberately. Lambda normally scales
+# vCPU with memory, so a CPU-bound render should get faster — but measured on
+# this project it did not: a 1080px render took 3044ms at 2048MB against 3085ms
+# at 1024MB. Since credits are billed in GB-hours, doubling memory for the same
+# runtime would double the cost for nothing. Re-measure before changing it.

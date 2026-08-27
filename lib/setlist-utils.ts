@@ -6,6 +6,7 @@ import type {
   ShowDate,
 } from "@/types/setlist"
 import { getPlacementBarColor } from "@/lib/placement-bar-color"
+import { getEncoreLabel } from "@/supabase/functions/_shared/setlist-share-card/set-grouping"
 
 /** Tailwind classes for a personnel pill by guest_category (fully rounded). */
 export function getPersonnelPillClassName(
@@ -108,39 +109,6 @@ export function formatShowDateLong(dateInput: string | null | undefined): string
 /** Placement bar color for setlist entries (home-style). */
 export function getPlacementColor(placement: string | null | undefined): string {
   return getPlacementBarColor(placement)
-}
-
-/**
- * Formats a date for setlist display (MM.DD.YY).
- * Accepts YYYY-MM-DD, ISO strings, numeric timestamps, or already-formatted MM.DD.YY.
- * Returns the input or empty string if parsing fails (avoids NaN in UI).
- */
-export function formatSetlistDate(dateInput: string | number | null | undefined): string {
-  if (dateInput == null) return ""
-  if (typeof dateInput === "number") {
-    const date = new Date(dateInput)
-    if (Number.isNaN(date.getTime())) return ""
-    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0")
-    const day = date.getUTCDate().toString().padStart(2, "0")
-    const year = date.getUTCFullYear().toString().slice(-2)
-    return `${month}.${day}.${year}`
-  }
-  const s = String(dateInput).trim()
-  if (!s) return ""
-  // Already in MM.DD.YY or MM.DD.YYYY format from API — always emit two-digit year
-  if (/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(s)) {
-    const [mo, da, yr] = s.split(".")
-    const y2 = yr.length === 4 ? yr.slice(-2) : yr.padStart(2, "0")
-    return `${mo.padStart(2, "0")}.${da.padStart(2, "0")}.${y2}`
-  }
-  // Parse: use as-is if ISO (contains T), otherwise append T00:00:00Z for date-only
-  const date = new Date(s.includes("T") ? s : s + "T00:00:00Z")
-  const time = date.getTime()
-  if (Number.isNaN(time)) return s
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0")
-  const day = date.getUTCDate().toString().padStart(2, "0")
-  const year = date.getUTCFullYear().toString().slice(-2)
-  return `${month}.${day}.${year}`
 }
 
 /**
@@ -321,35 +289,20 @@ export function calculateRarity(
   return Math.round(percentage) + "%"
 }
 
-/** Main sets only (numeric set id); encores E1, E2, E3 are not main. */
-export function isMainSet(set: string | null | undefined): boolean {
-  if (!set) return false
-  const s = String(set).trim()
-  if (!/^\d+$/.test(s)) return false
-  return Number.parseInt(s, 10) >= 1
-}
+/*
+ * Set-grouping rules live in the shared module so the Deno edge renderer and
+ * the web card cannot drift. Re-exported here to keep existing import paths.
+ */
+export { isMainSet, shouldShowSetBreak, getEncoreLabel } from "@/supabase/functions/_shared/setlist-share-card/set-grouping"
 
-/** Show Set Break bar between two different main sets (e.g. Set 1 → Set 2). */
-export function shouldShowSetBreak(
-  prevSet: string | null | undefined,
-  currSet: string | null | undefined,
-): boolean {
-  return (
-    isMainSet(prevSet) &&
-    isMainSet(currSet) &&
-    String(prevSet) !== String(currSet)
-  )
-}
-
-/** Encore bar label from entry_set (E1, E2, E3). Returns "" for unknown. */
-export function getEncoreLabel(entrySet: string | null | undefined): string {
-  if (!entrySet) return ""
-  const s = String(entrySet)
-  if (s === "E1") return "Encore"
-  if (s === "E2") return "2nd Encore"
-  if (s === "E3") return "3rd Encore"
-  return ""
-}
+/* Show-level formatting and colour ramps, shared with the edge renderer. */
+export {
+  formatSetlistDate,
+  getGapColor,
+  getGapPillBackground,
+  getRarityColor,
+  getRarityPillBackground,
+} from "@/supabase/functions/_shared/setlist-share-card/show-details"
 
 export type SetlistSegmentLength = {
   /** Raw `entry_set` key (for React keys). */
@@ -426,105 +379,3 @@ function setlistSegmentLabel(entrySet: string): string {
   return s
 }
 
-export function getRarityColor(percentage: string | null): string {
-  if (!percentage || percentage === "-" || percentage === "") return "transparent"
-  const numericPercentage = parseFloat(percentage.replace("%", ""))
-  if (Number.isNaN(numericPercentage)) return "transparent"
-  const colorStops = [
-    { percent: 0, color: { r: 156, g: 12, b: 12 } },
-    { percent: 12, color: { r: 230, g: 81, b: 0 } },
-    { percent: 24, color: { r: 179, g: 135, b: 0 } },
-    { percent: 50, color: { r: 46, g: 125, b: 50 } },
-    { percent: 100, color: { r: 13, g: 71, b: 161 } },
-  ]
-  let lowerStop = colorStops[0]
-  let upperStop = colorStops[colorStops.length - 1]
-  for (let i = 0; i < colorStops.length - 1; i++) {
-    if (
-      numericPercentage >= colorStops[i].percent &&
-      numericPercentage <= colorStops[i + 1].percent
-    ) {
-      lowerStop = colorStops[i]
-      upperStop = colorStops[i + 1]
-      break
-    }
-  }
-  const range = upperStop.percent - lowerStop.percent
-  const factor =
-    range !== 0 ? (numericPercentage - lowerStop.percent) / range : 0
-  const r = Math.round(
-    lowerStop.color.r + factor * (upperStop.color.r - lowerStop.color.r),
-  )
-  const g = Math.round(
-    lowerStop.color.g + factor * (upperStop.color.g - lowerStop.color.g),
-  )
-  const b = Math.round(
-    lowerStop.color.b + factor * (upperStop.color.b - lowerStop.color.b),
-  )
-  return `rgb(${r}, ${g}, ${b})`
-}
-
-/** Same rgb mix as `getRarityColor`, with alpha on the fill (default 70%). */
-export function getRarityPillBackground(percentage: string | null, alpha = 0.4): string {
-  const base = getRarityColor(percentage)
-  if (base === "transparent" || !base.startsWith("rgb(")) return base
-  const m = base.match(
-    /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i,
-  )
-  if (!m) return base
-  return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`
-}
-
-/** Gap color: 0 = blue (best), 100 = red (worst). Same stops as rarity, reversed. */
-export function getGapColor(value: string | number | null): string {
-  if (value == null || value === "" || value === "-") return "transparent"
-  const num = typeof value === "string" ? parseFloat(value) : value
-  if (Number.isNaN(num)) return "transparent"
-  const cappedValue = Math.min(num, 100)
-  const colorStops = [
-    { percent: 0, color: { r: 13, g: 71, b: 161 } },
-    { percent: 12, color: { r: 46, g: 125, b: 50 } },
-    { percent: 24, color: { r: 179, g: 135, b: 0 } },
-    { percent: 50, color: { r: 230, g: 81, b: 0 } },
-    { percent: 100, color: { r: 156, g: 12, b: 12 } },
-  ]
-  let lowerStop = colorStops[0]
-  let upperStop = colorStops[colorStops.length - 1]
-  for (let i = 0; i < colorStops.length - 1; i++) {
-    if (
-      cappedValue >= colorStops[i].percent &&
-      cappedValue <= colorStops[i + 1].percent
-    ) {
-      lowerStop = colorStops[i]
-      upperStop = colorStops[i + 1]
-      break
-    }
-  }
-  const range = upperStop.percent - lowerStop.percent
-  const factor =
-    range !== 0 ? (cappedValue - lowerStop.percent) / range : 0
-  const r = Math.round(
-    lowerStop.color.r + factor * (upperStop.color.r - lowerStop.color.r),
-  )
-  const g = Math.round(
-    lowerStop.color.g + factor * (upperStop.color.g - lowerStop.color.g),
-  )
-  const b = Math.round(
-    lowerStop.color.b + factor * (upperStop.color.b - lowerStop.color.b),
-  )
-  return `rgb(${r}, ${g}, ${b})`
-}
-
-/** Translucent fill from `getGapColor`, matching `getRarityPillBackground` treatment. */
-export function getGapPillBackground(
-  value: string | number | null,
-  alpha = 0.4,
-): string {
-  const base = getGapColor(value)
-  if (base === "transparent" || !base.startsWith("rgb(")) return base
-  const m = base.match(
-    /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i,
-  )
-  if (!m) return base
-  return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`
-}

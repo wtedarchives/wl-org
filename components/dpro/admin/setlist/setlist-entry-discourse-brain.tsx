@@ -16,7 +16,6 @@ import {
 import { cn } from "@/lib/utils"
 import type { AdminSetlistEntryData } from "@/types/admin"
 // Restore with the song-image capture block in handleClick.
-// import { useSetlistShareCapture } from "./setlist-share-capture"
 
 const OUTCOME_RESET_MS = 2500
 
@@ -40,7 +39,6 @@ export function SetlistEntryDiscourseBrain({
 }: SetlistEntryDiscourseBrainProps) {
   const { session } = useAuth()
   // Restore with the song-image capture block in handleClick.
-  // const shareCapture = useSetlistShareCapture()
   const [status, setStatus] = useState<DiscourseBrainStatus>("idle")
 
   useEffect(() => {
@@ -72,18 +70,15 @@ export function SetlistEntryDiscourseBrain({
 
     setStatus("sending")
     try {
-      // Bluesky song images temporarily disabled (share card + artwork).
-      // Restore this capture so admin attaches the card again; brains
-      // should stay null. A null capture used to fall back to category
-      // artwork server-side.
-      // const songImage =
-      //   surface === "admin" ? ((await shareCapture?.capture()) ?? null) : null
-
+      /*
+       * No image is sent. The share card is rendered server-side from the show,
+       * which is what makes this work on phones — the old browser capture
+       * rasterised blank on mobile WebKit.
+       */
       const { data, error } = await invokeDproAdmin<SetlistBrainResponse>(token, {
         action: "setlist_discourse_now_playing",
         entry_id: entry.entry_id,
         surface,
-        // ...(songImage ? { song_image_jpeg_base64: songImage } : {}),
       })
       if (error) throw new Error(error)
       const toasts = formatSetlistBrainToasts(data)
