@@ -75,7 +75,17 @@ function wordSpans(text: string): unknown[] {
   // with `columnGap` on the wrapping container instead.
   const words = text.match(/\S+/g)
   if (!words) return []
-  return words.map((word) => ({ type: "span", props: { style: {}, children: word } }))
+  /*
+   * `flexShrink: 0` is essential. Flex items shrink by default, and a word span
+   * cannot actually get narrower than its glyphs — so in a nowrap container a
+   * long title had every word squeezed on top of its neighbour into unreadable
+   * overlap. Words keep their width and overflow instead, to be clipped or
+   * faded by the container.
+   */
+  return words.map((word) => ({
+    type: "span",
+    props: { style: { flexShrink: 0 }, children: word },
+  }))
 }
 
 type StyledNode = { type: string; props: { style: Record<string, unknown> } }

@@ -56,11 +56,14 @@ const SPLIT_ASIDE_PX = CONTENT_WIDTH_PX - SPLIT_GAP_PX - SPLIT_MAIN_PX
  */
 const RAIL_WIDTH_PX = 14
 const PANEL_BORDER_PX = 1
-const SONG_STACK_INSET_PX = 8
+const SONG_INSET_LEFT_PX = 8
+/** Tighter than the left: the short badge and segue arrow sit against it. */
+const SONG_INSET_RIGHT_PX = 4
 const COACH_INDENT_PX = 12
 const SONG_COLUMN_WIDTH_PX =
   SPLIT_MAIN_PX - PANEL_BORDER_PX * 2 - RAIL_WIDTH_PX - PANEL_BORDER_PX
-const SONG_CONTENT_WIDTH_PX = SONG_COLUMN_WIDTH_PX - SONG_STACK_INSET_PX * 2
+const SONG_CONTENT_WIDTH_PX =
+  SONG_COLUMN_WIDTH_PX - SONG_INSET_LEFT_PX - SONG_INSET_RIGHT_PX
 const COACH_WIDTH_PX = SONG_CONTENT_WIDTH_PX - COACH_INDENT_PX
 
 /** Song title size, shared with its word-gap calculation. */
@@ -68,6 +71,17 @@ const SONG_FONT_SIZE_PX = 13
 
 /** A panel's padding on both sides plus its 1px border on both sides. */
 const PANEL_INSET_PX = 8 * 2 + PANEL_BORDER_PX * 2
+
+/**
+ * Where the long-title fade begins, as a percentage of the title slot.
+ *
+ * The browser card fades over the last 14px via `mask-image`. Satori does
+ * support `maskImage`, but not the `calc(100% - 14px)` stop the stylesheet
+ * uses — that silently failed to parse and faded the title from its start,
+ * which is what made this look unsupported at first. A percentage stop works,
+ * and short titles are untouched because the fade is positional.
+ */
+const TITLE_FADE_STOP = "90%"
 /** Matches WL_HOME_V2_SETLIST_SHARE_EXPORT_FRAME_RADIUS_PX. */
 export const CARD_RADIUS_PX = 16
 
@@ -208,8 +222,8 @@ function songRow(
     {
       display: "flex",
       flexDirection: "column",
-      marginLeft: SONG_STACK_INSET_PX,
-      marginRight: SONG_STACK_INSET_PX,
+      marginLeft: SONG_INSET_LEFT_PX,
+      marginRight: SONG_INSET_RIGHT_PX,
       width: SONG_CONTENT_WIDTH_PX,
       ...stackPadding(row),
     },
@@ -219,8 +233,7 @@ function songRow(
       /*
        * One span per word rather than a single string: Satori ignores
        * `wordSpacing`, so `columnGap` is the only way to tighten the space
-       * between words. The `mask-image` fade is unavailable here, so a long
-       * title simply clips.
+       * between words.
        */
       h(
         "div",
@@ -231,6 +244,7 @@ function songRow(
           minWidth: 0,
           overflow: "hidden",
           whiteSpace: "nowrap",
+          maskImage: `linear-gradient(to right, #fff ${TITLE_FADE_STOP}, transparent 100%)`,
           columnGap: spaceWidthPx(SONG_FONT_SIZE_PX),
           fontSize: SONG_FONT_SIZE_PX,
           fontWeight: 500,
@@ -247,7 +261,7 @@ function songRow(
             flexShrink: 0,
             alignItems: "center",
             fontFamily: MONO,
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 500,
             lineHeight: 1.35,
             letterSpacing: "-0.01em",
