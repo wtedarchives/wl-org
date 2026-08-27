@@ -53,10 +53,18 @@ export type BuildViewModelOptions = {
   posterSrc?: string | null
 }
 
-/** Leading `>` is markup, not content — the card draws its own arrow. */
+/**
+ * Strips the segue marker, keeping the entry.
+ *
+ * `entry_segue` is usually just ">" — the marker meaning "segues into the next
+ * song" — and only sometimes carries a label after it. Returning null for the
+ * bare marker (because stripping it leaves an empty string) is what made every
+ * segue arrow disappear. Null means no segue; "" means draw a bare arrow.
+ */
 function cleanSegue(segue: string | null): string | null {
-  const s = segue?.replace(/^>\s*/, "").trim()
-  return s ? s : null
+  const raw = segue?.trim()
+  if (!raw) return null
+  return raw.replace(/^>\s*/, "").trim()
 }
 
 function richOrNull(value: string | null | undefined): string | null {

@@ -30,6 +30,7 @@ import {
   type SetGroupingEntry,
   type ShareExportRow,
 } from "./set-grouping.ts"
+import { spacedWords, spaceWidthPx } from "./rich-text.ts"
 
 /** Design width of the card, matching WL_HOME_V2_SETLIST_SHARE_EXPORT_WIDTH_PX. */
 export const CARD_WIDTH_PX = 432
@@ -61,6 +62,9 @@ const SONG_COLUMN_WIDTH_PX =
   SPLIT_MAIN_PX - PANEL_BORDER_PX * 2 - RAIL_WIDTH_PX - PANEL_BORDER_PX
 const SONG_CONTENT_WIDTH_PX = SONG_COLUMN_WIDTH_PX - SONG_STACK_INSET_PX * 2
 const COACH_WIDTH_PX = SONG_CONTENT_WIDTH_PX - COACH_INDENT_PX
+
+/** Song title size, shared with its word-gap calculation. */
+const SONG_FONT_SIZE_PX = 13
 
 /** A panel's padding on both sides plus its 1px border on both sides. */
 const PANEL_INSET_PX = 8 * 2 + PANEL_BORDER_PX * 2
@@ -212,7 +216,12 @@ function songRow(
     h(
       "div",
       { display: "flex", flexDirection: "row", alignItems: "center", gap: 4, minWidth: 0 },
-      // `mask-image` fade is unavailable in Satori; the title simply clips.
+      /*
+       * One span per word rather than a single string: Satori ignores
+       * `wordSpacing`, so `columnGap` is the only way to tighten the space
+       * between words. The `mask-image` fade is unavailable here, so a long
+       * title simply clips.
+       */
       h(
         "div",
         {
@@ -222,12 +231,13 @@ function songRow(
           minWidth: 0,
           overflow: "hidden",
           whiteSpace: "nowrap",
-          fontSize: 13,
+          columnGap: spaceWidthPx(SONG_FONT_SIZE_PX),
+          fontSize: SONG_FONT_SIZE_PX,
           fontWeight: 500,
           color: C.songText,
           lineHeight: 1,
         },
-        e.songName,
+        ...spacedWords(e.songName),
       ),
       e.short ?
         h(
@@ -251,7 +261,13 @@ function songRow(
           e.short,
         )
       : null,
-      e.segue ?
+      /*
+       * `entry_segue` is normally the bare marker ">", meaning "segues into the
+       * next song", and only sometimes carries a label. An empty string is
+       * therefore meaningful — it still draws the arrow — so the check is
+       * against null, not truthiness.
+       */
+      e.segue !== null && e.segue !== undefined ?
         h(
           "div",
           {
@@ -260,10 +276,10 @@ function songRow(
             alignItems: "center",
             color: C.segueText,
             fontWeight: 700,
-            fontSize: 13,
+            fontSize: SONG_FONT_SIZE_PX,
             lineHeight: 1,
           },
-          `→ ${e.segue}`,
+          e.segue ? `→ ${e.segue}` : "→",
         )
       : null,
     ),

@@ -44,6 +44,31 @@ type RichNode = {
  * phrase. Emitting one span per word restores word-level wrapping, which is
  * what the browser card does.
  */
+/**
+ * Word gap as a fraction of the font size.
+ *
+ * Geist's own space is about 0.26em, which reads a shade loose on the card, so
+ * words are laid out as separate flex items with this gap instead. Kept
+ * fractional deliberately: rounding to whole pixels quantised 0.26 and 0.22 to
+ * the same value at 13px, which made the setting look like it did nothing.
+ */
+export const WORD_GAP_EM = 0.21
+
+/** Width of the gap between words at a given font size. */
+export function spaceWidthPx(fontSize: number): number {
+  return Math.max(1.5, fontSize * WORD_GAP_EM)
+}
+
+/**
+ * Splits text into one span per word, for layout with {@link spaceWidthPx}.
+ *
+ * Satori ignores `wordSpacing`, so the only way to control the space between
+ * words is to make each word its own flex item and space them with `columnGap`.
+ */
+export function spacedWords(text: string): unknown[] {
+  return wordSpans(text)
+}
+
 function wordSpans(text: string): unknown[] {
   // Whitespace is dropped rather than emitted: Satori trims it at flex-item
   // edges no matter how the span is styled, so inter-word spacing is restored
@@ -53,17 +78,19 @@ function wordSpans(text: string): unknown[] {
   return words.map((word) => ({ type: "span", props: { style: {}, children: word } }))
 }
 
-/** Approximate width of a space in Geist, for the wrap gap. */
-function spaceWidthPx(fontSize: number): number {
-  return Math.max(2, Math.round(fontSize * 0.26))
-}
-
 type StyledNode = { type: string; props: { style: Record<string, unknown> } }
 
-/** Cancels the container's word gap so a run hugs the one before it. */
+/**
+ * Cancels the container's word gap so a run hugs the one before it.
+ *
+ * Slightly more than the gap: a period carries visible left side bearing in
+ * Geist, so cancelling exactly `gapPx` still left a hairline before it while a
+ * comma already sat flush. Measured across both, `gapPx + 2` seats them the
+ * same without over-tightening the comma.
+ */
 function closeUpGap(node: unknown, gapPx: number): void {
   const styled = node as { props?: { style?: Record<string, unknown> } } | undefined
-  if (styled?.props?.style) styled.props.style.marginLeft = -gapPx
+  if (styled?.props?.style) styled.props.style.marginLeft = -(gapPx + 2)
 }
 
 /**
