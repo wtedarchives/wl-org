@@ -94,8 +94,11 @@ Deno.serve(async (req) => {
       .from("setlist_entries")
       .select(ENTRY_SELECT)
       .eq("entry_show", showId)
-      .order("entry_setnum", { ascending: true })
-      .order("entry_setorder", { ascending: true }),
+      // Set first, then position within the set — the order the card reads in,
+      // and what the web capture used. Ordering by setnum first interleaved
+      // the sets, and entry_setorder is nullable so it cannot be the key.
+      .order("entry_set", { ascending: true })
+      .order("entry_setnum", { ascending: true }),
   ])
 
   if (showRes.error) return jsonError(`Show lookup failed: ${showRes.error.message}`, 500)

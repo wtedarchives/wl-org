@@ -61,6 +61,9 @@ const SONG_COLUMN_WIDTH_PX =
   SPLIT_MAIN_PX - PANEL_BORDER_PX * 2 - RAIL_WIDTH_PX - PANEL_BORDER_PX
 const SONG_CONTENT_WIDTH_PX = SONG_COLUMN_WIDTH_PX - SONG_STACK_INSET_PX * 2
 const COACH_WIDTH_PX = SONG_CONTENT_WIDTH_PX - COACH_INDENT_PX
+
+/** A panel's padding on both sides plus its 1px border on both sides. */
+const PANEL_INSET_PX = 8 * 2 + PANEL_BORDER_PX * 2
 /** Matches WL_HOME_V2_SETLIST_SHARE_EXPORT_FRAME_RADIUS_PX. */
 export const CARD_RADIUS_PX = 16
 
@@ -149,7 +152,13 @@ export type CardStatRow = {
 export type CardViewModel = {
   entries: CardEntry[]
   detailPills: CardDetailPill[]
+  /**
+   * Rarity and average-gap rows. Only the Instagram end-of-show image carries
+   * them; the per-song Bluesky card shows the show poster in their place.
+   */
   statRows: CardStatRow[]
+  /** Data URI of the show poster, shown when there are no stat rows. */
+  posterSrc?: string | null
   /** Prepared rich HTML for the aside coach-notes panel. */
   coachHtml?: string | null
   /** Prepared rich HTML for the callbacks block under the split. */
@@ -445,12 +454,42 @@ function statsPanel(rows: CardStatRow[]): Node {
   )
 }
 
-function panelBlock(children: unknown, marginTop = 8): Node {
+/**
+ * The show poster, clipped to the same rounded panel the stats use.
+ *
+ * Height is left to Satori so the poster keeps its own proportions — these are
+ * gig posters and vary from square to tall portrait.
+ */
+function posterPanel(src: string): Node {
+  const innerWidth = SPLIT_ASIDE_PX - 2 // less the 1px border on each side
+  return h(
+    "div",
+    {
+      display: "flex",
+      width: SPLIT_ASIDE_PX,
+      borderRadius: 10,
+      border: `1px solid ${C.frameBorder}`,
+      background: C.panelBg,
+      overflow: "hidden",
+    },
+    img(src, { width: innerWidth, objectFit: "cover" }),
+  )
+}
+
+/**
+ * A rounded panel of a known width.
+ *
+ * The width is explicit because rich text inside resolves `width: "100%"`
+ * against it: in an auto-width panel that collapses to min-content and every
+ * word claims its own line.
+ */
+function panelBlock(children: unknown, width: number, marginTop = 8): Node {
   return h(
     "div",
     {
       display: "flex",
       flexDirection: "column",
+      width,
       marginTop,
       borderRadius: 10,
       border: `1px solid ${C.frameBorder}`,
@@ -481,15 +520,16 @@ function aside(vm: CardViewModel, rich: RichParser): Node {
       )
     : null,
     vm.statRows.length > 0 ? statsPanel(vm.statRows) : null,
+    vm.posterSrc ? posterPanel(vm.posterSrc) : null,
     vm.coachHtml ?
       panelBlock(
         rich(vm.coachHtml, {
-          display: "flex",
-          flexDirection: "column",
+          width: SPLIT_ASIDE_PX - PANEL_INSET_PX,
           fontSize: 10,
           lineHeight: 1.05,
           color: C.richText,
         }),
+        SPLIT_ASIDE_PX,
         0,
       )
     : null,
@@ -619,12 +659,12 @@ export function buildSetlistShareCard(
       vm.callbacksHtml ?
         panelBlock(
           rich(vm.callbacksHtml, {
-            display: "flex",
-            flexDirection: "column",
+            width: CONTENT_WIDTH_PX - PANEL_INSET_PX,
             fontSize: 11,
             lineHeight: 1.05,
             color: C.richText,
           }),
+          CONTENT_WIDTH_PX,
         )
       : null,
     ),

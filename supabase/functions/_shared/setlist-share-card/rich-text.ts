@@ -58,13 +58,67 @@ function spaceWidthPx(fontSize: number): number {
   return Math.max(2, Math.round(fontSize * 0.26))
 }
 
+type StyledNode = { type: string; props: { style: Record<string, unknown> } }
+
+/** Cancels the container's word gap so a run hugs the one before it. */
+function closeUpGap(node: unknown, gapPx: number): void {
+  const styled = node as { props?: { style?: Record<string, unknown> } } | undefined
+  if (styled?.props?.style) styled.props.style.marginLeft = -gapPx
+}
+
+/**
+ * Punctuation that hugs the word before it, so no word gap should precede it.
+ *
+ * Inferred from the text rather than read from the markup, because
+ * `satori-html` TRIMS text nodes: `"First time "` arrives as `"First time"`
+ * and `" has been played since "` loses both spaces. The original spacing is
+ * destroyed before this code sees it, so a run beginning with closing
+ * punctuation is taken to have butted against its neighbour — which turns
+ * `<a>11.06.20</a>,` back from "11.06.20 ," into "11.06.20,".
+ */
+const HUGGING_PUNCTUATION = /^[,.;:!?%)\]}\u2026\u3001\u3002]/
+
+/**
+ * Flattens a child list, closing up the gap before hugging punctuation.
+ *
+ * Word spacing comes from `columnGap`, which applies uniformly between flex
+ * items. That is right everywhere except before punctuation, which gets a
+ * negative margin to cancel it.
+ */
+function normaliseChildren(
+  children: unknown,
+  inWrap: boolean,
+  gapPx: number,
+): unknown[] {
+  const list = Array.isArray(children) ? children : [children]
+  const out: unknown[] = []
+
+  for (const child of list) {
+    if (typeof child === "string") {
+      if (!inWrap) {
+        out.push(child)
+        continue
+      }
+      const tokens = wordSpans(child)
+      if (tokens.length === 0) continue
+      if (out.length > 0 && HUGGING_PUNCTUATION.test(child.trimStart())) {
+        closeUpGap(tokens[0], gapPx)
+      }
+      out.push(...tokens)
+      continue
+    }
+
+    const node = normaliseRich(child, inWrap, gapPx)
+    if (node !== null && node !== undefined) out.push(node)
+  }
+
+  return out
+}
+
 function normaliseRich(node: unknown, inWrap = false, gapPx = 3): unknown {
   if (node === null || node === undefined) return node
   if (typeof node === "string") return inWrap ? wordSpans(node) : node
-  if (Array.isArray(node)) return node.flatMap((n) => {
-    const out = normaliseRich(n, inWrap, gapPx)
-    return Array.isArray(out) ? out : [out]
-  })
+  if (Array.isArray(node)) return normaliseChildren(node, inWrap, gapPx)
 
   const { type, props } = node as RichNode
   if (!type) return node
@@ -96,6 +150,19 @@ function normaliseRich(node: unknown, inWrap = false, gapPx = 3): unknown {
     style.margin = 0
   }
 
+  if (!isBlock) {
+    /*
+     * Inline runs must be flex containers too. A <span> holding several word
+     * spans with no `display` is laid out by Satori as a full-width block, so
+     * every link and bold phrase claimed its own line instead of flowing with
+     * the sentence around it.
+     */
+    style.display = "flex"
+    style.flexWrap = "wrap"
+    style.alignItems = "baseline"
+    style.columnGap = gapPx
+  }
+
   if (type === "strong" || type === "b") style.fontWeight = 700
   if (type === "em" || type === "i") style.fontStyle = "italic"
   if (type === "a") {
@@ -104,10 +171,12 @@ function normaliseRich(node: unknown, inWrap = false, gapPx = 3): unknown {
   }
   if (type === "li" && style.paddingLeft === undefined) style.paddingLeft = 8
 
-  const kids = normaliseRich(props?.children, childrenWrap, gapPx)
   return {
     type: isBlock ? "div" : "span",
-    props: { style, children: kids },
+    props: {
+      style,
+      children: normaliseChildren(props?.children, childrenWrap, gapPx),
+    },
   }
 }
 
@@ -124,16 +193,29 @@ export function makeRichParser(
 ): RichParser {
   return (markup, style) => {
     const parsed = parseHtml(markup) as RichNode
+    const gapPx = spaceWidthPx(Number(style.fontSize ?? 11))
     return {
       type: "div",
       props: {
-        style: { display: "flex", flexDirection: "column", width: "100%", ...style },
+        /*
+         * A wrapping ROW, not a column. CMS values are frequently bare inline
+         * content — "First time <a>…</a> has been played since <a>…</a>" has no
+         * block element at all — and a column put every text run and every link
+         * on its own line. As a wrap row the sentence flows, while genuine
+         * block children still stack: they carry `width: 100%`, so each one
+         * fills its line and pushes the next to the following row.
+         */
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "baseline",
+          columnGap: gapPx,
+          width: "100%",
+          ...style,
+        },
         children:
-          normaliseRich(
-            parsed?.props?.children,
-            false,
-            spaceWidthPx(Number(style.fontSize ?? 11)),
-          ) ?? null,
+          normaliseChildren(parsed?.props?.children, true, gapPx),
       },
     }
   }

@@ -13,6 +13,7 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 import type { ShareExportTourPosition } from "./show-details.ts"
+import { loadShowPosterDataUri } from "./show-poster.ts"
 import {
   buildCardViewModel,
   computeTourPosition,
@@ -86,8 +87,11 @@ export async function renderSetlistShareImage(
         .from("setlist_entries")
         .select(ENTRY_SELECT)
         .eq("entry_show", showId)
-        .order("entry_setnum", { ascending: true })
-        .order("entry_setorder", { ascending: true }),
+        // Set first, then position within the set — the order the card reads in,
+        // and what the web capture used. Ordering by setnum first interleaved
+        // the sets, and entry_setorder is nullable so it cannot be the key.
+        .order("entry_set", { ascending: true })
+        .order("entry_setnum", { ascending: true }),
     ])
 
     if (showRes.error) return { ok: false, error: showRes.error.message }
@@ -113,9 +117,18 @@ export async function renderSetlistShareImage(
       }
     }
 
+    /*
+     * Rarity and average gap belong on the end-of-show Instagram image only.
+     * The per-song Bluesky card shows the show's poster in that slot instead.
+     */
+    const includeStats = format === "instagram"
+    const posterSrc = includeStats ? null : await loadShowPosterDataUri(db, showId)
+
     const viewModel = buildCardViewModel(show, setlist, {
       tourPosition,
       showEntryCoachNotes: options.showEntryCoachNotes ?? true,
+      includeStats,
+      posterSrc,
     })
 
     const url = new URL(endpoint)

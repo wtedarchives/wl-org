@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { loadShowPosterImage } from "./setlist-share-card/show-poster.ts"
 import {
   boundedSupabaseImageUrl,
   buildLinkFacets,
@@ -114,24 +115,6 @@ async function loadTourPosition(
   return index >= 0 ? { position: index + 1, total: sorted.length } : null
 }
 
-/** First poster image linked to this show, if any. `show_posters.show` is jsonb. */
-async function loadShowPosterImage(
-  db: SupabaseClient,
-  showId: string,
-): Promise<string | undefined> {
-  const { data, error } = await db
-    .from("show_posters")
-    .select("image")
-    .filter("show", "cs", JSON.stringify([showId]))
-    .not("image", "is", null)
-    .limit(1)
-  if (error) {
-    console.error("bluesky show poster lookup:", error.message)
-    return undefined
-  }
-  const image = (data?.[0]?.image as string | null)?.trim()
-  return image || undefined
-}
 
 /** Also used by the Instagram caption builder. */
 export async function loadRootShowInfo(

@@ -44,6 +44,13 @@ export type BuildViewModelOptions = {
   /** Per-entry coach notes under each song. Off for the public export. */
   showEntryCoachNotes?: boolean
   tourPosition?: ShareExportTourPosition | null
+  /**
+   * Rarity and average gap. Only wanted on the Instagram end-of-show image —
+   * the per-song Bluesky card shows the poster instead.
+   */
+  includeStats?: boolean
+  /** Data URI of the show poster, used when stats are omitted. */
+  posterSrc?: string | null
 }
 
 /** Leading `>` is markup, not content — the card draws its own arrow. */
@@ -105,7 +112,8 @@ export function buildCardViewModel(
   return {
     entries,
     detailPills: buildShareExportDetailPills(show, options.tourPosition ?? null),
-    statRows: buildStatRows(show),
+    statRows: options.includeStats ? buildStatRows(show) : [],
+    posterSrc: options.posterSrc ?? null,
     coachHtml: richOrNull(show.show_coachnotes),
     callbacksHtml: richOrNull(show.show_callbacks),
     showDiscographySetUi: show.discography_display !== false,
