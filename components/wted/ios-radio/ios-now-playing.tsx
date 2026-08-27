@@ -3,7 +3,6 @@
 import Image from "next/image"
 import { useCallback, useEffect, useState } from "react"
 import {
-  Broadcast,
   CircleNotch,
   MoonStars,
   PlayCircle,
@@ -13,6 +12,7 @@ import {
 
 import { IosNowPlayingHistory } from "@/components/wted/ios-radio/ios-now-playing-history"
 import { useIosRadioPlayerContext } from "@/components/wted/ios-radio/ios-radio-player-context"
+import { WTED_RADIO_FALLBACK_ARTWORK } from "@/lib/wted-radio-co-status"
 import { formatRadioTrackClock } from "@/lib/wted-radio-track-display-title"
 
 import "./ios-radio.css"
@@ -60,7 +60,14 @@ function IosNowPlayingArtwork({
           unoptimized
         />
       : <span className="ios-now-playing__art-fallback">
-          <Broadcast size={64} weight="fill" aria-hidden />
+          <Image
+            src={WTED_RADIO_FALLBACK_ARTWORK}
+            alt=""
+            width={320}
+            height={320}
+            className="ios-now-playing__art-fallback-img"
+            unoptimized
+          />
         </span>
       }
     </button>

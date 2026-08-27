@@ -2,12 +2,7 @@
 
 import Image from "next/image"
 import { useState } from "react"
-import {
-  Broadcast,
-  CircleNotch,
-  PlayCircle,
-  StopCircle,
-} from "@phosphor-icons/react"
+import { CircleNotch, PlayCircle, StopCircle } from "@phosphor-icons/react"
 
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { IosRadioBarCountdown } from "@/components/wted/ios-radio/ios-radio-bar-countdown"
@@ -17,6 +12,7 @@ import { IosRadioBarVolume } from "@/components/wted/ios-radio/ios-radio-bar-vol
 import { IosRadioMarquee } from "@/components/wted/ios-radio/ios-radio-bar-marquee"
 import { useIosRadioPlayerContext } from "@/components/wted/ios-radio/ios-radio-player-context"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
+import { WTED_RADIO_FALLBACK_ARTWORK } from "@/lib/wted-radio-co-status"
 
 import "./ios-radio.css"
 
@@ -93,7 +89,14 @@ export function IosRadioBar({
             unoptimized
           />
         : <span className="ios-radio-bar__art-fallback">
-            <Broadcast size={28} weight="fill" aria-hidden />
+            <Image
+              src={WTED_RADIO_FALLBACK_ARTWORK}
+              alt=""
+              width={40}
+              height={40}
+              className="ios-radio-bar__art-fallback-img"
+              unoptimized
+            />
           </span>
         }
       </button>

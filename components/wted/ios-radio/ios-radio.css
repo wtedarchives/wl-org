@@ -113,6 +113,14 @@
     color 0.15s ease;
 }
 
+/* Contained, not `cover`: the logo is an illustration on transparency, so it is
+   centred on the teal ground the way the history rows treat their fallback. */
+.ios-radio-bar__art-fallback-img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
+
 .ios-radio-bar__copy {
   display: flex;
   min-width: 0;
@@ -683,6 +691,12 @@
   transition:
     background 0.15s ease,
     color 0.15s ease;
+}
+
+.wl-home-v2 .ios-now-playing__art-fallback-img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
 }
 
 .wl-home-v2 .ios-now-playing__track {

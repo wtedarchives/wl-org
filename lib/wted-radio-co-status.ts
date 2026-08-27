@@ -2,6 +2,17 @@ export const WTED_RADIO_CO_STATION_ID = "s3c11c85d6" as const
 
 export const WTED_RADIO_NAME = "WTED Goose Radio" as const
 
+/**
+ * Last-resort artwork for the header player.
+ *
+ * The chain above it — custom Radio.co art, the concert's release cover, the
+ * on-air episode's artwork — can all come up empty at once: a track whose show
+ * has no release, aired during a gap between two schedule slots. That is normal
+ * dead-air behaviour, not an error, so it gets the station logo rather than a
+ * "no artwork" icon.
+ */
+export const WTED_RADIO_FALLBACK_ARTWORK = "/WTED3.png" as const
+
 /** Now Playing page that shares the iOS-style header player (allowlisted testers). */
 export const WTED_RADIO_LISTEN_PATH = "/radio/listen" as const
 
