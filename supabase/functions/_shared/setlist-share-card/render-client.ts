@@ -118,11 +118,12 @@ export async function renderSetlistShareImage(
     }
 
     /*
-     * Rarity and average gap belong on the end-of-show Instagram image only.
-     * The per-song Bluesky card shows the show's poster in that slot instead.
+     * The poster appears on both formats. Rarity and average gap are extra on
+     * the end-of-show Instagram image only — the per-song Bluesky card leaves
+     * them off.
      */
     const includeStats = format === "instagram"
-    const posterSrc = includeStats ? null : await loadShowPosterDataUri(db, showId)
+    const posterSrc = await loadShowPosterDataUri(db, showId)
 
     const viewModel = buildCardViewModel(show, setlist, {
       tourPosition,

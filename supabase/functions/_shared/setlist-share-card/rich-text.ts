@@ -65,30 +65,26 @@ export function spaceWidthPx(fontSize: number): number {
  * Satori ignores `wordSpacing`, so the only way to control the space between
  * words is to make each word its own flex item and space them with `columnGap`.
  */
-export function spacedWords(text: string): unknown[] {
-  return wordSpans(text)
+export function spacedWords(text: string, style: Style = {}): unknown[] {
+  return wordSpans(text, style)
 }
 
-function wordSpans(text: string): unknown[] {
-  // Whitespace is dropped rather than emitted: Satori trims it at flex-item
-  // edges no matter how the span is styled, so inter-word spacing is restored
-  // with `columnGap` on the wrapping container instead.
+/**
+ * One span per word, carrying any inherited inline styling.
+ *
+ * `flexShrink: 0` is essential. Flex items shrink by default and a word span
+ * cannot be narrower than its glyphs, so in a nowrap row every word was
+ * squeezed onto its neighbour into unreadable overlap. Words keep their width
+ * and overflow instead, to be clipped or faded by their container.
+ */
+function wordSpans(text: string, style: Style = {}): unknown[] {
   const words = text.match(/\S+/g)
   if (!words) return []
-  /*
-   * `flexShrink: 0` is essential. Flex items shrink by default, and a word span
-   * cannot actually get narrower than its glyphs — so in a nowrap container a
-   * long title had every word squeezed on top of its neighbour into unreadable
-   * overlap. Words keep their width and overflow instead, to be clipped or
-   * faded by the container.
-   */
   return words.map((word) => ({
     type: "span",
-    props: { style: { flexShrink: 0 }, children: word },
+    props: { style: { ...style, flexShrink: 0 }, children: word },
   }))
 }
-
-type StyledNode = { type: string; props: { style: Record<string, unknown> } }
 
 /**
  * Cancels the container's word gap so a run hugs the one before it.
@@ -110,33 +106,46 @@ function closeUpGap(node: unknown, gapPx: number): void {
  * `satori-html` TRIMS text nodes: `"First time "` arrives as `"First time"`
  * and `" has been played since "` loses both spaces. The original spacing is
  * destroyed before this code sees it, so a run beginning with closing
- * punctuation is taken to have butted against its neighbour — which turns
- * `<a>11.06.20</a>,` back from "11.06.20 ," into "11.06.20,".
+ * punctuation is taken to have butted against its neighbour.
  */
 const HUGGING_PUNCTUATION = /^[,.;:!?%)\]}\u2026\u3001\u3002]/
 
+/** Inline emphasis, merged into each word rather than wrapped around them. */
+function inlineStyle(type: string): Style {
+  if (type === "strong" || type === "b") return { fontWeight: 700 }
+  if (type === "em" || type === "i") return { fontStyle: "italic" }
+  if (type === "a") return { color: "rgb(255, 163, 148)", fontWeight: 600 }
+  return {}
+}
+
 /**
- * Flattens a child list, closing up the gap before hugging punctuation.
+ * Flattens a child list into spans the parent can wrap.
  *
- * Word spacing comes from `columnGap`, which applies uniformly between flex
- * items. That is right everywhere except before punctuation, which gets a
- * negative margin to cancel it.
+ * Inline elements are NOT kept as nested containers. A `<a>` wrapping its own
+ * word spans became a flex item in the parent's wrap row, and flex items shrink
+ * by default — so the link squeezed and broke its text mid-phrase ("Atlas /
+ * Dogs") while leaving a gap beside it. Emitting the link's words directly into
+ * the parent, each carrying the link's colour, lets them wrap with the sentence
+ * exactly as the surrounding words do.
  */
 function normaliseChildren(
   children: unknown,
   inWrap: boolean,
   gapPx: number,
+  inherited: Style = {},
 ): unknown[] {
   const list = Array.isArray(children) ? children : [children]
   const out: unknown[] = []
 
   for (const child of list) {
+    if (child === null || child === undefined) continue
+
     if (typeof child === "string") {
       if (!inWrap) {
         out.push(child)
         continue
       }
-      const tokens = wordSpans(child)
+      const tokens = wordSpans(child, inherited)
       if (tokens.length === 0) continue
       if (out.length > 0 && HUGGING_PUNCTUATION.test(child.trimStart())) {
         closeUpGap(tokens[0], gapPx)
@@ -145,86 +154,68 @@ function normaliseChildren(
       continue
     }
 
-    const node = normaliseRich(child, inWrap, gapPx)
-    if (node !== null && node !== undefined) out.push(node)
+    const { type, props } = (child ?? {}) as RichNode
+    if (!type) continue
+
+    const className = String(props?.class ?? props?.className ?? "")
+    // A `<br>` stand-in: a full-width empty box forces the next wrap line.
+    if (className.includes(BR_GAP_CLASS)) {
+      out.push({
+        type: "div",
+        props: { style: { display: "flex", width: "100%", height: 3 } },
+      })
+      continue
+    }
+
+    if (!BLOCK_TAGS.has(type)) {
+      // Inline: merge its styling and hoist its words into this list.
+      out.push(
+        ...normaliseChildren(props?.children, inWrap, gapPx, {
+          ...inherited,
+          ...inlineStyle(type),
+        }),
+      )
+      continue
+    }
+
+    out.push(blockNode(type, props, gapPx, inherited))
   }
 
   return out
 }
 
-function normaliseRich(node: unknown, inWrap = false, gapPx = 3): unknown {
-  if (node === null || node === undefined) return node
-  if (typeof node === "string") return inWrap ? wordSpans(node) : node
-  if (Array.isArray(node)) return normaliseChildren(node, inWrap, gapPx)
+/** A block element: a flex container its children lay out inside. */
+function blockNode(
+  type: string,
+  props: RichNode["props"],
+  gapPx: number,
+  inherited: Style,
+): unknown {
+  const style: Style = { ...((props?.style ?? {}) as Style) }
+  const stacks = COLUMN_TAGS.has(type)
 
-  const { type, props } = node as RichNode
-  if (!type) return node
-
-  const incoming = (props?.style ?? {}) as Record<string, unknown>
-  const style: Record<string, unknown> = { ...incoming }
-  const className = String(props?.class ?? props?.className ?? "")
-
-  // A `<br>` stand-in: full-width zero-content box forces the next wrap line.
-  if (className.includes(BR_GAP_CLASS)) {
-    return { type: "div", props: { style: { display: "flex", width: "100%", height: 3 } } }
-  }
-
-  const isBlock = BLOCK_TAGS.has(type)
-  let childrenWrap = inWrap
-  if (isBlock) {
-    style.display = "flex"
-    if (COLUMN_TAGS.has(type)) {
-      style.flexDirection = "column"
-      childrenWrap = false
-    } else {
-      style.flexDirection = "row"
-      style.flexWrap = "wrap"
-      style.alignItems = "baseline"
-      style.columnGap = gapPx
-      childrenWrap = true
-    }
-    if (style.width === undefined) style.width = "100%"
-    style.margin = 0
-  }
-
-  if (!isBlock) {
-    /*
-     * Inline runs must be flex containers too. A <span> holding several word
-     * spans with no `display` is laid out by Satori as a full-width block, so
-     * every link and bold phrase claimed its own line instead of flowing with
-     * the sentence around it.
-     */
-    style.display = "flex"
+  style.display = "flex"
+  if (stacks) {
+    style.flexDirection = "column"
+  } else {
+    style.flexDirection = "row"
     style.flexWrap = "wrap"
     style.alignItems = "baseline"
     style.columnGap = gapPx
   }
-
-  if (type === "strong" || type === "b") style.fontWeight = 700
-  if (type === "em" || type === "i") style.fontStyle = "italic"
-  if (type === "a") {
-    style.color = "rgb(255, 163, 148)"
-    style.fontWeight = 600
-  }
+  if (style.width === undefined) style.width = "100%"
+  style.margin = 0
   if (type === "li" && style.paddingLeft === undefined) style.paddingLeft = 8
 
   return {
-    type: isBlock ? "div" : "span",
+    type: "div",
     props: {
       style,
-      children: normaliseChildren(props?.children, childrenWrap, gapPx),
+      children: normaliseChildren(props?.children, !stacks, gapPx, inherited),
     },
   }
 }
 
-/**
- * Builds a rich-HTML parser around a runtime-supplied `satori-html`.
- *
- * `satori-html` returns its own root div carrying `height: 100%`, which makes
- * every rich block expand to fill the card instead of hugging its text — that
- * stretched the coach panel and pushed the callbacks block outside the frame's
- * `overflow: hidden`. Only the parsed children are kept; the styling is ours.
- */
 export function makeRichParser(
   parseHtml: (markup: string) => unknown,
 ): RichParser {

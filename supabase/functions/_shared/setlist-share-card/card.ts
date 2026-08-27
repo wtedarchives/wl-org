@@ -530,7 +530,7 @@ function panelBlock(children: unknown, width: number, marginTop = 8): Node {
   )
 }
 
-function aside(vm: CardViewModel, rich: RichParser): Node {
+function aside(vm: CardViewModel): Node {
   return h(
     "div",
     {
@@ -551,18 +551,6 @@ function aside(vm: CardViewModel, rich: RichParser): Node {
     : null,
     vm.statRows.length > 0 ? statsPanel(vm.statRows) : null,
     vm.posterSrc ? posterPanel(vm.posterSrc) : null,
-    vm.coachHtml ?
-      panelBlock(
-        rich(vm.coachHtml, {
-          width: SPLIT_ASIDE_PX - PANEL_INSET_PX,
-          fontSize: 10,
-          lineHeight: 1.05,
-          color: C.richText,
-        }),
-        SPLIT_ASIDE_PX,
-        0,
-      )
-    : null,
   )
 }
 
@@ -684,8 +672,24 @@ export function buildSetlistShareCard(
           },
           setlistPanel(vm, rich),
         ),
-        aside(vm, rich),
+        aside(vm),
       ),
+      /*
+       * Coach notes and callbacks both run the full width of the card body,
+       * below the split. Coach notes used to sit in the aside at 10px; out here
+       * they take the same 11px as callbacks.
+       */
+      vm.coachHtml ?
+        panelBlock(
+          rich(vm.coachHtml, {
+            width: CONTENT_WIDTH_PX - PANEL_INSET_PX,
+            fontSize: 11,
+            lineHeight: 1.05,
+            color: C.richText,
+          }),
+          CONTENT_WIDTH_PX,
+        )
+      : null,
       vm.callbacksHtml ?
         panelBlock(
           rich(vm.callbacksHtml, {
