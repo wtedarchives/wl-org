@@ -80,3 +80,7 @@ verify_jwt = false
 # Radio-program "New Show" notifier; internal (service-role bearer checked in-function).
 [functions.radio-program-notify]
 verify_jwt = false
+
+# TRMNL e-ink device feed; custom API keys validated in-function (like bot-read-api).
+[functions.trmnl-feed]
+verify_jwt = false

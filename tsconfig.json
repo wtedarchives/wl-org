@@ -11,6 +11,10 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // Lets the Next app import the `_shared` edge modules, whose relative
+    // imports carry the `.ts` extension Deno requires. Permissive only, and
+    // safe with `noEmit` — nothing is required to use it.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
