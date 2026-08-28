@@ -45,6 +45,13 @@ export type TrmnlNowPlaying = {
   primary: string
   /** Artist and/or the source show's date + venue. */
   secondary: string | null
+  /**
+   * Cover for the track on air, resolved by the caller with the same chain the
+   * header player uses (custom Radio.co art, then the concert's release cover,
+   * then the airing episode's artwork). Null means draw no image — the panel is
+   * 1-bit, so a missing cover looks better as space than as a grey box.
+   */
+  artwork: string | null
 }
 
 export type TrmnlOnAir = {
@@ -120,7 +127,13 @@ export type RadioCoStatusInput = {
 export type RadioCoScheduleEventInput = {
   start: string
   end: string
-  playlist: { title?: string | null }
+  playlist: {
+    /** `wted_episodes.episode` join key. */
+    name?: string | null
+    title?: string | null
+    /** Path carries the playlist id, used when the name lookup misses. */
+    artwork?: string | null
+  }
 }
 
 /** `shows` columns the live query selects. */
@@ -142,9 +155,38 @@ export type TrmnlSetlistEntryInput = {
   entry_setorder: number | null
 }
 
+/**
+ * One merged slot on the local day, before its title is resolved.
+ *
+ * `buildTrmnlPayload` takes these rather than raw Radio.co events because the
+ * display title comes from `wted_episodes` — a database lookup keyed on
+ * `playlistName` (and `artworkUrl`, which carries the playlist id as a
+ * fallback). Callers select slots, resolve titles, then build.
+ */
+export type TrmnlScheduleSlot = {
+  /** Radio.co `playlist.name`, the `wted_episodes.episode` join key. */
+  playlistName: string
+  /** Radio.co `playlist.title`, the last-resort label. */
+  playlistTitle: string
+  /** Radio.co `playlist.artwork`; its path carries the playlist id. */
+  artworkUrl: string
+  displayStart: number
+  displayEnd: number
+  actualStart: number
+  actualEnd: number
+}
+
 export type BuildTrmnlPayloadInput = {
   status: RadioCoStatusInput | null
-  schedule: RadioCoScheduleEventInput[]
+  /** From {@link selectScheduleSlots}. */
+  slots: TrmnlScheduleSlot[]
+  /**
+   * Display title per slot, index-aligned with `slots`. A null entry falls back
+   * to the Radio.co playlist name, matching `resolveRadioScheduleSlotTitle`.
+   */
+  slotTitles: Array<string | null>
+  /** Cover for the track on air; see {@link TrmnlNowPlaying.artwork}. */
+  trackArtwork: string | null
   show: TrmnlShowInput | null
   setlist: TrmnlSetlistEntryInput[]
   nowMs: number
@@ -200,8 +242,7 @@ function startOfZonedDay(instant: number, tz: string): number {
   return corrected === offset ? guess : localMidnight - corrected
 }
 
-function formatZonedTime(iso: string, tz: string): string {
-  const t = new Date(iso).getTime()
+function formatZonedTime(t: number, tz: string): string {
   if (Number.isNaN(t)) return ""
   return new Intl.DateTimeFormat("en-US", {
     timeZone: tz,
@@ -219,7 +260,9 @@ function formatZonedTime(iso: string, tz: string): string {
  * Prefers live `current_track`, else the newest `history` row — the same
  * ordering as `getWtedNowPlayingTitle`.
  */
-export function parseRadioNowPlayingTitle(raw: string): TrmnlNowPlaying {
+export function parseRadioNowPlayingTitle(
+  raw: string,
+): Omit<TrmnlNowPlaying, "artwork"> {
   const title = raw.trim()
   const dateMatch =
     /(\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/.exec(title)
@@ -250,7 +293,9 @@ export function parseRadioNowPlayingTitle(raw: string): TrmnlNowPlaying {
   return { primary: parts[1]!, secondary: parts.slice(2).join(" · ") }
 }
 
-function buildNowPlaying(status: RadioCoStatusInput | null): TrmnlNowPlaying | null {
+function buildNowPlaying(
+  status: RadioCoStatusInput | null,
+): Omit<TrmnlNowPlaying, "artwork"> | null {
   const current = status?.current_track?.title?.trim()
   const raw = current || status?.history?.[0]?.title?.trim() || ""
   return raw ? parseRadioNowPlayingTitle(raw) : null
@@ -258,21 +303,23 @@ function buildNowPlaying(status: RadioCoStatusInput | null): TrmnlNowPlaying | n
 
 /* ---------------------------------------------------------- right: schedule */
 
-type ClippedSlot = {
-  title: string
-  displayStart: number
-  displayEnd: number
-  actualStart: number
-  actualEnd: number
-}
-
-/** Slots whose start or end falls on the `tz` day, clipped to that day. */
-function clipScheduleToDay(
+/**
+ * Slots whose start or end falls on the `tz` day, clipped to that day, with
+ * consecutive same-title rows merged.
+ *
+ * Exported because the display title needs a `wted_episodes` lookup that this
+ * module cannot do: callers select slots, resolve titles, then call
+ * {@link buildTrmnlPayload} with both.
+ */
+export function selectScheduleSlots(
   events: RadioCoScheduleEventInput[],
-  dayStart: number,
-  dayEnd: number,
-): ClippedSlot[] {
-  const clipped: ClippedSlot[] = []
+  nowMs: number,
+  tz: string,
+): TrmnlScheduleSlot[] {
+  const dayStart = startOfZonedDay(nowMs, tz)
+  const dayEnd = startOfZonedDay(dayStart + 36 * 60 * 60 * 1000, tz)
+
+  const clipped: TrmnlScheduleSlot[] = []
   for (const event of events) {
     const start = new Date(event.start).getTime()
     const end = new Date(event.end).getTime()
@@ -287,7 +334,9 @@ function clipScheduleToDay(
     if (displayStart >= displayEnd) continue
 
     clipped.push({
-      title: (event.playlist?.title ?? "").trim(),
+      playlistName: (event.playlist?.name ?? "").trim(),
+      playlistTitle: (event.playlist?.title ?? "").trim(),
+      artworkUrl: (event.playlist?.artwork ?? "").trim(),
       displayStart,
       displayEnd,
       actualStart: start,
@@ -295,21 +344,19 @@ function clipScheduleToDay(
     })
   }
   clipped.sort((a, b) => a.displayStart - b.displayStart)
-  return clipped
-}
 
-/** Collapse the consecutive same-title rows Radio.co emits for one program. */
-function mergeBackToBack(slots: ClippedSlot[]): ClippedSlot[] {
-  const merged: ClippedSlot[] = []
+  // Collapse the consecutive same-title rows Radio.co emits for one program.
+  // Matched on `playlist.title`, the same key the site merges on.
+  const merged: TrmnlScheduleSlot[] = []
   let i = 0
-  while (i < slots.length) {
-    const first = slots[i]!
+  while (i < clipped.length) {
+    const first = clipped[i]!
     let displayEnd = first.displayEnd
     let actualEnd = first.actualEnd
     let j = i + 1
-    while (j < slots.length) {
-      const next = slots[j]!
-      const sameTitle = first.title === next.title
+    while (j < clipped.length) {
+      const next = clipped[j]!
+      const sameTitle = first.playlistTitle === next.playlistTitle
       const backToBack =
         Math.abs(next.displayStart - displayEnd) <= BACK_TO_BACK_MS_TOLERANCE
       if (!sameTitle || !backToBack) break
@@ -321,6 +368,16 @@ function mergeBackToBack(slots: ClippedSlot[]): ClippedSlot[] {
     i = j
   }
   return merged
+}
+
+/** The slot containing `nowMs`, or null between programs. */
+export function currentScheduleSlot(
+  slots: TrmnlScheduleSlot[],
+  nowMs: number,
+): TrmnlScheduleSlot | null {
+  return (
+    slots.find((s) => nowMs >= s.actualStart && nowMs < s.actualEnd) ?? null
+  )
 }
 
 /* ----------------------------------------------------------- right: setlist */
@@ -368,13 +425,14 @@ function cleanSegue(segue: string | null): string | null {
 /**
  * How hard the template has to pack to fit the right column.
  *
- * The right column is roughly 400x420px, about 22 lines at a comfortable e-ink
- * size. Past that the template steps font size and line height down rather than
- * dropping content, so a long night still fits on one screen.
+ * The right column is roughly 400x386px — 420 less the strip reserved for the
+ * corner mark — or about 18 lines at a comfortable e-ink size. Past that the
+ * template steps font size and line height down rather than dropping content,
+ * so a long night still fits on one screen.
  */
 export function densityForCount(lines: number): TrmnlDensity {
-  if (lines <= 20) return "normal"
-  if (lines <= 30) return "compact"
+  if (lines <= 18) return "normal"
+  if (lines <= 28) return "compact"
   return "tight"
 }
 
@@ -465,6 +523,19 @@ function formatShowDateShort(raw: string | null): string {
 
 /* ------------------------------------------------------------------ build */
 
+/**
+ * Display label for a slot.
+ *
+ * Mirrors `resolveRadioScheduleSlotTitle`: prefer the resolved `wted_episodes`
+ * title, then Radio.co's playlist NAME, then its title. The site falls back to
+ * the name rather than the title, so this does too.
+ */
+function slotTitle(slot: TrmnlScheduleSlot, resolved: string | null | undefined): string {
+  return (
+    resolved?.trim() || slot.playlistName || slot.playlistTitle || ""
+  )
+}
+
 /** True when `show_time` puts the show inside its six-hour live window. */
 export function isShowLive(showTime: string | null, nowMs: number): boolean {
   if (!showTime) return false
@@ -474,21 +545,17 @@ export function isShowLive(showTime: string | null, nowMs: number): boolean {
 }
 
 export function buildTrmnlPayload(input: BuildTrmnlPayloadInput): TrmnlPayload {
-  const { status, schedule, show, setlist, nowMs, tz } = input
+  const { status, slots, slotTitles, trackArtwork, show, setlist, nowMs, tz } =
+    input
 
-  const dayStart = startOfZonedDay(nowMs, tz)
-  const dayEnd = startOfZonedDay(dayStart + 36 * 60 * 60 * 1000, tz)
-  const slots = mergeBackToBack(clipScheduleToDay(schedule, dayStart, dayEnd))
-
-  const currentSlot = slots.find(
-    (s) => nowMs >= s.actualStart && nowMs < s.actualEnd,
-  )
+  const current = currentScheduleSlot(slots, nowMs)
+  const currentIndex = current ? slots.indexOf(current) : -1
 
   const onAir: TrmnlOnAir | null =
-    currentSlot ?
+    current ?
       {
-        title: currentSlot.title,
-        time: `${formatZonedTime(new Date(currentSlot.displayStart).toISOString(), tz)} – ${formatZonedTime(new Date(currentSlot.displayEnd).toISOString(), tz)}`,
+        title: slotTitle(current, slotTitles[currentIndex]),
+        time: `${formatZonedTime(current.displayStart, tz)} – ${formatZonedTime(current.displayEnd, tz)}`,
       }
     : null
 
@@ -498,11 +565,13 @@ export function buildTrmnlPayload(input: BuildTrmnlPayloadInput): TrmnlPayload {
   // and the left column never blanks when the mode flips mid-show.
   const scheduleRows: TrmnlScheduleRow[] =
     live ? []
-    : slots.map((slot) => ({
-        time: formatZonedTime(new Date(slot.displayStart).toISOString(), tz),
-        title: slot.title,
+    : slots.map((slot, i) => ({
+        time: formatZonedTime(slot.displayStart, tz),
+        title: slotTitle(slot, slotTitles[i]),
         now: nowMs >= slot.actualStart && nowMs < slot.actualEnd,
       }))
+
+  const nowPlaying = buildNowPlaying(status)
 
   return {
     right: live ? "setlist" : "schedule",
@@ -512,7 +581,8 @@ export function buildTrmnlPayload(input: BuildTrmnlPayloadInput): TrmnlPayload {
       live ?
         densityForCount(live.entry_count + live.sets.length)
       : scheduleDensity(scheduleRows),
-    now_playing: buildNowPlaying(status),
+    now_playing:
+      nowPlaying ? { ...nowPlaying, artwork: trackArtwork } : null,
     on_air: onAir,
     schedule: scheduleRows,
     live,

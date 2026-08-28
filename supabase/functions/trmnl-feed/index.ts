@@ -35,7 +35,9 @@ import {
 } from "../_shared/bot-read-api-utils.ts"
 import {
   buildTrmnlPayload,
+  currentScheduleSlot,
   isShowLive,
+  selectScheduleSlots,
   TRMNL_DEFAULT_TZ,
   TRMNL_LIVE_WINDOW_MS,
   type RadioCoScheduleEventInput,
@@ -43,6 +45,11 @@ import {
   type TrmnlSetlistEntryInput,
   type TrmnlShowInput,
 } from "../_shared/trmnl-feed/payload.ts"
+import {
+  resolveNowPlayingArtwork,
+  resolveScheduleTitles,
+  type TrmnlFetchRows,
+} from "../_shared/trmnl-feed/lookups.ts"
 
 const RADIO_CO_STATION_ID = "s3c11c85d6"
 const RADIO_CO_STATUS_URL = `https://public.radio.co/stations/${RADIO_CO_STATION_ID}/status`
@@ -155,7 +162,11 @@ serve(async (req) => {
     }
 
     const [status, scheduleRes] = await Promise.all([
-      fetchJson<RadioCoStatusInput>(RADIO_CO_STATUS_URL),
+      fetchJson<
+        RadioCoStatusInput & {
+          current_track?: { artwork_url?: string | null } | null
+        }
+      >(RADIO_CO_STATUS_URL),
       fetchJson<{ data?: RadioCoScheduleEventInput[] }>(RADIO_CO_SCHEDULE_URL),
     ])
 
@@ -205,9 +216,46 @@ serve(async (req) => {
       setlist = (data ?? []) as TrmnlSetlistEntryInput[]
     }
 
+    // Titles and the now-playing cover both come from the database, so slots
+    // are selected first, resolved, then handed to the pure builder.
+    const slots = selectScheduleSlots(scheduleRes?.data ?? [], nowMs, tz)
+    const onAir = currentScheduleSlot(slots, nowMs)
+    const onAirIndex = onAir ? slots.indexOf(onAir) : -1
+
+    const fetchRows: TrmnlFetchRows = async (
+      table,
+      columns,
+      filterColumn,
+      values,
+    ) => {
+      const { data, error } = await client
+        .from(table)
+        .select(columns)
+        .in(filterColumn, values)
+      if (error) throw new Error(error.message)
+      // `select()` takes a runtime string here, so supabase-js cannot infer a
+      // row type and widens to its error shape. The adapter's contract is the
+      // untyped row bag `lookups.ts` expects.
+      return (data ?? []) as unknown as Array<Record<string, unknown>>
+    }
+
+    const resolution = await resolveScheduleTitles(slots, onAirIndex, fetchRows)
+
+    const trackArtwork = await resolveNowPlayingArtwork(
+      {
+        radioCoArtworkUrl: status?.current_track?.artwork_url ?? null,
+        trackTitle: status?.current_track?.title ?? null,
+        onAirEpisodeArtwork: resolution.onAirEpisodeArtwork,
+        onAirShowLink: resolution.onAirShowLink,
+      },
+      fetchRows,
+    )
+
     const payload = buildTrmnlPayload({
       status,
-      schedule: scheduleRes?.data ?? [],
+      slots,
+      slotTitles: resolution.titles,
+      trackArtwork,
       show,
       setlist,
       nowMs,

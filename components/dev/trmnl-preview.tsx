@@ -5,7 +5,9 @@ import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import {
   buildTrmnlPayload,
+  currentScheduleSlot,
   isShowLive,
+  selectScheduleSlots,
   TRMNL_DEFAULT_TZ,
   TRMNL_LIVE_WINDOW_MS,
   type RadioCoScheduleEventInput,
@@ -14,6 +16,11 @@ import {
   type TrmnlSetlistEntryInput,
   type TrmnlShowInput,
 } from "@/supabase/functions/_shared/trmnl-feed/payload"
+import {
+  resolveNowPlayingArtwork,
+  resolveScheduleTitles,
+  type TrmnlFetchRows,
+} from "@/supabase/functions/_shared/trmnl-feed/lookups"
 
 import "./trmnl-preview.css"
 
@@ -44,6 +51,17 @@ const API_KEY_STORAGE = "trmnl-preview-api-key"
 
 type Source = "local" | "edge"
 type ModeOverride = "" | "schedule" | "setlist"
+
+/** The shared lookups run against the anon client, same rows as the homepage. */
+const fetchRows: TrmnlFetchRows = async (table, columns, filterColumn, values) => {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from(table)
+    .select(columns)
+    .in(filterColumn, values)
+  if (error) throw new Error(error.message)
+  return (data ?? []) as unknown as Array<Record<string, unknown>>
+}
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
@@ -129,16 +147,39 @@ export function TrmnlPreview() {
       }
 
       const [status, schedule, show] = await Promise.all([
-        fetchJson<RadioCoStatusInput>(STATUS_URL),
+        fetchJson<
+          RadioCoStatusInput & {
+            current_track?: { artwork_url?: string | null } | null
+          }
+        >(STATUS_URL),
         fetchJson<{ data?: RadioCoScheduleEventInput[] }>(SCHEDULE_URL),
         loadShow(showId, mode, nowMs),
       ])
       const setlist = show ? await loadSetlist(show.show_id) : []
 
+      const slots = selectScheduleSlots(schedule?.data ?? [], nowMs, tz)
+      const onAir = currentScheduleSlot(slots, nowMs)
+      const resolution = await resolveScheduleTitles(
+        slots,
+        onAir ? slots.indexOf(onAir) : -1,
+        fetchRows,
+      )
+      const trackArtwork = await resolveNowPlayingArtwork(
+        {
+          radioCoArtworkUrl: status?.current_track?.artwork_url ?? null,
+          trackTitle: status?.current_track?.title ?? null,
+          onAirEpisodeArtwork: resolution.onAirEpisodeArtwork,
+          onAirShowLink: resolution.onAirShowLink,
+        },
+        fetchRows,
+      )
+
       setPayload(
         buildTrmnlPayload({
           status,
-          schedule: schedule?.data ?? [],
+          slots,
+          slotTitles: resolution.titles,
+          trackArtwork,
           show,
           setlist,
           nowMs,
@@ -263,10 +304,14 @@ function TrmnlScreen({ payload }: { payload: TrmnlPayload | null }) {
   return (
     <div className="trmnl-screen">
       <div className="trmnl-screen__col trmnl-screen__col--left">
-        <div className="trmnl-screen__eyebrow">Now Playing</div>
+        <div className="trmnl-screen__eyebrow">Now Playing on WTED Radio</div>
         <div className="trmnl-screen__track">{np?.primary ?? "—"}</div>
         {np?.secondary && (
           <div className="trmnl-screen__track-sub">{np.secondary}</div>
+        )}
+        {np?.artwork && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img className="trmnl-screen__art" src={np.artwork} alt="" />
         )}
 
         {onAir && (
@@ -283,10 +328,11 @@ function TrmnlScreen({ payload }: { payload: TrmnlPayload | null }) {
       >
         {payload.right === "setlist" && live ?
           <>
-            <div className="trmnl-screen__eyebrow">
-              {live.date} · {live.venue}
+            <div className="trmnl-screen__eyebrow">Live Now · {live.date}</div>
+            <div className="trmnl-screen__venue">
+              {live.venue}
+              {live.location ? ` — ${live.location}` : ""}
             </div>
-            <div className="trmnl-screen__venue">{live.location}</div>
             {live.sets.map((set) => (
               <div key={set.label} className="trmnl-screen__set">
                 <div className="trmnl-screen__set-label">{set.label}</div>
@@ -317,7 +363,7 @@ function TrmnlScreen({ payload }: { payload: TrmnlPayload | null }) {
             ))}
           </>
         : <>
-            <div className="trmnl-screen__eyebrow">Today on WTED</div>
+            <div className="trmnl-screen__eyebrow">Today on WTED Radio</div>
             {payload.schedule.map((row, i) => (
               <div
                 key={`${row.time}-${i}`}
@@ -334,6 +380,10 @@ function TrmnlScreen({ payload }: { payload: TrmnlPayload | null }) {
           </>
         }
       </div>
+
+      {/* Station mark, bottom-right of the panel, over both columns. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="trmnl-screen__logo" src="/WL.png" alt="" />
     </div>
   )
 }
