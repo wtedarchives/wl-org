@@ -62,7 +62,7 @@ const SHOW_COLUMNS =
   "show_id,show_date,show_time,show_tour,show_subvenue,show_venue_location"
 
 const SETLIST_COLUMNS =
-  "entry_set,entry_setnum,entry_song,entry_short,entry_segue,entry_setorder"
+  "entry_set,entry_setnum,entry_song,entry_short,entry_segue,entry_setorder,songs ( song_displayname )"
 
 /** A dead upstream degrades one column rather than failing the whole screen. */
 async function fetchJson<T>(url: string): Promise<T | null> {

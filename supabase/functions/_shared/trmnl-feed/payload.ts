@@ -153,6 +153,8 @@ export type TrmnlSetlistEntryInput = {
   entry_short: string | null
   entry_segue: string | null
   entry_setorder: number | null
+  /** Joined `songs` row; its display name wins over `entry_song`. */
+  songs?: { song_displayname?: string | null } | null
 }
 
 /**
@@ -489,7 +491,7 @@ function buildLive(
       sets.push({ label: setLabel(key), entries: [] })
     }
     sets[sets.length - 1]!.entries.push({
-      song: (entry.entry_song ?? "").trim(),
+      song: entry.songs?.song_displayname?.trim() || (entry.entry_song ?? "").trim(),
       short:
         shouldShowSetlistEntryShort(entry.entry_song, entry.entry_short) ?
           entry.entry_short!.trim()

@@ -44,7 +44,7 @@ const SCHEDULE_URL = `https://public.radio.co/stations/${RADIO_CO_STATION_ID}/em
 const SHOW_COLUMNS =
   "show_id,show_date,show_time,show_tour,show_subvenue,show_venue_location"
 const SETLIST_COLUMNS =
-  "entry_set,entry_setnum,entry_song,entry_short,entry_segue,entry_setorder"
+  "entry_set,entry_setnum,entry_song,entry_short,entry_segue,entry_setorder,songs ( song_displayname )"
 
 /** Where the entered API key is kept. Dev-only, never bundled. */
 const API_KEY_STORAGE = "trmnl-preview-api-key"
