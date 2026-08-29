@@ -13,7 +13,8 @@ import { corsHeaders } from "../_shared/cors.ts"
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-const REVIEW_VALID_REGEX = /^[a-zA-Z0-9\s.,!?'"()<>—–-]*$/
+// Apostrophes: straight ', iOS long-press ` ‘ ’, plus common typographic variants.
+const REVIEW_VALID_REGEX = /^[a-zA-Z0-9\s.,!?'"`´‘’‚‛ʼʻ′()<>—–-]*$/
 
 function bearerToken(h: string | null): string | null {
   if (!h?.startsWith("Bearer ")) return null

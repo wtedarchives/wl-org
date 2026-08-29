@@ -11,7 +11,8 @@ export interface ReviewEntry {
   username: string
 }
 
-const REVIEW_VALID_REGEX = /^[a-zA-Z0-9\s.,!?'"()<>—–-]*$/
+// Apostrophes: straight ', iOS long-press ` ‘ ’, plus common typographic variants.
+const REVIEW_VALID_REGEX = /^[a-zA-Z0-9\s.,!?'"`´‘’‚‛ʼʻ′()<>—–-]*$/
 
 export function useSetlistRating(showId: string | undefined, session: WysteriaSession | null) {
   const [averageRating, setAverageRating] = useState<number>(0)
