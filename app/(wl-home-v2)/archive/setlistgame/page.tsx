@@ -1,24 +1,16 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 
-import { EchoOfAShowView } from "@/components/echo-of-a-show/echo-of-a-show-view"
 import { WlHomeV2 } from "@/components/wl-home-v2"
-import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
+import { WlHomeV2SetlistGameRootView } from "@/components/wl-home-v2/wl-home-v2-setlistgame-root-view"
 
 export const metadata: Metadata = {
-  title: "Echo of a Show",
+  title: "Setlist Game",
 }
 
-export default function ArchiveEchoOfAShowPage() {
+export default function ArchiveSetlistGamePage() {
   return (
     <WlHomeV2>
-      <Suspense
-        fallback={
-          <WlHomeV2PageLoading message="Loading Echo of a Show…" />
-        }
-      >
-        <EchoOfAShowView />
-      </Suspense>
+      <WlHomeV2SetlistGameRootView />
     </WlHomeV2>
   )
 }

@@ -143,7 +143,7 @@ export const HELP_FAQ_ENTRIES: HelpFaqEntry[] = [
         ],
       },
       {
-        title: "Echo of a Show",
+        title: "Setlist Game",
         items: [
           "Call the songs before Goose plays them. Points for the song, more for the right set, most for the exact spot.",
         ],
