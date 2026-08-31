@@ -17,10 +17,6 @@ import {
 } from "@/lib/wl-home-v2-radio-schedule-share-export-days"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
 import { fetchScheduleShareImage } from "@/lib/radio-schedule-share-image"
-import {
-  radioScheduleShareStoragePath,
-  uploadRadioScheduleSharePng,
-} from "@/lib/radio-schedule-share-upload"
 import { maySeeScheduleShareImage } from "@/supabase/functions/_shared/schedule-share-card/access.ts"
 import {
   SCHEDULE_CARD_HEIGHT_PX,
@@ -39,11 +35,6 @@ function scheduleImageFilename(dayKey: string): string {
   return `wted-schedule-${dayKey}.jpg`
 }
 
-/** `/social-radio-schedule` lists only `.png`, so the upload copy is a PNG. */
-function scheduleUploadFilename(dayKey: string): string {
-  return `wted-schedule-${dayKey}.png`
-}
-
 export function WlHomeV2ScheduleImagePageClient() {
   const { session, loading: authLoading } = useAuth()
   const allowed = maySeeScheduleShareImage(
@@ -58,7 +49,6 @@ export function WlHomeV2ScheduleImagePageClient() {
     () => buildRadioScheduleShareExportDayOptions()[0]!.key,
   )
   const [busy, setBusy] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [current, setCurrent] = useState<DayState | null>(null)
@@ -170,63 +160,6 @@ export function WlHomeV2ScheduleImagePageClient() {
     }
   }, [current, selectedDayKey])
 
-  /**
-   * Publishes the same card to the `radio-schedules` bucket, which is what
-   * `/social-radio-schedule` lists. Admin-only, because the upload edge
-   * function is; a re-render is cheap and gives it the PNG that page expects.
-   */
-  const handleUpload = useCallback(async () => {
-    const token = session?.token
-    const option = dayOptions.find((o) => o.key === selectedDayKey)
-    if (!token || !option) return
-
-    setUploading(true)
-    setError(null)
-    setNotice(null)
-    try {
-      const nowMs =
-        isSameLocalCalendarDay(option.day, new Date()) ? Date.now() : 0
-      const { slots, error: scheduleError } =
-        await fetchRadioScheduleMergedSlotsForLocalDay(option.day, nowMs)
-      if (scheduleError) {
-        setError(scheduleError)
-        return
-      }
-      const viewModel = buildScheduleShareCardViewModel(option.day, slots)
-      const { blob, error: renderError } = await fetchScheduleShareImage(
-        token,
-        option.key,
-        viewModel,
-        "png",
-      )
-      if (!blob) {
-        setError(renderError ?? "Could not generate that image.")
-        return
-      }
-      const filename = scheduleUploadFilename(option.key)
-      const { publicUrl, error: uploadError } =
-        await uploadRadioScheduleSharePng(
-          token,
-          radioScheduleShareStoragePath(option.key, filename),
-          blob,
-        )
-      if (uploadError) {
-        setError(uploadError)
-        return
-      }
-      setNotice(
-        publicUrl ?
-          `Uploaded for the social page: ${publicUrl}`
-        : "Uploaded for the social page.",
-      )
-    } catch (e) {
-      console.error(e)
-      setError("Could not upload that image. Try again.")
-    } finally {
-      setUploading(false)
-    }
-  }, [dayOptions, selectedDayKey, session?.token])
-
   const selectedOption = dayOptions.find((o) => o.key === selectedDayKey)
 
   return (
@@ -316,7 +249,7 @@ export function WlHomeV2ScheduleImagePageClient() {
                 <button
                   type="button"
                   className="wl-home-v2-schedule-image__action wl-home-v2-schedule-image__action--primary"
-                  disabled={!current || busy || uploading}
+                  disabled={!current || busy}
                   onClick={() => void handleDownload()}
                 >
                   <DownloadSimple
@@ -325,20 +258,10 @@ export function WlHomeV2ScheduleImagePageClient() {
                   />
                   Download image
                 </button>
-                {session?.isAdmin ?
-                  <button
-                    type="button"
-                    className="wl-home-v2-schedule-image__action"
-                    disabled={busy || uploading || !selectedOption}
-                    onClick={() => void handleUpload()}
-                  >
-                    {uploading ? "Uploading…" : "Upload for social page"}
-                  </button>
-                : null}
                 <button
                   type="button"
                   className="wl-home-v2-schedule-image__action"
-                  disabled={busy || uploading || !selectedOption}
+                  disabled={busy || !selectedOption}
                   onClick={() => {
                     if (selectedOption) void renderDay(selectedOption, true)
                   }}

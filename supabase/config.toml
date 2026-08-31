@@ -89,3 +89,6 @@ verify_jwt = false
 # TRMNL e-ink device feed; custom API keys validated in-function (like bot-read-api).
 [functions.trmnl-feed]
 verify_jwt = false
+
+[functions.montgomery-monitor]
+verify_jwt = false
