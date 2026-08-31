@@ -18,11 +18,15 @@
  * rasterise the card should not have to prepare its images either. Fetches are
  * held to the same allowlist as `schedule-share-image-proxy`.
  *
- * There is no database access, so no Supabase credentials live on Netlify. The
- * caller is a signed-in browser, so the gate is the site's own session JWT
- * rather than the shared secret the setlist renderer uses.
+ * There is no database access, so no Supabase credentials live on Netlify.
+ *
+ * The caller is NOT the browser: requests arrive from the Supabase edge function
+ * of the same name, which verifies the visitor's Wysteria session JWT first.
+ * That check has to happen there because it needs `WYSTERIA_JWT_SECRET`, which
+ * Supabase stores hashed and cannot hand out. So this side is gated by the same
+ * `SHARE_IMAGE_SECRET` the setlist renderer uses, and neither platform needs a
+ * secret it does not already hold.
  */
-import { createHmac, timingSafeEqual } from "node:crypto"
 import satori from "satori"
 import { Resvg } from "@resvg/resvg-js"
 import jpeg from "jpeg-js"
@@ -39,7 +43,6 @@ import {
 } from "../../supabase/functions/_shared/schedule-share-card/card.ts"
 import { FONT_BASE64 } from "../../supabase/functions/_shared/setlist-share-card/generated/fonts.ts"
 import { readImageDimensions } from "../../supabase/functions/_shared/image-dimensions.ts"
-import { SCHEDULE_SHARE_IMAGE_ALLOWED_PROFILE_IDS } from "../../supabase/functions/_shared/schedule-share-card/access.ts"
 
 /** 1080 wide is Instagram's native story width; the 9∶16 frame lands at 1919. */
 const DEFAULT_WIDTH_PX = 1080
@@ -94,59 +97,6 @@ function jsonError(message: string, status: number) {
     status,
     headers: { "Content-Type": "application/json" },
   })
-}
-
-/* ─────────────────────────── auth ─────────────────────────────── */
-
-function base64UrlToBuffer(part: string): Buffer {
-  return Buffer.from(part.replace(/-/g, "+").replace(/_/g, "/"), "base64")
-}
-
-/**
- * Verifies the site's own session JWT (HS256, issued by `sso-callback`).
- *
- * `jose` is not a dependency here and this is the only token this function
- * ever sees, so the three-line HMAC check is done directly rather than pulling
- * a library into the bundle.
- */
-function verifySessionToken(
-  token: string,
-  secret: string,
-): Record<string, unknown> | null {
-  const parts = token.split(".")
-  if (parts.length !== 3) return null
-  const [headerB64, payloadB64, signatureB64] = parts as [string, string, string]
-
-  let header: { alg?: string }
-  let payload: Record<string, unknown>
-  try {
-    header = JSON.parse(base64UrlToBuffer(headerB64).toString("utf8"))
-    payload = JSON.parse(base64UrlToBuffer(payloadB64).toString("utf8"))
-  } catch {
-    return null
-  }
-  if (header.alg !== "HS256") return null
-
-  const expected = createHmac("sha256", secret)
-    .update(`${headerB64}.${payloadB64}`)
-    .digest()
-  const presented = base64UrlToBuffer(signatureB64)
-  if (presented.length !== expected.length) return null
-  if (!timingSafeEqual(presented, expected)) return null
-
-  const exp = payload.exp
-  if (typeof exp !== "number" || Date.now() / 1000 >= exp) return null
-  return payload
-}
-
-/** Admins, plus the individually allowlisted profiles. */
-function mayRenderSchedule(payload: Record<string, unknown>): boolean {
-  if (payload.is_admin === true) return true
-  const profileId = payload.profile_id
-  return (
-    typeof profileId === "string" &&
-    SCHEDULE_SHARE_IMAGE_ALLOWED_PROFILE_IDS.includes(profileId)
-  )
 }
 
 /* ───────────────────────── artwork ────────────────────────────── */
@@ -269,28 +219,23 @@ function readViewModel(raw: unknown): ScheduleCardViewModel | string {
 export default async function handler(req: Request): Promise<Response> {
   const url = new URL(req.url)
 
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "authorization, content-type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-    })
-  }
   if (req.method !== "POST") {
     return jsonError("POST a { dayKey, viewModel } body", 405)
   }
 
-  const secret = process.env.WYSTERIA_JWT_SECRET
-  if (!secret) return jsonError("WYSTERIA_JWT_SECRET is not configured", 500)
-
-  const bearer = req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]
-  if (!bearer) return jsonError("Unauthorized", 401)
-  const payload = verifySessionToken(bearer.trim(), secret)
-  if (!payload) return jsonError("Unauthorized", 401)
-  if (!mayRenderSchedule(payload)) return jsonError("Forbidden", 403)
+  /*
+   * Publicly reachable, so the caller presents a shared secret. There is no
+   * database access to protect, but rendering is CPU work and should not be
+   * free to anyone who finds the URL. Who the *visitor* is was already settled
+   * by the Supabase function that forwards here.
+   */
+  const expected = process.env.SHARE_IMAGE_SECRET
+  if (!expected) return jsonError("SHARE_IMAGE_SECRET is not configured", 500)
+  const presented =
+    req.headers.get("x-share-image-secret") ??
+    url.searchParams.get("secret") ??
+    ""
+  if (presented !== expected) return jsonError("Unauthorized", 401)
 
   const body = (await req.json().catch(() => null)) as {
     dayKey?: string

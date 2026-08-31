@@ -24,6 +24,11 @@ verify_jwt = false
 [functions.setlist-game-submission]
 verify_jwt = false
 
+# Authorizing proxy in front of the Netlify schedule-card renderer; the
+# Authorization header carries a Wysteria session JWT, verified in the function.
+[functions.schedule-share-image]
+verify_jwt = false
+
 [functions.user-attendance]
 verify_jwt = false
 

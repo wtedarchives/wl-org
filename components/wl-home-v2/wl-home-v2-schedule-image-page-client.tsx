@@ -16,6 +16,7 @@ import {
   type RadioScheduleShareExportDayOption,
 } from "@/lib/wl-home-v2-radio-schedule-share-export-days"
 import { downloadOrWebSharePng } from "@/lib/wl-home-v2-share-image-download"
+import { fetchScheduleShareImage } from "@/lib/radio-schedule-share-image"
 import {
   radioScheduleShareStoragePath,
   uploadRadioScheduleSharePng,
@@ -27,8 +28,6 @@ import {
 } from "@/supabase/functions/_shared/schedule-share-card/card.ts"
 
 import "./wl-home-v2-schedule-image.css"
-
-const RENDER_ENDPOINT = "/api/schedule-share-image"
 
 type DayState = {
   slots: RadioScheduleSlot[]
@@ -116,25 +115,16 @@ export function WlHomeV2ScheduleImagePageClient() {
         }
 
         const viewModel = buildScheduleShareCardViewModel(option.day, slots)
-        const res = await fetch(RENDER_ENDPOINT, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ dayKey: option.key, viewModel }),
-        })
-        if (!res.ok) {
-          const detail = await res.text().catch(() => "")
-          setError(
-            res.status === 401 || res.status === 403 ?
-              "Your session is not allowed to generate schedule images."
-            : `Render failed (${res.status}). ${detail.slice(0, 160)}`,
-          )
+        const { blob, error: renderError } = await fetchScheduleShareImage(
+          token,
+          option.key,
+          viewModel,
+        )
+        if (!blob) {
+          setError(renderError ?? "Could not generate that image.")
           return
         }
 
-        const blob = await res.blob()
         const previous = cacheRef.current.get(option.key)
         if (previous) URL.revokeObjectURL(previous.objectUrl)
         const entry: DayState = {
@@ -203,16 +193,14 @@ export function WlHomeV2ScheduleImagePageClient() {
         return
       }
       const viewModel = buildScheduleShareCardViewModel(option.day, slots)
-      const res = await fetch(`${RENDER_ENDPOINT}?format=png`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ dayKey: option.key, viewModel }),
-      })
-      if (!res.ok) {
-        setError(`Render failed (${res.status}).`)
+      const { blob, error: renderError } = await fetchScheduleShareImage(
+        token,
+        option.key,
+        viewModel,
+        "png",
+      )
+      if (!blob) {
+        setError(renderError ?? "Could not generate that image.")
         return
       }
       const filename = scheduleUploadFilename(option.key)
@@ -220,7 +208,7 @@ export function WlHomeV2ScheduleImagePageClient() {
         await uploadRadioScheduleSharePng(
           token,
           radioScheduleShareStoragePath(option.key, filename),
-          await res.blob(),
+          blob,
         )
       if (uploadError) {
         setError(uploadError)

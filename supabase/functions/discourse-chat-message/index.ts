@@ -2,8 +2,8 @@ import { corsHeaders } from "../_shared/cors.ts"
 
 const COMMUNITY_ORIGIN = "https://community.wysterialane.org"
 
-/** GOOSE(c) — https://community.wysterialane.org/chat/c/goosec/14 */
-const DEFAULT_ALLOWED_CHANNEL_IDS = [14]
+/** GOOSE(c) — https://community.wysterialane.org/chat/c/goosec/14 ; 3 = brains onstage/setlist channel (dpro-admin). */
+const DEFAULT_ALLOWED_CHANNEL_IDS = [14, 3]
 
 const MAX_MESSAGE_LENGTH = 4000
 
@@ -45,14 +45,20 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Unauthorized" }, 401)
     }
 
-    const apiKey = Deno.env.get("DISCOURSE_API_KEY")?.trim()
-    const apiUsername = Deno.env.get("DISCOURSE_API_USERNAME")?.trim()
+    // Prefer the known-good wted-brains creds (same as dpro-admin brain posts);
+    // fall back to the legacy DISCOURSE_API_* vars if BRAINS_* are unset.
+    const apiKey =
+      Deno.env.get("BRAINS_API_KEY")?.trim() ||
+      Deno.env.get("DISCOURSE_API_KEY")?.trim()
+    const apiUsername =
+      Deno.env.get("BRAINS_USERNAME")?.trim() ||
+      Deno.env.get("DISCOURSE_API_USERNAME")?.trim()
     if (!apiKey || !apiUsername) {
       return jsonResponse(
         {
           error: "Server configuration error",
           hint:
-            "supabase secrets set DISCOURSE_API_KEY=... DISCOURSE_API_USERNAME=wted-brains DISCOURSE_CHAT_INVOKE_SECRET=... && supabase functions deploy discourse-chat-message",
+            "supabase secrets set BRAINS_API_KEY=... BRAINS_USERNAME=wted-brains DISCOURSE_CHAT_INVOKE_SECRET=... && supabase functions deploy discourse-chat-message",
         },
         500,
       )
