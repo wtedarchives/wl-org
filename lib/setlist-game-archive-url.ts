@@ -1,4 +1,4 @@
-/** Existing Setlist Game UI lives at `/setlistgame2` (also `/archive/setlistgame2`). `/archive/setlistgame` is reserved for the rebuild. */
+/** Existing Setlist Game UI lives at `/setlistgame2` (also `/archive/setlistgame2`). Rebuild root is `/archive/echo` (`getEchoArchiveIndexUrl`). */
 export type SetlistGameArchiveUrlShell = "v2" | "legacy"
 
 const SETLIST_GAME_PATH: Record<SetlistGameArchiveUrlShell, string> = {

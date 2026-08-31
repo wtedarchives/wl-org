@@ -1,16 +1,17 @@
-import type { Metadata } from "next"
+"use client"
 
-import { WlHomeV2 } from "@/components/wl-home-v2"
-import { WlHomeV2SetlistGameRootView } from "@/components/wl-home-v2/wl-home-v2-setlistgame-root-view"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export const metadata: Metadata = {
-  title: "Setlist Game",
-}
+import { getEchoArchiveIndexUrl } from "@/lib/echo-archive-url"
 
-export default function ArchiveSetlistGamePage() {
-  return (
-    <WlHomeV2>
-      <WlHomeV2SetlistGameRootView />
-    </WlHomeV2>
-  )
+/** Legacy rebuild slug. Production also 301s via `public/_redirects`. */
+export default function ArchiveSetlistGameRedirectPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace(getEchoArchiveIndexUrl())
+  }, [router])
+
+  return null
 }

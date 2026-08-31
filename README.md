@@ -46,7 +46,7 @@ Browse and search Goose shows and related data:
 | Venues | `/archive/venues`, `/archive/venue?id=...` |
 | Discography | `/archive/discography`, `/archive/discography?id={uuid}` |
 | Lists | `/archive/lists`, `/archive/lists?id={uuid}` |
-| Setlist Game (rebuild) | `/archive/setlistgame` (root slug only; appearance TBD) |
+| Echo of a Show (rebuild) | `/archive/echo` (root slug only; appearance TBD). `/archive/setlistgame` 301s here. |
 | Setlist Game (existing UI) | `/setlistgame2`, `/archive/setlistgame2` |
 | Goose 101 | `/goose101` |
 | Submit corrections | `/archive/submit` (or `?submit=1` on archive pages) |

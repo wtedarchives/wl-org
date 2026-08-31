@@ -39,6 +39,7 @@
     "supabase/functions",
     "netlify/functions",
     "scripts/build-share-card-assets.ts",
-    "scripts/build-share-card-embeds.ts"
+    "scripts/build-share-card-embeds.ts",
+    "scripts/build-schedule-share-card-embeds.ts"
   ]
 }

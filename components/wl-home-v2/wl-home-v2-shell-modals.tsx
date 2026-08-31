@@ -9,7 +9,6 @@ import { WlHomeV2FollowUsModal } from "./wl-home-v2-follow-us-modal"
 import { WlHomeV2ForgotPasswordModal } from "./wl-home-v2-forgot-password-modal"
 import { WlHomeV2LoginModal } from "./wl-home-v2-login-modal"
 import { WlHomeV2RadioModal } from "./wl-home-v2-radio-modal"
-import { WlHomeV2RadioScheduleShareExportModal } from "./wl-home-v2-radio-schedule-share-export-modal"
 import { WlHomeV2RecentlyPlayedModal } from "./wl-home-v2-recently-played-modal"
 import { WlHomeV2RequestModal } from "./wl-home-v2-request-modal"
 import { WlHomeV2ScheduleModal } from "./wl-home-v2-schedule-modal"
@@ -54,10 +53,6 @@ export type WlHomeV2ShellModalsProps = {
   radioOpen: boolean
   setRadioOpen: (open: boolean) => void
   radioHeadingId: string
-  showRadioScheduleShare: boolean
-  radioScheduleShareOpen: boolean
-  setRadioScheduleShareOpen: (open: boolean) => void
-  radioScheduleShareBg: string
   followUsOpen: boolean
   setFollowUsOpen: (open: boolean) => void
   followUsHeadingId: string
@@ -101,10 +96,6 @@ export function WlHomeV2ShellModals({
   radioOpen,
   setRadioOpen,
   radioHeadingId,
-  showRadioScheduleShare,
-  radioScheduleShareOpen,
-  setRadioScheduleShareOpen,
-  radioScheduleShareBg,
   followUsOpen,
   setFollowUsOpen,
   followUsHeadingId,
@@ -155,11 +146,6 @@ export function WlHomeV2ShellModals({
         onClose={() => setRadioOpen(false)}
         headingId={radioHeadingId}
         onRequestSong={() => setRequestOpen(true)}
-      />
-      <WlHomeV2RadioScheduleShareExportModal
-        open={showRadioScheduleShare && radioScheduleShareOpen}
-        onOpenChange={setRadioScheduleShareOpen}
-        backgroundSrc={radioScheduleShareBg}
       />
       <WlHomeV2FollowUsModal
         open={followUsOpen}

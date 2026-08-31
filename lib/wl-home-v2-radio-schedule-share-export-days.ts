@@ -1,5 +1,5 @@
-/** Today plus the next three local calendar days (share export date picker). */
-export const WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_DAY_COUNT = 4
+/** Today plus the next seven local calendar days (`/radio/scheduleimg` picker). */
+export const WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_DAY_COUNT = 8
 
 export type RadioScheduleShareExportDayOption = {
   key: string
@@ -37,6 +37,7 @@ export function isSameLocalCalendarDay(a: Date, b: Date): boolean {
 
 export function buildRadioScheduleShareExportDayOptions(
   anchor: Date = new Date(),
+  count: number = WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_DAY_COUNT,
 ): RadioScheduleShareExportDayOption[] {
   const today = startOfLocalCalendarDay(anchor)
   const weekdayFmt = new Intl.DateTimeFormat(undefined, {
@@ -45,7 +46,7 @@ export function buildRadioScheduleShareExportDayOptions(
     day: "numeric",
   })
   return Array.from(
-    { length: WL_HOME_V2_RADIO_SCHEDULE_SHARE_EXPORT_DAY_COUNT },
+    { length: count },
     (_, i) => {
       const day = addLocalCalendarDays(today, i)
       return {

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAdminStatus } from "@/hooks/use-admin-status"
 import { useBrainsAccess } from "@/hooks/use-brains-access"
+import { maySeeScheduleShareImage } from "@/supabase/functions/_shared/schedule-share-card/access.ts"
 import { useWlHomeV2OpenSettings } from "@/components/wl-home-v2/wl-home-v2-open-settings-context"
 import { useBugCount } from "@/hooks/use-bug-count"
 import {
@@ -65,13 +66,10 @@ function WlHomeV2AdminNavIcon({
 export function WlHomeV2UserMenu({
   onOpenLogin,
   onOpenSignup,
-  onOpenShareSchedule,
   onOpenSettings,
 }: {
   onOpenLogin: () => void
   onOpenSignup: () => void
-  /** Admin-only: opens schedule image export modal. */
-  onOpenShareSchedule?: () => void
   /** Signed-in: opens account settings modal. */
   onOpenSettings?: () => void
 }) {
@@ -79,6 +77,11 @@ export function WlHomeV2UserMenu({
   const openSettingsFromContext = useWlHomeV2OpenSettings()
   const openSettings = onOpenSettings ?? openSettingsFromContext ?? undefined
   const { isAdmin } = useAdminStatus(session)
+  /*
+   * Not folded into the `isAdmin` group below: the schedule image tool is open
+   * to a short allowlist of non-admins too, so it has to render outside it.
+   */
+  const canShareSchedule = maySeeScheduleShareImage(isAdmin, session?.profileId)
   // One request per session for almost everyone: users with no assignment get an
   // empty reply and nothing further happens. Admins pass on their JWT claim.
   const { hasAccess: hasBrainsAccess } = useBrainsAccess()
@@ -222,21 +225,23 @@ export function WlHomeV2UserMenu({
                       Find
                     </Link>
                   </DropdownMenuItem>
-                  {onOpenShareSchedule ?
-                    <DropdownMenuItem
-                      className="top-nav-dd-item flex cursor-pointer items-center gap-2"
-                      onClick={onOpenShareSchedule}
-                    >
-                      <Export
-                        className="top-nav-dd-icon size-4 shrink-0"
-                        aria-hidden
-                      />
-                      Share Schedule
-                    </DropdownMenuItem>
-                  : null}
                   <DropdownMenuSeparator className="top-nav-dd-sep" />
                 </>
               )}
+              {canShareSchedule ?
+                <DropdownMenuItem asChild className="top-nav-dd-item">
+                  <Link
+                    href="/radio/scheduleimg"
+                    className="top-nav-dd-link flex cursor-pointer items-center gap-2"
+                  >
+                    <Export
+                      className="top-nav-dd-icon size-4 shrink-0"
+                      aria-hidden
+                    />
+                    Share Schedule
+                  </Link>
+                </DropdownMenuItem>
+              : null}
               <DropdownMenuItem asChild className="top-nav-dd-item">
                 <Link
                   href="/archive/profile?tab=overview"

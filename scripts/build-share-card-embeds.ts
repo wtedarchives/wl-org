@@ -25,6 +25,7 @@ const FONTS = [
   { file: "Geist-600.ttf", key: "geist600" },
   { file: "Geist-700.ttf", key: "geist700" },
   { file: "GeistMono-500.ttf", key: "geistMono500" },
+  { file: "GeistMono-700.ttf", key: "geistMono700" },
 ] as const
 
 function toBase64(bytes: Uint8Array): string {

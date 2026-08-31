@@ -11,10 +11,7 @@ import {
 } from "react"
 import { usePathname, useRouter } from "next/navigation"
 
-import { useAuth } from "@/components/auth-context"
 import { SetlistBreadcrumbProvider } from "@/components/setlist-breadcrumb-context"
-import { useSetlistAdmin } from "@/hooks/use-setlist-admin"
-import { pickRandomShareBackground } from "@/lib/wl-home-v2-share-backgrounds"
 import { cn } from "@/lib/utils"
 
 import "./wl-home-v2.css"
@@ -45,9 +42,6 @@ export function WlHomeV2({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { session } = useAuth()
-  const { showAdminUi } = useSetlistAdmin(session, undefined, undefined)
-  const showRadioScheduleShare = showAdminUi
 
   const [requestOpen, setRequestOpen] = useState(false)
   const requestHeadingId = useId()
@@ -81,11 +75,6 @@ export function WlHomeV2({
 
   const [radioOpen, setRadioOpen] = useState(false)
   const radioHeadingId = useId()
-
-  const [radioScheduleShareOpen, setRadioScheduleShareOpen] = useState(false)
-  const [radioScheduleShareBg, setRadioScheduleShareBg] = useState(() =>
-    pickRandomShareBackground(),
-  )
 
   const [followUsOpen, setFollowUsOpen] = useState(false)
   const followUsHeadingId = useId()
@@ -140,15 +129,6 @@ export function WlHomeV2({
     setSettingsOpen(true)
   }, [])
 
-  const openRadioScheduleShare = useCallback(() => {
-    setRadioScheduleShareBg(pickRandomShareBackground())
-    setRadioScheduleShareOpen(true)
-  }, [])
-
-  useEffect(() => {
-    if (!showRadioScheduleShare) setRadioScheduleShareOpen(false)
-  }, [showRadioScheduleShare])
-
   useEffect(() => {
     if (
       !requestOpen &&
@@ -163,7 +143,6 @@ export function WlHomeV2({
       !siteSearchOpen &&
       !radioOpen &&
       !followUsOpen &&
-      !radioScheduleShareOpen &&
       !settingsOpen
     )
       return
@@ -181,7 +160,6 @@ export function WlHomeV2({
       setSiteSearchOpen(false)
       setRadioOpen(false)
       setFollowUsOpen(false)
-      setRadioScheduleShareOpen(false)
       setSettingsOpen(false)
     }
     document.addEventListener("keydown", onKey)
@@ -199,7 +177,6 @@ export function WlHomeV2({
     siteSearchOpen,
     radioOpen,
     followUsOpen,
-    radioScheduleShareOpen,
     settingsOpen,
     closeArchiveModal,
   ])
@@ -222,9 +199,6 @@ export function WlHomeV2({
             onOpenArchive={openArchiveHub}
             onOpenRadio={() => setRadioOpen(true)}
             onOpenFollowUs={() => setFollowUsOpen(true)}
-            onOpenShareSchedule={
-              showRadioScheduleShare ? openRadioScheduleShare : undefined
-            }
           />
 
         <Suspense fallback={null}>
@@ -294,10 +268,6 @@ export function WlHomeV2({
         radioOpen={radioOpen}
         setRadioOpen={setRadioOpen}
         radioHeadingId={radioHeadingId}
-        showRadioScheduleShare={showRadioScheduleShare}
-        radioScheduleShareOpen={radioScheduleShareOpen}
-        setRadioScheduleShareOpen={setRadioScheduleShareOpen}
-        radioScheduleShareBg={radioScheduleShareBg}
         followUsOpen={followUsOpen}
         setFollowUsOpen={setFollowUsOpen}
         followUsHeadingId={followUsHeadingId}
