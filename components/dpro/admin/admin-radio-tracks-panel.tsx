@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils"
 import {
   ClickableRadioTracksTable,
   NewDispositionDialog,
+  RadioTrackDetailCard,
   RemovedDispositionDialog,
 } from "@/components/dpro/admin/admin-radio-tables"
+import { AdminRadioOrphanDeleteDialog } from "@/components/dpro/admin/admin-radio-orphan-delete-dialog"
 import { useAdminRadioTracksPanel } from "@/hooks/use-admin-radio-tracks-panel"
 import { useShowData } from "@/hooks/use-show-data"
 
@@ -24,6 +26,7 @@ export function AdminRadioTracksPanel() {
   const {
     newRows,
     removedRows,
+    orphanRows,
     loading,
     syncing,
     error,
@@ -33,13 +36,17 @@ export function AdminRadioTracksPanel() {
     setNewDispositionRow,
     removedDispositionRow,
     setRemovedDispositionRow,
+    orphanDispositionRow,
+    setOrphanDispositionRow,
     savingNewDisposition,
     savingRemovedDisposition,
+    savingOrphanDisposition,
     assigningShowUuid,
     assignShow,
     handleSync,
     confirmNewDisposition,
     confirmRemovedSkipped,
+    confirmOrphanDelete,
   } = useAdminRadioTracksPanel()
 
   return (
@@ -79,6 +86,23 @@ export function AdminRadioTracksPanel() {
         onConfirmSkipped={confirmRemovedSkipped}
         updating={savingRemovedDisposition}
       />
+
+      <AdminRadioOrphanDeleteDialog
+        open={orphanDispositionRow !== null}
+        onOpenChange={(nextOpen) => {
+          if (nextOpen) return
+          if (savingOrphanDisposition) return
+          setOrphanDispositionRow(null)
+        }}
+        updating={savingOrphanDisposition}
+        onConfirm={confirmOrphanDelete}
+        title="Remove from catalog"
+        description="This radio ID is in the database but not in Radio.co Studio or the public request feed. Removing it deletes the row. User playlist items that reference it are also deleted. Setlist entries and requests keep their other data and lose this radio ID."
+      >
+        {orphanDispositionRow ?
+          <RadioTrackDetailCard row={orphanDispositionRow} />
+        : null}
+      </AdminRadioOrphanDeleteDialog>
 
       <div className="wl-home-v2-admin-radio-tab-stack">
         <div
@@ -146,7 +170,9 @@ export function AdminRadioTracksPanel() {
               source of truth for{" "}
               <code className="wl-home-v2-admin-radio-tab-code">requestable</code>
               , and sets that flag, puts every new track in NEW for review, and
-              marks departures REMOVED. If more than 10% of requestable tracks
+              marks departures REMOVED. Sync also returns catalog rows that are
+              in the database but in neither Studio nor the public feed — click
+              one and Remove deletes that row. If more than 10% of requestable tracks
               would be hidden in one run it aborts without writing anything,
               since a truncated Radio.co response is indistinguishable from a
               real mass removal.
@@ -233,6 +259,7 @@ export function AdminRadioTracksPanel() {
                   onRowClick={(row) => {
                     if (updatingUuid !== null) return
                     setRemovedDispositionRow(null)
+                    setOrphanDispositionRow(null)
                     setNewDispositionRow(row)
                   }}
                 />
@@ -269,7 +296,47 @@ export function AdminRadioTracksPanel() {
                   onRowClick={(row) => {
                     if (updatingUuid !== null) return
                     setNewDispositionRow(null)
+                    setOrphanDispositionRow(null)
                     setRemovedDispositionRow(row)
+                  }}
+                />
+              )}
+            </div>
+          </div>
+
+          <div
+            className={
+              "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
+            }
+          >
+            <div
+              className={cn(
+                "wp-head wl-home-v2-years-shows-wp-head",
+                "wl-home-v2-admin-radio-tab-section-head",
+              )}
+            >
+              <span className="wp-head-date min-w-0 truncate">
+                NOT IN RADIO.CO{" "}
+                <span className="font-normal text-white/55">
+                  ({loading || syncing ? "…" : orphanRows.length})
+                </span>
+              </span>
+            </div>
+            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+              {loading || syncing ? (
+                <p className="wl-home-v2-admin-radio-tab-table-hint">
+                  {syncing ? "Syncing…" : "Loading…"}
+                </p>
+              ) : (
+                <ClickableRadioTracksTable
+                  listKind="orphan"
+                  rows={orphanRows}
+                  updatingUuid={updatingUuid}
+                  onRowClick={(row) => {
+                    if (updatingUuid !== null) return
+                    setNewDispositionRow(null)
+                    setRemovedDispositionRow(null)
+                    setOrphanDispositionRow(row)
                   }}
                 />
               )}

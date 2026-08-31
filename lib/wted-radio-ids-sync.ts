@@ -105,6 +105,8 @@ export type StudioCrawlChunkResult = {
   total_items: number
   next_page: number | null
   done: boolean
+  /** Radio.co track ids seen in this chunk. Client unions them for orphan detection. */
+  radio_ids?: string[]
 }
 
 /**
@@ -124,6 +126,12 @@ export type ReconcileWtedRadioIdsResult = {
   requeuedToNew: number
   updatedToRemoved: WtedRadioIdRow[]
   updatedTitles: WtedRadioIdRow[]
+  /**
+   * Rows whose `radio_id` is in `wted_radio_ids` but not in the Studio catalog
+   * or the public requests feed. Empty when the client did not pass a complete
+   * Studio id list. Not written — admin deletes them one at a time.
+   */
+  orphans: WtedRadioIdRow[]
   abortedReason?: string
 }
 

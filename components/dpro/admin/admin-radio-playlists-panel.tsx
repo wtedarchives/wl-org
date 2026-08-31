@@ -7,6 +7,7 @@ import { getSession } from "@/lib/jwt"
 import { getSupabaseFunctionsUrl } from "@/lib/supabase-functions"
 import {
   WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW,
+  type WtedEpisodeRadioSyncResult,
   type WtedEpisodeRadioSyncRow,
 } from "@/lib/wted-episodes-radio-sync"
 import { Button } from "@/components/ui/button"
@@ -15,8 +16,10 @@ import {
   NewPlaylistEditDialog,
   type SaveNewPlaylistEpisodePayload,
 } from "@/components/dpro/admin/admin-radio-playlist-new-dialog"
+import { AdminRadioOrphanDeleteDialog } from "@/components/dpro/admin/admin-radio-orphan-delete-dialog"
 import {
-  ClickableRadioPlaylistsTable,
+  AdminRadioPlaylistQueues,
+  PlaylistDetailCard,
   RemovedPlaylistDispositionDialog,
 } from "@/components/dpro/admin/admin-radio-playlist-tables"
 
@@ -69,11 +72,16 @@ export function AdminRadioPlaylistsPanel() {
     useState<WtedEpisodeRadioSyncRow | null>(null)
   const [removedDispositionRow, setRemovedDispositionRow] =
     useState<WtedEpisodeRadioSyncRow | null>(null)
+  const [orphanRows, setOrphanRows] = useState<WtedEpisodeRadioSyncRow[]>([])
+  const [orphanDispositionRow, setOrphanDispositionRow] =
+    useState<WtedEpisodeRadioSyncRow | null>(null)
 
   const savingNewDisposition =
     updatingUuid !== null && newDispositionRow !== null
   const savingRemovedDisposition =
     updatingUuid !== null && removedDispositionRow !== null
+  const savingOrphanDisposition =
+    updatingUuid !== null && orphanDispositionRow !== null
 
   const loadNewAndRemoved = useCallback(async () => {
     setError(null)
@@ -135,16 +143,41 @@ export function AdminRadioPlaylistsPanel() {
     if (ok) setRemovedDispositionRow(null)
   }
 
+  const handleOrphanDelete = async (uuid: string): Promise<boolean> => {
+    setUpdatingUuid(uuid)
+    setError(null)
+    try {
+      await callAdminEpisodes("delete", { uuid })
+      setOrphanRows((rows) => rows.filter((r) => r.uuid !== uuid))
+      await loadNewAndRemoved()
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete episode.")
+      return false
+    } finally {
+      setUpdatingUuid(null)
+    }
+  }
+
+  const confirmOrphanDelete = async () => {
+    if (!orphanDispositionRow) return
+    const ok = await handleOrphanDelete(orphanDispositionRow.uuid)
+    if (ok) setOrphanDispositionRow(null)
+  }
+
   const handleSync = async () => {
     setSyncing(true)
     setSyncBanner(null)
     setError(null)
+    setOrphanRows([])
     try {
-      const data = await callAdminEpisodes("sync") as {
-        inserted: WtedEpisodeRadioSyncRow[]
-        updatedToRemoved: WtedEpisodeRadioSyncRow[]
-      }
-      if (data.inserted.length === 0 && data.updatedToRemoved.length === 0) {
+      const data = await callAdminEpisodes("sync") as WtedEpisodeRadioSyncResult
+      setOrphanRows(data.orphans ?? [])
+      if (
+        data.inserted.length === 0 &&
+        data.updatedToRemoved.length === 0 &&
+        (data.orphans?.length ?? 0) === 0
+      ) {
         setSyncBanner({
           kind: "no-change",
           message: "No changes — episodes with Radio playlist IDs already match the Studio list.",
@@ -152,7 +185,7 @@ export function AdminRadioPlaylistsPanel() {
       } else {
         setSyncBanner({
           kind: "success",
-          message: `Sync complete: ${data.inserted.length} added as NEW, ${data.updatedToRemoved.length} marked REMOVED.`,
+          message: `Sync complete: ${data.inserted.length} added as NEW, ${data.updatedToRemoved.length} marked REMOVED, ${data.orphans?.length ?? 0} not in Radio.co.`,
         })
       }
       await loadNewAndRemoved()
@@ -190,6 +223,23 @@ export function AdminRadioPlaylistsPanel() {
         onConfirmSkipped={confirmRemovedSkipped}
         updating={savingRemovedDisposition}
       />
+
+      <AdminRadioOrphanDeleteDialog
+        open={orphanDispositionRow !== null}
+        onOpenChange={(nextOpen) => {
+          if (nextOpen) return
+          if (savingOrphanDisposition) return
+          setOrphanDispositionRow(null)
+        }}
+        updating={savingOrphanDisposition}
+        onConfirm={confirmOrphanDelete}
+        title="Remove episode"
+        description="This playlist ID is in the database but not in Radio.co Studio. Removing it deletes the episode row. Episode setlist entries that pointed at it will be unlinked."
+      >
+        {orphanDispositionRow ?
+          <PlaylistDetailCard row={orphanDispositionRow} />
+        : null}
+      </AdminRadioOrphanDeleteDialog>
 
       <div className="wl-home-v2-admin-radio-tab-stack">
         <div
@@ -242,7 +292,9 @@ export function AdminRadioPlaylistsPanel() {
               <code className="wl-home-v2-admin-radio-tab-code">
                 {WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW}
               </code>{" "}
-              until you assign a real show in the database.
+              until you assign a real show in the database. Sync also lists
+              episodes whose radio ID is not in Studio — click one and Remove
+              deletes that row.
             </p>
           </div>
         </div>
@@ -277,79 +329,32 @@ export function AdminRadioPlaylistsPanel() {
           )}
         </div>
 
-        <div className="wl-home-v2-admin-radio-tab-tables">
-          <div
-            className={
-              "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
-            }
-          >
-            <div
-              className={cn(
-                "wp-head wl-home-v2-years-shows-wp-head",
-                "wl-home-v2-admin-radio-tab-section-head",
-              )}
-            >
-              <span className="wp-head-date min-w-0 truncate">
-                NEW{" "}
-                <span className="font-normal text-white/55">
-                  ({loading ? "…" : newRows.length})
-                </span>
-              </span>
-            </div>
-            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
-              {loading ? (
-                <p className="wl-home-v2-admin-radio-tab-table-hint">Loading…</p>
-              ) : (
-                <ClickableRadioPlaylistsTable
-                  listKind="new"
-                  rows={newRows}
-                  updatingUuid={updatingUuid}
-                  onRowClick={(row) => {
-                    if (updatingUuid !== null) return
-                    setRemovedDispositionRow(null)
-                    setNewDispositionRow(row)
-                  }}
-                />
-              )}
-            </div>
-          </div>
-
-          <div
-            className={
-              "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
-            }
-          >
-            <div
-              className={cn(
-                "wp-head wl-home-v2-years-shows-wp-head",
-                "wl-home-v2-admin-radio-tab-section-head",
-              )}
-            >
-              <span className="wp-head-date min-w-0 truncate">
-                REMOVED{" "}
-                <span className="font-normal text-white/55">
-                  ({loading ? "…" : removedRows.length})
-                </span>
-              </span>
-            </div>
-            <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
-              {loading ? (
-                <p className="wl-home-v2-admin-radio-tab-table-hint">Loading…</p>
-              ) : (
-                <ClickableRadioPlaylistsTable
-                  listKind="removed"
-                  rows={removedRows}
-                  updatingUuid={updatingUuid}
-                  onRowClick={(row) => {
-                    if (updatingUuid !== null) return
-                    setNewDispositionRow(null)
-                    setRemovedDispositionRow(row)
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+        <AdminRadioPlaylistQueues
+          loading={loading}
+          syncing={syncing}
+          newRows={newRows}
+          removedRows={removedRows}
+          orphanRows={orphanRows}
+          updatingUuid={updatingUuid}
+          onNewClick={(row) => {
+            if (updatingUuid !== null) return
+            setRemovedDispositionRow(null)
+            setOrphanDispositionRow(null)
+            setNewDispositionRow(row)
+          }}
+          onRemovedClick={(row) => {
+            if (updatingUuid !== null) return
+            setNewDispositionRow(null)
+            setOrphanDispositionRow(null)
+            setRemovedDispositionRow(row)
+          }}
+          onOrphanClick={(row) => {
+            if (updatingUuid !== null) return
+            setNewDispositionRow(null)
+            setRemovedDispositionRow(null)
+            setOrphanDispositionRow(row)
+          }}
+        />
       </div>
     </>
   )

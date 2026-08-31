@@ -9,13 +9,13 @@ import type {
   StudioCrawlChunkResult,
   WtedRadioIdRow,
 } from "@/lib/wted-radio-ids-sync"
+import type { NewDispositionStatus } from "@/components/dpro/admin/admin-radio-tables"
 
 /** Studio pages per crawl invocation; halved on HTTP 546 (edge resource limit). */
 const SYNC_CRAWL_PAGES = 60
 const MIN_CRAWL_PAGES = 10
 /** ~177 pages ÷ MIN_CRAWL_PAGES, with generous headroom for 546 retries. */
 const MAX_CRAWL_INVOCATIONS = 60
-import type { NewDispositionStatus } from "@/components/dpro/admin/admin-radio-tables"
 
 export type AdminRadioTracksSyncBanner = {
   kind: "no-change" | "success" | "error"
@@ -34,12 +34,17 @@ export function useAdminRadioTracksPanel() {
     useState<WtedRadioIdRow | null>(null)
   const [removedDispositionRow, setRemovedDispositionRow] =
     useState<WtedRadioIdRow | null>(null)
+  const [orphanRows, setOrphanRows] = useState<WtedRadioIdRow[]>([])
+  const [orphanDispositionRow, setOrphanDispositionRow] =
+    useState<WtedRadioIdRow | null>(null)
   const [assigningShowUuid, setAssigningShowUuid] = useState<string | null>(null)
 
   const savingNewDisposition =
     updatingUuid !== null && newDispositionRow !== null
   const savingRemovedDisposition =
     updatingUuid !== null && removedDispositionRow !== null
+  const savingOrphanDisposition =
+    updatingUuid !== null && orphanDispositionRow !== null
 
   const loadNewAndRemoved = useCallback(async () => {
     if (!supabase) return
@@ -143,6 +148,39 @@ export function useAdminRadioTracksPanel() {
     if (ok) setRemovedDispositionRow(null)
   }
 
+  const handleOrphanDelete = async (uuid: string): Promise<boolean> => {
+    setUpdatingUuid(uuid)
+    setError(null)
+    try {
+      const session = getSession()
+      if (!session?.token) {
+        setError("Sign in again to perform this action.")
+        return false
+      }
+      const { error: invokeError } = await invokeDproAdmin(session.token, {
+        action: "wted_radio_ids_delete",
+        uuid,
+      })
+      if (invokeError) throw new Error(invokeError)
+      setOrphanRows((rows) => rows.filter((r) => r.uuid !== uuid))
+      await loadNewAndRemoved()
+      return true
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete catalog row.",
+      )
+      return false
+    } finally {
+      setUpdatingUuid(null)
+    }
+  }
+
+  const confirmOrphanDelete = async () => {
+    if (!orphanDispositionRow) return
+    const ok = await handleOrphanDelete(orphanDispositionRow.uuid)
+    if (ok) setOrphanDispositionRow(null)
+  }
+
   /**
    * Assign the track's show, which is what gives it tier-2 artwork
    * (show -> lowest-release_order release -> release_artwork).
@@ -204,6 +242,7 @@ export function useAdminRadioTracksPanel() {
     setSyncing(true)
     setSyncBanner(null)
     setError(null)
+    setOrphanRows([])
     try {
       const session = getSession()
       if (!session?.token) {
@@ -217,7 +256,9 @@ export function useAdminRadioTracksPanel() {
       let artworkClearedTotal = 0
       let pagesDone = 0
       let totalPages: number | null = null
+      let totalItems: number | null = null
       let guardPasses = 0
+      const studioIds = new Set<string>()
 
       for (;;) {
         // Runaway guard: at the minimum chunk size a full crawl is ~177/10
@@ -254,7 +295,11 @@ export function useAdminRadioTracksPanel() {
         artworkSetTotal += data.artwork_updated
         artworkClearedTotal += data.artwork_cleared
         totalPages = data.total_pages
+        totalItems = data.total_items
         pagesDone = data.next_page === null ? data.total_pages : data.next_page - 1
+        if (Array.isArray(data.radio_ids)) {
+          for (const id of data.radio_ids) studioIds.add(String(id))
+        }
         setSyncBanner({
           kind: "success",
           message: `Scanning Radio.co catalog… ${pagesDone}/${data.total_pages} pages, ${insertedTotal} new tracks found.`,
@@ -264,12 +309,20 @@ export function useAdminRadioTracksPanel() {
         startPage = data.next_page
       }
 
+      const studioRadioIds = [...studioIds]
+      const studioListComplete =
+        totalItems != null &&
+        studioRadioIds.length >= Math.floor(totalItems * 0.9)
+
       const { data: rec, error: recError } =
         await invokeDproAdmin<ReconcileWtedRadioIdsResult>(session.token, {
           action: "wted_radio_ids_sync",
+          ...(studioListComplete ? { studio_radio_ids: studioRadioIds } : {}),
         })
       if (recError) throw new Error(recError)
       if (!rec) throw new Error("Sync returned no data.")
+
+      setOrphanRows(rec.orphans ?? [])
 
       if (rec.abortedReason) {
         setSyncBanner({ kind: "error", message: rec.abortedReason })
@@ -285,9 +338,14 @@ export function useAdminRadioTracksPanel() {
         rec.madeUnrequestable +
         rec.requeuedToNew +
         rec.updatedToRemoved.length +
-        rec.updatedTitles.length
+        rec.updatedTitles.length +
+        (rec.orphans?.length ?? 0)
 
-      if (changed === 0) {
+      const orphanNote = studioListComplete
+        ? `${rec.orphans?.length ?? 0} not in Radio.co`
+        : "orphan check skipped (incomplete Studio id list)"
+
+      if (changed === 0 && studioListComplete && (rec.orphans?.length ?? 0) === 0) {
         setSyncBanner({
           kind: "no-change",
           message: `No changes — the database already matches Radio.co${
@@ -304,7 +362,8 @@ export function useAdminRadioTracksPanel() {
             `${rec.requeuedToNew} re-queued to NEW for show mapping, ` +
             `${rec.updatedToRemoved.length} marked REMOVED, ` +
             `${artworkSetTotal} custom artwork set, ${artworkClearedTotal} artwork cleared to release fallback, ` +
-            `${rec.updatedTitles.length} titles updated.`,
+            `${rec.updatedTitles.length} titles updated, ` +
+            `${orphanNote}.`,
         })
       }
       await loadNewAndRemoved()
@@ -321,6 +380,7 @@ export function useAdminRadioTracksPanel() {
   return {
     newRows,
     removedRows,
+    orphanRows,
     loading,
     syncing,
     error,
@@ -330,12 +390,16 @@ export function useAdminRadioTracksPanel() {
     setNewDispositionRow,
     removedDispositionRow,
     setRemovedDispositionRow,
+    orphanDispositionRow,
+    setOrphanDispositionRow,
     savingNewDisposition,
     savingRemovedDisposition,
+    savingOrphanDisposition,
     assigningShowUuid,
     assignShow,
     handleSync,
     confirmNewDisposition,
     confirmRemovedSkipped,
+    confirmOrphanDelete,
   }
 }

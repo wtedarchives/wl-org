@@ -23,6 +23,12 @@
  *
  * Only (2) needs a complete picture, and it gets that from the DB plus one small
  * request — never from the crawl. That is what makes chunking safe.
+ *
+ * Orphan detection (DB rows in neither Studio nor the public feed) is a read-only
+ * extra on (2). The client unions `radio_ids` from every crawl chunk and passes
+ * them as `studioRadioIds`. Reconcile returns those rows; the admin deletes them
+ * one at a time. Incomplete Studio id lists yield an empty orphan array rather
+ * than a false mass-orphan.
  */
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { RADIO_CO_STUDIO_API_V1 } from "./radio-co-session.ts"
@@ -409,6 +415,11 @@ export type ReconcileWtedRadioIdsResult = {
   requeuedToNew: number
   updatedToRemoved: WtedRadioIdRow[]
   updatedTitles: WtedRadioIdRow[]
+  /**
+   * Rows in the DB whose `radio_id` is in neither the Studio catalog nor the
+   * public requests feed. Empty when `studioRadioIds` was omitted. Not written.
+   */
+  orphans: WtedRadioIdRow[]
   /** Set when the removal guard tripped; nothing was written. */
   abortedReason?: string
 }
@@ -441,7 +452,7 @@ async function updateIn(
  */
 export async function reconcileWtedRadioIds(
   client: SupabaseClient,
-  options: { allowLargeRemoval?: boolean } = {},
+  options: { allowLargeRemoval?: boolean; studioRadioIds?: string[] } = {},
 ): Promise<ReconcileWtedRadioIdsResult> {
   const publicTracks = await fetchRadioCoRequestTracks()
   if (publicTracks.length === 0) {
@@ -452,6 +463,16 @@ export async function reconcileWtedRadioIds(
 
   const publicById = new Map(publicTracks.map((t) => [String(t.id), t]))
   const allDb = await fetchAllWtedRadioIds(client)
+
+  const studioSet =
+    options.studioRadioIds && options.studioRadioIds.length > 0
+      ? new Set(options.studioRadioIds.map(String))
+      : null
+  const orphans: WtedRadioIdRow[] = studioSet
+    ? allDb.filter(
+        (r) => !studioSet.has(r.radio_id) && !publicById.has(r.radio_id),
+      )
+    : []
 
   const toRequestable: string[] = []
   const toUnrequestable: string[] = []
@@ -479,6 +500,7 @@ export async function reconcileWtedRadioIds(
       requeuedToNew: 0,
       updatedToRemoved: [],
       updatedTitles: [],
+      orphans,
       abortedReason:
         `Aborted: ${toUnrequestable.length} of ${currentlyRequestable} requestable tracks ` +
         `(${Math.round(removalRatio * 100)}%) would be hidden, over the ` +
@@ -602,5 +624,6 @@ export async function reconcileWtedRadioIds(
     requeuedToNew,
     updatedToRemoved: updatedRows,
     updatedTitles,
+    orphans,
   }
 }

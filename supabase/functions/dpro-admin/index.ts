@@ -909,6 +909,7 @@ async function handleAction(
             total_items: chunk.totalItems,
             next_page: chunk.nextPage,
             done: chunk.nextPage === null,
+            radio_ids: chunk.tracks.map((t) => String(t.id)),
           },
         }
       } catch (e) {
@@ -920,12 +921,22 @@ async function handleAction(
     /**
      * Admin panel, step 2 of 2: set `requestable` from the public feed, resolve
      * PENDING rows into NEW, and mark departures REMOVED. Cheap enough to
-     * always run in a single invocation.
+     * always run in a single invocation. Pass `studio_radio_ids` (union of
+     * crawl-chunk ids) to also return catalog rows missing from Studio and
+     * the public feed — those are not written; the admin deletes them.
      */
     case "wted_radio_ids_sync": {
       try {
+        const rawStudio = body.studio_radio_ids
+        const studioRadioIds = Array.isArray(rawStudio)
+          ? rawStudio.map((id) => String(id)).filter((id) => id.length > 0)
+          : undefined
         const result = await reconcileWtedRadioIds(db, {
           allowLargeRemoval: body.allow_large_removal === true,
+          studioRadioIds:
+            studioRadioIds && studioRadioIds.length > 0
+              ? studioRadioIds
+              : undefined,
         })
         return { data: result }
       } catch (e) {
@@ -989,6 +1000,24 @@ async function handleAction(
         .select("uuid")
       if (error) return { error: error.message }
       if (!data?.length) return { error: "No matching REMOVED row." }
+      return { data: true }
+    }
+
+    /**
+     * Admin panel: delete a catalog row that Sync listed as missing from
+     * Radio.co (Studio + public feed). Cascades user playlist items; setlist
+     * entries and requests keep their other data and lose the radio_id.
+     */
+    case "wted_radio_ids_delete": {
+      const uuid = body.uuid as string | undefined
+      if (!uuid) return { error: "Missing uuid" }
+      const { data, error } = await db
+        .from("wted_radio_ids")
+        .delete()
+        .eq("uuid", uuid)
+        .select("uuid")
+      if (error) return { error: error.message }
+      if (!data?.length) return { error: "No matching catalog row." }
       return { data: true }
     }
 

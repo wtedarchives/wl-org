@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-function PlaylistDetailCard({ row }: { row: WtedEpisodeRadioSyncRow }) {
+export function PlaylistDetailCard({ row }: { row: WtedEpisodeRadioSyncRow }) {
   return (
     <div className="space-y-4 rounded-md border bg-muted/30 px-3 py-3 text-sm transition-all duration-200">
       <div className="grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:items-baseline">
@@ -61,19 +61,23 @@ export function ClickableRadioPlaylistsTable({
   rows: WtedEpisodeRadioSyncRow[]
   onRowClick: (row: WtedEpisodeRadioSyncRow) => void
   updatingUuid: string | null
-  listKind: "new" | "removed"
+  listKind: "new" | "removed" | "orphan"
 }) {
   if (rows.length === 0) {
     return (
       <p className="wl-home-v2-admin-radio-tab-table-hint">
-        No rows in this category.
+        {listKind === "orphan"
+          ? "Run Sync to list episodes that are not in Radio.co Studio."
+          : "No rows in this category."}
       </p>
     )
   }
   const ariaOpen = (radioId: string) =>
     listKind === "new"
       ? `Open actions for playlist ${radioId}`
-      : `Open actions for removed playlist ${radioId}`
+      : listKind === "orphan"
+        ? `Open remove dialog for playlist ${radioId} missing from Radio.co`
+        : `Open actions for removed playlist ${radioId}`
 
   return (
     <Table className="set-table">
@@ -183,5 +187,112 @@ export function RemovedPlaylistDispositionDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+export function AdminRadioPlaylistQueues({
+  loading,
+  syncing,
+  newRows,
+  removedRows,
+  orphanRows,
+  updatingUuid,
+  onNewClick,
+  onRemovedClick,
+  onOrphanClick,
+}: {
+  loading: boolean
+  syncing: boolean
+  newRows: WtedEpisodeRadioSyncRow[]
+  removedRows: WtedEpisodeRadioSyncRow[]
+  orphanRows: WtedEpisodeRadioSyncRow[]
+  updatingUuid: string | null
+  onNewClick: (row: WtedEpisodeRadioSyncRow) => void
+  onRemovedClick: (row: WtedEpisodeRadioSyncRow) => void
+  onOrphanClick: (row: WtedEpisodeRadioSyncRow) => void
+}) {
+  return (
+    <div className="wl-home-v2-admin-radio-tab-tables">
+      <AdminRadioPlaylistQueuePanel
+        title="NEW"
+        count={loading ? "…" : newRows.length}
+        loading={loading}
+        rows={newRows}
+        listKind="new"
+        updatingUuid={updatingUuid}
+        onRowClick={onNewClick}
+      />
+      <AdminRadioPlaylistQueuePanel
+        title="REMOVED"
+        count={loading ? "…" : removedRows.length}
+        loading={loading}
+        rows={removedRows}
+        listKind="removed"
+        updatingUuid={updatingUuid}
+        onRowClick={onRemovedClick}
+      />
+      <AdminRadioPlaylistQueuePanel
+        title="NOT IN RADIO.CO"
+        count={syncing || loading ? "…" : orphanRows.length}
+        loading={loading || syncing}
+        loadingHint={syncing ? "Syncing…" : "Loading…"}
+        rows={orphanRows}
+        listKind="orphan"
+        updatingUuid={updatingUuid}
+        onRowClick={onOrphanClick}
+      />
+    </div>
+  )
+}
+
+function AdminRadioPlaylistQueuePanel({
+  title,
+  count,
+  loading,
+  loadingHint = "Loading…",
+  rows,
+  listKind,
+  updatingUuid,
+  onRowClick,
+}: {
+  title: string
+  count: string | number
+  loading: boolean
+  loadingHint?: string
+  rows: WtedEpisodeRadioSyncRow[]
+  listKind: "new" | "removed" | "orphan"
+  updatingUuid: string | null
+  onRowClick: (row: WtedEpisodeRadioSyncRow) => void
+}) {
+  return (
+    <div
+      className={
+        "widget-panel wl-home-v2-years-shows-panel wl-home-v2-years-shows-panel--natural wl-home-v2-admin-radio-tab-panel"
+      }
+    >
+      <div
+        className={cn(
+          "wp-head wl-home-v2-years-shows-wp-head",
+          "wl-home-v2-admin-radio-tab-section-head",
+        )}
+      >
+        <span className="wp-head-date min-w-0 truncate">
+          {title}{" "}
+          <span className="font-normal text-white/55">({count})</span>
+        </span>
+      </div>
+      <div className="wl-home-v2-years-table-scroll min-h-0 min-w-0 flex-1">
+        {loading ? (
+          <p className="wl-home-v2-admin-radio-tab-table-hint">{loadingHint}</p>
+        ) : (
+          <ClickableRadioPlaylistsTable
+            listKind={listKind}
+            rows={rows}
+            updatingUuid={updatingUuid}
+            onRowClick={onRowClick}
+          />
+        )}
+      </div>
+    </div>
   )
 }

@@ -148,7 +148,7 @@ function ShowAssignRow({
  * `bare` omits the card chrome so a caller can wrap these rows together with
  * extra controls (the NEW dialog adds a show picker) inside one card.
  */
-function RadioTrackDetailCard({
+export function RadioTrackDetailCard({
   row,
   bare = false,
 }: {
@@ -191,19 +191,23 @@ export function ClickableRadioTracksTable({
   rows: WtedRadioIdRow[]
   onRowClick: (row: WtedRadioIdRow) => void
   updatingUuid: string | null
-  listKind: "new" | "removed"
+  listKind: "new" | "removed" | "orphan"
 }) {
   if (rows.length === 0) {
     return (
       <p className="wl-home-v2-admin-radio-tab-table-hint">
-        No rows in this category.
+        {listKind === "orphan"
+          ? "Run Sync to list catalog rows that are not in Radio.co."
+          : "No rows in this category."}
       </p>
     )
   }
   const ariaOpen = (radioId: string) =>
     listKind === "new"
       ? `Open actions for track ${radioId}`
-      : `Open actions for removed track ${radioId}`
+      : listKind === "orphan"
+        ? `Open remove dialog for track ${radioId} missing from Radio.co`
+        : `Open actions for removed track ${radioId}`
 
   return (
     <Table className="set-table">

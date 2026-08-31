@@ -132,6 +132,12 @@ serve(async (req) => {
 
     const playlistJson = await playlistsRes.json() as { playlists?: Playlist[] }
     const playlists: Playlist[] = Array.isArray(playlistJson.playlists) ? playlistJson.playlists : []
+    if (playlists.length === 0) {
+      return err(
+        "Radio.co Studio returned zero playlists — refusing to mark episodes removed",
+        502,
+      )
+    }
     const apiIdSet = new Set(playlists.map((p) => String(p.id)))
 
     // Fetch all wted_episodes with radio_id
@@ -167,6 +173,8 @@ serve(async (req) => {
       .filter((r) => !apiIdSet.has(r.radio_id) && r.status !== "REMOVED" && r.status !== "skipped")
       .map((r) => r.uuid)
 
+    const orphanRows = allDb.filter((r) => !apiIdSet.has(r.radio_id))
+
     const insertedRows: EpisodeRow[] = []
     for (let i = 0; i < toInsert.length; i += WRITE_BATCH) {
       const { data, error } = await db.from("wted_episodes").insert(toInsert.slice(i, i + WRITE_BATCH)).select(SYNC_SELECT)
@@ -181,7 +189,7 @@ serve(async (req) => {
       if (data) updatedRows.push(...(data as EpisodeRow[]))
     }
 
-    return ok({ inserted: insertedRows, updatedToRemoved: updatedRows })
+    return ok({ inserted: insertedRows, updatedToRemoved: updatedRows, orphans: orphanRows })
   }
 
   // ─── action: update ─────────────────────────────────────────────────────────
@@ -224,6 +232,25 @@ serve(async (req) => {
       .eq("status", "REMOVED")
 
     if (error) return err("Failed to skip episode", 500, { detail: error.message })
+    return ok({ ok: true })
+  }
+
+  // ─── action: delete ─────────────────────────────────────────────────────────
+  // Deletes a wted_episodes row that Sync listed as missing from Studio.
+  // Episode setlist entries that pointed at this radio_id are unlinked (SET NULL).
+
+  if (action === "delete") {
+    const uuid = body.uuid as string | undefined
+    if (!uuid) return err("Missing uuid", 400)
+
+    const { data, error } = await db
+      .from("wted_episodes")
+      .delete()
+      .eq("uuid", uuid)
+      .select("uuid")
+
+    if (error) return err("Failed to delete episode", 500, { detail: error.message })
+    if (!data?.length) return err("No matching episode.", 404)
     return ok({ ok: true })
   }
 

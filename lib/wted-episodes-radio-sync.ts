@@ -25,3 +25,10 @@ export const WTED_EPISODE_RADIO_SYNC_DEFAULT_SHOW = "Unsorted" as const
 
 export const WTED_EPISODE_RADIO_SYNC_SELECT =
   "uuid, radio_id, episode, artwork, status, display_name, show, order, host" as const
+
+export type WtedEpisodeRadioSyncResult = {
+  inserted: WtedEpisodeRadioSyncRow[]
+  updatedToRemoved: WtedEpisodeRadioSyncRow[]
+  /** Episodes with a radio_id that is not in the Studio playlist list. */
+  orphans: WtedEpisodeRadioSyncRow[]
+}
