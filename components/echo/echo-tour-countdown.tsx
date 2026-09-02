@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { type EchoNextShow } from "@/hooks/use-echo-next-show"
 import { getEchoLiveShowUrl } from "@/lib/echo-archive-url"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { cn } from "@/lib/utils"
 import { EchoTourStandingsCard } from "./echo-tour-standings"
 
@@ -18,12 +19,10 @@ function picksActionLabel(show: EchoNextShow | null): string | null {
 export function EchoTourCountdown({
   loading,
   show,
-  onPicks,
   onScoring,
 }: {
   loading: boolean
   show: EchoNextShow | null
-  onPicks: () => void
   onScoring: () => void
 }) {
   const dateLong = show?.dateLong || "\u00a0"
@@ -35,8 +34,7 @@ export function EchoTourCountdown({
 
   return (
     <div className="echo-tour-countdown">
-      <div className="echo-tour-next">
-        <div className="echo-tour-next-blob" aria-hidden />
+      <div className="echo-tour-next" style={echoTourSurfaceBgStyle("next-show")}>
         <div className="echo-tour-next-inner">
           <div className="echo-tour-kicker">Next show</div>
           {loading || show ?
@@ -62,15 +60,7 @@ export function EchoTourCountdown({
                 </div>
               </div>
               <div className="echo-tour-next-actions">
-                {picksLabel && show?.picksOpen ?
-                  <button
-                    type="button"
-                    className="echo-tour-btn-primary"
-                    onClick={onPicks}
-                  >
-                    {picksLabel}
-                  </button>
-                : picksLabel && show ?
+                {picksLabel && show ?
                   <Link
                     href={getEchoLiveShowUrl(show.showId)}
                     className="echo-tour-btn-primary"

@@ -14,25 +14,8 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
+import { groupSetlistGameSongsByCategory } from "@/lib/setlist-game-song-search"
 import type { Song } from "./types"
-
-const CATEGORY_ORDER = ["Goose", "Ted Tapes", "Cover Songs"] as const
-
-function getCategoryLabel(categoryType: string | undefined): string {
-  if (!categoryType) return "Other"
-  if (categoryType === "Goose" || categoryType === "Goose Misc") return "Goose"
-  if (categoryType === "Ted Tapes") return "Ted Tapes"
-  if (categoryType === "Cover Songs") return "Cover Songs"
-  return categoryType
-}
-
-function songMatchesQuery(song: Song, q: string): boolean {
-  if (!q.trim()) return true
-  const needle = q.trim().toLowerCase()
-  const canon = song.song.toLowerCase()
-  const disp = (song.song_displayname ?? "").toLowerCase()
-  return canon.includes(needle) || disp.includes(needle)
-}
 
 interface SongSearchCardProps {
   songs: Song[]
@@ -54,21 +37,10 @@ export function SongSearchCard({
 }: SongSearchCardProps) {
   const [query, setQuery] = useState("")
 
-  const filteredSongsByCategory = useMemo(() => {
-    const filtered = songs.filter((song) => {
-      const isPlaceholder = (song as { song_placeholder?: boolean }).song_placeholder
-      return !isPlaceholder
-    })
-    const groups: { category: string; songs: Song[] }[] = []
-    for (const cat of CATEGORY_ORDER) {
-      const catSongs = filtered.filter((s) => getCategoryLabel(s.category_type) === cat)
-      const matched = catSongs.filter((s) => songMatchesQuery(s, query))
-      if (matched.length > 0) {
-        groups.push({ category: cat, songs: matched })
-      }
-    }
-    return groups
-  }, [songs, query])
+  const filteredSongsByCategory = useMemo(
+    () => groupSetlistGameSongsByCategory(songs, query),
+    [songs, query],
+  )
 
   const totalHits = useMemo(
     () => filteredSongsByCategory.reduce((n, g) => n + g.songs.length, 0),

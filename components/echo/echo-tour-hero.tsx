@@ -1,6 +1,7 @@
 "use client"
 
 import { useEchoTourSummary } from "@/hooks/use-echo-tour-summary"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import {
   ECHO_ACTIVE_LEAGUE,
   ECHO_TOUR_LEG,
@@ -11,7 +12,7 @@ export function EchoTourHero() {
   const { summary } = useEchoTourSummary(ECHO_ACTIVE_LEAGUE)
 
   return (
-    <div className="echo-tour-hero">
+    <div className="echo-tour-hero" style={echoTourSurfaceBgStyle("hero")}>
       <div className="echo-tour-hero-copy">
         <h1 className="echo-tour-hero-title">
           {ECHO_TOUR_TITLE}{" "}

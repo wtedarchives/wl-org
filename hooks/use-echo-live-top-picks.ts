@@ -177,7 +177,10 @@ async function fetchPicks(submissionIds: string[]): Promise<PickRow[]> {
   return picks
 }
 
-export function useEchoLiveTopPicks(showId: string | null): EchoLiveTopPicks {
+export function useEchoLiveTopPicks(
+  showId: string | null,
+  refreshKey = 0,
+): EchoLiveTopPicks {
   const [state, setState] = useState<EchoLiveTopPicks>(EMPTY)
 
   useEffect(() => {
@@ -249,7 +252,7 @@ export function useEchoLiveTopPicks(showId: string | null): EchoLiveTopPicks {
     return () => {
       cancelled = true
     }
-  }, [showId])
+  }, [refreshKey, showId])
 
   return state
 }

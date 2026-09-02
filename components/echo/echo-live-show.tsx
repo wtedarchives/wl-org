@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, type CSSProperties } from "react"
+import { useCallback, useMemo, useState, type CSSProperties } from "react"
 import { Check } from "@phosphor-icons/react"
 
 import { useAuth } from "@/components/auth-context"
@@ -10,6 +10,7 @@ import { useEchoLiveStandings } from "@/hooks/use-echo-live-standings"
 import { useEchoLiveTopPicks } from "@/hooks/use-echo-live-top-picks"
 import type { UserPick } from "@/hooks/use-user-picks"
 import { formatSetlistDate } from "@/lib/setlist-utils"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
 
@@ -20,6 +21,7 @@ import {
   ECHO_OVERPICK_PENALTY,
   type EchoLiveBar,
 } from "./echo-live-data"
+import { EchoLivePicksInterface } from "./echo-live-picks-interface"
 import { EchoLiveSetlist } from "./echo-live-setlist"
 import { EchoLiveSubmissionDialog } from "./echo-live-submission-dialog"
 
@@ -56,7 +58,7 @@ function EchoLiveBars({
   loading?: boolean
 }) {
   return (
-    <div className="echo-live-card">
+    <div className="echo-live-card" style={echoTourSurfaceBgStyle(title)}>
       <div
         className={cn(
           "echo-tour-kicker echo-live-card-kicker",
@@ -108,17 +110,34 @@ export function EchoLiveShow({
 }) {
   const { session } = useAuth()
   const live = useEchoLiveShow(showId)
-  const topPicks = useEchoLiveTopPicks(showId)
+  const [statsRefreshKey, setStatsRefreshKey] = useState(0)
+  const topPicks = useEchoLiveTopPicks(showId, statsRefreshKey)
   const standings = useEchoLiveStandings(
     showId,
     Boolean(live.show?.scored),
     session?.profileId,
     !live.complete,
-    live.entries.length,
+    statsRefreshKey,
   )
   const [viewedPicks, setViewedPicks] = useState<UserPick[]>([])
   const [viewedUsername, setViewedUsername] = useState<string | null>(null)
   const [submissionModalOpen, setSubmissionModalOpen] = useState(false)
+
+  const handlePicksSubmitted = useCallback(() => {
+    void live.reload()
+    setStatsRefreshKey((key) => key + 1)
+  }, [live.reload])
+
+  const existingPicks = useMemo(
+    () =>
+      live.picks.map((pick) => ({
+        song: pick.song,
+        set: pick.set,
+        setnum: pick.setnum,
+        placement: pick.placement,
+      })),
+    [live.picks],
+  )
 
   const setlistSets = useMemo(
     () => buildEchoLiveSetlistSets(live.entries, live.picks, live.complete),
@@ -137,6 +156,7 @@ export function EchoLiveShow({
   const totalLabel = `${pickScore.total} points`
   const showPickScore =
     !live.loading && live.signedIn && live.picks.length > 0
+  const showPicksInterface = live.picksOpen && !live.complete
   const date = live.show ? formatSetlistDate(live.show.date) : "\u00a0"
   const venue = live.show?.venue?.trim() || ""
   const city = live.show?.city?.trim() || ""
@@ -179,7 +199,10 @@ export function EchoLiveShow({
 
   if (!showId) {
     return (
-      <div className="echo-tour-placeholder">
+      <div
+        className="echo-tour-placeholder"
+        style={echoTourSurfaceBgStyle("live-pending")}
+      >
         <div className="echo-tour-kicker">Live</div>
         <h1 className="echo-live-title">Live show</h1>
         <p className="echo-tour-placeholder-copy">
@@ -192,7 +215,7 @@ export function EchoLiveShow({
   return (
     <>
       <div className="echo-live">
-        <div className="echo-live-head">
+        <div className="echo-live-head" style={echoTourSurfaceBgStyle("live-head")}>
           <h1 className="echo-live-title">{date}</h1>
           <div className="echo-live-meta">
             {venue ?
@@ -206,47 +229,71 @@ export function EchoLiveShow({
                 {playerCount} {playerCount === 1 ? "player" : "players"}
               </span>
             : null}
+            {live.picksOpen ?
+              <span className="echo-live-meta-pill is-countdown">
+                <span className="echo-live-meta-pill-label">Time left to pick</span>
+                <span className="echo-live-meta-pill-countdown">
+                  {live.countdown}
+                </span>
+              </span>
+            : null}
           </div>
         </div>
 
-        <div className="echo-live-ledger">
-          <div className="echo-live-card">
-            <h2 className="echo-live-card-title">Setlist</h2>
-            {live.loading && setlistSets.length === 0 ?
-              <p className="echo-live-empty">Loading setlist…</p>
-            : setlistSets.length > 0 ?
-              <EchoLiveSetlist sets={setlistSets} />
-            : <p className="echo-live-empty">
-                Setlist hasn&apos;t been entered yet.
-              </p>}
-          </div>
-
-          <div className="echo-live-card">
-            <div className="echo-live-picks-head">
-              <h2 className="echo-live-card-title">Your picks</h2>
-              {showPickScore ?
-                <span className="echo-live-total-pill">{totalLabel}</span>
-              : null}
+        {showPicksInterface ?
+          <EchoLivePicksInterface
+            showId={showId}
+            showTime={live.show?.showTime ?? ""}
+            showScored={Boolean(live.show?.scored)}
+            submissionId={live.submissionId}
+            existingPicks={existingPicks}
+            onSubmitSuccess={handlePicksSubmitted}
+          />
+        : <div className="echo-live-ledger">
+            <div
+              className="echo-live-card"
+              style={echoTourSurfaceBgStyle("live-setlist")}
+            >
+              <h2 className="echo-live-card-title">Setlist</h2>
+              {live.loading && setlistSets.length === 0 ?
+                <p className="echo-live-empty">Loading setlist…</p>
+              : setlistSets.length > 0 ?
+                <EchoLiveSetlist sets={setlistSets} />
+              : <p className="echo-live-empty">
+                  Setlist hasn&apos;t been entered yet.
+                </p>}
             </div>
-            {live.loading ?
-              <p className="echo-live-empty">Loading picks…</p>
-            : !live.signedIn ?
-              <p className="echo-live-empty">Sign in to see your picks.</p>
-            : pickSets.length > 0 ?
-              <>
-                <EchoLiveSetlist sets={pickSets} showScores />
-                {extraSongs > 0 ?
-                  <p className="echo-live-overpick">
-                    {extraSongs} extra song{extraSongs === 1 ? "" : "s"} picked:{" "}
-                    <span className="echo-live-overpick-em">
-                      -{extraPoints} points
-                    </span>
-                  </p>
+
+            <div
+              className="echo-live-card"
+              style={echoTourSurfaceBgStyle("live-picks")}
+            >
+              <div className="echo-live-picks-head">
+                <h2 className="echo-live-card-title">Your picks</h2>
+                {showPickScore ?
+                  <span className="echo-live-total-pill">{totalLabel}</span>
                 : null}
-              </>
-            : <p className="echo-live-empty">No picks for this show.</p>}
-          </div>
-        </div>
+              </div>
+              {live.loading ?
+                <p className="echo-live-empty">Loading picks…</p>
+              : !live.signedIn ?
+                <p className="echo-live-empty">Sign in to see your picks.</p>
+              : pickSets.length > 0 ?
+                <>
+                  <EchoLiveSetlist sets={pickSets} showScores />
+                  {extraSongs > 0 ?
+                    <p className="echo-live-overpick">
+                      {extraSongs} extra song{extraSongs === 1 ? "" : "s"}{" "}
+                      picked:{" "}
+                      <span className="echo-live-overpick-em">
+                        -{extraPoints} points
+                      </span>
+                    </p>
+                  : null}
+                </>
+              : <p className="echo-live-empty">No picks for this show.</p>}
+            </div>
+          </div>}
 
         <div className="echo-live-stats">
           <EchoLiveBars
@@ -272,7 +319,10 @@ export function EchoLiveShow({
           />
         </div>
 
-        <div className="echo-live-card echo-live-show-standings">
+        <div
+          className="echo-live-card echo-live-show-standings"
+          style={echoTourSurfaceBgStyle("live-standings")}
+        >
           <h2 className="echo-live-card-title echo-live-standings-title">
             Show standings
           </h2>
@@ -289,15 +339,19 @@ export function EchoLiveShow({
                   data-me={row.isMe ? "true" : undefined}
                 >
                   <span className="echo-live-standing-rank">{row.rank}</span>
-                  <button
-                    type="button"
-                    className="echo-live-standing-name echo-live-standing-user"
-                    onClick={() =>
-                      void handleViewUserSubmission(row.userId, row.username)
-                    }
-                  >
-                    {row.username}
-                  </button>
+                  {live.picksOpen ?
+                    <span className="echo-live-standing-name">
+                      {row.username}
+                    </span>
+                  : <button
+                      type="button"
+                      className="echo-live-standing-name echo-live-standing-user"
+                      onClick={() =>
+                        void handleViewUserSubmission(row.userId, row.username)
+                      }
+                    >
+                      {row.username}
+                    </button>}
                   <div className="echo-live-standing-pills">
                     {row.showOpenerPicked ?
                       <span className="echo-live-standing-pill">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
+import { deriveEchoPicksStatus } from "@/lib/echo-picks-status"
 import { supabase } from "@/lib/supabase"
 
 export type EchoNextShow = {
@@ -30,41 +31,10 @@ function formatEchoShowDateLong(dateInput: string): string {
   })
 }
 
-function deriveCountdown(showTime: string): {
-  countdown: string
-  picksOpen: boolean
-} {
-  if (!showTime) return { countdown: "Picks Closed", picksOpen: false }
-
-  const now = new Date()
-  const showDateTime = new Date(showTime)
-  if (Number.isNaN(showDateTime.getTime())) {
-    return { countdown: "Picks Closed", picksOpen: false }
-  }
-
-  const closeAt = new Date(showDateTime.getTime() - 60 * 60 * 1000)
-  const timeDiff = closeAt.getTime() - now.getTime()
-  if (timeDiff <= 0) return { countdown: "Picks Closed", picksOpen: false }
-
-  const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor(
-    (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-  )
-  const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
-  const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000)
-
-  let countdown = `${seconds}s`
-  if (days > 0) countdown = `${days}d ${hours}h ${minutes}m`
-  else if (hours > 0) countdown = `${hours}h ${minutes}m ${seconds}s`
-  else if (minutes > 0) countdown = `${minutes}m ${seconds}s`
-
-  return { countdown, picksOpen: true }
-}
-
 function withCountdown(
   show: Omit<EchoNextShow, "countdown" | "picksOpen">,
 ): EchoNextShow {
-  return { ...show, ...deriveCountdown(show.showTime) }
+  return { ...show, ...deriveEchoPicksStatus(show.showTime) }
 }
 
 export function useEchoNextShow(

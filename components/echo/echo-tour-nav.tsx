@@ -3,6 +3,7 @@
 import Link from "next/link"
 
 import { getEchoArchiveUrl } from "@/lib/echo-archive-url"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { cn } from "@/lib/utils"
 import type { EchoNavId } from "./echo-tour-data"
 
@@ -14,7 +15,7 @@ const NAV_ITEMS: { id: EchoNavId; label: string }[] = [
 
 export function EchoTourNav({ active }: { active: EchoNavId }) {
   return (
-    <div className="echo-tour-bar">
+    <div className="echo-tour-bar" style={echoTourSurfaceBgStyle("nav")}>
       <div className="echo-tour-brand">
         <Link href={getEchoArchiveUrl("tour")} className="echo-tour-brand-name" scroll={false}>
           Echo of a Show

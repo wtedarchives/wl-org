@@ -1,5 +1,9 @@
 import type { PlayerStats, SortField, SortDirection } from "./standings-types"
 
+function compareUsernames(a: string, b: string): number {
+  return a.localeCompare(b, undefined, { sensitivity: "base" })
+}
+
 export function sortStandings(
   data: PlayerStats[],
   field: SortField,
@@ -8,10 +12,14 @@ export function sortStandings(
   return [...data].sort((a, b) => {
     let comparison = 0
 
-    const aVal = a[field]
-    const bVal = b[field]
-    if (aVal < bVal) comparison = -1
-    else if (aVal > bVal) comparison = 1
+    if (field === "username") {
+      comparison = compareUsernames(a.username, b.username)
+    } else {
+      const aVal = a[field]
+      const bVal = b[field]
+      if (aVal < bVal) comparison = -1
+      else if (aVal > bVal) comparison = 1
+    }
 
     comparison = direction === "asc" ? comparison : -comparison
 
@@ -28,7 +36,7 @@ export function sortStandings(
         if (a.songsPicked > b.songsPicked) return -1
         if (a.songsPicked < b.songsPicked) return 1
       }
-      return a.username.localeCompare(b.username)
+      return compareUsernames(a.username, b.username)
     }
 
     return comparison

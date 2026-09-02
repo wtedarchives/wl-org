@@ -13,12 +13,14 @@ import {
   parseEchoArchivePage,
   parseEchoArchiveShowId,
 } from "@/lib/echo-archive-url"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 
 import { EchoLiveShow } from "./echo-live-show"
 import { EchoTourCountdown } from "./echo-tour-countdown"
 import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
 import { EchoTourHero } from "./echo-tour-hero"
 import { EchoTourNav } from "./echo-tour-nav"
+import { EchoTourShowStatistics } from "./echo-tour-show-statistics"
 import { EchoTourShows } from "./echo-tour-shows"
 import "./echo-tour.css"
 
@@ -69,13 +71,12 @@ export function EchoTourView() {
             <EchoTourCountdown
               loading={nextShowLoading}
               show={nextShow}
-              onPicks={() => {}}
               onScoring={() => setShowRules(true)}
             />
             <EchoTourShows
-              onPastTours={() => go("tours")}
               onShowTimeSaved={() => setShowTimeRevision((n) => n + 1)}
             />
+            <EchoTourShowStatistics />
           </>
         : active === "show" ?
           <EchoLiveShow
@@ -83,7 +84,12 @@ export function EchoTourView() {
             showId={showIdFromUrl}
             resolving={!showIdFromUrl && nextShowLoading}
           />
-        : <div className="echo-tour-placeholder">
+        : <div
+            className="echo-tour-placeholder"
+            style={echoTourSurfaceBgStyle(
+              active === "tours" ? "history" : "profile",
+            )}
+          >
             <div className="echo-tour-kicker">
               {active === "tours" ? "Archive" : "You"}
             </div>

@@ -1,9 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
 import type { EchoLiveEntry, EchoLivePickRow } from "@/components/echo/echo-live-data"
+import { deriveEchoPicksStatus } from "@/lib/echo-picks-status"
 import { supabase } from "@/lib/supabase"
 
 function compareEchoSetKey(a: string, b: string): number {
@@ -34,7 +35,11 @@ export function useEchoLiveShow(showId: string | null): {
   show: EchoLiveShowInfo | null
   entries: EchoLiveEntry[]
   picks: EchoLivePickRow[]
+  submissionId: string | null
   complete: boolean
+  picksOpen: boolean
+  countdown: string
+  reload: () => Promise<void>
 } {
   const { session } = useAuth()
   const signedIn = Boolean(session?.profileId)
@@ -42,6 +47,8 @@ export function useEchoLiveShow(showId: string | null): {
   const [show, setShow] = useState<EchoLiveShowInfo | null>(null)
   const [entries, setEntries] = useState<EchoLiveEntry[]>([])
   const [picks, setPicks] = useState<EchoLivePickRow[]>([])
+  const [submissionId, setSubmissionId] = useState<string | null>(null)
+  const [countdownTick, setCountdownTick] = useState(0)
 
   const load = useCallback(async () => {
     if (!showId || !supabase) {
@@ -121,6 +128,7 @@ export function useEchoLiveShow(showId: string | null): {
 
       if (!session?.profileId) {
         setPicks([])
+        setSubmissionId(null)
         return
       }
 
@@ -137,13 +145,17 @@ export function useEchoLiveShow(showId: string | null): {
           submissionError.message,
         )
         setPicks([])
+        setSubmissionId(null)
         return
       }
 
       if (!submission) {
         setPicks([])
+        setSubmissionId(null)
         return
       }
+
+      setSubmissionId(submission.submission_id)
 
       const { data: pickRows, error: picksError } = await supabase
         .from("setlist_game_picks")
@@ -157,6 +169,7 @@ export function useEchoLiveShow(showId: string | null): {
       if (picksError) {
         console.error("Error fetching Echo live picks:", picksError.message)
         setPicks([])
+        setSubmissionId(null)
         return
       }
 
@@ -190,6 +203,20 @@ export function useEchoLiveShow(showId: string | null): {
   }, [load])
 
   const complete = Boolean(show?.scored || show?.setlistComplete)
+  const picksStatus = useMemo(
+    () => deriveEchoPicksStatus(show?.showTime ?? ""),
+    [countdownTick, show?.showTime],
+  )
+
+  useEffect(() => {
+    if (!show?.showTime || !picksStatus.picksOpen) return
+
+    const timerId = window.setInterval(() => {
+      setCountdownTick((tick) => tick + 1)
+    }, 1000)
+
+    return () => window.clearInterval(timerId)
+  }, [picksStatus.picksOpen, show?.showTime])
 
   useEffect(() => {
     if (!showId || !supabase || complete) return
@@ -241,5 +268,16 @@ export function useEchoLiveShow(showId: string | null): {
     return () => window.clearInterval(timerId)
   }, [complete, load, showId])
 
-  return { loading, signedIn, show, entries, picks, complete }
+  return {
+    loading,
+    signedIn,
+    show,
+    entries,
+    picks,
+    submissionId,
+    complete,
+    picksOpen: picksStatus.picksOpen,
+    countdown: picksStatus.countdown,
+    reload: load,
+  }
 }

@@ -1,13 +1,15 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
 import { useStandingsData } from "@/hooks/use-standings-data"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { formatOrdinal } from "@/lib/setlist-utils"
 import { cn } from "@/lib/utils"
 
 import { ECHO_ACTIVE_LEAGUE, type EchoStandingRow } from "./echo-tour-data"
+import { EchoTourStandingsDialog } from "./echo-tour-standings-dialog"
 
 export function EchoTourStandingsList({
   rows,
@@ -59,6 +61,7 @@ export function EchoTourStandingsList({
 
 export function EchoTourStandingsCard() {
   const { session } = useAuth()
+  const [standingsOpen, setStandingsOpen] = useState(false)
   const { standings, loading } = useStandingsData(
     ECHO_ACTIVE_LEAGUE,
     "totalPoints",
@@ -72,6 +75,7 @@ export function EchoTourStandingsCard() {
     isMe: Boolean(session?.profileId && player.userId === session.profileId),
   }))
 
+  const signedIn = Boolean(session)
   const me = rows.find((row) => row.isMe)
   const playerCount = rows.length
   const rankLabel = me ? formatOrdinal(me.rank) : loading ? "\u00a0" : "—"
@@ -82,41 +86,67 @@ export function EchoTourStandingsCard() {
     : null
 
   return (
-    <div className="echo-tour-card echo-tour-card--standings">
-      <div className="echo-tour-card-head">
-        <div className="echo-tour-kicker">Tour Standings</div>
-        <a
-          href="#"
-          className="echo-tour-kicker echo-tour-see-more"
-          onClick={(event) => event.preventDefault()}
-        >
-          See more →
-        </a>
-      </div>
-      <div className="echo-tour-rank-row">
-        <div className="echo-tour-rank-cluster">
-          <span className="echo-tour-rank">{rankLabel}</span>
-          <span className="echo-tour-rank-of">{ofPlayers}</span>
+    <>
+      <div
+        className="echo-tour-card echo-tour-card--standings"
+        style={echoTourSurfaceBgStyle("standings")}
+      >
+        <div className="echo-tour-card-head">
+          <div className="echo-tour-kicker">Tour Standings</div>
+          <button
+            type="button"
+            className="echo-tour-kicker echo-tour-see-more"
+            onClick={() => setStandingsOpen(true)}
+          >
+            See more →
+          </button>
         </div>
-        {pointsLabel ?
-          <span className="echo-tour-points-pill">{pointsLabel}</span>
-        : null}
-      </div>
+      {signedIn ?
+        <div className="echo-tour-rank-row">
+          <div className="echo-tour-rank-cluster">
+            <span className="echo-tour-rank">{rankLabel}</span>
+            <span className="echo-tour-rank-of">{ofPlayers}</span>
+          </div>
+          {pointsLabel ?
+            <span className="echo-tour-points-pill">{pointsLabel}</span>
+          : null}
+        </div>
+      : null}
       {loading ?
-        <div className="echo-tour-standings-wrap">
+        <div
+          className={cn(
+            "echo-tour-standings-wrap",
+            !signedIn && "echo-tour-standings-wrap--guest",
+          )}
+        >
           <div className="echo-tour-standings echo-tour-standings--empty">
             Loading standings…
           </div>
         </div>
       : rows.length === 0 ?
-        <div className="echo-tour-standings-wrap">
+        <div
+          className={cn(
+            "echo-tour-standings-wrap",
+            !signedIn && "echo-tour-standings-wrap--guest",
+          )}
+        >
           <div className="echo-tour-standings echo-tour-standings--empty">
             No scored shows yet.
           </div>
         </div>
-      : <div className="echo-tour-standings-wrap">
+      : <div
+          className={cn(
+            "echo-tour-standings-wrap",
+            !signedIn && "echo-tour-standings-wrap--guest",
+          )}
+        >
           <EchoTourStandingsList rows={rows} />
         </div>}
-    </div>
+      </div>
+      <EchoTourStandingsDialog
+        open={standingsOpen}
+        onOpenChange={setStandingsOpen}
+      />
+    </>
   )
 }

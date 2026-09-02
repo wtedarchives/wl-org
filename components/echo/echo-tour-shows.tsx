@@ -9,6 +9,7 @@ import { useAdminStatus } from "@/hooks/use-admin-status"
 import type { GameShow } from "@/hooks/use-game-shows"
 import { useGameShows } from "@/hooks/use-game-shows"
 import { getEchoLiveShowUrl } from "@/lib/echo-archive-url"
+import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { cn } from "@/lib/utils"
 
 import { ECHO_ACTIVE_LEAGUE, type EchoShowStatus } from "./echo-tour-data"
@@ -46,10 +47,8 @@ function picksStillOpen(show: GameShow) {
 }
 
 export function EchoTourShows({
-  onPastTours,
   onShowTimeSaved,
 }: {
-  onPastTours: () => void
   onShowTimeSaved?: () => void
 }) {
   const { session } = useAuth()
@@ -64,6 +63,7 @@ export function EchoTourShows({
     <div className="echo-tour-shows">
       <div
         className={cn("echo-tour-shows-list", isAdmin && "is-admin")}
+        style={echoTourSurfaceBgStyle("shows")}
       >
         <h2 className="echo-tour-shows-title" id="echo-tour-dates-heading">
           Tour dates
@@ -161,12 +161,13 @@ export function EchoTourShows({
                       )}
                     >
                       {canPick ?
-                        <button
-                          type="button"
+                        <Link
+                          href={getEchoLiveShowUrl(show.show_id)}
                           className="echo-tour-show-picks-btn"
+                          scroll={false}
                         >
                           {show.submission_id ? "Edit Picks" : "Make Picks"}
-                        </button>
+                        </Link>
                       : myScore}
                     </td>
                   </tr>
@@ -175,12 +176,6 @@ export function EchoTourShows({
             </tbody>
           </table>
           </div>}
-        <div className="echo-tour-shows-foot">
-          <span>Right-hand column is your score for that show.</span>
-          <button type="button" className="echo-tour-text-btn" onClick={onPastTours}>
-            See history
-          </button>
-        </div>
       </div>
       <EchoTourShowTimeDialog
         show={editingShow}

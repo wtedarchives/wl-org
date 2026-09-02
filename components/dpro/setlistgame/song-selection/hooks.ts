@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { supabase } from "@/lib/supabase"
+import { fetchSetlistGameSongs } from "@/lib/fetch-setlist-game-songs"
 import type { SongPick, Song, SetlistEntry } from "./types"
 import type { SongSelectionModalProps } from "./types"
 import {
@@ -44,75 +45,12 @@ export const useSongSelection = (props: SongSelectionModalProps) => {
     return calculateTimeRemaining(showTime);
   }, []);
 
-  // Fetch songs from "Goose", "Goose Misc", "Ted Tapes", or "Cover Songs" categories with pagination
   useEffect(() => {
     async function fetchSongs() {
-      if (!supabase) return
       try {
         setLoading(true)
-        
-        // Paginate through all songs
-        let allSongs: any[] = [];
-        let page = 0;
-        let hasMore = true;
-        const pageSize = 1000;
-        
-        while (hasMore) {
-          const { data, error } = await supabase
-            .from('songs')
-            .select(`
-              song, 
-              song_id,
-              song_displayname,
-              song_category,
-              setlistgame_omit,
-              categories!inner(
-                category,
-                category_type
-              )
-            `)
-            .in('categories.category_type', ['Goose', 'Goose Misc', 'Ted Tapes', 'Cover Songs'])
-            .or('setlistgame_omit.is.null,setlistgame_omit.eq.false')
-            .order('song')
-            .range(page * pageSize, (page + 1) * pageSize - 1);
-          
-          if (error) throw error;
-          
-          if (data && data.length > 0) {
-            allSongs = [...allSongs, ...data];
-            page++;
-            hasMore = data.length === pageSize;
-          } else {
-            hasMore = false;
-          }
-        }
-        
-        // Group songs by category type into three groups
-        const gooseSongs: Song[] = []; // Contains "Goose" and "Goose Misc"
-        const tedTapesSongs: Song[] = []; // Contains "Ted Tapes"
-        const coverSongs: Song[] = []; // Contains "Cover Songs"
-        
-        allSongs.forEach(item => {
-          const songData = {
-            song: item.song,
-            song_id: item.song_id,
-            song_displayname: item.song_displayname ?? null,
-            category_type: item.categories?.category_type
-          };
-          
-          const categoryType = item.categories?.category_type;
-          if (categoryType === 'Goose' || categoryType === 'Goose Misc') {
-            gooseSongs.push(songData);
-          } else if (categoryType === 'Ted Tapes') {
-            tedTapesSongs.push(songData);
-          } else if (categoryType === 'Cover Songs') {
-            coverSongs.push(songData);
-          }
-        });
-        
-        // Combine arrays: Goose first, then Ted Tapes, then Cover Songs
-        const songsData = [...gooseSongs, ...tedTapesSongs, ...coverSongs];
-        setSongs(songsData);
+        const songsData = await fetchSetlistGameSongs()
+        setSongs(songsData)
       } catch (error) {
         console.error('Error fetching songs:', error);
         setError('Failed to load songs. Please try again.');
