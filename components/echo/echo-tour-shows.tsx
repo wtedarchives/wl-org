@@ -49,12 +49,15 @@ function picksStillOpen(show: GameShow) {
 export function EchoTourShows({
   league = ECHO_ACTIVE_LEAGUE,
   allowAdmin = true,
+  variant = "default",
   onShowTimeSaved,
 }: {
   league?: string
   allowAdmin?: boolean
+  variant?: "default" | "history"
   onShowTimeSaved?: () => void
 }) {
+  const isHistory = variant === "history"
   const { session } = useAuth()
   const { isAdmin } = useAdminStatus(session)
   const showAdminControls = allowAdmin && isAdmin
@@ -64,7 +67,11 @@ export function EchoTourShows({
   return (
     <div className="echo-tour-shows">
       <div
-        className={cn("echo-tour-shows-list", showAdminControls && "is-admin")}
+        className={cn(
+          "echo-tour-shows-list",
+          showAdminControls && "is-admin",
+          isHistory && "is-history",
+        )}
         style={echoTourSurfaceBgStyle("shows")}
       >
         <h2 className="echo-tour-shows-title" id="echo-tour-dates-heading">
@@ -82,25 +89,33 @@ export function EchoTourShows({
             <table className="echo-tour-shows-table">
             <colgroup>
               <col className="echo-tour-col-date" />
-              <col className="echo-tour-col-venue" />
+              {!isHistory ?
+                <col className="echo-tour-col-venue" />
+              : null}
               <col className="echo-tour-col-city" />
-              <col className="echo-tour-col-status" />
+              {!isHistory ?
+                <col className="echo-tour-col-status" />
+              : null}
               <col className="echo-tour-col-players" />
               <col className="echo-tour-col-score" />
             </colgroup>
             <thead className="echo-tour-shows-head">
               <tr>
                 <th scope="col">Date</th>
-                <th scope="col">Venue</th>
+                {!isHistory ?
+                  <th scope="col">Venue</th>
+                : null}
                 <th scope="col">Location</th>
-                <th scope="col">Status</th>
+                {!isHistory ?
+                  <th scope="col">Status</th>
+                : null}
                 <th scope="col">Players</th>
                 <th scope="col">Score</th>
               </tr>
             </thead>
             <tbody>
               {gameShows.map((show) => {
-                const { status, label } = showStatus(show)
+                const statusInfo = showStatus(show)
                 const detail = show.show_detail?.trim()
                 const myScore = scoreLabel(show)
                 const canPick = picksStillOpen(show)
@@ -127,26 +142,33 @@ export function EchoTourShows({
                         : null}
                       </div>
                     </td>
-                    <td className="echo-tour-show-venue">
-                      <div className="echo-tour-show-venue-inner">
-                        <span className="echo-tour-show-venue-name">
-                          {show.show_subvenue}
-                        </span>
-                        {detail ?
-                          <span className="echo-tour-show-venue-detail">
-                            {detail}
+                    {!isHistory ?
+                      <td className="echo-tour-show-venue">
+                        <div className="echo-tour-show-venue-inner">
+                          <span className="echo-tour-show-venue-name">
+                            {show.show_subvenue}
                           </span>
-                        : null}
-                      </div>
-                    </td>
+                          {detail ?
+                            <span className="echo-tour-show-venue-detail">
+                              {detail}
+                            </span>
+                          : null}
+                        </div>
+                      </td>
+                    : null}
                     <td className="echo-tour-show-city">
                       {show.show_venue_location}
                     </td>
-                    <td className="echo-tour-show-status">
-                      <span className="echo-tour-pill" data-status={status}>
-                        {label}
-                      </span>
-                    </td>
+                    {!isHistory ?
+                      <td className="echo-tour-show-status">
+                        <span
+                          className="echo-tour-pill"
+                          data-status={statusInfo.status}
+                        >
+                          {statusInfo.label}
+                        </span>
+                      </td>
+                    : null}
                     <td
                       className="echo-tour-show-players"
                       aria-label={`${show.playerCount ?? 0} ${(show.playerCount ?? 0) === 1 ? "player" : "players"}`}

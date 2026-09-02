@@ -92,13 +92,15 @@
 .echo-tour-bar,
 .echo-tour-hero,
 .echo-tour-profile-header,
+.echo-tour-past-tours-head,
 .echo-tour-next,
 .echo-tour-card,
 .echo-tour-shows-list,
 .echo-tour-show-stats-panel,
 .echo-tour-placeholder,
 .echo-live-head,
-.echo-live-card {
+.echo-live-card,
+.echo-tour-past-tours-detail {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -107,13 +109,15 @@
 .echo-tour-bar::before,
 .echo-tour-hero::before,
 .echo-tour-profile-header::before,
+.echo-tour-past-tours-head::before,
 .echo-tour-next::before,
 .echo-tour-card::before,
 .echo-tour-shows-list::before,
 .echo-tour-show-stats-panel::before,
 .echo-tour-placeholder::before,
 .echo-live-head::before,
-.echo-live-card::before {
+.echo-live-card::before,
+.echo-tour-past-tours-detail::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -960,6 +964,10 @@
   text-align: center;
 }
 
+.echo-tour-shows-list.is-history .echo-tour-show-city {
+  text-align: left;
+}
+
 .echo-tour-show-status {
   text-align: center;
 }
@@ -1085,146 +1093,378 @@
   color: var(--echo-muted);
 }
 
-/* ——— History (past tours) ——— */
+/* ——— Past tours (history) ——— */
 
-.echo-tour-history {
+.echo-tour-past-tours {
+  min-width: 0;
+}
+
+.echo-tour-past-tours-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 26.4px;
+  padding: clamp(13.2px, 3.6vw, 22px) clamp(17.6px, 4.8vw, 35.2px);
   background: var(--echo-surface);
   color: var(--echo-ink);
   border-radius: 32px;
-  padding: clamp(17.6px, 4.8vw, 35.2px);
-  min-width: 0;
-  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(46, 43, 37, 0.16);
 }
 
-.echo-tour-history-title {
-  margin: 0 0 17.6px;
+.echo-tour-past-tours-head-picker {
+  width: 100%;
+  text-align: center;
 }
 
-.echo-tour-history-empty {
+@media (min-width: 640px) {
+  .echo-tour-past-tours-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .echo-tour-past-tours-head-picker {
+    width: auto;
+    flex: 0 0 auto;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .echo-tour-past-tours-title {
+    text-align: left;
+  }
+}
+
+.echo-tour-past-tours-title {
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: clamp(29px, 7vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--echo-ink);
+}
+
+.echo-tour-past-tours-empty,
+.echo-tour-past-tours-detail-loading {
   margin: 0;
   padding: 22px 0;
-  text-align: center;
   font-size: 15px;
   color: var(--echo-muted);
 }
 
-.echo-tour-history-scroll {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
+.echo-tour-past-tours-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26.4px;
+  align-items: flex-start;
+}
+
+.echo-tour-past-tours-shows-column {
+  flex: 1 1 340px;
   min-width: 0;
-  margin: 0 calc(-1 * clamp(17.6px, 4.8vw, 35.2px));
-  padding: 0 clamp(17.6px, 4.8vw, 35.2px);
 }
 
-.echo-tour-history-table {
-  width: max-content;
-  min-width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 14px;
+.echo-tour-past-tours-shows-column .echo-tour-shows {
+  margin-top: 0;
+  min-width: 0;
+  width: 100%;
 }
 
-.echo-tour-history-col-metric {
-  width: 72px;
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history {
+  width: 100%;
+  padding: clamp(13.2px, 3.6vw, 26.4px);
 }
 
-.echo-tour-history-head-row th {
-  padding: 0 8px 10px;
-  font-size: 11px;
-  font-weight: 600;
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-shows-title {
+  font-size: 25px;
   line-height: 1.15;
-  letter-spacing: 0.02em;
+  padding: 0 0 17.6px;
+  margin: 0;
+}
+
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-shows-scroll {
+  overflow-y: visible;
+  height: auto;
+  max-height: none;
+  width: 100%;
+}
+
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-shows-table {
+  width: 100%;
+}
+
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-show-row td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-show-row td:first-child {
+  padding-left: 13.2px;
+}
+
+.echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-show-row td:last-child {
+  padding-right: 13.2px;
+}
+
+.echo-tour-past-tours .echo-tour-show-stats {
+  margin-top: 26.4px;
+}
+
+.echo-tour-past-tours .echo-tour-show-stats-panel.is-history {
+  width: 100%;
+  padding: clamp(13.2px, 3.6vw, 26.4px);
+}
+
+.echo-tour-past-tours .echo-tour-show-stats-panel.is-history .echo-tour-shows-title {
+  font-size: 25px;
+  line-height: 1.15;
+  padding: 0 0 17.6px;
+  margin: 0;
+}
+
+.echo-tour-past-tours-summary {
+  min-width: 0;
+}
+
+.echo-tour-past-tours-select {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  appearance: none;
+  border: 1px solid rgba(32, 30, 29, 0.22);
+  border-radius: 999px;
+  padding: 14px 44px 14px 18px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 256 256'%3E%3Cpath fill='%23645c50' d='M213.66 101.66l-80 80a8 8 0 0 1-11.32 0l-80-80a8 8 0 0 1 11.32-11.32L128 164.69l74.34-74.35a8 8 0 0 1 11.32 11.32'/%3E%3C/svg%3E")
+      no-repeat right 16px center / 16px,
+    var(--echo-cream);
+  color: var(--echo-ink);
+  font-family: var(--echo-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+}
+
+.echo-tour-past-tours-select:focus-visible {
+  outline: none;
+  border-color: var(--echo-accent);
+  box-shadow: 0 0 0 3px rgba(198, 113, 57, 0.22);
+}
+
+.echo-tour-past-tours-detail-champion {
+  display: none;
+  margin-bottom: 17.6px;
+  padding-bottom: 17.6px;
+  border-bottom: 1px solid var(--echo-rule);
+  text-align: right;
+}
+
+.echo-tour-past-tours-detail-champion .echo-tour-past-tours-champion-names {
+  font-size: 16px;
+}
+
+.echo-tour-past-tours-champion-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--echo-muted);
+  color: var(--echo-faint);
+  margin-bottom: 4px;
   white-space: nowrap;
-  vertical-align: bottom;
+}
+
+.echo-tour-past-tours-champion-names {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--echo-accent-deep);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.echo-tour-past-tours-detail {
+  flex: 1 1 320px;
+  min-width: 0;
+  background: var(--echo-surface);
+  color: var(--echo-ink);
+  border-radius: 32px;
+  padding: clamp(13.2px, 3.6vw, 26.4px);
+}
+
+@media (min-width: 640px) {
+  .echo-tour-past-tours-detail {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .echo-tour-past-tours-detail-title,
+  .echo-tour-past-tours-summary {
+    flex-shrink: 0;
+  }
+
+  .echo-tour-past-tours-standings-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 2px;
+  }
+}
+
+.echo-tour-past-tours-detail-title {
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: 25px;
+  line-height: 1.15;
+  margin: 0 0 17.6px;
+  color: var(--echo-ink);
+}
+
+.echo-tour-past-tours-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13.2px 26.4px;
+  padding-bottom: 17.6px;
+  margin: 0 0 17.6px;
   border-bottom: 1px solid var(--echo-rule);
 }
 
-.echo-tour-history-head-row th.is-center {
-  text-align: center;
+.echo-tour-past-tours-stats > div {
+  min-width: 0;
 }
 
-.echo-tour-history-head-row th.is-left {
-  text-align: left;
+.echo-tour-past-tours-stats dt {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--echo-muted);
+  margin-bottom: 4px;
 }
 
-.echo-tour-history-head-row th.is-metric {
-  width: 72px;
+.echo-tour-past-tours-stats dd {
+  margin: 0;
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--echo-ink);
 }
 
-.echo-tour-history-head-row th:first-child {
-  padding-left: 12px;
+.echo-tour-past-tours-standings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.echo-tour-history-head-row th:last-child {
-  padding-right: 12px;
-}
-
-.echo-tour-history-row td {
-  padding: 10px 8px;
-  vertical-align: middle;
-  white-space: nowrap;
+.echo-tour-past-tours-standing-row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 50px;
+  align-items: center;
+  gap: 11px;
+  padding: 4px 13.2px;
+  border-radius: 999px;
+  background: transparent;
   transition: background 0.2s ease-out;
 }
 
-.echo-tour-history-row td:first-child {
-  padding-left: 12px;
-  border-radius: 22px 0 0 22px;
+.echo-tour-past-tours-standing-row.is-me {
+  background: rgba(198, 113, 57, 0.14);
 }
 
-.echo-tour-history-row td:last-child {
-  padding-right: 12px;
-  border-radius: 0 22px 22px 0;
+.echo-tour-past-tours-standing-rank {
+  font-size: 13px;
+  color: var(--echo-faint);
+  font-variant-numeric: tabular-nums;
 }
 
-.echo-tour-history-row:hover td {
-  background: rgba(255, 255, 255, 0.45);
-}
-
-.echo-tour-history-row td.is-center {
-  text-align: center;
-}
-
-.echo-tour-history-row td.is-muted {
-  color: var(--echo-muted);
-}
-
-.echo-tour-history-row td.is-italic {
-  font-style: italic;
-}
-
-.echo-tour-history-row td.is-tour {
-  font-weight: 600;
-}
-
-.echo-tour-history-row td.is-winners {
-  font-weight: 600;
-  white-space: normal;
-  min-width: 160px;
-}
-
-.echo-tour-history-tour-link {
-  color: inherit;
-  text-decoration: none;
-}
-
-.echo-tour a.echo-tour-history-tour-link,
-.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-history-tour-link {
-  color: inherit;
-}
-
-.echo-tour a.echo-tour-history-tour-link:hover,
-.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-history-tour-link:hover {
-  color: var(--echo-accent-deep);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.echo-tour-history-winner-score {
+.echo-tour-past-tours-standing-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
   font-weight: 400;
-  color: var(--echo-muted);
+  color: var(--echo-ink);
+}
+
+.echo-tour-past-tours-standing-name.is-me {
+  font-weight: 700;
+  color: var(--echo-accent-deep);
+}
+
+.echo-tour-past-tours-standing-pts {
+  text-align: right;
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  color: var(--echo-ink);
+}
+
+@media (max-width: 639px) {
+  .echo-tour-past-tours-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .echo-tour-past-tours-shows-column {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .echo-tour-past-tours-detail {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .echo-tour-past-tours-summary {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 16px;
+    padding-bottom: 17.6px;
+    margin-bottom: 17.6px;
+    border-bottom: 1px solid var(--echo-rule);
+  }
+
+  .echo-tour-past-tours-stats {
+    flex: 0 1 auto;
+    margin: 0;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .echo-tour-past-tours-detail-champion {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border-bottom: 0;
+    text-align: right;
+  }
+
+  .echo-tour-past-tours-champion-names {
+    white-space: nowrap;
+  }
+
+  .echo-tour-past-tours-standings-scroll {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
 }
 
 .echo-tour-past-tour-nav {
@@ -2451,6 +2691,14 @@
 @media (max-width: 639px) {
   .echo-tour-shows-title {
     font-size: 26px;
+  }
+
+  .echo-tour-past-tours-shows-column .echo-tour-shows-list.is-history .echo-tour-shows-title {
+    font-size: 25px;
+  }
+
+  .echo-tour-past-tours .echo-tour-show-stats-panel.is-history .echo-tour-shows-title {
+    font-size: 25px;
   }
 
   .echo-tour-rank {

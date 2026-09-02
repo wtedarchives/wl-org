@@ -1,87 +1,235 @@
 "use client"
 
-import Link from "next/link"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 
+import { useAuth } from "@/components/auth-context"
 import { usePastTours } from "@/hooks/use-past-tours"
-import { getEchoPastTourUrl } from "@/lib/echo-archive-url"
+import type { TourStats } from "@/hooks/use-past-tours"
+import { useStandingsData } from "@/hooks/use-standings-data"
 import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
+import { cn } from "@/lib/utils"
 
 import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
+import { EchoTourShowStatistics } from "./echo-tour-show-statistics"
+import { EchoTourShows } from "./echo-tour-shows"
+
+function formatTourChampions(
+  winners: TourStats["winners"],
+): string | null {
+  if (winners.length === 0) return null
+  return winners
+    .map((winner) => `${winner.username} (${winner.score})`)
+    .join(", ")
+}
+
+function championLabel(count: number): string {
+  if (count <= 1) return "Champion"
+  return "Champions"
+}
 
 export function EchoTourHistory() {
+  const tourSelectId = useId()
+  const showsColumnRef = useRef<HTMLDivElement>(null)
+  const [matchedPanelHeight, setMatchedPanelHeight] = useState<number | null>(
+    null,
+  )
+  const { session } = useAuth()
   const { loading, pastTours } = usePastTours(ECHO_ACTIVE_LEAGUE)
+  const [selectedTourId, setSelectedTourId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (pastTours.length === 0) return
+    setSelectedTourId((current) => {
+      if (current && pastTours.some((tour) => tour.tour_id === current)) {
+        return current
+      }
+      return pastTours[0]?.tour_id ?? null
+    })
+  }, [pastTours])
+
+  const selectedTour = useMemo(
+    () => pastTours.find((tour) => tour.tour_id === selectedTourId) ?? null,
+    [pastTours, selectedTourId],
+  )
+
+  useEffect(() => {
+    if (!selectedTour) {
+      setMatchedPanelHeight(null)
+      return
+    }
+
+    const column = showsColumnRef.current
+    if (!column) return
+
+    const desktopQuery = window.matchMedia("(min-width: 640px)")
+
+    const syncPanelHeight = () => {
+      if (!desktopQuery.matches) {
+        setMatchedPanelHeight(null)
+        return
+      }
+      setMatchedPanelHeight(Math.ceil(column.getBoundingClientRect().height))
+    }
+
+    syncPanelHeight()
+
+    const observer = new ResizeObserver(syncPanelHeight)
+    observer.observe(column)
+    desktopQuery.addEventListener("change", syncPanelHeight)
+
+    return () => {
+      observer.disconnect()
+      desktopQuery.removeEventListener("change", syncPanelHeight)
+    }
+  }, [selectedTour?.tour_id])
+
+  const { standings, loading: standingsLoading } = useStandingsData(
+    selectedTour?.tour ?? "",
+    "totalPoints",
+    "desc",
+  )
+
+  const selectedChampions = selectedTour ?
+    formatTourChampions(selectedTour.winners)
+  : null
 
   return (
-    <div
-      className="echo-tour-history"
-      style={echoTourSurfaceBgStyle("history")}
-    >
-      <h1 className="echo-live-title echo-tour-history-title">History</h1>
+    <div className="echo-tour-past-tours">
+      <header
+        className="echo-tour-past-tours-head"
+        style={echoTourSurfaceBgStyle("history-head")}
+      >
+        <h1 className="echo-tour-past-tours-title">History</h1>
+        {!loading && pastTours.length > 0 ?
+          <div className="echo-tour-past-tours-head-picker">
+            <label className="sr-only" htmlFor={tourSelectId}>
+              Select tour
+            </label>
+            <select
+              id={tourSelectId}
+              className="echo-tour-past-tours-select"
+              value={selectedTourId ?? ""}
+              onChange={(event) => setSelectedTourId(event.target.value)}
+            >
+              {pastTours.map((tour) => (
+                <option key={tour.tour_id} value={tour.tour_id}>
+                  {tour.tour}
+                </option>
+              ))}
+            </select>
+          </div>
+        : null}
+      </header>
 
       {loading ?
-        <p className="echo-tour-history-empty">Loading past tours…</p>
+        <p className="echo-tour-past-tours-empty">Loading past tours…</p>
       : pastTours.length === 0 ?
-        <p className="echo-tour-history-empty">No past tours found.</p>
-      : <div
-          className="echo-tour-history-scroll"
-          role="region"
-          aria-label="Past tours"
-        >
-          <table className="echo-tour-history-table">
-            <colgroup>
-              <col />
-              <col className="echo-tour-history-col-metric" />
-              <col className="echo-tour-history-col-metric" />
-              <col />
-            </colgroup>
-            <thead className="echo-tour-history-head-row">
-              <tr>
-                <th scope="col" className="is-left">
-                  Tour
-                </th>
-                <th scope="col" className="is-center is-metric">
-                  Players
-                </th>
-                <th scope="col" className="is-center is-metric">
-                  Shows
-                </th>
-                <th scope="col" className="is-left">
-                  Winner(s)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {pastTours.map((tour) => (
-                <tr key={tour.tour_id} className="echo-tour-history-row">
-                  <td className="is-tour">
-                    <Link
-                      href={getEchoPastTourUrl(tour.tour_id)}
-                      className="echo-tour-history-tour-link"
-                      scroll={false}
-                    >
-                      {tour.tour}
-                    </Link>
-                  </td>
-                  <td className="is-center is-muted">{tour.playerCount}</td>
-                  <td className="is-center is-muted">{tour.showCount}</td>
-                  <td className="is-winners">
-                    {tour.winners.length > 0 ?
-                      tour.winners.map((winner, index) => (
-                        <span key={`${winner.username}-${index}`}>
-                          {winner.username}{" "}
-                          <span className="echo-tour-history-winner-score">
-                            ({winner.score})
-                          </span>
-                          {index < tour.winners.length - 1 ? ", " : ""}
+        <p className="echo-tour-past-tours-empty">No past tours found.</p>
+      : selectedTour ?
+        <>
+          <div className="echo-tour-past-tours-layout">
+          <div
+            ref={showsColumnRef}
+            className="echo-tour-past-tours-shows-column"
+          >
+            <EchoTourShows
+              key={selectedTour.tour_id}
+              league={selectedTour.tour}
+              allowAdmin={false}
+              variant="history"
+            />
+          </div>
+
+          <section
+            className="echo-tour-past-tours-detail"
+            style={{
+              ...echoTourSurfaceBgStyle(
+                `past-tours-detail-${selectedTour.tour_id}`,
+              ),
+              ...(matchedPanelHeight != null ?
+                { height: matchedPanelHeight }
+              : {}),
+            }}
+            aria-label={`${selectedTour.tour} final standings`}
+          >
+            <h2 className="echo-tour-past-tours-detail-title">
+              Final standings
+            </h2>
+
+            <div className="echo-tour-past-tours-summary">
+              <dl className="echo-tour-past-tours-stats">
+                <div>
+                  <dt>Shows</dt>
+                  <dd>{selectedTour.showCount}</dd>
+                </div>
+                <div>
+                  <dt>Players</dt>
+                  <dd>{selectedTour.playerCount}</dd>
+                </div>
+              </dl>
+
+              <div className="echo-tour-past-tours-detail-champion">
+                <div className="echo-tour-past-tours-champion-label">
+                  {championLabel(selectedTour.winners.length)}
+                </div>
+                <div className="echo-tour-past-tours-champion-names">
+                  {selectedChampions ?? "No scores"}
+                </div>
+              </div>
+            </div>
+
+            <div className="echo-tour-past-tours-standings-scroll">
+              {standingsLoading ?
+                <p className="echo-tour-past-tours-detail-loading">
+                  Loading standings…
+                </p>
+              : standings.length === 0 ?
+                <p className="echo-tour-past-tours-detail-loading">
+                  No standings yet.
+                </p>
+              : <div className="echo-tour-past-tours-standings">
+                  {standings.map((player, index) => {
+                    const isMe = Boolean(
+                      session?.profileId &&
+                        player.userId === session.profileId,
+                    )
+                    return (
+                      <div
+                        key={player.userId}
+                        className={cn(
+                          "echo-tour-past-tours-standing-row",
+                          isMe && "is-me",
+                        )}
+                      >
+                        <span className="echo-tour-past-tours-standing-rank">
+                          {index + 1}
                         </span>
-                      ))
-                    : <span className="is-muted is-italic">No scores</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>}
+                        <span
+                          className={cn(
+                            "echo-tour-past-tours-standing-name",
+                            isMe && "is-me",
+                          )}
+                        >
+                          {player.username}
+                        </span>
+                        <span className="echo-tour-past-tours-standing-pts">
+                          {player.totalPoints}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>}
+            </div>
+          </section>
+        </div>
+
+          <EchoTourShowStatistics
+            key={`${selectedTour.tour_id}-stats`}
+            league={selectedTour.tour}
+            variant="history"
+          />
+        </>
+      : null}
     </div>
   )
 }

@@ -49,9 +49,12 @@ const STAT_COLUMNS = [
 
 export function EchoTourShowStatistics({
   league = ECHO_ACTIVE_LEAGUE,
+  variant = "default",
 }: {
   league?: string
+  variant?: "default" | "history"
 }) {
+  const isHistory = variant === "history"
   const { showStatsLoading, showsWithStats } = useShowStatistics(league)
 
   return (
@@ -60,8 +63,13 @@ export function EchoTourShowStatistics({
       aria-labelledby="echo-tour-show-stats-heading"
     >
       <div
-        className="echo-tour-shows-list echo-tour-show-stats-panel"
-        style={echoTourSurfaceBgStyle("show-stats")}
+        className={cn(
+          "echo-tour-shows-list echo-tour-show-stats-panel",
+          isHistory && "is-history",
+        )}
+        style={echoTourSurfaceBgStyle(
+          isHistory ? `show-stats-${league}` : "show-stats",
+        )}
       >
         <h2 className="echo-tour-shows-title" id="echo-tour-show-stats-heading">
           Show statistics
