@@ -46,6 +46,8 @@ export async function fetchSetlistCore(
             show_dripfieldcomplete,
             discography_display,
             egn_sourced,
+            show_issetlistgame,
+            show_scored,
             subvenues:show_subvenue(
               venues:subvenue_venue(
                 venue_id

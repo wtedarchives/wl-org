@@ -22,6 +22,7 @@ export interface TourShow {
   venue_id?: string
   attended?: boolean
   show_wl_link?: string | null
+  show_issetlistgame?: boolean
   show_length?: string | null
   show_rarity?: string | null
   show_gap?: string | null

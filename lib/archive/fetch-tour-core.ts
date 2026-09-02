@@ -113,6 +113,7 @@ export async function fetchTourCore(
             show_venue_location,
             show_subvenue_venue,
             show_wl_link,
+            show_issetlistgame,
             show_length,
             show_rarity,
             show_gap,

@@ -29,6 +29,10 @@ import type { WlHomeV2SetlistPlaceholderViewProps } from "@/components/wl-home-v
 import type { BandcampEntryTrack, SetlistEntry } from "@/types/setlist"
 import type { ShowRelease } from "@/hooks/use-setlist-releases"
 import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
+import {
+  isWlSetlistEchoPanelVisible,
+  WlSetlistEchoPanel,
+} from "@/components/wl-home-v2/wl-setlist-echo-panel"
 import { isValidWlCommunityTopicUrl } from "@/lib/wl-community-topic-url"
 import { TAILWIND_XL_MIN_PX } from "@/components/wl-home-v2/wl-home-v2-years-view.constants"
 import { SetlistEgnAttribution } from "@/components/dpro/setlist/setlist-egn-attribution"
@@ -132,6 +136,8 @@ export function WlHomeV2SetlistPlaceholderView({
     : "0.00"
   const wlCommunityHref = show.show_wl_link?.trim() ?? ""
   const showWlTopPosts = isValidWlCommunityTopicUrl(wlCommunityHref)
+  const showEchoPanel = isWlSetlistEchoPanelVisible(show)
+  const showSetlistSidePanels = showWlTopPosts || showEchoPanel
   const reviewSummary =
     reviewCount > 0 ?
       `${reviewCount.toLocaleString("en-US")} ${reviewCount === 1 ? "review" : "reviews"}`
@@ -164,10 +170,10 @@ export function WlHomeV2SetlistPlaceholderView({
     asideSongSpreadVisible ||
     asideShowChangesVisible ||
     asideBadgesVisible ||
-    (useCompactTools && showWlTopPosts)
+    (useCompactTools && showSetlistSidePanels)
 
   const showDesktopBelowTableRow =
-    !useCompactTools && (showMediaSection || showWlTopPosts)
+    !useCompactTools && (showMediaSection || showSetlistSidePanels)
 
   const showGroupLabel = show.show_group?.trim() ?? ""
   const venueLocation = show.show_venue_location?.trim() ?? ""
@@ -293,9 +299,14 @@ export function WlHomeV2SetlistPlaceholderView({
                         />
                       </div>
                     : null}
-                    {showWlTopPosts ?
+                    {showSetlistSidePanels ?
                       <div className="wl-home-v2-setlist-below-table-wl">
-                        <WLTopPosts wlLink={wlCommunityHref} />
+                        {showWlTopPosts ?
+                          <WLTopPosts wlLink={wlCommunityHref} />
+                        : null}
+                        {showEchoPanel ?
+                          <WlSetlistEchoPanel showId={showId} show={show} />
+                        : null}
                       </div>
                     : null}
                   </div>
@@ -337,6 +348,7 @@ export function WlHomeV2SetlistPlaceholderView({
             showChangesLoading={showChangesLoading}
             onOpenSetlistScan={onOpenSetlistScan}
             showWlTopPosts={showWlTopPosts}
+            showEchoPanel={showEchoPanel}
             wlCommunityHref={wlCommunityHref}
           />
           {useCompactTools && showEgnAttribution ?

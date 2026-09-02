@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Broadcast, Check, FileAudio, Presentation, Users } from "@phosphor-icons/react"
+import { Broadcast, Check, FileAudio, Presentation, Trophy, Users } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -50,6 +50,7 @@ export function YearShowsTable({
   wlHomeV2 = false,
 }: YearShowsTableProps) {
   const { session } = useAuth()
+  const hasSetlistGameShows = shows.some((show) => show.show_issetlistgame)
   const { sortedShows, handleSort } = useYearShowsSort(
     shows,
     attendeeCounts,
@@ -197,6 +198,16 @@ export function YearShowsTable({
               >
                 <span>Rating</span>
               </TableHead>
+              {hasSetlistGameShows ?
+                <TableHead className="w-[32px] !px-1 !py-0.5 text-center text-[11px] font-medium">
+                  <div className="flex w-full items-center justify-center">
+                    <Trophy
+                      className="size-3 shrink-0 text-muted-foreground"
+                      aria-hidden
+                    />
+                  </div>
+                </TableHead>
+              : null}
               <TableHead className="w-[32px] !px-1 !py-0.5 text-center text-[11px] font-medium">
                 <div className="flex w-full items-center justify-center">
                   <FileAudio
@@ -275,6 +286,7 @@ export function YearShowsTable({
                 showsWithPosters={showsWithPosters}
                 showsWithReleases={showsWithReleases}
                 showsWithRadioIds={showsWithRadioIds}
+                showEchoColumn={hasSetlistGameShows}
                 wlHomeV2={wlHomeV2}
               />
             ))}

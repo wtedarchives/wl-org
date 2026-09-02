@@ -101,6 +101,7 @@ export interface RawShowRow {
   venue_id?: string
   attended?: boolean
   show_wl_link?: string | null
+  show_issetlistgame?: boolean
   show_length?: string | null
   show_rarity?: string | null
   show_gap?: string | null
@@ -185,6 +186,7 @@ export function processShowData(
     venue_id,
     attended: attendedShowIds.includes(show.show_id),
     show_wl_link: show.show_wl_link,
+    show_issetlistgame: show.show_issetlistgame ?? false,
     show_length,
     show_rarity,
     show_gap,

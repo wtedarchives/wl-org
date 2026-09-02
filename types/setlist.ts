@@ -35,6 +35,8 @@ export interface Show {
   discography_display?: boolean | null
   /** When true, show ElGoose.Net data attribution on the setlist page. */
   egn_sourced?: boolean | null
+  show_issetlistgame?: boolean
+  show_scored?: boolean
 }
 
 /** A Bandcamp track linked to a setlist entry (for the setlist page icon + embed). */

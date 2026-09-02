@@ -20,6 +20,7 @@ export interface YearShow {
   venue_id?: string
   attended?: boolean
   show_wl_link?: string | null
+  show_issetlistgame?: boolean
 }
 
 interface ShowResponse {
@@ -35,6 +36,7 @@ interface ShowResponse {
   show_subvenue_venue: string
   show_venue_location: string
   show_wl_link?: string | null
+  show_issetlistgame?: boolean
   subvenues?: {
     venues?: {
       venue_id: string
@@ -103,6 +105,7 @@ export function useShowsDataByYear(currentYear: string) {
             show_subvenue_venue,
             show_venue_location,
             show_wl_link,
+            show_issetlistgame,
             subvenues:show_subvenue(
               venues:subvenue_venue(
                 venue_id

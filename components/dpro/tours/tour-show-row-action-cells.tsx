@@ -8,9 +8,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { getEchoLiveShowUrl } from "@/lib/echo-archive-url"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { cn } from "@/lib/utils"
-import { Broadcast, FileAudio, Presentation } from "@phosphor-icons/react"
+import { Broadcast, FileAudio, Presentation, Trophy } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import type { ReactNode } from "react"
@@ -50,6 +51,33 @@ function TourShowRowIconCell({
         )}
       </div>
     </TableCell>
+  )
+}
+
+export function TourShowRowEchoCell({
+  showId,
+  hasSetlistGame,
+  wlHomeV2,
+}: {
+  showId: string
+  hasSetlistGame: boolean
+  wlHomeV2: boolean
+}) {
+  return (
+    <TourShowRowIconCell
+      wlHomeV2={wlHomeV2}
+      visible={hasSetlistGame}
+      tooltip="Echo of a Show"
+      trigger={
+        <ArchivePrefetchLink
+          href={getEchoLiveShowUrl(showId)}
+          aria-label="Echo of a Show"
+          className="inline-flex items-center justify-center rounded p-0.5 text-sky-400 hover:text-sky-300"
+        >
+          <Trophy className="size-3.5" weight="regular" aria-hidden />
+        </ArchivePrefetchLink>
+      }
+    />
   )
 }
 

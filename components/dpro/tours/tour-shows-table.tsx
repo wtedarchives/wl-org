@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import type { ReactNode } from "react"
-import { Broadcast, Check, FileAudio, Presentation, Users } from "@phosphor-icons/react"
+import { Broadcast, Check, FileAudio, Presentation, Trophy, Users } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -54,6 +54,7 @@ export function TourShowsTable({
   const { session } = useAuth()
   const hasRarity = shows.some((s) => s.show_rarity != null && s.show_rarity !== "")
   const hasGap = shows.some((s) => s.show_gap != null && s.show_gap !== "")
+  const hasSetlistGameShows = shows.some((show) => show.show_issetlistgame)
   const { sortedShows, handleSort, sortIndicator } = useTourShowsSort(
     shows,
     attendeeCounts,
@@ -261,6 +262,15 @@ export function TourShowsTable({
               <span>Rating</span>{" "}
               <span className="text-[9px]">{sortIndicator("rating")}</span>
             </TableHead>
+            {hasSetlistGameShows ?
+              <TableHead
+                className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
+              >
+                <div className="flex w-full items-center justify-center">
+                  <Trophy className="size-3 shrink-0 text-muted-foreground" aria-hidden />
+                </div>
+              </TableHead>
+            : null}
             <TableHead
               className={cn("w-[32px] text-center text-[11px] font-medium", headCellTight)}
             >
@@ -345,6 +355,7 @@ export function TourShowsTable({
               showsWithRadioIds={showsWithRadioIds}
               showRarityColumn={hasRarity}
               showGapColumn={hasGap}
+              showEchoColumn={hasSetlistGameShows}
               wlHomeV2={wlHomeV2}
             />
           ))}

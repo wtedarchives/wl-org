@@ -16,6 +16,7 @@ import {
 } from "@/components/wl-home-v2/wl-home-v2-setlist-show-changes-section"
 import { WlHomeV2SetlistToolsPanel } from "@/components/wl-home-v2/wl-home-v2-setlist-tools-panel"
 import { WLTopPosts } from "@/components/wl-home-v2/wl-top-posts"
+import { WlSetlistEchoPanel } from "@/components/wl-home-v2/wl-setlist-echo-panel"
 import type { UserAttendedGooseCanonNavState } from "@/hooks/use-user-attended-goose-canon-nav"
 import type { ShowChangeRow } from "@/hooks/use-setlist-show-changes"
 import type { SetlistEntry, Show } from "@/types/setlist"
@@ -41,6 +42,7 @@ export function WlHomeV2SetlistPlaceholderAside({
   showChangesLoading,
   onOpenSetlistScan,
   showWlTopPosts,
+  showEchoPanel,
   wlCommunityHref,
 }: {
   useCompactTools: boolean
@@ -62,8 +64,11 @@ export function WlHomeV2SetlistPlaceholderAside({
   showChangesLoading: boolean
   onOpenSetlistScan?: () => void
   showWlTopPosts: boolean
+  showEchoPanel: boolean
   wlCommunityHref: string
 }) {
+  const showSetlistSidePanels = showWlTopPosts || showEchoPanel
+
   return (
     <aside
       className="wl-home-v2-years-aside wl-home-v2-setlist-aside"
@@ -103,7 +108,7 @@ export function WlHomeV2SetlistPlaceholderAside({
         className={cn(
           "wl-home-v2-setlist-aside-stats-tiles",
           useCompactTools &&
-            showWlTopPosts &&
+            showSetlistSidePanels &&
             "wl-home-v2-setlist-aside-stats-tiles--with-wl-posts",
         )}
       >
@@ -137,7 +142,7 @@ export function WlHomeV2SetlistPlaceholderAside({
           <WlHomeV2SetlistAsideAccent showId={showId} slot={4} />
         : null}
         <WlHomeV2SetlistShowBadgesTile show={show} />
-        {useCompactTools && showWlTopPosts &&
+        {useCompactTools && showSetlistSidePanels &&
         (asideStatsVisible ||
           asideSongSpreadVisible ||
           asideShowChangesVisible ||
@@ -146,6 +151,9 @@ export function WlHomeV2SetlistPlaceholderAside({
         : null}
         {useCompactTools && showWlTopPosts ?
           <WLTopPosts wlLink={wlCommunityHref} />
+        : null}
+        {useCompactTools && showEchoPanel ?
+          <WlSetlistEchoPanel showId={showId} show={show} />
         : null}
       </div>
     </aside>

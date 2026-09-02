@@ -1,0 +1,176 @@
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__link {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel {
+  min-width: 0;
+  transition:
+    background 0.2s ease-out,
+    border-color 0.2s ease-out;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__side-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__scored {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__title-row {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__header-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__winner-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__icon--accent {
+  color: rgb(56, 189, 248);
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__cta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel--play .wl-setlist-echo-panel__side-card {
+  gap: 0;
+  width: 100%;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__link:hover .wl-setlist-echo-panel,
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__link:focus-visible .wl-setlist-echo-panel {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__link:focus-visible {
+  outline: none;
+}
+
+.wl-home-v2 .wl-home-v2-setlist .wl-setlist-echo-panel__link:focus-visible .wl-setlist-echo-panel__side-card {
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.45);
+  border-radius: 10px;
+}
+
+@media (min-width: 1344px) {
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel {
+    --tile-bg: none;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.63);
+    border-radius: 10px;
+    border: 1px solid rgb(63, 65, 64);
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 14px 16px 16px;
+  }
+
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel--play {
+    padding: 0;
+  }
+
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel__link:hover
+    .wl-setlist-echo-panel,
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel__link:focus-visible
+    .wl-setlist-echo-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.24);
+  }
+
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel::before,
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel::after {
+    content: none;
+    display: none;
+  }
+
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel
+    .wl-home-v2-years-tile-inner {
+    padding: 0;
+  }
+
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-below-table-wl
+    .wl-setlist-echo-panel
+    .side-card {
+    background: transparent;
+    padding: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

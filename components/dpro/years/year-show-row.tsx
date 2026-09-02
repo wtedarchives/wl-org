@@ -2,6 +2,7 @@
 
 
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
+import { getEchoLiveShowUrl } from "@/lib/echo-archive-url"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getVenueArchiveUrl } from "@/lib/venue-archive-url"
 import Link from "next/link"
@@ -12,6 +13,7 @@ import {
   FileAudio,
   Presentation,
   Star,
+  Trophy,
 } from "@phosphor-icons/react"
 import { useAuth } from "@/components/auth-context"
 import {
@@ -99,6 +101,7 @@ export interface YearShowRowProps {
   showsWithPosters: Set<string>
   showsWithReleases: Set<string>
   showsWithRadioIds: Set<string>
+  showEchoColumn?: boolean
   wlHomeV2?: boolean
 }
 
@@ -112,6 +115,7 @@ export function YearShowRow({
   showsWithPosters,
   showsWithReleases,
   showsWithRadioIds,
+  showEchoColumn = false,
   wlHomeV2 = false,
 }: YearShowRowProps) {
   const { session } = useAuth()
@@ -202,6 +206,32 @@ export function YearShowRow({
           <RatingStars rating={rating} />
         </div>
       </TableCell>
+      {showEchoColumn ?
+        <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
+          <div className="inline-flex items-center justify-center">
+            {show.show_issetlistgame ?
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <ArchivePrefetchLink
+                      href={getEchoLiveShowUrl(show.show_id)}
+                      aria-label="Echo of a Show"
+                      className="inline-flex items-center justify-center rounded p-0.5 text-sky-400 hover:text-sky-300"
+                    >
+                      <Trophy className="size-3.5" weight="regular" aria-hidden />
+                    </ArchivePrefetchLink>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <span className="text-[11px]">Echo of a Show</span>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            : (
+              <span className="inline-block size-3.5" aria-hidden />
+            )}
+          </div>
+        </TableCell>
+      : null}
       <TableCell className="w-[32px] !px-1 !py-0.5 text-center align-middle leading-none">
         <div className="inline-flex items-center justify-center">
           {showsWithSetlists.has(show.show_id) ? (

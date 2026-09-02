@@ -12216,6 +12216,9 @@
     width: 336px;
     margin-left: auto;
     align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   .wl-home-v2
     .wl-home-v2-setlist
@@ -12393,11 +12396,21 @@
   flex: 0 0 auto;
   border-bottom: none;
 }
+.wl-home-v2
+  .wl-home-v2-setlist
+  .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts
+  > .wl-setlist-echo-panel__link {
+  flex: 0 0 auto;
+}
 @media (min-width: 768px) and (max-width: 1343px) {
   .wl-home-v2
     .wl-home-v2-setlist
     .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts
-    > section.wl-top-posts {
+    > section.wl-top-posts,
+  .wl-home-v2
+    .wl-home-v2-setlist
+    .wl-home-v2-setlist-aside-stats-tiles--with-wl-posts
+    > .wl-setlist-echo-panel__link {
     grid-column: 1 / -1;
   }
 }

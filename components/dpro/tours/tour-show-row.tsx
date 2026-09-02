@@ -3,6 +3,7 @@
 import { formatTourShowDate } from "@/components/dpro/tours/tour-show-format"
 import {
   TourShowRowAttendeeCountCell,
+  TourShowRowEchoCell,
   TourShowRowPosterCell,
   TourShowRowRadioCell,
   TourShowRowReleasesCell,
@@ -46,6 +47,7 @@ export interface TourShowRowProps {
   showsWithRadioIds: Set<string>
   showRarityColumn?: boolean
   showGapColumn?: boolean
+  showEchoColumn?: boolean
   wlHomeV2?: boolean
 }
 
@@ -60,6 +62,7 @@ export function TourShowRow({
   showsWithRadioIds,
   showRarityColumn = true,
   showGapColumn = true,
+  showEchoColumn = false,
   wlHomeV2 = false,
 }: TourShowRowProps) {
   const { session } = useAuth()
@@ -205,6 +208,13 @@ export function TourShowRow({
           <TourShowRowRatingStars rating={rating} />
         </div>
       </TableCell>
+      {showEchoColumn ?
+        <TourShowRowEchoCell
+          showId={show.show_id}
+          hasSetlistGame={Boolean(show.show_issetlistgame)}
+          wlHomeV2={wlHomeV2}
+        />
+      : null}
       <TourShowRowSetlistScanCell
         showId={show.show_id}
         hasSetlist={showsWithSetlists.has(show.show_id)}
