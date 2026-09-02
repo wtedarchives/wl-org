@@ -39,6 +39,9 @@ function isSectionLinkActive(
   ) {
     return true
   }
+  if (v2Href === "/archive/echo" && base === "/archive/echo") {
+    return true
+  }
   return false
 }
 

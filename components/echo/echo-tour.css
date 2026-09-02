@@ -91,6 +91,7 @@
 
 .echo-tour-bar,
 .echo-tour-hero,
+.echo-tour-profile-header,
 .echo-tour-next,
 .echo-tour-card,
 .echo-tour-shows-list,
@@ -105,6 +106,7 @@
 
 .echo-tour-bar::before,
 .echo-tour-hero::before,
+.echo-tour-profile-header::before,
 .echo-tour-next::before,
 .echo-tour-card::before,
 .echo-tour-shows-list::before,
@@ -1083,6 +1085,377 @@
   color: var(--echo-muted);
 }
 
+/* ——— History (past tours) ——— */
+
+.echo-tour-history {
+  background: var(--echo-surface);
+  color: var(--echo-ink);
+  border-radius: 32px;
+  padding: clamp(17.6px, 4.8vw, 35.2px);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.echo-tour-history-title {
+  margin: 0 0 17.6px;
+}
+
+.echo-tour-history-empty {
+  margin: 0;
+  padding: 22px 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--echo-muted);
+}
+
+.echo-tour-history-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+  margin: 0 calc(-1 * clamp(17.6px, 4.8vw, 35.2px));
+  padding: 0 clamp(17.6px, 4.8vw, 35.2px);
+}
+
+.echo-tour-history-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.echo-tour-history-col-metric {
+  width: 72px;
+}
+
+.echo-tour-history-head-row th {
+  padding: 0 8px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--echo-muted);
+  white-space: nowrap;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--echo-rule);
+}
+
+.echo-tour-history-head-row th.is-center {
+  text-align: center;
+}
+
+.echo-tour-history-head-row th.is-left {
+  text-align: left;
+}
+
+.echo-tour-history-head-row th.is-metric {
+  width: 72px;
+}
+
+.echo-tour-history-head-row th:first-child {
+  padding-left: 12px;
+}
+
+.echo-tour-history-head-row th:last-child {
+  padding-right: 12px;
+}
+
+.echo-tour-history-row td {
+  padding: 10px 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+  transition: background 0.2s ease-out;
+}
+
+.echo-tour-history-row td:first-child {
+  padding-left: 12px;
+  border-radius: 22px 0 0 22px;
+}
+
+.echo-tour-history-row td:last-child {
+  padding-right: 12px;
+  border-radius: 0 22px 22px 0;
+}
+
+.echo-tour-history-row:hover td {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.echo-tour-history-row td.is-center {
+  text-align: center;
+}
+
+.echo-tour-history-row td.is-muted {
+  color: var(--echo-muted);
+}
+
+.echo-tour-history-row td.is-italic {
+  font-style: italic;
+}
+
+.echo-tour-history-row td.is-tour {
+  font-weight: 600;
+}
+
+.echo-tour-history-row td.is-winners {
+  font-weight: 600;
+  white-space: normal;
+  min-width: 160px;
+}
+
+.echo-tour-history-tour-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.echo-tour a.echo-tour-history-tour-link,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-history-tour-link {
+  color: inherit;
+}
+
+.echo-tour a.echo-tour-history-tour-link:hover,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-history-tour-link:hover {
+  color: var(--echo-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.echo-tour-history-winner-score {
+  font-weight: 400;
+  color: var(--echo-muted);
+}
+
+.echo-tour-past-tour-nav {
+  margin-bottom: 17.6px;
+}
+
+.echo-tour-back-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--echo-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.echo-tour a.echo-tour-back-link,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-back-link {
+  color: var(--echo-muted);
+}
+
+.echo-tour a.echo-tour-back-link:hover,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-back-link:hover {
+  color: var(--echo-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.echo-tour-countdown--standings-only .echo-tour-side {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+/* ——— Profile ——— */
+
+.echo-tour-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 26.4px;
+}
+
+.echo-tour-profile-header {
+  display: flex;
+  align-items: center;
+  gap: clamp(13.2px, 3.6vw, 22px);
+  padding: clamp(13.2px, 3.6vw, 22px) clamp(17.6px, 4.8vw, 35.2px);
+  background: var(--echo-surface);
+  color: var(--echo-ink);
+  border-radius: 32px;
+  box-shadow: 0 3px 10px rgba(46, 43, 37, 0.16);
+}
+
+.echo-tour-profile-avatar[data-slot="avatar"] {
+  width: clamp(48px, 12vw, 64px);
+  height: clamp(48px, 12vw, 64px);
+  flex-shrink: 0;
+}
+
+.echo-tour-profile-avatar[data-slot="avatar"]::after {
+  border-color: rgba(46, 43, 37, 0.12);
+}
+
+.echo-tour-profile-avatar-fallback {
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: clamp(18px, 4.5vw, 24px);
+  color: var(--echo-accent-deep);
+  background: rgba(40, 91, 78, 0.12);
+}
+
+.echo-tour-profile-header-title {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: clamp(22px, 5.5vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--echo-ink);
+}
+
+.echo-tour-profile-card .echo-live-card-title {
+  margin-bottom: 14px;
+}
+
+.echo-tour-profile-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+  margin: 0 calc(-1 * clamp(13.2px, 3.6vw, 26.4px));
+  padding: 0 clamp(13.2px, 3.6vw, 26.4px);
+}
+
+.echo-tour-profile-table {
+  width: 100%;
+  min-width: 320px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.echo-tour-profile-table th {
+  padding: 0 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--echo-muted);
+  border-bottom: 1px solid var(--echo-rule);
+}
+
+.echo-tour-profile-table th.is-left,
+.echo-tour-profile-table td.is-left,
+.echo-tour-profile-table td.is-tour {
+  text-align: left;
+}
+
+.echo-tour-profile-table th.is-center,
+.echo-tour-profile-table td.is-center {
+  text-align: center;
+}
+
+.echo-tour-profile-table th.is-right,
+.echo-tour-profile-table td.is-right {
+  text-align: right;
+}
+
+.echo-tour-profile-table td {
+  padding: 5px 12px;
+  vertical-align: middle;
+  transition: background 0.2s ease-out;
+}
+
+.echo-tour-profile-table tbody tr td:first-child {
+  border-radius: 22px 0 0 22px;
+}
+
+.echo-tour-profile-table tbody tr td:last-child {
+  border-radius: 0 22px 22px 0;
+}
+
+.echo-tour-profile-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.echo-tour-profile-table td.is-muted {
+  color: var(--echo-muted);
+}
+
+.echo-tour-profile-table td.is-first-rank {
+  color: var(--echo-text);
+}
+
+.echo-profile-tour-rank-winner {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.echo-tour-profile-table td.is-strong {
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.echo-tour-profile-table td.is-tour {
+  font-weight: 600;
+}
+
+.echo-tour-profile-tour-link,
+.echo-profile-show-date,
+.echo-profile-show-tour {
+  color: inherit;
+  text-decoration: none;
+}
+
+.echo-tour a.echo-tour-profile-tour-link:hover,
+.echo-tour a.echo-profile-show-date:hover,
+.echo-tour a.echo-profile-show-tour:hover,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-tour-profile-tour-link:hover,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-profile-show-date:hover,
+.wl-home-v2 .wl-home-v2-setlist .echo-tour a.echo-profile-show-tour:hover {
+  color: var(--echo-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.echo-tour-profile-shows-table {
+  min-width: 720px;
+}
+
+.echo-tour-profile-shows-table .is-date {
+  white-space: nowrap;
+}
+
+.echo-tour-profile-shows-table .is-pills {
+  min-width: 148px;
+}
+
+.echo-profile-show-pills {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.echo-profile-show-date {
+  font-family: var(--echo-display);
+  font-weight: 800;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.echo-profile-show-tour {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.echo-profile-show-tour.is-plain {
+  color: var(--echo-ink);
+}
+
 /* ——— Live show ——— */
 
 .echo-live-head {
@@ -1458,7 +1831,7 @@
   gap: 6px 11px;
   min-width: 0;
   overflow: hidden;
-  padding: 9px 13.2px 9px 12px;
+  padding: 5px 5px 5px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.5);
 }
@@ -1881,7 +2254,10 @@
 }
 
 .echo-live-standing-name {
+  grid-area: name;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 15px;
   color: var(--echo-ink);
@@ -1976,21 +2352,19 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: max-content;
+  min-width: min(100%, 640px);
 }
 
 .echo-live-standing {
   display: grid;
-  grid-template-columns:
-    22px minmax(120px, max-content) minmax(88px, max-content)
-    minmax(112px, max-content) auto;
+  grid-template-columns: 28px minmax(120px, 1fr) 148px 120px 44px;
   grid-template-areas: "rank name pills songs pts";
   align-items: center;
-  gap: clamp(6px, 1.6vw, 10px);
+  column-gap: 12px;
   padding: 6px clamp(8px, 2.4vw, 12px);
   border-radius: 999px;
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: min(100%, 640px);
 }
 
 .echo-live-standing-rank {
@@ -2013,10 +2387,7 @@
   justify-content: center;
   gap: 4px;
   min-height: 0;
-}
-
-.echo-live-standing-pills:empty {
-  display: none;
+  min-width: 0;
 }
 
 .echo-live-standing-songs {

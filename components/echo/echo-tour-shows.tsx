@@ -47,22 +47,24 @@ function picksStillOpen(show: GameShow) {
 }
 
 export function EchoTourShows({
+  league = ECHO_ACTIVE_LEAGUE,
+  allowAdmin = true,
   onShowTimeSaved,
 }: {
+  league?: string
+  allowAdmin?: boolean
   onShowTimeSaved?: () => void
 }) {
   const { session } = useAuth()
   const { isAdmin } = useAdminStatus(session)
-  const { loading, gameShows, fetchGameShows } = useGameShows(
-    ECHO_ACTIVE_LEAGUE,
-    session,
-  )
+  const showAdminControls = allowAdmin && isAdmin
+  const { loading, gameShows, fetchGameShows } = useGameShows(league, session)
   const [editingShow, setEditingShow] = useState<GameShow | null>(null)
 
   return (
     <div className="echo-tour-shows">
       <div
-        className={cn("echo-tour-shows-list", isAdmin && "is-admin")}
+        className={cn("echo-tour-shows-list", showAdminControls && "is-admin")}
         style={echoTourSurfaceBgStyle("shows")}
       >
         <h2 className="echo-tour-shows-title" id="echo-tour-dates-heading">
@@ -113,7 +115,7 @@ export function EchoTourShows({
                         >
                           {formatMmDd(show.show_date)}
                         </Link>
-                        {isAdmin ?
+                        {showAdminControls ?
                           <button
                             type="button"
                             className="echo-tour-show-time-btn"

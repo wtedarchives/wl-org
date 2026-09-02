@@ -59,11 +59,15 @@ export function EchoTourStandingsList({
   )
 }
 
-export function EchoTourStandingsCard() {
+export function EchoTourStandingsCard({
+  league = ECHO_ACTIVE_LEAGUE,
+}: {
+  league?: string
+}) {
   const { session } = useAuth()
   const [standingsOpen, setStandingsOpen] = useState(false)
   const { standings, loading } = useStandingsData(
-    ECHO_ACTIVE_LEAGUE,
+    league,
     "totalPoints",
     "desc",
   )
@@ -146,6 +150,7 @@ export function EchoTourStandingsCard() {
       <EchoTourStandingsDialog
         open={standingsOpen}
         onOpenChange={setStandingsOpen}
+        league={league}
       />
     </>
   )

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { CaretDown, CaretUp, Plus, Trash } from "@phosphor-icons/react"
+import { CaretDown, CaretUp, Plus, Trash, X } from "@phosphor-icons/react"
 
 import { SongSelectionPlacementPill } from "@/components/dpro/setlistgame/song-selection/song-selection-placement-pill"
 import {
@@ -262,7 +262,7 @@ export function EchoLivePicksInterface({
                                     }
                                   }}
                                 >
-                                  ×
+                                  <X size={12} weight="bold" aria-hidden />
                                 </button>
                               </div>
                             )

@@ -57,16 +57,18 @@ function formatCell(field: SortField, player: PlayerStats): string {
 export function EchoTourStandingsDialog({
   open,
   onOpenChange,
+  league = ECHO_ACTIVE_LEAGUE,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  league?: string
 }) {
   const headingId = useId()
   const { session } = useAuth()
   const [sortField, setSortField] = useState<SortField>("totalPoints")
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
   const { standings, loading } = useStandingsData(
-    ECHO_ACTIVE_LEAGUE,
+    league,
     sortField,
     sortDirection,
   )
@@ -116,7 +118,7 @@ export function EchoTourStandingsDialog({
             <div className="modal-request-head-text">
               <h3 id={headingId}>Tour standings</h3>
               <p className="echo-tour-standings-dialog-league">
-                {ECHO_ACTIVE_LEAGUE}
+                {league}
               </p>
             </div>
             <button

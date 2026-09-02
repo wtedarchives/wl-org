@@ -12,14 +12,17 @@ import {
   isEchoArchivePage,
   parseEchoArchivePage,
   parseEchoArchiveShowId,
+  parseEchoArchiveTourId,
 } from "@/lib/echo-archive-url"
-import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 
 import { EchoLiveShow } from "./echo-live-show"
 import { EchoTourCountdown } from "./echo-tour-countdown"
 import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
 import { EchoTourHero } from "./echo-tour-hero"
+import { EchoTourHistory } from "./echo-tour-history"
 import { EchoTourNav } from "./echo-tour-nav"
+import { EchoTourPastTour } from "./echo-tour-past-tour"
+import { EchoTourProfile } from "./echo-tour-profile"
 import { EchoTourShowStatistics } from "./echo-tour-show-statistics"
 import { EchoTourShows } from "./echo-tour-shows"
 import "./echo-tour.css"
@@ -31,6 +34,7 @@ export function EchoTourView() {
     searchParams.get(ECHO_ARCHIVE_PAGE_PARAM),
   )
   const showIdFromUrl = parseEchoArchiveShowId(searchParams)
+  const tourIdFromUrl = parseEchoArchiveTourId(searchParams)
   const [showRules, setShowRules] = useState(false)
   const [showTimeRevision, setShowTimeRevision] = useState(0)
   const { loading: nextShowLoading, show: nextShow } = useEchoNextShow(
@@ -57,10 +61,6 @@ export function EchoTourView() {
     router.replace(getEchoLiveShowUrl(canonicalId), { scroll: false })
   }, [nextShow?.showId, router, searchParams])
 
-  const go = (page: typeof active) => {
-    router.push(getEchoArchiveUrl(page), { scroll: false })
-  }
-
   return (
     <div className="echo-tour">
       <div className="echo-tour-body">
@@ -84,20 +84,13 @@ export function EchoTourView() {
             showId={showIdFromUrl}
             resolving={!showIdFromUrl && nextShowLoading}
           />
-        : <div
-            className="echo-tour-placeholder"
-            style={echoTourSurfaceBgStyle(
-              active === "tours" ? "history" : "profile",
-            )}
-          >
-            <div className="echo-tour-kicker">
-              {active === "tours" ? "Archive" : "You"}
-            </div>
-            <h1 className="echo-live-title">
-              {active === "tours" ? "History" : "Profile"}
-            </h1>
-            <p className="echo-tour-placeholder-copy">Coming soon.</p>
-          </div>}
+        : active === "profile" ?
+          <EchoTourProfile />
+        : active === "tours" ?
+          tourIdFromUrl ?
+            <EchoTourPastTour tourId={tourIdFromUrl} />
+          : <EchoTourHistory />
+        : null}
       </div>
       <SetlistGameRulesDialog
         open={showRules}

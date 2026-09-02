@@ -1,17 +1,12 @@
-"use client"
+import { Suspense } from "react"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { ArchiveSetlistGameEchoRedirect } from "@/components/archive/archive-setlistgame-echo-redirect"
 
-import { getEchoArchiveIndexUrl } from "@/lib/echo-archive-url"
-
-/** Legacy rebuild slug. Production also 301s via `public/_redirects`. */
+/** Legacy rebuild slug. Production also 301s via `public/_redirects` / `netlify.toml`. */
 export default function ArchiveSetlistGameRedirectPage() {
-  const router = useRouter()
-
-  useEffect(() => {
-    router.replace(getEchoArchiveIndexUrl())
-  }, [router])
-
-  return null
+  return (
+    <Suspense fallback={null}>
+      <ArchiveSetlistGameEchoRedirect />
+    </Suspense>
+  )
 }

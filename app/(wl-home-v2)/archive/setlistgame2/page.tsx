@@ -1,24 +1,12 @@
 import { Suspense } from "react"
-import type { Metadata } from "next"
 
-import { WlHomeV2 } from "@/components/wl-home-v2"
-import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
-import { WlHomeV2SetlistGameView } from "@/components/wl-home-v2/wl-home-v2-setlistgame-view"
+import { ArchiveSetlistGameEchoRedirect } from "@/components/archive/archive-setlistgame-echo-redirect"
 
-export const metadata: Metadata = {
-  title: "Setlist Game",
-}
-
-export default function ArchiveSetlistGame2Page() {
+/** Legacy Setlist Game archive slug. Production also 301s via `public/_redirects` / `netlify.toml`. */
+export default function ArchiveSetlistGame2RedirectPage() {
   return (
-    <WlHomeV2>
-      <Suspense
-        fallback={
-          <WlHomeV2PageLoading message="Loading setlist game…" />
-        }
-      >
-        <WlHomeV2SetlistGameView />
-      </Suspense>
-    </WlHomeV2>
+    <Suspense fallback={null}>
+      <ArchiveSetlistGameEchoRedirect />
+    </Suspense>
   )
 }

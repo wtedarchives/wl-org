@@ -14,3 +14,28 @@
 # this project it did not: a 1080px render took 3044ms at 2048MB against 3085ms
 # at 1024MB. Since credits are billed in GB-hours, doubling memory for the same
 # runtime would double the cost for nothing. Re-measure before changing it.
+
+# Legacy Setlist Game archive slugs → Echo (preserve deep links before catch-all in _redirects)
+[[redirects]]
+  from = "/archive/setlistgame"
+  to = "/archive/echo?p=show&id=:id"
+  status = 301
+  query = { id = ":id" }
+
+[[redirects]]
+  from = "/archive/setlistgame"
+  to = "/archive/echo?p=tours&tour_id=:tour_id"
+  status = 301
+  query = { tour_id = ":tour_id" }
+
+[[redirects]]
+  from = "/archive/setlistgame2"
+  to = "/archive/echo?p=show&id=:id"
+  status = 301
+  query = { id = ":id" }
+
+[[redirects]]
+  from = "/archive/setlistgame2"
+  to = "/archive/echo?p=tours&tour_id=:tour_id"
+  status = 301
+  query = { tour_id = ":tour_id" }

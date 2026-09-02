@@ -47,10 +47,12 @@ const STAT_COLUMNS = [
   { key: "closers", label: "Closer picks", align: "center" },
 ] as const
 
-export function EchoTourShowStatistics() {
-  const { showStatsLoading, showsWithStats } = useShowStatistics(
-    ECHO_ACTIVE_LEAGUE,
-  )
+export function EchoTourShowStatistics({
+  league = ECHO_ACTIVE_LEAGUE,
+}: {
+  league?: string
+}) {
+  const { showStatsLoading, showsWithStats } = useShowStatistics(league)
 
   return (
     <section

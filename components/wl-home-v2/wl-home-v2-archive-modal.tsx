@@ -9,6 +9,7 @@ import {
   MagnifyingGlass,
   MapPin,
   MusicNote,
+  Trophy,
   UserCircle,
   Users,
   VinylRecord,
@@ -23,7 +24,6 @@ import {
   type ArchiveEntry,
 } from "@/lib/archive-hub-content"
 import { WlHomeV2ArchiveYearsSelector } from "@/components/wl-home-v2/wl-home-v2-archive-years-selector"
-import { WlHomeV2SetlistGameAlert } from "@/components/wl-home-v2/wl-home-v2-setlist-game-alert"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
@@ -48,6 +48,7 @@ const ARCHIVE_ICONS: Record<string, PhosphorTileIcon> = {
   ListMusic: ListNumbers,
   UserCircle,
   BookOpen,
+  Trophy,
 }
 
 const ICON_PROPS = {
@@ -233,7 +234,6 @@ export function WlHomeV2ArchiveModal({
               ))}
             </div>
             <div className="modal-archive-hub-footer">
-              <WlHomeV2SetlistGameAlert className="modal-archive-hub-setlist-game-alert" />
               <div className="modal-archive-hub-submit">
                 <p className="modal-archive-hub-submit-text">
                   Have setlist corrections, new shows, or other archive data to

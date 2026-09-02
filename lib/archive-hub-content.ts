@@ -76,6 +76,13 @@ export const ARCHIVE_ENTRIES: ArchiveEntry[] = [
       "A chronological guide to Goose, featuring audio and video links to various releases and performances.",
   },
   {
+    title: "Echo of a Show",
+    href: "/archive/echo?p=tour",
+    icon: "Trophy",
+    description:
+      "Our setlist guessing game. Build your setlist image.pngto accrue points and climb the leaderboard!",
+  },
+  {
     title: "Submit",
     href: "/archive/submit",
     icon: "PencilSimple",

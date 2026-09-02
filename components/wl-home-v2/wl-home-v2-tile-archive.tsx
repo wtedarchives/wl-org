@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, BookOpen, CalendarBlank, ClockCounterClockwise } from "@phosphor-icons/react"
+import { ArrowRight, CalendarBlank, ClockCounterClockwise, Trophy } from "@phosphor-icons/react"
 import Image from "next/image"
 import Link from "next/link"
 import type { CSSProperties, MouseEvent } from "react"
@@ -13,7 +13,7 @@ import {
 import type { WlHomeMostRecentShow } from "@/hooks/use-wl-home-most-recent-show"
 import { ArchivePrefetchLink } from "@/components/archive/archive-prefetch-link"
 import { WlHomeV2ArchiveRandomShowButton } from "@/components/wl-home-v2/wl-home-v2-archive-random-show-button"
-import { WlHomeV2SetlistGameAlert } from "@/components/wl-home-v2/wl-home-v2-setlist-game-alert"
+import { getEchoArchiveIndexUrl } from "@/lib/echo-archive-url"
 import { getSetlistArchiveUrl } from "@/lib/setlist-archive-url"
 import { getSongArchiveUrl } from "@/lib/song-archive-url"
 
@@ -59,7 +59,6 @@ export function WlHomeV2TileArchive({
       </div>
 
       <div className="tile-widget">
-        <WlHomeV2SetlistGameAlert />
         <div
           className={[
             "widget-panel",
@@ -175,9 +174,9 @@ export function WlHomeV2TileArchive({
           </div>
           <div className="tile-widget-actions-row">
             <WlHomeV2ArchiveRandomShowButton variant="tile-action" />
-            <Link href="/goose101" className="wbtn wbtn--app-store">
-              <span className="wbtn-text">Goose 101</span>
-              <BookOpen
+            <Link href={getEchoArchiveIndexUrl()} className="wbtn wbtn--app-store">
+              <span className="wbtn-text">Echo of a Show</span>
+              <Trophy
                 className="wbtn-icon"
                 size={18}
                 weight="regular"
