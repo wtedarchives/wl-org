@@ -9,31 +9,29 @@ import { convertFromEasternToUTC, convertToEasternDisplay } from "@/lib/utils/sh
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export function AdminShowTimeCell({
-  show,
-  onSaved,
-}: {
-  show: GameShow
-  onSaved: () => void | Promise<void>
-}) {
+export function useAdminShowTimeEditor(
+  show: GameShow | null,
+  onSaved: () => void | Promise<void>,
+) {
   const { session } = useAuth()
   const token = session?.token ?? null
+  const showId = show?.show_id ?? ""
+  const showTime = show?.show_time ?? null
 
-  const [draft, setDraft] = useState(() =>
-    convertToEasternDisplay(show.show_time ?? null)
-  )
+  const [draft, setDraft] = useState(() => convertToEasternDisplay(showTime))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setDraft(convertToEasternDisplay(show.show_time ?? null))
+    setDraft(convertToEasternDisplay(showTime))
     setError(null)
-  }, [show.show_id, show.show_time])
+  }, [showId, showTime])
 
-  const baseline = convertToEasternDisplay(show.show_time ?? null)
+  const baseline = convertToEasternDisplay(showTime)
   const dirty = draft !== baseline
 
   const handleSave = async () => {
+    if (!show) return
     if (!dirty) return
     if (!token) {
       setError("You must be signed in.")
@@ -65,6 +63,19 @@ export function AdminShowTimeCell({
       setSaving(false)
     }
   }
+
+  return { draft, setDraft, saving, error, dirty, token, handleSave }
+}
+
+export function AdminShowTimeCell({
+  show,
+  onSaved,
+}: {
+  show: GameShow
+  onSaved: () => void | Promise<void>
+}) {
+  const { draft, setDraft, saving, error, dirty, token, handleSave } =
+    useAdminShowTimeEditor(show, onSaved)
 
   return (
     <div className="flex w-full flex-col items-center justify-center gap-1 text-center">

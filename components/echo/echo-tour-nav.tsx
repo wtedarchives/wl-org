@@ -1,41 +1,39 @@
 "use client"
 
+import Link from "next/link"
+
+import { getEchoArchiveUrl } from "@/lib/echo-archive-url"
 import { cn } from "@/lib/utils"
 import type { EchoNavId } from "./echo-tour-data"
 
 const NAV_ITEMS: { id: EchoNavId; label: string }[] = [
   { id: "tour", label: "Tour" },
-  { id: "show", label: "Live show" },
-  { id: "tours", label: "Past tours" },
+  { id: "tours", label: "History" },
   { id: "profile", label: "Profile" },
 ]
 
-export function EchoTourNav({
-  active,
-  onNavigate,
-}: {
-  active: EchoNavId
-  onNavigate: (id: EchoNavId) => void
-}) {
+export function EchoTourNav({ active }: { active: EchoNavId }) {
   return (
     <div className="echo-tour-bar">
       <div className="echo-tour-brand">
-        <span className="echo-tour-brand-name">Echo of a Show</span>
+        <Link href={getEchoArchiveUrl("tour")} className="echo-tour-brand-name" scroll={false}>
+          Echo of a Show
+        </Link>
       </div>
       <div className="echo-tour-nav" role="tablist" aria-label="Echo of a Show">
         {NAV_ITEMS.map((item) => {
           const isActive = item.id === active
           return (
-            <button
+            <Link
               key={item.id}
-              type="button"
+              href={getEchoArchiveUrl(item.id)}
               role="tab"
               aria-selected={isActive}
               className={cn("echo-tour-nav-btn", isActive && "is-active")}
-              onClick={() => onNavigate(item.id)}
+              scroll={false}
             >
               {item.label}
-            </button>
+            </Link>
           )
         })}
       </div>

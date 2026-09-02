@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { echoFontClassName } from "@/components/echo/echo-fonts"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 
@@ -19,6 +20,8 @@ interface SetlistGameRulesDialogProps {
   onOpenChange: (open: boolean) => void
   /** Match Request a Song / average-setlist centered modal chrome on WL Home v2. */
   wlHomeV2?: boolean
+  /** Echo of a Show tan/ink chrome instead of the dark WL modal. */
+  echo?: boolean
 }
 
 function SetlistGameRulesBody() {
@@ -179,6 +182,7 @@ export function SetlistGameRulesDialog({
   open,
   onOpenChange,
   wlHomeV2 = false,
+  echo = false,
 }: SetlistGameRulesDialogProps) {
   const headingId = useId()
   useWlHomeV2ScrollLock(open && wlHomeV2)
@@ -208,7 +212,10 @@ export function SetlistGameRulesDialog({
           }}
         >
           <div
-            className="modal modal--wted-request modal--setlist-game-rules"
+            className={
+              "modal modal--wted-request modal--setlist-game-rules" +
+              (echo ? ` echo-modal ${echoFontClassName}` : "")
+            }
             role="dialog"
             aria-modal="true"
             aria-labelledby={headingId}

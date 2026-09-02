@@ -1,109 +1,105 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import type { EchoStandingRow } from "./echo-tour-data"
-import {
-  ECHO_NEXT_SHOW,
-  ECHO_TOP_TEN,
-  ECHO_YOU_THIS_TOUR,
-} from "./echo-tour-data"
+import Link from "next/link"
 
-function StandingsList({
-  rows,
-  className,
-}: {
-  rows: EchoStandingRow[]
-  className?: string
-}) {
-  return (
-    <div className={cn("echo-tour-standings", className)}>
-      {rows.map((row) => (
-        <div key={row.name} className="echo-tour-standings-row">
-          <span className="echo-tour-standings-rank">{row.rank}</span>
-          <span
-            className={cn(
-              "echo-tour-standings-name",
-              row.isMe && "is-me",
-            )}
-          >
-            {row.name}
-          </span>
-          <span className="echo-tour-standings-pts">{row.points}</span>
-        </div>
-      ))}
-    </div>
-  )
+import { type EchoNextShow } from "@/hooks/use-echo-next-show"
+import { getEchoLiveShowUrl } from "@/lib/echo-archive-url"
+import { cn } from "@/lib/utils"
+import { EchoTourStandingsCard } from "./echo-tour-standings"
+
+function picksActionLabel(show: EchoNextShow | null): string | null {
+  if (!show) return null
+  if (show.picksOpen) {
+    return show.submissionId ? "Edit your picks" : "Make your picks"
+  }
+  return "See setlist updates"
 }
 
 export function EchoTourCountdown({
+  loading,
+  show,
   onPicks,
   onScoring,
 }: {
+  loading: boolean
+  show: EchoNextShow | null
   onPicks: () => void
   onScoring: () => void
 }) {
+  const dateLong = show?.dateLong || "\u00a0"
+  const venue = show?.venue || "\u00a0"
+  const city = show?.city || "\u00a0"
+  const countdown = loading ? "\u00a0" : show?.countdown ?? "—"
+  const players = loading ? "\u00a0" : show ? String(show.players) : "—"
+  const picksLabel = picksActionLabel(show)
+
   return (
     <div className="echo-tour-countdown">
       <div className="echo-tour-next">
         <div className="echo-tour-next-blob" aria-hidden />
         <div className="echo-tour-next-inner">
-          <div className="echo-tour-kicker">Next show you can play</div>
-          <div className="echo-tour-next-date">{ECHO_NEXT_SHOW.dateLong}</div>
-          <div className="echo-tour-next-venue">{ECHO_NEXT_SHOW.venue}</div>
-          <div className="echo-tour-next-city">{ECHO_NEXT_SHOW.city}</div>
-          <div className="echo-tour-next-stats">
-            <div>
-              <div className="echo-tour-kicker">Picks close in</div>
-              <div className="echo-tour-stat-value is-accent">
-                {ECHO_NEXT_SHOW.countdown}
+          <div className="echo-tour-kicker">Next show</div>
+          {loading || show ?
+            <>
+              <div className="echo-tour-next-date">{dateLong}</div>
+              <div className="echo-tour-next-venue">{venue}</div>
+              <div className="echo-tour-next-city">{city}</div>
+              <div className="echo-tour-next-stats">
+                <div>
+                  <div className="echo-tour-kicker">Time left to pick</div>
+                  <div
+                    className={cn(
+                      "echo-tour-stat-value is-accent",
+                      show && !show.picksOpen && "is-closed",
+                    )}
+                  >
+                    {countdown}
+                  </div>
+                </div>
+                <div className="echo-tour-next-stats-end">
+                  <div className="echo-tour-kicker">Players</div>
+                  <div className="echo-tour-stat-value">{players}</div>
+                </div>
               </div>
-            </div>
-            <div className="echo-tour-next-stats-end">
-              <div className="echo-tour-kicker">In so far</div>
-              <div className="echo-tour-stat-value">{ECHO_NEXT_SHOW.players}</div>
-            </div>
-          </div>
-          <div className="echo-tour-next-actions">
-            <button
-              type="button"
-              className="echo-tour-btn-primary"
-              onClick={onPicks}
-            >
-              Make your picks
-            </button>
-            <button
-              type="button"
-              className="echo-tour-btn-ghost"
-              onClick={onScoring}
-            >
-              How scoring works
-            </button>
-            <span className="echo-tour-next-note">
-              Submissions close one hour before showtime.
-            </span>
-          </div>
+              <div className="echo-tour-next-actions">
+                {picksLabel && show?.picksOpen ?
+                  <button
+                    type="button"
+                    className="echo-tour-btn-primary"
+                    onClick={onPicks}
+                  >
+                    {picksLabel}
+                  </button>
+                : picksLabel && show ?
+                  <Link
+                    href={getEchoLiveShowUrl(show.showId)}
+                    className="echo-tour-btn-primary"
+                    scroll={false}
+                  >
+                    {picksLabel}
+                  </Link>
+                : null}
+                <button
+                  type="button"
+                  className="echo-tour-btn-ghost"
+                  onClick={onScoring}
+                >
+                  How scoring works
+                </button>
+                <span className="echo-tour-next-note">
+                  Submissions close one hour before showtime.
+                </span>
+              </div>
+            </>
+          : <p className="echo-tour-next-empty">
+              All shows on this tour have been scored.
+            </p>}
         </div>
       </div>
 
       <div className="echo-tour-side">
-        <div className="echo-tour-card">
-          <div className="echo-tour-kicker">You, this tour</div>
-          <div className="echo-tour-rank-row">
-            <span className="echo-tour-rank">{ECHO_YOU_THIS_TOUR.rankLabel}</span>
-            <span className="echo-tour-rank-of">{ECHO_YOU_THIS_TOUR.ofPlayers}</span>
-          </div>
-          <div className="echo-tour-rank-note">{ECHO_YOU_THIS_TOUR.pointsLine}</div>
-          <StandingsList rows={ECHO_TOP_TEN} />
-        </div>
+        <EchoTourStandingsCard />
       </div>
     </div>
   )
-}
-
-export function EchoTourStandingsList({
-  rows = ECHO_TOP_TEN,
-}: {
-  rows?: EchoStandingRow[]
-}) {
-  return <StandingsList rows={rows} />
 }
