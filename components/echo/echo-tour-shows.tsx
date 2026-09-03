@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Clock, Users } from "@phosphor-icons/react"
 
@@ -50,11 +50,14 @@ export function EchoTourShows({
   league = ECHO_ACTIVE_LEAGUE,
   allowAdmin = true,
   variant = "default",
+  refreshKey = 0,
   onShowTimeSaved,
 }: {
   league?: string
   allowAdmin?: boolean
   variant?: "default" | "history"
+  /** Bump after admin scoring so tour dates refetch. */
+  refreshKey?: number
   onShowTimeSaved?: () => void
 }) {
   const isHistory = variant === "history"
@@ -63,6 +66,11 @@ export function EchoTourShows({
   const showAdminControls = allowAdmin && isAdmin
   const { loading, gameShows, fetchGameShows } = useGameShows(league, session)
   const [editingShow, setEditingShow] = useState<GameShow | null>(null)
+
+  useEffect(() => {
+    if (refreshKey === 0) return
+    void fetchGameShows({ silent: true })
+  }, [fetchGameShows, refreshKey])
 
   return (
     <div className="echo-tour-shows">

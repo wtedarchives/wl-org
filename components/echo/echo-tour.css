@@ -230,6 +230,16 @@
   color: var(--echo-ink);
 }
 
+.echo-tour-nav-btn--score {
+  border: 1px solid rgba(155, 58, 47, 0.35);
+  color: #9b3a2f;
+  font-weight: 600;
+}
+
+.echo-tour-nav-btn--score:hover {
+  background: rgba(155, 58, 47, 0.1);
+}
+
 @media (max-width: 639px) {
   .echo-tour-bar {
     flex-direction: column;
@@ -3080,6 +3090,93 @@
 .wl-home-v2 .modal.modal--wted-request.modal--echo-show-time {
   max-width: min(420px, 96vw);
   max-height: none;
+}
+
+.wl-home-v2 .modal.modal--wted-request.modal--echo-scoring {
+  max-width: min(560px, 96vw);
+  max-height: none;
+}
+
+.wl-home-v2 .modal.echo-modal.modal--echo-scoring .modal-request-sub {
+  color: var(--echo-muted);
+}
+
+.echo-scoring-select-content[data-slot="select-content"] {
+  z-index: 10025;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-empty {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--echo-muted);
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-alert {
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  border: 1px solid;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-alert--success {
+  background: rgba(40, 91, 78, 0.12);
+  border-color: rgba(40, 91, 78, 0.35);
+  color: var(--echo-accent-deep);
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-alert--error {
+  background: rgba(155, 58, 47, 0.1);
+  border-color: rgba(155, 58, 47, 0.35);
+  color: #9b3a2f;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-alert--error strong {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-select-trigger {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--echo-rule);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--echo-ink);
+  font-family: var(--echo-body);
+  font-size: 14px;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-select-trigger[data-placeholder] {
+  color: var(--echo-faint);
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-select-trigger:focus-visible {
+  outline: 2px solid var(--echo-accent);
+  outline-offset: 2px;
+}
+
+.wl-home-v2 .modal.echo-modal .echo-scoring-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 16px;
+  margin-top: 18px;
 }
 
 .wl-home-v2 .modal.echo-modal .echo-show-time-show {

@@ -13,7 +13,16 @@ const NAV_ITEMS: { id: EchoNavId; label: string }[] = [
   { id: "profile", label: "Profile" },
 ]
 
-export function EchoTourNav({ active }: { active: EchoNavId }) {
+export function EchoTourNav({
+  active,
+  showScoreShow = false,
+  onOpenScoreShow,
+}: {
+  active: EchoNavId
+  /** Admin-only: opens the score-show modal (not a route tab). */
+  showScoreShow?: boolean
+  onOpenScoreShow?: () => void
+}) {
   return (
     <div className="echo-tour-bar" style={echoTourSurfaceBgStyle("nav")}>
       <div className="echo-tour-brand">
@@ -37,6 +46,17 @@ export function EchoTourNav({ active }: { active: EchoNavId }) {
             </Link>
           )
         })}
+        {showScoreShow && onOpenScoreShow ?
+          <button
+            type="button"
+            role="tab"
+            aria-selected={false}
+            className="echo-tour-nav-btn echo-tour-nav-btn--score"
+            onClick={onOpenScoreShow}
+          >
+            Score
+          </button>
+        : null}
       </div>
     </div>
   )
