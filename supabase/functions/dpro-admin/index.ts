@@ -1382,6 +1382,20 @@ async function handleAction(
       return { data: { entries: data ?? [] } }
     }
 
+    case "echo_settings_set_active_league": {
+      if (!isAdmin) return { error: "Admin only." }
+      const active_league = body.active_league as string | undefined
+      if (!active_league || active_league.trim() === "") {
+        return { error: "active_league is required." }
+      }
+      const { error } = await db
+        .from("echo_settings")
+        .update({ active_league: active_league.trim() })
+        .eq("id", true)
+      if (error) return { error: error.message }
+      return { data: { active_league: active_league.trim() } }
+    }
+
     default:
       return { error: `Unknown action: ${action}` }
   }

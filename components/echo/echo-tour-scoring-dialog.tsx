@@ -52,6 +52,7 @@ export function EchoTourScoringDialog({
     activeLeague,
     loading: leagueLoading,
     saving: leagueSaving,
+    saveError: leagueSaveError,
     setActiveLeague,
   } = useEchoSettingsAdmin()
   const { tours, loading: toursLoading } = useEchoTours()
@@ -195,7 +196,13 @@ export function EchoTourScoringDialog({
           </SelectContent>
         </Select>
       )}
-      {!leagueLoading && !toursLoading && activeLeague && (
+      {leagueSaveError && (
+        <div className="echo-scoring-alert echo-scoring-alert--error" role="alert">
+          <strong>Error saving league</strong>
+          <span>{leagueSaveError}</span>
+        </div>
+      )}
+      {!leagueLoading && !toursLoading && activeLeague && !leagueSaveError && (
         <span className="echo-scoring-league-badge">{activeLeague}</span>
       )}
     </div>

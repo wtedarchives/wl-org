@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 
+import { useAuth } from "@/components/auth-context"
+import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
 import { supabase } from "@/lib/supabase"
 
 const FALLBACK_LEAGUE = "2026 Summer [Second Leg]"
@@ -37,11 +39,14 @@ export function useEchoSettingsAdmin(): {
   activeLeague: string
   loading: boolean
   saving: boolean
+  saveError: string | null
   setActiveLeague: (league: string) => Promise<void>
 } {
+  const { session } = useAuth()
   const [activeLeague, setActiveLeagueState] = useState<string>(FALLBACK_LEAGUE)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!supabase) {
@@ -60,15 +65,19 @@ export function useEchoSettingsAdmin(): {
   }, [])
 
   const setActiveLeague = useCallback(async (league: string) => {
-    if (!supabase) return
     setSaving(true)
-    const { error } = await supabase
-      .from("echo_settings")
-      .update({ active_league: league })
-      .eq("id", true)
-    if (!error) setActiveLeagueState(league)
+    setSaveError(null)
+    const { error } = await invokeDproAdmin(session?.token, {
+      action: "echo_settings_set_active_league",
+      active_league: league,
+    })
+    if (error) {
+      setSaveError(error)
+    } else {
+      setActiveLeagueState(league)
+    }
     setSaving(false)
-  }, [])
+  }, [session?.token])
 
-  return { activeLeague, loading, saving, setActiveLeague }
+  return { activeLeague, loading, saving, saveError, setActiveLeague }
 }
