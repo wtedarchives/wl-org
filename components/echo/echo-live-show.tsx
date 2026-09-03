@@ -139,17 +139,37 @@ export function EchoLiveShow({
     [live.picks],
   )
 
+  const officiallyScored = Boolean(live.show?.scored)
+
   const setlistSets = useMemo(
-    () => buildEchoLiveSetlistSets(live.entries, live.picks, live.complete),
-    [live.complete, live.entries, live.picks],
+    () =>
+      buildEchoLiveSetlistSets(
+        live.entries,
+        live.picks,
+        live.complete,
+        officiallyScored,
+      ),
+    [live.complete, live.entries, live.picks, officiallyScored],
   )
   const pickSets = useMemo(
-    () => buildEchoLivePickSets(live.picks, live.entries, live.complete),
-    [live.complete, live.entries, live.picks],
+    () =>
+      buildEchoLivePickSets(
+        live.picks,
+        live.entries,
+        live.complete,
+        officiallyScored,
+      ),
+    [live.complete, live.entries, live.picks, officiallyScored],
   )
   const pickScore = useMemo(
-    () => buildEchoLivePickScore(live.picks, live.entries, live.complete),
-    [live.complete, live.entries, live.picks],
+    () =>
+      buildEchoLivePickScore(
+        live.picks,
+        live.entries,
+        live.complete,
+        officiallyScored,
+      ),
+    [live.complete, live.entries, live.picks, officiallyScored],
   )
   const extraSongs = pickScore.extraSongs
   const extraPoints = extraSongs * ECHO_OVERPICK_PENALTY
@@ -281,7 +301,7 @@ export function EchoLiveShow({
               : pickSets.length > 0 ?
                 <>
                   <EchoLiveSetlist sets={pickSets} showScores />
-                  {extraSongs > 0 ?
+                  {extraSongs > 0 && officiallyScored ?
                     <p className="echo-live-overpick">
                       {extraSongs} extra song{extraSongs === 1 ? "" : "s"}{" "}
                       picked:{" "}
@@ -389,6 +409,7 @@ export function EchoLiveShow({
           entries={live.entries}
           picks={viewedPicks}
           complete={live.complete}
+          officiallyScored={officiallyScored}
         />
       : null}
     </>

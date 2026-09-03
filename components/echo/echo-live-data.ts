@@ -236,6 +236,7 @@ function livePickOutcome(
   entries: EchoLiveEntry[],
   complete: boolean,
   allPicks: EchoLivePickRow[],
+  officiallyScored: boolean,
 ): {
   hit: boolean
   points: number | null
@@ -245,12 +246,18 @@ function livePickOutcome(
 } {
   if (pick.result) {
     const hit = pick.result !== "not_played"
+    let points = pick.score ?? (hit ? 0 : complete ? 0 : null)
+    const showcloser_correct =
+      officiallyScored && Boolean(pick.showcloser_correct)
+    if (!officiallyScored && pick.showcloser_correct && points != null) {
+      points = Math.max(0, points - 3)
+    }
     return {
       hit,
-      points: pick.score ?? (hit ? 0 : complete ? 0 : null),
+      points,
       result: pick.result,
       showopener_correct: pick.showopener_correct,
-      showcloser_correct: pick.showcloser_correct,
+      showcloser_correct,
     }
   }
 
@@ -274,13 +281,14 @@ function livePickOutcome(
   const showopener_correct =
     allPicks[0] === pick && entries[0]?.entry_song === pick.song
   const showcloser_correct =
+    officiallyScored &&
     complete &&
     allPicks[allPicks.length - 1] === pick &&
     entries[entries.length - 1]?.entry_song === pick.song
 
   let points = best.points
   if (showopener_correct) points += 3
-  if (showcloser_correct) points += 3
+  if (officiallyScored && showcloser_correct) points += 3
 
   return {
     hit: true,
@@ -322,8 +330,11 @@ export function buildEchoLiveSetlistSets(
   entries: EchoLiveEntry[],
   picks: EchoLivePickRow[],
   complete: boolean,
+  officiallyScored = false,
 ): EchoLiveSet[] {
-  const outcomes = picks.map((pick) => livePickOutcome(pick, entries, complete, picks))
+  const outcomes = picks.map((pick) =>
+    livePickOutcome(pick, entries, complete, picks, officiallyScored),
+  )
   return toSets(
     entries.map((entry) => {
       const pickIndex = picks.findIndex(
@@ -353,13 +364,21 @@ export function buildEchoLivePickScore(
   picks: EchoLivePickRow[],
   entries: EchoLiveEntry[],
   complete: boolean,
+  officiallyScored = false,
 ): EchoLivePickScore {
   let raw = 0
   for (const pick of picks) {
-    const outcome = livePickOutcome(pick, entries, complete, picks)
+    const outcome = livePickOutcome(
+      pick,
+      entries,
+      complete,
+      picks,
+      officiallyScored,
+    )
     if (outcome.points != null) raw += outcome.points
   }
-  const extraSongs = Math.max(0, picks.length - entries.length)
+  const extraSongs =
+    officiallyScored ? Math.max(0, picks.length - entries.length) : 0
   const penalty = extraSongs * ECHO_OVERPICK_PENALTY
   return {
     raw,
@@ -373,10 +392,17 @@ export function buildEchoLivePickSets(
   picks: EchoLivePickRow[],
   entries: EchoLiveEntry[],
   complete: boolean,
+  officiallyScored = false,
 ): EchoLiveSet[] {
   return toSets(
     picks.map((pick) => {
-      const outcome = livePickOutcome(pick, entries, complete, picks)
+      const outcome = livePickOutcome(
+        pick,
+        entries,
+        complete,
+        picks,
+        officiallyScored,
+      )
       return {
         set: pick.set,
         song: {

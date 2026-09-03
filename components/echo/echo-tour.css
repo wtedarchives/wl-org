@@ -1656,7 +1656,21 @@
 }
 
 .echo-tour-profile-shows-table {
-  min-width: 720px;
+  min-width: max-content;
+}
+
+.echo-tour-profile-shows-table th,
+.echo-tour-profile-shows-table td {
+  white-space: nowrap;
+}
+
+.echo-tour-profile-shows-table th.is-pts,
+.echo-tour-profile-shows-table td.is-pts,
+.echo-tour-profile-shows-table th.is-songs,
+.echo-tour-profile-shows-table td.is-songs,
+.echo-tour-profile-shows-table th.is-sets,
+.echo-tour-profile-shows-table td.is-sets {
+  text-align: center;
 }
 
 .echo-tour-profile-shows-table .is-date {
@@ -1664,7 +1678,7 @@
 }
 
 .echo-tour-profile-shows-table .is-pills {
-  min-width: 148px;
+  min-width: 0;
 }
 
 .echo-profile-show-pills {
@@ -1672,6 +1686,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
+  white-space: nowrap;
 }
 
 .echo-profile-show-date {
@@ -1682,14 +1697,10 @@
 }
 
 .echo-profile-show-tour {
-  display: inline-block;
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: inline;
   font-size: 14px;
   font-weight: 600;
-  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .echo-profile-show-tour.is-plain {
@@ -2703,6 +2714,36 @@
 
   .echo-tour-rank {
     font-size: 38px;
+  }
+
+  .echo-live-standings-scroll {
+    overflow-x: visible;
+    margin: 0;
+    padding: 0;
+  }
+
+  .echo-live-standings {
+    min-width: 0;
+  }
+
+  .echo-live-standing {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    grid-template-areas: "rank name pts";
+    align-items: center;
+    min-width: 0;
+    border-radius: 12px;
+  }
+
+  .echo-live-standing-pills,
+  .echo-live-standing-songs {
+    display: none;
+  }
+
+  .echo-live-standing-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    overflow-wrap: anywhere;
   }
 
   .echo-live-standing-pts {

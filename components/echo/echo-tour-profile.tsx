@@ -196,17 +196,17 @@ export function EchoTourProfile() {
                   <th scope="col" className="is-left">
                     Tour
                   </th>
-                  <th scope="col" className="is-left is-pills">
-                    Picks
+                  <th scope="col" className="is-pts">
+                    Pts
                   </th>
-                  <th scope="col" className="is-right">
+                  <th scope="col" className="is-songs">
                     Songs
                   </th>
-                  <th scope="col" className="is-right">
+                  <th scope="col" className="is-sets">
                     Sets
                   </th>
-                  <th scope="col" className="is-right">
-                    Pts
+                  <th scope="col" className="is-left is-pills">
+                    Pills
                   </th>
                 </tr>
               </thead>
@@ -235,19 +235,19 @@ export function EchoTourProfile() {
                           {row.tour}
                         </span>}
                     </td>
+                    <td className="is-pts is-strong">{row.totalPoints}</td>
+                    <td className="is-songs is-muted">
+                      {formatSongsCorrect(row.songsCorrect)}
+                    </td>
+                    <td className="is-sets is-muted">
+                      {formatSetsCorrect(row.setsCorrect)}
+                    </td>
                     <td className="is-pills">
                       <EchoProfileStandingPills
                         showOpenerPicked={row.showOpenerPicked}
                         showCloserPicked={row.showCloserPicked}
                       />
                     </td>
-                    <td className="is-right is-muted">
-                      {formatSongsCorrect(row.songsCorrect)}
-                    </td>
-                    <td className="is-right is-muted">
-                      {formatSetsCorrect(row.setsCorrect)}
-                    </td>
-                    <td className="is-right is-strong">{row.totalPoints}</td>
                   </tr>
                 ))}
               </tbody>

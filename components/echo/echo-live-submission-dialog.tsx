@@ -45,6 +45,7 @@ export function EchoLiveSubmissionDialog({
   entries,
   picks,
   complete,
+  officiallyScored = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -52,6 +53,7 @@ export function EchoLiveSubmissionDialog({
   entries: EchoLiveEntry[]
   picks: UserPick[]
   complete: boolean
+  officiallyScored?: boolean
 }) {
   const headingId = useId()
   const [activeTab, setActiveTab] = useState<SubmissionTab>("picks")
@@ -72,16 +74,24 @@ export function EchoLiveSubmissionDialog({
 
   const pickRows = useMemo(() => toEchoLivePickRows(picks), [picks])
   const setlistSets = useMemo(
-    () => buildEchoLiveSetlistSets(entries, pickRows, complete),
-    [complete, entries, pickRows],
+    () =>
+      buildEchoLiveSetlistSets(
+        entries,
+        pickRows,
+        complete,
+        officiallyScored,
+      ),
+    [complete, entries, officiallyScored, pickRows],
   )
   const pickSets = useMemo(
-    () => buildEchoLivePickSets(pickRows, entries, complete),
-    [complete, entries, pickRows],
+    () =>
+      buildEchoLivePickSets(pickRows, entries, complete, officiallyScored),
+    [complete, entries, officiallyScored, pickRows],
   )
   const pickScore = useMemo(
-    () => buildEchoLivePickScore(pickRows, entries, complete),
-    [complete, entries, pickRows],
+    () =>
+      buildEchoLivePickScore(pickRows, entries, complete, officiallyScored),
+    [complete, entries, officiallyScored, pickRows],
   )
   const extraSongs = pickScore.extraSongs
   const extraPoints = extraSongs * ECHO_OVERPICK_PENALTY
@@ -166,7 +176,7 @@ export function EchoLiveSubmissionDialog({
                   {pickSets.length > 0 ?
                     <>
                       <EchoLiveSetlist sets={pickSets} showScores />
-                      {extraSongs > 0 ?
+                      {extraSongs > 0 && officiallyScored ?
                         <p className="echo-live-overpick">
                           {extraSongs} extra song
                           {extraSongs === 1 ? "" : "s"} picked:{" "}
