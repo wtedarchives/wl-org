@@ -24,7 +24,9 @@
 
 # Echo of a Show — legacy Setlist Game archive slugs (query-aware rules in netlify.toml)
 /archive/setlistgame  /archive/echo  301
+/archive/setlistgame/*  /archive/echo  301
 /archive/setlistgame2  /archive/echo  301
+/archive/setlistgame2/*  /archive/echo  301
 
 # My Stats — path-style tabs → canonical query on `/archive/profile`
 /archive/profile/overview  /archive/profile?tab=overview  301

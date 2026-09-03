@@ -39,3 +39,13 @@
   to = "/archive/echo?p=tours&tour_id=:tour_id"
   status = 301
   query = { tour_id = ":tour_id" }
+
+[[redirects]]
+  from = "/archive/setlistgame/*"
+  to = "/archive/echo"
+  status = 301
+
+[[redirects]]
+  from = "/archive/setlistgame2/*"
+  to = "/archive/echo"
+  status = 301
