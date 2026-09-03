@@ -80,7 +80,7 @@ export function SetlistGameContent({
     session
   )
   const { userPicks, fetchUserPicks, resetPicks, setUserPicks } = useUserPicks()
-  const { loading: pastToursLoading, pastTours } = usePastTours(ACTIVE_LEAGUE)
+  const { loading: pastToursLoading, pastTours } = usePastTours()
 
   const handleSelectSongs = async (show: GameShow) => {
     setViewMode(false)

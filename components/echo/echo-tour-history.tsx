@@ -9,7 +9,6 @@ import { useStandingsData } from "@/hooks/use-standings-data"
 import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { cn } from "@/lib/utils"
 
-import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
 import { EchoTourShowStatistics } from "./echo-tour-show-statistics"
 import { EchoTourShows } from "./echo-tour-shows"
 
@@ -30,11 +29,12 @@ function championLabel(count: number): string {
 export function EchoTourHistory() {
   const tourSelectId = useId()
   const showsColumnRef = useRef<HTMLDivElement>(null)
+  const myRowRef = useRef<HTMLDivElement>(null)
   const [matchedPanelHeight, setMatchedPanelHeight] = useState<number | null>(
     null,
   )
   const { session } = useAuth()
-  const { loading, pastTours } = usePastTours(ECHO_ACTIVE_LEAGUE)
+  const { loading, pastTours } = usePastTours()
   const [selectedTourId, setSelectedTourId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -43,7 +43,9 @@ export function EchoTourHistory() {
       if (current && pastTours.some((tour) => tour.tour_id === current)) {
         return current
       }
-      return pastTours[0]?.tour_id ?? null
+      // Default to the highest-canonId tour that has scored submissions
+      const firstScored = pastTours.find((tour) => tour.playerCount > 0)
+      return (firstScored ?? pastTours[0])?.tour_id ?? null
     })
   }, [pastTours])
 
@@ -88,6 +90,13 @@ export function EchoTourHistory() {
     "totalPoints",
     "desc",
   )
+
+  // Scroll the signed-in user's row into view once standings finish loading
+  useEffect(() => {
+    if (standingsLoading) return
+    if (!myRowRef.current) return
+    myRowRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" })
+  }, [standingsLoading, selectedTourId])
 
   const selectedChampions = selectedTour ?
     formatTourChampions(selectedTour.winners)
@@ -147,7 +156,7 @@ export function EchoTourHistory() {
                 `past-tours-detail-${selectedTour.tour_id}`,
               ),
               ...(matchedPanelHeight != null ?
-                { height: matchedPanelHeight }
+                { height: Math.max(matchedPanelHeight, 500) }
               : {}),
             }}
             aria-label={`${selectedTour.tour} final standings`}
@@ -196,6 +205,7 @@ export function EchoTourHistory() {
                     return (
                       <div
                         key={player.userId}
+                        ref={isMe ? myRowRef : null}
                         className={cn(
                           "echo-tour-past-tours-standing-row",
                           isMe && "is-me",

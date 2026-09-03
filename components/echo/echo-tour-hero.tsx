@@ -2,11 +2,14 @@
 
 import { useEchoTourSummary } from "@/hooks/use-echo-tour-summary"
 import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
-import {
-  ECHO_ACTIVE_LEAGUE,
-  ECHO_TOUR_LEG,
-  ECHO_TOUR_TITLE,
-} from "./echo-tour-data"
+import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
+
+/** Splits "2026 Summer [Second Leg]" → { main: "2026 Summer", leg: "[Second Leg]" } */
+function splitLeagueTitle(league: string): { main: string; leg: string | null } {
+  const match = league.match(/^(.*?)(\s*\[.*\])\s*$/)
+  if (match) return { main: match[1].trim(), leg: match[2].trim() }
+  return { main: league, leg: null }
+}
 
 export function EchoTourHero({
   league = ECHO_ACTIVE_LEAGUE,
@@ -17,6 +20,7 @@ export function EchoTourHero({
   title?: string
 }) {
   const { summary } = useEchoTourSummary(league)
+  const { main, leg } = splitLeagueTitle(league)
 
   return (
     <div className="echo-tour-hero" style={echoTourSurfaceBgStyle("hero")}>
@@ -24,8 +28,10 @@ export function EchoTourHero({
         <h1 className="echo-tour-hero-title">
           {title ?? (
             <>
-              {ECHO_TOUR_TITLE}{" "}
-              <span className="echo-tour-hero-leg">{ECHO_TOUR_LEG}</span>
+              {main}
+              {leg ? (
+                <>{" "}<span className="echo-tour-hero-leg">{leg}</span></>
+              ) : null}
             </>
           )}
         </h1>

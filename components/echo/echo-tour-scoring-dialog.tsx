@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select"
 import { WlHomeV2ModalPortal } from "@/components/wl-home-v2/wl-home-v2-modal-portal"
 import type { GameShow } from "@/hooks/use-game-shows"
+import { useEchoSettingsAdmin } from "@/hooks/use-echo-settings"
+import { useEchoTours } from "@/hooks/use-echo-tours"
 import { useSetlistScoring } from "@/hooks/use-setlist-scoring"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { formatSetlistDate } from "@/lib/setlist-utils"
@@ -28,20 +30,31 @@ export function EchoTourScoringDialog({
   onOpenChange,
   gameShows,
   onScoringComplete,
+  onLeagueChanged,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   gameShows: GameShow[]
   onScoringComplete: () => void
+  onLeagueChanged?: () => void
 }) {
   const headingId = useId()
   const selectLabelId = useId()
   const selectId = useId()
-  const [selectedShowToScore, setSelectedShowToScore] = useState<string | null>(
-    null,
-  )
+  const leagueSelectLabelId = useId()
+  const leagueSelectId = useId()
+
+  const [selectedShowToScore, setSelectedShowToScore] = useState<string | null>(null)
   const { isScoring, scoringComplete, scoringError, scoreSubmissions } =
     useSetlistScoring()
+
+  const {
+    activeLeague,
+    loading: leagueLoading,
+    saving: leagueSaving,
+    setActiveLeague,
+  } = useEchoSettingsAdmin()
+  const { tours, loading: toursLoading } = useEchoTours()
 
   const scoreableShows = useMemo(
     () => gameShows.filter((show) => show.show_scored !== true),
@@ -67,7 +80,6 @@ export function EchoTourScoringDialog({
 
   const handleScoreSubmissions = async () => {
     if (!selectedShowToScore) return
-
     await scoreSubmissions(selectedShowToScore, () => {
       onScoringComplete()
       onOpenChange(false)
@@ -136,6 +148,59 @@ export function EchoTourScoringDialog({
       </div>
     )
 
+  const leagueSection = (
+    <div className="echo-scoring-league-section">
+      <div className="echo-scoring-league-head">
+        Active league
+        {leagueSaving && (
+          <span className="echo-scoring-league-saving">
+            <Loader2 className="size-3 animate-spin inline-block mr-1" aria-hidden />
+            Saving…
+          </span>
+        )}
+      </div>
+      {leagueLoading || toursLoading ?
+        <p className="echo-scoring-empty">Loading tours…</p>
+      : (
+        <Select
+          value={activeLeague}
+          onValueChange={(val) => void setActiveLeague(val).then(() => onLeagueChanged?.())}
+          disabled={leagueSaving}
+        >
+          <SelectTrigger
+            id={leagueSelectId}
+            aria-labelledby={leagueSelectLabelId}
+            size="sm"
+            className={cn(
+              "echo-scoring-select-trigger",
+              "h-auto w-full min-h-0 justify-between gap-1.5 shadow-none",
+            )}
+          >
+            <SelectValue placeholder="Select active league…" />
+          </SelectTrigger>
+          <SelectContent
+            className="echo-scoring-select-content"
+            position="popper"
+            sideOffset={4}
+          >
+            {tours.map((t) => (
+              <SelectItem
+                key={t.tour_id}
+                value={t.tour}
+                className="text-xs font-medium"
+              >
+                {t.tour}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      {!leagueLoading && !toursLoading && activeLeague && (
+        <span className="echo-scoring-league-badge">{activeLeague}</span>
+      )}
+    </div>
+  )
+
   return (
     <WlHomeV2ModalPortal open={open}>
       <div
@@ -175,7 +240,11 @@ export function EchoTourScoringDialog({
             </button>
           </div>
           <div className="modal-request-body">
-            <div className="echo-scoring-stack">{bodyInner}</div>
+            <div className="echo-scoring-stack">
+              {bodyInner}
+              <hr className="echo-scoring-divider" />
+              {leagueSection}
+            </div>
             {!scoringComplete ?
               <div className="echo-scoring-footer">
                 <button

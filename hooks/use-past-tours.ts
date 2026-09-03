@@ -12,7 +12,7 @@ export interface TourStats {
   canonId?: number
 }
 
-export function usePastTours(currentLeague: string): {
+export function usePastTours(): {
   loading: boolean
   pastTours: TourStats[]
 } {
@@ -29,10 +29,10 @@ export function usePastTours(currentLeague: string): {
       try {
         setLoading(true)
 
+        // Fetch all tours
         const { data: toursData, error: toursError } = await supabase
           .from("tours")
           .select("tour, tour_id, tour_canonid")
-          .neq("tour", currentLeague)
 
         if (toursError || !toursData || toursData.length === 0) {
           setLoading(false)
@@ -60,97 +60,116 @@ export function usePastTours(currentLeague: string): {
           })
         })
 
+        // Only require show_issetlistgame = true; include scored and unscored
         const { data: showsData, error: showsError } = await supabase
           .from("shows")
           .select("show_id, show_tour")
           .in("show_tour", toursData.map((t) => t.tour))
           .eq("show_issetlistgame", true)
-          .eq("show_scored", true)
 
         if (showsError || !showsData || showsData.length === 0) {
           setLoading(false)
           return
         }
 
+        // Count shows per tour
+        showsData.forEach((s) => {
+          const tourData = tourMap.get(s.show_tour)
+          if (tourData) tourData.showIds.add(s.show_id)
+        })
+
         const showIds = showsData.map((s) => s.show_id)
 
-        const { data: submissionsData, error: submissionsError } =
-          await supabase
-            .from("setlist_game_submissions")
-            .select("submission_id, user_id, show_id, score")
-            .in("show_id", showIds)
-            .not("score", "is", null)
-
-        if (submissionsError || !submissionsData || submissionsData.length === 0) {
-          setLoading(false)
-          return
-        }
+        // Fetch scored submissions (for player counts + winners)
+        const { data: submissionsData } = await supabase
+          .from("setlist_game_submissions")
+          .select("submission_id, user_id, show_id, score")
+          .in("show_id", showIds)
+          .not("score", "is", null)
 
         const showToTourMap = new Map(
           showsData.map((s) => [s.show_id, s.show_tour])
         )
 
-        submissionsData.forEach((sub) => {
-          const tour = showToTourMap.get(sub.show_id)
-          if (!tour || tour === currentLeague) return
+        if (submissionsData && submissionsData.length > 0) {
+          submissionsData.forEach((sub) => {
+            const tour = showToTourMap.get(sub.show_id)
+            if (!tour) return
+            const tourData = tourMap.get(tour)
+            if (!tourData) return
+            tourData.userIds.add(sub.user_id)
+            const current = tourData.userScores.get(sub.user_id) ?? 0
+            tourData.userScores.set(sub.user_id, current + (sub.score ?? 0))
+          })
 
-          const tourData = tourMap.get(tour)
-          if (!tourData) return
+          const userIds = [...new Set(submissionsData.map((s) => s.user_id))]
 
-          tourData.userIds.add(sub.user_id)
-          tourData.showIds.add(sub.show_id)
-          const current = tourData.userScores.get(sub.user_id) ?? 0
-          tourData.userScores.set(sub.user_id, current + (sub.score ?? 0))
-        })
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, username")
+            .in("id", userIds)
 
-        const userIds = [...new Set(submissionsData.map((s) => s.user_id))]
+          const usernameMap = new Map(
+            profiles?.map((p) => [p.id, p.username]) ?? []
+          )
 
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, username")
-          .in("id", userIds)
+          const tourStats: TourStats[] = []
 
-        const usernameMap = new Map(
-          profiles?.map((p) => [p.id, p.username]) ?? []
-        )
+          tourMap.forEach((data, tour) => {
+            if (data.showIds.size === 0) return
 
-        const tourStats: TourStats[] = []
+            let maxScore = -Infinity
+            const winners: Array<{ username: string; score: number }> = []
 
-        tourMap.forEach((data, tour) => {
-          if (data.showIds.size === 0) return
+            data.userScores.forEach((score, userId) => {
+              const username = usernameMap.get(userId) ?? "Unknown"
+              if (score > maxScore) {
+                maxScore = score
+                winners.length = 0
+                winners.push({ username, score })
+              } else if (score === maxScore) {
+                winners.push({ username, score })
+              }
+            })
 
-          let maxScore = -Infinity
-          const winners: Array<{ username: string; score: number }> = []
+            tourStats.push({
+              tour,
+              tour_id: data.tourId,
+              playerCount: data.userIds.size,
+              showCount: data.showIds.size,
+              winners,
+              canonId: data.canonId,
+            })
+          })
 
-          data.userScores.forEach((score, userId) => {
-            const username = usernameMap.get(userId) ?? "Unknown"
-            if (score > maxScore) {
-              maxScore = score
-              winners.length = 0
-              winners.push({ username, score })
-            } else if (score === maxScore) {
-              winners.push({ username, score })
+          tourStats.sort((a, b) => {
+            if (a.canonId != null && b.canonId != null) {
+              return b.canonId - a.canonId
             }
+            return b.tour.localeCompare(a.tour)
           })
 
-          tourStats.push({
-            tour,
-            tour_id: data.tourId,
-            playerCount: data.userIds.size,
-            showCount: data.showIds.size,
-            winners,
-            canonId: data.canonId,
+          setPastTours(tourStats)
+        } else {
+          // No scored submissions yet — still show tours that have game shows
+          const tourStats: TourStats[] = []
+          tourMap.forEach((data, tour) => {
+            if (data.showIds.size === 0) return
+            tourStats.push({
+              tour,
+              tour_id: data.tourId,
+              playerCount: 0,
+              showCount: data.showIds.size,
+              winners: [],
+              canonId: data.canonId,
+            })
           })
-        })
-
-        tourStats.sort((a, b) => {
-          if (a.canonId != null && b.canonId != null) {
-            return b.canonId - a.canonId
-          }
-          return b.tour.localeCompare(a.tour)
-        })
-
-        setPastTours(tourStats)
+          tourStats.sort((a, b) => {
+            if (a.canonId != null && b.canonId != null) return b.canonId - a.canonId
+            return b.tour.localeCompare(a.tour)
+          })
+          setPastTours(tourStats)
+        }
       } catch (error) {
         console.error("Error in fetchPastTours:", error)
       } finally {
@@ -159,7 +178,7 @@ export function usePastTours(currentLeague: string): {
     }
 
     fetchPastTours()
-  }, [currentLeague])
+  }, [])
 
   return { loading, pastTours }
 }

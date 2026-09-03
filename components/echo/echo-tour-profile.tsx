@@ -9,6 +9,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
+import { useEchoActiveLeague } from "@/hooks/use-echo-settings"
 import { useEchoProfile } from "@/hooks/use-echo-profile"
 import { useUserProfilePicture } from "@/hooks/use-user-profile-picture"
 import {
@@ -18,8 +19,6 @@ import {
 } from "@/lib/echo-archive-url"
 import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { formatOrdinal } from "@/lib/setlist-utils"
-
-import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
 
 function formatProfileDate(dateInput: string): string {
   const date = new Date(
@@ -40,9 +39,9 @@ function formatSetsCorrect(count: number): string {
   return count === 1 ? "1 set correct" : `${count} sets correct`
 }
 
-function getEchoTourUrl(tourId: string, tourName: string): string {
+function getEchoTourUrl(tourId: string, tourName: string, activeLeague: string): string {
   if (!tourId) return getEchoArchiveUrl("tour")
-  if (tourName === ECHO_ACTIVE_LEAGUE) return getEchoArchiveUrl("tour")
+  if (tourName === activeLeague) return getEchoArchiveUrl("tour")
   return getEchoPastTourUrl(tourId)
 }
 
@@ -79,6 +78,7 @@ export function EchoTourProfile() {
   const { session } = useAuth()
   const { profileDisplayName, profilePicture } = useUserProfilePicture()
   const { loading, tours, shows } = useEchoProfile(session?.profileId)
+  const { activeLeague } = useEchoActiveLeague()
 
   const displayName =
     profileDisplayName ??
@@ -145,7 +145,7 @@ export function EchoTourProfile() {
                     <td className="is-tour">
                       {row.tourId ?
                         <Link
-                          href={getEchoTourUrl(row.tourId, row.tour)}
+                          href={getEchoTourUrl(row.tourId, row.tour, activeLeague)}
                           className="echo-tour-profile-tour-link"
                           scroll={false}
                         >
@@ -225,7 +225,7 @@ export function EchoTourProfile() {
                     <td className="is-tour">
                       {row.tourId ?
                         <Link
-                          href={getEchoTourUrl(row.tourId, row.tour)}
+                          href={getEchoTourUrl(row.tourId, row.tour, activeLeague)}
                           className="echo-profile-show-tour"
                           scroll={false}
                         >

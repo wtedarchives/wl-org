@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-context"
 import { SetlistGameRulesDialog } from "@/components/dpro/setlistgame/setlist-game-rules-dialog"
 import { useAdminStatus } from "@/hooks/use-admin-status"
+import { useEchoActiveLeague } from "@/hooks/use-echo-settings"
 import { useEchoNextShow } from "@/hooks/use-echo-next-show"
 import { useGameShows } from "@/hooks/use-game-shows"
 import {
@@ -20,7 +21,6 @@ import {
 
 import { EchoLiveShow } from "./echo-live-show"
 import { EchoTourCountdown } from "./echo-tour-countdown"
-import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
 import { EchoTourHero } from "./echo-tour-hero"
 import { EchoTourHistory } from "./echo-tour-history"
 import { EchoTourNav } from "./echo-tour-nav"
@@ -45,12 +45,14 @@ export function EchoTourView() {
   const [showScoringModal, setShowScoringModal] = useState(false)
   const [showTimeRevision, setShowTimeRevision] = useState(0)
   const [tourDataRevision, setTourDataRevision] = useState(0)
+  const [leagueRevision, setLeagueRevision] = useState(0)
+  const { activeLeague } = useEchoActiveLeague(leagueRevision)
   const { loading: nextShowLoading, show: nextShow } = useEchoNextShow(
-    ECHO_ACTIVE_LEAGUE,
+    activeLeague,
     showTimeRevision,
   )
   const { gameShows, fetchGameShows } = useGameShows(
-    ECHO_ACTIVE_LEAGUE,
+    activeLeague,
     session,
   )
 
@@ -89,17 +91,18 @@ export function EchoTourView() {
         />
         {active === "tour" ?
           <>
-            <EchoTourHero />
+            <EchoTourHero league={activeLeague} />
             <EchoTourCountdown
               loading={nextShowLoading}
               show={nextShow}
               onScoring={() => setShowRules(true)}
             />
             <EchoTourShows
+              league={activeLeague}
               refreshKey={tourDataRevision}
               onShowTimeSaved={() => setShowTimeRevision((n) => n + 1)}
             />
-            <EchoTourShowStatistics />
+            <EchoTourShowStatistics league={activeLeague} />
           </>
         : active === "show" ?
           <EchoLiveShow
@@ -126,6 +129,7 @@ export function EchoTourView() {
         onOpenChange={setShowScoringModal}
         gameShows={gameShows}
         onScoringComplete={handleScoringComplete}
+        onLeagueChanged={() => setLeagueRevision((n) => n + 1)}
       />
     </div>
   )
