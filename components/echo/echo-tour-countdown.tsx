@@ -3,9 +3,11 @@
 import Link from "next/link"
 
 import { type EchoNextShow } from "@/hooks/use-echo-next-show"
+import { useStandingsData } from "@/hooks/use-standings-data"
 import { getEchoLiveShowUrl } from "@/lib/echo-archive-url"
 import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { cn } from "@/lib/utils"
+import { ECHO_ACTIVE_LEAGUE } from "./echo-tour-data"
 import { EchoTourStandingsCard } from "./echo-tour-standings"
 
 function picksActionLabel(show: EchoNextShow | null): string | null {
@@ -20,10 +22,12 @@ export function EchoTourCountdown({
   loading,
   show,
   onScoring,
+  league,
 }: {
   loading: boolean
   show: EchoNextShow | null
   onScoring: () => void
+  league?: string
 }) {
   const dateLong = show?.dateLong || "\u00a0"
   const venue = show?.venue || "\u00a0"
@@ -31,6 +35,13 @@ export function EchoTourCountdown({
   const countdown = loading ? "\u00a0" : show?.countdown ?? "—"
   const players = loading ? "\u00a0" : show ? String(show.players) : "—"
   const picksLabel = picksActionLabel(show)
+  const standingsLeague = league ?? ECHO_ACTIVE_LEAGUE
+  const { standings, loading: standingsLoading } = useStandingsData(
+    standingsLeague,
+    "totalPoints",
+    "desc",
+  )
+  const showStandingsCard = standingsLoading || standings.length > 0
 
   return (
     <div className="echo-tour-countdown">
@@ -76,9 +87,11 @@ export function EchoTourCountdown({
                 >
                   How scoring works
                 </button>
-                <span className="echo-tour-next-note">
-                  Submissions close one hour before showtime.
-                </span>
+                {show?.showTime ?
+                  <span className="echo-tour-next-note">
+                    Submissions close one hour before showtime.
+                  </span>
+                : null}
               </div>
             </>
           : <p className="echo-tour-next-empty">
@@ -87,9 +100,11 @@ export function EchoTourCountdown({
         </div>
       </div>
 
-      <div className="echo-tour-side">
-        <EchoTourStandingsCard />
-      </div>
+      {showStandingsCard ?
+        <div className="echo-tour-side">
+          <EchoTourStandingsCard league={standingsLeague} />
+        </div>
+      : null}
     </div>
   )
 }

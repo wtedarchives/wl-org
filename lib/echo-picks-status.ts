@@ -5,11 +5,11 @@ export type EchoPicksStatus = {
 
 /** Picks close one hour before showtime (Eastern). */
 export function deriveEchoPicksStatus(showTime: string): EchoPicksStatus {
-  if (!showTime) return { countdown: "Picks Closed", picksOpen: false }
+  if (!showTime) return { countdown: "Picks Open", picksOpen: true }
 
   const showDateTime = new Date(showTime)
   if (Number.isNaN(showDateTime.getTime())) {
-    return { countdown: "Picks Closed", picksOpen: false }
+    return { countdown: "Picks Open", picksOpen: true }
   }
 
   const closeAt = new Date(showDateTime.getTime() - 60 * 60 * 1000)

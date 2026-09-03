@@ -79,6 +79,9 @@ export function EchoTourStandingsCard({
     isMe: Boolean(session?.profileId && player.userId === session.profileId),
   }))
 
+  // Hide the card entirely on the tour home page when no shows have been scored yet
+  if (!loading && rows.length === 0) return null
+
   const signedIn = Boolean(session)
   const me = rows.find((row) => row.isMe)
   const playerCount = rows.length

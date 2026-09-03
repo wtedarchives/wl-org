@@ -34,7 +34,8 @@ function showStatus(show: GameShow): {
   if (show.timeRemaining) {
     return { status: "Open", label: `${show.timeRemaining} left` }
   }
-  return { status: "Open", label: "Open" }
+  // No show time set — picks are open but no countdown available
+  return { status: "Open", label: "Picks Open" }
 }
 
 function scoreLabel(show: GameShow) {

@@ -37,8 +37,19 @@ function calculateTimeRemaining(showTime: string): {
   isSelectionClosed: boolean
   isLessThan24Hours: boolean
 } {
+  // No show time set — picks are open indefinitely
+  if (!showTime) {
+    return { timeRemaining: "", isSelectionClosed: false, isLessThan24Hours: false }
+  }
+
   const now = new Date()
   const showDateTime = new Date(showTime)
+
+  // Invalid date — treat same as no show time
+  if (Number.isNaN(showDateTime.getTime())) {
+    return { timeRemaining: "", isSelectionClosed: false, isLessThan24Hours: false }
+  }
+
   const oneHourBefore = new Date(showDateTime.getTime() - 60 * 60 * 1000)
 
   const isSelectionClosed = now >= oneHourBefore

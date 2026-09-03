@@ -96,6 +96,7 @@ export function EchoTourView() {
               loading={nextShowLoading}
               show={nextShow}
               onScoring={() => setShowRules(true)}
+              league={activeLeague}
             />
             <EchoTourShows
               league={activeLeague}

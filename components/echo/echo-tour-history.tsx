@@ -90,6 +90,7 @@ export function EchoTourHistory() {
     "totalPoints",
     "desc",
   )
+  const showFinalStandingsPanel = standingsLoading || standings.length > 0
 
   // Scroll the signed-in user's row into view once standings finish loading
   useEffect(() => {
@@ -149,88 +150,86 @@ export function EchoTourHistory() {
             />
           </div>
 
-          <section
-            className="echo-tour-past-tours-detail"
-            style={{
-              ...echoTourSurfaceBgStyle(
-                `past-tours-detail-${selectedTour.tour_id}`,
-              ),
-              ...(matchedPanelHeight != null ?
-                { height: Math.max(matchedPanelHeight, 500) }
-              : {}),
-            }}
-            aria-label={`${selectedTour.tour} final standings`}
-          >
-            <h2 className="echo-tour-past-tours-detail-title">
-              Final standings
-            </h2>
+          {showFinalStandingsPanel ?
+            <section
+              className="echo-tour-past-tours-detail"
+              style={{
+                ...echoTourSurfaceBgStyle(
+                  `past-tours-detail-${selectedTour.tour_id}`,
+                ),
+                ...(matchedPanelHeight != null ?
+                  { height: Math.max(matchedPanelHeight, 500) }
+                : {}),
+              }}
+              aria-label={`${selectedTour.tour} final standings`}
+            >
+              <h2 className="echo-tour-past-tours-detail-title">
+                Final standings
+              </h2>
 
-            <div className="echo-tour-past-tours-summary">
-              <dl className="echo-tour-past-tours-stats">
-                <div>
-                  <dt>Shows</dt>
-                  <dd>{selectedTour.showCount}</dd>
-                </div>
-                <div>
-                  <dt>Players</dt>
-                  <dd>{selectedTour.playerCount}</dd>
-                </div>
-              </dl>
+              <div className="echo-tour-past-tours-summary">
+                <dl className="echo-tour-past-tours-stats">
+                  <div>
+                    <dt>Shows</dt>
+                    <dd>{selectedTour.showCount}</dd>
+                  </div>
+                  <div>
+                    <dt>Players</dt>
+                    <dd>{selectedTour.playerCount}</dd>
+                  </div>
+                </dl>
 
-              <div className="echo-tour-past-tours-detail-champion">
-                <div className="echo-tour-past-tours-champion-label">
-                  {championLabel(selectedTour.winners.length)}
-                </div>
-                <div className="echo-tour-past-tours-champion-names">
-                  {selectedChampions ?? "No scores"}
+                <div className="echo-tour-past-tours-detail-champion">
+                  <div className="echo-tour-past-tours-champion-label">
+                    {championLabel(selectedTour.winners.length)}
+                  </div>
+                  <div className="echo-tour-past-tours-champion-names">
+                    {selectedChampions ?? "No scores"}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="echo-tour-past-tours-standings-scroll">
-              {standingsLoading ?
-                <p className="echo-tour-past-tours-detail-loading">
-                  Loading standings…
-                </p>
-              : standings.length === 0 ?
-                <p className="echo-tour-past-tours-detail-loading">
-                  No standings yet.
-                </p>
-              : <div className="echo-tour-past-tours-standings">
-                  {standings.map((player, index) => {
-                    const isMe = Boolean(
-                      session?.profileId &&
-                        player.userId === session.profileId,
-                    )
-                    return (
-                      <div
-                        key={player.userId}
-                        ref={isMe ? myRowRef : null}
-                        className={cn(
-                          "echo-tour-past-tours-standing-row",
-                          isMe && "is-me",
-                        )}
-                      >
-                        <span className="echo-tour-past-tours-standing-rank">
-                          {index + 1}
-                        </span>
-                        <span
+              <div className="echo-tour-past-tours-standings-scroll">
+                {standingsLoading ?
+                  <p className="echo-tour-past-tours-detail-loading">
+                    Loading standings…
+                  </p>
+                : <div className="echo-tour-past-tours-standings">
+                    {standings.map((player, index) => {
+                      const isMe = Boolean(
+                        session?.profileId &&
+                          player.userId === session.profileId,
+                      )
+                      return (
+                        <div
+                          key={player.userId}
+                          ref={isMe ? myRowRef : null}
                           className={cn(
-                            "echo-tour-past-tours-standing-name",
+                            "echo-tour-past-tours-standing-row",
                             isMe && "is-me",
                           )}
                         >
-                          {player.username}
-                        </span>
-                        <span className="echo-tour-past-tours-standing-pts">
-                          {player.totalPoints}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>}
-            </div>
-          </section>
+                          <span className="echo-tour-past-tours-standing-rank">
+                            {index + 1}
+                          </span>
+                          <span
+                            className={cn(
+                              "echo-tour-past-tours-standing-name",
+                              isMe && "is-me",
+                            )}
+                          >
+                            {player.username}
+                          </span>
+                          <span className="echo-tour-past-tours-standing-pts">
+                            {player.totalPoints}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>}
+              </div>
+            </section>
+          : null}
         </div>
 
           <EchoTourShowStatistics
