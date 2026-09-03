@@ -1,10 +1,8 @@
 "use client"
 
-import { useCallback, useMemo, useState, type CSSProperties } from "react"
-import { Check } from "@phosphor-icons/react"
+import { useCallback, useMemo, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
-import { SongDisplayName } from "@/components/dpro/song-display-name"
 import { useEchoLiveShow } from "@/hooks/use-echo-live-show"
 import { useEchoLiveStandings } from "@/hooks/use-echo-live-standings"
 import { useEchoLiveTopPicks } from "@/hooks/use-echo-live-top-picks"
@@ -12,22 +10,18 @@ import type { UserPick } from "@/hooks/use-user-picks"
 import { formatSetlistDate } from "@/lib/setlist-utils"
 import { echoTourSurfaceBgStyle } from "@/lib/echo-tour-surface-bg"
 import { supabase } from "@/lib/supabase"
-import { cn } from "@/lib/utils"
 
+import { EchoLiveBars } from "./echo-live-bars"
 import {
   buildEchoLivePickScore,
   buildEchoLivePickSets,
   buildEchoLiveSetlistSets,
   ECHO_OVERPICK_PENALTY,
-  type EchoLiveBar,
 } from "./echo-live-data"
 import { EchoLivePicksInterface } from "./echo-live-picks-interface"
 import { EchoLiveSetlist } from "./echo-live-setlist"
+import { EchoLiveStandingsCard } from "./echo-live-standings-card"
 import { EchoLiveSubmissionDialog } from "./echo-live-submission-dialog"
-
-function formatSongsCorrect(count: number): string {
-  return count === 1 ? "1 song correct" : `${count} songs correct`
-}
 
 async function fetchPicksBySubmissionId(
   submissionId: string,
@@ -42,63 +36,6 @@ async function fetchPicksBySubmissionId(
     .order("set", { ascending: true })
     .order("setnum", { ascending: true })
   return data ?? []
-}
-
-function EchoLiveBars({
-  title,
-  items,
-  variant,
-  empty,
-  loading,
-}: {
-  title: string
-  items: EchoLiveBar[]
-  variant: "accent" | "sage"
-  empty: string
-  loading?: boolean
-}) {
-  return (
-    <div className="echo-live-card" style={echoTourSurfaceBgStyle(title)}>
-      <div
-        className={cn(
-          "echo-tour-kicker echo-live-card-kicker",
-          variant === "sage" && "is-sage",
-        )}
-      >
-        {title}
-      </div>
-      {loading && items.length === 0 ?
-        <p className="echo-live-empty">Loading…</p>
-      : items.length === 0 ?
-        <p className="echo-live-empty">{empty}</p>
-      : <div className="echo-live-bars">
-          {items.map((item) => (
-            <div key={item.song} className="echo-live-bar-row">
-              <div className="echo-live-bar-meta">
-                <span className="echo-live-bar-name">
-                  <SongDisplayName
-                    song={item.song}
-                    songDisplayName={item.displayName}
-                    compactInline
-                    underlineOnHover={false}
-                  />
-                </span>
-                <span className="echo-live-bar-count">{item.count}</span>
-              </div>
-              <div className="echo-live-bar-track">
-                <div
-                  className={cn(
-                    "echo-live-bar-fill",
-                    variant === "sage" && "is-sage",
-                  )}
-                  style={{ "--echo-bar": item.width } as CSSProperties}
-                />
-              </div>
-            </div>
-          ))}
-        </div>}
-    </div>
-  )
 }
 
 export function EchoLiveShow({
@@ -339,64 +276,14 @@ export function EchoLiveShow({
           />
         </div>
 
-        <div
-          className="echo-live-card echo-live-show-standings"
-          style={echoTourSurfaceBgStyle("live-standings")}
-        >
-          <h2 className="echo-live-card-title echo-live-standings-title">
-            Show standings
-          </h2>
-          {standings.loading && standings.standings.length === 0 ?
-            <p className="echo-live-empty">Loading standings…</p>
-          : standings.standings.length === 0 ?
-            <p className="echo-live-empty">No standings available yet.</p>
-          : <div className="echo-live-standings-scroll">
-              <div className="echo-live-standings">
-                {standings.standings.map((row) => (
-                <div
-                  key={row.userId}
-                  className="echo-live-standing"
-                  data-me={row.isMe ? "true" : undefined}
-                >
-                  <span className="echo-live-standing-rank">{row.rank}</span>
-                  {live.picksOpen ?
-                    <span className="echo-live-standing-name">
-                      {row.username}
-                    </span>
-                  : <button
-                      type="button"
-                      className="echo-live-standing-name echo-live-standing-user"
-                      onClick={() =>
-                        void handleViewUserSubmission(row.userId, row.username)
-                      }
-                    >
-                      {row.username}
-                    </button>}
-                  <div className="echo-live-standing-pills">
-                    {row.showOpenerPicked ?
-                      <span className="echo-live-standing-pill">
-                        <Check size={12} weight="bold" aria-hidden />
-                        show opener
-                      </span>
-                    : null}
-                    {row.showCloserPicked ?
-                      <span className="echo-live-standing-pill">
-                        <Check size={12} weight="bold" aria-hidden />
-                        show closer
-                      </span>
-                    : null}
-                  </div>
-                  <span className="echo-live-standing-songs">
-                    {formatSongsCorrect(row.songsCorrect)}
-                  </span>
-                  <span className="echo-live-standing-pts">
-                    {row.totalPoints}
-                  </span>
-                </div>
-                ))}
-              </div>
-            </div>}
-        </div>
+        <EchoLiveStandingsCard
+          standings={standings.standings}
+          loading={standings.loading}
+          picksOpen={live.picksOpen}
+          onViewUser={(userId, username) => {
+            void handleViewUserSubmission(userId, username)
+          }}
+        />
       </div>
 
       {viewedUsername ?
