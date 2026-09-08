@@ -59,7 +59,7 @@ export function SetlistEntryMediaCell({
   if (items.length === 0) return null
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1">
+    <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
       {items.map((item) => (
         <SetlistEntryMediaIcon
           key={item.service}

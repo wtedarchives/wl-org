@@ -216,7 +216,7 @@ export function WlHomeV2SetlistPairTableRow({
       />
       {showMediaColumn ?
         <td
-          className="center"
+          className="center media-cell"
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">

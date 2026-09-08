@@ -113,7 +113,7 @@ export function WlHomeV2SetlistTableHead({
           <th className="center">Rarity</th>
         : null}
         {showMediaColumn ?
-          <th className="center">
+          <th className="center media-cell">
             {isDesktop ?
               <Tooltip>
                 <TooltipTrigger asChild>

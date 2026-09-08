@@ -311,7 +311,7 @@ export function WlHomeV2SetlistTableRow({
       : null}
       {showMediaColumn ?
         <td
-          className="center"
+          className="center media-cell"
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
           <div className="setlist-cell-inner">

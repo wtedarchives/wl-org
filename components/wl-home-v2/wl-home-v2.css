@@ -14421,6 +14421,14 @@
   text-align: center;
   white-space: nowrap;
 }
+.wl-home-v2 .wl-home-v2-setlist .set-table th.media-cell,
+.wl-home-v2 .wl-home-v2-setlist .set-table td.media-cell {
+  white-space: nowrap;
+}
+.wl-home-v2 .wl-home-v2-setlist .set-table td.media-cell .setlist-cell-inner {
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
 .wl-home-v2 .wl-home-v2-setlist .set-table td.rarity-cell {
   font-size: 13px;
   color: #fff;
