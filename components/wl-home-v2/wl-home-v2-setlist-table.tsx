@@ -8,6 +8,7 @@ import {
   shouldShowSetlistEntryShort,
 } from "@/components/dpro/setlist/display-setlist-table.constants"
 import { computePlacementBarSpanRoles } from "@/lib/placement-bar-span"
+import { entryHasMediaColumnIcons } from "@/lib/setlist-entry-media"
 import {
   buildSetlistTableRows,
   computeDisplayNumbersForTableRows,
@@ -87,9 +88,7 @@ export function WlHomeV2SetlistTable({
 
   const showCanonColumns = show.show_canonid != null
   const showWtedColumn = setlist.some((e) => !!e.radio_id)
-  const showMediaColumn = setlist.some(
-    (e) => !!e.bandcampTrack || !!e.youtubeRelease,
-  )
+  const showMediaColumn = setlist.some(entryHasMediaColumnIcons)
   const showTimeColumn = setlist.some(
     (e) => (formatEntryLength(e.entry_length) ?? "") !== "",
   )
@@ -289,10 +288,6 @@ export function WlHomeV2SetlistTable({
                           : undefined}
                         onWtedClick={onPairWtedClick}
                         onBandcampClick={onPairBandcampClick}
-                        youtubeRelease={
-                          row.entries.map((e) => e.youtubeRelease).find(Boolean) ??
-                          null
-                        }
                         onYouTubeClick={onYouTubeClick}
                         showAdminUi={showAdminUi}
                         copiedEntryIds={copiedEntryIds}
@@ -329,7 +324,6 @@ export function WlHomeV2SetlistTable({
                         onSongClick={onSongClick}
                         onWtedClick={onWtedClick}
                         onBandcampClick={onBandcampClick}
-                        youtubeRelease={row.entry.youtubeRelease ?? null}
                         onYouTubeClick={onYouTubeClick}
                         showAdminUi={showAdminUi}
                         copiedEntryIds={copiedEntryIds}

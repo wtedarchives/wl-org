@@ -47,6 +47,11 @@ export function isEmbeddableService(service: string | null): boolean {
   return key === "bandcamp" || key === "youtube"
 }
 
+export function hasKnownServiceIcon(service: string | null | undefined): boolean {
+  const key = (service ?? "").toLowerCase().trim()
+  return key in KNOWN_SERVICE_LABELS
+}
+
 export function releaseServiceSortKey(release: ShowRelease): string {
   const k = (release.release_service ?? "").trim().toLowerCase()
   return k || OTHER_SERVICE_KEY

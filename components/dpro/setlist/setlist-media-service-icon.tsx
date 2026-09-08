@@ -3,7 +3,13 @@ import { Parallelogram, SpotifyLogo, YoutubeLogo } from "@phosphor-icons/react"
 
 import { SERVICE_COLORS } from "@/components/dpro/setlist/setlist-media-section.model"
 
-export function ReleaseServiceIcon({ service }: { service: string | null }) {
+export function ReleaseServiceIcon({
+  service,
+  size = 14,
+}: {
+  service: string | null
+  size?: number
+}) {
   if (!service?.trim()) return null
   const key = service.toLowerCase().trim()
   if (key === "nugs") {
@@ -11,8 +17,8 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
       <Image
         src="/NugsColor.png"
         alt=""
-        width={14}
-        height={14}
+        width={size}
+        height={size}
         className="shrink-0 rounded-sm object-contain"
       />
     )
@@ -22,8 +28,8 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
       <Image
         src="/discogs.png"
         alt=""
-        width={14}
-        height={14}
+        width={size}
+        height={size}
         className="shrink-0 rounded-sm object-contain"
       />
     )
@@ -33,8 +39,8 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
       <Image
         src="/vinyl.png"
         alt=""
-        width={14}
-        height={14}
+        width={size}
+        height={size}
         className="shrink-0 rounded-sm object-contain"
       />
     )
@@ -43,7 +49,7 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
     return (
       <YoutubeLogo
         className="shrink-0"
-        size={14}
+        size={size}
         weight="fill"
         style={{ color: SERVICE_COLORS.youtube }}
         aria-hidden
@@ -54,7 +60,7 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
     return (
       <SpotifyLogo
         className="shrink-0"
-        size={14}
+        size={size}
         weight="fill"
         style={{ color: SERVICE_COLORS.spotify }}
         aria-hidden
@@ -65,7 +71,7 @@ export function ReleaseServiceIcon({ service }: { service: string | null }) {
     return (
       <Parallelogram
         className="shrink-0"
-        size={14}
+        size={size}
         weight="fill"
         style={{ color: SERVICE_COLORS.bandcamp }}
         aria-hidden

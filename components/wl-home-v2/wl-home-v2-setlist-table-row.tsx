@@ -13,8 +13,7 @@ import { entryHasSongStatsLines } from "@/components/dpro/setlist/setlist-entry-
 import { SetlistEntryLastCell } from "@/components/dpro/setlist/setlist-entry-last-cell"
 import { SetlistEntryNumberCell } from "@/components/dpro/setlist/setlist-entry-number-cell"
 import { SetlistEntryWtedCell } from "@/components/dpro/setlist/setlist-entry-wted-cell"
-import { SetlistEntryBandcampCell } from "@/components/dpro/setlist/setlist-entry-bandcamp-cell"
-import { SetlistEntryYouTubeCell } from "@/components/dpro/setlist/setlist-entry-youtube-cell"
+import { SetlistEntryMediaCell } from "@/components/dpro/setlist/setlist-entry-media-cell"
 import {
   SetlistTruncatableCell,
   SetlistTruncatableHtmlCell,
@@ -58,7 +57,6 @@ export function WlHomeV2SetlistTableRow({
   onSongClick,
   onWtedClick,
   onBandcampClick,
-  youtubeRelease,
   onYouTubeClick,
   showTimeColumn,
   showCoachColumn,
@@ -91,7 +89,6 @@ export function WlHomeV2SetlistTableRow({
   onSongClick?: (entry: SetlistEntry) => void
   onWtedClick?: (entry: SetlistEntry) => void
   onBandcampClick?: (entry: SetlistEntry) => void
-  youtubeRelease?: ShowRelease | null
   onYouTubeClick?: (release: ShowRelease) => void
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>
@@ -317,15 +314,12 @@ export function WlHomeV2SetlistTableRow({
           className="center"
           onPointerEnter={isDesktop ? onDataCellPointerEnter : undefined}
         >
-          <div className="setlist-cell-inner flex items-center justify-center gap-1">
-            <SetlistEntryBandcampCell
-              entry={entry}
-              onBandcampClick={onBandcampClick}
-              showTooltips={isDesktop}
-              tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}
-            />
-            <SetlistEntryYouTubeCell
-              release={youtubeRelease ?? null}
+          <div className="setlist-cell-inner">
+            <SetlistEntryMediaCell
+              entries={[entry]}
+              onBandcampClick={
+                onBandcampClick ? () => onBandcampClick(entry) : undefined
+              }
               onYouTubeClick={onYouTubeClick}
               showTooltips={isDesktop}
               tooltipContentClassName={SETLIST_V2_ROW_TOOLTIP_CONTENT.className}

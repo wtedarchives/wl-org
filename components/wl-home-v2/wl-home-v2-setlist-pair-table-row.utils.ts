@@ -38,9 +38,6 @@ export function deriveWlHomeV2SetlistPairTableRowState({
   const combinedLength = pairCombinedLength(entries)
   const hasWted = pairHasWted(entries)
   const wtedProxyEntry = entries.find((e) => e.radio_id) ?? primaryEntry
-  const hasBandcamp = entries.some((e) => !!e.bandcampTrack)
-  const bandcampProxyEntry =
-    entries.find((e) => e.bandcampTrack) ?? primaryEntry
 
   const barPlacementTokens = pairPlacementBarTokens(entries)
   const isCopied = entries.some((e) => copiedEntryIds?.has(e.entry_id))
@@ -86,8 +83,6 @@ export function deriveWlHomeV2SetlistPairTableRowState({
     combinedLength,
     hasWted,
     wtedProxyEntry,
-    hasBandcamp,
-    bandcampProxyEntry,
     barPlacementTokens,
     isCopied,
     shouldReleaseHighlight,

@@ -25,7 +25,6 @@ export type WlHomeV2SetlistPairTableRowProps = {
   onSongClick?: (entries: SetlistEntry[]) => void
   onWtedClick?: (entries: SetlistEntry[]) => void
   onBandcampClick?: (entries: SetlistEntry[]) => void
-  youtubeRelease?: ShowRelease | null
   onYouTubeClick?: (release: ShowRelease) => void
   showAdminUi?: boolean
   copiedEntryIds?: Set<string>

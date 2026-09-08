@@ -123,8 +123,8 @@ export function WlHomeV2SetlistTableHead({
                   className="setlist-header-tooltip setlist-header-tooltip--tight"
                   {...SETLIST_HEADER_TOOLTIP_CONTENT}
                 >
-                  Use the icons below to play a song&apos;s media on Bandcamp or
-                  YouTube.
+                  Use the icons below to open a song&apos;s media on the linked
+                  service.
                 </TooltipContent>
               </Tooltip>
             : "Media"}
