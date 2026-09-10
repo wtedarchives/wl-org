@@ -235,6 +235,8 @@ export function ReleaseModal({
                       else if (link.includes("youtube.com")) service = "YouTube"
                       else if (link.includes("nugsnet")) service = "nugs"
                       else if (link.includes("spotify.com")) service = "Spotify"
+                      else if (link.includes("archive.org"))
+                        service = "Internet Archive"
                       if (service) handleInputChange("release_service", service)
                     }
                   }}

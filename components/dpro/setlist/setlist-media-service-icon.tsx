@@ -1,7 +1,17 @@
 import Image from "next/image"
 import { Parallelogram, SpotifyLogo, YoutubeLogo } from "@phosphor-icons/react"
 
-import { SERVICE_COLORS } from "@/components/dpro/setlist/setlist-media-section.model"
+import {
+  canonicalizeReleaseServiceKey,
+  SERVICE_COLORS,
+} from "@/components/dpro/setlist/setlist-media-section.model"
+
+const SERVICE_IMAGE_SRC: Record<string, string> = {
+  nugs: "/NugsColor.png",
+  discogs: "/discogs.png",
+  vinyl: "/vinyl.png",
+  "internet archive": "/InternetArchive.png",
+}
 
 export function ReleaseServiceIcon({
   service,
@@ -11,33 +21,12 @@ export function ReleaseServiceIcon({
   size?: number
 }) {
   if (!service?.trim()) return null
-  const key = service.toLowerCase().trim()
-  if (key === "nugs") {
+  const key = canonicalizeReleaseServiceKey(service)
+  const imageSrc = SERVICE_IMAGE_SRC[key]
+  if (imageSrc) {
     return (
       <Image
-        src="/NugsColor.png"
-        alt=""
-        width={size}
-        height={size}
-        className="shrink-0 rounded-sm object-contain"
-      />
-    )
-  }
-  if (key === "discogs") {
-    return (
-      <Image
-        src="/discogs.png"
-        alt=""
-        width={size}
-        height={size}
-        className="shrink-0 rounded-sm object-contain"
-      />
-    )
-  }
-  if (key === "vinyl") {
-    return (
-      <Image
-        src="/vinyl.png"
+        src={imageSrc}
         alt=""
         width={size}
         height={size}

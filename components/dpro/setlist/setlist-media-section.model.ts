@@ -16,6 +16,7 @@ export const KNOWN_SERVICE_LABELS: Record<string, string> = {
   spotify: "Spotify",
   vinyl: "Vinyl",
   youtube: "YouTube",
+  "internet archive": "Internet Archive",
 }
 
 /** Display order for media sections (top → bottom). Other is always last. */
@@ -26,7 +27,22 @@ export const SERVICE_SECTION_ORDER: readonly string[] = [
   "vinyl",
   "discogs",
   "youtube",
+  "internet archive",
 ]
+
+const SERVICE_KEY_ALIASES: Record<string, string> = {
+  internetarchive: "internet archive",
+  "archive.org": "internet archive",
+  archiveorg: "internet archive",
+}
+
+export function canonicalizeReleaseServiceKey(
+  service: string | null | undefined,
+): string {
+  const key = (service ?? "").trim().toLowerCase()
+  if (!key) return ""
+  return SERVICE_KEY_ALIASES[key] ?? key
+}
 
 export function compareServiceSectionKeys(a: string, b: string): number {
   const rank = (key: string) => {
@@ -48,12 +64,12 @@ export function isEmbeddableService(service: string | null): boolean {
 }
 
 export function hasKnownServiceIcon(service: string | null | undefined): boolean {
-  const key = (service ?? "").toLowerCase().trim()
+  const key = canonicalizeReleaseServiceKey(service)
   return key in KNOWN_SERVICE_LABELS
 }
 
 export function releaseServiceSortKey(release: ShowRelease): string {
-  const k = (release.release_service ?? "").trim().toLowerCase()
+  const k = canonicalizeReleaseServiceKey(release.release_service)
   return k || OTHER_SERVICE_KEY
 }
 
