@@ -227,39 +227,25 @@ export function useWlHomeV2SetlistPageClient() {
     [],
   )
 
-  const onWtedClick = useCallback(
-    (entry: SetlistEntry) => {
-      if (!session) {
-        openLogin?.()
-        return
-      }
-      setWtedModalEntryOptions(null)
-      setWtedModalEntry(entry)
-      setWtedModalOpen(true)
-    },
-    [session, openLogin],
-  )
+  const onWtedClick = useCallback((entry: SetlistEntry) => {
+    setWtedModalEntryOptions(null)
+    setWtedModalEntry(entry)
+    setWtedModalOpen(true)
+  }, [])
 
-  const onPairWtedClick = useCallback(
-    (entries: SetlistEntry[]) => {
-      if (!session) {
-        openLogin?.()
-        return
-      }
-      const options = uniqueWtedEntriesFromPair(entries)
-      if (options.length === 0) return
-      if (options.length === 1) {
-        setWtedModalEntryOptions(null)
-        setWtedModalEntry(options[0]!)
-        setWtedModalOpen(true)
-        return
-      }
-      setWtedModalEntryOptions(options)
+  const onPairWtedClick = useCallback((entries: SetlistEntry[]) => {
+    const options = uniqueWtedEntriesFromPair(entries)
+    if (options.length === 0) return
+    if (options.length === 1) {
+      setWtedModalEntryOptions(null)
       setWtedModalEntry(options[0]!)
       setWtedModalOpen(true)
-    },
-    [session, openLogin],
-  )
+      return
+    }
+    setWtedModalEntryOptions(options)
+    setWtedModalEntry(options[0]!)
+    setWtedModalOpen(true)
+  }, [])
 
   const closeSongModal = useCallback(() => {
     setSongModalOpen(false)

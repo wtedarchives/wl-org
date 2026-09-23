@@ -2,11 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 
-import { useAuth } from "@/components/auth-context"
 import { SetlistWtedPanel } from "@/components/dpro/setlist/setlist-wted-panel"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
-import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
-import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { WtedRequestSongCustomPanel } from "@/components/wted/wted-request-song-custom-panel"
 import { useWtedRadioIdsCatalog } from "@/hooks/use-wted-radio-ids-catalog"
 import { supabase } from "@/lib/supabase"
@@ -41,7 +38,7 @@ function resetWtedSelectionState() {
 }
 
 /**
- * Catalog search + WTED request sheet + login gate (same behavior as {@link WtedRequestSongCard} body).
+ * Catalog search + WTED request sheet (same behavior as {@link WtedRequestSongCard} body).
  */
 export function WtedRequestSongFlow({
   catalogFetchEnabled = true,
@@ -54,13 +51,11 @@ export function WtedRequestSongFlow({
   panelClassName?: string
   /** Optional outer flex wrapper (e.g. modal body min-height). */
   panelWrapperClassName?: string
-  /** Use WL Home v2 login gate styling when opening the WTED login-required dialog. */
+  /** Render the request panel inline (homepage request modal) instead of a sheet. */
   wlHomeV2LoginDialog?: boolean
   /** Focus the catalog search field (homepage request modal). */
   focusSearch?: boolean
 }) {
-  const { session } = useAuth()
-  const openLogin = useWlHomeV2OpenLogin()
   const catalogQueryEnabled = catalogFetchEnabled
   const { rows, loading, error } = useWtedRadioIdsCatalog(catalogQueryEnabled)
   const catalogDeferred = !catalogFetchEnabled
@@ -73,7 +68,6 @@ export function WtedRequestSongFlow({
   const [selectedShow, setSelectedShow] =
     useState<WtedSheetShowProps>(HOME_WTED_SHEET_SHOW)
   const [fallbackArtwork, setFallbackArtwork] = useState<string | null>(null)
-  const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
   const [busyRadioId, setBusyRadioId] = useState<string | null>(null)
 
   const clearSelection = useCallback(() => {
@@ -108,14 +102,6 @@ export function WtedRequestSongFlow({
 
   const pickTrack = useCallback(
     async (row: WtedRadioIdRow) => {
-      if (!session) {
-        if (wlHomeV2LoginDialog) {
-          openLogin?.()
-        } else {
-          setWtedLoginRequiredOpen(true)
-        }
-        return
-      }
       const art = wtedRadioIdsRowArtworkUrl(row)
 
       const finishPick = (
@@ -159,13 +145,7 @@ export function WtedRequestSongFlow({
         setBusyRadioId(null)
       }
     },
-    [
-      session,
-      wlHomeV2LoginDialog,
-      openLogin,
-      inlineInRequestModal,
-      applyResolvedSelection,
-    ],
+    [inlineInRequestModal, applyResolvedSelection],
   )
 
   const panelOpen = inlineInRequestModal
@@ -211,12 +191,6 @@ export function WtedRequestSongFlow({
         />
       </div>
 
-      {!wlHomeV2LoginDialog ?
-        <SetlistWtedLoginRequiredDialog
-          open={wtedLoginRequiredOpen}
-          onOpenChange={setWtedLoginRequiredOpen}
-        />
-      : null}
       {!inlineInRequestModal ?
         <SetlistWtedSheet
           open={wtedSheetOpen}

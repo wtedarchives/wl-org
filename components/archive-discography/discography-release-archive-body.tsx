@@ -2,13 +2,11 @@
 
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react"
 import { notFound, useRouter } from "next/navigation"
-import { useAuth } from "@/components/auth-context"
 import {
   useSetlistBreadcrumb,
   WTED_ARCHIVES_BREADCRUMB_ROOT,
   WL_V2_ARCHIVES_BREADCRUMB_ROOT,
 } from "@/components/setlist-breadcrumb-context"
-import { SetlistWtedLoginRequiredDialog } from "@/components/dpro/setlist/setlist-wted-login-required-dialog"
 import { SetlistWtedSheet } from "@/components/dpro/setlist/setlist-wted-sheet"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
 import { useDiscographyReleaseData } from "@/hooks/use-discography-release-data"
@@ -25,7 +23,6 @@ import {
   WlHomeV2ArchiveCrumbsTrail,
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
-import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { DiscographyReleaseArchiveHero } from "@/components/archive-discography/discography-release-archive-hero"
 import { DiscographyReleaseArchiveLoading } from "@/components/archive-discography/discography-release-archive-loading"
 import { DiscographyReleaseArchiveTrackSection } from "@/components/archive-discography/discography-release-archive-track-section"
@@ -60,9 +57,7 @@ export function DiscographyReleaseArchiveBody({
   rootClassName,
 }: DiscographyReleaseArchiveBodyProps) {
   const router = useRouter()
-  const { session } = useAuth()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
-  const openLogin = useWlHomeV2OpenLogin()
   const wtedModalHeadingId = useId()
   const [releaseArtworkFailed, setReleaseArtworkFailed] = useState(false)
   const [hoveredReleaseId, setHoveredReleaseId] = useState<string | null>(null)
@@ -70,7 +65,6 @@ export function DiscographyReleaseArchiveBody({
   const [wtedSheetEntry, setWtedSheetEntry] = useState<SetlistEntry | null>(
     null,
   )
-  const [wtedLoginRequiredOpen, setWtedLoginRequiredOpen] = useState(false)
   const { setSetlistBreadcrumbs } = useSetlistBreadcrumb()
   const { release, loading, error } = useDiscographyReleaseData(id)
   const {
@@ -105,7 +99,6 @@ export function DiscographyReleaseArchiveBody({
   useEffect(() => {
     setHoveredReleaseId(null)
     closeWtedRequestUi()
-    setWtedLoginRequiredOpen(false)
   }, [id, closeWtedRequestUi])
 
   useEffect(() => {
@@ -197,14 +190,6 @@ export function DiscographyReleaseArchiveBody({
     onSongClick: (entry: SetlistEntry) =>
       router.push(getSongArchiveUrl(entry.song_id)),
     onWtedClick: (entry: SetlistEntry) => {
-      if (!session) {
-        if (wlHomeV2Shell) {
-          openLogin?.()
-        } else {
-          setWtedLoginRequiredOpen(true)
-        }
-        return
-      }
       setWtedSheetEntry(entry)
       setWtedSheetOpen(true)
     },
@@ -233,12 +218,6 @@ export function DiscographyReleaseArchiveBody({
         onReleaseHover={setHoveredReleaseId}
       />
 
-      {!wlHomeV2Shell ?
-        <SetlistWtedLoginRequiredDialog
-          open={wtedLoginRequiredOpen}
-          onOpenChange={setWtedLoginRequiredOpen}
-        />
-      : null}
       {wlHomeV2Shell ?
         <WlHomeV2SetlistWtedModal
           open={wtedSheetOpen}

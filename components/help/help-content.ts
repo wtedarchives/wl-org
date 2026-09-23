@@ -70,7 +70,7 @@ export const HELP_FAQ_ENTRIES: HelpFaqEntry[] = [
     youtubeId: "dcBgMXgDomY",
     paragraphs: [
       "There are two ways to request a song to be played on WTED Goose Radio.",
-      "Please note that you must be signed in to your account in order to request songs. Users must wait 10 seconds between requests, and can only make four requests every 60 minutes.",
+      "You can request a song without signing in. Users must wait 10 seconds between requests, and can only make four requests every 60 minutes.",
       "On the home page of WTEDRadio.com, click on Request a Song. Search for the track you’re looking for, and click the green check mark. Confirm your selection by clicking on Request Track.",
       "On an individual show’s page, if a song is request-able on WTED Goose Radio, you’ll see the WTED Radio logo next to it. Click on the logo, and click Request Track.",
     ],

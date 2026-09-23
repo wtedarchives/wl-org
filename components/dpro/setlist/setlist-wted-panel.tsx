@@ -82,7 +82,10 @@ export function SetlistWtedPanel({
   )
   const { session } = useAuth()
   const accessToken = session?.token ?? null
-  const { requests, loading, error, refetch } = useWtedRequests(accessToken, open)
+  const { requests, loading, error, ready, refetch } = useWtedRequests(
+    accessToken,
+    open,
+  )
 
   const [lastRequestTime, setLastRequestTime] = useState<number>(0)
   const [submittingRadioId, setSubmittingRadioId] = useState<string | null>(
@@ -175,7 +178,7 @@ export function SetlistWtedPanel({
 
   const submitRequest = useCallback(
     async (targetEntry: SetlistEntry) => {
-      if (!targetEntry.radio_id || !accessToken) return
+      if (!targetEntry.radio_id) return
       const radioId = String(targetEntry.radio_id)
       if (
         !hasOpenSlot ||
@@ -227,7 +230,7 @@ export function SetlistWtedPanel({
   }, [activeEntry, canRequestThisEntry, submitRequest])
 
   useEffect(() => {
-    if (!autoRequestArmed || loading || !activeEntry?.radio_id) return
+    if (!ready || !autoRequestArmed || loading || !activeEntry?.radio_id) return
     const rid = String(activeEntry.radio_id)
     if (autoRequestedRadioIdRef.current === rid) {
       setAutoRequestArmed(false)
@@ -244,6 +247,7 @@ export function SetlistWtedPanel({
     void handleRequest()
   }, [
     autoRequestArmed,
+    ready,
     loading,
     activeEntry,
     canRequestThisEntry,

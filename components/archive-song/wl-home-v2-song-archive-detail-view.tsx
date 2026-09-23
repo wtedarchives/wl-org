@@ -25,7 +25,6 @@ import { WlHomeV2SongArchiveDetailWtedAside } from "@/components/archive-song/wl
 import { WlHomeV2SongArchiveDetailLyricsColumn } from "@/components/archive-song/wl-home-v2-song-archive-detail-lyrics-column"
 import { SongsArchiveSearchGlyph } from "@/components/archive-song/wl-home-v2-song-archive-search-glyph"
 import { songsArchiveSearchHits } from "@/components/archive-songs/songs-archive-helpers"
-import { useAuth } from "@/components/auth-context"
 import { WL_V2_ARCHIVES_BREADCRUMB_ROOT } from "@/components/setlist-breadcrumb-context"
 import {
   WlHomeV2ArchiveCrumbsShell,
@@ -33,7 +32,6 @@ import {
 } from "@/components/wl-home-v2/wl-home-v2-archive-crumbs"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import { useWlHomeV2OpenArchiveHub } from "@/components/wl-home-v2/wl-home-v2-open-archive-hub-context"
-import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { useWlHomeV2ScrollLock } from "@/hooks/use-wl-home-v2-scroll-lock"
 import { useSetlistData } from "@/hooks/use-setlist-data"
 import { useSongData } from "@/hooks/use-song-data"
@@ -45,10 +43,8 @@ import { SongDisplayName } from "@/components/dpro/song-display-name"
 import "./song-archive-detail-verbatim.css"
 
 export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
-  const { session } = useAuth()
   const songPerfWtedModalHeadingId = useId()
   const openArchiveHub = useWlHomeV2OpenArchiveHub()
-  const openLogin = useWlHomeV2OpenLogin()
   const { songs: archiveSongs } = useSongsArchiveData()
 
   const {
@@ -107,13 +103,9 @@ export function WlHomeV2SongArchiveDetailView({ songId }: { songId: string }) {
 
   const onPerfTableWtedPayloadClick = useCallback(
     (payload: SongArchivePerformanceWtedPayload) => {
-      if (!session) {
-        openLogin?.()
-        return
-      }
       setSongPerfWtedModal(payload)
     },
-    [session, openLogin],
+    [],
   )
 
   const closePerfTableWtedModal = useCallback(() => {

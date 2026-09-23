@@ -10,11 +10,9 @@ import {
 } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/components/auth-context"
 import { SetlistSongSpreadCard } from "@/components/dpro/setlist/setlist-song-spread-card"
 import { WlHomeV2SetlistJotyModal } from "@/components/wl-home-v2/wl-home-v2-setlist-joty-modal"
 import { WlHomeV2SetlistWtedModal } from "@/components/wl-home-v2/wl-home-v2-setlist-wted-modal"
-import { useWlHomeV2OpenLogin } from "@/components/wl-home-v2/wl-home-v2-open-login-context"
 import { WlHomeV2PageLoading } from "@/components/wl-home-v2/wl-home-v2-page-loading"
 import {
   WlHomeV2ArchiveCrumbsShell,
@@ -45,8 +43,6 @@ type WtedEpisodeLayoutMode = "mobile" | "desktop" | null
 
 export function WlHomeV2WtedEpisodePageClient() {
   const router = useRouter()
-  const { session } = useAuth()
-  const openLogin = useWlHomeV2OpenLogin()
   const wtedModalHeadingId = useId()
   const jotyModalHeadingId = useId()
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
@@ -152,17 +148,10 @@ export function WlHomeV2WtedEpisodePageClient() {
     [wtedModalEntry, rows],
   )
 
-  const handleWtedClick = useCallback(
-    (entry: SetlistEntry) => {
-      if (!session) {
-        openLogin?.()
-        return
-      }
-      setWtedModalEntry(entry)
-      setWtedModalOpen(true)
-    },
-    [session, openLogin],
-  )
+  const handleWtedClick = useCallback((entry: SetlistEntry) => {
+    setWtedModalEntry(entry)
+    setWtedModalOpen(true)
+  }, [])
 
   const handleJotyClick = useCallback(
     (entry: SetlistEntry) => {
