@@ -48,6 +48,7 @@ export function WtedRequestSongFlow({
   panelClassName,
   panelWrapperClassName,
   wlHomeV2LoginDialog = false,
+  focusSearch = false,
 }: {
   catalogFetchEnabled?: boolean
   panelClassName?: string
@@ -55,6 +56,8 @@ export function WtedRequestSongFlow({
   panelWrapperClassName?: string
   /** Use WL Home v2 login gate styling when opening the WTED login-required dialog. */
   wlHomeV2LoginDialog?: boolean
+  /** Focus the catalog search field (homepage request modal). */
+  focusSearch?: boolean
 }) {
   const { session } = useAuth()
   const openLogin = useWlHomeV2OpenLogin()
@@ -183,6 +186,7 @@ export function WtedRequestSongFlow({
           error={error}
           onPickTrack={pickTrack}
           busyRadioId={busyRadioId}
+          focusSearch={focusSearch}
           className={cn("min-h-0 flex-1 rounded-b-xl", panelClassName)}
           aboveListSlot={
             inlineInRequestModal && selectedEntry ?

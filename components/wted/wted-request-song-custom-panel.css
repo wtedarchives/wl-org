@@ -1,0 +1,8 @@
+/*
+ * Programmatic focus does not match :focus-visible, so the shared Input ring
+ * never appears when the request modal opens. Mirror that ring on :focus.
+ */
+.wted-request-search-input:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 30%, transparent);
+}

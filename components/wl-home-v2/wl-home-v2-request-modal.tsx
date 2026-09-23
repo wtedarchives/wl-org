@@ -57,6 +57,7 @@ export function WlHomeV2RequestModal({
           <div className="modal-request-body">
             <WtedRequestSongFlow
               catalogFetchEnabled={open}
+              focusSearch={open}
               panelWrapperClassName="min-h-[min(52vh,420px)]"
               panelClassName="rounded-none"
               wlHomeV2LoginDialog

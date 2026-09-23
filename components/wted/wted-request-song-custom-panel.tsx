@@ -13,6 +13,8 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+
+import "./wted-request-song-custom-panel.css"
 import {
   type WtedRadioIdRow,
   wtedRadioIdsRowArtworkUrl,
@@ -130,6 +132,7 @@ export function WtedRequestSongCustomPanel({
   busyRadioId,
   className,
   aboveListSlot,
+  focusSearch = false,
 }: {
   rows: WtedRadioIdRow[]
   loading: boolean
@@ -140,9 +143,56 @@ export function WtedRequestSongCustomPanel({
   className?: string
   /** Rendered between the search field and the scrollable track list. */
   aboveListSlot?: ReactNode
+  /** Focus the search field when this becomes true (homepage request modal). */
+  focusSearch?: boolean
 }) {
   const [query, setQuery] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!focusSearch) {
+      const input = searchRef.current
+      if (input && document.activeElement === input) input.blur()
+      return
+    }
+
+    let cancelled = false
+    const focusSearchField = () => {
+      const input = searchRef.current
+      if (!input || cancelled) return
+      const backdrop = input.closest(".modal-backdrop")
+      if (
+        backdrop instanceof HTMLElement &&
+        getComputedStyle(backdrop).visibility === "hidden"
+      ) {
+        return
+      }
+      const dialog = input.closest('[role="dialog"]')
+      const active = document.activeElement
+      if (
+        dialog &&
+        active instanceof Node &&
+        dialog.contains(active) &&
+        active !== input
+      ) {
+        return
+      }
+      input.focus({ preventScroll: true })
+      const cursor = input.value.length
+      input.setSelectionRange(cursor, cursor)
+    }
+
+    focusSearchField()
+    const frame = requestAnimationFrame(focusSearchField)
+    // Backdrop visibility can stay hidden until the open transition ends.
+    const timer = window.setTimeout(focusSearchField, 260)
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(frame)
+      window.clearTimeout(timer)
+    }
+  }, [focusSearch])
 
   const filtered = useMemo(() => {
     const q = normalize(query)
@@ -181,6 +231,7 @@ export function WtedRequestSongCustomPanel({
             aria-hidden
           />
           <Input
+            ref={searchRef}
             type="text"
             inputMode="search"
             enterKeyHint="search"
@@ -188,7 +239,7 @@ export function WtedRequestSongCustomPanel({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search…"
             className={cn(
-              "h-8 border-wl-dark-grey/50 !bg-white/10 py-0 !pl-9 text-[11px] leading-tight text-wl-white placeholder:text-wl-white/45",
+              "wted-request-search-input h-8 border-wl-dark-grey/50 !bg-white/10 py-0 !pl-9 text-[11px] leading-tight text-wl-white placeholder:text-wl-white/45",
               query ? "!pr-9" : "!pr-2",
             )}
             autoComplete="off"
