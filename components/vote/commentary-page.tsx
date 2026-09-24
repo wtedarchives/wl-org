@@ -28,8 +28,10 @@ export function CommentaryPage() {
         </Link>
         <h1 className="vote-page__title">Record commentary</h1>
         <p className="vote-page__lead">
-          Tell us about a moment from the 2026 Colorado run. Record up to 60
-          seconds. Each account can submit one commentary.
+          The commentary for this show will be collaborative. Record your thoughts on one or two
+          performances that really stood out. Each account can submit one clip,
+          up to 60 seconds, so we can fit as many comments into the show as
+          possible.
         </p>
         <CommentaryRecorder />
       </main>
