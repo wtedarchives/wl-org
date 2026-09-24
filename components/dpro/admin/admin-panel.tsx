@@ -27,6 +27,7 @@ import { AdminBandcamp } from "./admin-bandcamp"
 import { AdminDiscography } from "./admin-discography"
 import { AdminPoster } from "./admin-poster"
 import { AdminBrains } from "./admin-brains"
+import { AdminVote } from "./admin-vote"
 
 export function AdminPanel() {
   const { session } = useAuth()
@@ -220,6 +221,9 @@ export function AdminPanel() {
           </TabsContent>
           <TabsContent value="Brains" className="mt-0 w-full p-3 sm:p-4">
             <AdminBrains />
+          </TabsContent>
+          <TabsContent value="Vote" className="mt-0 w-full p-3 sm:p-4">
+            <AdminVote />
           </TabsContent>
         </div>
       </Tabs>

@@ -1396,6 +1396,61 @@ async function handleAction(
       return { data: { active_league: active_league.trim() } }
     }
 
+    case "colorado_run_vote_results": {
+      if (!isAdmin) return { error: "Admin only." }
+      const { count, error: countError } = await db
+        .from("vote_ballots")
+        .select("id", { count: "exact", head: true })
+      if (countError) return { error: countError.message }
+      const ballotCount = count ?? 0
+
+      const picks: { ballot_id: string; rank: number; selection: string }[] = []
+      const pageSize = 1000
+      for (let from = 0; ; from += pageSize) {
+        const { data, error } = await db
+          .from("vote_picks")
+          .select("ballot_id, rank, selection")
+          .range(from, from + pageSize - 1)
+        if (error) return { error: error.message }
+        if (!data?.length) break
+        picks.push(...data)
+        if (data.length < pageSize) break
+      }
+
+      const bySelection = new Map<
+        string,
+        { points: number; rankSum: number; ballots: Set<string> }
+      >()
+      for (const pick of picks) {
+        const row = bySelection.get(pick.selection) ?? {
+          points: 0,
+          rankSum: 0,
+          ballots: new Set<string>(),
+        }
+        row.points += 11 - pick.rank
+        row.rankSum += pick.rank
+        row.ballots.add(pick.ballot_id)
+        bySelection.set(pick.selection, row)
+      }
+
+      const rows = [...bySelection.entries()]
+        .map(([selection, row]) => {
+          const appearances = row.ballots.size
+          return {
+            selection,
+            points: row.points,
+            ballotPercent:
+              ballotCount === 0 ? 0 : (appearances / ballotCount) * 100,
+            averageRank: appearances === 0 ? 0 : row.rankSum / appearances,
+          }
+        })
+        .sort(
+          (a, b) => b.points - a.points || a.selection.localeCompare(b.selection),
+        )
+
+      return { data: { ballotCount, rows } }
+    }
+
     default:
       return { error: `Unknown action: ${action}` }
   }
