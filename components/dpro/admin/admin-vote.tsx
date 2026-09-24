@@ -14,6 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { invokeDproAdmin } from "@/lib/dpro-admin-edge"
+import {
+  getVoteSong,
+  getVoteSongIdByName,
+} from "@/components/vote/colorado-run-setlists"
 
 type VoteResultRow = {
   selection: string
@@ -33,6 +37,13 @@ function formatPercent(value: number) {
 
 function formatRank(value: number) {
   return value.toFixed(1)
+}
+
+function showLabel(selection: string) {
+  const id = getVoteSongIdByName(selection)
+  const entry = id ? getVoteSong(id) : null
+  if (!entry) return "—"
+  return `${entry.show.dateLabel} [${entry.show.location}]`
 }
 
 export function AdminVote() {
@@ -94,6 +105,7 @@ export function AdminVote() {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-white/70">Track</TableHead>
+                <TableHead className="text-white/70">Show</TableHead>
                 <TableHead className="text-right text-white/70">Points</TableHead>
                 <TableHead className="text-right text-white/70">Ballots</TableHead>
                 <TableHead className="text-right text-white/70">Avg rank</TableHead>
@@ -104,6 +116,9 @@ export function AdminVote() {
                 <TableRow key={row.selection}>
                   <TableCell className="min-w-[12rem] whitespace-normal text-sm text-white">
                     {row.selection}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-sm text-white">
+                    {showLabel(row.selection)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums text-sm text-white">
                     {row.points}
