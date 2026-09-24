@@ -1445,7 +1445,10 @@ async function handleAction(
           }
         })
         .sort(
-          (a, b) => b.points - a.points || a.selection.localeCompare(b.selection),
+          (a, b) =>
+            b.points - a.points ||
+            b.ballotPercent - a.ballotPercent ||
+            a.averageRank - b.averageRank,
         )
 
       return { data: { ballotCount, rows } }
