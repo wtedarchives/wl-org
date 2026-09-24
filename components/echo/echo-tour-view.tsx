@@ -44,22 +44,19 @@ export function EchoTourView() {
   const [showRules, setShowRules] = useState(false)
   const [showScoringModal, setShowScoringModal] = useState(false)
   const [showTimeRevision, setShowTimeRevision] = useState(0)
-  const [tourDataRevision, setTourDataRevision] = useState(0)
   const [leagueRevision, setLeagueRevision] = useState(0)
   const { activeLeague } = useEchoActiveLeague(leagueRevision)
   const { loading: nextShowLoading, show: nextShow } = useEchoNextShow(
     activeLeague,
     showTimeRevision,
   )
-  const { gameShows, fetchGameShows } = useGameShows(
+  const { gameShows } = useGameShows(
     activeLeague,
     session,
   )
 
   const handleScoringComplete = () => {
-    void fetchGameShows({ silent: true })
-    setShowTimeRevision((n) => n + 1)
-    setTourDataRevision((n) => n + 1)
+    window.location.reload()
   }
 
   useEffect(() => {
@@ -100,7 +97,6 @@ export function EchoTourView() {
             />
             <EchoTourShows
               league={activeLeague}
-              refreshKey={tourDataRevision}
               onShowTimeSaved={() => setShowTimeRevision((n) => n + 1)}
             />
             <EchoTourShowStatistics league={activeLeague} />
