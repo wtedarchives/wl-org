@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { useAuth } from "@/components/auth-context"
 import { loadMyCommentary, submitCommentary } from "@/components/vote/commentary-api"
+import { isVotingClosed } from "@/components/vote/voting-window"
 
 const MAX_SECONDS = 60
 
@@ -20,6 +21,7 @@ function formatClock(seconds: number) {
 
 export function CommentaryRecorder() {
   const { session, loading, signIn } = useAuth()
+  const [closed, setClosed] = useState(false)
   const [hydrated, setHydrated] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [playbackUrl, setPlaybackUrl] = useState<string | null>(null)
@@ -34,7 +36,11 @@ export function CommentaryRecorder() {
   const startedAtRef = useRef(0)
 
   useEffect(() => {
-    if (loading) return
+    setClosed(isVotingClosed())
+  }, [])
+
+  useEffect(() => {
+    if (loading || closed) return
     if (!session) {
       setSubmitted(false)
       setPlaybackUrl(null)
@@ -55,7 +61,7 @@ export function CommentaryRecorder() {
     return () => {
       cancelled = true
     }
-  }, [loading, session])
+  }, [closed, loading, session])
 
   useEffect(() => {
     return () => {
@@ -134,6 +140,14 @@ export function CommentaryRecorder() {
 
   const previewOpen = Boolean(previewUrl || (submitted && playbackUrl))
   const listenUrl = submitted ? playbackUrl : previewUrl
+
+  if (closed) {
+    return (
+      <p className="vote-page__closes">
+        Voting has concluded. Tune in to WTED Goose Radio to hear the Community&apos;s final Top 10.
+      </p>
+    )
+  }
 
   return (
     <div className="commentary">

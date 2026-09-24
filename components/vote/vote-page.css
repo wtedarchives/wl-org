@@ -72,6 +72,16 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
+.vote-page__closes {
+  margin: 14px auto 0;
+  max-width: 40rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #ffb999;
+}
+
 .vote-page__commentary {
   display: flex;
   align-items: center;
