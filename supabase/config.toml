@@ -28,6 +28,10 @@ verify_jwt = false
 [functions.colorado-run-vote]
 verify_jwt = false
 
+# Wysteria JWT verified inside the function. Private commentary uploads.
+[functions.colorado-run-commentary]
+verify_jwt = false
+
 # Authorizing proxy in front of the Netlify schedule-card renderer; the
 # Authorization header carries a Wysteria session JWT, verified in the function.
 [functions.schedule-share-image]

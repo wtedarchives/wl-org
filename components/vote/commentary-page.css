@@ -1,0 +1,112 @@
+.commentary-page__main {
+  max-width: 40rem;
+}
+
+.commentary-page__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 48px;
+  margin: 0 auto 16px;
+  padding: 0 22px;
+  border-radius: 10px;
+  background: #ff7a67;
+  color: #1a120f;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.commentary-page__back::before {
+  content: "←";
+}
+
+.commentary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.commentary__note,
+.commentary__error {
+  margin: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.commentary__note {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.commentary__error {
+  color: #ffb999;
+}
+
+.commentary__clock {
+  margin: 0;
+  text-align: center;
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.commentary__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.commentary__button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.commentary__button--record {
+  background: #58c8ae;
+  color: #1a120f;
+}
+
+.commentary__button--submit {
+  background: #ff7a67;
+  color: #1a120f;
+}
+
+.commentary__button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.commentary__preview {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 220ms ease-out, opacity 220ms ease-out;
+}
+
+.commentary__preview--open {
+  max-height: 80px;
+  opacity: 1;
+}
+
+.commentary__audio {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .commentary__actions {
+    flex-direction: row;
+  }
+
+  .commentary__button {
+    flex: 1 1 0;
+  }
+}

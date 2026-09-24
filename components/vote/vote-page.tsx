@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 
 import { VotePicker } from "@/components/vote/vote-picker"
 
@@ -31,6 +32,9 @@ export function VotePage() {
           points across every ballot become the community&apos;s top 10. Each
           account can submit once.
         </p>
+        <Link href="/vote/commentary" className="vote-page__commentary">
+          Record Commentary
+        </Link>
         <VotePicker />
       </main>
     </div>
