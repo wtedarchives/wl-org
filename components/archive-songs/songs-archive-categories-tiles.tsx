@@ -225,7 +225,10 @@ export function SongsArchiveCategoryTileArticle({
   let useCoversEightColGrid = false
   let coverHomeBackdrop: string | null = null
   if (!flowLayout) {
-    if (
+    if (sectionKey === "live") {
+      useCoversEightColGrid = true
+      coverHomeBackdrop = SONGS_ARCHIVE_COVER_DUAL_HOME_BG
+    } else if (
       sectionKey === "covers" &&
       cat.category_canonid === COVER_DUAL_SECTION_CANONID
     ) {

@@ -45,23 +45,20 @@ export function SongsArchiveCategoriesGrid({
         const title = SECTION_TITLES[key]
         const isDenseCoverSongSection =
           key === "covers" || key === "miscCovers"
+        const usesCoverWidthLayout =
+          key === "covers" || key === "miscCovers" || key === "live"
         const usesLegacyMulticolLayout =
-          key === "studio" ||
-          key === "live" ||
-          key === "ted" ||
-          key === "side"
+          key === "studio" || key === "ted" || key === "side"
         const headingId = `${reactId}-${key}`
         const fillerCount =
-          key === "covers" ||
-          key === "miscCovers" ||
-          usesLegacyMulticolLayout ?
+          usesCoverWidthLayout || usesLegacyMulticolLayout ?
             0
           : trailingEmptySlotsInCategoryGrid(
               sectionCats.length,
               gridColumnCount,
             )
         const tilesForGrid =
-          key === "covers" || key === "miscCovers" || usesLegacyMulticolLayout ?
+          usesCoverWidthLayout || usesLegacyMulticolLayout ?
             [...sectionCats]
           : orderCategoriesColumnMajor(sectionCats, gridColumnCount)
 
