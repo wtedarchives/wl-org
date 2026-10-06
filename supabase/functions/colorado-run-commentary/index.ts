@@ -20,8 +20,8 @@ const corsHeaders = {
 }
 
 const BUCKET = "colorado-run-commentary"
-/** Open through 11:59pm ET on October 11, 2026. Keep in sync with components/vote/voting-window.ts */
-const VOTING_CLOSES_AT_MS = Date.parse("2026-10-12T00:00:00-04:00")
+/** Open through 11:59pm ET on October 18, 2026. Keep in sync with components/vote/voting-window.ts */
+const VOTING_CLOSES_AT_MS = Date.parse("2026-10-19T00:00:00-04:00")
 const MAX_BYTES = 5 * 1024 * 1024
 const MAX_SECONDS = 60
 const SIGNED_URL_SECONDS = 60 * 60

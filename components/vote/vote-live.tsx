@@ -16,7 +16,7 @@ export function VoteLive({ children }: { children: ReactNode }) {
       <p className="vote-page__closes">
         {closed
           ? "Voting has concluded. Tune in to WTED Goose Radio to hear the Community's final Top 10."
-          : "Voting concludes October 11th at 11:59pm ET."}
+          : "Voting concludes October 18th at 11:59pm ET."}
       </p>
       {closed ? null : children}
     </>

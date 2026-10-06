@@ -15,8 +15,8 @@ import { jwtVerify } from "https://deno.land/x/jose@v4.15.5/index.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
 const PICK_LIMIT = 10
-/** Open through 11:59pm ET on October 11, 2026. Keep in sync with components/vote/voting-window.ts */
-const VOTING_CLOSES_AT_MS = Date.parse("2026-10-12T00:00:00-04:00")
+/** Open through 11:59pm ET on October 18, 2026. Keep in sync with components/vote/voting-window.ts */
+const VOTING_CLOSES_AT_MS = Date.parse("2026-10-19T00:00:00-04:00")
 
 /** Keep in sync with components/vote/colorado-run-setlists.ts song names. */
 const ALLOWED_SELECTIONS = new Set([
